@@ -67,7 +67,10 @@ public interface IProductPricer extends ITimed {
     }
 
     default double getPriceSellAll(@NotNull Player player) {
-        int balance = this.getProduct().getItemAmount(player);
+        int amountHas = this.getProduct().getItemAmount(player);
+        int amountCan = this.getProduct().getStockAmountLeft(player, TradeType.SELL);
+
+        int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);
         return balance * this.getPriceSell();
     }
 

@@ -9,10 +9,10 @@ import su.nightexpress.nexshop.shop.auction.AuctionConfig;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-public class AuctionListing extends AuctionItem {
+public class AuctionListing extends AbstractAuctionItem {
 
-    public static final String PLACEHOLDER_EXPIRES_IN = "%expires-in%";
-    public static final String PLACEHOLDER_DELETES_IN = "%deletes-in%";
+    public static final String PLACEHOLDER_EXPIRES_IN = "%listing_expires_in%";
+    public static final String PLACEHOLDER_DELETES_IN = "%listing_deletes_in%";
 
     private final long expireDate;
     private final long deleteDate;

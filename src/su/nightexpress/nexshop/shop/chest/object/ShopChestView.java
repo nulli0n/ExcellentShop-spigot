@@ -5,11 +5,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.api.gui.ContentType;
-import su.nexmedia.engine.manager.api.gui.GuiClick;
-import su.nexmedia.engine.manager.api.gui.GuiItem;
-import su.nexmedia.engine.manager.api.gui.JIcon;
+import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuItem;
+import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.CollectionsUT;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.api.AbstractShopView;
@@ -30,42 +29,33 @@ public class ShopChestView extends AbstractShopView<IShopChest> {
 
     public ShopChestView(@NotNull IShopChest shop) {
         super(shop, ChestShopConfig.YML_SHOP_VIEW);
-        JYML cfg = ChestShopConfig.YML_SHOP_VIEW;
 
         PRODUCT_SLOTS = cfg.getIntArray("Product_Slots");
-
         String path = "Product_Format.Lore.";
         PRODUCT_FORMAT_LORE = StringUT.color(cfg.getStringList(path + "Text"));
 
-        GuiClick click = (p, type, e) -> {
+        IMenuClick click = (player, type, e) -> {
             if (type == null) return;
 
-            if (type instanceof ContentType type2) {
-                switch (type2) {
-                    case EXIT -> p.closeInventory();
-                    case NEXT -> this.open(p, this.getUserPage(p, 0) + 1);
-                    case BACK -> this.open(p, this.getUserPage(p, 0) - 1);
-                    default -> {}
-                }
-                return;
+            if (type instanceof MenuItemType type2) {
+                this.onItemClickDefault(player, type2);
             }
         };
 
-        for (String id : cfg.getSection("custom-items")) {
-            GuiItem guiItem = cfg.getGuiItem("custom-items." + id, ContentType.class);
-            if (guiItem == null) continue;
+        for (String id : cfg.getSection("Content")) {
+            IMenuItem menuItem = cfg.getMenuItem("Content." + id, MenuItemType.class);
 
-            if (guiItem.getType() != null) {
-                guiItem.setClick(click);
+            if (menuItem.getType() != null) {
+                menuItem.setClick(click);
             }
-            this.addButton(guiItem);
+            this.addItem(menuItem);
         }
 
         this.setTitle(shop.getName());
     }
 
     @Override
-    public void displayProducts(@NotNull Player player, @NotNull Inventory inv, int page) {
+    public void displayProducts(@NotNull Player player, @NotNull Inventory inventory, int page) {
         int len = PRODUCT_SLOTS.length;
 
         List<IShopChestProduct> list = this.getShop().getProducts().stream().toList();
@@ -98,15 +88,16 @@ public class ShopChestView extends AbstractShopView<IShopChest> {
                 preview.setItemMeta(meta);
             }
 
-            JIcon icon = new JIcon(preview);
-            icon.setClick((p2, type, e) -> {
+            IMenuItem menuItem = new MenuItem(preview);
+            menuItem.setSlots(PRODUCT_SLOTS[count++]);
+            menuItem.setClick((p2, type, e) -> {
                 ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
                 if (clickType == null) return;
 
                 product.prepareTrade(p2, clickType);
             });
-            this.addButton(player, icon, PRODUCT_SLOTS[count++]);
+            this.addItem(player, menuItem);
         }
-        this.setUserPage(player, page, pages);
+        this.setPage(player, page, pages);
     }
 }

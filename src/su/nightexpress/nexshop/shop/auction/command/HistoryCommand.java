@@ -19,20 +19,20 @@ public class HistoryCommand extends ShopModuleCommand<AuctionManager> {
     }
 
     @Override
-    public boolean playersOnly() {
-        return true;
-    }
-
-    @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return plugin.lang().Auction_Command_History_Usage.getMsg();
     }
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Auction_Command_History_Desc.getMsg();
+    }
+
+    @Override
+    public boolean isPlayerOnly() {
+        return true;
     }
 
     @Override
@@ -45,24 +45,24 @@ public class HistoryCommand extends ShopModuleCommand<AuctionManager> {
     }
 
     @Override
-    protected void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         Player player = (Player) sender;
         UUID id;
         if (args.length >= 2) {
             if (!sender.hasPermission(Perms.AUCTION_CMD_OPEN_OTHERS)) {
-                this.errPerm(sender);
+                this.errorPermission(sender);
                 return;
             }
 
             ShopUser user = plugin.getUserManager().getOrLoadUser(args[1], false);
             if (user == null) {
-                this.errPlayer(sender);
+                this.errorPlayer(sender);
                 return;
             }
             id = user.getUUID();
         }
         else id = player.getUniqueId();
 
-        this.module.getAuctionHistoryGUI().open(player, 1, id);
+        this.module.getAuctionHistoryMenu().open(player, 1, id);
     }
 }

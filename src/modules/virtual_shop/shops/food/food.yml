@@ -1,8 +1,8 @@
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
-  BUY: true
   SELL: true
+  BUY: true
 Citizens:
   Attached_NPC: ''
 Icon:
@@ -11,5 +11,5 @@ Icon:
   durability: 0
   name: '&c&lFood'
   enchanted: false
-  item-flags: [ ]
+  item-flags: []
   unbreakable: false

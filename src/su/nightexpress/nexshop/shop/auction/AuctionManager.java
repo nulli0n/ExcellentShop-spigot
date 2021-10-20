@@ -31,25 +31,23 @@ import su.nightexpress.nexshop.shop.auction.command.ExpiredCommand;
 import su.nightexpress.nexshop.shop.auction.command.HistoryCommand;
 import su.nightexpress.nexshop.shop.auction.command.SellCommand;
 import su.nightexpress.nexshop.shop.auction.compatibility.ImportAuctionHouse;
-import su.nightexpress.nexshop.shop.auction.gui.*;
+import su.nightexpress.nexshop.shop.auction.menu.*;
 import su.nightexpress.nexshop.shop.auction.object.AuctionHistoryItem;
-import su.nightexpress.nexshop.shop.auction.object.AuctionItem;
+import su.nightexpress.nexshop.shop.auction.object.AbstractAuctionItem;
 import su.nightexpress.nexshop.shop.auction.object.AuctionListing;
 
 import java.util.*;
 
 public class AuctionManager extends ShopModule {
 
-    private AuctionConfig auctionConfig;
-
     private List<AuctionListing>     listings;
     private List<AuctionListing>     expired;
     private List<AuctionHistoryItem> history;
 
-    private AuctionMainGUI    auctionGUI;
-    private AuctionConfirmGUI auctionConfirmGUI;
-    private AuctionExpiredGUI auctionExpiredGUI;
-    private AuctionHistoryGUI auctionHistoryGUI;
+    private AuctionMainMenu    auctionMainMenu;
+    private AuctionConfirmMenu auctionConfirmMenu;
+    private AuctionExpiredMenu auctionExpiredMenu;
+    private AuctionHistoryMenu auctionHistoryMenu;
 
     private VaultHK     vaultHook;
     private MenuUpdater menuUpdater;
@@ -66,16 +64,17 @@ public class AuctionManager extends ShopModule {
 
     @Override
     @NotNull
-    public String version() {
+    public String getVersion() {
         return "1.50";
     }
 
     @Override
-    public void setup() {
+    protected void onLoad() {
+        super.onLoad();
+
         this.vaultHook = plugin.getVault();
         if (this.vaultHook == null || !this.vaultHook.hasEconomy()) {
-            this.interruptLoad();
-            this.error("No Vault Economy found! Auction will be disabled!");
+            this.interruptLoad("No Vault Economy found! Auction will be disabled!");
             return;
         }
 
@@ -85,24 +84,24 @@ public class AuctionManager extends ShopModule {
             this.history = new ArrayList<>(this.getHistoryData());
         }
 
-        this.auctionConfig = new AuctionConfig(this);
+        AuctionConfig.load(this);
 
-        JYML cfgGui = JYML.loadOrExtract(plugin, this.getPath() + "auction.gui.yml");
-        this.auctionGUI = new AuctionMainGUI(this, cfgGui);
+        JYML cfgGui = JYML.loadOrExtract(plugin, this.getPath() + "auction.menu.yml");
+        this.auctionMainMenu = new AuctionMainMenu(this, cfgGui);
 
-        JYML cfgGuiConfirm = JYML.loadOrExtract(plugin, this.getPath() + "auction.confirm.gui.yml");
-        this.auctionConfirmGUI = new AuctionConfirmGUI(this, cfgGuiConfirm);
+        JYML cfgGuiConfirm = JYML.loadOrExtract(plugin, this.getPath() + "auction.confirm.menu.yml");
+        this.auctionConfirmMenu = new AuctionConfirmMenu(this, cfgGuiConfirm);
 
-        JYML cfgGuiExpired = JYML.loadOrExtract(plugin, this.getPath() + "expired.gui.yml");
-        this.auctionExpiredGUI = new AuctionExpiredGUI(this, cfgGuiExpired);
+        JYML cfgGuiExpired = JYML.loadOrExtract(plugin, this.getPath() + "expired.menu.yml");
+        this.auctionExpiredMenu = new AuctionExpiredMenu(this, cfgGuiExpired);
 
-        JYML cfgGuiHistory = JYML.loadOrExtract(plugin, this.getPath() + "history.gui.yml");
-        this.auctionHistoryGUI = new AuctionHistoryGUI(this, cfgGuiHistory);
+        JYML cfgGuiHistory = JYML.loadOrExtract(plugin, this.getPath() + "history.menu.yml");
+        this.auctionHistoryMenu = new AuctionHistoryMenu(this, cfgGuiHistory);
 
         this.moduleCommand.addDefaultCommand(new AuctionCommand(this));
-        this.moduleCommand.addSubCommand(new SellCommand(this));
-        this.moduleCommand.addSubCommand(new HistoryCommand(this));
-        this.moduleCommand.addSubCommand(new ExpiredCommand(this));
+        this.moduleCommand.addChildren(new SellCommand(this));
+        this.moduleCommand.addChildren(new HistoryCommand(this));
+        this.moduleCommand.addChildren(new ExpiredCommand(this));
 
         this.menuUpdater = new MenuUpdater();
         this.menuUpdater.start();
@@ -111,26 +110,28 @@ public class AuctionManager extends ShopModule {
     }
 
     @Override
-    public void shutdown() {
+    protected void onShutdown() {
+        super.onShutdown();
+
         if (this.menuUpdater != null) {
             this.menuUpdater.stop();
             this.menuUpdater = null;
         }
-        if (this.auctionConfirmGUI != null) {
-            this.auctionConfirmGUI.shutdown();
-            this.auctionConfirmGUI = null;
+        if (this.auctionConfirmMenu != null) {
+            this.auctionConfirmMenu.clear();
+            this.auctionConfirmMenu = null;
         }
-        if (this.auctionGUI != null) {
-            this.auctionGUI.shutdown();
-            this.auctionGUI = null;
+        if (this.auctionMainMenu != null) {
+            this.auctionMainMenu.clear();
+            this.auctionMainMenu = null;
         }
-        if (this.auctionExpiredGUI != null) {
-            this.auctionExpiredGUI.shutdown();
-            this.auctionExpiredGUI = null;
+        if (this.auctionExpiredMenu != null) {
+            this.auctionExpiredMenu.clear();
+            this.auctionExpiredMenu = null;
         }
-        if (this.auctionHistoryGUI != null) {
-            this.auctionHistoryGUI.shutdown();
-            this.auctionHistoryGUI = null;
+        if (this.auctionHistoryMenu != null) {
+            this.auctionHistoryMenu.clear();
+            this.auctionHistoryMenu = null;
         }
 
         if (this.listings != null) {
@@ -276,11 +277,7 @@ public class AuctionManager extends ShopModule {
         if (!this.isSynced()) this.getListings().add(0, listing);
         this.plugin.getData().addAuctionListing(listing, true);
 
-        plugin.lang().Auction_Listing_Add_Success_Info
-                .replace("%amount%", item.getAmount())
-                .replace("%item%", ItemUT.getItemName(item))
-                .replace("%price%", NumberUT.format(price))
-                .send(player);
+        plugin.lang().Auction_Listing_Add_Success_Info.replace(listing.replacePlaceholders()).send(player);
 
         if (taxPay > 0) {
             plugin.lang().Auction_Listing_Add_Success_Tax
@@ -292,15 +289,14 @@ public class AuctionManager extends ShopModule {
         if (AuctionConfig.LISTINGS_ANNOUNCE) {
             ClickText clickText = new ClickText(plugin.lang().Auction_Listing_Add_Success_Announce
                     .replace("%player%", player.getDisplayName())
-                    .replace("%amount%", item.getAmount())
-                    .replace("%price%", NumberUT.format(price))
+                    .replace(listing.replacePlaceholders())
                     .getMsg());
 
             clickText.createPlaceholder("%item%", ItemUT.getItemName(item)).showItem(item);
             clickText.send(new HashSet<>(plugin.getServer().getOnlinePlayers()));
         }
 
-        this.getAuctionGUI().refill();
+        this.getAuctionMainMenu().update();
         return true;
     }
 
@@ -312,7 +308,7 @@ public class AuctionManager extends ShopModule {
         if (balance < price) {
             plugin.lang().Auction_Listing_Buy_Error_NoMoney
                     .replace("%balance%", NumberUT.format(balance))
-                    .replace("%price%", NumberUT.format(price))
+                    .replace(listing.replacePlaceholders())
                     .send(buyer);
             return false;
         }
@@ -332,19 +328,14 @@ public class AuctionManager extends ShopModule {
         ItemStack item = listing.getItemStack();
         ItemUT.addItem(buyer, item);
 
-        plugin.lang().Auction_Listing_Buy_Success_Info
-                .replace("%amount%", item.getAmount())
-                .replace("%item%", ItemUT.getItemName(item))
-                .replace("%seller%", listing.getOwnerName())
-                .replace("%price%", NumberUT.format(price))
-                .send(buyer);
+        plugin.lang().Auction_Listing_Buy_Success_Info.replace(listing.replacePlaceholders()).send(buyer);
 
         Player owner = this.plugin.getServer().getPlayer(listing.getOwner());
         if (owner != null) {
             this.payHistory(owner, history);
         }
 
-        this.getAuctionGUI().refill();
+        this.getAuctionMainMenu().update();
         return true;
     }
 
@@ -354,16 +345,7 @@ public class AuctionManager extends ShopModule {
         this.vaultHook.give(player, historyItem.getPrice());
         historyItem.setPaid(true);
         this.plugin.getData().saveAuctionHistory(historyItem, !this.isSynced());
-
-        ItemStack item = historyItem.getItemStack();
-
-        plugin.lang().Auction_Listing_Sell_Success_Info
-                .replace("%amount%", item.getAmount())
-                .replace("%item%", ItemUT.getItemName(item))
-                .replace("%buyer%", historyItem.getBuyerName())
-                .replace("%price%", NumberUT.format(historyItem.getPrice()))
-                .send(player);
-
+        plugin.lang().Auction_Listing_Sell_Success_Info.replace(historyItem.replacePlaceholders()).send(player);
         return historyItem.isPaid();
     }
 
@@ -373,7 +355,7 @@ public class AuctionManager extends ShopModule {
         ItemUT.addItem(player, listing.getItemStack());
         this.plugin.getData().deleteAuctionListing(listing, !this.isSynced());
 
-        this.getAuctionGUI().refill();
+        this.getAuctionMainMenu().update();
     }
 
     public void takeListing(@NotNull Player player, @NotNull AuctionListing listing) {
@@ -382,7 +364,7 @@ public class AuctionManager extends ShopModule {
         ItemUT.addItem(player, listing.getItemStack());
         this.plugin.getData().deleteAuctionListing(listing, !this.isSynced());
 
-        this.getAuctionGUI().refill();
+        this.getAuctionMainMenu().update();
     }
 
     private boolean checkDisableds(@NotNull Player player) {
@@ -398,49 +380,44 @@ public class AuctionManager extends ShopModule {
     }
 
     public boolean openAuction(@NotNull Player player) {
-        return this.openAuctionGUI(player, this.getAuctionGUI());
+        return this.openAuctionGUI(player, this.getAuctionMainMenu());
     }
 
     public boolean openAuctionConfirm(@NotNull Player player, @NotNull AuctionListing listing) {
         if (!this.checkDisableds(player)) return false;
 
-        this.auctionConfirmGUI.open(player, listing);
+        this.auctionConfirmMenu.open(player, listing);
         return true;
     }
 
     public boolean openAuctionExpired(@NotNull Player player) {
-        return this.openAuctionGUI(player, this.getAuctionExpiredGUI());
+        return this.openAuctionGUI(player, this.getAuctionExpiredMenu());
     }
 
     public boolean openAuctionHistory(@NotNull Player player) {
-        return this.openAuctionGUI(player, this.getAuctionHistoryGUI());
+        return this.openAuctionGUI(player, this.getAuctionHistoryMenu());
     }
 
-    private boolean openAuctionGUI(@NotNull Player player, @NotNull IAuctionGUI<?> gui) {
+    private boolean openAuctionGUI(@NotNull Player player, @NotNull AbstractAuctionMenu<?> menu) {
         if (!this.checkDisableds(player)) return false;
 
-        gui.open(player, gui.getUserPage(player, 0));
+        menu.open(player, menu.getPage(player));
         return true;
     }
 
     @NotNull
-    public AuctionConfig getAuctionConfig() {
-        return auctionConfig;
+    public AuctionMainMenu getAuctionMainMenu() {
+        return this.auctionMainMenu;
     }
 
     @NotNull
-    public AuctionMainGUI getAuctionGUI() {
-        return this.auctionGUI;
+    public AuctionExpiredMenu getAuctionExpiredMenu() {
+        return this.auctionExpiredMenu;
     }
 
     @NotNull
-    public AuctionExpiredGUI getAuctionExpiredGUI() {
-        return this.auctionExpiredGUI;
-    }
-
-    @NotNull
-    public AuctionHistoryGUI getAuctionHistoryGUI() {
-        return this.auctionHistoryGUI;
+    public AuctionHistoryMenu getAuctionHistoryMenu() {
+        return this.auctionHistoryMenu;
     }
 
     @Nullable
@@ -549,7 +526,7 @@ public class AuctionManager extends ShopModule {
     }
 
     @NotNull
-    private <T extends AuctionItem> List<T> getItems(@NotNull UUID id, @NotNull List<T> from) {
+    private <T extends AbstractAuctionItem> List<T> getItems(@NotNull UUID id, @NotNull List<T> from) {
         return from.stream().filter(listing -> listing != null && listing.getOwner().equals(id)).toList();
     }
 
@@ -574,12 +551,8 @@ public class AuctionManager extends ShopModule {
 
         @Override
         public void action() {
-            if (auctionGUI.isAnimated()) {
-                auctionGUI.refill();
-            }
-            if (auctionExpiredGUI.isAnimated()) {
-                auctionExpiredGUI.getViewers().forEach(p -> openAuctionExpired(p));
-            }
+            auctionMainMenu.update();
+            auctionExpiredMenu.update();
         }
     }
 }

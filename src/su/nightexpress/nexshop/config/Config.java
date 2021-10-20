@@ -1,26 +1,24 @@
 package su.nightexpress.nexshop.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.bukkit.Sound;
 import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
-
 import su.nexmedia.engine.config.api.IConfigTemplate;
 import su.nexmedia.engine.config.api.JYML;
 import su.nexmedia.engine.utils.CollectionsUT;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.type.ShopClickType;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.ShopGUIAmount;
+import su.nightexpress.nexshop.shop.menu.ShopCartMenu;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Config extends IConfigTemplate {
 
     public static boolean GENERAL_BUY_WITH_FULL_INVENTORY;
 
-    public static  JYML                          CART_YML;
-    private static Map<TradeType, ShopGUIAmount> CART_GUI;
+    private static Map<TradeType, ShopCartMenu> CART_MENU;
 
     public static Sound SOUND_PURCHASE_SUCCESS;
     public static Sound SOUND_PURCHASE_FAILURE;
@@ -35,10 +33,10 @@ public class Config extends IConfigTemplate {
         String path = "General.";
         GENERAL_BUY_WITH_FULL_INVENTORY = cfg.getBoolean(path + "Buy_With_Full_Inventory");
 
-        CART_GUI = new HashMap<>();
-        CART_YML = JYML.loadOrExtract(plugin, "cart.gui.yml");
+        CART_MENU = new HashMap<>();
         for (TradeType tradeType : TradeType.values()) {
-            CART_GUI.put(tradeType, new ShopGUIAmount((ExcellentShop) plugin, CART_YML, tradeType));
+            JYML cartConfig = JYML.loadOrExtract(plugin, "cart." + tradeType.name().toLowerCase() + ".menu.yml");
+            CART_MENU.put(tradeType, new ShopCartMenu((ExcellentShop) plugin, cartConfig, tradeType));
         }
 
         path = "GUI.";
@@ -60,7 +58,7 @@ public class Config extends IConfigTemplate {
     }
 
     @NotNull
-    public static ShopGUIAmount getCartGUI(@NotNull TradeType buyType) {
-        return CART_GUI.get(buyType);
+    public static ShopCartMenu getCartMenu(@NotNull TradeType buyType) {
+        return CART_MENU.get(buyType);
     }
 }

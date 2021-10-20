@@ -2,8 +2,9 @@ package su.nightexpress.nexshop;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import su.nexmedia.engine.NexDataPlugin;
+import su.nexmedia.engine.NexPlugin;
+import su.nexmedia.engine.api.command.GeneralCommand;
+import su.nexmedia.engine.api.data.UserDataHolder;
 import su.nexmedia.engine.commands.api.IGeneralCommand;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
@@ -22,7 +23,7 @@ import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.chest.ChestShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
 
-public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
+public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataHolder<ExcellentShop, ShopUser> {
 
     private static ExcellentShop instance;
 
@@ -30,6 +31,8 @@ public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
     private Lang   lang;
 
     private ShopDataHandler dataHandler;
+    private UserManager userManager;
+
     private CurrencyManager currencyManager;
     private ModuleCache     moduleCache;
 
@@ -54,7 +57,7 @@ public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
     @Override
     public void disable() {
         for (TradeType tradeType : TradeType.values()) {
-            Config.getCartGUI(tradeType).shutdown();
+            Config.getCartMenu(tradeType).clear();
         }
         if (this.currencyManager != null) {
             this.currencyManager.shutdown();
@@ -63,12 +66,12 @@ public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
     }
 
     @Override
-    protected boolean setupDataHandlers() {
+    public boolean setupDataHandlers() {
         try {
             this.dataHandler = ShopDataHandler.getInstance(this);
             this.dataHandler.setup();
-        } catch (Exception e) {
-            this.error("Could not setup data handler!");
+        }
+        catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -76,6 +79,11 @@ public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
         this.userManager = new UserManager(this);
         this.userManager.setup();
 
+        return true;
+    }
+
+    @Override
+    public boolean useNewCommandManager() {
         return true;
     }
 
@@ -106,8 +114,8 @@ public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
     }
 
     @Override
-    public void registerEditor() {
-
+    public void registerCommands(@NotNull GeneralCommand<ExcellentShop> mainCommand) {
+        super.registerCommands(mainCommand);
     }
 
     @Override
@@ -122,6 +130,12 @@ public class ExcellentShop extends NexDataPlugin<ExcellentShop, ShopUser> {
     @Override
     public ShopDataHandler getData() {
         return this.dataHandler;
+    }
+
+    @NotNull
+    @Override
+    public UserManager getUserManager() {
+        return userManager;
     }
 
     @NotNull

@@ -1,0 +1,15 @@
+Pages: 1
+Permission_Required: false
+Transaction_Allowed:
+  SELL: true
+  BUY: true
+Citizens:
+  Attached_NPC: ''
+Icon:
+  material: DIAMOND_SHOVEL
+  amount: 1
+  durability: 0
+  name: '&b&lTools'
+  enchanted: false
+  item-flags: []
+  unbreakable: false

@@ -9,6 +9,7 @@ import su.nexmedia.engine.config.api.JYML;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
+import su.nightexpress.nexshop.currency.CurrencyType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +28,7 @@ public class ChestShopConfig {
     public static List<String> DISPLAY_TEXT;
     public static int          DISPLAY_SLIDE_TIME;
 
+    public static String DEFAULT_CURRENCY;
     public static Set<String> ALLOWED_CURRENCIES;
 
     public static  double               SHOP_CREATION_COST_CREATE;
@@ -44,19 +46,23 @@ public class ChestShopConfig {
     public static Sound SOUND_CREATION;
     public static Sound SOUND_REMOVAL;
 
-    ChestShopConfig(@NotNull ChestShop chestShop) {
-        JYML cfg = chestShop.getJYML();
-        chestShop.plugin.getConfigManager().extractFullPath(chestShop.getFullPath() + "editor");
-        YML_SHOP_VIEW = JYML.loadOrExtract(chestShop.plugin, chestShop.getPath() + "view.yml");
-        YML_LIST_OWN = JYML.loadOrExtract(chestShop.plugin, chestShop.getPath() + "list.own.gui.yml");
-        YML_LIST_GLOBAL = JYML.loadOrExtract(chestShop.plugin, chestShop.getPath() + "list.global.gui.yml");
-        YML_LIST_SEARCH = JYML.loadOrExtract(chestShop.plugin, chestShop.getPath() + "list.search.gui.yml");
+    public static void load(@NotNull ChestShop chestShop) {
+        JYML cfg = chestShop.getConfig();
+
+        chestShop.plugin().getConfigManager().extractFullPath(chestShop.getFullPath() + "editor");
+        YML_SHOP_VIEW = JYML.loadOrExtract(chestShop.plugin(), chestShop.getPath() + "view.yml");
+        YML_LIST_OWN = JYML.loadOrExtract(chestShop.plugin(), chestShop.getPath() + "list.own.menu.yml");
+        YML_LIST_GLOBAL = JYML.loadOrExtract(chestShop.plugin(), chestShop.getPath() + "list.global.menu.yml");
+        YML_LIST_SEARCH = JYML.loadOrExtract(chestShop.plugin(), chestShop.getPath() + "list.search.menu.yml");
 
         String path = "Shops.";
+        cfg.addMissing(path + "Default_Currency", CurrencyType.VAULT);
+
+        DEFAULT_CURRENCY = cfg.getString(path + "Default_Currency", CurrencyType.VAULT);
         ALLOWED_CURRENCIES = cfg.getStringSet(path + "Allowed_Currencies").stream()
                 .map(String::toLowerCase).collect(Collectors.toSet());
         ALLOWED_CURRENCIES.removeIf(currencyId -> {
-            IShopCurrency currency = chestShop.plugin.getCurrencyManager().getCurrency(currencyId);
+            IShopCurrency currency = chestShop.plugin().getCurrencyManager().getCurrency(currencyId);
             return currency == null || !currency.hasOfflineSupport();
         });
 
@@ -93,6 +99,8 @@ public class ChestShopConfig {
         path = "Sounds.";
         SOUND_CREATION = cfg.getEnum(path + "Create", Sound.class, Sound.BLOCK_NOTE_BLOCK_BELL);
         SOUND_REMOVAL = cfg.getEnum(path + "Remove", Sound.class, Sound.BLOCK_ANVIL_PLACE);
+
+        cfg.saveChanges();
     }
 
     public static boolean isClaimPlugin(@NotNull String plugin) {

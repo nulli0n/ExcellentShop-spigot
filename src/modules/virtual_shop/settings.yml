@@ -1,4 +1,4 @@
-command-aliases: shop,vshop
+Command_Aliases: shop,vshop
 
 General:
   Disabled_In_Gamemodes:
@@ -15,7 +15,7 @@ GUI:
         - '%lore%'
         - '&7'
         - '             &eBuy: &6%product_price_buy_formatted% &8| &eSell: &6%product_price_sell_formatted%'
-        - '   &bBuy Left &8→ &3%product_limit_buy_available% &7| &3%product_limit_buy_reset% &8← Buy Restock'
+        - '   &bBuy Left &8→ &3%product_limit_buy_available% &7| &3%product_limit_buy_reset% &8← &bBuy Restock'
         - '   &bSell Left &8→ &3%product_limit_sell_available% &7| &3%product_limit_sell_reset% &8← &bSell Restock'
         - '&7'
         - '&cLeft-Click &8→ &fSelect Quantity &8← &cRight-Click'

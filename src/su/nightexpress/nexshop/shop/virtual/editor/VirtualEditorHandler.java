@@ -2,21 +2,20 @@ package su.nightexpress.nexshop.shop.virtual.editor;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
+import su.nexmedia.engine.api.editor.AbstractEditorHandler;
+import su.nexmedia.engine.api.editor.EditorUtils;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.editor.EditorHandler;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IShopDiscount;
-import su.nightexpress.nexshop.api.IShopProduct;
 import su.nightexpress.nexshop.api.virtual.IShopVirtual;
+import su.nightexpress.nexshop.api.virtual.IShopVirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.editor.handler.EditorHandlerDiscount;
 import su.nightexpress.nexshop.shop.virtual.editor.handler.EditorHandlerProduct;
 import su.nightexpress.nexshop.shop.virtual.editor.handler.EditorHandlerShop;
-import su.nightexpress.nexshop.shop.virtual.editor.object.EditorShopList;
+import su.nightexpress.nexshop.shop.virtual.object.ShopVirtual;
 
-public class VirtualEditorHandler extends EditorHandler<ExcellentShop> {
+public class VirtualEditorHandler extends AbstractEditorHandler<ExcellentShop, VirtualEditorType> {
 
     public static JYML SHOP_LIST_YML;
     public static JYML SHOP_MAIN_YML;
@@ -24,62 +23,42 @@ public class VirtualEditorHandler extends EditorHandler<ExcellentShop> {
     public static JYML SHOP_PRODUCT_LIST_YML;
     public static JYML SHOP_PRODUCT_MAIN_YML;
 
-    private final EditorShopList editorShopList;
-
-    private final EditorHandlerShop     handlerShop;
-    private final EditorHandlerProduct  handlerProduct;
-    private final EditorHandlerDiscount handlerDiscount;
+    private final VirtualShop virtualShop;
 
     public VirtualEditorHandler(@NotNull VirtualShop virtualShop) {
-        super(virtualShop.plugin, VirtualEditorType.class, null);
+        super(virtualShop.plugin());
+        this.virtualShop = virtualShop;
 
         SHOP_LIST_YML = JYML.loadOrExtract(plugin, virtualShop.getPath() + "editor/shop_list.yml");
         SHOP_MAIN_YML = JYML.loadOrExtract(plugin, virtualShop.getPath() + "editor/shop_main.yml");
         SHOP_PRODUCT_LIST_YML = JYML.loadOrExtract(plugin, virtualShop.getPath() + "editor/shop_product_list.yml");
         SHOP_PRODUCT_MAIN_YML = JYML.loadOrExtract(plugin, virtualShop.getPath() + "editor/shop_product.yml");
         SHOP_DISCOUNTS_YML = JYML.loadOrExtract(plugin, virtualShop.getPath() + "editor/shop_discounts.yml");
-
-        this.editorShopList = new EditorShopList(virtualShop);
-
-        this.handlerShop = new EditorHandlerShop(virtualShop);
-        this.handlerProduct = new EditorHandlerProduct(this.plugin);
-        this.handlerDiscount = new EditorHandlerDiscount(virtualShop);
     }
 
     @Override
-    protected boolean onType(@NotNull Player player, @Nullable Object obj, @NotNull Enum<?> type2, @NotNull String msg) {
-        VirtualEditorType type = (VirtualEditorType) type2;
+    protected void onLoad() {
+        super.onLoad();
+        this.addInputHandler(IShopVirtual.class, new EditorHandlerShop(this.plugin));
+        this.addInputHandler(IShopVirtualProduct.class, new EditorHandlerProduct(this.plugin));
+        this.addInputHandler(IShopDiscount.class, new EditorHandlerDiscount(this.virtualShop));
+    }
 
-        if (obj instanceof IShopVirtual || (type == VirtualEditorType.CREATE_SHOP && obj == null)) {
-            return this.getHandlerShop().onType(player, (IShopVirtual) obj, type, msg);
+    @Override
+    protected boolean onType(@NotNull Player player, @NotNull Object object,
+                             @NotNull VirtualEditorType type, @NotNull String input) {
+
+        if (type == VirtualEditorType.SHOP_CREATE) {
+            String id = EditorUtils.fineId(input);
+            if (this.virtualShop.getShopById(id) != null) {
+                EditorUtils.errorCustom(player, plugin.lang().Virtual_Shop_Editor_Create_Error_Exist.getMsg());
+                return false;
+            }
+            IShopVirtual shop = new ShopVirtual(this.virtualShop, this.virtualShop.getFullPath() + VirtualShop.DIR_SHOPS + id + "/" + id + ".yml");
+            this.virtualShop.getShopsMap().put(shop.getId(), shop);
+            return true;
         }
-        if (obj instanceof IShopProduct) {
-            return this.getHandlerProduct().onType(player, (IShopProduct) obj, type, msg);
-        }
-        if (obj instanceof IShopDiscount) {
-            return this.getHandlerDiscount().onType(player, (IShopDiscount) obj, type, msg);
-        }
 
-        return true;
-    }
-
-    @NotNull
-    public EditorShopList getEditorShopList() {
-        return this.editorShopList;
-    }
-
-    @NotNull
-    public EditorHandlerShop getHandlerShop() {
-        return this.handlerShop;
-    }
-
-    @NotNull
-    public EditorHandlerProduct getHandlerProduct() {
-        return this.handlerProduct;
-    }
-
-    @NotNull
-    public EditorHandlerDiscount getHandlerDiscount() {
-        return this.handlerDiscount;
+        return super.onType(player, object, type, input);
     }
 }

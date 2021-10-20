@@ -1,0 +1,16 @@
+Title: Brewing
+Size: 54
+Content:
+  b1bafeef-b02a-4ace-a2f0-7bf6eceff171:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          amount: 1
+          durability: 0
+          name: '&c&lReturn'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '49'
+    Type: RETURN

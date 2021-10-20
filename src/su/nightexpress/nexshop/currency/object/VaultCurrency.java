@@ -9,7 +9,7 @@ import su.nightexpress.nexshop.currency.CurrencyType;
 
 public class VaultCurrency extends AbstractShopCurrency {
 
-    private VaultHK vault;
+    private final VaultHK vault;
 
     public VaultCurrency(@NotNull String name, @NotNull String format, @NotNull VaultHK vaultHook) {
         super(CurrencyType.VAULT, name, format);

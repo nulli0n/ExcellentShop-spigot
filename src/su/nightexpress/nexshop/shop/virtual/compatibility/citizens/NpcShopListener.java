@@ -7,35 +7,35 @@ import net.citizensnpcs.api.trait.TraitInfo;
 import org.bukkit.craftbukkit.libs.org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.manager.ILoadable;
 import su.nexmedia.engine.hooks.external.citizens.CitizensHK;
 import su.nexmedia.engine.hooks.external.citizens.CitizensListener;
-import su.nexmedia.engine.manager.api.Loadable;
 import su.nightexpress.nexshop.api.virtual.IShopVirtual;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
 
 import java.util.Optional;
 
-public class NpcShopListener implements CitizensListener, Loadable {
+public class NpcShopListener implements CitizensListener, ILoadable {
 
     private final VirtualShop virtualShop;
-    private final CitizensHK  citizens;
-    private       TraitInfo   shopTrait;
+    private final CitizensHK citizens;
+    private final TraitInfo  shopTrait;
 
     public NpcShopListener(@NotNull VirtualShop virtualShop, @NotNull CitizensHK citizens) {
         this.virtualShop = virtualShop;
         this.citizens = citizens;
+        this.shopTrait = TraitInfo.create(ShopTrait.class).withName("exshop");
     }
 
     @Override
     public void setup() {
-        this.shopTrait = TraitInfo.create(ShopTrait.class).withName("exshop");
-        this.citizens.registerTrait(this.virtualShop.plugin, this.shopTrait);
-        this.citizens.addListener(this.virtualShop.plugin, this);
+        this.citizens.registerTrait(this.virtualShop.plugin(), this.shopTrait);
+        this.citizens.addListener(this.virtualShop.plugin(), this);
     }
 
     @Override
     public void shutdown() {
-        this.citizens.unregisterTrait(this.virtualShop.plugin, this.shopTrait);
+        this.citizens.unregisterTrait(this.virtualShop.plugin(), this.shopTrait);
         this.citizens.removeListener(this);
     }
 

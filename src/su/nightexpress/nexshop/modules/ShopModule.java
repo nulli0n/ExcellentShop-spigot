@@ -2,8 +2,8 @@ package su.nightexpress.nexshop.modules;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.commands.list.HelpCommand;
-import su.nexmedia.engine.modules.IModule;
+import su.nexmedia.engine.api.module.AbstractModule;
+import su.nexmedia.engine.command.list.HelpSubCommand;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IProductPrepared;
@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public abstract class ShopModule extends IModule<ExcellentShop> {
+public abstract class ShopModule extends AbstractModule<ExcellentShop> {
 
     protected Logger logger;
 
@@ -26,23 +26,17 @@ public abstract class ShopModule extends IModule<ExcellentShop> {
     }
 
     @Override
-    protected void onPreSetup() {
+    protected void onLoad() {
         this.logger = new Logger();
 
         if (this.moduleCommand != null) {
-            this.moduleCommand.addDefaultCommand(new HelpCommand<>(this.plugin));
-            this.moduleCommand.addSubCommand(new ModuleReloadCmd(this));
+            this.moduleCommand.addDefaultCommand(new HelpSubCommand<>(this.plugin));
+            this.moduleCommand.addChildren(new ModuleReloadCmd(this));
         }
-        super.onPreSetup();
     }
 
     @Override
-    protected void onPostSetup() {
-        super.onPostSetup();
-    }
-
-    @Override
-    protected void onUnload() {
+    protected void onShutdown() {
         if (this.logger != null) {
             this.logger = null;
         }

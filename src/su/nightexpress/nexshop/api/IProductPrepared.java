@@ -2,13 +2,14 @@ package su.nightexpress.nexshop.api;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
 import su.nightexpress.nexshop.api.type.TradeType;
 
 import java.util.function.UnaryOperator;
 
-public interface IProductPrepared {
+public interface IProductPrepared extends IPlaceholder {
 
     String PLACEHOLDER_ITEM   = "%item%";
     String PLACEHOLDER_AMOUNT = "%amount%";
@@ -45,11 +46,8 @@ public interface IProductPrepared {
         return price * this.getAmount();
     }
 
-    default void trade(@NotNull Player player, boolean isAll) {
-        if (this.getTradeType() == TradeType.BUY) {
-            this.buy(player);
-        }
-        else this.sell(player, isAll);
+    default boolean trade(@NotNull Player player, boolean isAll) {
+        return this.getTradeType() == TradeType.BUY ? this.buy(player) : this.sell(player, isAll);
     }
 
     boolean buy(@NotNull Player player);

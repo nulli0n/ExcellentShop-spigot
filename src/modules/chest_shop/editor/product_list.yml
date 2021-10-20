@@ -1,22 +1,17 @@
-title: Product Manager
-size: 54
-free-slot:
-  material: LIME_STAINED_GLASS_PANE
-  name: '&a&lFree Slot!'
-  lore:
-    - '&bSimply put items here!'
-product:
-  name: '&7%name%'
-  lore:
-    - '&bBuy Price: &a%buy%'
-    - '&bSell Price: &a%sell%'
-    - '&7'
-    - '&6Left-Click: &eEdit'
-    - '&6Shift+Right-Click: &eDelete'
+Title: '&8&l「 &9Editor - Shop Product List &8&l」'
+Size: 54
 
-content:
-  return:
-    material: BARRIER
-    name: '&eReturn'
-    type: RETURN
-    slots: 49
+Free_Slot:
+  material: LIME_STAINED_GLASS_PANE
+  name: '&a&lFree Slot'
+  lore:
+    - '&bSimply put item on me!'
+
+Product:
+  Name: '&e%product_preview_name%'
+  Lore:
+    - '&bBuy Price: &a%product_price_buy_min% - %product_price_buy_max%'
+    - '&bSell Price: &a%product_price_sell_min% - %product_price_sell_max%'
+    - '&7'
+    - '&6Shift+Left-Click: &eEdit'
+    - '&6Shift+Right-Click: &eDelete'

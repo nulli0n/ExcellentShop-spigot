@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import su.nexmedia.engine.utils.ItemUT;
+import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.modules.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
@@ -18,23 +19,23 @@ public class SellCommand extends ShopModuleCommand<AuctionManager> {
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return plugin.lang().Auction_Command_Sell_Usage.getMsg();
     }
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Auction_Command_Sell_Desc.getMsg();
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return true;
     }
 
     @Override
-    protected void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         if (args.length < 2) {
             this.printUsage(sender);
             return;
@@ -44,12 +45,15 @@ public class SellCommand extends ShopModuleCommand<AuctionManager> {
 
         ItemStack item = player.getInventory().getItemInMainHand();
         if (ItemUT.isAir(item)) {
-            this.errItem(sender);
+            this.errorItem(sender);
             return;
         }
 
-        double price = this.getNumD(sender, args[1], -1, false);
-        if (price < 0) return;
+        double price = StringUT.getDouble(args[1], -1, false);
+        if (price <= 0) {
+            this.errorNumber(sender, args[1]);
+            return;
+        }
 
         if (this.module.add(player, item, price)) {
             player.getInventory().setItemInMainHand(null);

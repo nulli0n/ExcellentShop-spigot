@@ -16,24 +16,24 @@ public class EditorCommand extends ShopModuleCommand<VirtualShop> {
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Core_Command_Editor_Desc.getMsg();
     }
 
     @Override
-    public boolean playersOnly() {
-        return true;
-    }
-
-    @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return "";
     }
 
     @Override
-    public void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public boolean isPlayerOnly() {
+        return true;
+    }
+
+    @Override
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         Player player = (Player) sender;
-        this.module.getEditorHandler().getEditorShopList().open(player, 1);
+        this.module.getEditor().open(player, 1);
     }
 }

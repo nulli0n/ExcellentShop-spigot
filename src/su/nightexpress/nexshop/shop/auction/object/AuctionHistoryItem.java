@@ -9,10 +9,10 @@ import su.nightexpress.nexshop.shop.auction.AuctionConfig;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-public class AuctionHistoryItem extends AuctionItem {
+public class AuctionHistoryItem extends AbstractAuctionItem {
 
-    public static final String PLACEHOLDER_BUYER    = "%buyer%";
-    public static final String PLACEHOLDER_BUY_DATE = "%date%";
+    public static final String PLACEHOLDER_BUYER    = "%listing_buyer%";
+    public static final String PLACEHOLDER_BUY_DATE = "%listing_buy_date%";
 
     private final String  buyerName;
     private       boolean isPaid;

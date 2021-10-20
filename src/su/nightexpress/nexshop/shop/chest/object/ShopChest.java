@@ -7,15 +7,12 @@ import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.manager.AbstractLoadableItem;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.LoadableItem;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nexmedia.engine.utils.LocUT;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.AbstractShopView;
-import su.nightexpress.nexshop.api.IProductPricer;
-import su.nightexpress.nexshop.api.IShopDiscount;
-import su.nightexpress.nexshop.api.IShopProduct;
+import su.nightexpress.nexshop.api.*;
 import su.nightexpress.nexshop.api.chest.IShopChest;
 import su.nightexpress.nexshop.api.chest.IShopChestProduct;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
@@ -28,29 +25,27 @@ import su.nightexpress.nexshop.shop.chest.ChestShopConfig;
 import su.nightexpress.nexshop.shop.chest.editor.object.EditorShopChest;
 
 import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ShopChest extends LoadableItem implements IShopChest {
+public class ShopChest extends AbstractLoadableItem<ExcellentShop> implements IShopChest {
 
-    private final ExcellentShop plugin;
-    private final ChestShop     chestShop;
+    private final ChestShop chestShop;
 
     private final Location      location;
     private final UUID          ownerId;
     private final String        ownerName;
     private final OfflinePlayer ownerPlayer;
-
-    private String                         name;
-    private boolean                        isAdmin;
-    private Map<TradeType, Boolean>        purchaseAllowed;
-    private Map<String, IShopChestProduct> products;
-
+    private final Map<TradeType, Boolean>        purchaseAllowed;
+    private final Map<String, IShopChestProduct> products;
+    private       String                         name;
+    private       boolean                        isAdmin;
     private Chest           chest;
     private EditorShopChest editor;
 
-    private boolean displayHas;
+    private boolean      displayHas;
     private List<String> displayText;
     private Location     displayHologramLoc;
     private Location     displayItemLoc;
@@ -63,8 +58,7 @@ public class ShopChest extends LoadableItem implements IShopChest {
             @NotNull Chest chest,
             @NotNull UUID id,
             boolean admin) {
-        super(chestShop.plugin, chestShop.getFullPath() + ChestShop.DIR_SHOPS + id.toString() + ".yml");
-        this.plugin = chestShop.plugin;
+        super(chestShop.plugin(), chestShop.getFullPath() + ChestShop.DIR_SHOPS + id + ".yml");
         this.chestShop = chestShop;
 
         this.location = chest.getLocation();
@@ -90,8 +84,7 @@ public class ShopChest extends LoadableItem implements IShopChest {
     }
 
     public ShopChest(@NotNull ChestShop chestShop, @NotNull JYML cfg) {
-        super(chestShop.plugin, cfg);
-        this.plugin = chestShop.plugin;
+        super(chestShop.plugin(), cfg);
         this.chestShop = chestShop;
 
         Location location = cfg.getLocation("Location");
@@ -145,7 +138,12 @@ public class ShopChest extends LoadableItem implements IShopChest {
                 throw new IllegalStateException("Invalid product item of '" + sId + "' in '" + getId() + "' shop!");
             }
 
-            IProductPricer pricer = new ProductPricer(priceMinMax, false, new HashSet<>(), new HashSet<>());
+            path2 = path + "Purchase.Randomizer.";
+            boolean isRndEnabled = cfg.getBoolean(path2 + "Enabled");
+            Set<DayOfWeek> rndDays = AbstractTimed.parseDays(cfg.getString(path2 + "Times.Days", ""));
+            Set<LocalTime[]> rndTimes = AbstractTimed.parseTimes(cfg.getStringList(path2 + "Times.Times"));
+
+            IProductPricer pricer = new ProductPricer(priceMinMax, isRndEnabled, rndDays, rndTimes);
 
             IShopChestProduct product = new ShopChestProduct(
                     this, sId,
@@ -162,6 +160,11 @@ public class ShopChest extends LoadableItem implements IShopChest {
     }
 
     @Override
+    public void save() {
+        super.save();
+    }
+
+    @Override
     @NotNull
     public ExcellentShop plugin() {
         return this.plugin;
@@ -171,13 +174,13 @@ public class ShopChest extends LoadableItem implements IShopChest {
     public void clear() {
         this.chestShop.getDisplayHandler().remove(this);
         if (this.editor != null) {
-            this.editor.shutdown();
+            this.editor.clear();
             this.editor = null;
         }
     }
 
     @Override
-    protected void save(@NotNull JYML cfg) {
+    public void onSave() {
         cfg.set("Location", this.getLocation());
         cfg.set("Name", this.getName());
         cfg.set("Owner.Id", this.getOwnerId().toString());
@@ -218,7 +221,7 @@ public class ShopChest extends LoadableItem implements IShopChest {
                     .collect(Collectors.toList()));
 
             cfg.setItem64(path + "Reward.Item", shopProduct.getItem());
-            cfg.set(path + "Reward.Commands", shopProduct.getCommands());
+            //cfg.set(path + "Reward.Commands", shopProduct.getCommands());
         }
     }
 
@@ -257,7 +260,7 @@ public class ShopChest extends LoadableItem implements IShopChest {
             return false;
         }
 
-        String currencyId = ChestShopConfig.ALLOWED_CURRENCIES.stream().findFirst().orElse(null);
+        String currencyId = ChestShopConfig.DEFAULT_CURRENCY;//ChestShopConfig.ALLOWED_CURRENCIES.stream().findFirst().orElse(null);
         if (currencyId == null) return false;
 
         IShopCurrency currency = plugin.getCurrencyManager().getCurrency(currencyId);
@@ -278,7 +281,7 @@ public class ShopChest extends LoadableItem implements IShopChest {
     @Override
     public void setName(@NotNull String name) {
         if (name.length() > 32) {
-            name = name.substring(0, 33);
+            name = name.substring(0, 32);
         }
         this.name = name;
     }

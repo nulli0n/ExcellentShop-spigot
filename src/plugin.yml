@@ -1,6 +1,6 @@
 name: ExcellentShop
 main: su.nightexpress.nexshop.ExcellentShop
-version: 4.0.6
+version: 4.0.7
 description: Advanced 3 in 1 shop plugin with many features!
 author: NightExpress
 depend: [ NexEngine ]
@@ -117,6 +117,7 @@ permissions:
     children:
       excellentshop.auction.cmd: true
       excellentshop.auction.bypass: true
+      excellentshop.auction.listing.remove.others: true
 
   excellentshop.auction.bypass:
     description: Bypass all auction restrictions.

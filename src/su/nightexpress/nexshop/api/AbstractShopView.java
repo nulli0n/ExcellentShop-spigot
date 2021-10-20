@@ -4,14 +4,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
+import su.nexmedia.engine.api.menu.AbstractMenu;
+import su.nexmedia.engine.api.menu.IMenuItem;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.api.gui.GuiItem;
-import su.nexmedia.engine.manager.api.gui.NGUI;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.ExcellentShop;
 
-public abstract class AbstractShopView<T extends IShop> extends NGUI<ExcellentShop> {
+public abstract class AbstractShopView<T extends IShop> extends AbstractMenu<ExcellentShop> {
 
     protected final @NotNull T shop;
 
@@ -26,31 +25,25 @@ public abstract class AbstractShopView<T extends IShop> extends NGUI<ExcellentSh
     }
 
     @Override
-    protected void onCreate(@NotNull Player player, @NotNull Inventory inv, int page) {
-        this.displayProducts(player, inv, page);
+    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+        this.displayProducts(player, inventory, this.getPage(player));
     }
 
-    public abstract void displayProducts(@NotNull Player player, @NotNull Inventory inv, int page);
+    @Override
+    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
+
+    }
+
+    public abstract void displayProducts(@NotNull Player player, @NotNull Inventory inventory, int page);
 
     @Override
-    protected void replaceMeta(@NotNull Player player, @NotNull ItemStack item, @NotNull GuiItem guiItem) {
-        super.replaceMeta(player, item, guiItem);
-
+    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+        super.onItemPrepare(player, menuItem, item);
         ItemUT.replace(item, this.shop.replacePlaceholders());
     }
 
     @Override
-    protected boolean cancelClick(int slot) {
-        return true;
-    }
-
-    @Override
-    protected boolean cancelPlayerClick() {
-        return true;
-    }
-
-    @Override
-    protected boolean ignoreNullClick() {
+    public boolean cancelClick(@NotNull SlotType slotType, int slot) {
         return true;
     }
 }

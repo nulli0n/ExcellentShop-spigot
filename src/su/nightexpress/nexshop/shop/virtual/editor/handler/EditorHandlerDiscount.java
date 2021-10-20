@@ -3,22 +3,24 @@ package su.nightexpress.nexshop.shop.virtual.editor.handler;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.manager.editor.EditorManager;
+import su.nexmedia.engine.api.editor.EditorUtils;
 import su.nexmedia.engine.utils.CollectionsUT;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.api.IShopDiscount;
 import su.nightexpress.nexshop.api.virtual.IShopVirtual;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorInputHandler;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-public class EditorHandlerDiscount implements IEditorHandler<IShopDiscount> {
+public class EditorHandlerDiscount extends VirtualEditorInputHandler<IShopDiscount> {
 
     private final VirtualShop virtualShop;
 
     public EditorHandlerDiscount(@NotNull VirtualShop virtualShop) {
+        super(virtualShop.plugin());
         this.virtualShop = virtualShop;
     }
 
@@ -37,7 +39,7 @@ public class EditorHandlerDiscount implements IEditorHandler<IShopDiscount> {
             case DISCOUNT_CHANGE_DAY -> {
                 DayOfWeek day = CollectionsUT.getEnum(msg, DayOfWeek.class);
                 if (day == null) {
-                    EditorManager.errorEnum(player, DayOfWeek.class);
+                    EditorUtils.errorEnum(player, DayOfWeek.class);
                     return false;
                 }
                 discount.getDays().add(day);
@@ -63,11 +65,9 @@ public class EditorHandlerDiscount implements IEditorHandler<IShopDiscount> {
         IShopVirtual shop = this.virtualShop.getShops().stream().filter(shop2 -> {
             return shop2.getDiscounts().stream().anyMatch(d -> d == discount);
         }).findFirst().orElse(null);
-
         if (shop == null) return true;
 
         shop.save();
-        shop.getEditor().getEditorDiscounts().open(player, 1);
         return true;
     }
 }

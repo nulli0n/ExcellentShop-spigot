@@ -28,7 +28,7 @@ public class ImportAuctionHouse {
             AuctionListing aucListing = new AuctionListing(id, owner, ownerName, itemStack, price, expireDate, deleteDate);
             auc.getListings().add(aucListing);
 
-            auc.plugin.getData().addAuctionListing(aucListing, false);
+            auc.plugin().getData().addAuctionListing(aucListing, false);
         });
     }
 }

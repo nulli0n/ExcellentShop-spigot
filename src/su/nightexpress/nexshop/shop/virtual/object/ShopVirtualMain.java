@@ -4,92 +4,78 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
+import su.nexmedia.engine.api.menu.AbstractMenu;
+import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.api.gui.ContentType;
-import su.nexmedia.engine.manager.api.gui.GuiClick;
-import su.nexmedia.engine.manager.api.gui.GuiItem;
-import su.nexmedia.engine.manager.api.gui.NGUI;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.virtual.IShopVirtual;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
 
-public class ShopVirtualMain extends NGUI<ExcellentShop> {
+public class ShopVirtualMain extends AbstractMenu<ExcellentShop> {
 
-    public ShopVirtualMain(@NotNull VirtualShop guiShop, @NotNull JYML cfg, @NotNull String path) {
-        super(guiShop.plugin, cfg, path);
+    private final VirtualShop virtualShop;
 
-        GuiClick click = (p, type, e) -> {
-            if (type == null) return;
+    public ShopVirtualMain(@NotNull VirtualShop virtualShop, @NotNull JYML cfg, @NotNull String path) {
+        super(virtualShop.plugin(), cfg, path);
+        this.virtualShop = virtualShop;
 
-            if (type instanceof ContentType type2) {
-
-                if (type2 == ContentType.EXIT) {
-                    p.closeInventory();
-                }
+        IMenuClick click = (player, type, e) -> {
+            if (type instanceof MenuItemType type2) {
+                this.onItemClickDefault(player, type2);
             }
         };
 
-        for (String id : cfg.getSection(path + "custom-items")) {
-            GuiItem guiItem = cfg.getGuiItem(path + "custom-items." + id, ContentType.class);
-            if (guiItem == null) continue;
+        for (String sId : cfg.getSection(path + "Content")) {
+            IMenuItem menuItem = cfg.getMenuItem(path + "Content." + sId, MenuItemType.class);
 
-            if (guiItem.getType() != null) {
-                guiItem.setClick(click);
+            if (menuItem.getType() != null) {
+                menuItem.setClick(click);
             }
-
-            this.addButton(guiItem);
+            this.addItem(menuItem);
         }
 
-        for (String id : cfg.getSection(path + "shop-items")) {
-            GuiItem guiItem = cfg.getGuiItem(path + "shop-items." + id);
-            if (guiItem == null) continue;
+        for (String sId : cfg.getSection(path + "Shops")) {
+            IMenuItem menuItem = cfg.getMenuItem(path + "Shops." + sId);
 
-            IShopVirtual shop = guiShop.getShopById(id);
+            IShopVirtual shop = virtualShop.getShopById(sId);
             if (shop == null) {
-                plugin.error("Invalid shop item in the main menu: '" + id + "' !");
+                plugin.error("Invalid shop item in the main menu: '" + sId + "' !");
                 continue;
             }
 
-            guiItem.setClick((p, type, e) -> {
+            menuItem.setClick((p, type, e) -> {
                 shop.open(p, 1);
             });
 
-            this.addButton(guiItem);
+            this.addItem(menuItem);
         }
     }
 
     @Override
-    protected void onCreate(@NotNull Player player, @NotNull Inventory inv, int slot) {
+    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
 
     }
 
     @Override
-    protected boolean cancelClick(int slot) {
-        return true;
+    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
+
     }
 
     @Override
-    protected boolean ignoreNullClick() {
-        return true;
-    }
+    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+        super.onItemPrepare(player, menuItem, item);
 
-    @Override
-    protected boolean cancelPlayerClick() {
-        return true;
-    }
-
-    @Override
-    protected void replaceMeta(@NotNull Player player, @NotNull ItemStack item, @NotNull GuiItem guiItem) {
-        super.replaceMeta(player, item, guiItem);
-
-        VirtualShop guiShop = plugin.getVirtualShop();
-        if (guiShop == null) return;
-
-        IShopVirtual shop = guiShop.getShopById(guiItem.getId());
+        IShopVirtual shop = this.virtualShop.getShopById(menuItem.getId());
         if (shop == null) return;
 
         ItemUT.replace(item, shop.replacePlaceholders());
+    }
+
+    @Override
+    public boolean cancelClick(@NotNull SlotType slotType, int slot) {
+        return true;
     }
 }

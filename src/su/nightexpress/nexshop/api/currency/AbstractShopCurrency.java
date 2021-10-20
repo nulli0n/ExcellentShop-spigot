@@ -4,8 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.NumberUT;
 import su.nexmedia.engine.utils.StringUT;
 
-import java.util.function.UnaryOperator;
-
 public abstract class AbstractShopCurrency implements IShopCurrency {
 
     private final String id;
@@ -16,14 +14,6 @@ public abstract class AbstractShopCurrency implements IShopCurrency {
         this.id = id.toLowerCase();
         this.name = StringUT.color(name);
         this.format = StringUT.color(format);
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-                .replace(PLACEHOLDER_NAME, this.getName())
-                ;
     }
 
     @Override

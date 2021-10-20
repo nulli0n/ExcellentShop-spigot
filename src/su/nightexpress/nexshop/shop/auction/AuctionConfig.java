@@ -38,9 +38,9 @@ public class AuctionConfig {
     public static LinkedHashMap<String, AuctionCategory> CATEGORIES_MAP;
     public static List<AuctionCategory>                  CATEGORIES;
 
-    AuctionConfig(@NotNull AuctionManager manager) {
-        JYML cfgCategories = JYML.loadOrExtract(manager.plugin, manager.getPath() + "categories.yml");
-        JYML cfg = manager.getJYML();
+    public static void load(@NotNull AuctionManager manager) {
+        JYML cfgCategories = JYML.loadOrExtract(manager.plugin(), manager.getPath() + "categories.yml");
+        JYML cfg = manager.getConfig();
 		
         /*Map<String, List<String>> categories = new HashMap<>();
         for (Material material : Material.values()) {

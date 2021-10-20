@@ -27,18 +27,18 @@ public class SearchCmd extends ShopModuleCommand<ChestShop> {
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Chest_Shop_Command_Search_Desc.getMsg();
     }
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return plugin.lang().Chest_Shop_Command_Search_Usage.getMsg();
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return true;
     }
 
@@ -52,7 +52,7 @@ public class SearchCmd extends ShopModuleCommand<ChestShop> {
     }
 
     @Override
-    public void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         if (args.length != 2) {
             this.printUsage(sender);
             return;

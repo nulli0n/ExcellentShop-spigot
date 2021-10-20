@@ -1,0 +1,53 @@
+Title: '&8&m     &8&l[ &9&lAuction - Expired &8&l]&8&m     &7'
+Size: 54
+
+Items:
+  Name: '&f%listing_item_name%'
+  Lore:
+    - '%listing_item_lore%'
+    - '&7'
+    - '&e▸ &7Price: &e$%listing_price%'
+    - '&c▸ &7Delete in: &c%listing_deletes_in%'
+    - '&7'
+    - '&6Click to &eTake Item'
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+
+Special:
+  take:
+    Display:
+      default:
+        Item:
+          material: 'HOPPER'
+          name: '&6Take All'
+          lore:
+            - '&7Take all items to your inventory.'
+    Type: AUCTION_EXPIRED_TAKE_ALL
+    Slots: 51
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&lNext Page →'
+    Slots: 53
+    Type: PAGE_NEXT
+
+  page_previous:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l← Previous Page'
+    Slots: 45
+    Type: PAGE_PREVIOUS
+
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&lExit &4&l✕'
+    Slots: 47
+    Type: RETURN

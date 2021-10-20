@@ -12,8 +12,6 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.ProductPricer;
 import su.nightexpress.nexshop.shop.chest.editor.object.EditorShopChestProduct;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 public class ShopChestProduct implements IShopChestProduct {
@@ -46,7 +44,7 @@ public class ShopChestProduct implements IShopChestProduct {
             @NotNull ItemStack rewardItem
     ) {
         this.shop = shop;
-        this.id = id;
+        this.id = id.toLowerCase();
 
         this.setCurrency(currency);
         this.pricer = pricer;
@@ -58,7 +56,7 @@ public class ShopChestProduct implements IShopChestProduct {
     @Override
     public void clear() {
         if (this.editor != null) {
-            this.editor.shutdown();
+            this.editor.clear();
             this.editor = null;
         }
     }
@@ -104,7 +102,7 @@ public class ShopChestProduct implements IShopChestProduct {
     @Override
     @Deprecated
     public int getStockAmountLeft(@NotNull Player player, @NotNull TradeType tradeType) {
-        return this.getShop().getProductAmount(this);
+        return tradeType == TradeType.BUY ? this.getShop().getProductAmount(this) : this.getShop().getProductSpace(this);//this.getShop().getProductAmount(this);
     }
 
     @Override
@@ -140,9 +138,7 @@ public class ShopChestProduct implements IShopChestProduct {
     }
 
     @Override
-    public void setPreview(@NotNull ItemStack preview) {
-
-    }
+    public void setPreview(@NotNull ItemStack preview) { }
 
     @Override
     @NotNull
@@ -154,36 +150,5 @@ public class ShopChestProduct implements IShopChestProduct {
     public void setItem(@NotNull ItemStack item) {
         this.rewardItem = new ItemStack(item);
         this.rewardItem.setAmount(1);
-    }
-
-    @Override
-    @NotNull
-    public List<String> getCommands() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public void setCommands(@NotNull List<String> commands) {
-
-    }
-
-    @Override
-    public int getBuyLimitAmount(@NotNull TradeType tradeType) {
-        return tradeType == TradeType.BUY ? -1 : this.getShop().getProductAmount(this);
-    }
-
-    @Override
-    public void setBuyLimitAmount(@NotNull TradeType tradeType, int buyLimitAmount) {
-
-    }
-
-    @Override
-    public long getBuyLimitCooldown(@NotNull TradeType tradeType) {
-        return 0L;
-    }
-
-    @Override
-    public void setBuyLimitCooldown(@NotNull TradeType tradeType, long buyLimitCooldown) {
-
     }
 }

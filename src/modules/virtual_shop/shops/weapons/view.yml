@@ -1,0 +1,42 @@
+Title: Weapons
+Size: 54
+Content:
+  429be2a8-da5d-43cf-b802-6222f09cbdac:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          amount: 1
+          durability: 0
+          name: '&c&lReturn'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '49'
+    Type: RETURN
+  2f208075-5a33-4113-a7b6-51e7da806ffa:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          amount: 1
+          durability: 0
+          name: '&e&lNext Page'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '53'
+    Type: PAGE_NEXT
+  d2ca5bac-945e-481c-843c-a728e37addca:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          amount: 1
+          durability: 0
+          name: '&e&lPrevious Page'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '45'
+    Type: PAGE_PREVIOUS

@@ -72,7 +72,7 @@ public abstract class AbstractShopPurchaseEvent extends IEvent implements Cancel
         this.setResult(Result.FAILURE);
     }
 
-    public enum Result {
+    public static enum Result {
         TOO_EXPENSIVE,
         NOT_ENOUGH_ITEMS,
         OUT_OF_STOCK,

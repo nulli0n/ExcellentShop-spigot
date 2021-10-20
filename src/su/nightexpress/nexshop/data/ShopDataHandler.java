@@ -3,10 +3,11 @@ package su.nightexpress.nexshop.data;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.data.AbstractUserDataHandler;
 import su.nexmedia.engine.data.DataTypes;
-import su.nexmedia.engine.data.IDataHandler;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.object.ShopUser;
 import su.nightexpress.nexshop.data.object.UserProductLimit;
 import su.nightexpress.nexshop.data.object.UserSettings;
@@ -18,7 +19,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Function;
 
-public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
+public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser> {
 
     private static ShopDataHandler INSTANCE;
 
@@ -40,10 +41,8 @@ public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
                 String name = rs.getString(COL_USER_NAME);
                 long date = rs.getLong(COL_USER_LAST_ONLINE);
 
-                UserSettings settings = gson.fromJson(rs.getString("settings"), new TypeToken<UserSettings>() {
-                }.getType());
-                Map<String, UserProductLimit> limits = gson.fromJson(rs.getString("virtual_limits"), new TypeToken<Map<String, UserProductLimit>>() {
-                }.getType());
+                UserSettings settings = gson.fromJson(rs.getString("settings"), new TypeToken<UserSettings>(){}.getType());
+                Map<String, Map<TradeType, UserProductLimit>> limits = gson.fromJson(rs.getString("virtualshop_limits"), new TypeToken<Map<String, Map<TradeType, UserProductLimit>>>(){}.getType());
 
                 return new ShopUser(plugin, uuid, name, date, settings, limits);
             } catch (SQLException e) {
@@ -126,6 +125,8 @@ public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
 
     @Override
     protected void onTableCreate() {
+        this.addColumn(this.tableUsers, "virtualshop_limits", DataTypes.STRING.build(this.dataType), "{}");
+
         // Create auction items table
         LinkedHashMap<String, String> aucLis = new LinkedHashMap<>();
         aucLis.put("aucId", DataTypes.STRING.build(this.dataType));
@@ -160,6 +161,7 @@ public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
 
         map.put("settings", DataTypes.STRING.build(this.dataType));
         map.put("virtual_limits", DataTypes.STRING.build(this.dataType));
+        map.put("virtualshop_limits", DataTypes.STRING.build(this.dataType));
         return map;
     }
 
@@ -169,7 +171,8 @@ public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
 
         map.put("settings", this.gson.toJson(user.getSettings()));
-        map.put("virtual_limits", this.gson.toJson(user.getVirtualProductLimits()));
+        map.put("virtual_limits", "{}");
+        map.put("virtualshop_limits", this.gson.toJson(user.getVirtualProductLimits()));
         return map;
     }
 
@@ -210,10 +213,10 @@ public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
     public void deleteAuctionListing(@NotNull AuctionListing bid, boolean async) {
         String sql = "DELETE FROM " + this.TABLE_AUCTION_ITEMS + " WHERE `aucId` = '" + bid.getId().toString() + "'";
         if (!async) {
-            this.execute(sql);
+            this.executeSQL(sql);
         }
         else {
-            this.plugin.runTask((c) -> this.execute(sql), async);
+            this.plugin.runTask((c) -> this.executeSQL(sql), async);
         }
     }
 
@@ -256,10 +259,10 @@ public class ShopDataHandler extends IDataHandler<ExcellentShop, ShopUser> {
         String sql = "DELETE FROM " + this.TABLE_AUCTION_HISTORY + " WHERE `aucId` = '" + historyItem.getId().toString() + "'";
 
         if (!async) {
-            this.execute(sql);
+            this.executeSQL(sql);
         }
         else {
-            this.plugin.runTask(c -> this.execute(sql), async);
+            this.plugin.runTask(c -> this.executeSQL(sql), async);
         }
     }
 }

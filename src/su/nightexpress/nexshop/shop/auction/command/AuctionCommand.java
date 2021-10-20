@@ -16,23 +16,23 @@ public class AuctionCommand extends ShopModuleCommand<AuctionManager> {
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return "";
     }
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Auction_Command_Open_Desc.getMsg();
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return true;
     }
 
     @Override
-    protected void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         this.module.openAuction((Player) sender);
     }
 }

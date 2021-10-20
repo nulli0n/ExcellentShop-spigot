@@ -1,33 +1,16 @@
-title: Food
-size: 54
-custom-items:
-  f7dd2ac3-0967-46d8-b8aa-5b4f2ebf407a:
-    material: ENDER_EYE
-    amount: 1
-    durability: 0
-    name: '&e&lPrevious Page'
-    enchanted: false
-    item-flags: [ ]
-    unbreakable: false
-    slots: '45'
-    type: BACK
-  849816ab-fc3d-4c6f-b5dd-20c16e74af5b:
-    material: BARRIER
-    amount: 1
-    durability: 0
-    name: '&c&lBack'
-    enchanted: false
-    item-flags: [ ]
-    unbreakable: false
-    slots: '49'
-    type: RETURN
-  31af8b3e-711e-4394-80b9-bc0f15b66a79:
-    material: ENDER_EYE
-    amount: 1
-    durability: 0
-    name: '&e&lNext Page'
-    enchanted: false
-    item-flags: [ ]
-    unbreakable: false
-    slots: '53'
-    type: NEXT
+Title: Food
+Size: 54
+Content:
+  6a11d9c0-b914-425b-bc2b-ed1b6ef7bece:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          amount: 1
+          durability: 0
+          name: '&c&lReturn'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '49'
+    Type: RETURN

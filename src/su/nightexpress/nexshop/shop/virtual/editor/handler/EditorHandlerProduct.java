@@ -2,57 +2,48 @@ package su.nightexpress.nexshop.shop.virtual.editor.handler;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.manager.editor.EditorManager;
+import su.nexmedia.engine.api.editor.EditorUtils;
 import su.nexmedia.engine.utils.CollectionsUT;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.IShopProduct;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.virtual.IShopVirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorInputHandler;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-public class EditorHandlerProduct implements IEditorHandler<IShopProduct> {
-
-    private ExcellentShop plugin;
+public class EditorHandlerProduct extends VirtualEditorInputHandler<IShopVirtualProduct> {
 
     public EditorHandlerProduct(@NotNull ExcellentShop plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
     @Override
     public boolean onType(
-            @NotNull Player player, @Nullable IShopProduct product,
+            @NotNull Player player, @NotNull IShopVirtualProduct product,
             @NotNull VirtualEditorType type, @NotNull String msg) {
 
-        if (product == null) return true;
+        //IShopVirtualProduct product = (IShopVirtualProduct) product2;
 
         switch (type) {
-            case PRODUCT_CHANGE_COMMANDS: {
-                product.getCommands().add(StringUT.colorRaw(msg));
-                break;
-            }
-            case PRODUCT_CHANGE_CURRENCY: {
+            case PRODUCT_CHANGE_COMMANDS -> product.getCommands().add(StringUT.colorRaw(msg));
+            case PRODUCT_CHANGE_CURRENCY -> {
                 String id = StringUT.colorOff(msg);
                 IShopCurrency currency = plugin.getCurrencyManager().getCurrency(id);
                 if (currency == null) {
-                    EditorManager.errorCustom(player, plugin.lang().Virtual_Shop_Editor_Product_Error_Currency.getMsg());
+                    EditorUtils.errorCustom(player, plugin.lang().Virtual_Shop_Editor_Product_Error_Currency.getMsg());
                     return false;
                 }
 
                 product.setCurrency(currency);
-                break;
             }
-            case PRODUCT_CHANGE_PRICE_SELL_MIN:
-            case PRODUCT_CHANGE_PRICE_SELL_MAX:
-            case PRODUCT_CHANGE_PRICE_BUY_MAX:
-            case PRODUCT_CHANGE_PRICE_BUY_MIN: {
+            case PRODUCT_CHANGE_PRICE_SELL_MIN, PRODUCT_CHANGE_PRICE_SELL_MAX, PRODUCT_CHANGE_PRICE_BUY_MAX, PRODUCT_CHANGE_PRICE_BUY_MIN -> {
                 double price = StringUT.getDouble(StringUT.colorOff(msg), -99, true);
                 if (price == -99) {
-                    EditorManager.errorNumber(player, false);
+                    EditorUtils.errorNumber(player, false);
                     return false;
                 }
 
@@ -68,38 +59,32 @@ public class EditorHandlerProduct implements IEditorHandler<IShopProduct> {
                 else {
                     product.getPricer().setPriceMin(TradeType.SELL, price);
                 }
-                break;
             }
-            case PRODUCT_CHANGE_LIMIT_BUY_AMOUNT: {
+            case PRODUCT_CHANGE_LIMIT_BUY_AMOUNT -> {
                 double value = StringUT.getDouble(StringUT.colorOff(msg), -1, true);
-                product.setBuyLimitAmount(TradeType.BUY, (int) value);
-                break;
+                product.setLimitAmount(TradeType.BUY, (int) value);
             }
-            case PRODUCT_CHANGE_LIMIT_BUY_RESET: {
+            case PRODUCT_CHANGE_LIMIT_BUY_RESET -> {
                 int value = StringUT.getInteger(StringUT.colorOff(msg), -1, true);
-                product.setBuyLimitCooldown(TradeType.BUY, value);
-                break;
+                product.setLimitCooldown(TradeType.BUY, value);
             }
-            case PRODUCT_CHANGE_LIMIT_SELL_AMOUNT: {
+            case PRODUCT_CHANGE_LIMIT_SELL_AMOUNT -> {
                 double value = StringUT.getDouble(StringUT.colorOff(msg), -1, true);
-                product.setBuyLimitAmount(TradeType.SELL, (int) value);
-                break;
+                product.setLimitAmount(TradeType.SELL, (int) value);
             }
-            case PRODUCT_CHANGE_LIMIT_SELL_RESET: {
+            case PRODUCT_CHANGE_LIMIT_SELL_RESET -> {
                 int value = StringUT.getInteger(StringUT.colorOff(msg), -1, true);
-                product.setBuyLimitCooldown(TradeType.SELL, value);
-                break;
+                product.setLimitCooldown(TradeType.SELL, value);
             }
-            case PRODUCT_CHANGE_PRICE_RND_TIME_DAY: {
+            case PRODUCT_CHANGE_PRICE_RND_TIME_DAY -> {
                 DayOfWeek day = CollectionsUT.getEnum(msg, DayOfWeek.class);
                 if (day == null) {
-                    EditorManager.errorEnum(player, DayOfWeek.class);
+                    EditorUtils.errorEnum(player, DayOfWeek.class);
                     return false;
                 }
                 product.getPricer().getDays().add(day);
-                break;
             }
-            case PRODUCT_CHANGE_PRICE_RND_TIME_TIME: {
+            case PRODUCT_CHANGE_PRICE_RND_TIME_TIME -> {
                 String[] raw = msg.split(" ");
                 LocalTime[] times = new LocalTime[raw.length];
 
@@ -112,15 +97,11 @@ public class EditorHandlerProduct implements IEditorHandler<IShopProduct> {
                 if (times.length < 2) return false;
 
                 product.getPricer().getTimes().add(times);
-                break;
             }
-            default: {
-                break;
-            }
+            default -> {}
         }
 
         product.getShop().save();
-        product.getEditor().open(player, 1);
         return true;
     }
 }

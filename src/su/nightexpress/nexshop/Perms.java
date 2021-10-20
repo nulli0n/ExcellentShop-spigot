@@ -8,6 +8,7 @@ public class Perms {
     public static final  String AUCTION_CMD_OPEN                    = PREFIX + "auction.cmd.open";
     public static final  String AUCTION_CMD_OPEN_OTHERS             = PREFIX + "auction.cmd.open.others";
     public static final  String AUCTION_CMD_SELL                    = PREFIX + "auction.cmd.sell";
+    public static final  String AUCTION_LISTING_REMOVE_OTHERS = PREFIX + "auction.listing.remove.others";
     public static final  String AUCTION_BYPASS_LISTING_TAX          = PREFIX + "auction.bypass.listing.tax";
     public static final  String AUCTION_BYPASS_LISTING_PRICE        = PREFIX + "auction.bypass.listing.price";
     public static final  String VIRTUAL_CMD_OPEN                    = PREFIX + "virtual.cmd.open";
@@ -22,7 +23,7 @@ public class Perms {
     public static final  String CHEST_REMOVE_OTHERS                 = PREFIX + "chestshop.remove.others";
     public static final  String CHEST_EDITOR_ADMINSHOP              = PREFIX + "chestshop.editor.adminshop";
     public static final  String CHEST_EDITOR_PRODUCT_PRICE_NEGATIVE = PREFIX + "chestshop.editor.product.price.negative";
-    public static final  String CHEST_EDITOR_PRODUCT_COMMANDS       = PREFIX + "chestshop.editor.product.commands";
+    //public static final  String CHEST_EDITOR_PRODUCT_COMMANDS       = PREFIX + "chestshop.editor.product.commands";
     public static final  String CHEST_EDITOR_PRODUCT_CURRENCY       = PREFIX + "chestshop.editor.product.currency";
     public static final  String CHEST_EDITOR_PRODUCT_PRICE_RND      = PREFIX + "chestshop.editor.product.price.randomizer";
 }

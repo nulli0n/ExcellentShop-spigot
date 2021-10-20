@@ -9,24 +9,24 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShop;
 
 public class ShopAPI {
 
-    private static ExcellentShop plugin;
+    private static final ExcellentShop PLUGIN;
 
     static {
-        plugin = ExcellentShop.getInstance();
+        PLUGIN = ExcellentShop.getInstance();
     }
 
     @Nullable
     public static VirtualShop getVirtualShop() {
-        return plugin.getVirtualShop();
+        return PLUGIN.getVirtualShop();
     }
 
     @Nullable
     public static ChestShop getChestShop() {
-        return plugin.getChestShop();
+        return PLUGIN.getChestShop();
     }
 
     @NotNull
     public static UserManager getUserManager() {
-        return (UserManager) plugin.getUserManager();
+        return PLUGIN.getUserManager();
     }
 }

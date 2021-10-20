@@ -5,18 +5,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuItem;
+import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.api.gui.ContentType;
-import su.nexmedia.engine.manager.api.gui.GuiClick;
-import su.nexmedia.engine.manager.api.gui.GuiItem;
-import su.nexmedia.engine.manager.api.gui.JIcon;
 import su.nightexpress.nexshop.api.AbstractShopView;
 import su.nightexpress.nexshop.api.type.ShopClickType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.api.virtual.IShopVirtual;
 import su.nightexpress.nexshop.api.virtual.IShopVirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,60 +26,53 @@ public class ShopVirtualView extends AbstractShopView<IShopVirtual> {
     public ShopVirtualView(@NotNull IShopVirtual shop, @NotNull JYML cfg) {
         super(shop, cfg);
 
-        GuiClick click = (p, type, e) -> {
-            if (type == null) return;
-
-            if (type instanceof ContentType type2) {
-                switch (type2) {
-                    case EXIT -> p.closeInventory();
-                    case NEXT -> this.open(p, this.getUserPage(p, 0) + 1);
-                    case BACK -> this.open(p, this.getUserPage(p, 0) - 1);
-                    case RETURN -> {
-                        VirtualShop virtualShop = plugin.getVirtualShop();
-                        if (virtualShop != null && virtualShop.hasMainMenu()) {
-                            virtualShop.openMainMenu(p);
-                        }
-                        else p.closeInventory();
-
+        IMenuClick click = (p, type, e) -> {
+            if (type instanceof MenuItemType type2) {
+                if (type2 == MenuItemType.RETURN) {
+                    VirtualShop virtualShop = plugin.getVirtualShop();
+                    if (virtualShop != null && virtualShop.hasMainMenu()) {
+                        virtualShop.openMainMenu(p);
                     }
-                    default -> {}
+                    else p.closeInventory();
                 }
+                else this.onItemClickDefault(p, type2);
             }
         };
 
-        for (String id : cfg.getSection("custom-items")) {
-            GuiItem guiItem = cfg.getGuiItem("custom-items." + id, ContentType.class);
-            if (guiItem == null) continue;
+        for (String sId : cfg.getSection("Content")) {
+            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
-            if (guiItem.getType() != null) {
-                guiItem.setClick(click);
+            if (menuItem.getType() != null) {
+                menuItem.setClick(click);
             }
-            this.addButton(guiItem);
+            this.addItem(menuItem);
         }
     }
 
     @Override
-    public void displayProducts(@NotNull Player player, @NotNull Inventory inv, int page) {
+    public void displayProducts(@NotNull Player player, @NotNull Inventory inventory, int page) {
         for (IShopVirtualProduct product : shop.getProducts()) {
             if (product.getPage() != page) continue;
 
             ItemStack preview = product.getPreview();
             ItemMeta meta = preview.getItemMeta();
 
-            List<String> loreFormat = VirtualConfig.PRODUCT_FORMAT_LORE_PRICE_ALL;
-            if (!product.isBuyable() || !shop.isPurchaseAllowed(TradeType.BUY))
-                loreFormat = VirtualConfig.PRODUCT_FORMAT_LORE_PRICE_SELL;
-            if (!product.isSellable() || !shop.isPurchaseAllowed(TradeType.SELL))
-                loreFormat = VirtualConfig.PRODUCT_FORMAT_LORE_PRICE_BUY;
+            List<String> loreFormat = VirtualShopConfig.PRODUCT_FORMAT_LORE_PRICE_ALL;
+            if (!product.isBuyable() || !shop.isPurchaseAllowed(TradeType.BUY)) {
+                loreFormat = VirtualShopConfig.PRODUCT_FORMAT_LORE_PRICE_SELL;
+            }
+            if (!product.isSellable() || !shop.isPurchaseAllowed(TradeType.SELL)) {
+                loreFormat = VirtualShopConfig.PRODUCT_FORMAT_LORE_PRICE_BUY;
+            }
 
             if (meta != null) {
                 List<String> lore = new ArrayList<>();
 
                 for (String lineFormat : loreFormat) {
-                    if (lineFormat.contains("product_limit_buy") && !product.isBuyLimited(TradeType.BUY)) {
+                    if (lineFormat.contains("product_limit_buy") && !product.isLimited(TradeType.BUY)) {
                         continue;
                     }
-                    if (lineFormat.contains("product_limit_sell") && !product.isBuyLimited(TradeType.SELL)) {
+                    if (lineFormat.contains("product_limit_sell") && !product.isLimited(TradeType.SELL)) {
                         continue;
                     }
                     if (lineFormat.contains("%lore%")) {
@@ -96,16 +89,17 @@ public class ShopVirtualView extends AbstractShopView<IShopVirtual> {
                 preview.setItemMeta(meta);
             }
 
-            JIcon icon = new JIcon(preview);
-            icon.setClick((p2, type, e) -> {
+            IMenuItem menuItem = new MenuItem(preview);
+            menuItem.setSlots(product.getSlot());
+            menuItem.setClick((player1, type, e) -> {
                 ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
                 if (clickType == null) return;
 
-                product.prepareTrade(p2, clickType);
+                product.prepareTrade(player1, clickType);
             });
-            this.addButton(player, icon, product.getSlot());
+            this.addItem(player, menuItem);
         }
 
-        this.setUserPage(player, page, shop.getPages());
+        this.setPage(player, page, this.shop.getPages());
     }
 }

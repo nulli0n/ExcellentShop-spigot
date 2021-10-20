@@ -20,8 +20,8 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.IListener;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nexmedia.engine.utils.MsgUT;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -35,16 +35,16 @@ import su.nightexpress.nexshop.shop.chest.object.ShopChest;
 
 import java.io.File;
 
-public class ChestShopListener extends IListener<ExcellentShop> {
+public class ChestShopListener extends AbstractListener<ExcellentShop> {
 
-    private ChestShop chestShop;
+    private final ChestShop chestShop;
 
     public ChestShopListener(@NotNull ChestShop chestShop) {
-        super(chestShop.plugin);
+        super(chestShop.plugin());
         this.chestShop = chestShop;
     }
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onShopPurchaseEvent(ChestShopPurchaseEvent e) {
         Player player = e.getPlayer();
 
@@ -63,12 +63,12 @@ public class ChestShopListener extends IListener<ExcellentShop> {
                         .send(player);
             }
             else if (e.getResult() == ChestShopPurchaseEvent.Result.OUT_OF_MONEY) {
-                plugin.lang().Chest_Shop_Product_Error_OutOfFunds
+                plugin.lang().Shop_Product_Error_OutOfFunds
                         .replace(prepared.replacePlaceholders())
                         .send(player);
             }
             else if (e.getResult() == ChestShopPurchaseEvent.Result.OUT_OF_SPACE) {
-                plugin.lang().Chest_Shop_Product_Error_OutOfSpace
+                plugin.lang().Shop_Product_Error_OutOfSpace
                         .replace(prepared.replacePlaceholders())
                         .send(player);
             }
@@ -92,7 +92,8 @@ public class ChestShopListener extends IListener<ExcellentShop> {
                     .replace(shop.replacePlaceholders())
                     .send(player);
 
-            if (owner != null) plugin.lang().Chest_Shop_Trade_Buy_Info_Owner
+            if (owner != null && !shop.isAdminShop()) plugin.lang().Chest_Shop_Trade_Buy_Info_Owner
+                    .replace("%player%", player.getDisplayName())
                     .replace(prepared.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
                     .send(owner);
@@ -103,7 +104,8 @@ public class ChestShopListener extends IListener<ExcellentShop> {
                     .replace(shop.replacePlaceholders())
                     .send(player);
 
-            if (owner != null) plugin.lang().Chest_Shop_Trade_Sell_Info_Owner
+            if (owner != null && !shop.isAdminShop()) plugin.lang().Chest_Shop_Trade_Sell_Info_Owner
+                    .replace("%player%", player.getDisplayName())
                     .replace(prepared.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
                     .send(owner);
@@ -118,7 +120,6 @@ public class ChestShopListener extends IListener<ExcellentShop> {
         Player player = e.getPlayer();
         Action action = e.getAction();
         IShopChest shop = this.chestShop.getShop(block);
-
         if (shop == null) return;
 
         boolean isDenied = e.useInteractedBlock() == Result.DENY;
@@ -190,22 +191,22 @@ public class ChestShopListener extends IListener<ExcellentShop> {
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopExplode(BlockExplodeEvent e) {
-        e.blockList().removeIf(b -> this.chestShop.isShop(b));
+        e.blockList().removeIf(this.chestShop::isShop);
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopExplode2(EntityExplodeEvent e) {
-        e.blockList().removeIf(b -> this.chestShop.isShop(b));
+        e.blockList().removeIf(this.chestShop::isShop);
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopPiston1(BlockPistonRetractEvent e) {
-        e.setCancelled(e.getBlocks().stream().anyMatch(b -> this.chestShop.isShop(b)));
+        e.setCancelled(e.getBlocks().stream().anyMatch(this.chestShop::isShop));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopPiston2(BlockPistonExtendEvent e) {
-        e.setCancelled(e.getBlocks().stream().anyMatch(b -> this.chestShop.isShop(b)));
+        e.setCancelled(e.getBlocks().stream().anyMatch(this.chestShop::isShop));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -257,7 +258,8 @@ public class ChestShopListener extends IListener<ExcellentShop> {
             try {
                 ShopChest shop = new ShopChest(this.chestShop, new JYML(file));
                 this.chestShop.addShop(shop);
-            } catch (Exception ex) {}
+            }
+            catch (Exception ex) {}
             return true;
         });
     }

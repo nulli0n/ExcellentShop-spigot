@@ -4,86 +4,73 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.api.gui.ContentType;
-import su.nexmedia.engine.manager.api.gui.GuiClick;
-import su.nexmedia.engine.manager.api.gui.GuiItem;
-import su.nexmedia.engine.manager.api.gui.NGUI;
-import su.nexmedia.engine.manager.editor.EditorManager;
+import su.nexmedia.engine.api.editor.EditorUtils;
+import su.nexmedia.engine.api.menu.AbstractMenu;
+import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.CollectionsUT;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.api.IProductPricer;
 import su.nightexpress.nexshop.api.chest.IShopChest;
 import su.nightexpress.nexshop.api.chest.IShopChestProduct;
-import su.nightexpress.nexshop.api.currency.IShopCurrency;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.shop.chest.ChestShop;
 import su.nightexpress.nexshop.shop.chest.ChestShopConfig;
 import su.nightexpress.nexshop.shop.chest.editor.ChestEditorHandler;
 import su.nightexpress.nexshop.shop.chest.editor.ChestEditorType;
 
 import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
-public class EditorShopChestProduct extends NGUI<ExcellentShop> {
+public class EditorShopChestProduct extends AbstractMenu<ExcellentShop> {
 
-    private IShopChestProduct product;
+    private final IShopChestProduct product;
 
     public EditorShopChestProduct(@NotNull ExcellentShop plugin, @NotNull IShopChestProduct product) {
         super(plugin, ChestEditorHandler.CONFIG_SHOP_PRODUCT, "");
         this.product = product;
 
         IShopChest shop = product.getShop();
+        IMenuClick click = (player, type, e) -> {
 
-        GuiClick click = (p, type, e) -> {
-            if (type == null) return;
+            ChestShop chestShop = plugin.getChestShop();
+            if (chestShop == null) return;
 
-            if (type instanceof ContentType) {
-                ContentType type2 = (ContentType) type;
+            if (type instanceof MenuItemType type2) {
                 switch (type2) {
-                    case RETURN -> shop.getEditor().getEditorProducts().open(p, 1);
-                    case EXIT -> p.closeInventory();
+                    case RETURN -> shop.getEditor().getEditorProducts().open(player, 1);
+                    case CLOSE -> player.closeInventory();
                     default -> {}
                 }
-                return;
             }
-
-            if (type instanceof ChestEditorType) {
-                ChestEditorType type2 = (ChestEditorType) type;
+            else if (type instanceof ChestEditorType type2) {
                 switch (type2) {
-                    case PRODUCT_CHANGE_COMMANDS: {
+                    /*case PRODUCT_CHANGE_COMMANDS -> {
                         if (e.isLeftClick()) {
-                            EditorManager.tipCustom(p, plugin.lang().Editor_Enter_Command.getMsg());
-                            EditorManager.startEdit(p, product, type2);
-                            EditorManager.sendCommandTips(p);
-                            p.closeInventory();
+                            EditorUtils.tipCustom(player, plugin.lang().Editor_Enter_Command.getMsg());
+                            EditorUtils.sendCommandTips(player);
+                            chestShop.getEditorHandler().startEdit(player, product, type2);
+                            player.closeInventory();
                             return;
                         }
 
                         if (e.isRightClick()) {
                             product.getCommands().clear();
                         }
-                        break;
-                    }
-                    case PRODUCT_CHANGE_CURRENCY: {
-                        EditorManager.tipCustom(p, plugin.lang().Editor_Enter_Currency.getMsg());
-                        EditorManager.startEdit(p, product, type2);
-                        EditorManager.sendClickableTips(p, ChestShopConfig.ALLOWED_CURRENCIES);
-                        p.closeInventory();
+                    }*/
+                    case PRODUCT_CHANGE_CURRENCY -> {
+                        EditorUtils.tipCustom(player, plugin.lang().Editor_Enter_Currency.getMsg());
+                        EditorUtils.sendClickableTips(player, ChestShopConfig.ALLOWED_CURRENCIES);
+                        chestShop.getEditorHandler().startEdit(player, product, type2);
+                        player.closeInventory();
                         return;
                     }
-                    case PRODUCT_CHANGE_PRICE_BUY: {
+                    case PRODUCT_CHANGE_PRICE_BUY -> {
                         if (e.getClick() == ClickType.MIDDLE) {
-                            if (!p.hasPermission(Perms.CHEST_EDITOR_PRODUCT_PRICE_NEGATIVE)) {
-                                EditorManager.errorCustom(p, plugin.lang().Chest_Shop_Editor_Error_Negative.getMsg());
+                            if (!player.hasPermission(Perms.CHEST_EDITOR_PRODUCT_PRICE_NEGATIVE)) {
+                                EditorUtils.errorCustom(player, plugin.lang().Chest_Shop_Editor_Error_Negative.getMsg());
                                 return;
                             }
                             product.getPricer().setPriceMin(TradeType.BUY, -1);
@@ -97,15 +84,15 @@ public class EditorShopChestProduct extends NGUI<ExcellentShop> {
                         }
                         else type3 = ChestEditorType.PRODUCT_CHANGE_PRICE_BUY_MAX;
 
-                        EditorManager.tipCustom(p, plugin.lang().Editor_Enter_Price.getMsg());
-                        EditorManager.startEdit(p, product, type3);
-                        p.closeInventory();
+                        EditorUtils.tipCustom(player, plugin.lang().Editor_Enter_Price.getMsg());
+                        chestShop.getEditorHandler().startEdit(player, product, type3);
+                        player.closeInventory();
                         return;
                     }
-                    case PRODUCT_CHANGE_PRICE_SELL: {
+                    case PRODUCT_CHANGE_PRICE_SELL -> {
                         if (e.getClick() == ClickType.MIDDLE) {
-                            if (!p.hasPermission(Perms.CHEST_EDITOR_PRODUCT_PRICE_NEGATIVE)) {
-                                EditorManager.errorCustom(p, plugin.lang().Chest_Shop_Editor_Error_Negative.getMsg());
+                            if (!player.hasPermission(Perms.CHEST_EDITOR_PRODUCT_PRICE_NEGATIVE)) {
+                                EditorUtils.errorCustom(player, plugin.lang().Chest_Shop_Editor_Error_Negative.getMsg());
                                 return;
                             }
                             product.getPricer().setPriceMin(TradeType.SELL, -1);
@@ -119,12 +106,12 @@ public class EditorShopChestProduct extends NGUI<ExcellentShop> {
                         }
                         else type3 = ChestEditorType.PRODUCT_CHANGE_PRICE_SELL_MAX;
 
-                        EditorManager.tipCustom(p, plugin.lang().Editor_Enter_Price.getMsg());
-                        EditorManager.startEdit(p, product, type3);
-                        p.closeInventory();
+                        EditorUtils.tipCustom(player, plugin.lang().Editor_Enter_Price.getMsg());
+                        chestShop.getEditorHandler().startEdit(player, product, type3);
+                        player.closeInventory();
                         return;
                     }
-                    case PRODUCT_CHANGE_PRICE_RND: {
+                    case PRODUCT_CHANGE_PRICE_RND -> {
                         if (e.getClick() == ClickType.MIDDLE) {
                             product.getPricer().setRandomizerEnabled(!product.getPricer().isRandomizerEnabled());
                             break;
@@ -141,49 +128,63 @@ public class EditorShopChestProduct extends NGUI<ExcellentShop> {
                         ChestEditorType type3;
                         if (e.isLeftClick()) {
                             type3 = ChestEditorType.PRODUCT_CHANGE_PRICE_RND_TIME_DAY;
-                            EditorManager.tipCustom(p, plugin.lang().Virtual_Shop_Editor_Enter_Day.getMsg());
-                            EditorManager.sendClickableTips(p, CollectionsUT.getEnumsList(DayOfWeek.class));
+                            EditorUtils.tipCustom(player, plugin.lang().Virtual_Shop_Editor_Enter_Day.getMsg());
+                            EditorUtils.sendClickableTips(player, CollectionsUT.getEnumsList(DayOfWeek.class));
                         }
                         else {
                             type3 = ChestEditorType.PRODUCT_CHANGE_PRICE_RND_TIME_TIME;
-                            EditorManager.tipCustom(p, plugin.lang().Virtual_Shop_Editor_Enter_Time_Full.getMsg());
+                            EditorUtils.tipCustom(player, plugin.lang().Virtual_Shop_Editor_Enter_Time_Full.getMsg());
                         }
 
-                        EditorManager.startEdit(p, product, type3);
-                        p.closeInventory();
+                        chestShop.getEditorHandler().startEdit(player, product, type3);
+                        player.closeInventory();
                         return;
                     }
-                    default: {
+                    default -> {
                         return;
                     }
                 }
 
                 shop.save();
-                this.open(p, 1);
-                return;
+                this.open(player, 1);
             }
         };
 
-        JYML cfg = ChestEditorHandler.CONFIG_SHOP_PRODUCT;
-        for (String id : cfg.getSection("content")) {
-            GuiItem guiItem = cfg.getGuiItem("content." + id, ContentType.class);
-            if (guiItem == null) continue;
+        for (String sId : cfg.getSection("Content")) {
+            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
-            if (guiItem.getType() != null) {
-                guiItem.setClick(click);
+            if (menuItem.getType() != null) {
+                menuItem.setClick(click);
             }
-            this.addButton(guiItem);
+            this.addItem(menuItem);
         }
 
-        for (String id : cfg.getSection("editor")) {
-            GuiItem guiItem = cfg.getGuiItem("editor." + id, ChestEditorType.class);
-            if (guiItem == null) continue;
+        for (String sId : cfg.getSection("Editor")) {
+            IMenuItem menuItem = cfg.getMenuItem("Editor." + sId, ChestEditorType.class);
 
-            Enum<?> type = guiItem.getType();
-            if (type != null) {
-                guiItem.setClick(click);
+            if (menuItem.getType() != null) {
+                menuItem.setClick(click);
+            }
+            this.addItem(menuItem);
+        }
+    }
 
-                if (type == ChestEditorType.PRODUCT_CHANGE_PRICE_RND) {
+    @Override
+    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+
+    }
+
+    @Override
+    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
+
+    }
+
+    @Override
+    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+        super.onItemPrepare(player, menuItem, item);
+
+        // TODO
+                /*if (type == ChestEditorType.PRODUCT_CHANGE_PRICE_RND) {
                     guiItem.setPermission(Perms.CHEST_EDITOR_PRODUCT_PRICE_RND);
                 }
                 else if (type == ChestEditorType.PRODUCT_CHANGE_COMMANDS) {
@@ -191,83 +192,14 @@ public class EditorShopChestProduct extends NGUI<ExcellentShop> {
                 }
                 else if (type == ChestEditorType.PRODUCT_CHANGE_CURRENCY) {
                     guiItem.setPermission(Perms.CHEST_EDITOR_PRODUCT_CURRENCY);
-                }
-            }
-            this.addButton(guiItem);
-        }
+                }*/
+
+        ItemUT.replace(item, product.replacePlaceholders());
+        ItemUT.replace(item, product.getCurrency().replacePlaceholders());
     }
 
     @Override
-    protected void onCreate(@NotNull Player player, @NotNull Inventory inv, int page) {
-
-    }
-
-    @Override
-    protected boolean cancelClick(int slot) {
-        return true;
-    }
-
-    @Override
-    protected boolean cancelPlayerClick() {
-        return false;
-    }
-
-    @Override
-    protected boolean ignoreNullClick() {
-        return false;
-    }
-
-    @Override
-    protected void replaceMeta(@NotNull Player player, @NotNull ItemStack item, @NotNull GuiItem guiItem) {
-        super.replaceMeta(player, item, guiItem);
-
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-
-        List<String> lore = meta.getLore();
-        if (lore == null || lore.isEmpty()) return;
-
-        IProductPricer pricer = this.product.getPricer();
-        ItemStack buyItem = product.getItem();
-        String itemName = !ItemUT.isAir(buyItem) ? ItemUT.getItemName(buyItem) : "null";
-
-        IShopCurrency cur = this.product.getCurrency();
-
-        lore.replaceAll(line -> line
-                .replace("%price-buy-min%", String.valueOf(pricer.getPriceMin(TradeType.BUY)))
-                .replace("%price-buy-max%", String.valueOf(pricer.getPriceMax(TradeType.BUY)))
-                .replace("%price-sell-min%", String.valueOf(pricer.getPriceMin(TradeType.SELL)))
-                .replace("%price-sell-max%", String.valueOf(pricer.getPriceMax(TradeType.SELL)))
-                .replace("%currency-id%", cur.getId())
-                .replace("%currency-name%", cur.getName())
-                .replace("%price-rnd-enabled%", plugin.lang().getBool(pricer.isRandomizerEnabled()))
-                .replace("%item%", itemName)
-        );
-
-        List<String> lore2 = new ArrayList<>();
-        for (String line : new ArrayList<>(lore)) {
-            if (line.contains("%commands%")) {
-                for (String cmd : product.getCommands()) {
-                    lore2.add(line.replace("%commands%", cmd));
-                }
-            }
-            else if (line.contains("%price-rnd-days%")) {
-                for (DayOfWeek day : pricer.getDays()) {
-                    lore2.add(line.replace("%price-rnd-days%", day.getDisplayName(TextStyle.FULL, Locale.ENGLISH)));
-                }
-            }
-            else if (line.contains("%price-rnd-times%")) {
-                DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_TIME;
-                for (LocalTime[] times : pricer.getTimes()) {
-                    lore2.add(line.replace("%price-rnd-times%", formatter.format(times[0]) + "-" + formatter.format(times[1])));
-                }
-            }
-            else {
-                lore2.add(line);
-            }
-        }
-
-        meta.setLore(lore2);
-        item.setItemMeta(meta);
+    public boolean cancelClick(@NotNull SlotType slotType, int slot) {
+        return slotType != SlotType.PLAYER && slotType != SlotType.EMPTY_PLAYER;
     }
 }

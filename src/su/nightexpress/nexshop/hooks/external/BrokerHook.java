@@ -82,7 +82,7 @@ public class BrokerHook extends NHook<ExcellentShop> {
             this.virtualShop.getShops().stream()
                     .filter(shop -> shop.hasPermission(player) && shop.isPurchaseAllowed(tradeType)).forEach(shop -> {
                 products.addAll(shop.getProducts().stream().filter(product -> {
-                    if (!product.isItemMatched(item)) return false;
+                    if (!product.isItemMatches(item)) return false;
                     if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                     if (tradeType == TradeType.SELL && !product.isSellable()) return false;
                     if (tradeType == TradeType.SELL && product.getItemAmount(player) < amount) return false;

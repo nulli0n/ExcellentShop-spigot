@@ -6,8 +6,8 @@ import su.nightexpress.nexshop.api.type.TradeType;
 
 public abstract class AbstractProductPrepared<S extends IShopProduct> implements IProductPrepared {
 
-    private final @NotNull S         product;
-    private final          TradeType buyType;
+    private final S         product;
+    private final TradeType buyType;
 
     private int amount;
 

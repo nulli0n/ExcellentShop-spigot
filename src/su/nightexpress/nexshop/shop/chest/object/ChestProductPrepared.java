@@ -3,9 +3,7 @@ package su.nightexpress.nexshop.shop.chest.object;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
 import su.nexmedia.engine.utils.ItemUT;
-import su.nexmedia.engine.utils.PlayerUT;
 import su.nightexpress.nexshop.api.AbstractProductPrepared;
 import su.nightexpress.nexshop.api.chest.IShopChest;
 import su.nightexpress.nexshop.api.chest.IShopChestProduct;
@@ -23,6 +21,7 @@ public class ChestProductPrepared extends AbstractProductPrepared<IShopChestProd
     @Override
     public boolean buy(@NotNull Player player) {
         if (this.getTradeType() != TradeType.BUY) return false;
+        if (this.getShopProduct().isEmpty()) return false;
 
         IShopChest shop = this.getShop();
         IShopChestProduct product = this.getShopProduct();
@@ -48,17 +47,15 @@ public class ChestProductPrepared extends AbstractProductPrepared<IShopChestProd
         // Process transaction
         ItemStack item = product.getItem();
         for (int stack = 0; stack < amountUser; stack++) {
-            if (!ItemUT.isAir(item)) {
-                ItemUT.addItem(player, item);
-            }
-            for (String cmd : product.getCommands()) {
+            ItemUT.addItem(player, item);
+            /*for (String cmd : product.getCommands()) {
                 PlayerUT.execCmd(player, cmd);
-            }
+            }*/
         }
 
         if (!shop.isAdminShop()) {
             shop.takeProduct(product, amountUser);
-            product.getCurrency().give(shop.getOwner(), price);
+            shop.addToShopBalance(product.getCurrency(), price);
         }
         product.getCurrency().take(player, price);
 
@@ -81,14 +78,14 @@ public class ChestProductPrepared extends AbstractProductPrepared<IShopChestProd
         int amount = this.getAmount();
 
         double price = this.getPrice();
-        double balanceShop = shop.getOwnerBalance(product.getCurrency());
+        double balanceShop = shop.getShopBalance(product.getCurrency());
 
         ChestShopPurchaseEvent event = new ChestShopPurchaseEvent(player, this);
 
         if ((amountPlayer < amountCan) || (isAll && amountPlayer < 1)) {
             event.setResult(Result.NOT_ENOUGH_ITEMS);
         }
-        else if (!isAdmin && balanceShop < price) {
+        else if (balanceShop >= 0 && balanceShop < price) {
             event.setResult(Result.OUT_OF_MONEY);
         }
         else if (space >= 0 && space < amount) {
@@ -102,7 +99,7 @@ public class ChestProductPrepared extends AbstractProductPrepared<IShopChestProd
         // Process transaction
         if (!isAdmin) {
             shop.addProduct(product, amount);
-            product.getCurrency().take(shop.getOwner(), price);
+            shop.takeFromShopBalance(product.getCurrency(), price);
         }
         product.getCurrency().give(player, price);
         product.takeItemAmount(player, amountCan);

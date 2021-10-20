@@ -16,23 +16,23 @@ public class ListCmd extends ShopModuleCommand<ChestShop> {
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Chest_Shop_Command_List_Desc.getMsg();
     }
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return "";
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return true;
     }
 
     @Override
-    public void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         Player player = (Player) sender;
         this.module.getListOwnGUI().open(player, 1);
     }

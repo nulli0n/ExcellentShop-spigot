@@ -8,7 +8,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.manager.IManager;
+import su.nexmedia.engine.api.manager.AbstractListener;
+import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.manager.api.task.ITask;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -18,7 +19,7 @@ import su.nightexpress.nexshop.api.chest.IShopChestProduct;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ChestDisplayHandler extends IManager<ExcellentShop> {
+public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
     public static boolean ALLOW_REMOVE = false;
 
@@ -30,7 +31,7 @@ public class ChestDisplayHandler extends IManager<ExcellentShop> {
     private Slider slider;
 
     public ChestDisplayHandler(@NotNull ChestShop chestShop) {
-        super(chestShop.plugin);
+        super(chestShop.plugin());
         this.chestShop = chestShop;
     }
 
@@ -40,7 +41,7 @@ public class ChestDisplayHandler extends IManager<ExcellentShop> {
         private final int maxCount = ChestShopConfig.DISPLAY_TEXT.size();
 
         Slider() {
-            super(chestShop.plugin, ChestShopConfig.DISPLAY_SLIDE_TIME, false);
+            super(chestShop.plugin(), ChestShopConfig.DISPLAY_SLIDE_TIME, false);
         }
 
         @Override
@@ -60,7 +61,7 @@ public class ChestDisplayHandler extends IManager<ExcellentShop> {
     }
 
     @Override
-    public void setup() {
+    public void onLoad() {
         ALLOW_REMOVE = false;
         this.hologramIds = new HashMap<>();
         this.itemIds = new HashMap<>();
@@ -69,11 +70,11 @@ public class ChestDisplayHandler extends IManager<ExcellentShop> {
             this.slider = new Slider();
             this.slider.start();
         }
-        this.registerListeners();
+        this.addListener(new DisplayListener(this.plugin));
     }
 
     @Override
-    public void shutdown() {
+    public void onShutdown() {
         ALLOW_REMOVE = true;
 
         if (this.slider != null) {
@@ -86,24 +87,6 @@ public class ChestDisplayHandler extends IManager<ExcellentShop> {
         this.hologramIds.clear();
         this.itemIds.values().forEach(Entity::remove);
         this.itemIds.clear();
-        this.unregisterListeners();
-    }
-
-    private Chunk chunkLast;
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onChunkUnload(ChunkUnloadEvent e) {
-        Chunk chunk = e.getChunk();
-        if (chunk.equals(this.chunkLast)) return;
-
-        this.chunkLast = chunk;
-        for (IShopChest shop : chestShop.getShops()) {
-            if (!shop.isDisplayHas()) continue;
-            if (shop.getLocation().getChunk().equals(chunk)) {
-                this.remove(shop);
-            }
-        }
-        this.chunkLast = null;
     }
 
     private void addHologram(@NotNull IShopChest shop, @NotNull String name) {
@@ -155,5 +138,29 @@ public class ChestDisplayHandler extends IManager<ExcellentShop> {
         this.deleteHologram(chest);
         this.deleteItem(chest);
         chest.setDisplayHas(false);
+    }
+
+    class DisplayListener extends AbstractListener<ExcellentShop> {
+
+        public DisplayListener(@NotNull ExcellentShop plugin) {
+            super(plugin);
+        }
+
+        private Chunk chunkLast;
+
+        @EventHandler(priority = EventPriority.HIGHEST)
+        public void onChunkUnload(ChunkUnloadEvent e) {
+            Chunk chunk = e.getChunk();
+            if (chunk.equals(this.chunkLast)) return;
+
+            this.chunkLast = chunk;
+            for (IShopChest shop : chestShop.getShops()) {
+                if (!shop.isDisplayHas()) continue;
+                if (shop.getLocation().getChunk().equals(chunk)) {
+                    remove(shop);
+                }
+            }
+            this.chunkLast = null;
+        }
     }
 }

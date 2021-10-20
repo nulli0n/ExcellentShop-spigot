@@ -18,12 +18,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.manager.AbstractLoadableItem;
 import su.nexmedia.engine.config.api.JYML;
 import su.nexmedia.engine.core.Version;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHK;
 import su.nexmedia.engine.hooks.external.WorldGuardHK;
-import su.nexmedia.engine.manager.LoadableItem;
+import su.nexmedia.engine.manager.api.task.ITask;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nexmedia.engine.utils.MsgUT;
 import su.nexmedia.engine.utils.Reflex;
@@ -42,9 +43,9 @@ import su.nightexpress.nexshop.shop.chest.compatibility.GriefPreventionHK;
 import su.nightexpress.nexshop.shop.chest.compatibility.LandsHK;
 import su.nightexpress.nexshop.shop.chest.compatibility.PlotSquaredHK;
 import su.nightexpress.nexshop.shop.chest.editor.ChestEditorHandler;
-import su.nightexpress.nexshop.shop.chest.gui.ShopListGlobalGUI;
-import su.nightexpress.nexshop.shop.chest.gui.ShopListOwnGUI;
-import su.nightexpress.nexshop.shop.chest.gui.ShopListSearchGUI;
+import su.nightexpress.nexshop.shop.chest.menu.ShopListGlobalMenu;
+import su.nightexpress.nexshop.shop.chest.menu.ShopListOwnMenu;
+import su.nightexpress.nexshop.shop.chest.menu.ShopListSearchMenu;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.object.ShopChest;
 
@@ -52,21 +53,20 @@ import java.util.*;
 
 public class ChestShop extends ShopModule {
 
-    private ChestShopConfig           config;
-    private ChestEditorHandler        editorHandler;
     private Map<Location, IShopChest> chests;
     private Set<ClaimHook>            claimHooks;
 
-    private ShopListOwnGUI    listOwnGUI;
-    private ShopListGlobalGUI listGlobalGUI;
-    private ShopListSearchGUI listSearchGUI;
+    private ShopListOwnMenu    listOwnGUI;
+    private ShopListGlobalMenu listGlobalGUI;
+    private ShopListSearchMenu listSearchGUI;
 
-    private ChestShopListener             shopListener;
     private ChestDisplayHandler           displayHandler;
     private Map<String, List<IShopChest>> searchCache;
 
     ChestNMS    chestNMS;
     Set<String> loadFails;
+    private ChestEditorHandler editorHandler;
+    private ProductTask productTask;
 
     public static final String DIR_SHOPS = "/shops/";
 
@@ -82,17 +82,19 @@ public class ChestShop extends ShopModule {
 
     @Override
     @NotNull
-    public String version() {
+    public String getVersion() {
         return "2.00";
     }
 
     @Override
-    public void setup() {
+    protected void onLoad() {
+        super.onLoad();
+
         this.searchCache = new HashMap<>();
         this.loadFails = new HashSet<>();
         this.chests = new HashMap<>();
 
-        this.config = new ChestShopConfig(this);
+        ChestShopConfig.load(this);
 
         String pack = ChestNMS.class.getPackage().getName();
         Class<?> nmsClazz = Reflex.getClass(pack, Version.CURRENT.name());
@@ -123,18 +125,19 @@ public class ChestShop extends ShopModule {
             });
         }
 
-        (this.shopListener = new ChestShopListener(this)).registerListeners();
+        this.addListener(new ChestShopListener(this));
 
-        this.listOwnGUI = new ShopListOwnGUI(this);
-        this.listGlobalGUI = new ShopListGlobalGUI(this);
-        this.listSearchGUI = new ShopListSearchGUI(this);
+        this.listOwnGUI = new ShopListOwnMenu(this);
+        this.listGlobalGUI = new ShopListGlobalMenu(this);
+        this.listSearchGUI = new ShopListSearchMenu(this);
 
         this.editorHandler = new ChestEditorHandler(this);
+        this.editorHandler.setup();
 
-        this.moduleCommand.addSubCommand(new CreateCmd(this));
-        this.moduleCommand.addSubCommand(new RemoveCmd(this));
-        this.moduleCommand.addSubCommand(new ListCmd(this));
-        this.moduleCommand.addSubCommand(new SearchCmd(this));
+        this.moduleCommand.addChildren(new CreateCmd(this));
+        this.moduleCommand.addChildren(new RemoveCmd(this));
+        this.moduleCommand.addChildren(new ListCmd(this));
+        this.moduleCommand.addChildren(new SearchCmd(this));
 
         for (JYML shopConfig : JYML.loadAll(this.getFullPath() + DIR_SHOPS, true)) {
             try {
@@ -146,26 +149,38 @@ public class ChestShop extends ShopModule {
             }
         }
         this.info("Shops Loaded: " + this.getShops().size());
+
+        this.productTask = new ProductTask(this.plugin);
+        this.productTask.start();
     }
 
     @Override
-    public void shutdown() {
+    protected void onShutdown() {
+        super.onShutdown();
+
+        if (this.productTask != null) {
+            this.productTask.stop();
+            this.productTask = null;
+        }
         if (this.editorHandler != null) {
             this.editorHandler.shutdown();
             this.editorHandler = null;
         }
         if (this.listOwnGUI != null) {
-            this.listOwnGUI.shutdown();
+            this.listOwnGUI.clear();
+            this.listOwnGUI = null;
         }
         if (this.listGlobalGUI != null) {
-            this.listGlobalGUI.shutdown();
+            this.listGlobalGUI.clear();
+            this.listGlobalGUI = null;
         }
         if (this.listSearchGUI != null) {
-            this.listSearchGUI.shutdown();
+            this.listSearchGUI.clear();
+            this.listSearchGUI = null;
         }
 
         // Destroy shop editors and displays.
-        this.getShops().forEach(shop -> shop.clear());
+        this.getShops().forEach(IShopChest::clear);
 
         if (this.displayHandler != null) {
             this.displayHandler.shutdown();
@@ -174,10 +189,6 @@ public class ChestShop extends ShopModule {
         if (this.chests != null) {
             this.chests.clear();
             this.chests = null;
-        }
-        if (this.shopListener != null) {
-            this.shopListener.unregisterListeners();
-            this.shopListener = null;
         }
 
         if (this.loadFails != null) {
@@ -192,6 +203,11 @@ public class ChestShop extends ShopModule {
             this.claimHooks.clear();
             this.claimHooks = null;
         }
+    }
+
+    @NotNull
+    public ChestEditorHandler getEditorHandler() {
+        return editorHandler;
     }
 
     public boolean createShop(@NotNull Player player, @NotNull Block block, boolean isAdmin) {
@@ -312,8 +328,7 @@ public class ChestShop extends ShopModule {
     }
 
     void removeShop(@NotNull IShopChest shop, boolean withData) {
-        if (withData && shop instanceof LoadableItem) {
-            LoadableItem item = (LoadableItem) shop;
+        if (withData && shop instanceof AbstractLoadableItem<?> item) {
             if (!item.getFile().delete()) return;
         }
 
@@ -330,11 +345,6 @@ public class ChestShop extends ShopModule {
             if (left != null) this.chests.remove(left.getLocation());
             if (right != null) this.chests.remove(right.getLocation());
         }
-    }
-
-    @NotNull
-    public ChestShopConfig getConfig() {
-        return config;
     }
 
     @NotNull
@@ -475,17 +485,17 @@ public class ChestShop extends ShopModule {
     }
 
     @NotNull
-    public ShopListOwnGUI getListOwnGUI() {
+    public ShopListOwnMenu getListOwnGUI() {
         return this.listOwnGUI;
     }
 
     @NotNull
-    public ShopListGlobalGUI getListGlobalGUI() {
+    public ShopListGlobalMenu getListGlobalGUI() {
         return this.listGlobalGUI;
     }
 
     @NotNull
-    public ShopListSearchGUI getListSearchGUI() {
+    public ShopListSearchMenu getListSearchGUI() {
         return this.listSearchGUI;
     }
 
@@ -501,5 +511,19 @@ public class ChestShop extends ShopModule {
 
     public void cacheFailedLoad(@NotNull String uuid) {
         this.loadFails.add(uuid);
+    }
+
+    class ProductTask extends ITask<ExcellentShop> {
+
+        public ProductTask(@NotNull ExcellentShop plugin) {
+            super(plugin, 60, true);
+        }
+
+        @Override
+        public void action() {
+            getShops().forEach(shop -> {
+                shop.getProducts().forEach(product -> product.getPricer().randomizePrices());
+            });
+        }
     }
 }

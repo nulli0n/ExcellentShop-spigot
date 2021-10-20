@@ -17,6 +17,7 @@ import su.nightexpress.nexshop.shop.virtual.command.EditorCommand;
 import su.nightexpress.nexshop.shop.virtual.command.OpenCommand;
 import su.nightexpress.nexshop.shop.virtual.compatibility.citizens.NpcShopListener;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorHandler;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopList;
 import su.nightexpress.nexshop.shop.virtual.object.ShopVirtual;
 import su.nightexpress.nexshop.shop.virtual.object.ShopVirtualMain;
 
@@ -28,14 +29,14 @@ import java.util.Map;
 
 public class VirtualShop extends ShopModule {
 
-    private VirtualConfig             virtualConfig;
-    private VirtualEditorHandler      editorHandler;
-    private ShopVirtualMain           mainMenu;
     private Map<String, IShopVirtual> shops;
+    private ShopVirtualMain           mainMenu;
 
-    private VirtualShopListener virtualShopListener;
-    private NpcShopListener     npcShopListener;
-    private ProductTask         productTask;
+    private NpcShopListener npcShopListener;
+    private ProductTask productTask;
+
+    private VirtualEditorHandler editorHandler;
+    private EditorShopList editor;
 
     public static final String DIR_SHOPS = "/shops/";
 
@@ -51,28 +52,38 @@ public class VirtualShop extends ShopModule {
 
     @Override
     @NotNull
-    public String version() {
+    public String getVersion() {
         return "2.00";
     }
 
     @Override
-    public void setup() {
+    public void onLoad() {
+        super.onLoad();
+
         this.shops = new HashMap<>();
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops");
+
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/blocks");
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/brewing");
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/food");
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/loot");
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/tools");
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/weapons");
+        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/wool");
+
         this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "editor");
 
-        this.virtualConfig = new VirtualConfig(this, this.cfg);
+        VirtualShopConfig.load(this, this.cfg);
+
         this.editorHandler = new VirtualEditorHandler(this);
+        this.editorHandler.setup();
 
         this.moduleCommand.addDefaultCommand(new OpenCommand(this));
-        this.moduleCommand.addSubCommand(new EditorCommand(this));
+        this.moduleCommand.addChildren(new EditorCommand(this));
 
         this.loadShops();
         this.loadMainMenu();
         this.loadCitizens();
-
-        this.virtualShopListener = new VirtualShopListener(this);
-        this.virtualShopListener.registerListeners();
+        this.addListener(new VirtualShopListener(this));
 
         this.productTask = new ProductTask(this.plugin);
         this.productTask.start();
@@ -94,12 +105,14 @@ public class VirtualShop extends ShopModule {
 
     private void loadMainMenu() {
         if (this.mainMenu != null) {
-            this.mainMenu.shutdown();
+            this.mainMenu.clear();
             this.mainMenu = null;
         }
 
-        if (!VirtualConfig.GUI_MAIN_MENU_YML.getBoolean("enabled")) return;
-        this.mainMenu = new ShopVirtualMain(this, VirtualConfig.GUI_MAIN_MENU_YML, "");
+        JYML menuConfig = JYML.loadOrExtract(this.plugin, this.getPath() + "main.menu.yml");
+
+        if (!menuConfig.getBoolean("Enabled")) return;
+        this.mainMenu = new ShopVirtualMain(this, menuConfig, "");
     }
 
     private void loadCitizens() {
@@ -112,33 +125,37 @@ public class VirtualShop extends ShopModule {
     }
 
     @Override
-    public void shutdown() {
+    protected void onShutdown() {
+        super.onShutdown();
+
         if (this.productTask != null) {
             this.productTask.stop();
             this.productTask = null;
-        }
-        if (this.virtualShopListener != null) {
-            this.virtualShopListener.unregisterListeners();
-            this.virtualShopListener = null;
         }
         if (this.npcShopListener != null) {
             this.npcShopListener.shutdown();
             this.npcShopListener = null;
         }
-
+        if (this.editor != null) {
+            this.editor.clear();
+            this.editor = null;
+        }
         if (this.mainMenu != null) {
-            this.mainMenu.shutdown();
+            this.mainMenu.clear();
             this.mainMenu = null;
         }
 
         // Shutdown Shop Views and editors
-        this.shops.values().forEach(shop -> shop.clear());
+        this.shops.values().forEach(IShopVirtual::clear);
         this.shops.clear();
     }
 
     @NotNull
-    public VirtualConfig getConfig() {
-        return this.virtualConfig;
+    public EditorShopList getEditor() {
+        if (this.editor == null) {
+            this.editor = new EditorShopList(this);
+        }
+        return editor;
     }
 
     public boolean hasMainMenu() {
@@ -177,13 +194,13 @@ public class VirtualShop extends ShopModule {
         if (player.hasPermission(Perms.ADMIN)) return true;
 
         String world = player.getWorld().getName();
-        if (VirtualConfig.GEN_DISABLED_WORLDS.contains(world)) {
+        if (VirtualShopConfig.GEN_DISABLED_WORLDS.contains(world)) {
             plugin.lang().Virtual_Shop_Open_Error_BadWorld.send(player);
             return false;
         }
 
         String mode = player.getGameMode().name();
-        if (VirtualConfig.GEN_DISABLED_GAMEMODES.contains(mode)) {
+        if (VirtualShopConfig.GEN_DISABLED_GAMEMODES.contains(mode)) {
             plugin.lang().Virtual_Shop_Open_Error_BadGamemode
                     .replace("%mode%", plugin.lang().getEnum(player.getGameMode()))
                     .send(player);
@@ -209,7 +226,7 @@ public class VirtualShop extends ShopModule {
     }
 
     @NotNull
-    public List<@NotNull String> getShops(@NotNull Player player) {
+    public List<String> getShops(@NotNull Player player) {
         return this.getShops().stream().filter(shop -> shop.hasPermission(player)).map(IShop::getId).toList();
     }
 

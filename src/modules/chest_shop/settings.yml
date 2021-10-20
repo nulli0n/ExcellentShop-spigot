@@ -1,6 +1,7 @@
-command-aliases: chestshop,cshop,cs
+Command_Aliases: chestshop,cshop,cs
 
 Shops:
+  Default_Currency: vault
   Allowed_Currencies:
     - vault
   Creation:

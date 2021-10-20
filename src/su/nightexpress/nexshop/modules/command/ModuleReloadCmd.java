@@ -14,24 +14,24 @@ public class ModuleReloadCmd extends ShopModuleCommand<ShopModule> {
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return "";
     }
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return "Reload the module.";
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return false;
     }
 
     @Override
-    public void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         this.module.reload();
-        this.plugin.lang().Module_Cmd_Reload.replace("%module%", module.name()).send(sender);
+        this.plugin.lang().Module_Cmd_Reload.replace("%module%", module.getName()).send(sender);
     }
 }

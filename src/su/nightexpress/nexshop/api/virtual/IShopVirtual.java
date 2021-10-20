@@ -3,57 +3,47 @@ package su.nightexpress.nexshop.api.virtual;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.manager.api.Cleanable;
-import su.nexmedia.engine.utils.Constants;
-import su.nexmedia.engine.utils.NumberUT;
-import su.nexmedia.engine.utils.TimeUT;
+import su.nexmedia.engine.api.manager.ICleanable;
+import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.AbstractShopView;
 import su.nightexpress.nexshop.api.IShop;
-import su.nightexpress.nexshop.api.IShopDiscount;
-import su.nightexpress.nexshop.shop.virtual.editor.object.EditorShop;
+import su.nightexpress.nexshop.api.currency.IShopCurrency;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopMain;
 
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
 
-public interface IShopVirtual extends IShop, Cleanable {
+public interface IShopVirtual extends IShop, ICleanable {
 
-    String PLACEHOLDER_PERMISSION_NEED    = "%shop_permission_required%";
-    String PLACEHOLDER_DISCOUNT_AVAILABLE = "%shop_discount_available%";
-    String PLACEHOLDER_DISCOUNT_AMOUNT    = "%shop_discount_amount%";
-    String PLACEHOLDER_DISCOUNT_TIMELEFT  = "%shop_discount_timeleft%";
+    String PLACEHOLDER_PERMISSION_REQUIRED = "%shop_permission_required%";
+    String PLACEHOLDER_PERMISSION_NODE     = "%shop_permission_node%";
+    String PLACEHOLDER_ICON = "%shop_icon_name%";
+    String PLACEHOLDER_PAGES = "%shop_pages%";
+    String PLACEHOLDER_VIEW_SIZE = "%shop_view_size%";
+    String PLACEHOLDER_VIEW_TITLE = "%shop_view_title%";
+    String PLACEHOLDER_NPC_IDS = "%shop_npc_ids%";
 
     @Override
     @NotNull
     default UnaryOperator<String> replacePlaceholders() {
-        IShopDiscount discount = this.getDiscount();
-        String hhTimeLeft;
-        if (discount != null) {
-            LocalTime[] times = discount.getCurrentTimes();
-            if (times != null) {
-                Duration dur = Duration.between(LocalTime.now(), times[1]);
-                hhTimeLeft = TimeUT.formatTime(dur.toMillis());
-            }
-            else hhTimeLeft = "-";
-        }
-        else hhTimeLeft = "-";
-
-
-        return str -> str
-                .replace(PLACEHOLDER_NAME, this.getName())
-                .replace(PLACEHOLDER_PERMISSION_NEED, plugin().lang().getBool(this.isPermissionRequired()))
-                .replace(PLACEHOLDER_DISCOUNT_AVAILABLE, plugin().lang().getBool(discount != null))
-                .replace(PLACEHOLDER_DISCOUNT_AMOUNT, discount != null ? NumberUT.format(discount.getDiscountRaw()) : "-")
-                .replace(PLACEHOLDER_DISCOUNT_TIMELEFT, hhTimeLeft)
-                ;
+        return str -> IShop.super.replacePlaceholders().apply(str
+                .replace(PLACEHOLDER_PERMISSION_NODE, Perms.VIRTUAL_SHOP + this.getId())
+                .replace(PLACEHOLDER_PERMISSION_REQUIRED, plugin().lang().getBool(this.isPermissionRequired()))
+                .replace(PLACEHOLDER_ICON, ItemUT.getItemName(this.getIcon()))
+                .replace(PLACEHOLDER_PAGES, String.valueOf(this.getPages()))
+                .replace(PLACEHOLDER_VIEW_SIZE, String.valueOf(this.getView().getSize()))
+                .replace(PLACEHOLDER_VIEW_TITLE,this.getView().getTitle())
+                .replace(PLACEHOLDER_NPC_IDS, String.join(", ", IntStream.of(this.getCitizensIds()).boxed()
+                        .map(String::valueOf).toList()))
+        );
     }
 
     @Override
     @NotNull
-    EditorShop getEditor();
+    EditorShopMain getEditor();
 
     @Override
     @NotNull
@@ -65,9 +55,22 @@ public interface IShopVirtual extends IShop, Cleanable {
 
     default boolean hasPermission(@NotNull Player player) {
         if (!this.isPermissionRequired()) return true;
+        return player.hasPermission(Perms.VIRTUAL_SHOP + this.getId());
+    }
 
-        return player.hasPermission(Perms.VIRTUAL_SHOP + Constants.MASK_ANY)
-                || player.hasPermission(Perms.VIRTUAL_SHOP + this.getId());
+    @Override
+    default double getShopBalance(@NotNull IShopCurrency currency) {
+        return -1D;
+    }
+
+    @Override
+    default void takeFromShopBalance(@NotNull IShopCurrency currency, double amount) {
+
+    }
+
+    @Override
+    default void addToShopBalance(@NotNull IShopCurrency currency, double amount) {
+
     }
 
     @NotNull

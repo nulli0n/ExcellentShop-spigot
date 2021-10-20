@@ -18,8 +18,8 @@ public class ProductPricer extends AbstractTimed implements IProductPricer {
 
     private IShopProduct product;
 
-    private Map<TradeType, double[]> priceMinMax;
-    private Map<TradeType, Double>   priceReal;
+    private final Map<TradeType, double[]> priceMinMax;
+    private final Map<TradeType, Double>   priceReal;
 
     private boolean   isRndEnabled;
     private LocalTime rndLastTime;

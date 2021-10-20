@@ -13,8 +13,8 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.core.config.CoreConfig;
-import su.nexmedia.engine.manager.api.Cleanable;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nexmedia.engine.utils.LocUT;
 import su.nexmedia.engine.utils.NumberUT;
@@ -22,7 +22,6 @@ import su.nightexpress.nexshop.api.AbstractShopView;
 import su.nightexpress.nexshop.api.IShop;
 import su.nightexpress.nexshop.api.IShopProduct;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
-import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.editor.object.EditorShopChest;
 
 import java.util.Collection;
@@ -31,7 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-public interface IShopChest extends IShop, Cleanable {
+public interface IShopChest extends IShop, ICleanable {
 
     String PLACEHOLDER_OWNER        = "%shop_owner%";
     String PLACEHOLDER_LOC_X        = "%shop_location_x%";
@@ -39,8 +38,6 @@ public interface IShopChest extends IShop, Cleanable {
     String PLACEHOLDER_LOC_Z        = "%shop_location_z%";
     String PLACEHOLDER_LOC_WORLD    = "%shop_location_world%";
     String PLACEHOLDER_IS_ADMIN     = "%shop_is_admin%";
-    String PLACEHOLDER_BUY_ALLOWED  = "%shop_buy_allowed%";
-    String PLACEHOLDER_SELL_ALLOWED = "%shop_sell_allowed%";
 
     @Override
     @NotNull
@@ -48,17 +45,14 @@ public interface IShopChest extends IShop, Cleanable {
         Location location = this.getLocation();
         World world = this.getChest().getWorld();
 
-        return (str) -> str
-                .replace(PLACEHOLDER_NAME, this.getName())
+        return str -> IShop.super.replacePlaceholders().apply(str
                 .replace(PLACEHOLDER_OWNER, this.getOwnerName())
                 .replace(PLACEHOLDER_LOC_X, NumberUT.format(location.getX()))
                 .replace(PLACEHOLDER_LOC_Y, NumberUT.format(location.getY()))
                 .replace(PLACEHOLDER_LOC_Z, NumberUT.format(location.getZ()))
                 .replace(PLACEHOLDER_LOC_WORLD, CoreConfig.getWorldName(world.getName()))
                 .replace(PLACEHOLDER_IS_ADMIN, plugin().lang().getBool(this.isAdminShop()))
-                .replace(PLACEHOLDER_BUY_ALLOWED, plugin().lang().getBool(this.isPurchaseAllowed(TradeType.BUY)))
-                .replace(PLACEHOLDER_SELL_ALLOWED, plugin().lang().getBool(this.isPurchaseAllowed(TradeType.SELL)))
-                ;
+        );
     }
 
     @Override
@@ -81,8 +75,6 @@ public interface IShopChest extends IShop, Cleanable {
         }
         player.teleport(location);
     }
-
-    void setName(@NotNull String name);
 
     @NotNull
     Location getLocation();
@@ -120,9 +112,26 @@ public interface IShopChest extends IShop, Cleanable {
     @NotNull
     OfflinePlayer getOwner();
 
-    default double getOwnerBalance(@NotNull IShopCurrency currency) {
+    @Override
+    default double getShopBalance(@NotNull IShopCurrency currency) {
+        if (this.isAdminShop()) return -1D;
+
         OfflinePlayer player = this.getOwner();
         return currency.getBalance(player);
+    }
+
+    @Override
+    default void takeFromShopBalance(@NotNull IShopCurrency currency, double amount) {
+        if (this.isAdminShop()) return;
+
+        currency.take(this.getOwner(), amount);
+    }
+
+    @Override
+    default void addToShopBalance(@NotNull IShopCurrency currency, double amount) {
+        if (this.isAdminShop()) return;
+
+        currency.give(this.getOwner(), amount);
     }
 
     default boolean isOwner(@NotNull Player player) {
@@ -142,8 +151,8 @@ public interface IShopChest extends IShop, Cleanable {
 
         int amount = 0;
         ItemStack item = product.getItem();
-        Inventory inv = this.getChestInventory();
-        for (ItemStack has : inv.getContents()) {
+        Inventory inventory = this.getChestInventory();
+        for (ItemStack has : inventory.getContents()) {
             if (has != null && has.isSimilar(item)) {
                 amount += has.getAmount();
             }
@@ -156,9 +165,9 @@ public interface IShopChest extends IShop, Cleanable {
 
         int space = 0;
         ItemStack item = product.getItem();
-        Inventory inv = this.getChestInventory();
-        for (int slot = 0; slot < inv.getSize(); slot++) {
-            ItemStack has = inv.getItem(slot);
+        Inventory inventory = this.getChestInventory();
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack has = inventory.getItem(slot);
             if (has == null || ItemUT.isAir(has)) {
                 space += item.getMaxStackSize();
             }
@@ -175,9 +184,9 @@ public interface IShopChest extends IShop, Cleanable {
         if (!this.isProduct(product)) return;
         if (this.isAdminShop()) return;
 
-        Inventory inv = this.getChestInventory();
+        Inventory inventory = this.getChestInventory();
         for (int count = 0; count < amount; count++) {
-            if (!inv.addItem(product.getItem()).isEmpty()) break;
+            if (!inventory.addItem(product.getItem()).isEmpty()) break;
         }
     }
 
@@ -185,17 +194,17 @@ public interface IShopChest extends IShop, Cleanable {
         if (!this.isProduct(product)) return false;
         if (this.isAdminShop()) return true;
 
-        Inventory inv = this.getChestInventory();
-        return inv.containsAtLeast(product.getItem(), 1);
+        Inventory inventory = this.getChestInventory();
+        return inventory.containsAtLeast(product.getItem(), 1);
     }
 
     default void takeProduct(@NotNull IShopProduct product, int amount) {
         if (!this.isProduct(product)) return;
         if (this.isAdminShop()) return;
 
-        Inventory inv = this.getChestInventory();
+        Inventory inventory = this.getChestInventory();
         for (int count = 0; count < amount; count++) {
-            if (!inv.removeItem(product.getItem()).isEmpty()) break;
+            if (!inventory.removeItem(product.getItem()).isEmpty()) break;
         }
     }
 

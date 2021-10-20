@@ -37,7 +37,7 @@ Sounds:
 Currency:
   Default:
     exp:
-      Enabled: false
+      Enabled: true
       Name: Exp
       Format: '%price% %currency_name%'
     vault:
@@ -46,13 +46,13 @@ Currency:
       Format: '%currency_name%%price%'
   Custom_Item:
     emeralds:
-      Enabled: false
+      Enabled: true
       Name: 'Emerald(s)'
       Format: '%price% %currency_name%'
       Item:
         material: EMERALD
     custom-gold:
-      Enabled: false
+      Enabled: true
       Name: 'Gold'
       Format: '%price% %currency_name%'
       Item:

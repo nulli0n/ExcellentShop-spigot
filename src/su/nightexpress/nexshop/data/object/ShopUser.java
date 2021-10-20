@@ -3,19 +3,20 @@ package su.nightexpress.nexshop.data.object;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.data.users.IAbstractUser;
+import su.nexmedia.engine.api.data.AbstractUser;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.IProductPrepared;
-import su.nightexpress.nexshop.api.IShopProduct;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.virtual.IShopVirtualProduct;
+import su.nightexpress.nexshop.api.virtual.IShopVirtualProductPrepared;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ShopUser extends IAbstractUser<ExcellentShop> {
+public class ShopUser extends AbstractUser<ExcellentShop> {
 
-    private final Map<String, UserProductLimit> virtualLimits;
+    private final Map<String, Map<TradeType, UserProductLimit>> virtualLimits;
     private final UserSettings                  settings;
 
     public ShopUser(@NotNull ExcellentShop plugin, @NotNull Player player) {
@@ -30,7 +31,7 @@ public class ShopUser extends IAbstractUser<ExcellentShop> {
     public ShopUser(
             @NotNull ExcellentShop plugin, @NotNull UUID uuid, @NotNull String name, long lastOnline,
             @NotNull UserSettings settings,
-            @NotNull Map<String, UserProductLimit> virtualLimits
+            @NotNull Map<String, Map<TradeType, UserProductLimit>> virtualLimits
     ) {
         super(plugin, uuid, name, lastOnline);
 
@@ -44,27 +45,27 @@ public class ShopUser extends IAbstractUser<ExcellentShop> {
     }
 
     @NotNull
-    public Map<String, UserProductLimit> getVirtualProductLimits() {
-        this.virtualLimits.values().removeIf(l -> l.isExpired(TradeType.BUY) && l.isExpired(TradeType.SELL));
+    public Map<String, Map<TradeType, UserProductLimit>> getVirtualProductLimits() {
+        this.virtualLimits.values().forEach(map -> map.values().removeIf(UserProductLimit::isExpired));
         return this.virtualLimits;
     }
 
-    public void addVirtualProductLimit(@NotNull IProductPrepared product, @NotNull TradeType tradeType) {
-        IShopProduct shopProduct = product.getShopProduct();
-        if (!shopProduct.isBuyLimited(tradeType) || shopProduct.getBuyLimitCooldown(tradeType) == 0) return;
+    public void addVirtualProductLimit(@NotNull IShopVirtualProductPrepared product, @NotNull TradeType tradeType) {
+        IShopVirtualProduct shopProduct = product.getShopProduct();
+        if (!shopProduct.isLimited(tradeType) || shopProduct.getLimitCooldown(tradeType) == 0) return;
 
         UserProductLimit productLimit = this.getVirtualProductLimit(tradeType, shopProduct.getId());
         if (productLimit == null) {
-            productLimit = new UserProductLimit(product);
-            productLimit.updateLastOperationTime(product, tradeType);
+            productLimit = new UserProductLimit(product, tradeType);
         }
-        productLimit.addCount(tradeType, product.getAmount());
+        productLimit.addCount(product.getAmount());
 
-        this.getVirtualProductLimits().put(shopProduct.getId(), productLimit);
+        String id = shopProduct.getId();
+        this.getVirtualProductLimits().computeIfAbsent(id, k -> new HashMap<>()).put(tradeType, productLimit);
     }
 
     @Nullable
     public UserProductLimit getVirtualProductLimit(@NotNull TradeType tradeType, @NotNull String id) {
-        return this.getVirtualProductLimits().get(id);
+        return this.getVirtualProductLimits().getOrDefault(id, Collections.emptyMap()).get(tradeType);
     }
 }

@@ -1,4 +1,4 @@
-command-aliases: auction,auc,ah
+Command_Aliases: auction,auc,ah
 
 Settings:
   Date_Format: MM/dd/yyyy HH:mm:ss

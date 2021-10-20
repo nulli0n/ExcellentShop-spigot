@@ -19,18 +19,18 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Virtual_Shop_Command_Open_Desc.getMsg();
     }
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return plugin.lang().Virtual_Shop_Command_Open_Usage.getMsg();
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return false;
     }
 
@@ -47,11 +47,11 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
     }
 
     @Override
-    public void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         // /virtualshop open
         if (args.length < 2) {
             if (!(sender instanceof Player player)) {
-                this.errPlayer(sender);
+                this.errorPlayer(sender);
                 return;
             }
             this.module.openMainMenu(player);
@@ -67,7 +67,7 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
                     plugin.lang().Virtual_Shop_Open_Error_InvalidShop.send(sender);
                 }
                 else {
-                    this.errPlayer(sender);
+                    this.errorPlayer(sender);
                 }
                 return;
             }
@@ -78,14 +78,14 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
 
         if (player == null) {
             if (!(sender instanceof  Player player1)) {
-                this.errPlayer(sender);
+                this.errorPlayer(sender);
                 return;
             }
             player = player1;
         }
 
         if (!shopVirtual.hasPermission(player)) {
-            this.errPerm(player);
+            this.errorPermission(player);
             return;
         }
 

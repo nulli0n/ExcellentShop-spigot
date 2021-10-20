@@ -4,8 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.manager.AbstractLoadableItem;
 import su.nexmedia.engine.config.api.JYML;
-import su.nexmedia.engine.manager.LoadableItem;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -18,7 +18,7 @@ import su.nightexpress.nexshop.currency.CurrencyType;
 import su.nightexpress.nexshop.shop.ProductPricer;
 import su.nightexpress.nexshop.shop.ShopDiscount;
 import su.nightexpress.nexshop.shop.virtual.VirtualShop;
-import su.nightexpress.nexshop.shop.virtual.editor.object.EditorShop;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopMain;
 
 import java.io.File;
 import java.time.DayOfWeek;
@@ -27,47 +27,46 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ShopVirtual extends LoadableItem implements IShopVirtual {
+public class ShopVirtual extends AbstractLoadableItem<ExcellentShop> implements IShopVirtual {
 
-    private final ExcellentShop plugin;
     private final JYML          configProducts;
     private final JYML          configView;
 
-    private int                              pages;
-    private boolean                          isPermissionRequired;
-    private Map<TradeType, Boolean>          purchaseAllowed;
-    private ItemStack                        icon;
-    private int[]                            citizensIds;
-    private Collection<IShopDiscount>        discounts;
-    private Map<String, IShopVirtualProduct> products;
+    private String name;
+    private int pages;
+    private boolean isPermissionRequired;
+    private ItemStack icon;
+
+    private final Map<TradeType, Boolean> purchaseAllowed;
+    private       int[]                            citizensIds;
+    private final Collection<IShopDiscount>        discounts;
+    private final Map<String, IShopVirtualProduct> products;
 
     private AbstractShopView<IShopVirtual> view;
-    private EditorShop                     editor;
+    private EditorShopMain                 editor;
 
     public ShopVirtual(@NotNull VirtualShop virtualShop, @NotNull JYML cfg) {
-        super(virtualShop.plugin, cfg);
-        this.plugin = virtualShop.plugin;
+        super(virtualShop.plugin(), cfg);
 
         this.cfg.addMissing("Icon.material", Material.STONE.name());
         this.cfg.saveChanges();
 
         this.configProducts = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "products.yml");
         this.configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "view.yml");
-        this.configView.addMissing("title", StringUT.capitalizeFully(this.getId()));
-        this.configView.addMissing("size", 54);
+        this.configView.addMissing("Title", StringUT.capitalizeFully(this.getId()));
+        this.configView.addMissing("Size", 54);
         this.configView.saveChanges();
 
+        this.setName(cfg.getString("Name", this.configView.getString("Title", this.getId())));
         this.setPages(cfg.getInt("Pages", 1));
         this.setPermissionRequired(cfg.getBoolean("Permission_Required", false));
+        this.setIcon(cfg.getItem("Icon"));
+        this.setCitizensIds(cfg.getIntArray("Citizens.Attached_NPC"));
 
         this.purchaseAllowed = new HashMap<>();
         for (TradeType buyType : TradeType.values()) {
             this.setPurchaseAllowed(buyType, cfg.getBoolean("Transaction_Allowed." + buyType.name(), true));
         }
-
-        this.setIcon(cfg.getItem("Icon"));
-        this.setCitizensIds(cfg.getIntArray("Citizens.Attached_NPC"));
-
 
         this.discounts = new HashSet<>();
         for (String sId : cfg.getSection("Discounts.Custom")) {
@@ -105,7 +104,7 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
                 continue;
             }
 
-            Map<TradeType, long[]> limit = new HashMap<>();
+            Map<TradeType, int[]> limit = new HashMap<>();
             Map<TradeType, double[]> priceMinMax = new HashMap<>();
             boolean itemMetaEnabled = configProducts.getBoolean(path2 + "Item_Meta_Enabled");
             for (TradeType tradeType : TradeType.values()) {
@@ -117,8 +116,8 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
 
                 String path4 = path + "Limit." + tradeType.name() + ".";
                 int buyLimitAmount = configProducts.getInt(path4 + "Amount", -1);
-                long buyLimitCooldown = configProducts.getLong(path4 + "Cooldown", 0);
-                limit.put(tradeType, new long[]{buyLimitAmount, buyLimitCooldown});
+                int buyLimitCooldown = configProducts.getInt(path4 + "Cooldown", 0);
+                limit.put(tradeType, new int[]{buyLimitAmount, buyLimitCooldown});
             }
 
             path2 = path + "Purchase.Randomizer.";
@@ -155,6 +154,11 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     }
 
     @Override
+    public void save() {
+        super.save();
+    }
+
+    @Override
     @NotNull
     public ExcellentShop plugin() {
         return this.plugin;
@@ -163,11 +167,11 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     @Override
     public void clear() {
         if (this.editor != null) {
-            this.editor.shutdown();
+            this.editor.clear();
             this.editor = null;
         }
         if (this.view != null) {
-            this.view.shutdown();
+            this.view.clear();
             this.view = null;
         }
         if (this.products != null) {
@@ -177,11 +181,12 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     }
 
     @Override
-    protected void save(@NotNull JYML cfg) {
-        configView.set("title", this.view.getTitle());
-        configView.set("size", this.view.getSize());
+    public void onSave() {
+        configView.set("Title", this.view.getTitle());
+        configView.set("Size", this.view.getSize());
         configView.saveChanges();
 
+        cfg.set("Name", this.getName());
         cfg.set("Pages", this.getPages());
         cfg.set("Permission_Required", this.isPermissionRequired());
         this.purchaseAllowed.forEach((type, isAllowed) -> {
@@ -213,8 +218,8 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
             configProducts.set(path + "Discount.Allowed", shopProduct.isDiscountAllowed());
 
             for (TradeType tradeType : TradeType.values()) {
-                configProducts.set(path + "Limit." + tradeType.name() + ".Amount", shopProduct.getBuyLimitAmount(tradeType));
-                configProducts.set(path + "Limit." + tradeType.name() + ".Cooldown", shopProduct.getBuyLimitCooldown(tradeType));
+                configProducts.set(path + "Limit." + tradeType.name() + ".Amount", shopProduct.getLimitAmount(tradeType));
+                configProducts.set(path + "Limit." + tradeType.name() + ".Cooldown", shopProduct.getLimitCooldown(tradeType));
             }
 
             configProducts.set(path + "Purchase.Currency", shopProduct.getCurrency().getId());
@@ -242,7 +247,12 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     @Override
     @NotNull
     public String getName() {
-        return this.getView().getTitle();
+        return this.name;
+    }
+
+    @Override
+    public void setName(@NotNull String name) {
+        this.name = name;
     }
 
     @NotNull
@@ -257,9 +267,9 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
 
     @Override
     @NotNull
-    public EditorShop getEditor() {
+    public EditorShopMain getEditor() {
         if (this.editor == null) {
-            this.editor = new EditorShop(this.plugin(), this);
+            this.editor = new EditorShopMain(this.plugin(), this);
         }
         return this.editor;
     }
@@ -268,7 +278,12 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     public void setupView() {
         this.configView.reload();
         this.view = new ShopVirtualView(this, this.getConfigView());
-        this.getEditor().rebuild();
+        // this.getEditor().rebuild();
+        this.getEditor().getEditorViewDesign().setTitle(this.getView().getTitle());
+        this.getEditor().getEditorViewDesign().setSize(this.getView().getSize());
+
+        this.getEditor().getEditorProducts().setTitle(this.getView().getTitle());
+        this.getEditor().getEditorProducts().setSize(this.getView().getSize());
     }
 
     @Override
@@ -281,11 +296,12 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     @Deprecated
     public void open(@NotNull Player player, int page) {
         if (!this.hasPermission(player)) {
-            plugin.lang().Error_NoPerm.replace("%id%", this.getId()).send(player);
+            plugin.lang().Error_NoPerm.send(player);
             return;
         }
-        VirtualShop guiShop = plugin.getVirtualShop();
-        if (guiShop != null && !guiShop.isShopAllowed(player)) {
+
+        VirtualShop virtualShop = plugin.getVirtualShop();
+        if (virtualShop != null && !virtualShop.isShopAllowed(player)) {
             return;
         }
         this.getView().open(player, page);
@@ -297,26 +313,24 @@ public class ShopVirtual extends LoadableItem implements IShopVirtual {
     }
 
     @Override
-    public void setPermissionRequired(boolean isPermission) {
-        this.isPermissionRequired = isPermission;
+    public void setPermissionRequired(boolean isPermissionRequired) {
+        this.isPermissionRequired = isPermissionRequired;
     }
 
     @Override
-    public boolean isPurchaseAllowed(@NotNull TradeType buyType) {
-        return this.purchaseAllowed.getOrDefault(buyType, true);
+    public boolean isPurchaseAllowed(@NotNull TradeType tradeType) {
+        return this.purchaseAllowed.getOrDefault(tradeType, true);
     }
 
     @Override
-    public void setPurchaseAllowed(@NotNull TradeType buyType, boolean isAllowed) {
-        this.purchaseAllowed.put(buyType, isAllowed);
+    public void setPurchaseAllowed(@NotNull TradeType tradeType, boolean isAllowed) {
+        this.purchaseAllowed.put(tradeType, isAllowed);
     }
 
     @Override
     @NotNull
     public ItemStack getIcon() {
-        ItemStack icon = new ItemStack(this.icon);
-        ItemUT.replace(icon, this.replacePlaceholders());
-        return icon;
+        return new ItemStack(this.icon);
     }
 
     @Override

@@ -1,0 +1,113 @@
+Title: '&8&m            &8&l[ &9&lAuction &8&l]&8&m            &7'
+Size: 54
+
+Items:
+  Name: '&f%listing_item_name%'
+  Lore:
+    - '%listing_item_lore%'
+    - '&7'
+    - '&c▸ &7Price: &c$%listing_price%'
+    - '&f▸ &7Seller: &f%listing_seller%'
+    - '&f▸ &7Expires in: &f%listing_expires_in%'
+    - '&7'
+    - '&6Shift+Right: &eRemove Listing'
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+
+Special:
+  expire:
+    Display:
+      default:
+        Item:
+          material: 'HOPPER'
+          name: '&bExpired Items'
+          lore:
+            - '&7Here you can browse all'
+            - '&7your unsold expired items.'
+    Type: AUCTION_EXPIRED
+    Slots: 47
+
+  sold:
+    Display:
+      default:
+        Item:
+          material: 'EMERALD'
+          name: '&aSold Items'
+          lore:
+            - '&7Here is your sales history.'
+    Type: AUCTION_HISTORY
+    Slots: 51
+
+  category:
+    Display:
+      default:
+        Item:
+          material: 'COMPASS'
+          name: '&eItems Category'
+          lore:
+            - '&7Currently displayed'
+            - '&7only &6%category-name% &7items.'
+            - '&7'
+            - '&6&lClick me to toggle.'
+    Type: AUCTION_CATEGORY
+    Slots: 46
+
+  sort:
+    Display:
+      default:
+        Item:
+          material: 'NAME_TAG'
+          name: '&aItems Order'
+          lore:
+            - '&7Items are displayed'
+            - '&7in a &6%sort-type% &7order.'
+            - '&7'
+            - '&6&lClick me to toggle.'
+    Type: AUCTION_SORTING
+    Slots: 52
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&lNext Page →'
+    Slots: 53
+    Type: PAGE_NEXT
+
+  page_previous:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l← Previous Page'
+    Slots: 45
+    Type: PAGE_PREVIOUS
+
+  info:
+    Display:
+      default:
+        Item:
+          material: 'BOOK'
+          name: '&6Information'
+          lore:
+            - '&6&lSelling Items:'
+            - '&6▸ &7Hold item and type'
+            - '  &6/auc sell <price>'
+            - '&7'
+            - '&6&lItem Expire:'
+            - '&6▸ &7When you put an item to'
+            - '  &7auction, it will have &6%expire%'
+            - '  &7to be sold before it will be removed'
+            - '  &7from the auction.'
+            - '&7'
+            - '&6&lItem Price:'
+            - '&6▸ &7You will have to pay'
+            - '&7  extra &6%tax%% &7of item price'
+            - '&7  to be able to put in on auction.'
+            - '&7'
+            - '&6&lCancel Items:'
+            - '&6▸ &7Use Shift+Right click'
+            - '&7  to cancel any item you selling.'
+    Type: NONE
+    Slots: 49

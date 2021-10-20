@@ -20,18 +20,18 @@ public class ExpiredCommand extends ShopModuleCommand<AuctionManager> {
 
     @Override
     @NotNull
-    public String usage() {
+    public String getUsage() {
         return plugin.lang().Auction_Command_Expired_Usage.getMsg();
     }
 
     @Override
     @NotNull
-    public String description() {
+    public String getDescription() {
         return plugin.lang().Auction_Command_Expired_Desc.getMsg();
     }
 
     @Override
-    public boolean playersOnly() {
+    public boolean isPlayerOnly() {
         return true;
     }
 
@@ -45,24 +45,24 @@ public class ExpiredCommand extends ShopModuleCommand<AuctionManager> {
     }
 
     @Override
-    protected void perform(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         Player player = (Player) sender;
         UUID id;
         if (args.length >= 2) {
             if (!sender.hasPermission(Perms.AUCTION_CMD_OPEN_OTHERS)) {
-                this.errPerm(sender);
+                this.errorPermission(sender);
                 return;
             }
 
             ShopUser user = plugin.getUserManager().getOrLoadUser(args[1], false);
             if (user == null) {
-                this.errPlayer(sender);
+                this.errorPlayer(sender);
                 return;
             }
             id = user.getUUID();
         }
         else id = player.getUniqueId();
 
-        this.module.getAuctionExpiredGUI().open(player, 1, id);
+        this.module.getAuctionExpiredMenu().open(player, 1, id);
     }
 }
