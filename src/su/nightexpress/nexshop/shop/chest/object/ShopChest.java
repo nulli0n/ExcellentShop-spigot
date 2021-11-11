@@ -260,12 +260,7 @@ public class ShopChest extends AbstractLoadableItem<ExcellentShop> implements IS
             return false;
         }
 
-        String currencyId = ChestShopConfig.DEFAULT_CURRENCY;//ChestShopConfig.ALLOWED_CURRENCIES.stream().findFirst().orElse(null);
-        if (currencyId == null) return false;
-
-        IShopCurrency currency = plugin.getCurrencyManager().getCurrency(currencyId);
-        if (currency == null) return false;
-
+        IShopCurrency currency = ChestShopConfig.DEFAULT_CURRENCY;
         IShopChestProduct shopProduct = new ShopChestProduct(this, currency, item);
         this.getProductMap().put(shopProduct.getId(), shopProduct);
 

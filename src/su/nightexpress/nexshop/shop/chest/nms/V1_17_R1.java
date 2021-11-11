@@ -5,10 +5,7 @@ import net.minecraft.network.chat.ChatComponentText;
 import net.minecraft.world.EnumHand;
 import net.minecraft.world.EnumInteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.EnumItemSlot;
-import net.minecraft.world.entity.EnumMobSpawn;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.decoration.EntityArmorStand;
 import net.minecraft.world.entity.item.EntityItem;
 import net.minecraft.world.entity.player.EntityHuman;
@@ -97,6 +94,31 @@ public class V1_17_R1 implements ChestNMS {
         }
 
         @Override
+        public void entityBaseTick() {
+
+        }
+
+        @Override
+        public boolean isFireProof() {
+            return true;
+        }
+
+        @Override
+        public void burnFromLava() {
+
+        }
+
+        @Override
+        public void setOnFire(int i) {
+
+        }
+
+        @Override
+        public void move(EnumMoveType enummovetype, Vec3D vec3d) {
+
+        }
+
+        @Override
         public void pickup(EntityHuman entityhuman) {
         }
 
@@ -155,8 +177,28 @@ public class V1_17_R1 implements ChestNMS {
         }*/
 
         @Override
+        public void entityBaseTick() {
+            super.entityBaseTick();
+        }
+
+        @Override
         public boolean isFireProof() {
             return true;
+        }
+
+        @Override
+        public void burnFromLava() {
+
+        }
+
+        @Override
+        public void setOnFire(int i) {
+
+        }
+
+        @Override
+        public void move(EnumMoveType enummovetype, Vec3D vec3d) {
+
         }
 
         @Override

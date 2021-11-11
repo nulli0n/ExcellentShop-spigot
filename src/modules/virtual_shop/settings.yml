@@ -1,6 +1,7 @@
 Command_Aliases: shop,vshop
 
 General:
+  Default_Currency: vault
   Disabled_In_Gamemodes:
     - CREATIVE
     - SPECTATOR

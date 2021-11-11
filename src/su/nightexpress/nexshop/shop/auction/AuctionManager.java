@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.auction;
 import com.google.common.collect.Lists;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,11 +13,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nexmedia.engine.config.api.JYML;
 import su.nexmedia.engine.data.StorageType;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHK;
-import su.nexmedia.engine.manager.api.task.ITask;
 import su.nexmedia.engine.utils.ClickText;
 import su.nexmedia.engine.utils.Constants;
 import su.nexmedia.engine.utils.ItemUT;
@@ -32,11 +33,12 @@ import su.nightexpress.nexshop.shop.auction.command.HistoryCommand;
 import su.nightexpress.nexshop.shop.auction.command.SellCommand;
 import su.nightexpress.nexshop.shop.auction.compatibility.ImportAuctionHouse;
 import su.nightexpress.nexshop.shop.auction.menu.*;
-import su.nightexpress.nexshop.shop.auction.object.AuctionHistoryItem;
 import su.nightexpress.nexshop.shop.auction.object.AbstractAuctionItem;
+import su.nightexpress.nexshop.shop.auction.object.AuctionHistoryItem;
 import su.nightexpress.nexshop.shop.auction.object.AuctionListing;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public class AuctionManager extends ShopModule {
 
@@ -50,7 +52,6 @@ public class AuctionManager extends ShopModule {
     private AuctionHistoryMenu auctionHistoryMenu;
 
     private VaultHK     vaultHook;
-    private MenuUpdater menuUpdater;
 
     public AuctionManager(@NotNull ExcellentShop plugin) {
         super(plugin);
@@ -103,8 +104,7 @@ public class AuctionManager extends ShopModule {
         this.moduleCommand.addChildren(new HistoryCommand(this));
         this.moduleCommand.addChildren(new ExpiredCommand(this));
 
-        this.menuUpdater = new MenuUpdater();
-        this.menuUpdater.start();
+        this.addListener(new Listener(this.plugin));
 
         this.plugin.getServer().getScheduler().runTaskLater(plugin, this::importData, 5L);
     }
@@ -113,10 +113,6 @@ public class AuctionManager extends ShopModule {
     protected void onShutdown() {
         super.onShutdown();
 
-        if (this.menuUpdater != null) {
-            this.menuUpdater.stop();
-            this.menuUpdater = null;
-        }
         if (this.auctionConfirmMenu != null) {
             this.auctionConfirmMenu.clear();
             this.auctionConfirmMenu = null;
@@ -315,38 +311,35 @@ public class AuctionManager extends ShopModule {
 
         this.vaultHook.take(buyer, price);
 
-        AuctionHistoryItem history = new AuctionHistoryItem(listing, buyer);
+        AuctionHistoryItem historyItem = new AuctionHistoryItem(listing, buyer);
 
         if (!this.isSynced()) {
             this.getListings().remove(listing);
-            this.getHistory().add(history);
+            this.getHistory().add(historyItem);
         }
-
-        plugin.getData().addAuctionHistory(history, !this.isSynced());
-        plugin.getData().deleteAuctionListing(listing, !this.isSynced());
 
         ItemStack item = listing.getItemStack();
         ItemUT.addItem(buyer, item);
 
-        plugin.lang().Auction_Listing_Buy_Success_Info.replace(listing.replacePlaceholders()).send(buyer);
+        OfflinePlayer seller = this.plugin.getServer().getOfflinePlayer(listing.getOwner());
+        this.vaultHook.give(seller, historyItem.getPrice());
 
-        Player owner = this.plugin.getServer().getPlayer(listing.getOwner());
-        if (owner != null) {
-            this.payHistory(owner, history);
+        Player sellerOnline = seller.getPlayer();
+        if (sellerOnline != null && sellerOnline.isOnline()) {
+            this.notifyHistory(sellerOnline, historyItem);
         }
+
+        plugin.lang().Auction_Listing_Buy_Success_Info.replace(listing.replacePlaceholders()).send(buyer);
+        plugin.getData().addAuctionHistory(historyItem, !this.isSynced());
+        plugin.getData().deleteAuctionListing(listing, !this.isSynced());
 
         this.getAuctionMainMenu().update();
         return true;
     }
 
-    private boolean payHistory(@NotNull Player player, @NotNull AuctionHistoryItem historyItem) {
-        if (historyItem.isPaid()) return historyItem.isPaid();
-
-        this.vaultHook.give(player, historyItem.getPrice());
-        historyItem.setPaid(true);
-        this.plugin.getData().saveAuctionHistory(historyItem, !this.isSynced());
+    private void notifyHistory(@NotNull Player player, @NotNull AuctionHistoryItem historyItem) {
+        historyItem.setNotified(true);
         plugin.lang().Auction_Listing_Sell_Success_Info.replace(historyItem.replacePlaceholders()).send(player);
-        return historyItem.isPaid();
     }
 
     public void takeExpired(@NotNull Player player, @NotNull AuctionListing listing) {
@@ -448,7 +441,7 @@ public class AuctionManager extends ShopModule {
 
     @NotNull
     private List<AuctionListing> getListingsData() {
-        return Lists.reverse(plugin.getData().getAuctionListing().stream().filter(lis -> !lis.isExpired()).toList());
+        return new ArrayList<>(Lists.reverse(plugin.getData().getAuctionListing().stream().filter(lis -> !lis.isExpired()).toList()));
     }
 
     @NotNull
@@ -482,7 +475,7 @@ public class AuctionManager extends ShopModule {
 
     @NotNull
     private List<AuctionListing> getExpiredData() {
-        return Lists.reverse(plugin.getData().getAuctionListing().stream().filter(AuctionListing::isExpired).toList());
+        return new ArrayList<>(Lists.reverse(plugin.getData().getAuctionListing().stream().filter(AuctionListing::isExpired).toList()));
     }
 
     @NotNull
@@ -512,7 +505,7 @@ public class AuctionManager extends ShopModule {
 
     @NotNull
     private List<AuctionHistoryItem> getHistoryData() {
-        return Lists.reverse(this.plugin.getData().getAuctionHistory());
+        return new ArrayList<>(Lists.reverse(this.plugin.getData().getAuctionHistory()));
     }
 
     @NotNull
@@ -530,29 +523,24 @@ public class AuctionManager extends ShopModule {
         return from.stream().filter(listing -> listing != null && listing.getOwner().equals(id)).toList();
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onSellerJoin(PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-        this.getHistory(player).forEach(listing -> this.payHistory(player, listing));
+    class Listener extends AbstractListener<ExcellentShop> {
 
-        int expired = this.getExpired(player).size();
-        if (expired > 0) {
-            plugin.lang().Auction_Listing_Expired_Notify.replace("%amount%", expired).send(player);
-        }
-    }
-
-    // A hack to update Auction GUIs to display a valid item expire time.
-    // Internal animation will not work because items are added in onCreate method.
-    class MenuUpdater extends ITask<ExcellentShop> {
-
-        public MenuUpdater() {
-            super(AuctionManager.this.plugin, 1, false);
+        public Listener(@NotNull ExcellentShop plugin) {
+            super(plugin);
         }
 
-        @Override
-        public void action() {
-            auctionMainMenu.update();
-            auctionExpiredMenu.update();
+        @EventHandler(priority = EventPriority.HIGHEST)
+        public void onSellerJoin(PlayerJoinEvent e) {
+            Player player = e.getPlayer();
+            getHistory(player).stream().filter(Predicate.not(AuctionHistoryItem::isNotified)).forEach(listing -> {
+                notifyHistory(player, listing);
+                plugin.getData().saveAuctionHistory(listing, true);
+            });
+
+            int expired = getExpired(player).size();
+            if (expired > 0) {
+                plugin.lang().Auction_Listing_Expired_Notify.replace("%amount%", expired).send(player);
+            }
         }
     }
 }

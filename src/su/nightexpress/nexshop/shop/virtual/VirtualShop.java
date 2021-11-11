@@ -62,17 +62,24 @@ public class VirtualShop extends ShopModule {
 
         this.shops = new HashMap<>();
 
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/blocks");
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/brewing");
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/food");
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/loot");
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/tools");
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/weapons");
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/wool");
+        File dir = new File(this.getFullPath() + DIR_SHOPS);
+        if (!dir.exists()) {
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/blocks");
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/brewing");
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/food");
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/loot");
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/tools");
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/weapons");
+            this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/wool");
+        }
 
         this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "editor");
 
         VirtualShopConfig.load(this, this.cfg);
+        if (VirtualShopConfig.DEFAULT_CURRENCY == null) {
+            this.interruptLoad("Invalid default currency!");
+            return;
+        }
 
         this.editorHandler = new VirtualEditorHandler(this);
         this.editorHandler.setup();

@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.AbstractUserDataHandler;
 import su.nexmedia.engine.data.DataTypes;
+import su.nexmedia.engine.data.StorageType;
 import su.nexmedia.engine.utils.ItemUT;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.type.TradeType;
@@ -43,6 +44,7 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
 
                 UserSettings settings = gson.fromJson(rs.getString("settings"), new TypeToken<UserSettings>(){}.getType());
                 Map<String, Map<TradeType, UserProductLimit>> limits = gson.fromJson(rs.getString("virtualshop_limits"), new TypeToken<Map<String, Map<TradeType, UserProductLimit>>>(){}.getType());
+                if (limits == null) limits = new HashMap<>();
 
                 return new ShopUser(plugin, uuid, name, date, settings, limits);
             } catch (SQLException e) {
@@ -85,11 +87,11 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
                 }
 
                 double price = rs.getDouble("price");
-                boolean isPaid = rs.getBoolean("isPaid");
+                boolean isNotified = rs.getBoolean("isPaid");
                 long buyDate = rs.getLong("buyDate");
                 long deleteDate = rs.getLong("deleteDate");
 
-                return new AuctionHistoryItem(id, owner, ownerName, buyerName, itemStack, price, isPaid, buyDate, deleteDate);
+                return new AuctionHistoryItem(id, owner, ownerName, buyerName, itemStack, price, isNotified, buyDate, deleteDate);
             } catch (SQLException e) {
                 return null;
             }
@@ -125,7 +127,8 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
 
     @Override
     protected void onTableCreate() {
-        this.addColumn(this.tableUsers, "virtualshop_limits", DataTypes.STRING.build(this.dataType), "{}");
+        String def = this.dataType == StorageType.SQLITE ? "{}" : "";
+        this.addColumn(this.tableUsers, "virtualshop_limits", DataTypes.STRING.build(this.dataType), def);
 
         // Create auction items table
         LinkedHashMap<String, String> aucLis = new LinkedHashMap<>();
@@ -183,12 +186,12 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
     }
 
     @NotNull
-    public List<su.nightexpress.nexshop.shop.auction.object.AuctionListing> getAuctionListing() {
+    public List<AuctionListing> getAuctionListing() {
         return this.getDatas(this.TABLE_AUCTION_ITEMS, Collections.emptyMap(), this.FUNC_AUC_LISTING, -1);
     }
 
     @NotNull
-    public List<su.nightexpress.nexshop.shop.auction.object.AuctionHistoryItem> getAuctionHistory() {
+    public List<AuctionHistoryItem> getAuctionHistory() {
         return this.getDatas(this.TABLE_AUCTION_HISTORY, Collections.emptyMap(), this.FUNC_AUC_HISTORY, -1);
     }
 
@@ -210,8 +213,8 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
         }
     }
 
-    public void deleteAuctionListing(@NotNull AuctionListing bid, boolean async) {
-        String sql = "DELETE FROM " + this.TABLE_AUCTION_ITEMS + " WHERE `aucId` = '" + bid.getId().toString() + "'";
+    public void deleteAuctionListing(@NotNull AuctionListing listing, boolean async) {
+        String sql = "DELETE FROM " + this.TABLE_AUCTION_ITEMS + " WHERE `aucId` = '" + listing.getId() + "'";
         if (!async) {
             this.executeSQL(sql);
         }
@@ -228,7 +231,7 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
         map.put("buyerName", historyItem.getBuyerName());
         map.put("itemStack", ItemUT.toBase64(historyItem.getItemStack()));
         map.put("price", String.valueOf(historyItem.getPrice()));
-        map.put("isPaid", String.valueOf(historyItem.isPaid() ? 1 : 0));
+        map.put("isPaid", String.valueOf(historyItem.isNotified() ? 1 : 0));
         map.put("buyDate", String.valueOf(historyItem.getBuyDate()));
         map.put("deleteDate", String.valueOf(historyItem.getDeleteDate()));
 
@@ -242,7 +245,7 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
 
     public void saveAuctionHistory(@NotNull AuctionHistoryItem historyItem, boolean async) {
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("isPaid", String.valueOf(historyItem.isPaid() ? 1 : 0));
+        map.put("isPaid", String.valueOf(historyItem.isNotified() ? 1 : 0));
 
         LinkedHashMap<String, String> mapWhere = new LinkedHashMap<>();
         mapWhere.put("aucId", historyItem.getId().toString());
@@ -256,7 +259,7 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
     }
 
     public void deleteAuctionHistory(@NotNull AuctionHistoryItem historyItem, boolean async) {
-        String sql = "DELETE FROM " + this.TABLE_AUCTION_HISTORY + " WHERE `aucId` = '" + historyItem.getId().toString() + "'";
+        String sql = "DELETE FROM " + this.TABLE_AUCTION_HISTORY + " WHERE `aucId` = '" + historyItem.getId() + "'";
 
         if (!async) {
             this.executeSQL(sql);

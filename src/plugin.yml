@@ -1,6 +1,6 @@
 name: ExcellentShop
 main: su.nightexpress.nexshop.ExcellentShop
-version: 4.0.7
+version: 4.0.7.3
 description: Advanced 3 in 1 shop plugin with many features!
 author: NightExpress
 depend: [ NexEngine ]
@@ -9,7 +9,7 @@ api-version: 1.15
 
 permissions:
   excellentshop.user:
-    description: Allows to use /exshop command
+    description: Access to basic plugin functions.
     default: true
   excellentshop.admin:
     description: Full access
@@ -147,4 +147,8 @@ permissions:
     default: op
   excellentshop.auction.cmd.sell:
     description: Access to /auction sell command.
+    default: op
+
+  excellentshop.auction.listing.remove.others:
+    description: Allows to remove listings of other players.
     default: op

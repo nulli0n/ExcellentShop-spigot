@@ -1,6 +1,9 @@
 Title: '&8&m            &8&l[ &9&lAuction &8&l]&8&m            &7'
 Size: 54
 
+Animation:
+  Tick: 40
+
 Items:
   Name: '&f%listing_item_name%'
   Lore:

@@ -18,6 +18,7 @@ import su.nightexpress.nexshop.api.IShopProduct;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
 import su.nightexpress.nexshop.api.virtual.IShopVirtual;
 import su.nightexpress.nexshop.api.virtual.IShopVirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopConfig;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorHandler;
 import su.nightexpress.nexshop.shop.virtual.object.ShopVirtualProduct;
 
@@ -128,7 +129,7 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
                 if (cursor != null && !ItemUT.isAir(cursor)) {
                     IShopVirtualProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
-                        IShopCurrency currency = plugin.getCurrencyManager().getCurrencyFirst();
+                        IShopCurrency currency = VirtualShopConfig.DEFAULT_CURRENCY;
                         cached = new ShopVirtualProduct(this.shop, currency, cursor, e.getRawSlot(), page);
                     }
                     else {
@@ -154,7 +155,7 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
         IMenuItem free = new MenuItem(FREE_SLOT);
         int[] freeSlots = new int[this.getSize() - contentSlots.size()];
         int count = 0;
-        for (int slot = 0; slot < inventory.getSize(); slot++) {
+        for (int slot = 0; count < freeSlots.length; slot++) {
             if (contentSlots.contains(slot)) continue;
             freeSlots[count++] = slot;
         }
@@ -165,7 +166,7 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
 
             IShopVirtualProduct shopProduct = this.getCachedProduct(cursor);
             if (shopProduct == null) {
-                IShopCurrency currency = plugin.getCurrencyManager().getCurrencyFirst();
+                IShopCurrency currency = VirtualShopConfig.DEFAULT_CURRENCY;
                 shopProduct = new ShopVirtualProduct(this.shop, currency, cursor, e.getRawSlot(), page);
             }
             else {

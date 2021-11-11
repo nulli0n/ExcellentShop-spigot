@@ -50,9 +50,9 @@ public class V1_15_R1 implements ChestNMS {
         nmsWorld.addEntity(entity);
         entity.getBukkitEntity().teleport(loc);
 
-        //if (!this.addToChunk(entity)) return null;
+        //if (!this.addToChunk(su.nexmedia.engine.manager.entity)) return null;
 
-        //Reflex.invokeMethod(ENTITY_REGISTER, nmsWorld, entity);
+        //Reflex.invokeMethod(ENTITY_REGISTER, nmsWorld, su.nexmedia.engine.manager.entity);
         return (ArmorStand) entity.getBukkitEntity();
     }
 

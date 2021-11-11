@@ -95,6 +95,10 @@ public class ChestShop extends ShopModule {
         this.chests = new HashMap<>();
 
         ChestShopConfig.load(this);
+        if (ChestShopConfig.DEFAULT_CURRENCY == null) {
+            this.interruptLoad("Invalid default currency!");
+            return;
+        }
 
         String pack = ChestNMS.class.getPackage().getName();
         Class<?> nmsClazz = Reflex.getClass(pack, Version.CURRENT.name());

@@ -62,6 +62,10 @@ public class ShopUser extends AbstractUser<ExcellentShop> {
 
         String id = shopProduct.getId();
         this.getVirtualProductLimits().computeIfAbsent(id, k -> new HashMap<>()).put(tradeType, productLimit);
+
+        if (plugin.cfg().dataSaveInstant) {
+            plugin.getUserManager().save(this, true);
+        }
     }
 
     @Nullable

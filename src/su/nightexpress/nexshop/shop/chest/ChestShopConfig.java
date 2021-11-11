@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.config.api.JYML;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.StringUT;
+import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.IShopCurrency;
 import su.nightexpress.nexshop.currency.CurrencyType;
 
@@ -28,7 +29,7 @@ public class ChestShopConfig {
     public static List<String> DISPLAY_TEXT;
     public static int          DISPLAY_SLIDE_TIME;
 
-    public static String DEFAULT_CURRENCY;
+    public static IShopCurrency DEFAULT_CURRENCY;
     public static Set<String> ALLOWED_CURRENCIES;
 
     public static  double               SHOP_CREATION_COST_CREATE;
@@ -47,6 +48,7 @@ public class ChestShopConfig {
     public static Sound SOUND_REMOVAL;
 
     public static void load(@NotNull ChestShop chestShop) {
+        ExcellentShop plugin = chestShop.plugin();
         JYML cfg = chestShop.getConfig();
 
         chestShop.plugin().getConfigManager().extractFullPath(chestShop.getFullPath() + "editor");
@@ -58,7 +60,7 @@ public class ChestShopConfig {
         String path = "Shops.";
         cfg.addMissing(path + "Default_Currency", CurrencyType.VAULT);
 
-        DEFAULT_CURRENCY = cfg.getString(path + "Default_Currency", CurrencyType.VAULT);
+        DEFAULT_CURRENCY = plugin.getCurrencyManager().getCurrency(cfg.getString(path + "Default_Currency", CurrencyType.VAULT));
         ALLOWED_CURRENCIES = cfg.getStringSet(path + "Allowed_Currencies").stream()
                 .map(String::toLowerCase).collect(Collectors.toSet());
         ALLOWED_CURRENCIES.removeIf(currencyId -> {

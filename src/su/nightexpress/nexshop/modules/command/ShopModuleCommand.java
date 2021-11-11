@@ -1,16 +1,41 @@
 package su.nightexpress.nexshop.modules.command;
 
+import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.AbstractCommand;
+import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.module.AbstractModuleCommand;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.modules.ShopModule;
 
-public abstract class ShopModuleCommand<M extends ShopModule> extends AbstractCommand<ExcellentShop> {
+public class ShopModuleCommand<M extends ShopModule> extends AbstractModuleCommand<ExcellentShop, M> {
 
-    protected M module;
+    public ShopModuleCommand(@NotNull M module, @NotNull String[] aliases) {
+        super(module, aliases, null);
+    }
 
-    public ShopModuleCommand(@NotNull M module, @NotNull String[] aliases, @NotNull String permission) {
-        super(module.plugin(), aliases, permission);
-        this.module = module;
+    public ShopModuleCommand(@NotNull M module, @NotNull String[] aliases, @Nullable String permission) {
+        super(module, aliases, permission);
+    }
+
+    @Override
+    @NotNull
+    public String getUsage() {
+        return "";
+    }
+
+    @Override
+    @NotNull
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public boolean isPlayerOnly() {
+        return false;
+    }
+
+    @Override
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+
     }
 }

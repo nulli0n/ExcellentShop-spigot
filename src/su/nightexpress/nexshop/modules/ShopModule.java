@@ -4,12 +4,14 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.module.AbstractModule;
 import su.nexmedia.engine.command.list.HelpSubCommand;
+import su.nexmedia.engine.config.api.JYML;
 import su.nexmedia.engine.utils.StringUT;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IProductPrepared;
 import su.nightexpress.nexshop.api.IShop;
 import su.nightexpress.nexshop.api.event.AbstractShopPurchaseEvent;
 import su.nightexpress.nexshop.modules.command.ModuleReloadCmd;
+import su.nightexpress.nexshop.modules.command.ShopModuleCommand;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -19,6 +21,8 @@ import java.time.format.DateTimeFormatter;
 
 public abstract class ShopModule extends AbstractModule<ExcellentShop> {
 
+    protected JYML cfg;
+    protected ShopModuleCommand<ShopModule> moduleCommand;
     protected Logger logger;
 
     public ShopModule(@NotNull ExcellentShop plugin) {
@@ -27,24 +31,48 @@ public abstract class ShopModule extends AbstractModule<ExcellentShop> {
 
     @Override
     protected void onLoad() {
+        this.cfg = JYML.loadOrExtract(plugin, this.getPath() + "settings.yml");
         this.logger = new Logger();
 
-        if (this.moduleCommand != null) {
-            this.moduleCommand.addDefaultCommand(new HelpSubCommand<>(this.plugin));
-            this.moduleCommand.addChildren(new ModuleReloadCmd(this));
-        }
+        this.registerCommands();
     }
 
     @Override
     protected void onShutdown() {
+        this.unregisterCommands();
         if (this.logger != null) {
             this.logger = null;
         }
     }
 
     @NotNull
+    public JYML getConfig() {
+        return this.cfg;
+    }
+
+    @NotNull
     public Logger getLogger() {
         return this.logger;
+    }
+
+    private void registerCommands() {
+        String alias = cfg.getString("Command_Aliases");
+        if (alias == null) return;
+
+        String[] aliases = alias.split(",");
+        if (aliases.length == 0 || aliases[0].isEmpty()) return;
+
+        this.moduleCommand = new ShopModuleCommand<>(this, aliases);
+        this.moduleCommand.addDefaultCommand(new HelpSubCommand<>(this.plugin));
+        this.moduleCommand.addChildren(new ModuleReloadCmd(this));
+        this.plugin.getNewCommandManager().registerCommand(this.moduleCommand);
+    }
+
+    private void unregisterCommands() {
+        if (this.moduleCommand == null) return;
+
+        this.plugin.getNewCommandManager().unregisterCommand(this.moduleCommand);
+        this.moduleCommand = null;
     }
 
     public class Logger {

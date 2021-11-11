@@ -15,7 +15,7 @@ public class AuctionHistoryItem extends AbstractAuctionItem {
     public static final String PLACEHOLDER_BUY_DATE = "%listing_buy_date%";
 
     private final String  buyerName;
-    private       boolean isPaid;
+    private boolean isNotified;
     private final long buyDate;
     private final long deleteDate;
 
@@ -40,12 +40,12 @@ public class AuctionHistoryItem extends AbstractAuctionItem {
             @NotNull String buyerName,
             @NotNull ItemStack itemStack,
             double price,
-            boolean isPaid,
+            boolean isNotified,
             long buyDate,
             long deleteDate
     ) {
         super(id, owner, ownerName, itemStack, price);
-        this.isPaid = isPaid;
+        this.setNotified(isNotified);
         this.buyerName = buyerName;
         this.buyDate = buyDate;
         this.deleteDate = deleteDate;
@@ -69,16 +69,16 @@ public class AuctionHistoryItem extends AbstractAuctionItem {
         return buyDate;
     }
 
+    public boolean isNotified() {
+        return isNotified;
+    }
+
+    public void setNotified(boolean notified) {
+        isNotified = notified;
+    }
+
     public long getDeleteDate() {
         return this.deleteDate;
-    }
-
-    public boolean isPaid() {
-        return isPaid;
-    }
-
-    public void setPaid(boolean isPaid) {
-        this.isPaid = isPaid;
     }
 
     public boolean isValid() {
