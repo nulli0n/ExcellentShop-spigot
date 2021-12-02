@@ -1,0 +1,25 @@
+Title: '&8&m             &8&l[ &9&l拍卖行 - 确认 &8&l]&8&m              &7'
+Size: 9
+Item_Slot: 4
+
+Content:
+  accept:
+    Display:
+      default:
+        Item:
+          material: 'LIME_STAINED_GLASS_PANE'
+          name: '&a&l&n确认'
+          lore:
+            - '&c▸ &7价格： &c$%listing_price%'
+            - '&f▸ &7委托人： &f%listing_seller%'
+    Type: CONFIRMATION_ACCEPT
+    Slots: 5,6,7,8
+
+  decline:
+    Display:
+      default:
+        Item:
+          material: 'RED_STAINED_GLASS_PANE'
+          name: '&c&l&n取消'
+    Type: CONFIRMATION_DECLINE
+    Slots: 0,1,2,3

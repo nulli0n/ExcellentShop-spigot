@@ -1,0 +1,77 @@
+Title: '&8&l「 &9商店编辑器 - 选项 &8&l」'
+Size: 9
+
+Content: { }
+
+Editor:
+  shop_name:
+    Display:
+      default:
+        Item:
+          material: NAME_TAG
+          name: '&e商店名'
+          lore:
+            - '&b当前： &a%shop_name%'
+            - '&7'
+            - '&6左键： &e编辑'
+    Type: SHOP_CHANGE_NAME
+    Slots: 0
+
+  product:
+    Display:
+      default:
+        Item:
+          material: CHEST
+          name: '&e商店商品'
+          lore:
+            - '&7在这里管理出售的物品。'
+            - '&7'
+            - '&6左键： &e管理'
+    Type: SHOP_CHANGE_PRODUCTS
+    Slots: 4
+
+  admin:
+    Display:
+      default:
+        Item:
+          material: REDSTONE
+          name: '&e管理员商店'
+          lore:
+            - '&b管理员商店： &a%shop_is_admin%'
+            - '&7'
+            - '&7切换该商店为管理员商店。'
+            - '&8（管理员商店拥有无限的物品与货币）'
+            - '&7'
+            - '&6左键： &e切换'
+    Type: SHOP_CHANGE_ADMIN
+    Slots: 1
+
+  operations:
+    Display:
+      default:
+        Item:
+          material: WRITABLE_BOOK
+          name: '&e交易管理'
+          lore:
+            - '&b允许出售： &a%shop_buy_allowed%'
+            - '&b允许收购： &a%shop_sell_allowed%'
+            - '&7'
+            - '&7定义玩家是否可以在此'
+            - '&7商店购买或出售物品。'
+            - '&7'
+            - '&6左键： &e切换出售状态'
+            - '&6右键： &e切换收购状态'
+    Type: SHOP_CHANGE_TRANSACTIONS
+    Slots: 2
+
+  delete:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c删除商店'
+          lore:
+            - '&7该商店将会被永久删除。'
+            - '&c（按住 &c&lShift &c以确认）'
+    Type: SHOP_DELETE
+    Slots: 8

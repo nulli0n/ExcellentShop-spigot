@@ -1,0 +1,37 @@
+Title: 商店
+Size: 54
+
+Shop_Icon:
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+  Name: '&6%shop_name% &6商店'
+  Lore:
+    - '&6▸ &e开店人： &6%shop_owner%'
+    - '&6▸ &e位置： &6%shop_location_x%&e， &6%shop_location_y%&e， &6%shop_location_z% &e，世界： &6%shop_location_world%'
+    - '&7'
+    - '&6左键： &e传送'
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l下一页 →'
+    Slots: 53
+    Type: PAGE_NEXT
+  page_previous:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l← 上一页'
+    Slots: 45
+    Type: PAGE_PREVIOUS
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l退出 &4&l✕'
+    Slots: 49
+    Type: CLOSE

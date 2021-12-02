@@ -1,0 +1,116 @@
+Title: '&8&m              &8&l[ &9&l拍卖行 &8&l]&8&m              &7'
+Size: 54
+
+Animation:
+  Tick: 40
+
+Items:
+  Name: '&f%listing_item_name%'
+  Lore:
+    - '%listing_item_lore%'
+    - '&7'
+    - '&c▸ &7价格： &c$%listing_price%'
+    - '&f▸ &7委托人： &f%listing_seller%'
+    - '&f▸ &7期限： &f%listing_expires_in%'
+    - '&7'
+    - '&6Shift+右键： &e从列表中移除'
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+
+Special:
+  expire:
+    Display:
+      default:
+        Item:
+          material: 'HOPPER'
+          name: '&b过期商品'
+          lore:
+            - '&7您可在此浏览所有关于'
+            - '&7您已过期的拍卖商品。'
+    Type: AUCTION_EXPIRED
+    Slots: 47
+
+  sold:
+    Display:
+      default:
+        Item:
+          material: 'EMERALD'
+          name: '&a售出商品'
+          lore:
+            - '&7浏览您的拍卖历史。'
+    Type: AUCTION_HISTORY
+    Slots: 51
+
+  category:
+    Display:
+      default:
+        Item:
+          material: 'COMPASS'
+          name: '&e商品分类'
+          lore:
+            - '&7目前仅显示'
+            - '&7有关 &6%category-name% &7的商品。'
+            - '&7'
+            - '&6&l单击： 切换'
+    Type: AUCTION_CATEGORY
+    Slots: 46
+
+  sort:
+    Display:
+      default:
+        Item:
+          material: 'NAME_TAG'
+          name: '&a商品排序'
+          lore:
+            - '&7当前商品以'
+            - '&6%sort-type%序 &7显示。'
+            - '&7'
+            - '&6&l单击： 切换'
+    Type: AUCTION_SORTING
+    Slots: 52
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l下一页 →'
+    Slots: 53
+    Type: PAGE_NEXT
+
+  page_previous:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l← 上一页'
+    Slots: 45
+    Type: PAGE_PREVIOUS
+
+  info:
+    Display:
+      default:
+        Item:
+          material: 'BOOK'
+          name: '&6信息'
+          lore:
+            - '&6&l竞拍商品：'
+            - '&6▸ &7手持商品并输入'
+            - '  &6/auc sell <价格>'
+            - '&7'
+            - '&6&l下架商品：'
+            - '&6▸ &7当你将商品上架到拍卖行，'
+            - '  &7会有 &6%expire% 的拍卖时间。'
+            - '  &7若无人购买则过期后'
+            - '  &7会从拍卖行下架。'
+            - '&7'
+            - '&6&l商品价格：'
+            - '&6▸ &7你需要额外支付'
+            - '&7  &6%tax%% &7的商品税'
+            - '&7  才能将其上架到拍卖行。'
+            - '&7'
+            - '&6&l取消竞拍：'
+            - '&6▸ &7单击 Shift+左键 以'
+            - '&7  取消您已开始竞拍的物品。'
+    Type: NONE
+    Slots: 49

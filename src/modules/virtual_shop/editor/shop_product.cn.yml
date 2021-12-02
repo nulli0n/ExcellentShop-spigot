@@ -1,0 +1,224 @@
+Title: '&8&l「 &9编辑器 - 商店商品 &8&l」'
+Size: 27
+
+Content:
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l返回 &4&l✕'
+    Slots: 22
+    Type: RETURN
+
+Editor:
+  preview:
+    Display:
+      default:
+        Item:
+          material: ITEM_FRAME
+          name: '&e商品图标'
+          lore:
+            - '&b当前图标： &a%product_preview_name%'
+            - '&7'
+            - '&7该图标将会在'
+            - '&7商店中显示。'
+            - '&7'
+            - '&6放置物品： &e替换'
+            - '&6鼠标中键： &e拾取物品'
+    Type: PRODUCT_CHANGE_PREVIEW
+    Slots: 0
+
+  item:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&e销售物品'
+          lore:
+            - '&b当前物品： &a%product_item_name%'
+            - '&7'
+            - '&7该物品为实际销售的物品。'
+            - '&7玩家可单击购买或出售。'
+            - '&7'
+            - '&a您也可以下架/删除该商品。'
+            - '&7'
+            - '&6放置物品： &e替换'
+            - '&6鼠标中键： &e拾取物品'
+            - '&6右键： &e禁用'
+    Type: PRODUCT_CHANGE_ITEM
+    Slots: 1
+
+  commands:
+    Display:
+      default:
+        Item:
+          material: COMMAND_BLOCK
+          name: '&e命令'
+          lore:
+            - '&b当玩家交易成功后'
+            - '&b将执行的命令：'
+            - '&a%product_commands%'
+            - '&7'
+            - '&6左键： &e添加命令'
+            - '&6右键： &e清空列表'
+    Type: PRODUCT_CHANGE_COMMANDS
+    Slots: 2
+
+  currency:
+    Display:
+      default:
+        Item:
+          material: EMERALD
+          name: '&e货币类型'
+          lore:
+            - '&b当前货币： &a%currency_id%'
+            - '&7'
+            - '&7为此商品选择销售货币。'
+            - '&7'
+            - '&6左键： &e更换货币'
+    Type: PRODUCT_CHANGE_CURRENCY
+    Slots: 8
+
+  item_meta:
+    Display:
+      '0':
+        Item:
+          material: GRAY_DYE
+          name: '&e物品元数据 &7（启用）'
+          lore:
+            - '&7玩家可出售带有&8不同&7元数据'
+            - '&8（如名称、附魔等信息）&7的商品。'
+            - '&7'
+            - '&6左键： &e切换'
+      '1':
+        Item:
+          material: LIME_DYE
+          name: '&e物品元数据 &a（启用）'
+          lore:
+            - '&7当玩家想把商品出售给商店时，'
+            - '&7商品的元数据&8（如名称、附魔等信息）'
+            - '&7必须与商店设定的元数据相同。'
+            - '&7'
+            - '&6左键： &e切换'
+    Type: PRODUCT_CHANGE_ITEM_META
+    Slots: 3
+
+  price_buy:
+    Display:
+      default:
+        Item:
+          material: NAME_TAG
+          name: '&e价格：卖出'
+          lore:
+            - '&b最低价格： &a%product_price_buy_min%'
+            - '&b最高价格： &a%product_price_buy_max%'
+            - '&7'
+            - '&7玩家需要为此商品'
+            - '&7支付多少的价格？'
+            - '&7'
+            - '&8（最高价格只有使用到'
+            - '&8随机价格时才有用。）'
+            - '&7'
+            - '&6左键： &e编辑最低价格'
+            - '&6右键： &e编辑最高价格'
+            - '&6鼠标中键： &e禁用'
+    Type: PRODUCT_CHANGE_PRICE_BUY
+    Slots: 6
+
+  price_sell:
+    Display:
+      default:
+        Item:
+          material: NAME_TAG
+          name: '&e价格： 收购'
+          lore:
+            - '&b最低价格： &a%product_price_sell_min%'
+            - '&b最高价格： &a%product_price_sell_max%'
+            - '&7'
+            - '&7您需要为此待收购的商品'
+            - '&7支付多少的买价？'
+            - '&7'
+            - '&8（最高价格只有使用到'
+            - '&8随机价格时才有用。）'
+            - '&7'
+            - '&6左键： &e编辑最低价格'
+            - '&6右键： &e编辑最高价格'
+            - '&6鼠标中键： &e禁用'
+    Type: PRODUCT_CHANGE_PRICE_SELL
+    Slots: 7
+
+  price_discount:
+    Display:
+      default:
+        Item:
+          material: GOLD_NUGGET
+          name: '&e允许折扣'
+          lore:
+            - '&b是否允许： &a%product_discount_allowed%'
+            - '&7'
+            - '&7当启用后，产品购买价格'
+            - '&7将受到商店折扣的影响。'
+            - '&7'
+            - '&6左键： &e切换'
+    Type: PRODUCT_CHANGE_DISCOUNT
+    Slots: 4
+
+  price_rnd:
+    Display:
+      default:
+        Item:
+          material: COMPARATOR
+          name: '&e随机价格'
+          lore:
+            - '&b是否启用： &a%product_price_random_enabled%'
+            - '&b星期：'
+            - '&a%product_price_random_days%'
+            - '&b时间：'
+            - '&a%product_price_random_times%'
+            - '&7'
+            - '&7启用此功能后，产品价格将在'
+            - '&7指定的时间日期内随机生成'
+            - '&7最高价与最低价之间的价格。'
+            - '&7'
+            - '&7若禁用此功能，或没有设置时间'
+            - '&7则仅使用最低价作为商品价格。'
+            - '&7'
+            - '&6左键： &e编辑星期'
+            - '&6右键： &e编辑时间'
+            - '&6Shift+左键： &e重置星期'
+            - '&6Shift+右键： &e重置时间'
+            - '&6鼠标中键： &e切换开关'
+    Type: PRODUCT_CHANGE_PRICE_RND
+    Slots: 5
+
+  stock_buy:
+    Display:
+      default:
+        Item:
+          material: HOPPER
+          name: '&e出售 & 收购限制'
+          lore:
+            - '&b最大出售数量： &a%product_limit_buy_amount%'
+            - '&b最大收购数量： &a%product_limit_sell_amount%'
+            - '&b出售冷却： &a%product_limit_buy_cooldown%'
+            - '&b收购冷却： &a%product_limit_sell_cooldown%'
+            - '&7'
+            - '&7定义了每次可出售/收购产品的'
+            - '&7最小和最大数量。'
+            - '&7'
+            - '&7当玩家达到最大数量时'
+            - '&7他将无法购买/出售任何商品'
+            - '&7直到冷却时间结束。'
+            - '&7'
+            - '&7当冷却时间为负值时'
+            - '&7则商品将永不过期'
+            - '&7使产品的购买时间是一次性的。'
+            - '&7'
+            - '&6左键： &e编辑出售数量'
+            - '&6右键： &e编辑出售冷却'
+            - '&6Shift+左键： &e编辑收数量'
+            - '&6Shift+右键： &e编辑收购冷却'
+            - '&6鼠标中键： &e禁用'
+    Type: PRODUCT_CHANGE_LIMIT
+    Slots: 13

@@ -1,0 +1,111 @@
+Enabled: true
+Title: '&8&m              &8&l[ &9&l商店&8&l ]&8&m             '
+Size: 27
+
+Content: {}
+
+Shops:
+  blocks:
+    Display:
+      default:
+        Item:
+          material: SPRUCE_LOG
+          name: '&2&l建筑方块'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 11
+
+  brewing:
+    Display:
+      default:
+        Item:
+          material: BREWING_STAND
+          name: '&6&l酿造'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 12
+
+  food:
+    Display:
+      default:
+        Item:
+          material: APPLE
+          name: '&c&l食物'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 13
+
+  loot:
+    Display:
+      default:
+        Item:
+          material: SLIME_BALL
+          name: '&a&l怪物战利品'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 14
+
+  tools:
+    Display:
+      default:
+        Item:
+          material: DIAMOND_SHOVEL
+          name: '&b&l工具'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 15
+
+  weapons:
+    Display:
+      default:
+        Item:
+          material: GOLDEN_SWORD
+          name: '&e&lWeapon & Armor 武器与盔甲'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 16
+
+  wool:
+    Display:
+      default:
+        Item:
+          material: WHITE_WOOL
+          name: '&f&l羊毛'
+          lore:
+            - '&6需要权限： &e%shop_permission_required%'
+            - '&7'
+            - '&e&l折扣'
+            - '&6折扣状态： &e%shop_discount_available%'
+            - '&6剩余时间： &e%shop_discount_timeleft%'
+            - '&6折扣力度： &e%shop_discount_amount%%'
+    Slots: 10

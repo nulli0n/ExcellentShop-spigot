@@ -1,0 +1,53 @@
+Title: '&8&l「 &9编辑器 - 商店折扣 &8&l」'
+Size: 54
+
+Object:
+  Name: '&e商店折扣'
+  Lore:
+    - '&b折扣力度： &a%discount_amount_raw%%'
+    - '&b星期：'
+    - '&a%discount_days%'
+    - '&b时间：'
+    - '&a%discount_times%'
+    - '&7'
+    - '&6左键： &e编辑折扣'
+    - '&6Shift+左键： &e编辑星期'
+    - '&6Shift+右键： &e编辑时间'
+    - '&6鼠标中键： &e删除'
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l下一页 →'
+    Slots: 44
+    Type: PAGE_NEXT
+  page_previous:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l← 上一页'
+    Slots: 36
+    Type: PAGE_PREVIOUS
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l返回 &4&l✕'
+    Slots: 39
+    Type: RETURN
+
+Editor:
+  add:
+    Display:
+      default:
+        Item:
+          material: ANVIL
+          name: '&a&l新折扣 &2&l+'
+    Type: DISCOUNT_CREATE
+    Slots: 41

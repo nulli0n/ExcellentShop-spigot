@@ -1,0 +1,17 @@
+Title: '&8&l「 &9编辑器 - 商店商品列表 &8&l」'
+Size: 54
+
+Free_Slot:
+  material: LIME_STAINED_GLASS_PANE
+  name: '&a&l空货架'
+  lore:
+    - '&b放置物品以上架'
+
+Product:
+  Name: '&e%product_preview_name%'
+  Lore:
+    - '&b卖价： &a%product_price_buy_min% - %product_price_buy_max%'
+    - '&b收价： &a%product_price_sell_min% - %product_price_sell_max%'
+    - '&7'
+    - '&6Shift+左键： &e编辑'
+    - '&6Shift+右键： &e删除'
