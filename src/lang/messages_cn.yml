@@ -20,8 +20,8 @@ Shop:
       - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l这商品太贵了！ '
       - ' &7我还差： &c%price%&7!'
       NotEnoughItems:
-      - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l我身上没带够
-        物品！ '
+      - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l我身上没带够物品！
+        '
       - ' &7我还差 &cx%amount% &7个 &c%item%&7!'
 Auction:
   Command:
@@ -41,8 +41,8 @@ Auction:
       Success:
         Info: '&7您以 &a$%price%&7 的底价拍出了 &ax%amount% &7个
           &a%item%&7。'
-        Tax: '&7您为此拍卖支付了 &c%tax-percent%% &4（%tax-amount%$） &7的
-          拍卖税。'
+        Tax: '&7您为此拍卖支付了 &c%tax-percent%% &4（%tax-amount%$）
+          &7的拍卖税。'
         Announce: '&a%player% &7在拍卖所以 &e$%price% &7的底价拍出了 &ax%amount% &7个
           &a%item%。'
       Error:
@@ -93,8 +93,8 @@ Virtual:
         - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l成功！ '
         - ' &7您以 &a%price% &7的价格售出了 &ax%amount% &7个 &a%item%&7！'
         Buy:
-        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l成功
-         购买！ '
+        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l成功购买！
+         '
         - ' &7您以 &a%price%&7 的价格购入了 &ax%amount% &7个 &a%item%&7！'
     Editor:
       Enter:
@@ -131,8 +131,8 @@ Chest:
     Creation:
       Info:
         Done:
-        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l商店
-         已创建！'
+        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l商店已创建！
+         '
         - '&7使用 &aShift+单击 &7来进入 &a编辑模式&7。'
       Error:
         AlreadyShop: 该箱子已经是商店了！
@@ -144,8 +144,8 @@ Chest:
         NotEnoughFunds: 您没有足够的金额！
     Removal:
       Info:
-        Done: '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l商店
-         已移除。'
+        Done: '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l商店已移除。
+         '
       Error:
         NotAShop: 该方块不是一个商店！
     Product:
@@ -153,20 +153,20 @@ Chest:
         BadItem: 该物品无法交易！
     ShopList:
       Info:
-        Switch: 服务器商店列表： %state%&7.
+        Switch: 服务器商店列表： %state%&7。
     Trade:
       Buy:
         Info:
           User: '{message: ~prefix: false;}&e您在 &6%shop_owner%&e 开的 &6%shop_name%&e
             商店中 以 &6%price%&e 的价格购买了 &6x%amount% &e个 &6%item%&e。'
-          Owner: '{message: ~prefix: false;}&6%player% &e刚从您开的 &6%shop_name%&e 商店
-            以 &6%price% &e的价格购买了 &6x%amount% &e个 &6%item%&e。'
+          Owner: '{message: ~prefix: false;}&6%player% &e刚从您开的 &6%shop_name%&e 商店以
+            &6%price% &e的价格购买了 &6x%amount% &e个 &6%item%&e。'
       Sell:
         Info:
           User: '{message: ~prefix: false;}&e您在 &6%shop_owner%&e 开的 &6%shop_name%&e
             商店中 以 &6%price%&e 的价格出售了 &6x%amount% &e个 &6%item%&e。'
-          Owner: '{message: ~prefix: false;}&6%player% &e刚从您开的 &6%shop_name%&e 商店
-            以 &6%price% &e的价格出售了 &6x%amount% &e个 &6%item%&e。'
+          Owner: '{message: ~prefix: false;}&6%player% &e刚从您开的 &6%shop_name%&e 商店以
+            &6%price% &e的价格出售了 &6x%amount% &e个 &6%item%&e。'
     Editor:
       Tip:
         Name: '&7请输入新名称...'
