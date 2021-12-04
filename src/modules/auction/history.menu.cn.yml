@@ -1,0 +1,40 @@
+Title: '&8&m     &8&l[ &9&l拍卖行 - 历史记录 &8&l]&8&m     &7'
+Size: 54
+
+Items:
+  Name: '&f%listing_item_name%'
+  Lore:
+    - '%listing_item_lore%'
+    - '&7'
+    - '&c▸ &7出价： &c$%listing_price%'
+    - '&f▸ &7买受人： &f%listing_buyer%'
+    - '&f▸ &7日期： &f%listing_buy_date%'
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l下一页 →'
+    Slots: 53
+    Type: PAGE_NEXT
+
+  page_previous:
+    Display:
+      default:
+        Item:
+          material: ENDER_EYE
+          name: '&e&l← 上一页'
+    Slots: 45
+    Type: PAGE_PREVIOUS
+
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l退出 &4&l✕'
+    Slots: 49
+    Type: RETURN

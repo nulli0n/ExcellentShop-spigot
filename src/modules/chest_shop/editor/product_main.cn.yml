@@ -1,0 +1,100 @@
+Title: '&8&l「 &9商店编辑器 - 商品 &8&l」'
+Size: 27
+
+Content:
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l返回 &4&l✕'
+    Slots: 22
+    Type: RETURN
+
+Editor:
+  currency:
+    Display:
+      default:
+        Item:
+          material: EMERALD
+          name: '&e货币类型'
+          lore:
+            - '&b当前货币： &a%currency_id% (%currency_name%)'
+            - '&7'
+            - '&7为此商品选择销售货币。'
+            - '&7'
+            - '&6左键： &e更换货币'
+    Type: PRODUCT_CHANGE_CURRENCY
+    Slots: 2
+
+  price_buy:
+    Display:
+      default:
+        Item:
+          material: NAME_TAG
+          name: '&e价格： 卖出'
+          lore:
+            - '&b最低价格： &a%product_price_buy_min%'
+            - '&b最高价格： &a%product_price_buy_max%'
+            - '&7'
+            - '&7玩家需要为此商品'
+            - '&7支付多少的价格？'
+            - '&7'
+            - '&8（最高价格只有使用到'
+            - '&8随机价格时才能生效。）'
+            - '&7'
+            - '&6左键： &e编辑最低价格'
+            - '&6右键： &e编辑最高价格'
+            - '&6鼠标中键： &e禁用'
+    Type: PRODUCT_CHANGE_PRICE_BUY
+    Slots: 0
+
+  price_sell:
+    Display:
+      default:
+        Item:
+          material: NAME_TAG
+          name: '&e价格： 收购'
+          lore:
+            - '&b最低价格： &a%product_price_sell_min%'
+            - '&b最高价格： &a%product_price_sell_max%'
+            - '&7'
+            - '&7您需要为此待收购的商品'
+            - '&7支付多少的买价？'
+            - '&7'
+            - '&8（最高价格只有使用到'
+            - '&8随机价格时才能生效。）'
+            - '&7'
+            - '&6左键： &e编辑最低价格'
+            - '&6右键： &e编辑最高价格'
+            - '&6鼠标中键： &e禁用'
+    Type: PRODUCT_CHANGE_PRICE_SELL
+    Slots: 1
+
+  price_rnd:
+    Display:
+      default:
+        Item:
+          material: COMPARATOR
+          name: '&e随机价格'
+          lore:
+            - '&b是否启用： &a%product_price_random_enabled%'
+            - '&b星期：'
+            - '&a%product_price_random_days%'
+            - '&b时间：'
+            - '&a%product_price_random_times%'
+            - '&7'
+            - '&7启用此功能后，产品价格将在'
+            - '&7指定的时间日期内随机生成'
+            - '&7最高价格与最低价格之间的价格。'
+            - '&7'
+            - '&7若禁用此功能，或没有设置时间'
+            - '&7则仅使用最低价格作为商品价格。'
+            - '&7'
+            - '&6左键： &e编辑星期'
+            - '&6右键： &e编辑时间'
+            - '&6Shift+左键： &e重置星期'
+            - '&6Shift+右键： &e重置时间'
+            - '&6鼠标中键： &e切换开关'
+    Type: PRODUCT_CHANGE_PRICE_RND
+    Slots: 3

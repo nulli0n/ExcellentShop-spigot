@@ -1,0 +1,133 @@
+Title: '&0购物车'
+Size: 54
+
+Product:
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35
+
+Content:
+  accept:
+    Display:
+      default:
+        Item:
+          material: EMERALD
+          name: '&a&l接受'
+          lore:
+            - '&a已选数量： &f%amount% &7（&f约 %amount_stacks% 组&7）'
+            - '&e合计价格： &6%price%'
+            - '&e余额： &6%balance%'
+    Slots: 53
+    Type: CONFIRMATION_ACCEPT
+  cancel:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l取消'
+    Slots: 45
+    Type: CONFIRMATION_DECLINE
+  pane1:
+    Display:
+      default:
+        Item:
+          material: BLACK_STAINED_GLASS_PANE
+    Slots: 46,47,48,49,50,51,52
+
+Amount_Buttons:
+  add_1:
+    Display:
+      default:
+        Item:
+          material: LIME_STAINED_GLASS_PANE
+          name: '&a[添加] &2+1'
+          amount: 1
+    Product_Amount: 1
+    Slots: 42
+    Type: ADD
+
+  add_16:
+    Display:
+      default:
+        Item:
+          material: LIME_STAINED_GLASS_PANE
+          name: '&a[添加] &2+16'
+          amount: 16
+    Product_Amount: 16
+    Slots: 43
+    Type: ADD
+
+  add_32:
+    Display:
+      default:
+        Item:
+          material: LIME_STAINED_GLASS_PANE
+          name: '&a[添加] &2+32'
+          amount: 32
+    Product_Amount: 32
+    Slots: 44
+    Type: ADD
+
+  take_1:
+    Display:
+      default:
+        Item:
+          material: RED_STAINED_GLASS_PANE
+          name: '&c[减少] &4-1'
+          amount: 1
+    Product_Amount: -1
+    Slots: 38
+    Type: TAKE
+
+  take_16:
+    Display:
+      default:
+        Item:
+          material: RED_STAINED_GLASS_PANE
+          name: '&c[减少] &4-16'
+          amount: 16
+    Product_Amount: -16
+    Slots: 37
+    Type: TAKE
+
+  take_32:
+    Display:
+      default:
+        Item:
+          material: RED_STAINED_GLASS_PANE
+          name: '&c[减少] &4-32'
+          amount: 32
+    Product_Amount: -32
+    Slots: 36
+    Type: TAKE
+
+  set_1:
+    Display:
+      default:
+        Item:
+          material: CYAN_STAINED_GLASS_PANE
+          name: '&31 &b[个]'
+          amount: 1
+    Product_Amount: 1
+    Slots: 39
+    Type: SET
+
+  set_32:
+    Display:
+      default:
+        Item:
+          material: CYAN_STAINED_GLASS_PANE
+          name: '&332 &b[个]'
+          amount: 32
+    Product_Amount: 32
+    Slots: 40
+    Type: SET
+
+  set_64:
+    Display:
+      default:
+        Item:
+          material: CYAN_STAINED_GLASS_PANE
+          name: '&364 &b[个]'
+          amount: 64
+    Product_Amount: 64
+    Slots: 41
+    Type: SET

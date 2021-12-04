@@ -1,0 +1,174 @@
+Title: '&8&l「 &9编辑器 - 虚拟商店 &8&l」'
+Size: 54
+
+Content:
+  return:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          name: '&c&l返回 &4&l✕'
+    Slots: 49
+    Type: RETURN
+
+Editor:
+  icon:
+    Display:
+      default:
+        Item:
+          material: STONE
+          name: '&e商店图标'
+          lore:
+            - '&b当前： &a%shop_icon_name%'
+            - '&7'
+            - '&7个人商店的图标。'
+            - '&7该图标仅在编辑器中显示。'
+            - '&7'
+            - '&6放置物品： &e替换'
+    Type: SHOP_CHANGE_ICON
+    Slots: 4
+
+  permission:
+    Display:
+      '0':
+        Item:
+          material: GUNPOWDER
+          name: '&e权限 &7（禁用）'
+          lore:
+            - '&b需要权限： &a%shop_permission_required%'
+            - '&b节点： &a%shop_permission_node%'
+            - '&7'
+            - '&7权限已禁用。所有玩家都'
+            - '&7可以访问和使用该商店。'
+            - '&7'
+            - '&6左键： &e切换'
+      '1':
+        Item:
+          material: REDSTONE
+          name: '&e权限 &a（启用）'
+          lore:
+            - '&b需要权限： &a%shop_permission_required%'
+            - '&b节点： &a%shop_permission_node%'
+            - '&7'
+            - '&7玩家必须拥有上述权限'
+            - '&7才能访问和使用该商店。'
+            - '&7'
+            - '&6左键： &e切换'
+    Type: SHOP_CHANGE_PERMISSION
+    Slots: 13
+
+  discounts:
+    Display:
+      default:
+        Item:
+          material: GOLD_NUGGET
+          name: '&e折扣管理器'
+          lore:
+            - '&7管理商品折扣'
+            - '&7'
+            - '&6左键： &e进入'
+    Type: SHOP_CHANGE_DISCOUNTS
+    Slots: 22
+
+  pages:
+    Display:
+      default:
+        Item:
+          material: BOOK
+          name: '&e商店页数'
+          lore:
+            - '&b页数： &a%shop_pages%'
+            - '&7'
+            - '&7编辑商店页数。'
+            - '&a（不要忘了在外观添加一个翻页按钮）'
+            - '&7'
+            - '&6左键： &e+1 页'
+            - '&6右键： &e-1 页'
+    Type: SHOP_CHANGE_PAGES
+    Slots: 11
+
+  operations:
+    Display:
+      default:
+        Item:
+          material: WRITABLE_BOOK
+          name: '&e交易管理'
+          lore:
+            - '&b出售： &a%shop_buy_allowed%'
+            - '&b收购： &a%shop_sell_allowed%'
+            - '&7'
+            - '&7定义玩家是否可以在此'
+            - '&7商店购买和出售商品。'
+            - '&7'
+            - '&6左键： &e切换出售'
+            - '&6右键： &e切换收购'
+    Type: SHOP_CHANGE_TRANSACTIONS
+    Slots: 15
+
+  products:
+    Display:
+      default:
+        Item:
+          material: CHEST
+          name: '&e商品管理器'
+          lore:
+            - '&7在此管理商店的商品。'
+            - '&7'
+            - '&6左键： &e进入'
+    Type: SHOP_CHANGE_PRODUCTS
+    Slots: 23
+
+  view_design:
+    Display:
+      default:
+        Item:
+          material: PAINTING
+          name: '&e商店外观设计'
+          lore:
+            - '&b标题： &a%shop_view_title%'
+            - '&b大小： &a%shop_view_size%'
+            - '&7'
+            - '&7您可在此更改商店的外观。'
+            - '&7直接将欲布局的物品'
+            - '&7摆放到编辑器里即可。'
+            - '&8（单击 ESC 可保存并退出）'
+            - '&7'
+            - '&6左键： &e编辑外观'
+            - '&6Shift+左键: &e编辑标题'
+            - '&6Shift+右键: &e编辑大小'
+    Type: SHOP_CHANGE_VIEW_DESIGN
+    Slots: 21
+
+  citizens:
+    Display:
+      default:
+        Item:
+          material: PLAYER_HEAD
+          name: '&e附身 NPC &c[Citizens 插件]'
+          lore:
+            - '&b选定的 NPC 将作为'
+            - '&b进入本商店的另一途径：'
+            - '&a%shop_npc_ids%'
+            - '&7'
+            - '&c（需要安装 &c&l&oCitizens&c 插件）'
+            - '&7'
+            - '&6左键： &e添加 NPC'
+            - '&6右键： &e清空列表'
+    Type: SHOP_CHANGE_CITIZENS_ID
+    Slots: 8
+
+  delete:
+    Display:
+      default:
+        Item:
+          material: CAULDRON
+          name: '&c删除商店'
+          lore:
+            - '&7该商店将会被永久删除。'
+            - '&c（按住 &c&lShift &c以确认）'
+    Type: SHOP_DELETE
+    Slots: 53
+
+
+
+
