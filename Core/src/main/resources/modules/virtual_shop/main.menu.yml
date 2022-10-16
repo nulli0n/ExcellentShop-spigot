@@ -1,0 +1,111 @@
+Enabled: true
+Title: '&8&m              &8&l[ &9&lShop&8&l ]&8&m             '
+Size: 27
+
+Content: {}
+
+Shops:
+  blocks:
+    Display:
+      default:
+        Item:
+          Material: SPRUCE_LOG
+          Name: '&2&lBuilding Blocks'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 11
+
+  brewing:
+    Display:
+      default:
+        Item:
+          Material: BREWING_STAND
+          Name: '&6&lBrewing'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 12
+
+  food:
+    Display:
+      default:
+        Item:
+          Material: APPLE
+          Name: '&c&lFood'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 13
+
+  loot:
+    Display:
+      default:
+        Item:
+          Material: SLIME_BALL
+          Name: '&a&lMob Loot'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 14
+
+  tools:
+    Display:
+      default:
+        Item:
+          Material: DIAMOND_SHOVEL
+          Name: '&b&lTools'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 15
+
+  weapons:
+    Display:
+      default:
+        Item:
+          Material: GOLDEN_SWORD
+          Name: '&e&lWeapon & Armor'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 16
+
+  wool:
+    Display:
+      default:
+        Item:
+          Material: WHITE_WOOL
+          Name: '&f&lWool'
+          Lore:
+            - '&6Need Permission: &e%shop_permission_required%'
+            - '&7'
+            - '&e&lDiscount'
+            - '&6Available: &e%shop_discount_available%'
+            - '&6Timeleft: &e%shop_discount_timeleft%'
+            - '&6Discount: &e%shop_discount_amount%%'
+    Slots: 10

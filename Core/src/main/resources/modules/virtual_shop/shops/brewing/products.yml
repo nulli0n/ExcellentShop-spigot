@@ -1,0 +1,404 @@
+List:
+  a7046191-e09a-414a-9cce-e69107196292:
+    Shop_View:
+      Preview: k00010004qb40096qqbeclhn4ob6egt66obldhi74rre0400agrfeln78080
+      Slot: 7
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: k00010004qb40096qqbeclhn4ob6egt66obldhi74rre0400agrfeln78080
+      Commands: []
+  2670c136-e8ca-4ab8-b65e-35616e834419:
+    Shop_View:
+      Preview: 1800020009km800kdlkmspb3e9gmct1qctk62srkbtq6aobi0400agrfeln78080
+      Slot: 6
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: 1800020009km800kdlkmspb3e9gmct1qctk62srkbtq6aobi0400agrfeln78080
+      Commands: []
+  ce2225af-c76a-4765-a610-b2f12c1dd656:
+    Shop_View:
+      Preview: k00010004qb400bmqqbeclhn4ob6egt68sj1ctnmsnr2e9im2t380400agrfeln78080
+      Slot: 2
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: k00010004qb400bmqqbeclhn4ob6egt68sj1ctnmsnr2e9im2t380400agrfeln78080
+      Commands: []
+  b0bff1a9-4fee-44f1-8ce2-5776205857eb:
+    Shop_View:
+      Preview: a0000g002d5i006jdd5n6aoric5j78ejgd1gmst3fdlfmqpbdc9p62rj50400agrfeln78080
+      Slot: 12
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: a0000g002d5i006jdd5n6aoric5j78ejgd1gmst3fdlfmqpbdc9p62rj50400agrfeln78080
+      Commands: []
+  ca26635c-465d-496e-a70f-cfe800d67fbf:
+    Shop_View:
+      Preview: a0000g002d5i005bdd5n6aoric5j78ejic5h64qbkbtj6urrk0400agrfeln78080
+      Slot: 10
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: a0000g002d5i005bdd5n6aoric5j78ejic5h64qbkbtj6urrk0400agrfeln78080
+      Commands: []
+  74101d2c-2835-44fb-bcde-18cbfb82e4fe:
+    Shop_View:
+      Preview: 1800020009km800udlkmspb3e9gmct1qcpin4rb5dpq6ap2vedo6ip35e9fmaub50400agrfeln78080
+      Slot: 3
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: 1800020009km800udlkmspb3e9gmct1qcpin4rb5dpq6ap2vedo6ip35e9fmaub50400agrfeln78080
+      Commands: []
+  79db289d-2845-4812-878d-c8235f56340e:
+    Shop_View:
+      Preview: 2g0004000j9cg020rb9dpim6sj1cpq3kprcd5pn8pbid5n6enrdclm6urivedm6ior50400agrfeln78080
+      Slot: 9
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: 2g0004000j9cg020rb9dpim6sj1cpq3kprcd5pn8pbid5n6enrdclm6urivedm6ior50400agrfeln78080
+      Commands: []
+  f10233d3-fe17-411b-8cae-15a470890ba3:
+    Shop_View:
+      Preview: k00010004qb400bmqqbeclhn4ob6egt6errcchimsnr3c5p74rrk0400agrfeln78080
+      Slot: 11
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: k00010004qb400bmqqbeclhn4ob6egt6errcchimsnr3c5p74rrk0400agrfeln78080
+      Commands: []
+  beebe38d-0112-42bc-9dac-ccb2fb5021d6:
+    Shop_View:
+      Preview: 2g0004000j9cg01crb9dpim6sj1cpq3kprcc5pn6nr2dtq78r350400agrfeln78080
+      Slot: 0
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: 2g0004000j9cg01crb9dpim6sj1cpq3kprcc5pn6nr2dtq78r350400agrfeln78080
+      Commands: []
+  483805ac-da68-4a9c-b867-6d3fd1159b4f:
+    Shop_View:
+      Preview: a0000g002d5i005bdd5n6aoric5j78ejdc5jmqoavcdp6aobd0400agrfeln78080
+      Slot: 5
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: a0000g002d5i005bdd5n6aoric5j78ejdc5jmqoavcdp6aobd0400agrfeln78080
+      Commands: []
+  47928e56-6279-43a1-8816-739944215d43:
+    Shop_View:
+      Preview: 5000080016ip0021mmirj5cdp62pjk79o6ut39dtn0k003ehgme2000p86ut39dtn003rdd5n6aoric5j78ejnc5q6asg00400agrfeln78080
+      Slot: 1
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: 5000080016ip0021mmirj5cdp62pjk79o6ut39dtn0k003ehgme2000p86ut39dtn003rdd5n6aoric5j78ejnc5q6asg00400agrfeln78080
+      Commands: []
+  c8547aa0-ad3f-490e-b469-1de8c97580fc:
+    Shop_View:
+      Preview: 2g0004000j9cg01crb9dpim6sj1cpq3kojcc5t6anrgdtrm8pbi0400agrfeln78080
+      Slot: 4
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: 2g0004000j9cg01crb9dpim6sj1cpq3kojcc5t6anrgdtrm8pbi0400agrfeln78080
+      Commands: []
+  3a1cd503-8179-4690-9cb5-0578c2ad567f:
+    Shop_View:
+      Preview: k00010004qb400bmqqbeclhn4ob6egt64sj5etkmspqvedq62rj40400agrfeln78080
+      Slot: 8
+      Page: 1
+    Discount:
+      Allowed: true
+    Limit:
+      BUY:
+        Amount: -1
+        Cooldown: 0
+      SELL:
+        Amount: -1
+        Cooldown: 0
+    Purchase:
+      Currency: vault
+      Item_Meta_Enabled: true
+      BUY:
+        Price_Min: 50.0
+        Price_Max: 50.0
+      SELL:
+        Price_Min: 20.0
+        Price_Max: 20.0
+      Randomizer:
+        Enabled: false
+        Times:
+          Days: ''
+          Times: []
+    Reward:
+      Item: k00010004qb400bmqqbeclhn4ob6egt64sj5etkmspqvedq62rj40400agrfeln78080
+      Commands: []

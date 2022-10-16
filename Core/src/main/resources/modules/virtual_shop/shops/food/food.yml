@@ -1,0 +1,15 @@
+Pages: 1
+Permission_Required: false
+Transaction_Allowed:
+  SELL: true
+  BUY: true
+Citizens:
+  Attached_NPC: ''
+Icon:
+  material: APPLE
+  amount: 1
+  durability: 0
+  name: '&c&lFood'
+  enchanted: false
+  item-flags: []
+  unbreakable: false

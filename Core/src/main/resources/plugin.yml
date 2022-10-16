@@ -1,0 +1,137 @@
+name: ExcellentShop
+main: su.nightexpress.nexshop.ExcellentShop
+version: '${project.version}'
+description: Advanced 3 in 1 shop plugin with many features!
+author: NightExpress
+depend: [ NexEngine ]
+softdepend: [ Vault, Citizens, PlayerPoints, WorldGuard, Lands, PlotSquared, GamePoints, GriefPrevention, Broker ]
+api-version: 1.17
+
+permissions:
+  excellentshop.user:
+    description: Access to basic plugin functions.
+    default: true
+  excellentshop.admin:
+    description: Full access
+    default: op
+
+  #+----------------------------------+
+  #|     Virtual Shop Permissions     |
+  #+----------------------------------+
+  excellentshop.virtual:
+    description: Full access to Virtual Shop.
+    default: op
+    children:
+      excellentshop.virtual.mainmenu: true
+      excellentshop.virtual.shop.*: true
+      excellentshop.virtual.cmd: true
+
+  excellentshop.virtual.mainmenu:
+    description: Access to main menu.
+    default: true
+  excellentshop.virtual.shop.*:
+    description: Access to all shops.
+    default: op
+
+  excellentshop.virtual.cmd:
+    description: Access to all commands.
+    default: op
+    children:
+      excellentshop.virtual.cmd.open: true
+  excellentshop.virtual.cmd.open:
+    description: Access to /shop open command.
+    default: op
+
+  #+----------------------------------+
+  #|      Chest Shop Permissions      |
+  #+----------------------------------+
+  excellentshop.chestshop:
+    description: Full access to Chest Shop.
+    default: op
+    children:
+      excellentshop.chestshop.cmd: true
+      excellentshop.chestshop.teleport: true
+      excellentshop.chestshop.teleport.others: true
+      excellentshop.chestshop.create: true
+      excellentshop.chestshop.remove: true
+      excellentshop.chestshop.remove.others: true
+      excellentshop.chestshop.type.*: true
+      excellentshop.chestshop.editor.adminshop: true
+      excellentshop.chestshop.editor.product.price: true
+      excellentshop.chestshop.editor.product.currency: true
+      excellentshop.chestshop.editor.product.commands: true
+
+  excellentshop.chestshop.create:
+    description: Allows to create shops.
+    default: op
+  excellentshop.chestshop.remove:
+    description: Allows to remove your own shops.
+    default: op
+  excellentshop.chestshop.remove.others:
+    description: Allows to remove other player's shops.
+    default: op
+  excellentshop.chestshop.teleport:
+    description: Access to using teleport to own shops.
+    default: op
+  excellentshop.chestshop.teleport.others:
+    description: Access to using teleport to other player's shops.
+    default: op
+
+  excellentshop.chestshop.type.*:
+    description: Allows to create any type shops.
+    default: op
+    children:
+      excellentshop.chestshop.type.player: true
+      excellentshop.chestshop.type.admin: true
+  excellentshop.chestshop.type.player:
+    description: Allows to create player shops.
+    default: op
+  excellentshop.chestshop.type.admin:
+    description: Allows to create admin shops.
+    default: op
+
+  excellentshop.chestshop.cmd:
+    description: Access to all ChestShop module commands.
+    default: op
+    children:
+      excellentshop.chestshop.cmd.list: true
+      excellentshop.chestshop.cmd.search: true
+  excellentshop.chestshop.cmd.list:
+    description: Access to /chestshop list command.
+    default: op
+  excellentshop.chestshop.cmd.search:
+    description: Access to /chestshop search command.
+    default: op
+
+  # ---------------- ChestShop Editor ---------------- #
+  excellentshop.chestshop.editor:
+    description: Grants access to all editor options.
+    default: op
+    children:
+      excellentshop.editor.type: true
+      excellentshop.editor.product.price: true
+      excellentshop.editor.product.currency: true
+      excellentshop.editor.product.commands: true
+
+  excellentshop.chestshop.editor.type:
+    description: Allows to change the shop type via editor.
+    default: op
+  excellentshop.chestshop.editor.product.price:
+    description: Access to all shop price modifiers.
+    default: op
+    children:
+      excellentshop.chestshop.price.negative: true
+      excellentshop.chestshop.price.randomizer: true
+  excellentshop.chestshop.editor.product.price.negative:
+    description: Allows to set negative price to disable buying/selling in shop.
+    default: op
+  excellentshop.chestshop.editor.product.price.randomizer:
+    description: Allows to set up a price randomizer at specified times.
+    default: op
+  excellentshop.chestshop.editor.product.currency:
+    description: Allows to change product currency.
+    default: op
+  excellentshop.chestshop.editor.product.commands:
+    description: Allows to add commands to shop products.
+    default: op
+  # ---------------- End ChestShop Editor ---------------- #

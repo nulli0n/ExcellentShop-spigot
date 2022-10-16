@@ -1,0 +1,51 @@
+Command_Aliases: shop,vshop
+
+General:
+  Default_Currency: vault
+  Disabled_In_Gamemodes:
+    - CREATIVE
+    - SPECTATOR
+  Disabled_In_Worlds:
+    - world2
+    - some_world
+
+GUI:
+  Product_Format:
+    Lore:
+      Price_All:
+        - '%lore%'
+        - '&7'
+        - '             &eBuy: &6%product_price_buy_formatted% &8| &eSell: &6%product_price_sell_formatted%'
+        - '   &bBuy Left &8→ &3%product_limit_buy_available% &7| &3%product_limit_buy_reset% &8← &bBuy Restock'
+        - '   &bSell Left &8→ &3%product_limit_sell_available% &7| &3%product_limit_sell_reset% &8← &bSell Restock'
+        - '&7'
+        - '&cLeft-Click &8→ &fSelect Quantity &8← &cRight-Click'
+        - '&cShift-Left &8→ &fBuy &7(Quick) &fSell &8← &cShift-Right'
+        - '&c[F] Key &8→ &fSell All &7(%product_price_sell_all_formatted%)'
+      Price_Buy_Only:
+        - '%lore%'
+        - '&7'
+        - '             &eBuy: &6%product_price_buy_formatted%'
+        - '   &bBuy Left &8→ &3%product_limit_buy_available%'
+        - '   &bBuy Restock &8→ &3%product_limit_buy_reset%'
+        - '&7'
+        - '&cLeft-Click &8→ &fSelect Quantity'
+        - '&cShift-Left &8→ &fQuick Buy'
+      Price_Sell_Only:
+        - '%lore%'
+        - '&7'
+        - '             &eSell: &6%product_price_sell_formatted%'
+        - '   &bSell Left &8→ &3%product_limit_sell_available%'
+        - '   &bSell Restock &8→ &3%product_limit_sell_reset%'
+        - '&7'
+        - '&cRight-Click &8→ &fSelect Quantity'
+        - '&cShift-Right &8→ &fQuick Sell'
+        - '&c[F] Key &8→ &fSell All &7(%product_price_sell_all_formatted%)'
+
+Transaction_Logs:
+  Output:
+    File: true
+    Console: true
+  Format:
+    Date: dd/MM/yyyy HH:mm:ss
+    Purchase: '(%type%) %player% - x%amount% of %item% for %price%&7 in %shop_name% shop.'

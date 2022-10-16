@@ -1,0 +1,201 @@
+Module:
+  Cmd:
+    Reload: 已重载 &a%module% &7模组!
+  Editor:
+    Enter:
+      Command: '&7请输入新命令...'
+      Price: '&7请输入新价格...'
+      Currency: '&7请输入新货币名...'
+Shop:
+  Product:
+    Error:
+      Unbuyable: '&c您无法购买此商品。'
+      Unsellable: '&c您无法出售此商品'
+      OutOfStock: '&c该商品已售空！'
+      OutOfSpace: '&c该商店空间不足！'
+      OutOfFunds: 该商店本金不足！
+      FullStock: '&c存放该商店的库存不足！'
+      FullInventory: '&c您的物品栏已满，无法继续购买商品！'
+      TooExpensive:
+      - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l这商品太贵了！ '
+      - ' &7我还差： &c%price%&7!'
+      NotEnoughItems:
+      - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l我身上没带够
+        物品！ '
+      - ' &7我还差 &cx%amount% &7个 &c%item%&7!'
+Auction:
+  Command:
+    Open:
+      Desc: 打开拍卖行。
+    Sell:
+      Desc: 拍卖物品至拍卖行
+      Usage: <底价>
+    Expired:
+      Desc: 列出正在拍卖的物品
+      Usage: '[玩家]'
+    History:
+      Desc: 列出已拍卖的物品
+      Usage: '[玩家]'
+  Listing:
+    Add:
+      Success:
+        Info: '&7您以 &a$%price%&7 的底价拍出了 &ax%amount% &7个
+          &a%item%&7。'
+        Tax: '&7您为此拍卖支付了 &c%tax-percent%% &4（%tax-amount%$） &7的
+          拍卖税。'
+        Announce: '&a%player% &7在拍卖所以 &e$%price% &7的底价拍出了 &ax%amount% &7个
+          &a%item%。'
+      Error:
+        BadItem: '&c无法在拍卖所拍卖物品 &e%item%！'
+        Limit: '&c拍卖的底价不能超过 &e%amount% &c！'
+        Price:
+          Tax: '&c无法支付 &e%tax-percent%% &c（&e$%tax-amount%）&c的拍卖税！'
+          Min: '&c商品价格不能低于 &e$%min%&c！'
+          Max: '&c商品价格不能高于 &e$%max%&c！'
+          Negative: '&c商品价格不能为负！'
+          Material:
+            Min: '&e%material% &c的价格（单价）不能低于 &e$%min%&c！'
+            Max: '&e%material% &c的价格（单价）不能高于 &e$%max%&c!'
+        DisabledGamemode: '&c您无法在此游戏模式下上架商品！'
+    Buy:
+      Success:
+        Info: '{message: ~prefix: false;}&e您已从 &6%seller% &e里以 &6$%price% &e的价格购入了
+          &6x%amount% &e 个 &6%item%&e！'
+      Error:
+        NoMoney: '{message: ~prefix: false;}&c您没有足够的存款！当前余额： &e$%balance%&c，
+         还需： &e$%price%&c。'
+    Sell:
+      Success:
+        Info: '{message: ~prefix: false;}&e您以 &6$%price%&e 的价格售出 &6x%amount% &e个 &6%item%
+          &e给 &6%buyer%&e 。'
+    Expired:
+      Notify: '{message: ~prefix: false;}&e您有 &6%amount% &e件拍卖过期商品！ 请在系统自动销毁前键入 &6/auc
+        expired &e收取过期商品！'
+  Error:
+    DisabledWorld: '&c该世界已禁用拍卖所！'
+Virtual:
+  Shop:
+    Command:
+      Open:
+        Desc: 新建虚拟商店
+        Usage: '[商店] [玩家]'
+    MainMenu:
+      Error:
+        Disabled: '&c主商店菜单已禁用！'
+    Open:
+      Error:
+        BadWorld: '&c该世界已禁用商店！'
+        BadGamemode: '&c您无法在 &e%mode% &c模式下进入商店！'
+        InvalidShop: '&c该商店不存在！'
+    Product:
+      Purchase:
+        Sell:
+        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l成功！ '
+        - ' &7你以 &a%price% &7的价格售出了 &ax%amount% &7个 &a%item%&7！'
+        Buy:
+        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l成功
+         购买！ '
+        - ' &7你以 &a%price%&7 的价格购入了 &ax%amount% &7个 &a%item%&7！'
+    Editor:
+      Enter:
+        Id: '&7输入商品 ID...'
+        NpcId: '&7输入 NPC ID...'
+        Title: '&7输入商店标题...'
+        Amount: '&7输入新数额...'
+        Time:
+          Seconds: '&7输入 &c秒单位的时间&7 值...'
+          Full: '&7输入时间间隔，如 &c18:00 19:00&7...'
+        Day: '&c用英语&7输入日期...'
+      Create:
+        Error:
+          Exist: '&c该商店 ID 已存在！'
+          BadId: '&c商店 ID 仅允许 &e字母 &c和 &e数字&c！'
+      Product:
+        Error:
+          Currency: '&c该经济系统不可用！'
+Chest:
+  Shop:
+    Command:
+      List:
+        Desc: 列出您开设的商店。
+      Create:
+        Desc: 创建以您视角指向的箱子作为商店。
+        Usage: '[admin(true/false)]'
+      Search:
+        Desc: 搜索带指定物品的商店。
+        Usage: <物品>
+      Remove:
+        Desc: 删除以您视角指向的箱子商店。
+    Error:
+      NotOwner: 您不是该商店的开店人！
+    Creation:
+      Info:
+        Done:
+        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&l商店
+         已创建！'
+        - '&7使用 &aShift+单击 &7来进入 &a编辑模式&7。'
+      Error:
+        AlreadyShop: 该箱子已经是商店了！
+        NotEmpty: 请先移除箱子内所有物品。
+        NotAChest: 该方块不是一个箱子！
+        BadLocation: 您无法在此地创建商店！
+        LimitReached: 您已达到创建商店的最大限制！无法继续创建商店。
+        BadArea: 您只能在您的领地内创建商店！
+        NotEnoughFunds: 您没有足够的金额！
+    Removal:
+      Info:
+        Done: '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&l商店
+         已移除。'
+      Error:
+        NotAShop: 该方块不是一个商店！
+    Product:
+      Error:
+        BadItem: 该物品无法交易！
+    ShopList:
+      Info:
+        Switch: 服务器商店列表： %state%&7.
+    Trade:
+      Buy:
+        Info:
+          User: '{message: ~prefix: false;}&e您在 &6%shop_owner%&e 开的 &6%shop_name%&e
+            商店中 以 &6%price%&e 的价格购买了 &6x%amount% &e个 &6%item%&e。'
+          Owner: '{message: ~prefix: false;}&6%player% &e刚从您开的 &6%shop_name%&e 商店
+            以 &6%price% &e的价格购买了 &6x%amount% &e个 &6%item%&e。'
+      Sell:
+        Info:
+          User: '{message: ~prefix: false;}&e您在 &6%shop_owner%&e 开的 &6%shop_name%&e
+            商店中 以 &6%price%&e 的价格出售了 &6x%amount% &e个 &6%item%&e。'
+          Owner: '{message: ~prefix: false;}&6%player% &e刚从您开的 &6%shop_name%&e 商店
+            以 &6%price% &e的价格出售了 &6x%amount% &e个 &6%item%&e。'
+    Editor:
+      Tip:
+        Name: '&7输入新名称...'
+      Error:
+        Currency:
+          NotAllowed: '&e无法使用该经济系统'
+        Negative: '&7数字必须为正数！'
+        ProductLeft: '&c请先移除箱子内所有物品。'
+Other:
+  Never: 从未
+  Infinity: 无限
+GameMode:
+  CREATIVE: 创造
+  SURVIVAL: 生存
+  ADVENTURE: 极限
+  SPECTATOR: 旁观
+AuctionSortType:
+  NAME: 名称顺
+  MATERIAL: 商品顺
+  SELLER: 销售人顺
+  NEWEST: 时间顺
+  OLDEST: 时间倒
+  MOST_EXPENSIVE: 价格顺
+  LEAST_EXPENSIVE: 价格倒
+TradeType:
+  BUY: 购买
+  SELL: 出售
+Editor:
+  Enter:
+    Command: '&7输入新命令...'
+    Price: '&7输入新价格...'
+    Currency: '&7输入经济系统 ID...'

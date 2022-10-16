@@ -1,0 +1,11 @@
+Enabled: true
+Name: 'Gold'
+Format: 'x%price% %currency_name%'
+Number_Format: '#,###.##'
+Item:
+  Material: GOLD_INGOT
+  Name: '&e&lGOLD INGOT'
+  Enchants:
+    fortune: 5
+  Item_Flags:
+    - HIDE_ENCHANTS

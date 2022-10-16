@@ -1,0 +1,52 @@
+Title: Server Chest Shops
+Size: 54
+
+Shop_Icon:
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44
+  Name: '&6%shop_name% &6Shop'
+  Lore:
+    - '&6▸ &eOwner: &6%shop_owner%'
+    - '&6▸ &eLocation: &6%shop_location_x%&e, &6%shop_location_y%&e, &6%shop_location_z% &ein &6%shop_location_world%'
+    - '&7'
+    - '&6Left Click: &eTeleport'
+    - '&6Right Click: &eOpen editor'
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          Material: ENDER_EYE
+          Name: '&e&lNext Page →'
+    Slots: 53
+    Type: PAGE_NEXT
+
+  page_previous:
+    Display:
+      default:
+        Item:
+          Material: ENDER_EYE
+          Name: '&e&l← Previous Page'
+    Slots: 45
+    Type: PAGE_PREVIOUS
+
+  return:
+    Display:
+      default:
+        Item:
+          Material: BARRIER
+          Name: '&c&lExit &4&l✕'
+    Slots: 49
+    Type: CLOSE
+
+Special:
+  global:
+    Display:
+      default:
+        Item:
+          Material: CHEST
+          Name: '&6My Shops'
+          Lore:
+            - '&7Click to display your own shops only.'
+    Slots: 51
+    Type: LIST_GLOBAL_TOGGLE

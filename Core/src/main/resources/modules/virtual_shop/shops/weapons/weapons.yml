@@ -1,0 +1,15 @@
+Pages: 2
+Permission_Required: false
+Transaction_Allowed:
+  SELL: true
+  BUY: true
+Citizens:
+  Attached_NPC: ''
+Icon:
+  material: GOLDEN_SWORD
+  amount: 1
+  durability: 0
+  name: '&e&lWeapons'
+  enchanted: false
+  item-flags: []
+  unbreakable: false

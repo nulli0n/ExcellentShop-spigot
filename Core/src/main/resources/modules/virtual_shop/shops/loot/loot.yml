@@ -1,0 +1,15 @@
+Pages: 1
+Permission_Required: false
+Transaction_Allowed:
+  SELL: true
+  BUY: true
+Citizens:
+  Attached_NPC: ''
+Icon:
+  material: SLIME_BALL
+  amount: 1
+  durability: 0
+  name: '&a&lMob Loot'
+  enchanted: false
+  item-flags: []
+  unbreakable: false

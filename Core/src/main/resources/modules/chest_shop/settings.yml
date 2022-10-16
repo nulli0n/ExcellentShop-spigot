@@ -1,0 +1,55 @@
+Command_Aliases: chestshop,cshop,cs
+
+Shops:
+  Delete_Invalid_Shop_Configs: false
+  Default_Currency: vault
+  Allowed_Currencies:
+    - vault
+    - emeralds
+  AdminShop_Name: 'MyServerCraft'
+  Creation:
+    Cost:
+      Create: 0
+      Remove: 0
+    Max_Shops_Per_Rank:
+      default: 10
+      vip: 20
+      gold: 30
+      admin: -1
+    In_Player_Claims_Only:
+      Enabled: false
+    World_Blacklist:
+      - someworld
+      - anotherworld
+  Products:
+    Material_Blacklist:
+      - BEDROCK
+      - BARRIER
+    Lore_Blacklist:
+      - sample lore
+    Name_Blacklist:
+      - sample item name
+    Max_Products_Per_Shop:
+      default: 5
+      vip: 7
+      admin: -1
+
+Display:
+  Showcase:
+    Material: GLASS
+  Title:
+    Slide_Interval: 3
+    Values:
+      PLAYER:
+        - '&a%shop_name%'
+        - '&7Owner: &6%shop_owner%'
+      ADMIN:
+        - '&a%shop_name%'
+
+Transaction_Logs:
+  Output:
+    File: true
+    Console: true
+  Format:
+    Date: dd/MM/yyyy HH:mm:ss
+    Purchase: '(%type%) %player% - x%amount% of %item% for %price%&7 in %shop_name%&r shop owned by %shop_owner%.'

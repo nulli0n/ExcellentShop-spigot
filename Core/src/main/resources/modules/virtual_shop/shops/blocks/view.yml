@@ -1,0 +1,16 @@
+Title: Blocks
+Size: 54
+Content:
+  564eff0c-9eb1-4dcc-a72c-6bd7a5fe329d:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          amount: 1
+          durability: 0
+          name: '&c&lReturn'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '49'
+    Type: RETURN

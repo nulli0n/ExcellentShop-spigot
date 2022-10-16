@@ -1,0 +1,174 @@
+Title: '&8&l「 &9Editor - Virtual Shop &8&l」'
+Size: 54
+
+Content:
+  return:
+    Display:
+      default:
+        Item:
+          Material: BARRIER
+          Name: '&c&lReturn &4&l✕'
+    Slots: 49
+    Type: RETURN
+
+Editor:
+  icon:
+    Display:
+      default:
+        Item:
+          Material: STONE
+          Name: '&eShop Icon'
+          Lore:
+            - '&bCurrent: &a%shop_icon_name%'
+            - '&7'
+            - '&7Personal shop icon.'
+            - '&7This icon displayed in editor only.'
+            - '&7'
+            - '&6Drag & Drop: &eReplace'
+    Type: SHOP_CHANGE_ICON
+    Slots: 4
+
+  permission:
+    Display:
+      '0':
+        Item:
+          Material: GUNPOWDER
+          Name: '&ePermission &7(Disabled)'
+          Lore:
+            - '&bRequired: &a%shop_permission_required%'
+            - '&bNode: &a%shop_permission_node%'
+            - '&7'
+            - '&7Permission is disabled. All players'
+            - '&7can open and use this shop.'
+            - '&7'
+            - '&6Left-Click: &eToggle'
+      '1':
+        Item:
+          Material: REDSTONE
+          Name: '&ePermission &a(Enabled)'
+          Lore:
+            - '&bRequired: &a%shop_permission_required%'
+            - '&bNode: &a%shop_permission_node%'
+            - '&7'
+            - '&7Player must have permission above'
+            - '&7to be able open and use this shop.'
+            - '&7'
+            - '&6Left-Click: &eToggle'
+    Type: SHOP_CHANGE_PERMISSION
+    Slots: 13
+
+  discounts:
+    Display:
+      default:
+        Item:
+          Material: GOLD_NUGGET
+          Name: '&eDiscount Manager'
+          Lore:
+            - '&7Manage shop discounts here.'
+            - '&7'
+            - '&6Left-Click: &eNavigate'
+    Type: SHOP_CHANGE_DISCOUNTS
+    Slots: 22
+
+  pages:
+    Display:
+      default:
+        Item:
+          Material: BOOK
+          Name: '&eShop Pages'
+          Lore:
+            - '&bPages: &a%shop_pages%'
+            - '&7'
+            - '&7Amount of shop pages.'
+            - '&a(Don''t forget to add page buttons to View)'
+            - '&7'
+            - '&6Left-Click: &e+1 Page'
+            - '&6Right-Click: &e-1 Page'
+    Type: SHOP_CHANGE_PAGES
+    Slots: 11
+
+  operations:
+    Display:
+      default:
+        Item:
+          Material: WRITABLE_BOOK
+          Name: '&eTrade Types'
+          Lore:
+            - '&bAllow Buy: &a%shop_buy_allowed%'
+            - '&bAllow Sell: &a%shop_sell_allowed%'
+            - '&7'
+            - '&7Defines if players can buy or sell'
+            - '&7items in this shop.'
+            - '&7'
+            - '&6Left-Click: &eToggle Buying'
+            - '&6Right-Click: &eToggle Selling'
+    Type: SHOP_CHANGE_TRANSACTIONS
+    Slots: 15
+
+  products:
+    Display:
+      default:
+        Item:
+          Material: CHEST
+          Name: '&eProduct Manager'
+          Lore:
+            - '&7Manage shop products here.'
+            - '&7'
+            - '&6Left-Click: &eNavigate'
+    Type: SHOP_CHANGE_PRODUCTS
+    Slots: 23
+
+  view_design:
+    Display:
+      default:
+        Item:
+          Material: PAINTING
+          Name: '&eShop View Design'
+          Lore:
+            - '&bTitle: &a%shop_view_title%'
+            - '&bSize: &a%shop_view_size%'
+            - '&7'
+            - '&7Here you can change shop view design.'
+            - '&7Simply put items as you want them'
+            - '&7to see in the shop!'
+            - '&8(Use ESC to save and return)'
+            - '&7'
+            - '&6Left-Click: &eNavigate'
+            - '&6Shift-Left: &eChange Title'
+            - '&6Shift-Right: &eChange Size'
+    Type: SHOP_CHANGE_VIEW_DESIGN
+    Slots: 21
+
+  citizens:
+    Display:
+      default:
+        Item:
+          Material: PLAYER_HEAD
+          Name: '&eAttached NPCs &c[Citizens]'
+          Lore:
+            - '&bThe following NPCs will'
+            - '&bopen this shop on click:'
+            - '&a%shop_npc_ids%'
+            - '&7'
+            - '&c(You must have &c&l&oCitizens&c installed)'
+            - '&7'
+            - '&6Left-Click: &eAdd NPC'
+            - '&6Right-Click: &eClear List'
+    Type: SHOP_CHANGE_CITIZENS_ID
+    Slots: 8
+
+  delete:
+    Display:
+      default:
+        Item:
+          Material: CAULDRON
+          Name: '&cDelete Shop'
+          Lore:
+            - '&7Shop will be permanently deleted.'
+            - '&c(Hold &c&lShift &cto confirm)'
+    Type: SHOP_DELETE
+    Slots: 53
+
+
+
+

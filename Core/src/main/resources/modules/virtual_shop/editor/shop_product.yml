@@ -1,0 +1,239 @@
+Title: '&8&l「 &9Editor - Shop Product &8&l」'
+Size: 27
+
+Content:
+  return:
+    Display:
+      default:
+        Item:
+          Material: BARRIER
+          Name: '&c&lReturn &4&l✕'
+    Slots: 22
+    Type: RETURN
+
+Editor:
+  preview:
+    Display:
+      default:
+        Item:
+          Material: ITEM_FRAME
+          Name: '&eItem Preview'
+          Lore:
+            - '&bCurrent: &a%product_preview_name%'
+            - '&7'
+            - '&7This item will be displayed'
+            - '&7in shop pages.'
+            - '&7'
+            - '&6Drag and Drop: &eReplace'
+            - '&6Shift-Left: &eGet Item'
+    Type: PRODUCT_CHANGE_PREVIEW
+    Slots: 0
+
+  item:
+    Display:
+      default:
+        Item:
+          Material: BARRIER
+          Name: '&eTrade Item'
+          Lore:
+            - '&bCurrent: &a%product_item_name%'
+            - '&7'
+            - '&7This is the main product item.'
+            - '&7Players can buy and sell it.'
+            - '&7'
+            - '&aYou can also disable/remove it.'
+            - '&7'
+            - '&6Drag and Drop: &eReplace'
+            - '&6Right-Click: &eDisable'
+            - '&6Shift-Left: &eGet Item'
+    Type: PRODUCT_CHANGE_ITEM
+    Slots: 1
+
+  commands:
+    Display:
+      default:
+        Item:
+          Material: COMMAND_BLOCK
+          Name: '&eCommands'
+          Lore:
+            - '&bThe following commands will be'
+            - '&bexecuted when player purchases'
+            - '&bthis product:'
+            - '&a%product_commands%'
+            - '&7'
+            - '&6Left-Click: &eAdd Command'
+            - '&6Right-Click: &eClear List'
+    Type: PRODUCT_CHANGE_COMMANDS
+    Slots: 2
+
+  currency:
+    Display:
+      default:
+        Item:
+          Material: EMERALD
+          Name: '&eCurrency Manager'
+          Lore:
+            - '&bCurrency: &a%currency_id%'
+            - '&7'
+            - '&7Defines product currency.'
+            - '&7'
+            - '&6Left-Click: &eChange Currency'
+    Type: PRODUCT_CHANGE_CURRENCY
+    Slots: 8
+
+  item_meta:
+    Display:
+      '0':
+        Item:
+          Material: GRAY_DYE
+          Name: '&eItem Meta &7(Enabled)'
+          Lore:
+            - '&7Player can sell items with any'
+            - '&7metadata &8(name, lore, etc.)&7 for this product'
+            - '&7while it have the same as product material.'
+            - '&7'
+            - '&6Left-Click: &eToggle'
+      '1':
+        Item:
+          Material: LIME_DYE
+          Name: '&eItem Meta &a(Enabled)'
+          Lore:
+            - '&7When player is about to sell this product'
+            - '&7to the shop, it must have the same'
+            - '&7metadata &8(name, lore, etc.)&7 as in product item.'
+            - '&7'
+            - '&6Left-Click: &eToggle'
+    Type: PRODUCT_CHANGE_ITEM_META
+    Slots: 3
+
+  price_buy:
+    Display:
+      default:
+        Item:
+          Material: NAME_TAG
+          Name: '&ePrice: Buy'
+          Lore:
+            - '&bMin: &a%product_price_buy_min%'
+            - '&bMax: &a%product_price_buy_max%'
+            - '&7'
+            - '&7How much player will have to pay'
+            - '&7to purchase this product?'
+            - '&7'
+            - '&8(Max. price is only useful when you'
+            - '&8have price randomizer enabled.)'
+            - '&7'
+            - '&6Left-Click: &eChange Min'
+            - '&6Right-Click: &eChange Max'
+            - '&6Shift-Right: &eDisable'
+    Type: PRODUCT_CHANGE_PRICE_BUY
+    Slots: 6
+
+  price_sell:
+    Display:
+      default:
+        Item:
+          Material: NAME_TAG
+          Name: '&ePrice: Sell'
+          Lore:
+            - '&bMin: &a%product_price_sell_min%'
+            - '&bMax: &a%product_price_sell_max%'
+            - '&7'
+            - '&7How much player will receive for'
+            - '&7selling this product to the shop?'
+            - '&7'
+            - '&8(Max. price is only useful when you'
+            - '&8have price randomizer enabled.)'
+            - '&7'
+            - '&6Left-Click: &eChange Min'
+            - '&6Right-Click: &eChange Max'
+            - '&6Shift-Right: &eDisable'
+    Type: PRODUCT_CHANGE_PRICE_SELL
+    Slots: 7
+
+  price_discount:
+    Display:
+      default:
+        Item:
+          Material: GOLD_NUGGET
+          Name: '&eDiscount Allowed'
+          Lore:
+            - '&bAllowed: &a%product_discount_allowed%'
+            - '&7'
+            - '&7When enabled, product buy price'
+            - '&7will be affected by shop discount(s).'
+            - '&7'
+            - '&6Left-Click: &eChange Toggle'
+    Type: PRODUCT_CHANGE_DISCOUNT
+    Slots: 4
+
+  price_rnd_toggle:
+    Display:
+      default:
+        Item:
+          Material: COMPARATOR
+          Name: '&ePrice Randomizer: Toggle'
+          Lore:
+            - '&bEnabled: &a%product_price_random_enabled%'
+            - '&7'
+            - '&7When enabled, product price will be'
+            - '&7randomly generated between the min. and'
+            - '&7max. price values in specified days and times.'
+            - '&7'
+            - '&7When disabled, or not in time, min.'
+            - '&7price values will be used.'
+            - '&7'
+            - '&6Left-Click: &eToggle'
+    Type: PRODUCT_CHANGE_PRICE_RANDOMIZER_TOGGLE
+    Slots: 17
+
+  price_rnd_times:
+    Display:
+      default:
+        Item:
+          Material: CLOCK
+          Name: '&ePrice Randomizer: Times'
+          Lore:
+            - '&bDays:'
+            - '&a%product_price_random_days%'
+            - '&bTimes:'
+            - '&a%product_price_random_times%'
+            - '&7'
+            - '&6Left-Click: &eAdd Day(s)'
+            - '&6Right-Click: &eAdd Time(s)'
+            - '&6Shift-Left: &eReset Days'
+            - '&6Shift-Right: &eReset Times'
+    Type: PRODUCT_CHANGE_PRICE_RANDOMIZER_TIMES
+    Slots: 26
+
+  stock_buy:
+    Display:
+      default:
+        Item:
+          Material: HOPPER
+          Name: '&eBuy & Sell Limits'
+          Lore:
+            - '&bBuy Amount: &a%product_limit_buy_amount%'
+            - '&bSell Amount: &a%product_limit_sell_amount%'
+            - '&bBuy Cooldown: &a%product_limit_buy_cooldown%'
+            - '&bSell Cooldown: &a%product_limit_sell_cooldown%'
+            - '&7'
+            - '&7Defines min. and max. amount of'
+            - '&7product that can be purchased/sold at once.'
+            - '&7'
+            - '&7When player reaches max. amount, he'
+            - '&7will not be able to purchase/sold product until'
+            - '&7cooldown is expired.'
+            - '&7'
+            - '&7When cooldown is negative value, then'
+            - '&7it will never be expired, making product'
+            - '&7one-timed for purchase.'
+            - '&7'
+            - '&eSet amount value to &6&l-1 &eto disable it.'
+            - '&eSet cooldown value to &6&l0 &eto disable it.'
+            - '&7'
+            - '&6Left-Click: &eChange Buy Amount'
+            - '&6Right-Click: &eChange Buy Cooldown'
+            - '&6Shift-Left: &eChange Sell Amount'
+            - '&6Shift-Right: &eChange Sell Cooldown'
+    Type: PRODUCT_CHANGE_LIMIT
+    Slots: 5

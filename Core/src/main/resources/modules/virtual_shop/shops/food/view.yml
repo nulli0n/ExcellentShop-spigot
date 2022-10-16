@@ -1,0 +1,16 @@
+Title: Food
+Size: 54
+Content:
+  6a11d9c0-b914-425b-bc2b-ed1b6ef7bece:
+    Display:
+      default:
+        Item:
+          material: BARRIER
+          amount: 1
+          durability: 0
+          name: '&c&lReturn'
+          enchanted: false
+          item-flags: []
+          unbreakable: false
+    Slots: '49'
+    Type: RETURN

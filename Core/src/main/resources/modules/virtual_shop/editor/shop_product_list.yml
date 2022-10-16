@@ -1,0 +1,17 @@
+Title: '&8&l「 &9Editor - Shop Product List &8&l」'
+Size: 54
+
+Free_Slot:
+  Material: LIME_STAINED_GLASS_PANE
+  Name: '&a&lFree Slot'
+  Lore:
+    - '&bSimply put item on me!'
+
+Product:
+  Name: '&e%product_preview_name%'
+  Lore:
+    - '&bBuy Price: &a%product_price_buy_min% - %product_price_buy_max%'
+    - '&bSell Price: &a%product_price_sell_min% - %product_price_sell_max%'
+    - '&7'
+    - '&6Shift+Left-Click: &eEdit'
+    - '&6Shift+Right-Click: &eDelete'

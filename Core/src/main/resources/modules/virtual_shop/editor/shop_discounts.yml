@@ -1,0 +1,55 @@
+Title: '&8&l「 &9Editor - Shop Discounts &8&l」'
+Size: 54
+
+Object:
+  Name: '&eShop Discount'
+  Lore:
+    - '&bDiscount: &a%discount_amount_raw%%'
+    - '&bDays:'
+    - '&a%discount_days%'
+    - '&bTimes:'
+    - '&a%discount_times%'
+    - '&7'
+    - '&6Left-Click: &eChange Discount'
+    - '&6Right-Click: &eDelete'
+    - '&6Shift-Left: &eAdd Day'
+    - '&6Shift-Right: &eAdd Time'
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+
+Content:
+  page_next:
+    Display:
+      default:
+        Item:
+          Material: ENDER_EYE
+          Name: '&e&lNext Page →'
+    Slots: 44
+    Type: PAGE_NEXT
+
+  page_previous:
+    Display:
+      default:
+        Item:
+          Material: ENDER_EYE
+          Name: '&e&l← Previous Page'
+    Slots: 36
+    Type: PAGE_PREVIOUS
+
+  return:
+    Display:
+      default:
+        Item:
+          Material: BARRIER
+          Name: '&c&lReturn &4&l✕'
+    Slots: 39
+    Type: RETURN
+
+Editor:
+  add:
+    Display:
+      default:
+        Item:
+          Material: ANVIL
+          Name: '&a&lNew Discount &2&l+'
+    Type: DISCOUNT_CREATE
+    Slots: 41
