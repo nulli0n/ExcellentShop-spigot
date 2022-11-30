@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.shop.chest.listener;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
@@ -20,57 +19,64 @@ import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nexmedia.engine.utils.MessageUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.api.shop.chest.IProductChestPrepared;
-import su.nightexpress.nexshop.api.shop.chest.IShopChest;
-import su.nightexpress.nexshop.api.shop.chest.event.ChestShopPurchaseEvent;
+import su.nightexpress.nexshop.api.event.ChestShopPurchaseEvent;
+import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+
+import java.util.*;
 
 public class ChestShopListener extends AbstractListener<ExcellentShop> {
 
-    private final ChestShop chestShop;
+    private final ChestShopModule       chestShop;
+    private final Map<String, Set<JYML>> unloadedShops;
 
-    public ChestShopListener(@NotNull ChestShop chestShop) {
+    public ChestShopListener(@NotNull ChestShopModule chestShop) {
         super(chestShop.plugin());
         this.chestShop = chestShop;
+        this.unloadedShops = new HashMap<>();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onShopPurchaseEvent(ChestShopPurchaseEvent e) {
         Player player = e.getPlayer();
 
-        IProductChestPrepared prepared = e.getPrepared();
-        IShopChest shop = prepared.getShop();
+        PreparedProduct<ChestProduct> prepared = e.getPrepared();
+        ChestShop shop = prepared.getProduct().getShop();
 
         if (e.isCancelled()) {
             if (e.getResult() == ChestShopPurchaseEvent.Result.TOO_EXPENSIVE) {
-                plugin.getMessage(Lang.Shop_Product_Error_TooExpensive)
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_TOO_EXPENSIVE)
                     .replace(prepared.replacePlaceholders())
                     .send(player);
             }
             else if (e.getResult() == ChestShopPurchaseEvent.Result.NOT_ENOUGH_ITEMS) {
-                plugin.getMessage(Lang.Shop_Product_Error_NotEnoughItems)
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS)
                     .replace(prepared.replacePlaceholders())
                     .send(player);
             }
             else if (e.getResult() == ChestShopPurchaseEvent.Result.OUT_OF_MONEY) {
-                plugin.getMessage(Lang.Shop_Product_Error_OutOfFunds)
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS)
                     .replace(prepared.replacePlaceholders())
                     .send(player);
             }
             else if (e.getResult() == ChestShopPurchaseEvent.Result.OUT_OF_SPACE) {
-                plugin.getMessage(Lang.Shop_Product_Error_OutOfSpace)
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE)
                     .replace(prepared.replacePlaceholders())
                     .send(player);
             }
             else if (e.getResult() == ChestShopPurchaseEvent.Result.OUT_OF_STOCK) {
-                plugin.getMessage(Lang.Shop_Product_Error_OutOfStock)
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK)
                     .replace(prepared.replacePlaceholders())
                     .send(player);
             }
@@ -84,24 +90,24 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
         Player owner = shop.getOwner().getPlayer();
 
         if (e.getTradeType() == TradeType.BUY) {
-            plugin.getMessage(Lang.Shop_Trade_Buy_Info_User)
+            plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_USER)
                 .replace(prepared.replacePlaceholders())
                 .replace(shop.replacePlaceholders())
                 .send(player);
 
-            if (owner != null && !shop.isAdminShop()) plugin.getMessage(Lang.Shop_Trade_Buy_Info_Owner)
+            if (owner != null && !shop.isAdminShop()) plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_OWNER)
                 .replace("%player%", player.getDisplayName())
                 .replace(prepared.replacePlaceholders())
                 .replace(shop.replacePlaceholders())
                 .send(owner);
         }
         else {
-            plugin.getMessage(Lang.Shop_Trade_Sell_Info_User)
+            plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_USER)
                 .replace(prepared.replacePlaceholders())
                 .replace(shop.replacePlaceholders())
                 .send(player);
 
-            if (owner != null && !shop.isAdminShop()) plugin.getMessage(Lang.Shop_Trade_Sell_Info_Owner)
+            if (owner != null && !shop.isAdminShop()) plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_OWNER)
                 .replace("%player%", player.getDisplayName())
                 .replace(prepared.replacePlaceholders())
                 .replace(shop.replacePlaceholders())
@@ -114,7 +120,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
         Block block = e.getClickedBlock();
         if (block == null) return;
 
-        IShopChest shop = this.chestShop.getShop(block);
+        ChestShop shop = this.chestShop.getShop(block);
         if (shop == null) return;
 
         Player player = e.getPlayer();
@@ -130,7 +136,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
                     shop.getEditor().open(player, 1);
                 }
                 else {
-                    plugin.getMessage(Lang.Shop_Error_NotOwner).send(player);
+                    plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
                 }
                 return;
             }
@@ -149,12 +155,12 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
         Block block = e.getBlock();
         Player player = e.getPlayer();
 
-        IShopChest shop = this.chestShop.getShop(block);
+        ChestShop shop = this.chestShop.getShop(block);
         if (shop == null) return;
 
         if (!shop.isOwner(player)) {
             e.setCancelled(true);
-            plugin.getMessage(Lang.Shop_Error_NotOwner).send(player);
+            plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
         }
         else {
             if (player.getGameMode() == GameMode.CREATIVE) {
@@ -168,11 +174,11 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopExpansion(BlockPlaceEvent e) {
         Block block = e.getBlockPlaced();
-        if (!ChestShop.isValidChest(block)) {
+        if (!ChestShopModule.isValidContainer(block)) {
             return;
         }
 
-        IShopChest shop = this.chestShop.getShopSideChest(block);
+        ChestShop shop = this.chestShop.getShopSideChest(block);
         if (shop == null || block.getType() != shop.getLocation().getBlock().getType()) {
             return;
         }
@@ -183,7 +189,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
             return;
         }
 
-        shop.setChest((Chest) block.getState());
+        //shop.setChest((Chest) block.getState());
         this.chestShop.getShopsMap().put(block.getLocation(), shop);
         this.plugin.runTask(c -> shop.updateDisplay(), false);
     }
@@ -215,7 +221,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
 
         // Prevent to steal items from the chest shop.
         if (to.getType() == InventoryType.HOPPER && from.getType() == InventoryType.CHEST) {
-            IShopChest shop = this.chestShop.getShop(from);
+            ChestShop shop = this.chestShop.getShop(from);
             if (shop != null) {
                 e.setCancelled(true);
                 return;
@@ -224,7 +230,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
 
         // Prevent to put different from a product items to the chest shop.
         if (to.getType() == InventoryType.CHEST && from.getType() == InventoryType.HOPPER) {
-            IShopChest shop = this.chestShop.getShop(to);
+            ChestShop shop = this.chestShop.getShop(to);
             if (shop == null) return;
 
             ItemStack item = e.getItem();
@@ -238,7 +244,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
     public void onShopBadProductClick(InventoryClickEvent e) {
         if (e.getInventory().getType() != InventoryType.CHEST) return;
 
-        IShopChest shop = this.chestShop.getShop(e.getInventory());
+        ChestShop shop = this.chestShop.getShop(e.getInventory());
         if (shop == null) return;
 
         ItemStack item = e.getCurrentItem();
@@ -247,20 +253,17 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
         }
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onDataWorldLoad(WorldLoadEvent e) {
-        this.chestShop.loadShops();
+        this.unloadedShops.getOrDefault(e.getWorld().getName(), Collections.emptySet()).forEach(this.chestShop::loadShop);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onDataWorldUnLoad(WorldUnloadEvent e) {
         World world = e.getWorld();
-        this.chestShop.getShops().removeIf(shop -> {
-            if (shop.getChest().getWorld().equals(world)) {
-                shop.clear();
-                return true;
-            }
-            return false;
+        this.chestShop.getShops().stream().filter(shop -> shop.getContainer().getWorld().equals(world)).forEach(shop -> {
+            this.chestShop.unloadShop(shop);
+            this.unloadedShops.computeIfAbsent(world.getName(), k -> new HashSet<>()).add(shop.getConfig());
         });
     }
 }

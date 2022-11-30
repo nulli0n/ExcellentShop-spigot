@@ -9,7 +9,7 @@ import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.data.object.ShopUser;
+import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;

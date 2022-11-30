@@ -5,20 +5,20 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
-public class ListCmd extends ShopModuleCommand<ChestShop> {
+public class ListCmd extends ShopModuleCommand<ChestShopModule> {
 
-    public ListCmd(@NotNull ChestShop module) {
-        super(module, new String[]{"list"}, Perms.CHEST_CMD_LIST);
+    public ListCmd(@NotNull ChestShopModule module) {
+        super(module, new String[]{"list"}, Perms.CHEST_SHOP_COMMAND_LIST);
     }
 
     @Override
     @NotNull
     public String getDescription() {
-        return plugin.getMessage(Lang.Command_List_Desc).getLocalized();
+        return plugin.getMessage(ChestLang.COMMAND_LIST_DESC).getLocalized();
     }
 
     @Override

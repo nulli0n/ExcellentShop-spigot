@@ -10,7 +10,7 @@ import su.nightexpress.nexshop.module.ShopModule;
 public class ModuleReloadCmd extends ShopModuleCommand<ShopModule> {
 
     public ModuleReloadCmd(@NotNull ShopModule m) {
-        super(m, new String[]{"reload"}, Perms.ADMIN);
+        super(m, new String[]{"reload"}, Perms.COMMAND_RELOAD);
     }
 
     @Override

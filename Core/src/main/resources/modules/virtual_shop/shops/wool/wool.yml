@@ -1,3 +1,4 @@
+Name: '&a&lWool'
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
@@ -6,10 +7,4 @@ Transaction_Allowed:
 Citizens:
   Attached_NPC: ''
 Icon:
-  material: LIME_WOOL
-  amount: 1
-  durability: 0
-  name: '&a&lWool'
-  enchanted: false
-  item-flags: []
-  unbreakable: false
+  Material: LIME_WOOL

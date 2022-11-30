@@ -1,3 +1,4 @@
+Name: '&a&lMob Loot'
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
@@ -6,10 +7,4 @@ Transaction_Allowed:
 Citizens:
   Attached_NPC: ''
 Icon:
-  material: SLIME_BALL
-  amount: 1
-  durability: 0
-  name: '&a&lMob Loot'
-  enchanted: false
-  item-flags: []
-  unbreakable: false
+  Material: SLIME_BALL

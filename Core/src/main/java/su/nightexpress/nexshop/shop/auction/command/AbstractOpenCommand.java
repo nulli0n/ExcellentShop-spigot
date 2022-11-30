@@ -6,7 +6,7 @@ import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.PlayerUtil;
-import su.nightexpress.nexshop.data.object.ShopUser;
+import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.menu.AbstractAuctionMenu;

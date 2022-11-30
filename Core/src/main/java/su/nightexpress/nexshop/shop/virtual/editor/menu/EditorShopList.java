@@ -2,113 +2,93 @@ package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.editor.EditorButtonType;
 import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.AbstractMenuAuto;
 import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.editor.AbstractEditorMenuAuto;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.virtual.IShopVirtual;
-import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopConfig;
+import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
-import su.nightexpress.nexshop.shop.virtual.object.ShopVirtual;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
-public class EditorShopList extends AbstractMenuAuto<ExcellentShop, IShopVirtual> {
+public class EditorShopList extends AbstractEditorMenuAuto<ExcellentShop, VirtualShopModule, VirtualShop> {
 
-    private final VirtualShop virtualShop;
+    public EditorShopList(@NotNull VirtualShopModule module) {
+        super(module.plugin(), module, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
 
-    private final String       objectName;
-    private final List<String> objectLore;
-    private final int[] objectSlots;
-
-    public EditorShopList(@NotNull VirtualShop virtualShop) {
-        super(virtualShop.plugin(), VirtualShopConfig.SHOP_LIST_YML, "");
-        this.virtualShop = virtualShop;
-
-        this.objectName = StringUtil.color(cfg.getString("Object.Name", "%title%"));
-        this.objectLore = StringUtil.color(cfg.getStringList("Object.Lore"));
-        this.objectSlots = cfg.getIntArray("Object.Slots");
-
-        EditorInput<VirtualShop, VirtualEditorType> input = (player, vshop, type, e) -> {
+        EditorInput<VirtualShopModule, VirtualEditorType> input = (player, module2, type, e) -> {
             if (type == VirtualEditorType.SHOP_CREATE) {
                 String id = EditorManager.fineId(e.getMessage());
-                if (vshop.getShopById(id) != null) {
-                    EditorManager.error(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Create_Error_Exist).getLocalized());
+                if (!module2.createShop(id)) {
+                    EditorManager.error(player, plugin.getMessage(VirtualLang.EDITOR_SHOP_CREATE_ERROR_EXIST).getLocalized());
                     return false;
                 }
-                IShopVirtual shop = new ShopVirtual(vshop, vshop.getFullPath() + VirtualShop.DIR_SHOPS + id + "/" + id + ".yml");
-                vshop.getShopsMap().put(shop.getId(), shop);
             }
             return true;
         };
 
         IMenuClick click = (player, type, e) -> {
-            if (type == null) return;
-
             if (type instanceof MenuItemType type2) {
                 this.onItemClickDefault(player, type2);
             }
             else if (type instanceof VirtualEditorType type2) {
                 if (type2 == VirtualEditorType.SHOP_CREATE) {
-                    EditorManager.startEdit(player, virtualShop, type2, input);
-                    EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Id).getLocalized());
+                    EditorManager.startEdit(player, module, type2, input);
+                    EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_ID).getLocalized());
                     player.closeInventory();
                 }
             }
         };
 
-        for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+        this.loadItems(click);
+    }
 
-            if (menuItem.getType() != null) {
-                menuItem.setClick(click);
-            }
-            this.addItem(menuItem);
-        }
-
-        for (String sId : cfg.getSection("Editor")) {
-            IMenuItem menuItem = cfg.getMenuItem("Editor." + sId, VirtualEditorType.class);
-
-            if (menuItem.getType() != null) {
-                menuItem.setClick(click);
-            }
-            this.addItem(menuItem);
-        }
+    @Override
+    public void setTypes(@NotNull Map<EditorButtonType, Integer> map) {
+        map.put(VirtualEditorType.SHOP_CREATE, 41);
+        map.put(MenuItemType.CLOSE, 39);
+        map.put(MenuItemType.PAGE_NEXT, 44);
+        map.put(MenuItemType.PAGE_PREVIOUS, 36);
     }
 
     @Override
     @NotNull
-    protected List<IShopVirtual> getObjects(@NotNull Player player) {
-        return new ArrayList<>(this.virtualShop.getShops());
+    protected List<VirtualShop> getObjects(@NotNull Player player) {
+        return new ArrayList<>(this.parent.getShops());
     }
 
     @Override
     public int[] getObjectSlots() {
-        return objectSlots;
+        return IntStream.range(0, 36).toArray();
     }
 
     @Override
     @NotNull
-    protected ItemStack getObjectStack(@NotNull Player player, @NotNull IShopVirtual shop) {
+    protected ItemStack getObjectStack(@NotNull Player player, @NotNull VirtualShop shop) {
         ItemStack item = new ItemStack(shop.getIcon());
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
 
-        meta.setDisplayName(this.objectName);
-        meta.setLore(this.objectLore);
+        ItemStack editor = VirtualEditorType.SHOP_OBJECT.getItem();
+        ItemMeta meta2 = editor.getItemMeta();
+        if (meta2 == null) return item;
+
+        meta.setDisplayName(meta2.getDisplayName());
+        meta.setLore(meta2.getLore());
         meta.addItemFlags(ItemFlag.values());
         item.setItemMeta(meta);
 
@@ -118,15 +98,15 @@ public class EditorShopList extends AbstractMenuAuto<ExcellentShop, IShopVirtual
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull IShopVirtual shop) {
+    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull VirtualShop shop) {
         return (player1, type, e) -> {
+            if (e.isShiftClick() && e.isRightClick()) {
+                this.parent.delete(shop);
+                this.open(player, this.getPage(player));
+                return;
+            }
             shop.getEditor().open(player1, 1);
         };
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
     }
 
     @Override

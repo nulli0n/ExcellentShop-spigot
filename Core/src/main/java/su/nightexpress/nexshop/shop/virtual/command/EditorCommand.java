@@ -7,12 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
-public class EditorCommand extends ShopModuleCommand<VirtualShop> {
+public class EditorCommand extends ShopModuleCommand<VirtualShopModule> {
 
-    public EditorCommand(@NotNull VirtualShop module) {
-        super(module, new String[]{"editor"}, Perms.ADMIN);
+    public EditorCommand(@NotNull VirtualShopModule module) {
+        super(module, new String[]{"editor"}, Perms.VIRTUAL_COMMAND_EDITOR);
     }
 
     @Override

@@ -25,50 +25,6 @@ import java.util.List;
 
 public class V1_19_R1 implements ChestNMS {
 
-    /*@Override
-    @NotNull
-    public ArmorStand createHologram(@NotNull Location location, @NotNull ItemStack showcase) {
-        org.bukkit.World world = location.getWorld();
-        if (world == null) throw new IllegalStateException("Location world is null!");
-
-        ServerLevel nmsWorld = ((CraftWorld) world).getHandle();
-        CustomStand entity = new CustomStand(nmsWorld);
-        ArmorStand armorStand = (ArmorStand) entity.getBukkitEntity();
-        entity.moveTo(location.getX(), location.getY(), location.getZ(), 0, 0);
-        entity.setYHeadRot(0);
-        entity.setItemSlot(EquipmentSlot.HEAD, CraftItemStack.asNMSCopy(showcase));
-        armorStand.setInvisible(true);
-        armorStand.setInvulnerable(true);
-        armorStand.setSmall(false);
-        armorStand.setGravity(false);
-        armorStand.setCustomNameVisible(true);
-        armorStand.setSilent(true);
-        armorStand.setRemoveWhenFarAway(false);
-
-        nmsWorld.addFreshEntity(entity);
-
-        armorStand.teleport(location);
-        return armorStand;
-    }*/
-
-    /*@NotNull
-    public static Map<String, List<String>> getItemsWithCategory() {
-        Map<String, List<String>> categories = new HashMap<>();
-        Stream.of(Material.values()).filter(Material::isItem).filter(Predicate.not(Material::isAir))
-            .sorted(Comparator.comparing(Enum::name)).forEach(material -> {
-
-            net.minecraft.world.item.Item item = CraftMagicNumbers.getItem(material);
-            if (item == null) return;
-
-            CreativeModeTab tab = item.getItemCategory();//.t();
-            if (tab == null) return;
-
-            String name = tab.getRecipeFolderName();//.b();
-            categories.computeIfAbsent(name, list -> new ArrayList<>()).add(material.name());
-        });
-        return categories;
-    }*/
-
     @Override
     public int createHologram(@NotNull Location location, @NotNull ItemStack showcase, @NotNull String name) {
         org.bukkit.World world = location.getWorld();
@@ -82,10 +38,12 @@ public class V1_19_R1 implements ChestNMS {
         entity.setYHeadRot(0);
         armorStand.setInvisible(true);
         armorStand.setInvulnerable(true);
-        armorStand.setCustomName(StringUtil.color(name));
+        if (!name.isEmpty()) {
+            armorStand.setCustomName(StringUtil.color(name));
+            armorStand.setCustomNameVisible(true);
+        }
         armorStand.setSmall(false);
         armorStand.setGravity(false);
-        armorStand.setCustomNameVisible(true);
         armorStand.setSilent(true);
         armorStand.setRemoveWhenFarAway(false);
 
@@ -138,140 +96,4 @@ public class V1_19_R1 implements ChestNMS {
             ((CraftPlayer) player).getHandle().connection.send(packetPlayOutEntityDestroy);
         });
     }
-
-    /*@Override
-    @NotNull
-    public Item createItem(@NotNull Location location) {
-        org.bukkit.World world = location.getWorld();
-        if (world == null) throw new IllegalStateException("Location world is null!");
-
-        ServerLevel nmsWorld = ((CraftWorld) world).getHandle();
-        CustomItem customItem = new CustomItem(nmsWorld);
-        Item item = (Item) customItem.getBukkitEntity();
-
-        customItem.setPos(location.getX(), location.getY(), location.getZ());
-        item.setItemStack(UNKNOWN);
-        item.setPickupDelay(Short.MAX_VALUE);
-        item.setInvulnerable(true);
-        item.setCustomName("");
-
-        nmsWorld.addFreshEntity(customItem);
-
-        item.teleport(location);
-        return item;
-    }*/
-
-    /*static class CustomItem extends ItemEntity {
-
-        public CustomItem(ServerLevel world) {
-            super(EntityType.ITEM, world);
-        }
-
-        @Override
-        public void tick() { }
-
-
-        @Override
-        public void baseTick() { }
-
-        @Override
-        public boolean fireImmune() {
-            return true;
-        }
-
-        @Override
-        public void lavaHurt() { }
-
-        @Override
-        public void setSecondsOnFire(int i, boolean callEvent) { }
-
-        @Override
-        public void move(MoverType enummovetype, Vec3 vec3d) { }
-
-        @Override
-        public void playerTouch(Player entityhuman) { }
-
-        @Override
-        public void inactiveTick() { }
-
-        @Override
-        public boolean isAlive() {
-            return false;
-        }
-
-        @Override
-        public boolean hurt(DamageSource damagesource, float f2) {
-            return false;
-        }
-
-        @Override
-        public void remove(Entity.RemovalReason entity_removalreason) {
-            if (!ChestDisplayRemovalState.ALLOW_REMOVE) return;
-            super.remove(entity_removalreason);
-        }
-    }*/
-
-    /*static class CustomStand extends net.minecraft.world.entity.decoration.ArmorStand {
-
-        public CustomStand(ServerLevel world) {
-            super(EntityType.ARMOR_STAND, world);
-            this.disabledSlots = EquipmentSlot.HEAD.getFilterFlag();
-        }
-
-        @Override
-        public boolean isShowArms() {
-            return false;
-        }
-
-        @Override
-        protected void doPush(Entity entity) { }
-
-        @Override
-        public InteractionResult interactAt(Player entityhuman, Vec3 vec3d, InteractionHand enumhand) {
-            return InteractionResult.FAIL;
-        }
-
-        @Override
-        public InteractionResult interact(Player entityhuman, InteractionHand enumhand) {
-            return InteractionResult.FAIL;
-        } */
-
-        /*@Override
-        public boolean isAlive() {
-            return false;
-        }*/
-
-        /*@Override
-        public void baseTick() {
-            super.baseTick();
-        }
-
-        @Override
-        public boolean fireImmune() {
-            return true;
-        }
-
-        @Override
-        public void lavaHurt() { }
-
-        @Override
-        public void setSecondsOnFire(int i, boolean callEvent) { }
-
-        @Override
-        public void move(MoverType enummovetype, Vec3 vec3d) { }
-
-        @Override
-        protected void pushEntities() { }
-
-        @Override
-        public boolean hurt(DamageSource damagesource, float f2) {
-            return false;
-        }
-
-        @Override
-        public void remove(Entity.RemovalReason entity_removalreason) {
-            if (!ChestDisplayRemovalState.ALLOW_REMOVE) return;
-            super.remove(entity_removalreason);
-        }
-    }*/
 }

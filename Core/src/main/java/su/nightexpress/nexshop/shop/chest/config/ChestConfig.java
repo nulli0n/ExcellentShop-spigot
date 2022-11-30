@@ -1,31 +1,41 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
+import com.google.common.collect.Sets;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
+import su.nexmedia.engine.utils.Placeholders;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.currency.CurrencyId;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
-import su.nightexpress.nexshop.shop.chest.type.ChestType;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ChestConfig {
 
-    public static  ItemStack                    DISPLAY_SHOWCASE;
-    private static Map<ChestType, List<String>> DISPLAY_TEXT;
-    public static  int                          DISPLAY_SLIDE_INTERVAL;
+    public static  ItemStack                        DISPLAY_SHOWCASE;
+    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", "When 'true', creates a client-side hologram above the shop.", true);
+    private static Map<ChestShopType, List<String>> DISPLAY_TEXT;
+    public static  int                              DISPLAY_SLIDE_INTERVAL;
 
+    public static final JOption<String> EDITOR_TITLE = JOption.create("Shops.Editor_Title", "Sets title for Editor GUIs.", "Shop Editor");
     public static boolean        DELETE_INVALID_SHOP_CONFIGS;
     public static ICurrency      DEFAULT_CURRENCY;
+    public static final JOption<Set<String>> ALLOWED_CONTAINERS = new JOption<Set<String>>("Shops.Allowed_Containers", "A list of Materials, that can be used for shop creation.\nhttps://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html", (cfg, path, def) -> {
+        return cfg.getStringSet(path).stream().map(String::toUpperCase).collect(Collectors.toSet());
+    }, () -> Sets.newHashSet(Material.CHEST.name(), Material.TRAPPED_CHEST.name(), Material.BARREL.name(), Material.SHULKER_BOX.name()));
     public static Set<ICurrency> ALLOWED_CURRENCIES;
     public static String         ADMIN_SHOP_NAME;
+    public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name", "Default shop name, that will be used on shop creation.", "&a" + Placeholders.Player.NAME + "'s Shop");
 
     public static  double               SHOP_CREATION_COST_CREATE;
     public static  double               SHOP_CREATION_COST_REMOVE;
@@ -38,17 +48,10 @@ public class ChestConfig {
     public static  Set<String>          SHOP_PRODUCT_DENIED_LORES;
     public static  Set<String>          SHOP_PRODUCT_DENIED_NAMES;
 
-    public static JYML CONFIG_SHOP;
-    public static JYML CONFIG_SHOP_PRODUCTS;
-    public static JYML CONFIG_SHOP_PRODUCT;
-
-    public static void load(@NotNull ChestShop chestShop) {
+    public static void load(@NotNull ChestShopModule chestShop) {
         ExcellentShop plugin = chestShop.plugin();
         JYML cfg = chestShop.getConfig();
-
-        CONFIG_SHOP = JYML.loadOrExtract(plugin, chestShop.getPath() + "editor/shop_main.yml");
-        CONFIG_SHOP_PRODUCTS = JYML.loadOrExtract(plugin, chestShop.getPath() + "editor/product_list.yml");
-        CONFIG_SHOP_PRODUCT = JYML.loadOrExtract(plugin, chestShop.getPath() + "editor/product_main.yml");
+        cfg.initializeOptions(ChestConfig.class);
 
         cfg.addMissing("Shops.Default_Currency", CurrencyId.VAULT);
         cfg.addMissing("Shops.Delete_Invalid_Shop_Configs", false);
@@ -56,8 +59,8 @@ public class ChestConfig {
         if (!cfg.isConfigurationSection("Display.Title.Values")) {
             cfg.remove("Display.Title.Values");
         }
-        cfg.addMissing("Display.Title.Values." + ChestType.PLAYER, Arrays.asList("&a%shop_name%", "&7Owner: &6%shop_owner%"));
-        cfg.addMissing("Display.Title.Values." + ChestType.ADMIN, Arrays.asList("&a%shop_name%", "&7Server Shop"));
+        cfg.addMissing("Display.Title.Values." + ChestShopType.PLAYER, Arrays.asList("&a%shop_name%", "&7Owner: &6%shop_owner%"));
+        cfg.addMissing("Display.Title.Values." + ChestShopType.ADMIN, Arrays.asList("&a%shop_name%", "&7Server Shop"));
 
         String path = "Shops.";
         DELETE_INVALID_SHOP_CONFIGS = cfg.getBoolean(path + "Delete_Invalid_Shop_Configs", false);
@@ -95,7 +98,7 @@ public class ChestConfig {
         DISPLAY_SHOWCASE = cfg.getItem(path + "Showcase");
         DISPLAY_SLIDE_INTERVAL = cfg.getInt(path + "Title.Slide_Interval", 3);
         DISPLAY_TEXT = new HashMap<>();
-        for (ChestType type : ChestType.values()) {
+        for (ChestShopType type : ChestShopType.values()) {
             DISPLAY_TEXT.put(type, StringUtil.color(cfg.getStringList(path + "Title.Values." + type.name())));
         }
 
@@ -111,7 +114,7 @@ public class ChestConfig {
     }
 
     @NotNull
-    public static List<String> getDisplayText(@NotNull ChestType chestType) {
+    public static List<String> getDisplayText(@NotNull ChestShopType chestType) {
         return DISPLAY_TEXT.getOrDefault(chestType, Collections.emptyList());
     }
 

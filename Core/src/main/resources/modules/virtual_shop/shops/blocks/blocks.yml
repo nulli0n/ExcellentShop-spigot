@@ -1,3 +1,4 @@
+Name: '&2&lBlocks'
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
@@ -6,10 +7,4 @@ Transaction_Allowed:
 Citizens:
   Attached_NPC: ''
 Icon:
-  material: SPRUCE_LOG
-  amount: 1
-  durability: 0
-  name: '&2&lBlocks'
-  enchanted: false
-  item-flags: []
-  unbreakable: false
+  Material: SPRUCE_LOG

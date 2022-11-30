@@ -1,29 +1,41 @@
 package su.nightexpress.nexshop;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.data.UserManager;
+import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.data.ShopDataHandler;
+import su.nightexpress.nexshop.data.ShopUserManager;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 public class ShopAPI {
 
-    private static final ExcellentShop PLUGIN = ExcellentShop.getPlugin(ExcellentShop.class);
+    public static final ExcellentShop PLUGIN = ExcellentShop.getPlugin(ExcellentShop.class);
+
+    @NotNull
+    public static ShopDataHandler getDataHandler() {
+        return PLUGIN.getData();
+    }
+
+    @NotNull
+    public static CurrencyManager getCurrencyManager() {
+        return PLUGIN.getCurrencyManager();
+    }
 
     public static AuctionManager getAuctionManager() {
         return PLUGIN.getAuctionManager();
     }
 
-    public static VirtualShop getVirtualShop() {
+    public static VirtualShopModule getVirtualShop() {
         return PLUGIN.getVirtualShop();
     }
 
-    public static ChestShop getChestShop() {
+    public static ChestShopModule getChestShop() {
         return PLUGIN.getChestShop();
     }
 
     @NotNull
-    public static UserManager getUserManager() {
+    public static ShopUserManager getUserManager() {
         return PLUGIN.getUserManager();
     }
 }

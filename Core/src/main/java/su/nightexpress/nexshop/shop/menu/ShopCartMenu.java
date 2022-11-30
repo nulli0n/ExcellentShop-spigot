@@ -17,14 +17,14 @@ import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.IProductPrepared;
-import su.nightexpress.nexshop.api.shop.IShop;
-import su.nightexpress.nexshop.api.shop.IProduct;
-import su.nightexpress.nexshop.api.shop.chest.IShopChest;
 import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.shop.PreparedProduct;
+import su.nightexpress.nexshop.api.shop.Product;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.api.shop.virtual.IProductVirtual;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -33,8 +33,8 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
 
     private final int[] productSlots;
 
-    private final Map<Player, IProductPrepared> products;
-    private final Map<Player, Double>           balance;
+    private final Map<Player, PreparedProduct<?>> products;
+    private final Map<Player, Double>             balance;
 
     enum ButtonType {
         ADD, SET, TAKE
@@ -47,24 +47,22 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
         this.productSlots = cfg.getIntArray("Product.Slots");
 
         IMenuClick click = (player, type, e) -> {
-            if (type == null) return;
-
-            IProductPrepared prepared = this.products.get(player);
+            PreparedProduct<?> prepared = this.products.get(player);
             if (prepared == null) {
                 player.closeInventory();
                 return;
             }
 
-            IProduct product = prepared.getProduct();
-            IShop shop = product.getShop();
+            Product<?, ?, ?> product = prepared.getProduct();
+            Shop<?, ?> shop = product.getShop();
 
             if (type instanceof MenuItemType type2) {
                 switch (type2) {
                     case CONFIRMATION_ACCEPT, CONFIRMATION_DECLINE -> {
                         if (type2 == MenuItemType.CONFIRMATION_ACCEPT) prepared.trade(player, false);
                         int page = 1;
-                        if (product instanceof IProductVirtual) {
-                            page = ((IProductVirtual) product).getPage();
+                        if (product instanceof VirtualProduct) {
+                            page = ((VirtualProduct) product).getPage();
                         }
                         shop.open(player, page);
                     }
@@ -90,7 +88,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
 
                         int capacitySpace = Integer.MAX_VALUE;
                         int capacityCart = this.getMaxPossibleAmount(prepared);
-                        int capacityProduct = product.getStockAmountLeft(player, prepared.getTradeType());
+                        int capacityProduct = product.getStock().getPossibleAmount(prepared.getTradeType(), player);//product.getStockAmountLeft(player, prepared.getTradeType());
                         double shopBalance = shop.getBank().getBalance(product.getCurrency());
                         double userBalance = product.getCurrency().getBalance(player);
 
@@ -102,8 +100,8 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
                             }
                             else {
                                 // Allow to sell no more than chest shop can carry.
-                                if (shop instanceof IShopChest shopChest) {
-                                    int chestSpace = shopChest.getProductSpace(product);
+                                if (shop instanceof ChestShop shopChest) {
+                                    int chestSpace = product.getStock().getLeftAmount(TradeType.SELL);
                                     if (chestSpace >= 0) capacitySpace = chestSpace;
 
                                     //shopBalance = shopChest.getBank().getBalance(product.getCurrency());
@@ -175,12 +173,12 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
         super.open(player, page);
     }
 
-    public void open(@NotNull Player player, @NotNull IProductPrepared prepared) {
+    public void open(@NotNull Player player, @NotNull PreparedProduct<?> prepared) {
         this.products.put(player, prepared);
         this.open(player, 1);
     }
 
-    private int getMaxPossibleAmount(@NotNull IProductPrepared prepared) {
+    private int getMaxPossibleAmount(@NotNull PreparedProduct<?> prepared) {
         ItemStack preview = prepared.getProduct().getPreview();
         int stackSize = preview.getType().getMaxStackSize();
         return stackSize * this.productSlots.length;
@@ -188,7 +186,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
 
     @Override
     public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
-        IProductPrepared prepared = this.products.get(player);
+        PreparedProduct<?> prepared = this.products.get(player);
         if (prepared == null) return;
 
         ItemStack preview = prepared.getProduct().getPreview();
@@ -225,10 +223,10 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
     public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
         super.onItemPrepare(player, menuItem, item);
 
-        IProductPrepared prepared = this.products.get(player);
+        PreparedProduct<?> prepared = this.products.get(player);
         if (prepared == null) return;
 
-        IProduct shopProduct = prepared.getProduct();
+        Product<?, ?, ?> shopProduct = prepared.getProduct();
         ICurrency currency = shopProduct.getCurrency();
 
         ItemStack preview = shopProduct.getPreview();

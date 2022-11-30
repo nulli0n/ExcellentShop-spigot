@@ -7,32 +7,32 @@ import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.api.task.AbstractTask;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.chest.IProductChest;
-import su.nightexpress.nexshop.api.shop.chest.IShopChest;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
-import su.nightexpress.nexshop.shop.chest.type.ChestType;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
-    private final ChestShop chestShop;
+    private final ChestShopModule chestShop;
 
-    private Map<IShopChest, Integer> holograms;
-    private Map<IShopChest, Integer>       items;
+    private Map<ChestShop, Integer> holograms;
+    private Map<ChestShop, Integer> items;
 
     private Slider slider;
 
-    public ChestDisplayHandler(@NotNull ChestShop chestShop) {
+    public ChestDisplayHandler(@NotNull ChestShopModule chestShop) {
         super(chestShop.plugin());
         this.chestShop = chestShop;
     }
 
     class Slider extends AbstractTask<ExcellentShop> {
 
-        private final Map<ChestType, Integer> count = new HashMap<>();
+        private final Map<ChestShopType, Integer> count = new HashMap<>();
 
         Slider() {
             super(chestShop.plugin(), ChestConfig.DISPLAY_SLIDE_INTERVAL, false);
@@ -54,14 +54,14 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
                 addItem(shop);*/
             });
 
-            for (ChestType chestType : ChestType.values()) {
+            for (ChestShopType chestType : ChestShopType.values()) {
                 int count = this.count.getOrDefault(chestType, 0) + 1;
                 if (count >= ChestConfig.getDisplayText(chestType).size()) count = 0;
                 this.count.put(chestType, count);
             }
         }
 
-        public int getCount(@NotNull IShopChest shop) {
+        public int getCount(@NotNull ChestShop shop) {
             return this.count.getOrDefault(shop.getType(), 0);
         }
     }
@@ -94,16 +94,21 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         this.items.clear();
     }
 
-    private void addHologram(@NotNull IShopChest shop, @NotNull String name) {
+    private void addHologram(@NotNull ChestShop shop, @NotNull String name) {
         Location location = shop.getDisplayLocation();
         ItemStack showcase = ChestConfig.DISPLAY_SHOWCASE;
         //String text = shop.getDisplayText().get(0);
 
-        int stand = this.holograms.computeIfAbsent(shop, i -> chestShop.getNMS().createHologram(location, showcase, name));
+        if (!ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) {
+            name = "";
+        }
+        String name2 = name;
+
+        int stand = this.holograms.computeIfAbsent(shop, i -> chestShop.getNMS().createHologram(location, showcase, name2));
         // stand.setCustomName(name);
     }
 
-    private void deleteHologram(@NotNull IShopChest shop) {
+    private void deleteHologram(@NotNull ChestShop shop) {
         if (!holograms.containsKey(shop)) return;
         int stand = this.holograms.remove(shop);
         //if (stand == null) return;
@@ -114,16 +119,16 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         //ChestDisplayRemovalState.ALLOW_REMOVE = false;
     }
 
-    private void addItem(@NotNull IShopChest shop) {
+    private void addItem(@NotNull ChestShop shop) {
         Location location = shop.getDisplayItemLocation();
-        IProductChest product = Rnd.get(shop.getProducts().stream().toList());
+        ChestProduct product = Rnd.get(shop.getProducts().stream().toList());
         ItemStack itemS = product == null ? ChestNMS.UNKNOWN : product.getItem();
 
         int item = this.items.computeIfAbsent(shop, i -> chestShop.getNMS().createItem(location, itemS));
         //item.setItemStack(product.getItem());
     }
 
-    private void deleteItem(@NotNull IShopChest shop) {
+    private void deleteItem(@NotNull ChestShop shop) {
         if (!items.containsKey(shop)) return;
         int item = this.items.remove(shop);
         //if (item == null) return;
@@ -134,7 +139,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         //ChestDisplayRemovalState.ALLOW_REMOVE = false;
     }
 
-    public void create(@NotNull IShopChest chest) {
+    public void create(@NotNull ChestShop chest) {
         //if (!chestShop.chestNMS.isSafeCreation(chest.getLocation())) return;
         if (!chest.getDisplayText().isEmpty()) {
             int count = this.slider != null ? this.slider.getCount(chest) : 0;
@@ -144,7 +149,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         //chest.setDisplayCreated(true);
     }
 
-    public void remove(@NotNull IShopChest chest) {
+    public void remove(@NotNull ChestShop chest) {
         this.deleteHologram(chest);
         this.deleteItem(chest);
         //chest.setDisplayCreated(false);

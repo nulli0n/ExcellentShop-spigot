@@ -1,42 +1,31 @@
 Title: Weapons
 Size: 54
 Content:
-  429be2a8-da5d-43cf-b802-6222f09cbdac:
+  return:
     Display:
       default:
         Item:
-          material: BARRIER
-          amount: 1
-          durability: 0
-          name: '&c&lReturn'
-          enchanted: false
-          item-flags: []
-          unbreakable: false
+          Material: BARRIER
+          Name: '&c&lReturn'
     Slots: '49'
     Type: RETURN
-  2f208075-5a33-4113-a7b6-51e7da806ffa:
+
+  page_next:
     Display:
       default:
         Item:
-          material: ENDER_EYE
-          amount: 1
-          durability: 0
-          name: '&e&lNext Page'
-          enchanted: false
-          item-flags: []
-          unbreakable: false
-    Slots: '53'
+          Material: 'PLAYER_HEAD'
+          Name: '&e&lNext Page'
+          Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19'
+    Slots: 53
     Type: PAGE_NEXT
-  d2ca5bac-945e-481c-843c-a728e37addca:
+
+  page_previous:
     Display:
       default:
         Item:
-          material: ENDER_EYE
-          amount: 1
-          durability: 0
-          name: '&e&lPrevious Page'
-          enchanted: false
-          item-flags: []
-          unbreakable: false
-    Slots: '45'
+          Material: 'PLAYER_HEAD'
+          Name: '&e&lPrevious Page'
+          Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0='
+    Slots: 45
     Type: PAGE_PREVIOUS

@@ -1,8 +1,13 @@
-Command_Aliases: chestshop,cshop,cs
+Command_Aliases: 'chestshop,cshop,cs'
 
 Shops:
   Delete_Invalid_Shop_Configs: false
   Default_Currency: vault
+  Allowed_Containers:
+    - CHEST
+    - TRAPPED_CHEST
+    - SHULKER_BOX
+    - BARREL
   Allowed_Currencies:
     - vault
     - emeralds
@@ -38,6 +43,7 @@ Display:
   Showcase:
     Material: GLASS
   Title:
+    Enabled: true
     Slide_Interval: 3
     Values:
       PLAYER:

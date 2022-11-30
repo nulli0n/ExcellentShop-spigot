@@ -2,42 +2,43 @@ package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.editor.EditorButtonType;
 import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.*;
+import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.editor.AbstractEditorMenu;
 import su.nexmedia.engine.editor.EditorManager;
-import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.api.shop.virtual.IProductVirtual;
-import su.nightexpress.nexshop.api.shop.virtual.IShopVirtual;
+import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopConfig;
+import su.nightexpress.nexshop.editor.menu.ProductPriceEditor;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
+import java.util.Map;
 
-public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
+public class EditorShopProduct extends AbstractEditorMenu<ExcellentShop, VirtualProduct> {
 
-    private final IProductVirtual product;
+    private ProductPriceEditor editorPrice;
 
-    public EditorShopProduct(@NotNull ExcellentShop plugin, @NotNull IProductVirtual product) {
-        super(plugin, VirtualShopConfig.SHOP_PRODUCT_MAIN_YML, "");
-        this.product = product;
+    public EditorShopProduct(@NotNull ExcellentShop plugin, @NotNull VirtualProduct product) {
+        super(plugin, product, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
 
-        IShopVirtual shop = product.getShop();
-
-        EditorInput<IProductVirtual, VirtualEditorType> input = (player, product2, type, e) -> {
+        VirtualShop shop = product.getShop();
+        EditorInput<VirtualProduct, VirtualEditorType> input = (player, product2, type, e) -> {
             String msg = StringUtil.color(e.getMessage());
             switch (type) {
                 case PRODUCT_CHANGE_COMMANDS -> product2.getCommands().add(StringUtil.colorRaw(msg));
@@ -45,69 +46,43 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
                     String id = StringUtil.colorOff(msg);
                     ICurrency currency = plugin.getCurrencyManager().getCurrency(id);
                     if (currency == null) {
-                        EditorManager.error(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Product_Error_Currency).getLocalized());
+                        EditorManager.error(player, plugin.getMessage(Lang.EDITOR_GENERIC_ERROR_CURRENCY).getLocalized());
                         return false;
                     }
 
                     product2.setCurrency(currency);
                 }
-                case PRODUCT_CHANGE_PRICE_SELL_MIN, PRODUCT_CHANGE_PRICE_SELL_MAX, PRODUCT_CHANGE_PRICE_BUY_MAX, PRODUCT_CHANGE_PRICE_BUY_MIN -> {
-                    double price = StringUtil.getDouble(StringUtil.colorOff(msg), -99, true);
-                    if (price == -99) {
-                        EditorManager.error(player, EditorManager.ERROR_NUM_INVALID);
-                        return false;
-                    }
-
-                    if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MIN) {
-                        product2.getPricer().setPriceMin(TradeType.BUY, price);
-                    }
-                    else if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MAX) {
-                        product2.getPricer().setPriceMax(TradeType.BUY, price);
-                    }
-                    else if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MAX) {
-                        product2.getPricer().setPriceMax(TradeType.SELL, price);
-                    }
-                    else {
-                        product2.getPricer().setPriceMin(TradeType.SELL, price);
-                    }
-                }
-                case PRODUCT_CHANGE_LIMIT_BUY_AMOUNT -> {
-                    double value = StringUtil.getDouble(StringUtil.colorOff(msg), -1, true);
-                    product2.setLimitAmount(TradeType.BUY, (int) value);
-                }
-                case PRODUCT_CHANGE_LIMIT_BUY_RESET -> {
+                case PRODUCT_CHANGE_STOCK_GLOBAL_BUY_INITIAL_AMOUNT -> {
                     int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
-                    product2.setLimitCooldown(TradeType.BUY, value);
+                    product2.getStock().setInitialAmount(StockType.GLOBAL, TradeType.BUY, value);
                 }
-                case PRODUCT_CHANGE_LIMIT_SELL_AMOUNT -> {
-                    double value = StringUtil.getDouble(StringUtil.colorOff(msg), -1, true);
-                    product2.setLimitAmount(TradeType.SELL, (int) value);
-                }
-                case PRODUCT_CHANGE_LIMIT_SELL_RESET -> {
+                case PRODUCT_CHANGE_STOCK_GLOBAL_BUY_RESTOCK_TIME -> {
                     int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
-                    product2.setLimitCooldown(TradeType.SELL, value);
+                    product2.getStock().setRestockCooldown(StockType.GLOBAL, TradeType.BUY, value);
                 }
-                case PRODUCT_CHANGE_PRICE_RANDOMIZER_TIMES_DAY -> {
-                    DayOfWeek day = CollectionsUtil.getEnum(msg, DayOfWeek.class);
-                    if (day == null) {
-                        EditorManager.error(player, EditorManager.ERROR_ENUM);
-                        return false;
-                    }
-                    product2.getPricer().getDays().add(day);
+                case PRODUCT_CHANGE_STOCK_GLOBAL_SELL_INITIAL_AMOUNT -> {
+                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
+                    product2.getStock().setInitialAmount(StockType.GLOBAL, TradeType.SELL, value);
                 }
-                case PRODUCT_CHANGE_PRICE_RANDOMIZER_TIMES_TIME -> {
-                    String[] raw = msg.split(" ");
-                    LocalTime[] times = new LocalTime[raw.length];
-
-                    for (int count = 0; count < raw.length; count++) {
-                        String[] split = raw[count].split(":");
-                        int hour = StringUtil.getInteger(split[0], 0);
-                        int minute = StringUtil.getInteger(split.length >= 2 ? split[1] : "0", 0);
-                        times[count] = LocalTime.of(hour, minute);
-                    }
-                    if (times.length < 2) return false;
-
-                    product2.getPricer().getTimes().add(times);
+                case PRODUCT_CHANGE_STOCK_GLOBAL_SELL_RESTOCK_TIME -> {
+                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
+                    product2.getStock().setRestockCooldown(StockType.GLOBAL, TradeType.SELL, value);
+                }
+                case PRODUCT_CHANGE_STOCK_PLAYER_BUY_INITIAL_AMOUNT -> {
+                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
+                    product2.getStock().setInitialAmount(StockType.PLAYER, TradeType.BUY, value);
+                }
+                case PRODUCT_CHANGE_STOCK_PLAYER_BUY_RESTOCK_TIME -> {
+                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
+                    product2.getStock().setRestockCooldown(StockType.PLAYER, TradeType.BUY, value);
+                }
+                case PRODUCT_CHANGE_STOCK_PLAYER_SELL_INITIAL_AMOUNT -> {
+                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
+                    product2.getStock().setInitialAmount(StockType.PLAYER, TradeType.SELL, value);
+                }
+                case PRODUCT_CHANGE_STOCK_PLAYER_SELL_RESTOCK_TIME -> {
+                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), -1, true);
+                    product2.getStock().setRestockCooldown(StockType.PLAYER, TradeType.SELL, value);
                 }
                 default -> {}
             }
@@ -117,19 +92,25 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
         };
         
         IMenuClick click = (player, type, e) -> {
-            VirtualShop virtualShop = plugin.getVirtualShop();
-            if (virtualShop == null) return;
-
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
-                    shop.getEditor().getEditorProducts().open(player, this.product.getPage());
+                    shop.getEditor().getEditorProducts().open(player, this.object.getPage());
                 }
             }
             else if (type instanceof VirtualEditorType type2) {
                 switch (type2) {
+                    case PRODUCT_CHANGE_PRICE -> {
+                        if (e.getClick() == ClickType.DROP) {
+                            product.getPricer().update();
+                            this.open(player, 1);
+                            return;
+                        }
+                        this.getEditorPrice().open(player, 1);
+                        return;
+                    }
                     case PRODUCT_CHANGE_COMMANDS -> {
                         if (e.isLeftClick()) {
-                            EditorManager.tip(player, plugin.getMessage(Lang.Editor_Enter_Command).getLocalized());
+                            EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_PRODUCT_ENTER_COMMAND).getLocalized());
                             EditorManager.sendCommandTips(player);
                             EditorManager.startEdit(player, product, type2, input);
                             player.closeInventory();
@@ -170,7 +151,7 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
                         }
                     }
                     case PRODUCT_CHANGE_CURRENCY -> {
-                        EditorManager.tip(player, plugin.getMessage(Lang.Editor_Enter_Currency).getLocalized());
+                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_CURRENCY).getLocalized());
                         EditorManager.suggestValues(player, plugin.getCurrencyManager()
                                 .getCurrencies().stream().map(ICurrency::getId).toList(), true);
                         EditorManager.startEdit(player, product, type2, input);
@@ -179,62 +160,26 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
                     }
                     case PRODUCT_CHANGE_DISCOUNT -> product.setDiscountAllowed(!product.isDiscountAllowed());
                     case PRODUCT_CHANGE_ITEM_META -> product.setItemMetaEnabled(!product.isItemMetaEnabled());
-                    case PRODUCT_CHANGE_PRICE_BUY -> {
-                        if (e.isShiftClick() && e.isRightClick()) {
-                            product.getPricer().setPriceMin(TradeType.BUY, -1);
-                            product.getPricer().setPriceMax(TradeType.BUY, -1);
-                            break;
-                        }
-
-                        VirtualEditorType type3;
-                        if (e.isLeftClick()) {
-                            type3 = VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MIN;
-                        }
-                        else type3 = VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MAX;
-
-                        EditorManager.tip(player, plugin.getMessage(Lang.Editor_Enter_Price).getLocalized());
-                        EditorManager.startEdit(player, product, type3, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_SELL -> {
-                        if (e.isShiftClick() && e.isRightClick()) {
-                            product.getPricer().setPriceMin(TradeType.SELL, -1);
-                            product.getPricer().setPriceMax(TradeType.SELL, -1);
-                            break;
-                        }
-
-                        VirtualEditorType type3;
-                        if (e.isLeftClick()) {
-                            type3 = VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MIN;
-                        }
-                        else type3 = VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MAX;
-
-                        EditorManager.tip(player, plugin.getMessage(Lang.Editor_Enter_Price).getLocalized());
-                        EditorManager.startEdit(player, product, type3, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_LIMIT -> {
+                    case PRODUCT_CHANGE_STOCK_GLOBAL -> {
                         VirtualEditorType type3;
                         if (e.isShiftClick()) {
                             if (e.isLeftClick()) {
-                                type3 = VirtualEditorType.PRODUCT_CHANGE_LIMIT_SELL_AMOUNT;
-                                EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Amount).getLocalized());
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_GLOBAL_SELL_INITIAL_AMOUNT;
+                                EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_AMOUNT).getLocalized());
                             }
                             else {
-                                type3 = VirtualEditorType.PRODUCT_CHANGE_LIMIT_SELL_RESET;
-                                EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Time_Seconds).getLocalized());
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_GLOBAL_SELL_RESTOCK_TIME;
+                                EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS).getLocalized());
                             }
                         }
                         else {
                             if (e.isLeftClick()) {
-                                type3 = VirtualEditorType.PRODUCT_CHANGE_LIMIT_BUY_AMOUNT;
-                                EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Amount).getLocalized());
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_GLOBAL_BUY_INITIAL_AMOUNT;
+                                EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_AMOUNT).getLocalized());
                             }
                             else {
-                                type3 = VirtualEditorType.PRODUCT_CHANGE_LIMIT_BUY_RESET;
-                                EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Time_Seconds).getLocalized());
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_GLOBAL_BUY_RESTOCK_TIME;
+                                EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS).getLocalized());
                             }
                         }
 
@@ -242,25 +187,27 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
                         player.closeInventory();
                         return;
                     }
-                    case PRODUCT_CHANGE_PRICE_RANDOMIZER_TOGGLE -> product.getPricer().setRandomizerEnabled(!product.getPricer().isRandomizerEnabled());
-                    case PRODUCT_CHANGE_PRICE_RANDOMIZER_TIMES -> {
+                    case PRODUCT_CHANGE_STOCK_PLAYER -> {
+                        VirtualEditorType type3;
                         if (e.isShiftClick()) {
                             if (e.isLeftClick()) {
-                                product.getPricer().getDays().clear();
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_PLAYER_SELL_INITIAL_AMOUNT;
+                                EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_AMOUNT).getLocalized());
                             }
-                            else product.getPricer().getTimes().clear();
-                            break;
-                        }
-
-                        VirtualEditorType type3;
-                        if (e.isLeftClick()) {
-                            type3 = VirtualEditorType.PRODUCT_CHANGE_PRICE_RANDOMIZER_TIMES_DAY;
-                            EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Day).getLocalized());
-                            EditorManager.suggestValues(player, CollectionsUtil.getEnumsList(DayOfWeek.class), true);
+                            else {
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_PLAYER_SELL_RESTOCK_TIME;
+                                EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS).getLocalized());
+                            }
                         }
                         else {
-                            type3 = VirtualEditorType.PRODUCT_CHANGE_PRICE_RANDOMIZER_TIMES_TIME;
-                            EditorManager.tip(player, plugin.getMessage(Lang.Virtual_Shop_Editor_Enter_Time_Full).getLocalized());
+                            if (e.isLeftClick()) {
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_PLAYER_BUY_INITIAL_AMOUNT;
+                                EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_AMOUNT).getLocalized());
+                            }
+                            else {
+                                type3 = VirtualEditorType.PRODUCT_CHANGE_STOCK_PLAYER_BUY_RESTOCK_TIME;
+                                EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS).getLocalized());
+                            }
                         }
 
                         EditorManager.startEdit(player, product, type3, input);
@@ -275,44 +222,41 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
             }
         };
 
-        for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
-
-            if (menuItem.getType() != null) {
-                menuItem.setClick(click);
-            }
-            this.addItem(menuItem);
-        }
-
-        for (String sId : cfg.getSection("Editor")) {
-            IMenuItem menuItem = cfg.getMenuItem("Editor." + sId, VirtualEditorType.class);
-
-            if (menuItem.getType() != null) {
-                menuItem.setClick(click);
-            }
-            this.addItem(menuItem);
-        }
+        this.loadItems(click);
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
-    @Nullable
-    public MenuItemDisplay onItemDisplayPrepare(@NotNull Player player, @NotNull IMenuItem menuItem) {
-        if (menuItem.getType() instanceof VirtualEditorType type) {
-            if (type == VirtualEditorType.PRODUCT_CHANGE_ITEM_META) {
-                return menuItem.getDisplay(String.valueOf(product.isItemMetaEnabled() ? 1 : 0));
-            }
+    public void clear() {
+        super.clear();
+        if (this.editorPrice != null) {
+            this.editorPrice.clear();
+            this.editorPrice = null;
         }
-        return super.onItemDisplayPrepare(player, menuItem);
+    }
+
+    @NotNull
+    public ProductPriceEditor getEditorPrice() {
+        if (this.editorPrice == null) {
+            this.editorPrice = new ProductPriceEditor(this.object);
+        }
+        return editorPrice;
+    }
+
+    @Override
+    public void setTypes(@NotNull Map<EditorButtonType, Integer> map) {
+        map.put(VirtualEditorType.PRODUCT_CHANGE_COMMANDS, 10);
+        map.put(VirtualEditorType.PRODUCT_CHANGE_CURRENCY, 13);
+        map.put(VirtualEditorType.PRODUCT_CHANGE_DISCOUNT, 16);
+
+        map.put(VirtualEditorType.PRODUCT_CHANGE_ITEM, 2);
+        map.put(VirtualEditorType.PRODUCT_CHANGE_ITEM_META, 4);
+        map.put(VirtualEditorType.PRODUCT_CHANGE_PREVIEW, 6);
+
+        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE, 22);
+        map.put(VirtualEditorType.PRODUCT_CHANGE_STOCK_GLOBAL, 29);
+        map.put(VirtualEditorType.PRODUCT_CHANGE_STOCK_PLAYER, 33);
+
+        map.put(MenuItemType.RETURN, 40);
     }
 
     @Override
@@ -321,19 +265,21 @@ public class EditorShopProduct extends AbstractMenu<ExcellentShop> {
 
         Enum<?> type = menuItem.getType();
         if (type != null) {
-            if (type == VirtualEditorType.PRODUCT_CHANGE_PREVIEW) {
-                item.setType(this.product.getPreview().getType());
+            if (type == VirtualEditorType.PRODUCT_CHANGE_ITEM_META) {
+                item.setType(object.isItemMetaEnabled() ? Material.WRITABLE_BOOK : Material.BOOK);
+            }
+            else if (type == VirtualEditorType.PRODUCT_CHANGE_PREVIEW) {
+                item.setType(this.object.getPreview().getType());
             }
             else if (type == VirtualEditorType.PRODUCT_CHANGE_ITEM) {
-                ItemStack buyItem = product.getItem();
+                ItemStack buyItem = object.getItem();
                 if (!buyItem.getType().isAir()) {
                     item.setType(buyItem.getType());
                 }
             }
         }
 
-        ItemUtil.replace(item, product.replacePlaceholders());
-        ItemUtil.replace(item, product.getCurrency().replacePlaceholders());
+        ItemUtil.replace(item, object.replacePlaceholders());
     }
 
     @Override

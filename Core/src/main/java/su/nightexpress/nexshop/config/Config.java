@@ -17,11 +17,11 @@ public class Config {
 
     public static boolean GENERAL_BUY_WITH_FULL_INVENTORY;
 
-    private static Map<TradeType, ShopCartMenu> CART_MENU;
+    @Deprecated private static Map<TradeType, ShopCartMenu> CART_MENU;
 
-    public static Sound SOUND_PURCHASE_SUCCESS;
-    public static Sound SOUND_PURCHASE_FAILURE;
-    public static Sound SOUND_CART_ADDITEM;
+    @Deprecated public static Sound SOUND_PURCHASE_SUCCESS;
+    @Deprecated public static Sound SOUND_PURCHASE_FAILURE;
+    @Deprecated public static Sound SOUND_CART_ADDITEM;
 
     public static void load(@NotNull ExcellentShop plugin) {
         JYML cfg = plugin.getConfig();

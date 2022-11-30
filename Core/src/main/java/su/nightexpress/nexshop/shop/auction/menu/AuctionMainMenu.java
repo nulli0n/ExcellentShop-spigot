@@ -136,7 +136,7 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
             if (item.isOwner(player1)) return;
 
             if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY && player1.getInventory().firstEmpty() < 0) {
-                plugin.getMessage(Lang.Shop_Product_Error_FullInventory).send(player1);
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player1);
                 return;
             }
             this.auctionManager.getPurchaseConfirmationMenu().open(player1, item);

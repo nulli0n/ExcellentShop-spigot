@@ -1,7 +1,7 @@
 # Default GUI configuration settings you can see on the NexEngine wiki.
 # https://github.com/nulli0n/NexEngine-spigot/wiki/Menu-Config
 
-Title: '&8&m    &8&l[ &9&lCurrency Selector &8&l]&8&m    &7'
+Title: '&8&m    &8&l[ &9&lCurrency Filter &8&l]&8&m    &7'
 Size: 54
 
 # Custom item format for the auction item categories.

@@ -16,21 +16,21 @@ import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.chest.IProductChest;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 
 import java.util.*;
 
-public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, IProductChest> {
+public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduct> {
 
-    private final ChestShop                     chestShop;
-    private final Map<String, Set<IProductChest>> searchCache;
+    private final ChestShopModule                chestShop;
+    private final Map<String, Set<ChestProduct>> searchCache;
 
     private final int[]        productSlots;
     private final String       productName;
     private final List<String> productLore;
 
-    public ChestListSearchMenu(@NotNull ChestShop chestShop) {
+    public ChestListSearchMenu(@NotNull ChestShopModule chestShop) {
         super(chestShop.plugin(), JYML.loadOrExtract(chestShop.plugin(), chestShop.getPath() + "menu/search.yml"), "");
         this.chestShop = chestShop;
         this.searchCache = new HashMap<>();
@@ -61,7 +61,7 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, IProduc
     }
 
     public void searchProduct(@NotNull Player player, @NotNull Material material) {
-        Set<IProductChest> products = new HashSet<>();
+        Set<ChestProduct> products = new HashSet<>();
         this.chestShop.getShops().forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> product.getItem().getType() == material).toList());
         });
@@ -69,7 +69,7 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, IProduc
     }
 
     @NotNull
-    public Collection<IProductChest> getSearchResult(@NotNull Player player) {
+    public Collection<ChestProduct> getSearchResult(@NotNull Player player) {
         return this.searchCache.getOrDefault(player.getName(), Collections.emptySet());
     }
 
@@ -80,14 +80,14 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, IProduc
 
     @Override
     @NotNull
-    protected List<IProductChest> getObjects(@NotNull Player player) {
+    protected List<ChestProduct> getObjects(@NotNull Player player) {
         return new ArrayList<>(this.getSearchResult(player).stream()
             .sorted((p1, p2) -> (int) (p1.getPricer().getPriceBuy() - p2.getPricer().getPriceBuy())).toList());
     }
 
     @Override
     @NotNull
-    protected ItemStack getObjectStack(@NotNull Player player, @NotNull IProductChest product) {
+    protected ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
         ItemStack item = new ItemStack(product.getItem());
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
@@ -103,7 +103,7 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, IProduc
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull IProductChest product) {
+    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull ChestProduct product) {
         return (player1, type, e) -> {
             product.getShop().teleport(player1);
         };

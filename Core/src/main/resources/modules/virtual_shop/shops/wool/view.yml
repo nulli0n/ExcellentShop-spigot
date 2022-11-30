@@ -1,16 +1,11 @@
 Title: Wool
 Size: 54
 Content:
-  447b0eb1-6ab2-4909-83f2-311b23ecff20:
+  return:
     Display:
       default:
         Item:
-          material: BARRIER
-          amount: 1
-          durability: 0
-          name: '&c&lReturn'
-          enchanted: false
-          item-flags: []
-          unbreakable: false
+          Material: BARRIER
+          Name: '&c&lReturn'
     Slots: '49'
     Type: RETURN

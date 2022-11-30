@@ -38,10 +38,12 @@ public class V1_18_R2 implements ChestNMS {
         entity.setYHeadRot(0);
         armorStand.setInvisible(true);
         armorStand.setInvulnerable(true);
-        armorStand.setCustomName(StringUtil.color(name));
+        if (!name.isEmpty()) {
+            armorStand.setCustomName(StringUtil.color(name));
+            armorStand.setCustomNameVisible(true);
+        }
         armorStand.setSmall(false);
         armorStand.setGravity(false);
-        armorStand.setCustomNameVisible(true);
         armorStand.setSilent(true);
         armorStand.setRemoveWhenFarAway(false);
 

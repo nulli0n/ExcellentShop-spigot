@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -15,25 +14,27 @@ import su.nexmedia.engine.api.menu.AbstractMenu;
 import su.nexmedia.engine.api.menu.IMenuItem;
 import su.nexmedia.engine.api.menu.MenuItemDisplay;
 import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.utils.*;
+import su.nexmedia.engine.utils.CollectionsUtil;
+import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.PDCUtil;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.virtual.IShopVirtual;
-import su.nightexpress.nexshop.api.shop.virtual.IProductVirtual;
-import su.nightexpress.nexshop.shop.virtual.object.ShopVirtual;
+import su.nightexpress.nexshop.editor.GenericEditorType;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
 import java.util.*;
 
 public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
 
-    private final IShopVirtual shop;
+    private final VirtualShop shop;
 
     private final NamespacedKey keyItemType;
     private final NamespacedKey keyReserved;
 
     private static final String TAG_LORE = "menu_type";
-    private static final String TIP_LORE_TYPE = StringUtil.color("&eItem Type &7(Middle-Click): &6");
 
-    public EditorShopViewDesign(@NotNull ExcellentShop plugin, @NotNull IShopVirtual shop) {
+    public EditorShopViewDesign(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
         super(plugin, shop.getView().getTitle(), shop.getView().getSize());
         this.keyItemType = new NamespacedKey(plugin, "menu_item_type");
         this.keyReserved = new NamespacedKey(plugin, "reserved_slot");
@@ -59,9 +60,9 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
             }
         }
 
-        ItemStack reserved = new ItemStack(Material.BARRIER);
+        ItemStack reserved = GenericEditorType.PRODUCT_RESERVED_SLOT.getItem();
         PDCUtil.setData(reserved, this.keyReserved, true);
-        for (IProductVirtual product : this.shop.getProducts()) {
+        for (VirtualProduct product : this.shop.getProducts()) {
             int slot = product.getSlot();
             if (slot >= inventory.getSize()) continue;
             inventory.setItem(slot, reserved);
@@ -82,7 +83,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
             return;
         }
 
-        if (e.getClick() == ClickType.MIDDLE && slot < this.getSize()) {
+        if (e.getClick() == ClickType.DROP && slot < this.getSize()) {
             PDCUtil.setData(item, this.keyItemType, CollectionsUtil.switchEnum(this.getType(item)).name());
             e.setCancelled(true);
         }
@@ -112,7 +113,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
 
     private void updateItem(@NotNull ItemStack item) {
         ItemUtil.delLore(item, TAG_LORE);
-        String str = StringUtil.color(TIP_LORE_TYPE + this.getType(item).name());
+        String str = StringUtil.color("&e&l" + this.getType(item).name());
         ItemUtil.addLore(item, TAG_LORE, str, -1);
     }
 
@@ -128,7 +129,6 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
             map.computeIfAbsent(item, k -> new ArrayList<>()).add(slot);
         }
 
-        ShopVirtual shop = (ShopVirtual) this.shop;
         JYML cfg = shop.getConfigView();
         cfg.set("Content", null);
 

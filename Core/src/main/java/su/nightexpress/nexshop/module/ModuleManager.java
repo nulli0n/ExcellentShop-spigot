@@ -6,14 +6,14 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.module.AbstractModuleManager;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 public class ModuleManager extends AbstractModuleManager<ExcellentShop> {
 
-    private VirtualShop    virtualShop;
-    private ChestShop      chestShop;
-    private AuctionManager auctionManager;
+    private VirtualShopModule virtualShop;
+    private ChestShopModule   chestShop;
+    private AuctionManager    auctionManager;
 
     public ModuleManager(@NotNull ExcellentShop plugin) {
         super(plugin);
@@ -21,18 +21,18 @@ public class ModuleManager extends AbstractModuleManager<ExcellentShop> {
 
     @Override
     public void loadModules() {
-        this.virtualShop = this.register(new VirtualShop(plugin));
-        this.chestShop = this.register(new ChestShop(plugin));
+        this.virtualShop = this.register(new VirtualShopModule(plugin));
+        this.chestShop = this.register(new ChestShopModule(plugin));
         this.auctionManager = this.register(new AuctionManager(plugin));
     }
 
     @Nullable
-    public VirtualShop getVirtualShop() {
+    public VirtualShopModule getVirtualShop() {
         return this.virtualShop;
     }
 
     @Nullable
-    public ChestShop getChestShop() {
+    public ChestShopModule getChestShop() {
         return this.chestShop;
     }
 

@@ -6,20 +6,20 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
-public class RemoveCmd extends ShopModuleCommand<ChestShop> {
+public class RemoveCmd extends ShopModuleCommand<ChestShopModule> {
 
-    public RemoveCmd(@NotNull ChestShop module) {
-        super(module, new String[]{"remove"}, Perms.CHEST_REMOVE);
+    public RemoveCmd(@NotNull ChestShopModule module) {
+        super(module, new String[]{"remove"}, Perms.CHEST_SHOP_REMOVE);
     }
 
     @Override
     @NotNull
     public String getDescription() {
-        return plugin.getMessage(Lang.Command_Remove_Desc).getLocalized();
+        return plugin.getMessage(ChestLang.COMMAND_REMOVE_DESC).getLocalized();
     }
 
     @Override

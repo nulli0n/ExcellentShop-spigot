@@ -68,6 +68,7 @@ public class CurrencyCreateCommand extends AbstractCommand<ExcellentShop> {
         ICurrency currency = plugin.getCurrencyManager().getCurrency(id);
         if (currency == null) {
             CurrencyItemConfig config = new CurrencyItemConfig(plugin, id);
+            config.setItem(item);
             currency = new ItemCurrency(config);
             config.save();
             plugin.getCurrencyManager().registerCurrency(currency);

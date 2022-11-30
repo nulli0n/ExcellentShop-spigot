@@ -5,14 +5,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SearchCmd extends ShopModuleCommand<ChestShop> {
+public class SearchCmd extends ShopModuleCommand<ChestShopModule> {
 
     private static final List<String> MATERIALS = new ArrayList<>();
 
@@ -22,20 +22,20 @@ public class SearchCmd extends ShopModuleCommand<ChestShop> {
         }
     }
 
-    public SearchCmd(@NotNull ChestShop module) {
-        super(module, new String[]{"search"}, Perms.CHEST_CMD_SEARCH);
+    public SearchCmd(@NotNull ChestShopModule module) {
+        super(module, new String[]{"search"}, Perms.CHEST_SHOP_COMMAND_SEARCH);
     }
 
     @Override
     @NotNull
     public String getDescription() {
-        return plugin.getMessage(Lang.Command_Search_Desc).getLocalized();
+        return plugin.getMessage(ChestLang.COMMAND_SEARCH_DESC).getLocalized();
     }
 
     @Override
     @NotNull
     public String getUsage() {
-        return plugin.getMessage(Lang.Command_Search_Usage).getLocalized();
+        return plugin.getMessage(ChestLang.COMMAND_SEARCH_USAGE).getLocalized();
     }
 
     @Override

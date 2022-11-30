@@ -6,10 +6,10 @@ Product_Format:
   Lore:
     Text:
       - '%lore%'
-      - '&7'
-      - '             &eBuy: &6%product_price_buy_formatted% &8| &eSell: &6%product_price_sell_formatted%'
-      - '             &eItems Left: &6%product_limit_buy_available%'
-      - '&7'
+      - ''
+      - '&eBuy: &6%product_price_buy_formatted% &8| &eSell: &6%product_price_sell_formatted%'
+      - '&eStock: &6%product_stock_global_buy_amount_left%&7/&6%product_stock_global_sell_amount_left%'
+      - ''
       - '&cLeft-Click &8→ &fSelect Quantity &8← &cRight-Click'
       - '&cShift-Left &8→ &fBuy &7(Quick) &fSell &8← &cShift-Right'
       - '&cF Key &8→ &fSell All &7(%product_price_sell_all_formatted%)'
@@ -48,8 +48,9 @@ Content:
     Display:
       default:
         Item:
-          Material: ENDER_EYE
-          Name: '&e&lNext Page →'
+          Material: 'PLAYER_HEAD'
+          Name: '&e&lNext Page'
+          Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19'
     Slots: 44
     Type: PAGE_NEXT
 
@@ -57,8 +58,9 @@ Content:
     Display:
       default:
         Item:
-          Material: ENDER_EYE
-          Name: '&e&l← Previous Page'
+          Material: 'PLAYER_HEAD'
+          Name: '&e&lPrevious Page'
+          Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0='
     Slots: 36
     Type: PAGE_PREVIOUS
 
@@ -67,6 +69,6 @@ Content:
       default:
         Item:
           Material: BARRIER
-          Name: '&c&lExit &4&l✕'
+          Name: '&c&lExit'
     Slots: 40
     Type: CLOSE

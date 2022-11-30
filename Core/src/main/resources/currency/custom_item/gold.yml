@@ -1,7 +1,7 @@
 Enabled: true
 Name: 'Gold'
 Format: 'x%price% %currency_name%'
-Number_Format: '#,###.##'
+Number_Format: '#,##0'
 Item:
   Material: GOLD_INGOT
   Name: '&e&lGOLD INGOT'

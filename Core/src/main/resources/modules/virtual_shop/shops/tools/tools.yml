@@ -1,3 +1,4 @@
+Name: '&b&lTools'
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
@@ -6,10 +7,4 @@ Transaction_Allowed:
 Citizens:
   Attached_NPC: ''
 Icon:
-  material: DIAMOND_SHOVEL
-  amount: 1
-  durability: 0
-  name: '&b&lTools'
-  enchanted: false
-  item-flags: []
-  unbreakable: false
+  Material: DIAMOND_SHOVEL

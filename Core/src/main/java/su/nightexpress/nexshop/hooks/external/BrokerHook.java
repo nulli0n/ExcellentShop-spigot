@@ -11,10 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.hook.AbstractHook;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.IProductPrepared;
-import su.nightexpress.nexshop.api.shop.IProduct;
+import su.nightexpress.nexshop.api.shop.PreparedProduct;
+import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -29,7 +29,7 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
 
     @Override
     public boolean setup() {
-        VirtualShop virtualShop = plugin.getVirtualShop();
+        VirtualShopModule virtualShop = plugin.getVirtualShop();
         if (virtualShop != null) {
             this.virtualShopBroker = new VirtualShopBroker(virtualShop);
             plugin.getServer().getScheduler().runTaskLater(plugin, c -> {
@@ -50,11 +50,11 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
 
     class VirtualShopBroker implements Broker<ItemStack> {
 
-        private final VirtualShop virtualShop;
+        private final VirtualShopModule virtualShop;
 
         private static final String NO_PRODUCT = "No product available";
 
-        public VirtualShopBroker(@NotNull VirtualShop virtualShop) {
+        public VirtualShopBroker(@NotNull VirtualShopModule virtualShop) {
             this.virtualShop = virtualShop;
         }
 
@@ -74,22 +74,22 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
         }
 
         @Nullable
-        private IProduct getBestProduct(@NotNull Player player, @NotNull TradeType tradeType,
-                                        @NotNull ItemStack item, int amount) {
-            Set<IProduct> products = new HashSet<>();
+        private Product<?, ?, ?> getBestProduct(@NotNull Player player, @NotNull TradeType tradeType,
+                                                @NotNull ItemStack item, int amount) {
+            Set<Product<?, ?, ?>> products = new HashSet<>();
             this.virtualShop.getShops().stream()
-                    .filter(shop -> shop.hasPermission(player) && shop.isPurchaseAllowed(tradeType)).forEach(shop -> {
+                    .filter(shop -> shop.hasPermission(player) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
                 products.addAll(shop.getProducts().stream().filter(product -> {
                     if (!product.isItemMatches(item)) return false;
                     if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                     if (tradeType == TradeType.SELL && !product.isSellable()) return false;
-                    if (tradeType == TradeType.SELL && product.getItemAmount(player) < amount) return false;
-                    if (product.getStockAmountLeft(player, tradeType) < amount) return false;
+                    if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;
+                    if (product.getStock().getPossibleAmount(tradeType, player) < amount) return false;
                     return true;
                 }).toList());
             });
 
-            Comparator<IProduct> comp = (p1, p2) -> {
+            Comparator<Product<?, ?, ?>> comp = (p1, p2) -> {
                 return (int) (p1.getPricer().getPrice(tradeType) - p2.getPricer().getPrice(tradeType));
             };
 
@@ -111,7 +111,7 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
             Player player = playerId.isEmpty() ? null : plugin.getServer().getPlayer(playerId.get());
             if (player == null) return Optional.empty();
 
-            IProduct product = this.getBestProduct(player, TradeType.BUY, itemStack, amount);
+            Product<?, ?, ?> product = this.getBestProduct(player, TradeType.BUY, itemStack, amount);
             return Optional.ofNullable(product == null ? null : BigDecimal.valueOf(product.getPricer().getPrice(TradeType.BUY)));
         }
 
@@ -120,7 +120,7 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
             Player player = playerId.isEmpty() ? null : plugin.getServer().getPlayer(playerId.get());
             if (player == null) return Optional.empty();
 
-            IProduct product = this.getBestProduct(player, TradeType.SELL, itemStack, amount);
+            Product<?, ?, ?> product = this.getBestProduct(player, TradeType.SELL, itemStack, amount);
             return Optional.ofNullable(product == null ? null : BigDecimal.valueOf(product.getPricer().getPrice(TradeType.SELL)));
         }
 
@@ -133,10 +133,10 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
             Optional<BigDecimal> value = getBuyPrice(playerId, worldId, itemStack, amount);
             if (player == null || value.isEmpty()) return builder.buildFailure(NO_PRODUCT);
 
-            IProduct product = this.getBestProduct(player, TradeType.BUY, itemStack, amount);
+            Product<?, ?, ?> product = this.getBestProduct(player, TradeType.BUY, itemStack, amount);
             if (product == null) return builder.buildFailure(NO_PRODUCT);
 
-            IProductPrepared prepared = product.getPrepared(TradeType.BUY);
+            PreparedProduct<?> prepared = product.getPrepared(TradeType.BUY);
             prepared.setAmount(amount);
 
             return builder.setValue(value.get()).buildSuccess(() -> prepared.trade(player, false));
@@ -151,10 +151,10 @@ public class BrokerHook extends AbstractHook<ExcellentShop> {
             Optional<BigDecimal> value = getSellPrice(playerId, worldId, itemStack, amount);
             if (player == null || value.isEmpty()) return builder.buildFailure(NO_PRODUCT);
 
-            IProduct product = this.getBestProduct(player, TradeType.SELL, itemStack, amount);
+            Product<?, ?, ?> product = this.getBestProduct(player, TradeType.SELL, itemStack, amount);
             if (product == null) return builder.buildFailure(NO_PRODUCT);
 
-            IProductPrepared prepared = product.getPrepared(TradeType.SELL);
+            PreparedProduct<?> prepared = product.getPrepared(TradeType.SELL);
             prepared.setAmount(amount);
 
             return builder.setValue(value.get()).buildSuccess(() -> prepared.trade(player, false));

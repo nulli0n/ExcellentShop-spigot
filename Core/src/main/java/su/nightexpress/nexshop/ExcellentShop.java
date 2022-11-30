@@ -13,23 +13,25 @@ import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.data.ShopDataHandler;
-import su.nightexpress.nexshop.data.UserManager;
-import su.nightexpress.nexshop.data.object.ShopUser;
+import su.nightexpress.nexshop.data.ShopUserManager;
+import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.hooks.HookId;
 import su.nightexpress.nexshop.hooks.external.BrokerHook;
 import su.nightexpress.nexshop.module.ModuleManager;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.menu.AuctionMainMenu;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.type.ChestType;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 
 public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataHolder<ExcellentShop, ShopUser> {
 
     private ShopDataHandler dataHandler;
-    private UserManager userManager;
+    private ShopUserManager userManager;
 
     private CurrencyManager currencyManager;
     private ModuleManager   moduleManager;
@@ -84,7 +86,7 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
             return false;
         }
 
-        this.userManager = new UserManager(this);
+        this.userManager = new ShopUserManager(this);
         this.userManager.setup();
 
         return true;
@@ -99,10 +101,12 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     public void loadLang() {
         this.getLangManager().loadMissing(Lang.class);
         this.getLangManager().loadMissing(ChestLang.class);
+        this.getLangManager().loadMissing(VirtualLang.class);
         this.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
         this.getLangManager().setupEnum(TradeType.class);
-        this.getLangManager().setupEnum(ChestType.class);
-        this.getLangManager().getConfig().saveChanges();
+        this.getLangManager().setupEnum(ChestShopType.class);
+        this.getLangManager().setupEditorEnum(VirtualEditorType.class);
+        this.getLang().saveChanges();
     }
 
     @Override
@@ -129,7 +133,7 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
 
     @NotNull
     @Override
-    public UserManager getUserManager() {
+    public ShopUserManager getUserManager() {
         return userManager;
     }
 
@@ -144,12 +148,12 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     }
 
     @Nullable
-    public VirtualShop getVirtualShop() {
+    public VirtualShopModule getVirtualShop() {
         return this.moduleManager.getVirtualShop();
     }
 
     @Nullable
-    public ChestShop getChestShop() {
+    public ChestShopModule getChestShop() {
         return this.moduleManager.getChestShop();
     }
 

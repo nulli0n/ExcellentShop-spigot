@@ -5,29 +5,29 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.api.shop.virtual.IShopVirtual;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
-import su.nightexpress.nexshop.shop.virtual.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
 import java.util.List;
 
-public class OpenCommand extends ShopModuleCommand<VirtualShop> {
+public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
 
-    public OpenCommand(@NotNull VirtualShop guiShop) {
-        super(guiShop, new String[]{"open"}, Perms.VIRTUAL_CMD_OPEN);
+    public OpenCommand(@NotNull VirtualShopModule guiShop) {
+        super(guiShop, new String[]{"open"}, Perms.VIRTUAL_COMMAND_OPEN);
     }
 
     @Override
     @NotNull
     public String getDescription() {
-        return plugin.getMessage(Lang.Virtual_Shop_Command_Open_Desc).getLocalized();
+        return plugin.getMessage(VirtualLang.COMMAND_OPEN_DESC).getLocalized();
     }
 
     @Override
     @NotNull
     public String getUsage() {
-        return plugin.getMessage(Lang.Virtual_Shop_Command_Open_Usage).getLocalized();
+        return plugin.getMessage(VirtualLang.COMMAND_OPEN_USAGE).getLocalized();
     }
 
     @Override
@@ -37,11 +37,11 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
 
     @Override
     @NotNull
-    public List<@NotNull String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
+    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
         if (arg == 1) {
-            return module.getShops(player);
+            return module.getShops(player).stream().map(VirtualShop::getId).toList();
         }
-        if (arg == 2 && player.hasPermission(Perms.VIRTUAL_CMD_OPEN_OTHERS)) {
+        if (arg == 2 && player.hasPermission(Perms.VIRTUAL_COMMAND_OPEN_OTHERS)) {
             return PlayerUtil.getPlayerNames();
         }
         return super.getTab(player, arg, args);
@@ -59,13 +59,13 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
             return;
         }
 
-        IShopVirtual shopVirtual = this.module.getShopById(args[1]);
-        Player player = plugin.getServer().getPlayer(args.length >= 3 && shopVirtual != null ? args[2] : args[1]);
+        VirtualShop virtualShop = this.module.getShopById(args[1]);
+        Player player = plugin.getServer().getPlayer(args.length >= 3 && virtualShop != null ? args[2] : args[1]);
 
-        if (shopVirtual == null) {
+        if (virtualShop == null) {
             if (player == null) {
                 if (sender instanceof Player || args.length >= 3) {
-                    plugin.getMessage(Lang.Virtual_Shop_Open_Error_InvalidShop).send(sender);
+                    plugin.getMessage(VirtualLang.OPEN_ERROR_INVALID_SHOP).send(sender);
                 }
                 else {
                     this.errorPlayer(sender);
@@ -85,16 +85,16 @@ public class OpenCommand extends ShopModuleCommand<VirtualShop> {
             player = player1;
         }
 
-        if (!player.equals(sender) && !sender.hasPermission(Perms.VIRTUAL_CMD_OPEN_OTHERS)) {
+        if (!player.equals(sender) && !sender.hasPermission(Perms.VIRTUAL_COMMAND_OPEN_OTHERS)) {
             this.errorPermission(sender);
             return;
         }
 
-        if (!shopVirtual.hasPermission(player)) {
+        if (!virtualShop.hasPermission(player)) {
             this.errorPermission(player);
             return;
         }
 
-        shopVirtual.open(player, 1);
+        virtualShop.open(player, 1);
     }
 }

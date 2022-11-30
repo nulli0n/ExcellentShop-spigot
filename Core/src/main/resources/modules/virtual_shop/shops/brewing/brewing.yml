@@ -1,3 +1,4 @@
+Name: '&6&lBrewing'
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
@@ -6,10 +7,4 @@ Transaction_Allowed:
 Citizens:
   Attached_NPC: ''
 Icon:
-  material: BREWING_STAND
-  amount: 1
-  durability: 0
-  name: '&6&lBrewing'
-  enchanted: false
-  item-flags: []
-  unbreakable: false
+  Material: BREWING_STAND

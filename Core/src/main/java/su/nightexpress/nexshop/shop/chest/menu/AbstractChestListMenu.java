@@ -16,21 +16,21 @@ import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.chest.IShopChest;
-import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.ChestShop;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
 import java.util.List;
 
-public abstract class AbstractChestListMenu extends AbstractMenuAuto<ExcellentShop, IShopChest> {
+public abstract class AbstractChestListMenu extends AbstractMenuAuto<ExcellentShop, ChestShop> {
 
-    protected ChestShop chestShop;
+    protected ChestShopModule chestShop;
 
     protected int[]        objectSlots;
     protected String       shopName;
     protected List<String> shopLore;
 
-    public AbstractChestListMenu(@NotNull ChestShop chestShop, @NotNull JYML cfg) {
+    public AbstractChestListMenu(@NotNull ChestShopModule chestShop, @NotNull JYML cfg) {
         super(chestShop.plugin(), cfg, "");
         this.chestShop = chestShop;
 
@@ -55,7 +55,7 @@ public abstract class AbstractChestListMenu extends AbstractMenuAuto<ExcellentSh
                     }
                     else return;
 
-                    plugin.getMessage(Lang.ShopList_Info_Switch)
+                    plugin.getMessage(ChestLang.SHOP_LIST_INFO_SWITCH)
                         .replace("%state%", LangManager.getBoolean(isGlobal))
                         .send(player);
                 }
@@ -92,7 +92,7 @@ public abstract class AbstractChestListMenu extends AbstractMenuAuto<ExcellentSh
 
     @Override
     @NotNull
-    protected ItemStack getObjectStack(@NotNull Player player, @NotNull IShopChest shop) {
+    protected ItemStack getObjectStack(@NotNull Player player, @NotNull ChestShop shop) {
         ItemStack item = new ItemStack(shop.getLocation().getBlock().getType());
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;

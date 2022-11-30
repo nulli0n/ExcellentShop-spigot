@@ -17,24 +17,17 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.hook.AbstractHook;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.WorldGuardHook;
-import su.nightexpress.nexshop.ExcellentShop;
 
-public class WorldGuardFlags extends AbstractHook<ExcellentShop> implements ClaimHook {
+public class WorldGuardFlags implements ClaimHook {
 
     private static StateFlag FLAG_CHEST_SHOP_CREATE;
 
     private static final String NAME_CHEST_SHOP_CREATE = "chest-shop-create";
 
-    public WorldGuardFlags(@NotNull ExcellentShop plugin, @NotNull String pluginName) {
-        super(plugin, pluginName);
-    }
+    public WorldGuardFlags() {
 
-    @Override
-    public boolean setup() {
-        return true;
     }
 
     public static void setupFlag() {
@@ -50,11 +43,6 @@ public class WorldGuardFlags extends AbstractHook<ExcellentShop> implements Clai
                 FLAG_CHEST_SHOP_CREATE = existing2;
             }
         }
-    }
-
-    @Override
-    public void shutdown() {
-
     }
 
     @Override

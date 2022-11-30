@@ -7,9 +7,9 @@ import su.nexmedia.engine.api.module.AbstractModule;
 import su.nexmedia.engine.command.list.HelpSubCommand;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.IProductPrepared;
-import su.nightexpress.nexshop.api.shop.IShop;
-import su.nightexpress.nexshop.api.event.AbstractShopPurchaseEvent;
+import su.nightexpress.nexshop.api.event.ShopPurchaseEvent;
+import su.nightexpress.nexshop.api.shop.PreparedProduct;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.module.command.ModuleReloadCmd;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 
@@ -91,12 +91,12 @@ public abstract class ShopModule extends AbstractModule<ExcellentShop> {
             this.format = StringUtil.color(cfg.getString(path + "Format.Purchase", "%type%: %player% - x%amount% of %item% for %price%&7 in %shop_name% shop."));
         }
 
-        public void logTransaction(@NotNull AbstractShopPurchaseEvent event) {
+        public void logTransaction(@NotNull ShopPurchaseEvent<?> event) {
             if (!this.outFile && !this.outConsole) return;
 
             Player player = event.getPlayer();
-            IProductPrepared prepared = event.getPrepared();
-            IShop shop = event.getShop();
+            PreparedProduct<?> prepared = event.getPrepared();
+            Shop<?, ?> shop = event.getShop();
 
             String format = this.format.replace("%player%", player.getName());
             format = prepared.replacePlaceholders().apply(format);
