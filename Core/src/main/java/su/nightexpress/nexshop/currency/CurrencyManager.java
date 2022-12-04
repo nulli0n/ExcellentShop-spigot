@@ -1,9 +1,7 @@
 package su.nightexpress.nexshop.currency;
 
 import me.xanium.gemseconomy.GemsEconomy;
-import me.xanium.gemseconomy.account.Account;
 import me.xanium.gemseconomy.currency.Currency;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -12,22 +10,27 @@ import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHook;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
 import su.nightexpress.nexshop.currency.config.CurrencyConfig;
 import su.nightexpress.nexshop.currency.config.CurrencyItemConfig;
 import su.nightexpress.nexshop.currency.external.GamePointsCurrency;
+import su.nightexpress.nexshop.currency.external.GemsEconomyCurrency;
 import su.nightexpress.nexshop.currency.external.PlayerPointsCurrency;
 import su.nightexpress.nexshop.currency.external.VaultEcoCurrency;
 import su.nightexpress.nexshop.currency.internal.ExpCurrency;
 import su.nightexpress.nexshop.currency.internal.ItemCurrency;
 import su.nightexpress.nexshop.hooks.HookId;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
     public static final String DIR_DEFAULT = "/currency/default/";
-    public static final String DIR_CUSTOM = "/currency/custom_item/";
+    public static final String DIR_CUSTOM  = "/currency/custom_item/";
 
     private Map<String, ICurrency> currencyMap;
 
@@ -75,45 +78,14 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
                     }
                 }
                 case CurrencyId.GEMSECONOMY -> {
-                    if (Hooks.hasPlugin("GemsEconomy")) {
+                    if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
 
                         // GemsEconomy plugin itself has multi currency support, which means that
                         // we need to dynamically register an ICurrency for each currency of GemsEconomy.
                         // This also includes the dynamic creation of currency config files in ExcellentShop.
 
                         for (Currency currency : GemsEconomy.inst().getCurrencyManager().getCurrencies()) {
-                            CurrencyConfig currencyConfig = loadConfigDefault("gemseconomy:" + currency.getSingular().toLowerCase(Locale.ROOT));
-                            currencyConfig.save();
-                            ICurrency gemsCurrency = new ICurrency() {
-                                private final String identifier = currency.getSingular();
-                                private final CurrencyConfig config = currencyConfig;
-
-                                @Override
-                                public @NotNull ICurrencyConfig getConfig() {
-                                    return config;
-                                }
-
-                                @Override
-                                public double getBalance(@NotNull Player player) {
-                                    Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
-                                    return GemsEconomy.getAPI().pullAccount(player.getUniqueId()).getBalance(gemsCurrency);
-                                }
-
-                                @Override
-                                public void give(@NotNull Player player, double amount) {
-                                    Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
-                                    Account account = GemsEconomy.getAPI().pullAccount(player.getUniqueId());
-                                    account.deposit(gemsCurrency, amount);
-                                }
-
-                                @Override
-                                public void take(@NotNull Player player, double amount) {
-                                    Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
-                                    Account account = GemsEconomy.getAPI().pullAccount(player.getUniqueId());
-                                    account.withdraw(gemsCurrency, amount);
-                                }
-                            };
-                            this.registerCurrency(gemsCurrency);
+                            this.registerCurrency(new GemsEconomyCurrency(currency.getSingular()));
                         }
                     }
                 }

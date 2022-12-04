@@ -6,8 +6,9 @@ import su.nightexpress.gamepoints.api.GamePointsAPI;
 import su.nightexpress.gamepoints.data.PointUser;
 import su.nightexpress.nexshop.api.currency.AbstractCurrency;
 import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
+import su.nightexpress.nexshop.api.currency.SingleCurrency;
 
-public class GamePointsCurrency extends AbstractCurrency {
+public class GamePointsCurrency extends AbstractCurrency implements SingleCurrency {
 
     public GamePointsCurrency(@NotNull ICurrencyConfig config) {
         super(config);

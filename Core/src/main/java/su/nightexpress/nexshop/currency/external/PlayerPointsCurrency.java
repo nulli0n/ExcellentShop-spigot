@@ -7,9 +7,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.AbstractCurrency;
 import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
+import su.nightexpress.nexshop.api.currency.SingleCurrency;
 import su.nightexpress.nexshop.hooks.HookId;
 
-public class PlayerPointsCurrency extends AbstractCurrency {
+public class PlayerPointsCurrency extends AbstractCurrency implements SingleCurrency {
 
     private final PlayerPointsAPI api;
 
