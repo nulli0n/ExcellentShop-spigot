@@ -1,5 +1,9 @@
 package su.nightexpress.nexshop.currency;
 
+import me.xanium.gemseconomy.GemsEconomy;
+import me.xanium.gemseconomy.account.Account;
+import me.xanium.gemseconomy.currency.Currency;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -8,6 +12,7 @@ import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHook;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
 import su.nightexpress.nexshop.currency.config.CurrencyConfig;
 import su.nightexpress.nexshop.currency.config.CurrencyItemConfig;
 import su.nightexpress.nexshop.currency.external.GamePointsCurrency;
@@ -18,7 +23,6 @@ import su.nightexpress.nexshop.currency.internal.ItemCurrency;
 import su.nightexpress.nexshop.hooks.HookId;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
@@ -42,20 +46,78 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     private void loadDefault() {
-        Stream.of(CurrencyId.values()).forEach(currencyId -> {
-            CurrencyConfig config = this.loadConfigDefault(currencyId);
-            config.save();
+        CurrencyId.stream().forEach(currencyId -> {
+            switch (currencyId) {
+                case CurrencyId.EXP -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.EXP);
+                    config.save();
+                    this.registerCurrency(new ExpCurrency(config));
+                }
+                case CurrencyId.VAULT -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.VAULT);
+                    config.save();
+                    if (Hooks.hasVault() && VaultHook.hasEconomy()) {
+                        this.registerCurrency(new VaultEcoCurrency(config));
+                    }
+                }
+                case CurrencyId.GAME_POINTS -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.GAME_POINTS);
+                    config.save();
+                    if (Hooks.hasPlugin(HookId.GAME_POINTS)) {
+                        this.registerCurrency(new GamePointsCurrency(config));
+                    }
+                }
+                case CurrencyId.PLAYER_POINTS -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.PLAYER_POINTS);
+                    config.save();
+                    if (Hooks.hasPlugin(HookId.PLAYER_POINTS)) {
+                        this.registerCurrency(new PlayerPointsCurrency(config));
+                    }
+                }
+                case CurrencyId.GEMSECONOMY -> {
+                    if (Hooks.hasPlugin("GemsEconomy")) {
 
-            ICurrency currency = switch (currencyId) {
-                case CurrencyId.EXP -> new ExpCurrency(config);
-                case CurrencyId.VAULT -> !Hooks.hasVault() || !VaultHook.hasEconomy() ? null : new VaultEcoCurrency(config);
-                case CurrencyId.GAME_POINTS -> !Hooks.hasPlugin(HookId.GAME_POINTS) ? null : new GamePointsCurrency(config);
-                case CurrencyId.PLAYER_POINTS -> !Hooks.hasPlugin(HookId.PLAYER_POINTS) ? null : new PlayerPointsCurrency(config);
-                default -> null;
-            };
-            if (currency == null) return;
+                        // GemsEconomy plugin itself has multi currency support, which means that
+                        // we need to dynamically register an ICurrency for each currency of GemsEconomy.
+                        // This also includes the dynamic creation of currency config files in ExcellentShop.
 
-            this.registerCurrency(currency);
+                        for (Currency currency : GemsEconomy.inst().getCurrencyManager().getCurrencies()) {
+                            CurrencyConfig currencyConfig = loadConfigDefault("gemseconomy:" + currency.getSingular().toLowerCase(Locale.ROOT));
+                            currencyConfig.save();
+                            ICurrency gemsCurrency = new ICurrency() {
+                                private final String identifier = currency.getSingular();
+                                private final CurrencyConfig config = currencyConfig;
+
+                                @Override
+                                public @NotNull ICurrencyConfig getConfig() {
+                                    return config;
+                                }
+
+                                @Override
+                                public double getBalance(@NotNull Player player) {
+                                    Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
+                                    return GemsEconomy.getAPI().pullAccount(player.getUniqueId()).getBalance(gemsCurrency);
+                                }
+
+                                @Override
+                                public void give(@NotNull Player player, double amount) {
+                                    Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
+                                    Account account = GemsEconomy.getAPI().pullAccount(player.getUniqueId());
+                                    account.deposit(gemsCurrency, amount);
+                                }
+
+                                @Override
+                                public void take(@NotNull Player player, double amount) {
+                                    Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
+                                    Account account = GemsEconomy.getAPI().pullAccount(player.getUniqueId());
+                                    account.withdraw(gemsCurrency, amount);
+                                }
+                            };
+                            this.registerCurrency(gemsCurrency);
+                        }
+                    }
+                }
+            }
         });
     }
 
@@ -115,4 +177,5 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
         if (opt.isEmpty()) throw new IllegalArgumentException("No currencies are installed!");
         return opt.get();
     }
+
 }

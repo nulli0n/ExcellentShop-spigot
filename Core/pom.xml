@@ -103,6 +103,11 @@
             <version>1.3.4</version>
         </dependency>
         <dependency>
+            <groupId>me.xanium.gemseconomy</groupId>
+            <artifactId>GemsEconomy</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>NMS</artifactId>
             <version>4.3.0</version>
