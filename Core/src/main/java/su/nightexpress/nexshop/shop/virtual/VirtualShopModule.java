@@ -27,6 +27,7 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopList;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShopBank;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopListener;
 import su.nightexpress.nexshop.shop.virtual.menu.VirtualMenuMain;
 
@@ -156,6 +157,8 @@ public class VirtualShopModule extends ShopModule {
         shop.setName("&e&l" + StringUtil.capitalizeFully(id.replace("_", " ")));
         shop.setDescription(Arrays.asList("&7Freshly created shop.", "&7Edit me in &a/shop editor"));
         shop.setIcon(new ItemStack(Material.REDSTONE));
+        shop.setBank(new VirtualShopBank(shop));
+        shop.setupView();
         shop.save();
         this.getShopsMap().put(shop.getId(), shop);
         return true;

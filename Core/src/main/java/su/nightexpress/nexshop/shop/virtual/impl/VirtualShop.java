@@ -34,7 +34,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
     private       int                 pages;
     private       boolean             isPermissionRequired;
     private       ItemStack           icon;
-    private       int[]               citizensIds;
+    private       int[]               citizensIds = new int[0];
 
     private ShopView<VirtualShop> view;
     private EditorShopMain        editor;
