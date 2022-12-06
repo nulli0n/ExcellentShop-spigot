@@ -84,7 +84,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
                         // we need to dynamically register an ICurrency for each currency of GemsEconomy.
                         // This also includes the dynamic creation of currency config files in ExcellentShop.
 
-                        for (Currency currency : GemsEconomy.inst().getCurrencyManager().getCurrencies()) {
+                        for (Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
                             this.registerCurrency(new GemsEconomyCurrency(currency.getSingular()));
                         }
                     }

@@ -39,14 +39,14 @@ public class GemsEconomyCurrency extends AbstractCurrency implements MultiCurren
 
     @Override
     public double getBalance(@NotNull Player player) {
-        Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
-        return GemsEconomy.getAPI().pullAccount(player.getUniqueId()).getBalance(gemsCurrency);
+        Currency gemsCurrency = GemsEconomy.getInstance().getCurrencyManager().getCurrency(identifier);
+        return GemsEconomy.getInstance().getAccountManager().getAccount(player).getBalance(gemsCurrency);
     }
 
     @Override
     public void give(@NotNull Player player, double amount) {
-        Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
-        Account account = GemsEconomy.getAPI().pullAccount(player.getUniqueId());
+        Currency gemsCurrency = GemsEconomy.getInstance().getCurrencyManager().getCurrency(identifier);
+        Account account = GemsEconomy.getInstance().getAccountManager().getAccount(player);
         if (account != null) {
             account.deposit(gemsCurrency, amount);
         } else throw new IllegalStateException("Cannot find GemsEconomy account for player: " + player.getName());
@@ -54,8 +54,8 @@ public class GemsEconomyCurrency extends AbstractCurrency implements MultiCurren
 
     @Override
     public void take(@NotNull Player player, double amount) {
-        Currency gemsCurrency = GemsEconomy.inst().getCurrencyManager().getCurrency(identifier);
-        Account account = GemsEconomy.getAPI().pullAccount(player.getUniqueId());
+        Currency gemsCurrency = GemsEconomy.getInstance().getCurrencyManager().getCurrency(identifier);
+        Account account = GemsEconomy.getInstance().getAccountManager().getAccount(player);
         if (account != null) {
             account.withdraw(gemsCurrency, amount);
         } else throw new IllegalStateException("Cannot find GemsEconomy account for player: " + player.getName());
