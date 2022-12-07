@@ -70,7 +70,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
                         this.registerCurrency(new PlayerPointsCurrency(config));
                     }
                 }
-                case CurrencyId.GEMSECONOMY -> {
+                case CurrencyId.GEMS_ECONOMY -> {
                     if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
                         GemsEconomyCurrency.registerCurrencies();
                     }

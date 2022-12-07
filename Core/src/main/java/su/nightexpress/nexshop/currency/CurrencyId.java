@@ -11,11 +11,11 @@ public class CurrencyId {
     public static final String VAULT         = "vault";
     public static final String PLAYER_POINTS = "player_points";
     public static final String GAME_POINTS   = "game_points";
-    public static final String GEMSECONOMY   = "gemseconomy";
+    public static final String GEMS_ECONOMY  = "gemseconomy";
 
     @NotNull
     public static String[] values() {
-        return new String[]{EXP, VAULT, PLAYER_POINTS, GAME_POINTS, GEMSECONOMY};
+        return new String[]{EXP, VAULT, PLAYER_POINTS, GAME_POINTS, GEMS_ECONOMY};
     }
 
     @NotNull
