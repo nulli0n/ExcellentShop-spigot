@@ -1,7 +1,5 @@
 package su.nightexpress.nexshop.currency;
 
-import me.xanium.gemseconomy.GemsEconomy;
-import me.xanium.gemseconomy.currency.Currency;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -20,12 +18,7 @@ import su.nightexpress.nexshop.currency.internal.ExpCurrency;
 import su.nightexpress.nexshop.currency.internal.ItemCurrency;
 import su.nightexpress.nexshop.hooks.HookId;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
@@ -79,14 +72,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
                 }
                 case CurrencyId.GEMSECONOMY -> {
                     if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
-
-                        // GemsEconomy plugin itself has multi currency support, which means that
-                        // we need to dynamically register an ICurrency for each currency of GemsEconomy.
-                        // This also includes the dynamic creation of currency config files in ExcellentShop.
-
-                        for (Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
-                            this.registerCurrency(new GemsEconomyCurrency(currency.getSingular()));
-                        }
+                        GemsEconomyCurrency.registerCurrencies();
                     }
                 }
             }

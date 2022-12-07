@@ -26,6 +26,16 @@ public class GemsEconomyCurrency extends AbstractCurrency implements MultiCurren
         this.identifier = identifier;
     }
 
+    public static void registerCurrencies() {
+        // GemsEconomy plugin itself has multi currency support, which means that
+        // we need to dynamically register an ICurrency for each currency in GemsEconomy database.
+        // This also includes the dynamic creation of currency config files in ExcellentShop.
+
+        for (Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
+            ShopAPI.getCurrencyManager().registerCurrency(new GemsEconomyCurrency(currency.getSingular()));
+        }
+    }
+
     private static CurrencyConfig loadOrCreateConfig(String identifier) {
         JYML jyml = JYML.loadOrExtract(ShopAPI.PLUGIN, CurrencyManager.DIR_DEFAULT
                                                        + "gemseconomy:"
