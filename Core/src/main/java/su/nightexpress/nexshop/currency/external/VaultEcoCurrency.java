@@ -5,8 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.hooks.external.VaultHook;
 import su.nightexpress.nexshop.api.currency.AbstractCurrency;
 import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
+import su.nightexpress.nexshop.api.currency.SingleCurrency;
 
-public class VaultEcoCurrency extends AbstractCurrency {
+public class VaultEcoCurrency extends AbstractCurrency implements SingleCurrency {
 
     public VaultEcoCurrency(@NotNull ICurrencyConfig config) {
         super(config);

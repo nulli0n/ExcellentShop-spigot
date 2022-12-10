@@ -11,6 +11,7 @@ import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.currency.config.CurrencyConfig;
 import su.nightexpress.nexshop.currency.config.CurrencyItemConfig;
 import su.nightexpress.nexshop.currency.external.GamePointsCurrency;
+import su.nightexpress.nexshop.currency.external.GemsEconomyCurrency;
 import su.nightexpress.nexshop.currency.external.PlayerPointsCurrency;
 import su.nightexpress.nexshop.currency.external.VaultEcoCurrency;
 import su.nightexpress.nexshop.currency.internal.ExpCurrency;
@@ -18,12 +19,11 @@ import su.nightexpress.nexshop.currency.internal.ItemCurrency;
 import su.nightexpress.nexshop.hooks.HookId;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
     public static final String DIR_DEFAULT = "/currency/default/";
-    public static final String DIR_CUSTOM = "/currency/custom_item/";
+    public static final String DIR_CUSTOM  = "/currency/custom_item/";
 
     private Map<String, ICurrency> currencyMap;
 
@@ -42,20 +42,40 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     private void loadDefault() {
-        Stream.of(CurrencyId.values()).forEach(currencyId -> {
-            CurrencyConfig config = this.loadConfigDefault(currencyId);
-            config.save();
-
-            ICurrency currency = switch (currencyId) {
-                case CurrencyId.EXP -> new ExpCurrency(config);
-                case CurrencyId.VAULT -> !Hooks.hasVault() || !VaultHook.hasEconomy() ? null : new VaultEcoCurrency(config);
-                case CurrencyId.GAME_POINTS -> !Hooks.hasPlugin(HookId.GAME_POINTS) ? null : new GamePointsCurrency(config);
-                case CurrencyId.PLAYER_POINTS -> !Hooks.hasPlugin(HookId.PLAYER_POINTS) ? null : new PlayerPointsCurrency(config);
-                default -> null;
-            };
-            if (currency == null) return;
-
-            this.registerCurrency(currency);
+        CurrencyId.stream().forEach(currencyId -> {
+            switch (currencyId) {
+                case CurrencyId.EXP -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.EXP);
+                    config.save();
+                    this.registerCurrency(new ExpCurrency(config));
+                }
+                case CurrencyId.VAULT -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.VAULT);
+                    config.save();
+                    if (Hooks.hasVault() && VaultHook.hasEconomy()) {
+                        this.registerCurrency(new VaultEcoCurrency(config));
+                    }
+                }
+                case CurrencyId.GAME_POINTS -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.GAME_POINTS);
+                    config.save();
+                    if (Hooks.hasPlugin(HookId.GAME_POINTS)) {
+                        this.registerCurrency(new GamePointsCurrency(config));
+                    }
+                }
+                case CurrencyId.PLAYER_POINTS -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.PLAYER_POINTS);
+                    config.save();
+                    if (Hooks.hasPlugin(HookId.PLAYER_POINTS)) {
+                        this.registerCurrency(new PlayerPointsCurrency(config));
+                    }
+                }
+                case CurrencyId.GEMS_ECONOMY -> {
+                    if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
+                        GemsEconomyCurrency.registerCurrencies();
+                    }
+                }
+            }
         });
     }
 
@@ -115,4 +135,5 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
         if (opt.isEmpty()) throw new IllegalArgumentException("No currencies are installed!");
         return opt.get();
     }
+
 }

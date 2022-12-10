@@ -4,8 +4,9 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.AbstractCurrency;
 import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
+import su.nightexpress.nexshop.api.currency.SingleCurrency;
 
-public class ExpCurrency extends AbstractCurrency {
+public class ExpCurrency extends AbstractCurrency implements SingleCurrency {
 
     public ExpCurrency(@NotNull ICurrencyConfig config) {
         super(config);
