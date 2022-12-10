@@ -7,13 +7,14 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.3.0</version>
+    <version>4.3.1</version>
     <modules>
         <module>Core</module>
         <module>NMS</module>
         <module>V1_17_R1</module>
         <module>V1_18_R2</module>
         <module>V1_19</module>
+        <module>V1_19_R2</module>
     </modules>
 
     <properties>
@@ -36,7 +37,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.19.2-R0.1-SNAPSHOT</version>
+            <version>1.19.3-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>su.nexmedia</groupId>

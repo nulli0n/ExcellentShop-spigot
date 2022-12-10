@@ -32,7 +32,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     @Override
-    public void onLoad() {
+    protected void onLoad() {
         this.currencyMap = new HashMap<>();
         this.plugin.getConfigManager().extract(DIR_DEFAULT);
         this.plugin.getConfigManager().extract(DIR_CUSTOM);
@@ -93,7 +93,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     @Override
-    public void onShutdown() {
+    protected void onShutdown() {
         if (this.currencyMap != null) {
             this.currencyMap.clear();
             this.currencyMap = null;

@@ -78,7 +78,7 @@ public class AuctionConfig {
             ICurrency currency = manager.plugin().getCurrencyManager().getCurrency(curId);
             if (currency == null) {
                 manager.error("Invalid/Unknown currency provided: '" + curId + "'. Ignoring...");
-                return;
+                continue;
             }
 
             String path2 = path + "Currency." + curId + ".";

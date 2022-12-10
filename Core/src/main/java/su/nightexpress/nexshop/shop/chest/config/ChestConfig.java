@@ -23,19 +23,28 @@ import java.util.stream.Collectors;
 public class ChestConfig {
 
     public static  ItemStack                        DISPLAY_SHOWCASE;
-    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", "When 'true', creates a client-side hologram above the shop.", true);
+    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", true, "When 'true', creates a client-side hologram above the shop.");
     private static Map<ChestShopType, List<String>> DISPLAY_TEXT;
     public static  int                              DISPLAY_SLIDE_INTERVAL;
 
-    public static final JOption<String> EDITOR_TITLE = JOption.create("Shops.Editor_Title", "Sets title for Editor GUIs.", "Shop Editor");
+    public static final JOption<String> EDITOR_TITLE = JOption.create("Shops.Editor_Title", "Shop Editor",
+        "Sets title for Editor GUIs."
+    );
     public static boolean        DELETE_INVALID_SHOP_CONFIGS;
     public static ICurrency      DEFAULT_CURRENCY;
-    public static final JOption<Set<String>> ALLOWED_CONTAINERS = new JOption<Set<String>>("Shops.Allowed_Containers", "A list of Materials, that can be used for shop creation.\nhttps://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html", (cfg, path, def) -> {
-        return cfg.getStringSet(path).stream().map(String::toUpperCase).collect(Collectors.toSet());
-    }, () -> Sets.newHashSet(Material.CHEST.name(), Material.TRAPPED_CHEST.name(), Material.BARREL.name(), Material.SHULKER_BOX.name()));
+    public static final JOption<Set<String>> ALLOWED_CONTAINERS = new JOption<Set<String>>("Shops.Allowed_Containers",
+        (cfg, path, def) -> cfg.getStringSet(path).stream().map(String::toUpperCase).collect(Collectors.toSet()),
+        () -> Sets.newHashSet(Material.CHEST.name(), Material.TRAPPED_CHEST.name(), Material.BARREL.name(), Material.SHULKER_BOX.name()),
+        "A list of Materials, that can be used for shop creation.",
+        "Allowed: CHEST, TRAPPED_CHEST, BARREL, SHULKER_BOX (and colored ones).",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html"
+    );
     public static Set<ICurrency> ALLOWED_CURRENCIES;
     public static String         ADMIN_SHOP_NAME;
-    public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name", "Default shop name, that will be used on shop creation.", "&a" + Placeholders.Player.NAME + "'s Shop");
+    public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name",
+        "&a" + Placeholders.Player.NAME + "'s Shop",
+        "Default shop name, that will be used on shop creation."
+    );
 
     public static  double               SHOP_CREATION_COST_CREATE;
     public static  double               SHOP_CREATION_COST_REMOVE;

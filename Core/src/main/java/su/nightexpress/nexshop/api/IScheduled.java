@@ -29,6 +29,7 @@ public interface IScheduled {
     }
 
     @NotNull
+    @Deprecated
     static Set<LocalTime> parseTimesOld(@NotNull List<String> list) {
         return list.stream().map(timeRaw -> LocalTime.parse(timeRaw.split("-")[0], TIME_FORMATTER)).collect(Collectors.toSet());
     }

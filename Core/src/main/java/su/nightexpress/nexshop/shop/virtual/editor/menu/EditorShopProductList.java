@@ -129,6 +129,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
                         cached.setItem(cursor);
                         cached.setPricer(new FlatProductPricer());
                         cached.setStock(new VirtualProductStock());
+                        cached.getStock().unlock();
                     }
                     cached.setSlot(e.getRawSlot());
                     cached.setPage(page);
@@ -166,6 +167,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
                 shopProduct.setItem(cursor);
                 shopProduct.setPricer(new FlatProductPricer());
                 shopProduct.setStock(new VirtualProductStock());
+                shopProduct.getStock().unlock();
             }
             shopProduct.setSlot(e.getRawSlot());
             shopProduct.setPage(page);
