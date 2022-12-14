@@ -38,7 +38,7 @@ public class GemsEconomyCurrency extends AbstractCurrency implements MultiCurren
 
     private static CurrencyConfig loadOrCreateConfig(String identifier) {
         JYML jyml = JYML.loadOrExtract(ShopAPI.PLUGIN, CurrencyManager.DIR_DEFAULT
-                                                       + "gemseconomy:"
+                                                       + "gemseconomy~"
                                                        + identifier.toLowerCase(Locale.ROOT)
                                                        + ".yml");
         if (!jyml.isSet("Name")) jyml.set("Name", "GemsEconomy : " + identifier.toUpperCase(Locale.ROOT));
