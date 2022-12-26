@@ -3,13 +3,12 @@ package su.nightexpress.nexshop.editor.menu;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.editor.EditorButtonType;
 import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.AbstractEditorMenu;
 import su.nexmedia.engine.editor.EditorManager;
@@ -75,7 +74,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
                     FloatProductPricer pricer = (FloatProductPricer) product2.getPricer();
                     DayOfWeek day = CollectionsUtil.getEnum(msg, DayOfWeek.class);
                     if (day == null) {
-                        EditorManager.error(player, EditorManager.ERROR_ENUM);
+                        EditorManager.error(player, plugin.getMessage(Lang.EDITOR_ERROR_ENUM).getLocalized());
                         return false;
                     }
                     pricer.getDays().add(day);
@@ -134,7 +133,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             return true;
         };
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
                     this.object.getEditor().open(player, 1);
@@ -305,12 +304,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
-        super.onPrepare(player, inventory);
-    }
-
-    @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+    public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
         Map<EditorButtonType, Integer> map = new HashMap<>();
         this.setTypes(map);
 
@@ -319,7 +313,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             if (type == GenericEditorType.PRODUCT_CHANGE_PRICE_FLAT_BUY || type == GenericEditorType.PRODUCT_CHANGE_PRICE_FLAT_SELL) {
                 if (priceType != PriceType.FLAT) {
                     item.setType(Material.AIR);
-                    menuItem.setSlots();
+                    menuItem.setSlots(new int[0]);
                 }
                 else menuItem.setSlots(IntStream.of(map.get(type)).toArray());
             }
@@ -327,7 +321,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             || type == GenericEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH) {
                 if (priceType != PriceType.FLOAT) {
                     item.setType(Material.AIR);
-                    menuItem.setSlots();
+                    menuItem.setSlots(new int[0]);
                 }
                 else menuItem.setSlots(IntStream.of(map.get(type)).toArray());
             }
@@ -335,7 +329,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             || type == GenericEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL || type == GenericEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP) {
                 if (priceType != PriceType.DYNAMIC) {
                     item.setType(Material.AIR);
-                    menuItem.setSlots();
+                    menuItem.setSlots(new int[0]);
                 }
                 else menuItem.setSlots(IntStream.of(map.get(type)).toArray());
             }

@@ -3,9 +3,7 @@ package su.nightexpress.nexshop.shop.auction.menu;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
-import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.*;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 
@@ -17,7 +15,7 @@ public class AuctionExpiredMenu extends AbstractAuctionMenu<AuctionListing> {
     public AuctionExpiredMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager, cfg);
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
 
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
@@ -36,19 +34,19 @@ public class AuctionExpiredMenu extends AbstractAuctionMenu<AuctionListing> {
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
 
         for (String sId : cfg.getSection("Special")) {
-            IMenuItem menuItem = cfg.getMenuItem("Special." + sId, ItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Special." + sId, ItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -67,7 +65,7 @@ public class AuctionExpiredMenu extends AbstractAuctionMenu<AuctionListing> {
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull AuctionListing item) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionListing item) {
         return (player1, type, e) -> {
             this.auctionManager.takeListing(player1, item);
             this.open(player1, this.getPage(player1));

@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.editor.EditorButtonType;
 import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.AbstractEditorMenu;
 import su.nexmedia.engine.editor.EditorManager;
@@ -18,6 +18,7 @@ import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
@@ -47,7 +48,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
                     msg = StringUtil.colorOff(msg);
                     int inputN = StringUtil.getInteger(msg, -1);
                     if (inputN < 0) {
-                        EditorManager.error(player, EditorManager.ERROR_NUM_NOT_INT);
+                        EditorManager.error(player, plugin.getMessage(Lang.EDITOR_ERROR_NUMBER_NOT_INT).getLocalized());
                         return false;
                     }
 
@@ -64,7 +65,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
             return true;
         };
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             VirtualShopModule virtualShop = plugin.getVirtualShop();
             if (virtualShop == null) return;
 
@@ -230,11 +231,14 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
     }
 
     @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+    public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
         super.onItemPrepare(player, menuItem, item);
         if (menuItem.getType() instanceof VirtualEditorType type) {
             if (type == VirtualEditorType.SHOP_CHANGE_PERMISSION) {
                 item.setType(this.object.isPermissionRequired() ? Material.REDSTONE : Material.GUNPOWDER);
+            }
+            else if (type == VirtualEditorType.SHOP_CHANGE_ICON) {
+                item.setType(this.object.getIcon().getType());
             }
         }
         ItemUtil.replace(item, this.object.replacePlaceholders());

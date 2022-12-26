@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JWriter;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.api.manager.IEditable;
@@ -28,7 +28,7 @@ import java.util.function.UnaryOperator;
 public abstract class Product<
     P extends Product<P, S, T>,
     S extends Shop<S, P>,
-    T extends ProductStock<P>> implements ICleanable, IEditable, IPlaceholder, JWriter {
+    T extends ProductStock<P>> implements ICleanable, IEditable, IPlaceholder, JOption.Writer {
 
     protected final String id;
 

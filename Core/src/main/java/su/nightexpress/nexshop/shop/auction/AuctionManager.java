@@ -28,6 +28,7 @@ import su.nightexpress.nexshop.shop.auction.listing.AbstractAuctionItem;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 import su.nightexpress.nexshop.shop.auction.menu.*;
+import su.nightexpress.nexshop.shop.auction.task.AuctionMenuUpdateTask;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,12 +51,14 @@ public class AuctionManager extends ShopModule {
     private AuctionMainMenu                 mainMenu;
     private AuctionPurchaseConfirmationMenu purchaseConfirmationMenu;
     private AuctionExpiredMenu              expiredMenu;
-    private AuctionHistoryMenu   historyMenu;
-    private AuctionUnclaimedMenu        unclaimedMenu;
-    private AuctionSellingMenu          sellingMenu;
-    private AuctionCategoryFilterMenu   categoryFilterMenu;
-    private AuctionCurrencyFilterMenu   currencyFilterMenu;
-    private AuctionCurrencySelectorMenu currencySelectorMenu;
+    private AuctionHistoryMenu              historyMenu;
+    private AuctionUnclaimedMenu            unclaimedMenu;
+    private AuctionSellingMenu              sellingMenu;
+    private AuctionCategoryFilterMenu       categoryFilterMenu;
+    private AuctionCurrencyFilterMenu       currencyFilterMenu;
+    private AuctionCurrencySelectorMenu     currencySelectorMenu;
+
+    private AuctionMenuUpdateTask menuUpdateTask;
 
     public AuctionManager(@NotNull ExcellentShop plugin) {
         super(plugin, ModuleId.AUCTION);
@@ -72,7 +75,7 @@ public class AuctionManager extends ShopModule {
         }
 
         this.plugin.getLangManager().loadMissing(AuctionLang.class);
-        this.plugin.getConfigManager().extract(this.getPath() + "/menu/");
+        this.plugin.getConfigManager().extractResources(this.getPath() + "/menu/");
 
         this.dataHandler = AuctionDataHandler.getInstance(this);
         this.dataHandler.setup();
@@ -88,10 +91,17 @@ public class AuctionManager extends ShopModule {
         this.addListener(new AuctionListener(this));
 
         //AuctionUtils.fillDummy(this);
+        this.menuUpdateTask = new AuctionMenuUpdateTask(this);
+        this.menuUpdateTask.start();
     }
 
     @Override
     protected void onShutdown() {
+        if (this.menuUpdateTask != null) {
+            this.menuUpdateTask.stop();
+            this.menuUpdateTask = null;
+        }
+
         super.onShutdown();
 
         if (this.categoryFilterMenu != null) {
@@ -130,8 +140,10 @@ public class AuctionManager extends ShopModule {
             this.unclaimedMenu.clear();
             this.unclaimedMenu = null;
         }
-
-        this.dataHandler.shutdown();
+        if (this.dataHandler != null) {
+            this.dataHandler.shutdown();
+            this.dataHandler = null;
+        }
         this.clearListings();
     }
 

@@ -12,6 +12,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class CreateCmd extends ShopModuleCommand<ChestShopModule> {
@@ -47,7 +48,7 @@ public class CreateCmd extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 100);
 

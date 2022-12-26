@@ -3,8 +3,8 @@ package su.nightexpress.nexshop.shop.auction.menu;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
@@ -18,8 +18,7 @@ public class AuctionUnclaimedMenu extends AbstractAuctionMenu<AuctionCompletedLi
     public AuctionUnclaimedMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager, cfg);
 
-        IMenuClick click = (p, type, e) -> {
-
+        MenuClick click = (p, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
                     this.auctionManager.getMainMenu().open(p, 1);
@@ -29,10 +28,10 @@ public class AuctionUnclaimedMenu extends AbstractAuctionMenu<AuctionCompletedLi
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -47,7 +46,7 @@ public class AuctionUnclaimedMenu extends AbstractAuctionMenu<AuctionCompletedLi
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull AuctionCompletedListing listing) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionCompletedListing listing) {
         return (player1, type, e) -> {
             listing.getCurrency().give(player, listing.getPrice());
             listing.setRewarded(true);

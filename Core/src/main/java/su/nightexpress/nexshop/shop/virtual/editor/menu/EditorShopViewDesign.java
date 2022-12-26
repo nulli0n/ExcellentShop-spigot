@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -7,17 +8,15 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.IMenuItem;
-import su.nexmedia.engine.api.menu.MenuItemDisplay;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PDCUtil;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.editor.GenericEditorType;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
@@ -32,7 +31,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
     private final NamespacedKey keyItemType;
     private final NamespacedKey keyReserved;
 
-    private static final String TAG_LORE = "menu_type";
+    private static final String TYPE_PREFIX = ChatColor.AQUA + "Type: " + ChatColor.GREEN;
 
     public EditorShopViewDesign(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
         super(plugin, shop.getView().getTitle(), shop.getView().getSize());
@@ -42,15 +41,12 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+    public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
         this.setPage(player, 1, this.shop.getPages()); // Hack for page items display.
 
-        for (IMenuItem menuItem : this.shop.getView().getItemsMap().values()) {
-            MenuItemDisplay display = menuItem.getDisplay(player);
-            if (display == null) continue;
-
+        for (MenuItem menuItem : this.shop.getView().getItemsMap().values()) {
             Enum<?> type = menuItem.getType();
-            ItemStack item = display.getItem();
+            ItemStack item = menuItem.getItem();
             PDCUtil.setData(item, this.keyItemType, type != null ? type.name() : "null");
             this.updateItem(item);
 
@@ -67,11 +63,8 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
             if (slot >= inventory.getSize()) continue;
             inventory.setItem(slot, reserved);
         }
-    }
 
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
+        return true;
     }
 
     @Override
@@ -98,7 +91,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
         }, false);
 
         for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null) ItemUtil.delLore(item, TAG_LORE);
+            if (item != null) this.removeTypeLore(item);
         }
 
         super.onClose(player, e);
@@ -112,9 +105,32 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
     }
 
     private void updateItem(@NotNull ItemStack item) {
-        ItemUtil.delLore(item, TAG_LORE);
-        String str = StringUtil.color("&e&l" + this.getType(item).name());
-        ItemUtil.addLore(item, TAG_LORE, str, -1);
+        this.removeTypeLore(item);
+        this.addTypeLore(item, this.getType(item));
+    }
+
+    private void removeTypeLore(@NotNull ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        List<String> lore = meta.getLore();
+        if (lore == null) return;
+
+        lore.removeIf(line -> line.startsWith(TYPE_PREFIX));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+    }
+
+    private void addTypeLore(@NotNull ItemStack item, @NotNull MenuItemType type) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
+
+        List<String> lore = meta.getLore();
+        if (lore == null) lore = new ArrayList<>();
+
+        lore.add(0, TYPE_PREFIX + type.name());
+        meta.setLore(lore);
+        item.setItemMeta(meta);
     }
 
     private void save(@NotNull Inventory inventory) {
@@ -134,13 +150,13 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
 
         items.forEach((type, map) -> {
             map.forEach((item2, slots) -> {
-                ItemUtil.delLore(item2, TAG_LORE);
+                this.removeTypeLore(item2);
 
                 String id = UUID.randomUUID().toString();
                 String path = "Content." + id + ".";
                 String typeRaw = this.getType(item2).name();
 
-                cfg.setItem(path + "Display.default.Item.", item2);
+                cfg.setItem(path + "Item.", item2);
                 cfg.setIntArray(path + "Slots", slots.stream().mapToInt(i -> i).toArray());
                 cfg.set(path + "Type", typeRaw);
             });

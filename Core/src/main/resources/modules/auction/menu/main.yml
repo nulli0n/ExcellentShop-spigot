@@ -4,11 +4,6 @@
 Title: '&8&m            &8&l[ &9&lAuction &8&l]&8&m            &7'
 Size: 54
 
-# Animation timer is used here to simply update the GUI to replace dynamic placeholders
-# and check for the listings changes.
-Animation:
-  Tick: 20
-
 # Custom item format for the auction listings.
 # You can use Auction Listing placeholders here.
 # https://github.com/nulli0n/ExcellentShop-spigot/wiki/Internal-Placeholders

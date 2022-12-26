@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.chest.menu;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.MenuClick;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
@@ -26,7 +26,7 @@ public class ChestListGlobalMenu extends AbstractChestListMenu {
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull ChestShop shop) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull ChestShop shop) {
         return (player1, type, e) -> {
             if (e.isRightClick()) {
                 if (shop.isOwner(player1) || player1.hasPermission(Perms.ADMIN)) {

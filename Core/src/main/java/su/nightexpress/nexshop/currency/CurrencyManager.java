@@ -34,8 +34,8 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     @Override
     protected void onLoad() {
         this.currencyMap = new HashMap<>();
-        this.plugin.getConfigManager().extract(DIR_DEFAULT);
-        this.plugin.getConfigManager().extract(DIR_CUSTOM);
+        this.plugin.getConfigManager().extractResources(DIR_DEFAULT);
+        this.plugin.getConfigManager().extractResources(DIR_CUSTOM);
 
         this.loadDefault();
         this.loadCustom();

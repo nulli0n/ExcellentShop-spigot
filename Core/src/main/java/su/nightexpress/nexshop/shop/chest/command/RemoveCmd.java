@@ -4,11 +4,12 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+
+import java.util.Map;
 
 public class RemoveCmd extends ShopModuleCommand<ChestShopModule> {
 
@@ -34,7 +35,7 @@ public class RemoveCmd extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 100);
 

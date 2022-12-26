@@ -7,10 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
-import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.*;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.MessageUtil;
 import su.nexmedia.engine.utils.NumberUtil;
@@ -46,7 +43,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
         this.balance = new WeakHashMap<>();
         this.productSlots = cfg.getIntArray("Product.Slots");
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             PreparedProduct<?> prepared = this.products.get(player);
             if (prepared == null) {
                 player.closeInventory();
@@ -74,7 +71,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
             if (type instanceof ButtonType type2) {
                 switch (type2) {
                     case ADD, SET, TAKE -> {
-                        IMenuItem menuItem = this.getItem(player, e.getRawSlot());
+                        MenuItem menuItem = this.getItem(player, e.getRawSlot());
                         if (!(menuItem instanceof ShopCartMenuItem cartMenuItem)) return;
 
                         int btnAmount = cartMenuItem.getProductAmount();
@@ -144,10 +141,10 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -156,7 +153,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
             ShopCartMenuItem menuItem = new ShopCartMenuItem(cfg.getMenuItem("Amount_Buttons." + id, ButtonType.class));
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
                 menuItem.setProductAmount(cfg.getInt("Amount_Buttons." + id + ".Product_Amount"));
             }
             this.addItem(menuItem);
@@ -166,11 +163,11 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
     }
 
     @Override
-    public void open(@NotNull Player player, int page) {
+    public boolean open(@NotNull Player player, int page) {
         if (!this.products.containsKey(player)) {
             throw new IllegalStateException("Attempt to open an empty Shop Cart Menu!");
         }
-        super.open(player, page);
+        return super.open(player, page);
     }
 
     public void open(@NotNull Player player, @NotNull PreparedProduct<?> prepared) {
@@ -185,9 +182,9 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+    public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
         PreparedProduct<?> prepared = this.products.get(player);
-        if (prepared == null) return;
+        if (prepared == null) return true;
 
         ItemStack preview = prepared.getProduct().getPreview();
         int stackSize = preview.getType().getMaxStackSize();
@@ -200,11 +197,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
             preparedAmount -= stackSize;
             this.addItem(player, preview2, this.productSlots[count++]);
         }
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
+        return true;
     }
 
     @Override
@@ -220,7 +213,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
     }
 
     @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+    public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
         super.onItemPrepare(player, menuItem, item);
 
         PreparedProduct<?> prepared = this.products.get(player);

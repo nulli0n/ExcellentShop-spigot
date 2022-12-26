@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JWriter;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.api.manager.IEditable;
@@ -21,7 +21,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public class VirtualDiscount implements IScheduled, IEditable, ICleanable, IPlaceholder, JWriter {
+public class VirtualDiscount implements IScheduled, IEditable, ICleanable, IPlaceholder, JOption.Writer {
 
     private VirtualShop shop;
     private Set<DayOfWeek> days;

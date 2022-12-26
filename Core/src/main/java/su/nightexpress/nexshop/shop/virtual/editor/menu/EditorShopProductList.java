@@ -7,8 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
@@ -63,10 +62,10 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+    public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
         int page = this.getPage(player);
 
-        IMenuClick click = (player1, type, e) -> {
+        MenuClick click = (player1, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
                     this.shop.getEditor().open(player1, 1);
@@ -76,9 +75,9 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
         };
 
         Set<Integer> contentSlots = new HashSet<>();
-        for (IMenuItem item : this.shop.getView().getItemsMap().values()) {
-            IMenuItem clone = new MenuItem(item);
-            clone.setClick(click);
+        for (MenuItem item : this.shop.getView().getItemsMap().values()) {
+            MenuItem clone = new MenuItem(item);
+            clone.setClickHandler(click);
             this.addItem(player, clone);
             contentSlots.addAll(IntStream.of(clone.getSlots()).boxed().toList());
         }
@@ -96,9 +95,9 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
             productIcon.setItemMeta(productMeta);
             ItemUtil.replace(productIcon, shopProduct.replacePlaceholders());
 
-            IMenuItem productMenuItem = new MenuItem(productIcon);
-            productMenuItem.setSlots(shopProduct.getSlot());
-            productMenuItem.setClick((player2, type, e) -> {
+            MenuItem productMenuItem = new MenuItem(productIcon);
+            productMenuItem.setSlots(new int[]{shopProduct.getSlot()});
+            productMenuItem.setClickHandler((player2, type, e) -> {
                 if (!e.isLeftClick() && !e.isRightClick()) return;
 
                 if (e.isShiftClick()) {
@@ -149,7 +148,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
         }
 
 
-        IMenuItem free = new MenuItem(GenericEditorType.PRODUCT_FREE_SLOT.getItem());
+        MenuItem free = new MenuItem(GenericEditorType.PRODUCT_FREE_SLOT.getItem());
         int[] freeSlots = new int[this.getSize() - contentSlots.size()];
         int count = 0;
         for (int slot = 0; count < freeSlots.length; slot++) {
@@ -157,7 +156,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
             freeSlots[count++] = slot;
         }
         free.setSlots(freeSlots);
-        free.setClick((player1, type, e) -> {
+        free.setClickHandler((player1, type, e) -> {
             ItemStack cursor = e.getCursor();
             if (cursor == null || cursor.getType().isAir()) return;
 
@@ -180,5 +179,6 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
         this.addItem(player, free);
 
         this.setPage(player, page, this.shop.getPages()); // Hack for page items display.
+        return true;
     }
 }

@@ -4,14 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenuAuto;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
@@ -39,25 +38,20 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestPr
         this.productName = StringUtil.color(cfg.getString("Product.Name", ""));
         this.productLore = StringUtil.color(cfg.getStringList("Product.Lore"));
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 this.onItemClickDefault(player, type2);
             }
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
     }
 
     public void searchProduct(@NotNull Player player, @NotNull Material material) {
@@ -103,7 +97,7 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestPr
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull ChestProduct product) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull ChestProduct product) {
         return (player1, type, e) -> {
             product.getShop().teleport(player1);
         };

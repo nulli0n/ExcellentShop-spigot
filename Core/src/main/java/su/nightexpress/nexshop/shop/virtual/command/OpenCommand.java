@@ -11,6 +11,7 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
 import java.util.List;
+import java.util.Map;
 
 public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
 
@@ -48,7 +49,7 @@ public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         // /virtualshop open
         if (args.length < 2) {
             if (!(sender instanceof Player player)) {

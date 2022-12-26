@@ -3,13 +3,12 @@ package su.nightexpress.nexshop.shop.auction.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -32,7 +31,7 @@ public class AuctionPurchaseConfirmationMenu extends AbstractMenu<ExcellentShop>
         this.itemSlot = cfg.getInt("Item_Slot");
         this.cache = new WeakHashMap<>();
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
 
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.CONFIRMATION_ACCEPT) {
@@ -50,10 +49,10 @@ public class AuctionPurchaseConfirmationMenu extends AbstractMenu<ExcellentShop>
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -68,17 +67,7 @@ public class AuctionPurchaseConfirmationMenu extends AbstractMenu<ExcellentShop>
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
+    public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
         super.onItemPrepare(player, menuItem, item);
 
         AuctionListing listing = this.cache.get(player);

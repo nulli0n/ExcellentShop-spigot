@@ -63,7 +63,6 @@ public class ChestShopModule extends ShopModule {
     @Override
     protected void onLoad() {
         super.onLoad();
-        this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "editor");
         this.chests = new HashMap<>();
 
         ChestConfig.load(this);

@@ -47,6 +47,11 @@ public class VirtualShopListener extends AbstractListener<ExcellentShop> {
                     .replace(prepared.replacePlaceholders())
                     .send(player);
             }
+            else if (e.getResult() == Result.OUT_OF_STOCK) {
+                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK)
+                    .replace(prepared.replacePlaceholders())
+                    .send(player);
+            }
             MessageUtil.sound(player, Config.SOUND_PURCHASE_FAILURE);
             return;
         }

@@ -3,28 +3,30 @@ package su.nightexpress.nexshop.shop.auction.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenuAuto;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.Pair;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.StringUtil;
-import su.nexmedia.engine.utils.data.Pair;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.AuctionUtils;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
+import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class AuctionCurrencySelectorMenu extends AbstractMenuAuto<ExcellentShop, ICurrency> {
 
@@ -42,18 +44,17 @@ public class AuctionCurrencySelectorMenu extends AbstractMenuAuto<ExcellentShop,
         this.itemLore = StringUtil.color(cfg.getStringList("Items.Lore"));
         this.objectSlots = cfg.getIntArray("Items.Slots");
 
-        IMenuClick click = (player, type, e) -> {
-
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 this.onItemClickDefault(player, type2);
             }
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -107,7 +108,7 @@ public class AuctionCurrencySelectorMenu extends AbstractMenuAuto<ExcellentShop,
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull ICurrency currency) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull ICurrency currency) {
         return (player2, type, e) -> {
             Pair<ItemStack, Double> prepared = this.getPrepared(player2);
             if (prepared == null) {
@@ -120,11 +121,6 @@ public class AuctionCurrencySelectorMenu extends AbstractMenuAuto<ExcellentShop,
             }
             player2.closeInventory();
         };
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
     }
 
     @Override

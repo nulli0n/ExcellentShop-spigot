@@ -6,8 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.CollectionsUtil;
@@ -32,17 +31,17 @@ public class ChestShopView extends ShopView<ChestShop> {
         PRODUCT_SLOTS = cfg.getIntArray("Product_Slots");
         PRODUCT_FORMAT_LORE = StringUtil.color(cfg.getStringList("Product_Format.Lore.Text"));
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 this.onItemClickDefault(player, type2);
             }
         };
 
         for (String id : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + id, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + id, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -84,9 +83,9 @@ public class ChestShopView extends ShopView<ChestShop> {
                 preview.setItemMeta(meta);
             }
 
-            IMenuItem menuItem = new MenuItem(preview);
-            menuItem.setSlots(PRODUCT_SLOTS[count++]);
-            menuItem.setClick((p2, type, e) -> {
+            MenuItem menuItem = new MenuItem(preview);
+            menuItem.setSlots(new int[]{PRODUCT_SLOTS[count++]});
+            menuItem.setClickHandler((p2, type, e) -> {
                 ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
                 if (clickType == null) return;
 

@@ -14,6 +14,8 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.shop.Product;
+import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.price.ProductPriceManager;
 import su.nightexpress.nexshop.data.stock.ProductStockManager;
@@ -21,15 +23,18 @@ import su.nightexpress.nexshop.module.ModuleId;
 import su.nightexpress.nexshop.module.ShopModule;
 import su.nightexpress.nexshop.shop.virtual.command.EditorCommand;
 import su.nightexpress.nexshop.shop.virtual.command.OpenCommand;
+import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
 import su.nightexpress.nexshop.shop.virtual.compat.citizens.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.compat.citizens.VirtualShopTrait;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopList;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShopBank;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopListener;
-import su.nightexpress.nexshop.shop.virtual.menu.VirtualMenuMain;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
 
 import java.io.File;
 import java.util.*;
@@ -41,7 +46,8 @@ public class VirtualShopModule extends ShopModule {
     public static ICurrency defaultCurrency;
 
     private Map<String, VirtualShop> shops;
-    private VirtualMenuMain          mainMenu;
+    private ShopMainMenu             mainMenu;
+    private ShopSellMenu sellMenu;
     private EditorShopList           editor;
 
     public VirtualShopModule(@NotNull ExcellentShop plugin) {
@@ -56,7 +62,7 @@ public class VirtualShopModule extends ShopModule {
         File dir = new File(this.getFullPath() + "shops");
         if (!dir.exists()) {
             for (String id : new String[]{"blocks", "brewing", "food", "loot", "tools", "weapons", "wool"}) {
-                this.plugin.getConfigManager().extractFullPath(this.getFullPath() + "shops/" + id);
+                this.plugin.getConfigManager().extractResources(this.getPath() + "shops/" + id);
             }
         }
 
@@ -69,10 +75,16 @@ public class VirtualShopModule extends ShopModule {
         this.moduleCommand.addDefaultCommand(new OpenCommand(this));
         this.moduleCommand.addChildren(new EditorCommand(this));
 
+
         this.loadShops();
         this.loadMainMenu();
         this.loadCitizens();
         this.addListener(new VirtualShopListener(this));
+
+        if (VirtualConfig.SELL_MENU_ENABLED.get()) {
+            this.sellMenu = new ShopSellMenu(this, JYML.loadOrExtract(plugin, this.getPath() + "sell.menu.yml"));
+            this.plugin.getCommandManager().registerCommand(new SellMenuCommand(this, VirtualConfig.SELL_MENU_COMMANDS.get().split(",")));
+        }
     }
 
     @Override
@@ -88,6 +100,10 @@ public class VirtualShopModule extends ShopModule {
         if (this.mainMenu != null) {
             this.mainMenu.clear();
             this.mainMenu = null;
+        }
+        if (this.sellMenu != null) {
+            this.sellMenu.clear();
+            this.sellMenu = null;
         }
         this.shops.values().forEach(VirtualShop::clear);
         this.shops.clear();
@@ -126,7 +142,7 @@ public class VirtualShopModule extends ShopModule {
         }
 
         if (!VirtualConfig.MAIN_MENU_ENABLED.get()) return;
-        this.mainMenu = new VirtualMenuMain(this);
+        this.mainMenu = new ShopMainMenu(this);
     }
 
     private void loadCitizens() {
@@ -182,6 +198,11 @@ public class VirtualShopModule extends ShopModule {
         return true;
     }
 
+    @NotNull
+    public ShopSellMenu getSellMenu() {
+        return sellMenu;
+    }
+
     public void openMainMenu(@NotNull Player player) {
         if (!this.hasMainMenu()) {
             plugin.getMessage(VirtualLang.MAIN_MENU_ERROR_DISABLED).send(player);
@@ -228,5 +249,27 @@ public class VirtualShopModule extends ShopModule {
     @Nullable
     public VirtualShop getShopById(@NotNull String id) {
         return this.getShopsMap().get(id.toLowerCase());
+    }
+
+    @Nullable
+    public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, int amount, @NotNull TradeType tradeType) {
+        Set<VirtualProduct> products = new HashSet<>();
+        this.getShops().stream()
+            .filter(shop -> shop.hasPermission(player) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
+            products.addAll(shop.getProducts().stream().filter(product -> {
+                if (!product.isItemMatches(item)) return false;
+                if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
+                if (tradeType == TradeType.SELL && !product.isSellable()) return false;
+                //if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;
+                //if (product.getStock().getPossibleAmount(tradeType, player) < amount) return false;
+                return true;
+            }).toList());
+        });
+
+        Comparator<Product<?, ?, ?>> comp = (p1, p2) -> {
+            return (int) (p1.getPricer().getPrice(tradeType) - p2.getPricer().getPrice(tradeType));
+        };
+
+        return (tradeType == TradeType.BUY ? products.stream().min(comp) : products.stream().max(comp)).orElse(null);
     }
 }

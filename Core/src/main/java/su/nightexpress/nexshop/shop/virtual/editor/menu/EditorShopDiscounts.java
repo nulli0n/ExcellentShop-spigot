@@ -5,14 +5,14 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.editor.EditorButtonType;
-import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.AbstractEditorMenuAuto;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class EditorShopDiscounts extends AbstractEditorMenuAuto<ExcellentShop, V
     public EditorShopDiscounts(@NotNull VirtualShop shop) {
         super(shop.plugin(), shop, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
                     shop.getEditor().open(player, 1);
@@ -73,7 +73,7 @@ public class EditorShopDiscounts extends AbstractEditorMenuAuto<ExcellentShop, V
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull VirtualDiscount discount) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull VirtualDiscount discount) {
         return (player1, type, e) -> {
             if (e.isShiftClick()) {
                 if (e.isRightClick()) {

@@ -5,7 +5,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.menu.IMenuItem;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
@@ -25,7 +24,7 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
     }
 
     @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+    public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
         int page = this.getPage(player);
         int productCount = 0;
         int maxProducts = ChestConfig.getMaxShopProducts(player);
@@ -44,9 +43,9 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
             productIcon.setItemMeta(productMeta);
             ItemUtil.replace(productIcon, shopProduct.replacePlaceholders());
 
-            IMenuItem item = new MenuItem(productIcon);
-            item.setSlots(productCount++);
-            item.setClick((p, type, e) -> {
+            MenuItem item = new MenuItem(productIcon);
+            item.setSlots(new int[]{productCount++});
+            item.setClickHandler((p, type, e) -> {
                 if (e.isLeftClick()) {
                     shopProduct.getEditor().open(p, 1);
                     return;
@@ -66,7 +65,7 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
             this.addItem(player, item);
         }
 
-        IMenuItem free = new MenuItem(GenericEditorType.PRODUCT_FREE_SLOT.getItem());
+        MenuItem free = new MenuItem(GenericEditorType.PRODUCT_FREE_SLOT.getItem());
         int[] freeSlots = new int[maxProducts - productCount];
         int count2 = 0;
         for (int slot = productCount; slot < maxProducts; slot++) {
@@ -74,7 +73,7 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
         }
 
         free.setSlots(freeSlots);
-        free.setClick((player2, type, e) -> {
+        free.setClickHandler((player2, type, e) -> {
             ItemStack cursor = e.getCursor();
             if (cursor == null || !this.shop.createProduct(player2, cursor)) return;
 
@@ -84,5 +83,6 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
             this.open(player2, page);
         });
         this.addItem(player, free);
+        return true;
     }
 }

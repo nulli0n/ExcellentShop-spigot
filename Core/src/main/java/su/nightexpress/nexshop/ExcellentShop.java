@@ -122,7 +122,9 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
 
     @Override
     public void registerHooks() {
-        this.registerHook(HookId.BROKER, BrokerHook.class);
+        if (Hooks.hasPlugin(HookId.BROKER)) {
+            BrokerHook.setup();
+        }
     }
 
     @Override

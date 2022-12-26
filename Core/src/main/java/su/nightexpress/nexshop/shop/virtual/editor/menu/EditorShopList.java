@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.editor.EditorButtonType;
 import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.IMenuClick;
+import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.AbstractEditorMenuAuto;
 import su.nexmedia.engine.editor.EditorManager;
@@ -41,7 +41,7 @@ public class EditorShopList extends AbstractEditorMenuAuto<ExcellentShop, Virtua
             return true;
         };
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 this.onItemClickDefault(player, type2);
             }
@@ -98,7 +98,7 @@ public class EditorShopList extends AbstractEditorMenuAuto<ExcellentShop, Virtua
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull VirtualShop shop) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull VirtualShop shop) {
         return (player1, type, e) -> {
             if (e.isShiftClick() && e.isRightClick()) {
                 this.parent.delete(shop);

@@ -2,7 +2,7 @@ package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JWriter;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nightexpress.nexshop.api.type.PriceType;
@@ -14,7 +14,7 @@ import su.nightexpress.nexshop.shop.FloatProductPricer;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ProductPricer implements IPlaceholder, JWriter {
+public abstract class ProductPricer implements IPlaceholder, JOption.Writer {
 
     protected final Map<TradeType, Double> priceCurrent;
     protected       Product<?, ?, ?>       product;

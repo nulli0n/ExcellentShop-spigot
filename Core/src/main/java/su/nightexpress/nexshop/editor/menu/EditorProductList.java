@@ -4,10 +4,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.IMenu;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.shop.Shop;
 
@@ -21,14 +19,9 @@ public abstract class EditorProductList<S extends Shop<S, ?>> extends AbstractMe
     }
 
     @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
     public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
         plugin.runTask((c) -> {
-            IMenu menu = IMenu.getMenu(player);
+            AbstractMenu<?> menu = getMenu(player);
             if (menu != null) return;
 
             shop.getEditor().open(player, 1);
@@ -38,7 +31,7 @@ public abstract class EditorProductList<S extends Shop<S, ?>> extends AbstractMe
     }
 
     @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull IMenu.SlotType slotType) {
+    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
         return slotType != SlotType.PLAYER && slotType != SlotType.EMPTY_PLAYER;
     }
 

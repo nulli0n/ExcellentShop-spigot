@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.shop.auction.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -85,11 +84,6 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
         else if (aucItem.isOwner(player)) formatType = FormatType.OWNER;
 
         return this.loreFormat.getOrDefault(formatType, Collections.emptyList());
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
     }
 
     @Override

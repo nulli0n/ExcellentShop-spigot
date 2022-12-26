@@ -12,6 +12,7 @@ import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.menu.AbstractAuctionMenu;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 abstract class AbstractOpenCommand extends ShopModuleCommand<AuctionManager> {
@@ -41,7 +42,7 @@ abstract class AbstractOpenCommand extends ShopModuleCommand<AuctionManager> {
     }
 
     @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         Player player = (Player) sender;
         if (!this.module.canBeUsedHere(player)) return;
 

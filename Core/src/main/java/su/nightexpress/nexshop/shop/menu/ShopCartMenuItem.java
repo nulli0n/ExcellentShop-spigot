@@ -1,14 +1,13 @@
 package su.nightexpress.nexshop.shop.menu;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.menu.IMenuItem;
 import su.nexmedia.engine.api.menu.MenuItem;
 
 public class ShopCartMenuItem extends MenuItem {
 
     private int productAmount;
 
-    public ShopCartMenuItem(@NotNull IMenuItem menuItem) {
+    public ShopCartMenuItem(@NotNull MenuItem menuItem) {
         super(menuItem);
     }
 

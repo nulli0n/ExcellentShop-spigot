@@ -15,74 +15,66 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
-public class VirtualMenuMain extends AbstractMenu<ExcellentShop> {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ShopMainMenu extends AbstractMenu<ExcellentShop> {
 
     private final VirtualShopModule module;
+    private final Map<String, Integer> shopSlots;
 
-    public VirtualMenuMain(@NotNull VirtualShopModule module) {
+    public ShopMainMenu(@NotNull VirtualShopModule module) {
         super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getPath() + "main.menu.yml"), "");
         this.module = module;
+        this.shopSlots = new HashMap<>();
+        this.cfg.getSection("Shops").forEach(shopId -> {
+            this.shopSlots.put(shopId.toLowerCase(), cfg.getInt("Shops." + shopId));
+        });
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 this.onItemClickDefault(player, type2);
             }
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
+    }
 
-        for (String sId : cfg.getSection("Shops")) {
-            VirtualShop shop = module.getShopById(sId);
+    @Override
+    public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
+        this.shopSlots.forEach((shopId, slot) -> {
+            VirtualShop shop = module.getShopById(shopId);
             if (shop == null) {
-                plugin.error("Invalid shop in the main menu: '" + sId + "' !");
-                continue;
+                this.module.error("Invalid shop in the main menu: '" + shopId + "' !");
+                return;
             }
 
             ItemStack icon = shop.getIcon();
             ItemMeta meta = icon.getItemMeta();
-            if (meta == null) continue;
+            if (meta == null) return;
 
             meta.setDisplayName(VirtualConfig.SHOP_FORMAT_NAME.get());
             meta.setLore(VirtualConfig.SHOP_FORMAT_LORE.get());
             meta.addItemFlags(ItemFlag.values());
             icon.setItemMeta(meta);
+            ItemUtil.replace(icon, shop.replacePlaceholders());
 
-            int slot = cfg.getInt("Shops." + sId, cfg.getInt("Shops." + sId + ".Slots"));
-            IMenuItem menuItem = new MenuItem(shop.getId(), icon, slot);
+            MenuItem menuItem = new MenuItem(shop.getId(), icon, slot);
 
-            menuItem.setClick((player, type, e) -> {
-                shop.open(player, 1);
+            menuItem.setClickHandler((player2, type, e) -> {
+                shop.open(player2, 1);
             });
 
-            this.addItem(menuItem);
-        }
-    }
-
-    @Override
-    public void onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
-    }
-
-    @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull IMenuItem menuItem, @NotNull ItemStack item) {
-        super.onItemPrepare(player, menuItem, item);
-
-        VirtualShop shop = this.module.getShopById(menuItem.getId());
-        if (shop == null) return;
-
-        ItemUtil.replace(item, shop.replacePlaceholders());
+            this.addItem(player, menuItem);
+        });
+        return true;
     }
 
     @Override

@@ -9,6 +9,8 @@ import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
+import java.util.Map;
+
 @Deprecated
 public class OpenCommand extends ShopModuleCommand<ChestShopModule> {
 
@@ -34,7 +36,7 @@ public class OpenCommand extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 10);
         ChestShop shopChest = this.module.getShop(block);

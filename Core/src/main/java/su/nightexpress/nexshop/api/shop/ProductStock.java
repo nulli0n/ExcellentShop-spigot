@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.api.shop;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JWriter;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.type.StockType;
@@ -11,7 +11,7 @@ import su.nightexpress.nexshop.api.type.TradeType;
 
 import java.util.function.UnaryOperator;
 
-public abstract class ProductStock<P extends Product<P, ?, ?>> implements IPlaceholder, IPurchaseListener, JWriter {
+public abstract class ProductStock<P extends Product<P, ?, ?>> implements IPlaceholder, IPurchaseListener, JOption.Writer {
 
     protected P       product;
     protected boolean locked;

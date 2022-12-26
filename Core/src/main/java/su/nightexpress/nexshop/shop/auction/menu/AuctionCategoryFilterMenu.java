@@ -2,14 +2,13 @@ package su.nightexpress.nexshop.shop.auction.menu;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenuAuto;
-import su.nexmedia.engine.api.menu.IMenuClick;
-import su.nexmedia.engine.api.menu.IMenuItem;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
@@ -39,7 +38,7 @@ public class AuctionCategoryFilterMenu extends AbstractMenuAuto<ExcellentShop, A
         this.objectSlots = cfg.getIntArray("Items.Slots");
         this.selectedIcon = cfg.getItem("Selected");
 
-        IMenuClick click = (player, type, e) -> {
+        MenuClick click = (player, type, e) -> {
 
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN || type2 == MenuItemType.CONFIRMATION_DECLINE) {
@@ -53,10 +52,10 @@ public class AuctionCategoryFilterMenu extends AbstractMenuAuto<ExcellentShop, A
         };
 
         for (String sId : cfg.getSection("Content")) {
-            IMenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
 
             if (menuItem.getType() != null) {
-                menuItem.setClick(click);
+                menuItem.setClickHandler(click);
             }
             this.addItem(menuItem);
         }
@@ -93,7 +92,7 @@ public class AuctionCategoryFilterMenu extends AbstractMenuAuto<ExcellentShop, A
 
     @Override
     @NotNull
-    protected IMenuClick getObjectClick(@NotNull Player player, @NotNull AuctionCategory category) {
+    protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionCategory category) {
         return (player2, type, e) -> {
             ItemStack clicked = e.getCurrentItem();
             if (clicked == null || clicked.getType().isAir()) return;
@@ -108,10 +107,5 @@ public class AuctionCategoryFilterMenu extends AbstractMenuAuto<ExcellentShop, A
     @Override
     public boolean cancelClick(@NotNull InventoryClickEvent inventoryClickEvent, @NotNull SlotType slotType) {
         return true;
-    }
-
-    @Override
-    public void onReady(@NotNull Player player, @NotNull Inventory inventory) {
-
     }
 }

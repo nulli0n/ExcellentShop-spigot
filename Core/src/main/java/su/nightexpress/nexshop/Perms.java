@@ -42,6 +42,7 @@ public class Perms {
     public static final JPermission VIRTUAL_COMMAND_EDITOR  = new JPermission(PREFIX + "virtual.command.editor", "Access to '/virtualshop editor' command.", OP);
     public static final JPermission VIRTUAL_COMMAND_OPEN        = new JPermission(PREFIX + "virtual.command.open", "Access to '/virtualshop open' command.");
     public static final JPermission VIRTUAL_COMMAND_OPEN_OTHERS = new JPermission(PREFIX + "virtual.command.open.others", "Access to '/virtualshop open' command on other players.");
+    public static final JPermission VIRTUAL_COMMAND_SELL_MENU = new JPermission(PREFIX + "virtual.command.sellmenu", "Access to the Sell Menu commands.");
     public static final JPermission VIRTUAL_MAIN_MENU           = new JPermission(PREFIX + "virtual.mainmenu", "Access to the Main Menu of Virtual Shop module.");
     public static final JPermission VIRTUAL_SHOP                = new JPermission(PREFIX_VIRTUAL_SHOP + Placeholders.MASK_ANY, "Access to all the Virtual Shops.");
 

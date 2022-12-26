@@ -8,6 +8,8 @@ import su.nexmedia.engine.api.module.AbstractModuleCommand;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.module.ShopModule;
 
+import java.util.Map;
+
 public class ShopModuleCommand<M extends ShopModule> extends AbstractModuleCommand<ExcellentShop, M> {
 
     public ShopModuleCommand(@NotNull M module, @NotNull String[] aliases) {
@@ -40,7 +42,7 @@ public class ShopModuleCommand<M extends ShopModule> extends AbstractModuleComma
     }
 
     @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
 
     }
 }

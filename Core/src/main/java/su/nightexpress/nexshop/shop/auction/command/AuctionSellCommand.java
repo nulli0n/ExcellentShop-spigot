@@ -10,6 +10,8 @@ import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
 
+import java.util.Map;
+
 public class AuctionSellCommand extends ShopModuleCommand<AuctionManager> {
 
     public AuctionSellCommand(@NotNull AuctionManager module) {
@@ -34,7 +36,7 @@ public class AuctionSellCommand extends ShopModuleCommand<AuctionManager> {
     }
 
     @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         if (args.length < 2) {
             this.printUsage(sender);
             return;

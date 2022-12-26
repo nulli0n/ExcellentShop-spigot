@@ -66,7 +66,7 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
         int possible = product.getStock().getPossibleAmount(this.getTradeType(), player);//product.getStockAmountLeft(player, this.getTradeType());
         int amountHas = product.countItem(player);
-        int amountCan = isAll ? ((possible >= 0 && possible < amountHas) ? possible : amountHas) : this.getAmount();
+        int amountCan = isAll ? ((possible >= 0 && possible < amountHas) ? possible : amountHas) : possible < 0 ? this.getAmount() : Math.min(possible, this.getAmount());
 
         this.setAmount(amountCan);
 
@@ -77,6 +77,9 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
         if ((amountHas < amountCan) || (isAll && amountHas < 1)) {
             event.setResult(Result.NOT_ENOUGH_ITEMS);
+        }
+        else if (!isAll && amountCan < 1) {
+            event.setResult(Result.OUT_OF_STOCK);
         }
         else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
             event.setResult(Result.OUT_OF_MONEY);
