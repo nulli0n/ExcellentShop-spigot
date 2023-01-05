@@ -6,6 +6,7 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 
@@ -47,7 +48,7 @@ public class AuctionSellingMenu extends AbstractAuctionMenu<AuctionListing>  {
     @NotNull
     protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionListing item) {
         return (player1, type, e) -> {
-            if (e.isRightClick()) {
+            if (e.isRightClick() || PlayerUtil.isBedrockPlayer(player1)) {
                 this.auctionManager.takeListing(player1, item);
                 this.open(player1, this.getPage(player1));
             }

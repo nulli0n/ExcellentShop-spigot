@@ -7,6 +7,7 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.currency.internal.ItemCurrency;
 import su.nightexpress.nexshop.shop.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
@@ -61,6 +62,9 @@ public abstract class ProductPricer implements IPlaceholder, JOption.Writer {
     }
 
     public void setPrice(@NotNull TradeType tradeType, double price) {
+        if (this.product != null && this.getProduct().getCurrency() instanceof ItemCurrency) {
+            price = (int) Math.floor(price);
+        }
         this.priceCurrent.put(tradeType, price);
     }
 

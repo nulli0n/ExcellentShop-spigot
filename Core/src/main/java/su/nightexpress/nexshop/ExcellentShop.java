@@ -23,6 +23,7 @@ import su.nightexpress.nexshop.shop.auction.menu.AuctionMainMenu;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.editor.ChestEditorType;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
@@ -106,6 +107,7 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
         this.getLangManager().setupEnum(TradeType.class);
         this.getLangManager().setupEnum(ChestShopType.class);
         this.getLangManager().setupEditorEnum(VirtualEditorType.class);
+        this.getLangManager().setupEditorEnum(ChestEditorType.class);
         this.getLang().saveChanges();
     }
 

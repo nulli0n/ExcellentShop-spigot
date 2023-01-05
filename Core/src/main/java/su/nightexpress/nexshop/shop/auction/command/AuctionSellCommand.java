@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Perms;
+import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
@@ -57,7 +58,17 @@ public class AuctionSellCommand extends ShopModuleCommand<AuctionManager> {
         }
 
         if (this.module.canAdd(player, item, price)) {
-            this.module.getCurrencySelectorMenu().open(player, item, price);
+            if (this.module.getCurrencies(player).size() <= 1) {
+                ICurrency currency = this.module.getCurrencies(player).stream().findFirst().orElse(null);
+                if (currency == null) return;
+
+                if (!this.module.add(player, item, currency, price)) {
+                    return;
+                }
+            }
+            else {
+                this.module.getCurrencySelectorMenu().open(player, item, price);
+            }
             player.getInventory().setItemInMainHand(null);
         }
     }

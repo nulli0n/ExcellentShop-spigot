@@ -33,9 +33,9 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.listener.ChestShopListener;
-import su.nightexpress.nexshop.shop.chest.menu.ChestListGlobalMenu;
-import su.nightexpress.nexshop.shop.chest.menu.ChestListOwnMenu;
-import su.nightexpress.nexshop.shop.chest.menu.ChestListSearchMenu;
+import su.nightexpress.nexshop.shop.chest.menu.list.ChestListGlobalMenu;
+import su.nightexpress.nexshop.shop.chest.menu.list.ChestListOwnMenu;
+import su.nightexpress.nexshop.shop.chest.menu.list.ChestListSearchMenu;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 

@@ -27,7 +27,7 @@ public class ItemCurrency extends AbstractCurrency implements MultiCurrency {
 
     @Override
     public double getBalance(@NotNull Player player) {
-        return PlayerUtil.countItem(player, this.getItem());
+        return Math.floor(PlayerUtil.countItem(player, this.getItem()));
     }
 
     @Override

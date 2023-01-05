@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.chest.menu;
+package su.nightexpress.nexshop.shop.chest.menu.list;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

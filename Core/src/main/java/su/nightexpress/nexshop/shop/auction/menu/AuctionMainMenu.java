@@ -5,10 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.*;
-import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.NumberUtil;
-import su.nexmedia.engine.utils.TimeUtil;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.config.Config;
@@ -124,8 +121,8 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
     @NotNull
     protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionListing item) {
         return (player1, type, e) -> {
-            if (e.isShiftClick() && e.isRightClick()) {
-                if (item.isOwner(player1) || player1.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) {
+            if (item.isOwner(player1) || player1.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) {
+                if (e.isShiftClick() && e.isRightClick() || PlayerUtil.isBedrockPlayer(player1)) {
                     this.auctionManager.takeListing(player1, item);
                     this.open(player1, this.getPage(player1));
                 }

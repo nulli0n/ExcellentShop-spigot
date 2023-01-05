@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.editor.menu;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -44,7 +45,7 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
             ItemUtil.replace(productIcon, shopProduct.replacePlaceholders());
 
             MenuItem item = new MenuItem(productIcon);
-            item.setSlots(new int[]{productCount++});
+            item.setSlots(productCount++);
             item.setClickHandler((p, type, e) -> {
                 if (e.isLeftClick()) {
                     shopProduct.getEditor().open(p, 1);
@@ -83,6 +84,25 @@ public class ShopProductsEditor extends EditorProductList<ChestShop> {
             this.open(player2, page);
         });
         this.addItem(player, free);
+        return true;
+    }
+
+    @Override
+    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
+        Player player = (Player) e.getWhoClicked();
+        if (slotType != SlotType.PLAYER || !PlayerUtil.isBedrockPlayer(player)) {
+            return super.cancelClick(e, slotType);
+        }
+
+        ItemStack item = e.getCurrentItem();
+        if (item == null || item.getType().isAir()) return true;
+
+        int maxProducts = ChestConfig.getMaxShopProducts(player);
+        int hasProducts = this.shop.getProducts().size();
+        if (maxProducts >= 0 && hasProducts >= maxProducts) return true;
+
+        this.shop.createProduct(player, item);
+
         return true;
     }
 }

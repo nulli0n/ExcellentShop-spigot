@@ -30,7 +30,7 @@ import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.editor.menu.ShopEditor;
+import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.*;
@@ -48,7 +48,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     private OfflinePlayer ownerPlayer;
     private ChestShopType type;
 
-    private ShopEditor editor;
+    private ShopSettingsMenu settingsMenu;
 
     private List<String> displayText;
     private Location     displayHologramLoc;
@@ -149,9 +149,9 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
             displayHandler.remove(this);
         }
 
-        if (this.editor != null) {
-            this.editor.clear();
-            this.editor = null;
+        if (this.settingsMenu != null) {
+            this.settingsMenu.clear();
+            this.settingsMenu = null;
         }
         this.products.values().forEach(ChestProduct::clear);
         this.products.clear();
@@ -197,11 +197,11 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
 
     @Override
     @NotNull
-    public ShopEditor getEditor() {
-        if (this.editor == null) {
-            this.editor = new ShopEditor(this);
+    public ShopSettingsMenu getEditor() {
+        if (this.settingsMenu == null) {
+            this.settingsMenu = new ShopSettingsMenu(this);
         }
-        return this.editor;
+        return this.settingsMenu;
     }
 
     @Override
