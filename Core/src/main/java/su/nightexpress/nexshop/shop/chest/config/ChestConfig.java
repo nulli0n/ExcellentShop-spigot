@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.utils.Placeholders;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.currency.CurrencyId;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
@@ -22,8 +22,19 @@ import java.util.stream.Collectors;
 
 public class ChestConfig {
 
-    public static  ItemStack                        DISPLAY_SHOWCASE;
-    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", true, "When 'true', creates a client-side hologram above the shop.");
+    public static final JOption<Map<String, ItemStack>> DISPLAY_SHOWCASE = new JOption<Map<String, ItemStack>>("Display.Showcase",
+        (cfg, path, def) -> {
+            return cfg.getSection(path).stream().collect(Collectors.toMap(k -> k, v -> cfg.getItem(path + "." + v)));
+        },
+        () -> Map.of(Placeholders.DEFAULT, new ItemStack(Material.GLASS), Material.CHEST.name(), new ItemStack(Material.WHITE_STAINED_GLASS)),
+        "Sets an item that will be used as a shop showcase.",
+        "You can provide different showcases for different shop types you set in 'Allowed_Containers' option.",
+        "Showcase is basically an invisible armor stand with equipped item on the head.",
+        "Feel free to use custom-modeled items and such!",
+        Placeholders.URL_ENGINE_ITEMS);
+
+    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", true,
+        "When 'true', creates a client-side hologram above the shop.");
     private static Map<ChestShopType, List<String>> DISPLAY_TEXT;
     public static  int                              DISPLAY_SLIDE_INTERVAL;
 
@@ -36,8 +47,9 @@ public class ChestConfig {
         (cfg, path, def) -> cfg.getStringSet(path).stream().map(String::toUpperCase).collect(Collectors.toSet()),
         () -> Sets.newHashSet(Material.CHEST.name(), Material.TRAPPED_CHEST.name(), Material.BARREL.name(), Material.SHULKER_BOX.name()),
         "A list of Materials, that can be used for shop creation.",
-        "Allowed: CHEST, TRAPPED_CHEST, BARREL, SHULKER_BOX (and colored ones).",
-        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html"
+        "Only 'Container' block materials, can be used!",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/block/Container.html"
     );
     public static Set<ICurrency> ALLOWED_CURRENCIES;
     public static String         ADMIN_SHOP_NAME;
@@ -104,7 +116,6 @@ public class ChestConfig {
         SHOP_PRODUCT_DENIED_NAMES = cfg.getStringSet(path + "Name_Blacklist");
 
         path = "Display.";
-        DISPLAY_SHOWCASE = cfg.getItem(path + "Showcase");
         DISPLAY_SLIDE_INTERVAL = cfg.getInt(path + "Title.Slide_Interval", 3);
         DISPLAY_TEXT = new HashMap<>();
         for (ChestShopType type : ChestShopType.values()) {
@@ -112,6 +123,10 @@ public class ChestConfig {
         }
 
         cfg.saveChanges();
+    }
+
+    static {
+        DISPLAY_SHOWCASE.setWriter((cfg, path) -> DISPLAY_SHOWCASE.get().forEach((type, item) -> cfg.setItem(path + "." + type, item)));
     }
 
     public static int getMaxShops(@NotNull Player player) {

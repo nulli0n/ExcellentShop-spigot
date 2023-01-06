@@ -31,6 +31,17 @@ public abstract class ShopModule extends AbstractModule<ExcellentShop> {
 
     @Override
     protected void onLoad() {
+        /*File dirOld = new File(plugin.getDataFolder().getAbsolutePath() + "/modules/" + this.getId());
+        File dirNew = new File(plugin.getDataFolder().getAbsolutePath() + "/" + this.getId());
+        if (dirOld.exists() && !dirNew.exists()) {
+            try {
+                Files.move(dirOld.toPath(), dirNew.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }*/
+
         this.cfg = JYML.loadOrExtract(plugin, this.getPath() + "settings.yml");
         this.logger = new Logger();
 
@@ -44,6 +55,11 @@ public abstract class ShopModule extends AbstractModule<ExcellentShop> {
             this.logger = null;
         }
     }
+
+    /*@NotNull
+    public String getPath() {
+        return this.getId() + "/";
+    }*/
 
     @NotNull
     public JYML getConfig() {

@@ -20,6 +20,7 @@ import su.nexmedia.engine.config.EngineConfig;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
+import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.Shop;
@@ -248,23 +249,19 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     }
 
     @NotNull
-    public Set<Chest> getChestSides() {
-        if (!(this.getContainer() instanceof Chest chest)) return Collections.emptySet();
+    public Pair<Container, Container> getSides() {
+        Container container = this.getContainer();
 
-        Set<Chest> chests = new HashSet<>();
-        chests.add(chest);
-
-        if (!this.isDoubleChest()) return chests;
+        if (!(this.getContainer() instanceof Chest chest)) return Pair.of(container, container);
+        if (!this.isDoubleChest()) return Pair.of(container, container);
 
         DoubleChest doubleChest = (DoubleChest) this.getInventory().getHolder();
-        if (doubleChest == null) return chests;
+        if (doubleChest == null) return Pair.of(container, container);
 
         Chest left = (Chest) doubleChest.getLeftSide();
         Chest right = (Chest) doubleChest.getRightSide();
-        if (left != null) chests.add(left);
-        if (right != null) chests.add(right);
 
-        return chests;
+        return Pair.of(left != null ? left : container, right != null ? right : container);
     }
 
     @NotNull

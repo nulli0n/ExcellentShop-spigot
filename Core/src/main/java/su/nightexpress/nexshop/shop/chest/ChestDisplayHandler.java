@@ -7,6 +7,7 @@ import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.api.task.AbstractTask;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
@@ -41,17 +42,8 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         @Override
         public void action() {
             chestShop.getShops().forEach(shop -> {
-                //shop.getLocation().getChunk().setForceLoaded(false);
-                /*if (!shop.isDisplayCreated()) {
-                    create(shop);
-                    return;
-                }*/
                 remove(shop);
                 create(shop);
-                /*deleteHologram(shop);
-                addHologram(shop, shop.getDisplayText().get(this.count.getOrDefault(shop.getType(), 0)));
-                deleteItem(shop);
-                addItem(shop);*/
             });
 
             for (ChestShopType chestType : ChestShopType.values()) {
@@ -68,7 +60,6 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
     @Override
     protected void onLoad() {
-        //ChestDisplayRemovalState.ALLOW_REMOVE = false;
         this.holograms = new HashMap<>();
         this.items = new HashMap<>();
 
@@ -76,47 +67,38 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
             this.slider = new Slider();
             this.slider.start();
         }
-        //this.addListener(new DisplayListener(this.plugin));
     }
 
     @Override
     protected void onShutdown() {
-        //ChestDisplayRemovalState.ALLOW_REMOVE = true;
-
         if (this.slider != null) {
             this.slider.stop();
             this.slider = null;
         }
         this.chestShop.getShops().forEach(this::remove);
-        //this.holograms.values().forEach(Entity::remove);
         this.holograms.clear();
-        //this.items.values().forEach(Entity::remove);
         this.items.clear();
     }
 
     private void addHologram(@NotNull ChestShop shop, @NotNull String name) {
         Location location = shop.getDisplayLocation();
-        ItemStack showcase = ChestConfig.DISPLAY_SHOWCASE;
-        //String text = shop.getDisplayText().get(0);
+        ItemStack showcase = ChestConfig.DISPLAY_SHOWCASE.get()
+            .getOrDefault(shop.getContainer().getType().name(), ChestConfig.DISPLAY_SHOWCASE.get().get(Placeholders.DEFAULT));
+        if (showcase == null) return;
 
         if (!ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) {
             name = "";
         }
         String name2 = name;
 
-        int stand = this.holograms.computeIfAbsent(shop, i -> chestShop.getNMS().createHologram(location, showcase, name2));
-        // stand.setCustomName(name);
+        this.holograms.computeIfAbsent(shop, i -> chestShop.getNMS().createHologram(location, showcase, name2));
     }
 
     private void deleteHologram(@NotNull ChestShop shop) {
         if (!holograms.containsKey(shop)) return;
         int stand = this.holograms.remove(shop);
-        //if (stand == null) return;
 
         chestShop.getNMS().deleteEntity(stand);
-        //ChestDisplayRemovalState.ALLOW_REMOVE = true;
-        //stand.remove();
-        //ChestDisplayRemovalState.ALLOW_REMOVE = false;
     }
 
     private void addItem(@NotNull ChestShop shop) {
@@ -125,34 +107,26 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         ItemStack itemS = product == null ? ChestNMS.UNKNOWN : product.getItem();
 
         int item = this.items.computeIfAbsent(shop, i -> chestShop.getNMS().createItem(location, itemS));
-        //item.setItemStack(product.getItem());
     }
 
     private void deleteItem(@NotNull ChestShop shop) {
         if (!items.containsKey(shop)) return;
         int item = this.items.remove(shop);
-        //if (item == null) return;
 
-        //ChestDisplayRemovalState.ALLOW_REMOVE = true;
         chestShop.getNMS().deleteEntity(item);
-        //item.remove();
-        //ChestDisplayRemovalState.ALLOW_REMOVE = false;
     }
 
     public void create(@NotNull ChestShop chest) {
-        //if (!chestShop.chestNMS.isSafeCreation(chest.getLocation())) return;
         if (!chest.getDisplayText().isEmpty()) {
             int count = this.slider != null ? this.slider.getCount(chest) : 0;
             this.addHologram(chest, chest.getDisplayText().get(count));
         }
         this.addItem(chest);
-        //chest.setDisplayCreated(true);
     }
 
     public void remove(@NotNull ChestShop chest) {
         this.deleteHologram(chest);
         this.deleteItem(chest);
-        //chest.setDisplayCreated(false);
     }
 
     /*class DisplayListener extends AbstractListener<ExcellentShop> {

@@ -15,6 +15,7 @@ import su.nexmedia.engine.Version;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHook;
+import su.nexmedia.engine.utils.Pair;
 import su.nexmedia.engine.utils.Reflex;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
@@ -46,7 +47,7 @@ public class ChestShopModule extends ShopModule {
 
     private ChestNMS  chestNMS;
 
-    private Map<Location, ChestShop> chests;
+    private Map<Location, ChestShop> shops;
     private Set<ClaimHook>           claimHooks;
 
     private ChestListOwnMenu    listOwnMenu;
@@ -63,7 +64,7 @@ public class ChestShopModule extends ShopModule {
     @Override
     protected void onLoad() {
         super.onLoad();
-        this.chests = new HashMap<>();
+        this.shops = new HashMap<>();
 
         ChestConfig.load(this);
         if (ChestConfig.DEFAULT_CURRENCY == null) {
@@ -159,9 +160,9 @@ public class ChestShopModule extends ShopModule {
             this.displayHandler.shutdown();
             this.displayHandler = null;
         }
-        if (this.chests != null) {
-            this.chests.clear();
-            this.chests = null;
+        if (this.shops != null) {
+            this.shops.clear();
+            this.shops = null;
         }
         if (this.claimHooks != null) {
             this.claimHooks.clear();
@@ -271,12 +272,10 @@ public class ChestShopModule extends ShopModule {
     }
 
     private void addShop(@NotNull ChestShop shop) {
-        if (shop.getChestSides().isEmpty()) {
-            this.getShopsMap().put(shop.getLocation(), shop);
-        }
-        else {
-            shop.getChestSides().forEach(chest -> this.chests.put(chest.getLocation(), shop));
-        }
+        Pair<Container, Container> sides = shop.getSides();
+        this.getShopsMap().put(sides.getFirst().getLocation(), shop);
+        this.getShopsMap().put(sides.getSecond().getLocation(), shop);
+
         shop.setupView();
         shop.updateDisplay();
     }
@@ -284,7 +283,11 @@ public class ChestShopModule extends ShopModule {
     void removeShop(@NotNull ChestShop shop) {
         if (!shop.getFile().delete()) return;
         shop.clear();
-        shop.getChestSides().stream().map(BlockState::getLocation).forEach(this.chests::remove);
+
+        Pair<Container, Container> sides = shop.getSides();
+        this.getShopsMap().remove(sides.getFirst().getLocation());
+        this.getShopsMap().remove(sides.getSecond().getLocation());
+        //shop.getChestSides().stream().map(BlockState::getLocation).forEach(this.shops::remove);
     }
 
     public boolean depositToShop(@NotNull Player player, @NotNull ChestShop shop, @NotNull ICurrency currency, double amount) {
@@ -340,7 +343,7 @@ public class ChestShopModule extends ShopModule {
 
     @NotNull
     public Map<Location, ChestShop> getShopsMap() {
-        return this.chests;
+        return this.shops;
     }
 
     @NotNull
