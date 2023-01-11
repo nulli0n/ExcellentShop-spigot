@@ -60,7 +60,7 @@ public abstract class Product<
             str = this.replacePlaceholdersView().apply(str);
             str = this.getPricer().replacePlaceholders().apply(str);
             return str
-                .replace(Placeholders.PRODUCT_PRICE_TYPE, this.getPricer().getType().name())
+                .replace(Placeholders.PRODUCT_PRICE_TYPE, getShop().plugin().getLangManager().getEnum(this.getPricer().getType()))
                 .replace(Placeholders.PRODUCT_DISCOUNT_ALLOWED, LangManager.getBoolean(this.isDiscountAllowed()))
                 .replace(Placeholders.PRODUCT_ITEM_META_ENABLED, LangManager.getBoolean(this.isItemMetaEnabled()))
                 .replace(Placeholders.PRODUCT_ITEM_NAME, itemName)

@@ -24,11 +24,12 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
 
     public ChestProduct(@NotNull ICurrency currency, @NotNull ItemStack item) {
         this(UUID.randomUUID().toString(), currency, item);
-        this.setItem(item);
     }
 
     public ChestProduct(@NotNull String id, @NotNull ICurrency currency, @NotNull ItemStack item) {
         super(id, item, currency);
+        this.setItem(item);
+        this.setItemMetaEnabled(true);
     }
 
     @NotNull
@@ -75,8 +76,8 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
         }
 
         ChestProduct product = new ChestProduct(id, currency, item);
-        product.setItemMetaEnabled(true);
-        product.setItem(item);
+        //product.setItemMetaEnabled(true);
+        //product.setItem(item);
 
         PriceType priceType = cfg.getEnum(path + ".Price.Type", PriceType.class, PriceType.FLAT);
         product.setPricer(ProductPricer.read(priceType, cfg, path + ".Price"));

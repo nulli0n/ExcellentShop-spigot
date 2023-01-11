@@ -7,6 +7,7 @@ import su.nexmedia.engine.api.command.GeneralCommand;
 import su.nexmedia.engine.api.data.UserDataHolder;
 import su.nexmedia.engine.command.list.ReloadSubCommand;
 import su.nexmedia.engine.hooks.Hooks;
+import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.command.currency.CurrencyMainCommand;
 import su.nightexpress.nexshop.config.Config;
@@ -15,6 +16,7 @@ import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.data.ShopDataHandler;
 import su.nightexpress.nexshop.data.ShopUserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
+import su.nightexpress.nexshop.editor.GenericEditorType;
 import su.nightexpress.nexshop.hooks.HookId;
 import su.nightexpress.nexshop.hooks.external.BrokerHook;
 import su.nightexpress.nexshop.module.ModuleManager;
@@ -106,8 +108,10 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
         this.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
         this.getLangManager().setupEnum(TradeType.class);
         this.getLangManager().setupEnum(ChestShopType.class);
+        this.getLangManager().setupEnum(PriceType.class);
         this.getLangManager().setupEditorEnum(VirtualEditorType.class);
         this.getLangManager().setupEditorEnum(ChestEditorType.class);
+        this.getLangManager().setupEditorEnum(GenericEditorType.class);
         this.getLang().saveChanges();
     }
 
