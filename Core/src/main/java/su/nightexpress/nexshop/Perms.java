@@ -34,8 +34,8 @@ public class Perms {
     public static final JPermission CHEST_SHOP_CREATE   = new JPermission(PREFIX + "chestshop.create");
     public static final JPermission CHEST_SHOP_REMOVE        = new JPermission(PREFIX + "chestshop.remove");
     public static final JPermission CHEST_SHOP_REMOVE_OTHERS = new JPermission(PREFIX + "chestshop.remove.others");
-    public static final JPermission CHEST_SHOP_TYPE  = new JPermission(PREFIX_CHEST_TYPE + Placeholders.MASK_ANY);
-    public static final JPermission CHEST_SHOP_PRICE = new JPermission(PREFIX_CHEST_PRICE + Placeholders.MASK_ANY);
+    public static final JPermission CHEST_SHOP_TYPE  = new JPermission(PREFIX_CHEST_TYPE + Placeholders.WILDCARD);
+    public static final JPermission CHEST_SHOP_PRICE = new JPermission(PREFIX_CHEST_PRICE + Placeholders.WILDCARD);
 
     public static final JPermission VIRTUAL         = new JPermission(PREFIX + "virtual", "Full access to the Virtual Shop module.");
     public static final JPermission VIRTUAL_COMMAND = new JPermission(PREFIX + "virtual.command", "Access to all the Virtual Shop commands.");
@@ -44,12 +44,12 @@ public class Perms {
     public static final JPermission VIRTUAL_COMMAND_OPEN_OTHERS = new JPermission(PREFIX + "virtual.command.open.others", "Access to '/virtualshop open' command on other players.");
     public static final JPermission VIRTUAL_COMMAND_SELL_MENU = new JPermission(PREFIX + "virtual.command.sellmenu", "Access to the Sell Menu commands.");
     public static final JPermission VIRTUAL_MAIN_MENU           = new JPermission(PREFIX + "virtual.mainmenu", "Access to the Main Menu of Virtual Shop module.");
-    public static final JPermission VIRTUAL_SHOP                = new JPermission(PREFIX_VIRTUAL_SHOP + Placeholders.MASK_ANY, "Access to all the Virtual Shops.");
+    public static final JPermission VIRTUAL_SHOP                = new JPermission(PREFIX_VIRTUAL_SHOP + Placeholders.WILDCARD, "Access to all the Virtual Shops.");
 
     public static final JPermission AUCTION         = new JPermission(PREFIX + "auction", "Access to all the Auction functions.", OP);
     public static final JPermission AUCTION_COMMAND = new JPermission(PREFIX + "auction.command", "Access to all the Auction commands.", OP);
     public static final JPermission AUCTION_BYPASS  = new JPermission(PREFIX + "auction.bypass", "Bypass all the Auction restrictions.", OP);
-    public static final JPermission AUCTION_CURRENCY = new JPermission(PREFIX_AUCTION_CURRENCY + Placeholders.MASK_ANY, "Allows to use all enabled currencies on Auction.", OP);
+    public static final JPermission AUCTION_CURRENCY = new JPermission(PREFIX_AUCTION_CURRENCY + Placeholders.WILDCARD, "Allows to use all enabled currencies on Auction.", OP);
 
     public static final JPermission AUCTION_COMMAND_EXPIRED = new JPermission(PREFIX + "auction.command.expired", "Access to '/auction expired' command", TRUE);
     public static final JPermission AUCTION_COMMAND_EXPIRED_OTHERS = new JPermission(PREFIX + "auction.command.expired.others", "Access to '/auction expired' of other players.", OP);

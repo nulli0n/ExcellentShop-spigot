@@ -121,8 +121,8 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
     @NotNull
     protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionListing item) {
         return (player1, type, e) -> {
-            if (item.isOwner(player1) || player1.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) {
-                if (e.isShiftClick() && e.isRightClick() || PlayerUtil.isBedrockPlayer(player1)) {
+            if (e.isShiftClick() && e.isRightClick() || PlayerUtil.isBedrockPlayer(player1)) {
+                if (item.isOwner(player1) || player1.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) {
                     this.auctionManager.takeListing(player1, item);
                     this.open(player1, this.getPage(player1));
                 }

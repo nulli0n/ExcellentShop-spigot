@@ -143,9 +143,9 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
                 switch (type2) {
                     case PRODUCT_CHANGE_PRICE_TYPE -> {
                         PriceType priceType = CollectionsUtil.switchEnum(product.getPricer().getType());
-                        if (product instanceof ChestProduct chestProduct) {
-                            while (priceType != product.getPricer().getType() && !player.hasPermission(Perms.PREFIX_CHEST_PRICE + priceType.name().toLowerCase()) && !player.hasPermission(Perms.CHEST_SHOP_PRICE)) {
-                                priceType = CollectionsUtil.switchEnum(product.getPricer().getType());
+                        if (product instanceof ChestProduct chestProduct && !player.hasPermission(Perms.CHEST_SHOP_PRICE)) {
+                            while (priceType != product.getPricer().getType() && !player.hasPermission(Perms.PREFIX_CHEST_PRICE + priceType.name().toLowerCase())) {
+                                priceType = CollectionsUtil.switchEnum(priceType);
                             }
                         }
                         if (priceType == product.getPricer().getType()) return;
@@ -313,7 +313,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             if (type == GenericEditorType.PRODUCT_CHANGE_PRICE_FLAT_BUY || type == GenericEditorType.PRODUCT_CHANGE_PRICE_FLAT_SELL) {
                 if (priceType != PriceType.FLAT) {
                     item.setType(Material.AIR);
-                    menuItem.setSlots(new int[0]);
+                    menuItem.setSlots();
                 }
                 else menuItem.setSlots(IntStream.of(map.get(type)).toArray());
             }
@@ -321,7 +321,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             || type == GenericEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH) {
                 if (priceType != PriceType.FLOAT) {
                     item.setType(Material.AIR);
-                    menuItem.setSlots(new int[0]);
+                    menuItem.setSlots();
                 }
                 else menuItem.setSlots(IntStream.of(map.get(type)).toArray());
             }
@@ -329,7 +329,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Produc
             || type == GenericEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL || type == GenericEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP) {
                 if (priceType != PriceType.DYNAMIC) {
                     item.setType(Material.AIR);
-                    menuItem.setSlots(new int[0]);
+                    menuItem.setSlots();
                 }
                 else menuItem.setSlots(IntStream.of(map.get(type)).toArray());
             }

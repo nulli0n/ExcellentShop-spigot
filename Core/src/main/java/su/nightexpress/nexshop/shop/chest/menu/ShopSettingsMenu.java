@@ -42,7 +42,15 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
                     shop2.setName(msg);
                     shop2.updateDisplayText();
                 }
-                case SHOP_BANK_DEPOSIT, SHOP_BANK_WITHDRAW -> {
+                case SHOP_BANK, SHOP_BANK_DEPOSIT, SHOP_BANK_WITHDRAW -> {
+                    if (type == ChestEditorType.SHOP_BANK && PlayerUtil.isBedrockPlayer(player)) {
+                        if (msg.startsWith("+")) type = ChestEditorType.SHOP_BANK_DEPOSIT;
+                        else if (msg.startsWith("-")) type = ChestEditorType.SHOP_BANK_WITHDRAW;
+                        else return false;
+                        
+                        msg = msg.substring(1);
+                    }
+
                     String[] split = msg.split(" ");
                     if (split.length != 2) {
                         EditorManager.error(player, plugin.getMessage(ChestLang.EDITOR_ERROR_BANK_INVALID_SYNTAX).getLocalized());
@@ -102,8 +110,10 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
                         }
                     }
                     case SHOP_BANK -> {
-                        if (e.isLeftClick()) type2 = ChestEditorType.SHOP_BANK_DEPOSIT;
-                        else if (e.isRightClick()) type2 = ChestEditorType.SHOP_BANK_WITHDRAW;
+                        if (!PlayerUtil.isBedrockPlayer(player)) {
+                            if (e.isLeftClick()) type2 = ChestEditorType.SHOP_BANK_DEPOSIT;
+                            else if (e.isRightClick()) type2 = ChestEditorType.SHOP_BANK_WITHDRAW;
+                        }
 
                         EditorManager.startEdit(player, shop, type2, input);
                         plugin.getMessage(ChestLang.EDITOR_TIP_BANK_CURRENCY).asList().forEach(line -> {

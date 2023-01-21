@@ -90,7 +90,7 @@ public class AuctionManager extends ShopModule {
 
         this.addListener(new AuctionListener(this));
 
-        //AuctionUtils.fillDummy(this);
+        AuctionUtils.fillDummy(this);
         this.menuUpdateTask = new AuctionMenuUpdateTask(this);
         this.menuUpdateTask.start();
     }
