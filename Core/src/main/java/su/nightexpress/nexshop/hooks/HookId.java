@@ -10,4 +10,5 @@ public class HookId {
     public static final String BROKER           = "Broker";
     public static final String AUCTION_HOUSE    = "AuctionHouse";
     public static final String GEMS_ECONOMY     = "GemsEconomy";
+    public static final String ELITEMOBS     = "EliteMobs";
 }
