@@ -4,5 +4,5 @@ version: '${project.version}'
 description: Advanced 3 in 1 shop plugin with many features!
 author: NightExpress
 depend: [ NexEngine ]
-softdepend: [ Vault, Citizens, PlayerPoints, WorldGuard, Lands, PlotSquared, GamePoints, GriefPrevention, Broker ]
+softdepend: [ Vault, Citizens, PlayerPoints, WorldGuard, Lands, PlotSquared, GamePoints, GriefPrevention, Broker, EliteMobs ]
 api-version: 1.17
