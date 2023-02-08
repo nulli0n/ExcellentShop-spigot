@@ -51,10 +51,15 @@ public class ShopSellMenu extends AbstractMenu<ExcellentShop> {
                     List<Pair<ItemStack, VirtualProduct>> userItems = USER_ITEMS.remove(player);
                     if (userItems != null && !userItems.isEmpty()) {
                         userItems.forEach(pair -> {
-                            PlayerUtil.addItem(player, pair.getFirst());
-                            VirtualPreparedProduct preparedProduct = pair.getSecond().getPrepared(TradeType.SELL);
-                            preparedProduct.setAmount(pair.getFirst().getAmount());
-                            preparedProduct.sell(player, false);
+                            Collection<ItemStack> left = player.getInventory().addItem(pair.getFirst()).values();
+                            if (left.isEmpty()) {
+                                VirtualPreparedProduct preparedProduct = pair.getSecond().getPrepared(TradeType.SELL);
+                                preparedProduct.setAmount(pair.getFirst().getAmount());
+                                preparedProduct.sell(player, false);
+                            }
+                            else {
+                                left.forEach(item -> PlayerUtil.addItem(player, item));
+                            }
                         });
                         player.updateInventory();
                         plugin.getMessage(VirtualLang.SELL_MENU_SOLD).send(player);

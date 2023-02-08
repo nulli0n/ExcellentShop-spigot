@@ -60,7 +60,7 @@ public class ChestLang {
     public static final LangKey EDITOR_TIP_PRODUCT_CURRENCY = new LangKey("ChestShop.Editor.Tip.Product.Currency", """
         &7
         &b&lSelect a Currency &7(Click)&b&l:
-        &2▸ {json: ~showText: &7Click to select; ~runCommand: %currency_id% ;}&a%currency_name% &7(&f%currency_id%&7){end-json}
+        &2▸ {json: ~showText: &7Click to select; ~runCommand: /%currency_id%;}&a%currency_name% &7(&f%currency_id%&7){end-json}
         &7
         """);
     public static final LangKey EDITOR_TIP_BANK_EXCHANGE = new LangKey("ChestShop.Editor.Tip.Bank.Exchange", "&7Enter currency and amount...");

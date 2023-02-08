@@ -62,7 +62,7 @@ public abstract class Shop<
         if (!this.canAccess(player, true)) {
             return;
         }
-        this.getView().open(player, 1);
+        this.getView().open(player, page);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
         this.shop = shop;
 
         EditorInput<ChestShop, ChestEditorType> input = (player, shop2, type, e) -> {
-            String msg = StringUtil.color(e.getMessage());
+            String msg = StringUtil.colorOff(e.getMessage());
             switch (type) {
                 case SHOP_CHANGE_NAME -> {
                     shop2.setName(msg);

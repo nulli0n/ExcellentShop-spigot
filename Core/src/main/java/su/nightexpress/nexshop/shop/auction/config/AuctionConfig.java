@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.StringUtil;
@@ -27,6 +28,8 @@ public class AuctionConfig {
     public static  boolean LISTINGS_ANNOUNCE;
     private static Map<String, Integer> LISTINGS_PER_RANK;
     public static Map<String, AuctionCurrencySetting> CURRENCIES;
+    public static final JOption<Boolean> LISTINGS_PRICE_ROUND_TO_INT = JOption.create("Settings.Listings.Price.Round_To_Integer", false,
+        "When 'true', removes decimals from listing's price on sell.");
     private static Map<String, double[]> LISTINGS_PRICE_PER_CURRENCY;
     private static  Map<String, double[]> LISTINGS_PRICE_PER_MATERIAL;
     public static  double                LISTINGS_TAX_ON_LISTING_ADD;
@@ -40,6 +43,7 @@ public class AuctionConfig {
     public static void load(@NotNull AuctionManager manager) {
         JYML cfgCategories = JYML.loadOrExtract(manager.plugin(), manager.getPath() + "categories.yml");
         JYML cfg = manager.getConfig();
+        cfg.initializeOptions(AuctionConfig.class);
 
         /*Map<String, List<String>> categories = V1_19_R1.getItemsWithCategory();
         categories.forEach((catName, catItems) -> {

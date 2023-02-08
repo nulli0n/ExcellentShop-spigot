@@ -1,4 +1,4 @@
-Name: '&a&lWool'
+Name: '<gradient:#7afd2f>&lWool Market</gradient:#b9f099>'
 Pages: 1
 Permission_Required: false
 Transaction_Allowed:
@@ -6,5 +6,7 @@ Transaction_Allowed:
   BUY: true
 Citizens:
   Attached_NPC: ''
+Description:
+- '#d4d9d8Wool with colors.'
 Icon:
   Material: LIME_WOOL

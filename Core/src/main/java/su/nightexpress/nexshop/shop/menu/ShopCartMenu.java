@@ -58,8 +58,8 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
                     case CONFIRMATION_ACCEPT, CONFIRMATION_DECLINE -> {
                         if (type2 == MenuItemType.CONFIRMATION_ACCEPT) prepared.trade(player, false);
                         int page = 1;
-                        if (product instanceof VirtualProduct) {
-                            page = ((VirtualProduct) product).getPage();
+                        if (product instanceof VirtualProduct virtualProduct) {
+                            page = virtualProduct.getPage();
                         }
                         shop.open(player, page);
                     }

@@ -40,8 +40,6 @@ Shops:
       admin: -1
 
 Display:
-  Showcase:
-    Material: GLASS
   Title:
     Enabled: true
     Slide_Interval: 3
