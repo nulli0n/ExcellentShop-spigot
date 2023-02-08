@@ -16,6 +16,7 @@ import su.nightexpress.nexshop.currency.external.PlayerPointsCurrency;
 import su.nightexpress.nexshop.currency.external.VaultEcoCurrency;
 import su.nightexpress.nexshop.currency.internal.ExpCurrency;
 import su.nightexpress.nexshop.currency.internal.ItemCurrency;
+import su.nightexpress.nexshop.currency.external.EliteMobsCurrency;
 import su.nightexpress.nexshop.hooks.HookId;
 
 import java.util.*;
@@ -73,6 +74,13 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
                 case CurrencyId.GEMS_ECONOMY -> {
                     if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
                         GemsEconomyCurrency.registerCurrencies();
+                    }
+                }
+                case CurrencyId.ELITEMOBS -> {
+                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.ELITEMOBS);
+                    config.save();
+                    if (Hooks.hasPlugin(HookId.ELITEMOBS)) {
+                        this.registerCurrency(new EliteMobsCurrency(config));
                     }
                 }
             }
