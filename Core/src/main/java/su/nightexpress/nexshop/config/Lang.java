@@ -28,6 +28,8 @@ public class Lang extends EngineLang {
 
     public static final LangKey ERROR_CURRENCY_INVALID = LangKey.of("Error.Currency.Invalid", "&cInvalid currency!");
 
+    public static final LangKey EDITOR_GENERIC_ENTER_NAME     = LangKey.of("Editor.Generic.Enter.Name", "&7Enter &a[Name]");
+    public static final LangKey EDITOR_GENERIC_ENTER_AMOUNT   = LangKey.of("Editor.Generic.Enter.Amount", "&7Enter &a[Amount]");
     public static final LangKey EDITOR_GENERIC_ENTER_DAY      = LangKey.of("Editor.Generic.Enter.Day", "&7Enter &aDay &7in &aEnglish");
     public static final LangKey EDITOR_GENERIC_ENTER_TIME     = LangKey.of("Editor.Generic.Enter.Time", "&7Enter &aTime&7 like &a18:00:00");
     public static final LangKey EDITOR_GENERIC_ENTER_SECONDS  = LangKey.of("Editor.Generic.Enter.Seconds", "&7Enter &aseconds &7amount");

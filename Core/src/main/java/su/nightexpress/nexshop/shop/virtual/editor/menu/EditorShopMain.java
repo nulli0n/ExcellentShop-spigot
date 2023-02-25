@@ -77,7 +77,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
             else if (type instanceof VirtualEditorType type2) {
                 switch (type2) {
                     case SHOP_CHANGE_NAME -> {
-                        EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_NAME).getLocalized());
+                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
                         EditorManager.startEdit(player, shop, type2, input);
                         player.closeInventory();
                         return;

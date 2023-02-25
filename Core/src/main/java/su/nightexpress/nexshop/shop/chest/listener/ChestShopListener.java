@@ -115,7 +115,7 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
         }
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onShopInteract(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         if (block == null) return;

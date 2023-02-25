@@ -18,7 +18,7 @@ import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.editor.GenericEditorType;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 
@@ -56,7 +56,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
             }
         }
 
-        ItemStack reserved = GenericEditorType.PRODUCT_RESERVED_SLOT.getItem();
+        ItemStack reserved = VirtualEditorType.PRODUCT_RESERVED_SLOT.getItem();
         PDCUtil.setData(reserved, this.keyReserved, true);
         for (VirtualProduct product : this.shop.getProducts()) {
             int slot = product.getSlot();

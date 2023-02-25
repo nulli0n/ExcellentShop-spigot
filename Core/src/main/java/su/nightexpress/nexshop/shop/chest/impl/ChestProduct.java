@@ -14,13 +14,13 @@ import su.nightexpress.nexshop.currency.CurrencyId;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
-import su.nightexpress.nexshop.shop.chest.editor.menu.ShopProductEditor;
+import su.nightexpress.nexshop.shop.chest.menu.ProductPriceMenu;
 
 import java.util.UUID;
 
 public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductStock> {
 
-    private ShopProductEditor editor;
+    private ProductPriceMenu priceEditor;
 
     public ChestProduct(@NotNull ICurrency currency, @NotNull ItemStack item) {
         this(UUID.randomUUID().toString(), currency, item);
@@ -96,19 +96,18 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
 
     @Override
     public void clear() {
-        if (this.editor != null) {
-            this.editor.clear();
-            this.editor = null;
+        if (this.priceEditor != null) {
+            this.priceEditor.clear();
+            this.priceEditor = null;
         }
     }
 
-    @Override
     @NotNull
-    public ShopProductEditor getEditor() {
-        if (this.editor == null) {
-            this.editor = new ShopProductEditor(this);
+    public ProductPriceMenu getPriceEditor() {
+        if (this.priceEditor == null) {
+            this.priceEditor = new ProductPriceMenu(this);
         }
-        return this.editor;
+        return priceEditor;
     }
 
     @Override

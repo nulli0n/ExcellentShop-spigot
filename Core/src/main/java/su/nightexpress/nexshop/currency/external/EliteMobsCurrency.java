@@ -1,8 +1,9 @@
 package su.nightexpress.nexshop.currency.external;
 
+
+import com.magmaguy.elitemobs.economy.EconomyHandler;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import com.magmaguy.elitemobs.economy.EconomyHandler;
 import su.nightexpress.nexshop.api.currency.AbstractCurrency;
 import su.nightexpress.nexshop.api.currency.ICurrencyConfig;
 import su.nightexpress.nexshop.api.currency.SingleCurrency;
@@ -15,8 +16,7 @@ public class EliteMobsCurrency extends AbstractCurrency implements SingleCurrenc
 
     @Override
     public double getBalance(@NotNull Player player) {
-        double points = EconomyHandler.checkCurrency(player.getUniqueId());
-        return points;
+        return EconomyHandler.checkCurrency(player.getUniqueId());
     }
 
     @Override

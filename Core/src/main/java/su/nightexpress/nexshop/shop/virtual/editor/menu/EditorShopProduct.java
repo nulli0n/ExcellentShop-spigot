@@ -22,7 +22,6 @@ import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.editor.menu.ProductPriceEditor;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
@@ -87,7 +86,7 @@ public class EditorShopProduct extends AbstractEditorMenu<ExcellentShop, Virtual
                 default -> {}
             }
 
-            product2.getShop().save();
+            product2.getShop().saveProducts();
             return true;
         };
         
@@ -217,7 +216,7 @@ public class EditorShopProduct extends AbstractEditorMenu<ExcellentShop, Virtual
                     default -> { return; }
                 }
 
-                shop.save();
+                shop.saveProducts();
                 this.open(player, 1);
             }
         };

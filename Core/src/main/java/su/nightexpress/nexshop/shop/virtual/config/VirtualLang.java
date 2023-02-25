@@ -21,7 +21,6 @@ public class VirtualLang {
     public static final LangKey SELL_MENU_SOLD = LangKey.of("VirtualShop.SellMenu.Sold", "<! type:\"titles:10:60:20\" !>&a&lItems Sold!\n&7You sold your items!");
 
     public static final LangKey EDITOR_ENTER_ID                = LangKey.of("VirtualShop.Editor.Enter.Id", "&7Enter shop id...");
-    public static final LangKey EDITOR_ENTER_NAME              = LangKey.of("VirtualShop.Editor.Enter.Name", "&7Enter shop &aname&7...");
     public static final LangKey EDITOR_ENTER_DESCRIPTION       = LangKey.of("VirtualShop.Editor.Enter.Description", "&7Enter &adescription&7...");
     public static final LangKey EDITOR_ENTER_NPC_ID            = LangKey.of("VirtualShop.Editor.Enter.NpcId", "&7Enter Citizens id...");
     public static final LangKey EDITOR_ENTER_TITLE             = LangKey.of("VirtualShop.Editor.Enter.Title", "&7Enter shop title...");

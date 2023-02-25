@@ -7,7 +7,6 @@ import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.ShopPurchaseEvent;
-import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceData;
@@ -17,14 +16,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
-public class DynamicProductPricer extends ProductPricer implements IPurchaseListener {
+public class DynamicProductPricer extends RangedProductPricer implements IPurchaseListener {
 
-    private final Map<TradeType, double[]> priceMinMax;
     private final Map<TradeType, Double> priceInitial;
     private final Map<TradeType, Double> priceStep;
 
     public DynamicProductPricer() {
-        this.priceMinMax = new HashMap<>();
         this.priceInitial = new HashMap<>();
         this.priceStep = new HashMap<>();
     }
@@ -127,22 +124,6 @@ public class DynamicProductPricer extends ProductPricer implements IPurchaseList
     @Nullable
     public ProductPriceData getData() {
         return ProductPriceManager.getData(this.getProduct().getShop().getId(), this.getProduct().getId());
-    }
-
-    public double getPriceMin(@NotNull TradeType tradeType) {
-        return this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[0];
-    }
-
-    public double getPriceMax(@NotNull TradeType tradeType) {
-        return this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[1];
-    }
-
-    public void setPriceMin(@NotNull TradeType tradeType, double price) {
-        this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[0] = price;
-    }
-
-    public void setPriceMax(@NotNull TradeType tradeType, double price) {
-        this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[1] = price;
     }
 
     public double getInitial(@NotNull TradeType tradeType) {

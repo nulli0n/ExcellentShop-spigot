@@ -4,27 +4,22 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
+import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
-public class SearchCmd extends ShopModuleCommand<ChestShopModule> {
+public class SearchCommand extends ShopModuleCommand<ChestShopModule> {
 
-    private static final List<String> MATERIALS = new ArrayList<>();
+    private static final List<String> MATERIALS = Stream.of(Material.values())
+        .filter(Material::isItem).map(Enum::name).map(String::toLowerCase).toList();
 
-    static {
-        for (Material m : Material.values()) {
-            MATERIALS.add(m.name());
-        }
-    }
-
-    public SearchCmd(@NotNull ChestShopModule module) {
-        super(module, new String[]{"search"}, Perms.CHEST_SHOP_COMMAND_SEARCH);
+    public SearchCommand(@NotNull ChestShopModule module) {
+        super(module, new String[]{"search"}, ChestPerms.COMMAND_SEARCH);
     }
 
     @Override
@@ -46,11 +41,11 @@ public class SearchCmd extends ShopModuleCommand<ChestShopModule> {
 
     @Override
     @NotNull
-    public List<@NotNull String> getTab(@NotNull Player p, int i, @NotNull String[] args) {
-        if (i == 1) {
+    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
+        if (arg == 1) {
             return MATERIALS;
         }
-        return super.getTab(p, i, args);
+        return super.getTab(player, arg, args);
     }
 
     @Override
@@ -61,12 +56,11 @@ public class SearchCmd extends ShopModuleCommand<ChestShopModule> {
         }
 
         Player player = (Player) sender;
-        Material mat = Material.getMaterial(args[1].toUpperCase());
-        if (mat == null) {
+        Material material = Material.getMaterial(args[1].toUpperCase());
+        if (material == null) {
             return;
         }
 
-        this.module.getListSearchMenu().searchProduct(player, mat);
-        this.module.getListSearchMenu().open(player, 1);
+        this.module.getSearchMenu().open(player, material);
     }
 }

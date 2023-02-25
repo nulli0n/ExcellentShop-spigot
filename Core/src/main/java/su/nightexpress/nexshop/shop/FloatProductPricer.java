@@ -6,7 +6,6 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.IScheduled;
-import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceData;
@@ -22,16 +21,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public class FloatProductPricer extends ProductPricer implements IScheduled {
+public class FloatProductPricer extends RangedProductPricer implements IScheduled {
 
-    private final Map<TradeType, double[]> priceMinMax;
     private Set<DayOfWeek>   days;
     private Set<LocalTime> times;
 
     private ScheduledFuture<?> updateTask;
 
     public FloatProductPricer() {
-        this.priceMinMax = new HashMap<>();
         this.days = new HashSet<>();
         this.times = new HashSet<>();
     }
@@ -145,22 +142,6 @@ public class FloatProductPricer extends ProductPricer implements IScheduled {
     @Nullable
     public ProductPriceData getData() {
         return ProductPriceManager.getData(this.getProduct().getShop().getId(), this.getProduct().getId());
-    }
-
-    public double getPriceMin(@NotNull TradeType tradeType) {
-        return this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[0];
-    }
-
-    public double getPriceMax(@NotNull TradeType tradeType) {
-        return this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[1];
-    }
-
-    public void setPriceMin(@NotNull TradeType tradeType, double price) {
-        this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[0] = price;
-    }
-
-    public void setPriceMax(@NotNull TradeType tradeType, double price) {
-        this.priceMinMax.computeIfAbsent(tradeType, b -> new double[]{-1, -1})[1] = price;
     }
 
     public void randomize() {

@@ -4,9 +4,9 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nightexpress.nexshop.Perms;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
+import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CreateCmd extends ShopModuleCommand<ChestShopModule> {
+public class CreateCommand extends ShopModuleCommand<ChestShopModule> {
 
-    public CreateCmd(@NotNull ChestShopModule module) {
-        super(module, new String[]{"create"}, Perms.CHEST_SHOP_CREATE);
+    public CreateCommand(@NotNull ChestShopModule module) {
+        super(module, new String[]{"create"}, ChestPerms.CREATE);
     }
 
     @Override
@@ -51,13 +51,7 @@ public class CreateCmd extends ShopModuleCommand<ChestShopModule> {
     public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 100);
-
-        ChestShopType type = args.length >= 2 ? CollectionsUtil.getEnum(args[1], ChestShopType.class) : ChestShopType.PLAYER;
-        if (type == null) {
-            this.errorType(sender, ChestShopType.class);
-            return;
-        }
-
+        ChestShopType type = args.length >= 2 ? StringUtil.getEnum(args[1], ChestShopType.class).orElse(ChestShopType.PLAYER) : ChestShopType.PLAYER;
         this.module.createShop(player, block, type);
     }
 }

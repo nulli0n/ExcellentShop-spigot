@@ -11,72 +11,33 @@ import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.EditorManager;
-import su.nexmedia.engine.utils.*;
+import su.nexmedia.engine.utils.CollectionsUtil;
+import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
-import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.editor.menu.ShopProductsEditor;
+import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
-
-import java.util.stream.Stream;
 
 public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
 
-    private final ChestShop          shop;
-    private       ShopProductsEditor productsEditor;
+    private final ChestShop shop;
+
+    private ShopProductsMenu productsMenu;
+    private ShopBankMenu     bankMenu;
 
     public ShopSettingsMenu(@NotNull ChestShop shop) {
         super(shop.plugin(), JYML.loadOrExtract(shop.plugin(), shop.getModule().getPath() + "menu/shop_settings.yml"), "");
         this.shop = shop;
 
-        EditorInput<ChestShop, ChestEditorType> input = (player, shop2, type, e) -> {
-            String msg = StringUtil.colorOff(e.getMessage());
+        EditorInput<ChestShop, Type> input = (player, shop2, type, e) -> {
+            String msg = e.getMessage();
             switch (type) {
                 case SHOP_CHANGE_NAME -> {
                     shop2.setName(msg);
                     shop2.updateDisplayText();
                 }
-                case SHOP_BANK, SHOP_BANK_DEPOSIT, SHOP_BANK_WITHDRAW -> {
-                    if (type == ChestEditorType.SHOP_BANK && PlayerUtil.isBedrockPlayer(player)) {
-                        if (msg.startsWith("+")) type = ChestEditorType.SHOP_BANK_DEPOSIT;
-                        else if (msg.startsWith("-")) type = ChestEditorType.SHOP_BANK_WITHDRAW;
-                        else return false;
-                        
-                        msg = msg.substring(1);
-                    }
-
-                    String[] split = msg.split(" ");
-                    if (split.length != 2) {
-                        EditorManager.error(player, plugin.getMessage(ChestLang.EDITOR_ERROR_BANK_INVALID_SYNTAX).getLocalized());
-                        return false;
-                    }
-
-                    ICurrency currency = plugin.getCurrencyManager().getCurrency(split[0]);
-                    if (currency == null) {
-                        EditorManager.error(player, plugin.getMessage(ChestLang.SHOP_ERROR_CURRENCY_INVALID).getLocalized());
-                        return false;
-                    }
-
-                    double amount = StringUtil.getDouble(split[1], 0, true);
-                    if (amount == 0D) {
-                        EditorManager.error(player, plugin.getMessage(Lang.EDITOR_ERROR_NUMBER_GENERIC).getLocalized());
-                        return false;
-                    }
-
-                    if (type == ChestEditorType.SHOP_BANK_DEPOSIT) {
-                        return shop.getModule().depositToShop(player, shop2, currency, amount);
-                    }
-                    else {
-                        return shop.getModule().withdrawFromShop(player, shop2, currency, amount);
-                    }
-                }
-                default -> { }
             }
 
             shop2.save();
@@ -86,45 +47,21 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
         MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
                 if (type2 == MenuItemType.RETURN) {
-                    shop.getModule().getListOwnMenu().open(player, 1);
+                    shop.getModule().getListMenu().open(player, 1);
                 }
                 else this.onItemClickDefault(player, type2);
             }
-            else if (type instanceof ChestEditorType type2) {
+            else if (type instanceof Type type2) {
                 switch (type2) {
                     case SHOP_CHANGE_NAME -> {
                         EditorManager.startEdit(player, shop, type2, input);
-                        EditorManager.tip(player, plugin.getMessage(ChestLang.EDITOR_TIP_NAME).getLocalized());
+                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
                         player.closeInventory();
                         return;
                     }
-                    case SHOP_CHANGE_TYPE -> {
-                        if (Stream.of(ChestShopType.values()).noneMatch(t -> t.hasPermission(player))) {
-                            plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
-                            return;
-                        }
-
-                        shop.setType(CollectionsUtil.switchEnum(shop.getType()));
-                        while (!shop.getType().hasPermission(player)) {
-                            shop.setType(CollectionsUtil.switchEnum(shop.getType()));
-                        }
-                    }
+                    case SHOP_CHANGE_TYPE -> shop.setType(CollectionsUtil.next(shop.getType(), shopType -> shopType.hasPermission(player)));
                     case SHOP_BANK -> {
-                        if (!PlayerUtil.isBedrockPlayer(player)) {
-                            if (e.isLeftClick()) type2 = ChestEditorType.SHOP_BANK_DEPOSIT;
-                            else if (e.isRightClick()) type2 = ChestEditorType.SHOP_BANK_WITHDRAW;
-                        }
-
-                        EditorManager.startEdit(player, shop, type2, input);
-                        plugin.getMessage(ChestLang.EDITOR_TIP_BANK_CURRENCY).asList().forEach(line -> {
-                            if (line.contains(Placeholders.CURRENCY_ID)) {
-                                for (ICurrency currency : ChestConfig.ALLOWED_CURRENCIES) {
-                                    MessageUtil.sendWithJSON(player, currency.replacePlaceholders().apply(line));
-                                }
-                            }
-                            else MessageUtil.sendWithJSON(player, line);
-                        });
-                        player.closeInventory();
+                        this.getBankMenu().open(player, 1);
                         return;
                     }
                     case SHOP_CHANGE_TRANSACTIONS -> {
@@ -154,13 +91,13 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
                         }
                     }
                     case SHOP_CHANGE_PRODUCTS -> {
-                        this.getProductsEditor().open(player, 1);
+                        this.getProductsMenu().open(player, 1);
                         return;
                     }
                     case SHOP_DELETE -> {
                         if (!e.isShiftClick() && !PlayerUtil.isBedrockPlayer(player)) return;
-                        if (!player.hasPermission(Perms.CHEST_SHOP_REMOVE)
-                                || (!shop.isOwner(player) && !player.hasPermission(Perms.CHEST_SHOP_REMOVE_OTHERS))) {
+                        if (!player.hasPermission(ChestPerms.REMOVE)
+                                || (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS))) {
                             plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
                             return;
                         }
@@ -179,7 +116,7 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
         };
 
         for (String sId : cfg.getSection("Content")) {
-            MenuItem menuItem = cfg.getMenuItem("Content." + sId, ChestEditorType.class);
+            MenuItem menuItem = cfg.getMenuItem("Content." + sId, Type.class);
             if (menuItem.getType() != null) {
                 menuItem.setClickHandler(click);
             }
@@ -187,21 +124,42 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
         }
     }
 
+    private enum Type {
+        SHOP_CHANGE_NAME,
+        SHOP_CHANGE_TYPE,
+        SHOP_CHANGE_TRANSACTIONS,
+        SHOP_CHANGE_PRODUCTS,
+        SHOP_BANK,
+        SHOP_DELETE,
+    }
+
     @Override
     public void clear() {
-        if (this.productsEditor != null) {
-            this.productsEditor.clear();
-            this.productsEditor = null;
+        if (this.productsMenu != null) {
+            this.productsMenu.clear();
+            this.productsMenu = null;
+        }
+        if (this.bankMenu != null) {
+            this.bankMenu.clear();
+            this.bankMenu = null;
         }
         super.clear();
     }
 
     @NotNull
-    public ShopProductsEditor getProductsEditor() {
-        if (this.productsEditor == null) {
-            this.productsEditor = new ShopProductsEditor(this.shop);
+    public ShopProductsMenu getProductsMenu() {
+        if (this.productsMenu == null) {
+            this.productsMenu = new ShopProductsMenu(this.shop);
         }
-        return this.productsEditor;
+        return this.productsMenu;
+    }
+
+    @NotNull
+    public ShopBankMenu getBankMenu() {
+        if (this.bankMenu == null) {
+            this.bankMenu = new ShopBankMenu(this.shop);
+        }
+        return bankMenu;
     }
 
     @Override
@@ -213,17 +171,5 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
     @Override
     public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
         return true;
-    }
-
-    enum ChestEditorType {
-
-        SHOP_CHANGE_NAME,
-        SHOP_CHANGE_TYPE,
-        SHOP_CHANGE_TRANSACTIONS,
-        SHOP_CHANGE_PRODUCTS,
-        SHOP_BANK,
-        SHOP_BANK_DEPOSIT,
-        SHOP_BANK_WITHDRAW,
-        SHOP_DELETE,
     }
 }

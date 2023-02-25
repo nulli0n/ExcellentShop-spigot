@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.chest.menu.list;
+package su.nightexpress.nexshop.shop.chest.menu;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,31 +12,32 @@ import su.nexmedia.engine.api.menu.AbstractMenuAuto;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 
 import java.util.*;
 
-public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduct> {
+public class ShopsSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduct> {
 
-    private final ChestShopModule                chestShop;
-    private final Map<String, Set<ChestProduct>> searchCache;
+    private final ChestShopModule                module;
+    private final Map<Player, List<ChestProduct>> searchCache;
 
     private final int[]        productSlots;
     private final String       productName;
     private final List<String> productLore;
 
-    public ChestListSearchMenu(@NotNull ChestShopModule chestShop) {
-        super(chestShop.plugin(), JYML.loadOrExtract(chestShop.plugin(), chestShop.getPath() + "menu/search.yml"), "");
-        this.chestShop = chestShop;
-        this.searchCache = new HashMap<>();
+    public ShopsSearchMenu(@NotNull ChestShopModule module) {
+        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getPath() + "menu/shops_search.yml"), "");
+        this.module = module;
+        this.searchCache = new WeakHashMap<>();
 
         this.productSlots = cfg.getIntArray("Product.Slots");
-        this.productName = StringUtil.color(cfg.getString("Product.Name", ""));
-        this.productLore = StringUtil.color(cfg.getStringList("Product.Lore"));
+        this.productName = Colorizer.apply(cfg.getString("Product.Name", Placeholders.PRODUCT_ITEM_NAME));
+        this.productLore = Colorizer.apply(cfg.getStringList("Product.Lore"));
 
         MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
@@ -54,17 +55,18 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestPr
         }
     }
 
-    public void searchProduct(@NotNull Player player, @NotNull Material material) {
-        Set<ChestProduct> products = new HashSet<>();
-        this.chestShop.getShops().forEach(shop -> {
+    public void open(@NotNull Player player, @NotNull Material material) {
+        List<ChestProduct> products = new ArrayList<>();
+        this.module.getShops().forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> product.getItem().getType() == material).toList());
         });
-        this.searchCache.put(player.getName(), products);
+        this.searchCache.put(player, products);
+        this.open(player, 1);
     }
 
     @NotNull
-    public Collection<ChestProduct> getSearchResult(@NotNull Player player) {
-        return this.searchCache.getOrDefault(player.getName(), Collections.emptySet());
+    private Collection<ChestProduct> getSearchResult(@NotNull Player player) {
+        return this.searchCache.getOrDefault(player, Collections.emptyList());
     }
 
     @Override
@@ -106,7 +108,7 @@ public class ChestListSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestPr
     @Override
     public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
         super.onClose(player, e);
-        this.searchCache.remove(player.getName());
+        this.searchCache.remove(player);
     }
 
     @Override

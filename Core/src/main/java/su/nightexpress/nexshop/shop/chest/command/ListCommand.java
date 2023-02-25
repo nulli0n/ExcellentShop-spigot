@@ -3,17 +3,19 @@ package su.nightexpress.nexshop.shop.chest.command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Perms;
+import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
+import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
+import java.util.List;
 import java.util.Map;
 
-public class ListCmd extends ShopModuleCommand<ChestShopModule> {
+public class ListCommand extends ShopModuleCommand<ChestShopModule> {
 
-    public ListCmd(@NotNull ChestShopModule module) {
-        super(module, new String[]{"list"}, Perms.CHEST_SHOP_COMMAND_LIST);
+    public ListCommand(@NotNull ChestShopModule module) {
+        super(module, new String[]{"list", "browse"}, ChestPerms.COMMAND_LIST);
     }
 
     @Override
@@ -34,8 +36,22 @@ public class ListCmd extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
+    @NotNull
+    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
+        if (arg == 1) {
+            return CollectionsUtil.playerNames(player);
+        }
+        return super.getTab(player, arg, args);
+    }
+
+    @Override
     public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
         Player player = (Player) sender;
-        this.module.getListOwnMenu().open(player, 1);
+        if (args.length >= 2) {
+            this.module.getListMenu().open(player, args[1], 1);
+        }
+        else {
+            this.module.getListMenu().open(player, 1);
+        }
     }
 }

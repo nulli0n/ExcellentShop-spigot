@@ -9,10 +9,10 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.WeakMenuItem;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.ShopView;
 import su.nightexpress.nexshop.api.type.ShopClickType;
 
@@ -26,10 +26,10 @@ public class ChestShopView extends ShopView<ChestShop> {
     private static List<String> PRODUCT_FORMAT_LORE;
 
     public ChestShopView(@NotNull ChestShop shop) {
-        super(shop, JYML.loadOrExtract(shop.plugin(), ShopAPI.getChestShop().getPath() + "view.yml"));
+        super(shop, JYML.loadOrExtract(shop.plugin(), shop.getModule().getPath() + "view.yml"));
 
         PRODUCT_SLOTS = cfg.getIntArray("Product_Slots");
-        PRODUCT_FORMAT_LORE = StringUtil.color(cfg.getStringList("Product_Format.Lore.Text"));
+        PRODUCT_FORMAT_LORE = Colorizer.apply(cfg.getStringList("Product_Format.Lore.Text"));
 
         MenuClick click = (player, type, e) -> {
             if (type instanceof MenuItemType type2) {
@@ -39,7 +39,6 @@ public class ChestShopView extends ShopView<ChestShop> {
 
         for (String id : cfg.getSection("Content")) {
             MenuItem menuItem = cfg.getMenuItem("Content." + id, MenuItemType.class);
-
             if (menuItem.getType() != null) {
                 menuItem.setClickHandler(click);
             }
@@ -51,10 +50,9 @@ public class ChestShopView extends ShopView<ChestShop> {
 
     @Override
     public void displayProducts(@NotNull Player player, @NotNull Inventory inventory, int page) {
-        int len = PRODUCT_SLOTS.length;
-
-        List<ChestProduct> list = this.getShop().getProducts().stream().toList();
-        List<List<ChestProduct>> split = CollectionsUtil.split(list, len);
+        int length = PRODUCT_SLOTS.length;
+        List<ChestProduct> list = new ArrayList<>(this.getShop().getProducts());
+        List<List<ChestProduct>> split = CollectionsUtil.split(list, length);
 
         int pages = split.size();
         if (pages < 1) list = Collections.emptyList();
@@ -83,15 +81,15 @@ public class ChestShopView extends ShopView<ChestShop> {
                 preview.setItemMeta(meta);
             }
 
-            MenuItem menuItem = new MenuItem(preview);
-            menuItem.setSlots(new int[]{PRODUCT_SLOTS[count++]});
-            menuItem.setClickHandler((p2, type, e) -> {
+            WeakMenuItem menuItem = new WeakMenuItem(player, preview, PRODUCT_SLOTS[count++]);
+            menuItem.setPriority(100);
+            menuItem.setClickHandler((player2, type, e) -> {
                 ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
                 if (clickType == null) return;
 
-                product.prepareTrade(p2, clickType);
+                product.prepareTrade(player2, clickType);
             });
-            this.addItem(player, menuItem);
+            this.addItem(menuItem);
         }
         this.setPage(player, page, pages);
     }

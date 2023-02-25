@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
+import su.nexmedia.engine.api.manager.IEditable;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.IScheduled;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> {
+public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> implements IEditable {
 
     private       int                   shopSlot;
     private       int                   shopPage;

@@ -132,7 +132,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
 
         return str -> super.replacePlaceholders().apply(str
             .replace(Placeholders.SHOP_BANK_BALANCE, ChestConfig.ALLOWED_CURRENCIES.stream()
-                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(DELIMITER_DEFAULT)))
+                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
             .replace(Placeholders.SHOP_CHEST_OWNER, this.getOwnerName())
             .replace(Placeholders.SHOP_CHEST_LOCATION_X, NumberUtil.format(location.getX()))
             .replace(Placeholders.SHOP_CHEST_LOCATION_Y, NumberUtil.format(location.getY()))

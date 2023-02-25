@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.manager.ICleanable;
-import su.nexmedia.engine.api.manager.IEditable;
 import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.ItemUtil;
@@ -28,7 +27,7 @@ import java.util.function.UnaryOperator;
 public abstract class Product<
     P extends Product<P, S, T>,
     S extends Shop<S, P>,
-    T extends ProductStock<P>> implements ICleanable, IEditable, IPlaceholder, JOption.Writer {
+    T extends ProductStock<P>> implements ICleanable, IPlaceholder, JOption.Writer {
 
     protected final String id;
 

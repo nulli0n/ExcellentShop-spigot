@@ -1,0 +1,46 @@
+Title: '#5d6d7e&lShop Products'
+Size: 27
+Inventory_Type: CHEST
+Use_Mini_Message: false
+
+Products:
+  Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17
+  Free:
+    Material: GREEN_TERRACOTTA
+    Name: '#a5ff9a&l[Free Slot]'
+    Lore:
+      - '#ddeceeDrag & drop item here to #a5ff9aadd'
+      - '#ddeceeit to your shop.'
+  Locked:
+    Material: RED_TERRACOTTA
+    Name: '#ff9a9a&l[Locked Slot]'
+    Lore:
+      - '#ddeceePurchase ranks at our #ff9a9astore'
+      - '#ddeceeto unlock more #ff9a9aperks#ddecee and #ff9a9aslots#ddecee!'
+      - ''
+      - '#ff9a9ahttp://store.mycraft.com/'
+  Product:
+    Name: '#fffc9a&l%product_preview_name%'
+    Lore:
+      - '%product_preview_lore%'
+      - ''
+      - '#fffc9a&lDetails:'
+      - '#fffc9a▪ #ddeceeCurrency: #fffc9a%product_currency%'
+      - '#fffc9a▪ #ddeceePrice Type: #fffc9a%product_price_type%'
+      - '#fffc9a▪ #ddeceeBuy Price: #fffc9a%product_price_buy_formatted%'
+      - '#fffc9a▪ #ddeceeSell Price: #fffc9a%product_price_sell_formatted%'
+      - ''
+      - '#9af7ff&lActions:'
+      - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange Currency'
+      - '#9af7ff▪ #ddeceeRight-Click: #9af7ffChange Price'
+      - '#ff9a9a▪ #ddeceeShift-Right: #ff9a9aDelete'
+
+Content:
+  return:
+    Priority: 5
+    Slots: 22
+    Type: RETURN
+    Item:
+      Material: PLAYER_HEAD
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmU5YWU3YTRiZTY1ZmNiYWVlNjUxODEzODlhMmY3ZDQ3ZTJlMzI2ZGI1OWVhM2ViNzg5YTkyYzg1ZWE0NiJ9fX0=
+      Name: '#e3fbf9(↓) &lReturn'

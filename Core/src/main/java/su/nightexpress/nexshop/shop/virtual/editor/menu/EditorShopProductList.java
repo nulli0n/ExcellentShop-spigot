@@ -2,19 +2,21 @@ package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.menu.AbstractMenu;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.editor.GenericEditorType;
-import su.nightexpress.nexshop.editor.menu.EditorProductList;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
@@ -25,14 +27,16 @@ import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class EditorShopProductList extends EditorProductList<VirtualShop> {
+public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
 
     private static final Map<String, VirtualProduct> PRODUCT_CACHE = new HashMap<>();
 
+    private final VirtualShop shop;
     private final NamespacedKey keyProductCache;
 
     public EditorShopProductList(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
-        super(shop);
+        super(shop.plugin(), shop.getView().getTitle(), shop.getView().getSize());
+        this.shop = shop;
         this.keyProductCache = new NamespacedKey(plugin, "product_cache");
     }
 
@@ -106,7 +110,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
                     }
                     else if (e.isRightClick()) {
                         this.shop.removeProduct(shopProduct);
-                        this.shop.save();
+                        this.shop.saveProducts();
                         this.open(player2, page);
                     }
                     return;
@@ -135,7 +139,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
                     this.shop.addProduct(cached);
                 }
 
-                this.shop.save();
+                this.shop.saveProducts();
 
                 // Set cached item to cursor
                 // so player can put it somewhere
@@ -148,7 +152,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
         }
 
 
-        MenuItem free = new MenuItem(GenericEditorType.PRODUCT_FREE_SLOT.getItem());
+        MenuItem free = new MenuItem(VirtualEditorType.PRODUCT_FREE_SLOT.getItem());
         int[] freeSlots = new int[this.getSize() - contentSlots.size()];
         int count = 0;
         for (int slot = 0; count < freeSlots.length; slot++) {
@@ -171,7 +175,7 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
             shopProduct.setSlot(e.getRawSlot());
             shopProduct.setPage(page);
             this.shop.addProduct(shopProduct);
-            this.shop.save();
+            this.shop.saveProducts();
             e.getView().setCursor(null);
             this.open(player1, page);
         });
@@ -180,5 +184,27 @@ public class EditorShopProductList extends EditorProductList<VirtualShop> {
 
         this.setPage(player, page, this.shop.getPages()); // Hack for page items display.
         return true;
+    }
+
+    @Override
+    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
+        this.plugin.runTask(task -> {
+            AbstractMenu<?> menu = getMenu(player);
+            if (menu != null) return;
+
+            this.shop.getEditor().open(player, 1);
+        });
+
+        super.onClose(player, e);
+    }
+
+    @Override
+    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
+        return slotType != SlotType.PLAYER && slotType != SlotType.EMPTY_PLAYER;
+    }
+
+    @Override
+    public boolean cancelClick(@NotNull InventoryDragEvent e) {
+        return e.getRawSlots().stream().anyMatch(slot -> slot < e.getInventory().getSize());
     }
 }

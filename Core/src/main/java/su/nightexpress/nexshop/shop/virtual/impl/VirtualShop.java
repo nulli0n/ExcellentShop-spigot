@@ -172,6 +172,10 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         cfg.set("Discounts", null);
         this.discountConfigs.forEach(discountConfig -> discountConfig.write(cfg, "Discounts." + UUID.randomUUID()));
 
+        this.saveProducts();
+    }
+
+    public void saveProducts() {
         configProducts.set("List", null);
         this.getProducts()
             .stream().sorted(Comparator.comparingInt(VirtualProduct::getSlot).thenComparingInt(VirtualProduct::getPage))

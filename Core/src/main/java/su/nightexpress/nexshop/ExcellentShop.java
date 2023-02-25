@@ -16,7 +16,6 @@ import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.data.ShopDataHandler;
 import su.nightexpress.nexshop.data.ShopUserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
-import su.nightexpress.nexshop.editor.GenericEditorType;
 import su.nightexpress.nexshop.hooks.HookId;
 import su.nightexpress.nexshop.hooks.external.BrokerHook;
 import su.nightexpress.nexshop.module.ModuleManager;
@@ -24,9 +23,6 @@ import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.menu.AuctionMainMenu;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
-import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.editor.ChestEditorType;
-import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
@@ -103,15 +99,11 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     @Override
     public void loadLang() {
         this.getLangManager().loadMissing(Lang.class);
-        this.getLangManager().loadMissing(ChestLang.class);
         this.getLangManager().loadMissing(VirtualLang.class);
         this.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
         this.getLangManager().setupEnum(TradeType.class);
-        this.getLangManager().setupEnum(ChestShopType.class);
         this.getLangManager().setupEnum(PriceType.class);
         this.getLangManager().setupEditorEnum(VirtualEditorType.class);
-        this.getLangManager().setupEditorEnum(ChestEditorType.class);
-        this.getLangManager().setupEditorEnum(GenericEditorType.class);
         this.getLang().saveChanges();
     }
 

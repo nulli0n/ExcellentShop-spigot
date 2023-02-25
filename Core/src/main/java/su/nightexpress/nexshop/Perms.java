@@ -5,10 +5,8 @@ import su.nexmedia.engine.api.server.JPermission;
 
 public class Perms {
 
-    private static final String PREFIX = "excellentshop.";
+    public static final String PREFIX = "excellentshop.";
     public static final String PREFIX_AUCTION_CURRENCY = PREFIX + "auction.currency.";
-    public static final String PREFIX_CHEST_PRICE = PREFIX + "chestshop.price.";
-    public static final String PREFIX_CHEST_TYPE = PREFIX + "chestshop.type.";
     public static final String PREFIX_VIRTUAL_SHOP = PREFIX + "virtual.shop.";
 
     private static final PermissionDefault OP = PermissionDefault.OP;
@@ -24,18 +22,6 @@ public class Perms {
     public static final JPermission COMMAND_CURRENCY_TAKE = new JPermission(PREFIX + "command.currency.take", "Access to 'currency take' sub-command.", OP);
     public static final JPermission COMMAND_CURRENCY_CREATE = new JPermission(PREFIX + "command.currency.create", "Access to 'currency create' sub-command.", OP);
     public static final JPermission COMMAND_RELOAD         = new JPermission(PREFIX + "command.reload", "Access to the reload command.", OP);
-
-    public static final JPermission CHEST_SHOP = new JPermission(PREFIX + "chestshop", "Full access to the Chest Shop module.");
-    public static final JPermission CHEST_SHOP_COMMAND      = new JPermission(PREFIX + "chestshop.command", "Access to all the Chest Shop commands.");
-    public static final JPermission CHEST_SHOP_COMMAND_LIST   = new JPermission(PREFIX + "chestshop.command.list");
-    public static final JPermission CHEST_SHOP_COMMAND_SEARCH = new JPermission(PREFIX + "chestshop.command.search");
-    public static final JPermission CHEST_SHOP_TELEPORT        = new JPermission(PREFIX + "chestshop.teleport");
-    public static final JPermission CHEST_SHOP_TELEPORT_OTHERS = new JPermission(PREFIX + "chestshop.teleport.others");
-    public static final JPermission CHEST_SHOP_CREATE   = new JPermission(PREFIX + "chestshop.create");
-    public static final JPermission CHEST_SHOP_REMOVE        = new JPermission(PREFIX + "chestshop.remove");
-    public static final JPermission CHEST_SHOP_REMOVE_OTHERS = new JPermission(PREFIX + "chestshop.remove.others");
-    public static final JPermission CHEST_SHOP_TYPE  = new JPermission(PREFIX_CHEST_TYPE + Placeholders.WILDCARD);
-    public static final JPermission CHEST_SHOP_PRICE = new JPermission(PREFIX_CHEST_PRICE + Placeholders.WILDCARD);
 
     public static final JPermission VIRTUAL         = new JPermission(PREFIX + "virtual", "Full access to the Virtual Shop module.");
     public static final JPermission VIRTUAL_COMMAND = new JPermission(PREFIX + "virtual.command", "Access to all the Virtual Shop commands.");
@@ -70,14 +56,9 @@ public class Perms {
     public static final JPermission AUCTION_LISTING_REMOVE_OTHERS = new JPermission(PREFIX + "auction.listing.remove.others", "Allows to remove other player's listings.", OP);
 
     static {
-        PLUGIN.addChildren(PLUGIN_COMMAND, CHEST_SHOP, VIRTUAL, AUCTION);
+        PLUGIN.addChildren(PLUGIN_COMMAND, VIRTUAL, AUCTION);
         PLUGIN_COMMAND.addChildren(COMMAND_CURRENCY, COMMAND_RELOAD);
         COMMAND_CURRENCY.addChildren(COMMAND_CURRENCY_CREATE, COMMAND_CURRENCY_GIVE, COMMAND_CURRENCY_TAKE);
-
-        CHEST_SHOP.addChildren(CHEST_SHOP_COMMAND, CHEST_SHOP_CREATE, CHEST_SHOP_PRICE,
-            CHEST_SHOP_REMOVE, CHEST_SHOP_REMOVE_OTHERS,
-            CHEST_SHOP_TELEPORT, CHEST_SHOP_TELEPORT_OTHERS, CHEST_SHOP_TYPE);
-        CHEST_SHOP_COMMAND.addChildren(CHEST_SHOP_COMMAND_LIST, CHEST_SHOP_COMMAND_SEARCH);
 
         VIRTUAL.addChildren(VIRTUAL_COMMAND, VIRTUAL_MAIN_MENU, VIRTUAL_SHOP);
         VIRTUAL_COMMAND.addChildren(VIRTUAL_COMMAND_EDITOR, VIRTUAL_COMMAND_OPEN, VIRTUAL_COMMAND_OPEN_OTHERS);
