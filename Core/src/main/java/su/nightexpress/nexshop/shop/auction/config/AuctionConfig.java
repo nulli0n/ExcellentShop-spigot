@@ -38,6 +38,10 @@ public class AuctionConfig {
     public static  Set<String>           LISTINGS_DISABLED_NAMES;
     public static  Set<String>           LISTINGS_DISABLED_LORES;
 
+    public static final JOption<Integer> MENU_UPDATE_INTERVAL = JOption.create("Menu.Update_Interval", 1,
+        "Sets how often auction menus will be refreshed to players who are viewing them.",
+        "Set this to -1 to disable refreshing task. Then menus will be updated only when there are listings changes.");
+
     public static Map<String, AuctionCategory> CATEGORIES_MAP;
 
     public static void load(@NotNull AuctionManager manager) {

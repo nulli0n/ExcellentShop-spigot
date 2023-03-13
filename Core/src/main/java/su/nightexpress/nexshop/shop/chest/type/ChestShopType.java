@@ -9,6 +9,6 @@ public enum ChestShopType {
 
     public boolean hasPermission(@NotNull Player player) {
         return player.hasPermission(ChestPerms.SHOP_TYPE)
-            || player.hasPermission(ChestPerms.SHOP_TYPE + this.name().toLowerCase());
+            || player.hasPermission(ChestPerms.PREFIX_SHOP_TYPE + this.name().toLowerCase());
     }
 }

@@ -17,6 +17,7 @@ import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.PDCUtil;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
@@ -47,7 +48,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
         for (MenuItem menuItem : this.shop.getView().getItemsMap().values()) {
             Enum<?> type = menuItem.getType();
             ItemStack item = menuItem.getItem();
-            PDCUtil.setData(item, this.keyItemType, type != null ? type.name() : "null");
+            PDCUtil.set(item, this.keyItemType, type != null ? type.name() : "null");
             this.updateItem(item);
 
             for (int slot : menuItem.getSlots()) {
@@ -57,7 +58,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
         }
 
         ItemStack reserved = VirtualEditorType.PRODUCT_RESERVED_SLOT.getItem();
-        PDCUtil.setData(reserved, this.keyReserved, true);
+        PDCUtil.set(reserved, this.keyReserved, true);
         for (VirtualProduct product : this.shop.getProducts()) {
             int slot = product.getSlot();
             if (slot >= inventory.getSize()) continue;
@@ -71,13 +72,13 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
     public void onClick(@NotNull Player player, @Nullable ItemStack item, int slot, @NotNull InventoryClickEvent e) {
         if (item == null || item.getType().isAir()) return;
 
-        if (PDCUtil.getBooleanData(item, this.keyReserved)) {
+        if (PDCUtil.getBoolean(item, this.keyReserved).orElse(false)) {
             e.setCancelled(true);
             return;
         }
 
         if (e.getClick() == ClickType.DROP && slot < this.getSize()) {
-            PDCUtil.setData(item, this.keyItemType, CollectionsUtil.switchEnum(this.getType(item)).name());
+            PDCUtil.set(item, this.keyItemType, CollectionsUtil.next(this.getType(item)).name());
             e.setCancelled(true);
         }
         this.updateItem(item);
@@ -85,10 +86,10 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
 
     @Override
     public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
-        plugin.runTask(c -> {
+        this.plugin.runTask(task -> {
             this.save(e.getInventory());
             this.shop.getEditor().open(player, 1);
-        }, false);
+        });
 
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null) this.removeTypeLore(item);
@@ -99,9 +100,8 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
 
     @NotNull
     private MenuItemType getType(@NotNull ItemStack item) {
-        String typeRaw = PDCUtil.getStringData(item, this.keyItemType);
-        MenuItemType type = typeRaw == null ? MenuItemType.NONE : CollectionsUtil.getEnum(typeRaw, MenuItemType.class);
-        return type == null ? MenuItemType.NONE : type;
+        String typeRaw = PDCUtil.getString(item, this.keyItemType).orElse(null);
+        return typeRaw == null ? MenuItemType.NONE : StringUtil.getEnum(typeRaw, MenuItemType.class).orElse(MenuItemType.NONE);
     }
 
     private void updateItem(@NotNull ItemStack item) {
@@ -138,7 +138,7 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack item = inventory.getItem(slot);
             if (item == null || item.getType().isAir()) continue;
-            if (PDCUtil.getBooleanData(item, this.keyReserved)) continue;
+            if (PDCUtil.getBoolean(item, this.keyReserved).orElse(false)) continue;
 
             MenuItemType type = this.getType(item);
             Map<ItemStack, List<Integer>> map = items.computeIfAbsent(type, k -> new HashMap<>());

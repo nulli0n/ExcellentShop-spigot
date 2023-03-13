@@ -3,17 +3,17 @@ package su.nightexpress.nexshop.shop.auction.listing;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
+import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
 import java.util.UUID;
-import java.util.function.UnaryOperator;
 
-public abstract class AbstractAuctionItem implements IPlaceholder {
+public abstract class AbstractAuctionItem implements Placeholder {
 
     protected final UUID      id;
     protected       UUID      owner;
@@ -22,6 +22,7 @@ public abstract class AbstractAuctionItem implements IPlaceholder {
     protected       double    price;
     protected final ICurrency currency;
     protected final long dateCreation;
+    protected PlaceholderMap placeholderMap;
 
     public AbstractAuctionItem(
             @NotNull UUID id,
@@ -39,20 +40,23 @@ public abstract class AbstractAuctionItem implements IPlaceholder {
         this.currency = currency;
         this.price = price;
         this.dateCreation = dateCreation;
+        this.placeholderMap = new PlaceholderMap()
+            .add(Placeholders.LISTING_SELLER, this.getOwnerName())
+            .add(Placeholders.LISTING_PRICE, this.getCurrency().format(this.getPrice()))
+            .add(Placeholders.LISTING_DATE_CREATION, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getDateCreation())))
+            .add(Placeholders.LISTING_ITEM_AMOUNT, String.valueOf(this.getItemStack().getAmount()))
+            .add(Placeholders.LISTING_ITEM_NAME, ItemUtil.getItemName(this.getItemStack()))
+            .add(Placeholders.LISTING_ITEM_LORE, String.join("\n", ItemUtil.getLore(this.getItemStack())))
+            .add(Placeholders.LISTING_ITEM_VALUE, String.valueOf(ItemUtil.toBase64(this.getItemStack())))
+            .add(Placeholders.LISTING_DELETES_IN, () -> TimeUtil.formatTimeLeft(this.getDeleteDate()))
+            .add(Placeholders.LISTING_DELETE_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getDeleteDate())))
+        ;
     }
 
+    @Override
     @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.LISTING_SELLER, this.getOwnerName())
-            .replace(Placeholders.LISTING_PRICE, this.getCurrency().format(this.getPrice()))
-            .replace(Placeholders.LISTING_DATE_CREATION, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getDateCreation())))
-            .replace(Placeholders.LISTING_ITEM_AMOUNT, String.valueOf(this.getItemStack().getAmount()))
-            .replace(Placeholders.LISTING_ITEM_NAME, ItemUtil.getItemName(this.getItemStack()))
-            .replace(Placeholders.LISTING_ITEM_LORE, String.join("\n", ItemUtil.getLore(this.getItemStack())))
-            .replace(Placeholders.LISTING_ITEM_VALUE, String.valueOf(ItemUtil.toBase64(this.getItemStack())))
-            .replace(Placeholders.LISTING_DELETES_IN, TimeUtil.formatTimeLeft(this.getDeleteDate()))
-            ;
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     @NotNull

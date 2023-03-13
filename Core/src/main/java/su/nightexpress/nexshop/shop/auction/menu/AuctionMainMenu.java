@@ -4,7 +4,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.*;
+import su.nexmedia.engine.api.menu.MenuClick;
+import su.nexmedia.engine.api.menu.MenuItem;
+import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.currency.ICurrency;
@@ -108,10 +111,16 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
     @Override
     @NotNull
     protected List<AuctionListing> getObjects(@NotNull Player player) {
+        return this.auctionManager.getActiveListings();
+    }
+
+    @Override
+    @NotNull
+    protected List<AuctionListing> fineObjects(@NotNull List<AuctionListing> objects, @NotNull Player player) {
         Set<AuctionCategory> categories = getCategories(player);
         Set<ICurrency> currencies = getCurrencies(player);
 
-        return this.auctionManager.getActiveListings().stream()
+        return objects.stream()
             .filter(listing -> categories.isEmpty() || categories.stream().anyMatch(category -> category.isItemOfThis(listing.getItemStack())))
             .filter(listing -> currencies.isEmpty() || currencies.contains(listing.getCurrency()))
             .sorted(getListingOrder(player).getComparator()).toList();
@@ -145,18 +154,17 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
     public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
         super.onItemPrepare(player, menuItem, item);
 
-        String category = getCategories(player).stream().map(AuctionCategory::getName).collect(Collectors.joining(", "));
-        String currency = getCurrencies(player).stream().map(c -> c.getConfig().getName()).collect(Collectors.joining(", "));
+        PlaceholderMap placeholderMap = new PlaceholderMap()
+            .add("%tax%", () -> NumberUtil.format(AuctionConfig.LISTINGS_TAX_ON_LISTING_ADD))
+            .add("%expire%", () -> TimeUtil.formatTime(AuctionConfig.LISTINGS_EXPIRE_IN))
+            .add(PLACEHOLDER_LISTING_ORDER, () -> plugin.getLangManager().getEnum(getListingOrder(player)))
+            .add(PLACEHOLDER_CATEGORIES, () -> getCategories(player).stream().map(AuctionCategory::getName).collect(Collectors.joining(", ")))
+            .add(PLACEHOLDER_CURRENCIES, () -> getCurrencies(player).stream().map(c -> c.getConfig().getName()).collect(Collectors.joining(", ")))
+            .add(PLACEHOLDER_EXPIRED_AMOUNT, () -> String.valueOf(auctionManager.getExpiredListings(player).size()))
+            .add(PLACEHOLDER_UNCLAIMED_AMOUNT, () -> String.valueOf(auctionManager.getUnclaimedListings(player).size()))
+            ;
 
-        ItemUtil.replace(item, line -> line
-            .replace("%tax%", NumberUtil.format(AuctionConfig.LISTINGS_TAX_ON_LISTING_ADD))
-            .replace("%expire%", TimeUtil.formatTime(AuctionConfig.LISTINGS_EXPIRE_IN))
-            .replace(PLACEHOLDER_LISTING_ORDER, plugin.getLangManager().getEnum(getListingOrder(player)))
-            .replace(PLACEHOLDER_CATEGORIES, category)
-            .replace(PLACEHOLDER_CURRENCIES, currency)
-            .replace(PLACEHOLDER_EXPIRED_AMOUNT, String.valueOf(auctionManager.getExpiredListings(player).size()))
-            .replace(PLACEHOLDER_UNCLAIMED_AMOUNT, String.valueOf(auctionManager.getUnclaimedListings(player).size()))
-        );
+        ItemUtil.replace(item, placeholderMap.replacer());
     }
 
     private enum AuctionItemType {
@@ -185,7 +193,7 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
             return l1.getOwnerName().compareTo(l2.getOwnerName());
         }),
         NEWEST((l1, l2) -> {
-            return Long.compare(l2.getExpireDate(), l1.getExpireDate());
+            return Long.compare(l2.getDateCreation(), l1.getDateCreation());
         }),
         OLDEST((l1, l2) -> {
             return Long.compare(l1.getExpireDate(), l2.getExpireDate());

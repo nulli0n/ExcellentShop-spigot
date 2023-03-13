@@ -10,7 +10,9 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
     public static final String LISTING_PRICE         = "%listing_price%";
     public static final String LISTING_DATE_CREATION = "%listing_date_creation%";
     public static final String LISTING_DELETES_IN    = "%listing_deletes_in%";
+    public static final String LISTING_DELETE_DATE    = "%listing_delete_date%";
     public static final String LISTING_EXPIRES_IN    = "%listing_expires_in%";
+    public static final String LISTING_EXPIRE_DATE    = "%listing_expire_date%";
     public static final String LISTING_BUYER         = "%listing_buyer%";
     public static final String LISTING_BUY_DATE      = "%listing_buy_date%";
 

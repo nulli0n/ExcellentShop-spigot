@@ -6,12 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.AuctionUtils;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
+import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
 import java.util.UUID;
-import java.util.function.UnaryOperator;
 
 public class AuctionCompletedListing extends AbstractAuctionItem {
 
@@ -55,15 +54,10 @@ public class AuctionCompletedListing extends AbstractAuctionItem {
         this.setRewarded(isRewarded);
         this.buyerName = buyerName;
         this.buyDate = buyDate;
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> super.replacePlaceholders().apply(str
-                .replace(Placeholders.LISTING_BUYER, this.getBuyerName())
-                .replace(Placeholders.LISTING_BUY_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getBuyDate())))
-        );
+        this.placeholderMap
+            .add(Placeholders.LISTING_BUYER, this.getBuyerName())
+            .add(Placeholders.LISTING_BUY_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getBuyDate())))
+            ;
     }
 
     @NotNull

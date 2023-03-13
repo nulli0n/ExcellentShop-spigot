@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenuAuto;
@@ -65,15 +64,13 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
     @NotNull
     protected ItemStack getObjectStack(@NotNull Player player, @NotNull A aucItem) {
         ItemStack item = new ItemStack(aucItem.getItemStack());
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return item;
-
-        meta.setDisplayName(this.itemName);
-        meta.setLore(this.itemLore);
-        item.setItemMeta(meta);
-
-        ItemUtil.replaceLore(item, PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, aucItem));
-        ItemUtil.replace(item, aucItem.replacePlaceholders());
+        ItemUtil.mapMeta(item, meta -> {
+            List<String> lore = StringUtil.replace(this.itemLore, PLACEHOLDER_LORE_FORMAT, false, this.getLoreFormat(player, aucItem));
+            lore.replaceAll(aucItem.replacePlaceholders());
+            meta.setDisplayName(aucItem.replacePlaceholders().apply(this.itemName));
+            meta.setLore(lore);
+            //ItemUtil.replace(meta, aucItem.replacePlaceholders());
+        });
         return item;
     }
 

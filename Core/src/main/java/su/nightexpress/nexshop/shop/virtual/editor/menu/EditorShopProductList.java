@@ -10,10 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItem;
-import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.*;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -46,16 +43,16 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
         PRODUCT_CACHE.put(pId, product);
 
         ItemStack stack = product.getPreview();
-        PDCUtil.setData(stack, this.keyProductCache, pId);
+        PDCUtil.set(stack, this.keyProductCache, pId);
         return stack;
     }
 
     @Nullable
     private VirtualProduct getCachedProduct(@NotNull ItemStack stack) {
-        String pId = PDCUtil.getStringData(stack, this.keyProductCache);
+        String pId = PDCUtil.getString(stack, this.keyProductCache).orElse(null);
         if (pId == null) return null;
 
-        PDCUtil.removeData(stack, this.keyProductCache);
+        PDCUtil.remove(stack, this.keyProductCache);
         return PRODUCT_CACHE.remove(pId);
     }
 
@@ -80,9 +77,12 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
 
         Set<Integer> contentSlots = new HashSet<>();
         for (MenuItem item : this.shop.getView().getItemsMap().values()) {
-            MenuItem clone = new MenuItem(item);
+            MenuItem clone = new WeakMenuItem(player, item.getItem());
+            clone.setSlots(item.getSlots());
+            clone.setPriority(100);
+            clone.setType(item.getType());
             clone.setClickHandler(click);
-            this.addItem(player, clone);
+            this.addItem(clone);
             contentSlots.addAll(IntStream.of(clone.getSlots()).boxed().toList());
         }
 
@@ -99,8 +99,8 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
             productIcon.setItemMeta(productMeta);
             ItemUtil.replace(productIcon, shopProduct.replacePlaceholders());
 
-            MenuItem productMenuItem = new MenuItem(productIcon);
-            productMenuItem.setSlots(new int[]{shopProduct.getSlot()});
+            MenuItem productMenuItem = new WeakMenuItem(player, productIcon);
+            productMenuItem.setSlots(shopProduct.getSlot());
             productMenuItem.setClickHandler((player2, type, e) -> {
                 if (!e.isLeftClick() && !e.isRightClick()) return;
 
@@ -147,12 +147,12 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
                 this.open(player2, page);
                 player2.getOpenInventory().setCursor(saved);
             });
-            this.addItem(player, productMenuItem);
+            this.addItem(productMenuItem);
             contentSlots.add(shopProduct.getSlot());
         }
 
 
-        MenuItem free = new MenuItem(VirtualEditorType.PRODUCT_FREE_SLOT.getItem());
+        MenuItem free = new WeakMenuItem(player, VirtualEditorType.PRODUCT_FREE_SLOT.getItem());
         int[] freeSlots = new int[this.getSize() - contentSlots.size()];
         int count = 0;
         for (int slot = 0; count < freeSlots.length; slot++) {
@@ -180,7 +180,7 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
             this.open(player1, page);
         });
 
-        this.addItem(player, free);
+        this.addItem(free);
 
         this.setPage(player, page, this.shop.getPages()); // Hack for page items display.
         return true;

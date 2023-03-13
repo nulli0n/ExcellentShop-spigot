@@ -45,7 +45,7 @@ public class AuctionManager extends ShopModule {
     private static final Map<UUID, Set<AuctionListing>> PLAYER_LISTINGS_MAP = new ConcurrentHashMap<>();
     private static final Map<UUID, Set<AuctionCompletedListing>> PLAYER_COMPLETED_LISTINGS_MAP = new ConcurrentHashMap<>();
 
-    private static final Comparator<AbstractAuctionItem> SORT_BY_CREATION = (l1, l2) -> {
+    public static final Comparator<AbstractAuctionItem> SORT_BY_CREATION = (l1, l2) -> {
         return Long.compare(l2.getDateCreation(), l1.getDateCreation());
     };
 
@@ -549,7 +549,7 @@ public class AuctionManager extends ShopModule {
 
     @NotNull
     public List<AuctionListing> getActiveListings() {
-        return LISTINGS_MAP.values().stream().filter(Predicate.not(AuctionListing::isExpired)).sorted(SORT_BY_CREATION).toList();
+        return LISTINGS_MAP.values().stream().filter(Predicate.not(AuctionListing::isExpired))/*.sorted(SORT_BY_CREATION)*/.toList();
     }
 
     @NotNull

@@ -9,6 +9,7 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.WeakMenuItem;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.ShopView;
 import su.nightexpress.nexshop.api.type.ShopClickType;
@@ -99,15 +100,15 @@ public class VirtualShopView extends ShopView<VirtualShop> {
             meta.setLore(StringUtil.stripEmpty(lore));
             preview.setItemMeta(meta);
 
-            MenuItem menuItem = new MenuItem(preview);
-            menuItem.setSlots(new int[]{product.getSlot()});
+            MenuItem menuItem = new WeakMenuItem(player, preview);
+            menuItem.setSlots(product.getSlot());
             menuItem.setClickHandler((player1, type, e) -> {
                 ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
                 if (clickType == null) return;
 
                 product.prepareTrade(player1, clickType);
             });
-            this.addItem(player, menuItem);
+            this.addItem(menuItem);
         }
 
         this.setPage(player, page, this.shop.getPages());
