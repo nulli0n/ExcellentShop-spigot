@@ -1,6 +1,8 @@
 package su.nightexpress.nexshop.shop.chest.listener;
 
 import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -131,6 +133,17 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
         if (action == Action.RIGHT_CLICK_BLOCK) {
             if (player.isSneaking()) {
                 if (isDenied) return;
+
+                ItemStack item = e.getItem();
+                if (item != null) {
+                    if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME) {
+                        if (!shop.isOwner(player)) {
+                            plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
+                            e.setUseInteractedBlock(Result.DENY);
+                        }
+                        return;
+                    }
+                }
 
                 if (shop.isOwner(player) || player.hasPermission(Perms.ADMIN)) {
                     shop.getEditor().open(player, 1);

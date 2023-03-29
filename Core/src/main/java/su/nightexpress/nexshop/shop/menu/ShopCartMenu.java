@@ -94,7 +94,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
                             ItemStack item = itemProduct.getItem();
                             if (tradeType == TradeType.BUY) {
                                 // Allow to buy no more than player can carry.
-                                capacitySpace = PlayerUtil.countItemSpace(player, item);
+                                capacitySpace = PlayerUtil.countItemSpace(player, item) / product.getUnitAmount(); // <-- added
                             }
                             else {
                                 // Allow to sell no more than chest shop can carry.
@@ -106,7 +106,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
                                 }
                                 // Allow to sell no more than player have in inventory.
                                 if (tradeType == TradeType.SELL) {
-                                    int userHas = PlayerUtil.countItem(player, item);
+                                    int userHas = product.countUnits(player);//PlayerUtil.countItem(player, item);
                                     capacityCart = Math.min(capacityCart, userHas);
                                 }
                             }
@@ -179,7 +179,9 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
     private int getMaxPossibleAmount(@NotNull PreparedProduct<?> prepared) {
         ItemStack preview = prepared.getProduct().getPreview();
         int stackSize = preview.getType().getMaxStackSize();
-        return stackSize * this.productSlots.length;
+        int fullSize = stackSize * this.productSlots.length;
+
+        return fullSize / prepared.getProduct().getUnitAmount();//stackSize * this.productSlots.length;
     }
 
     @Override
@@ -189,7 +191,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
 
         ItemStack preview = prepared.getProduct().getPreview();
         int stackSize = preview.getType().getMaxStackSize();
-        int preparedAmount = prepared.getAmount();
+        int preparedAmount = prepared.getAmount() * prepared.getProduct().getUnitAmount(); // <-- added
         int count = 0;
         while (preparedAmount > 0 && count < this.productSlots.length) {
             ItemStack preview2 = prepared.getProduct().getPreview();
@@ -225,7 +227,7 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
 
         ItemStack preview = shopProduct.getPreview();
         int amount = prepared.getAmount();
-        int stacks = (int) ((double) amount / (double) preview.getType().getMaxStackSize());
+        int stacks = (int) ((double) preview.getAmount() * amount / (double) preview.getType().getMaxStackSize());
         double balance = this.balance.computeIfAbsent(player, k -> currency.getBalance(player));
 
         ItemUtil.replace(item, line -> currency.replacePlaceholders().apply(line)

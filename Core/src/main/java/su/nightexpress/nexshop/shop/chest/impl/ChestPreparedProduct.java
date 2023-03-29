@@ -63,26 +63,32 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         ChestShop shop = product.getShop();
 
         boolean isAdmin = shop.isAdminShop();
-        int amountShopCanStore = product.getStock().getLeftAmount(TradeType.SELL);
-        int amountPlayerHas = product.count(player);
-        int amountToSell = isAll ? Math.min((!isAdmin ? amountShopCanStore : amountPlayerHas), amountPlayerHas) : this.getAmount();
-        this.setAmount(amountToSell);
+        int shopSpace = product.getStock().getLeftAmount(TradeType.SELL);
+        int userCount = product.countUnits(player);//product.count(player);
+        int fined;// = isAll ? Math.min((!isAdmin ? shopSpace : userCount), userCount) : this.getAmount();
+        if (isAll) {
+            fined = Math.min((!isAdmin ? shopSpace : userCount), userCount);
+        }
+        else {
+            fined = this.getAmount();
+        }
+        this.setAmount(fined);
 
-        int amountFinal = this.getAmount();
+        //int amountFinal = this.getAmount();
 
         double price = this.getPrice();
         //double balanceShop = shop.getBank().getBalance(product.getCurrency());
 
         ChestShopPurchaseEvent event = new ChestShopPurchaseEvent(player, this);
 
-        if ((amountPlayerHas < amountToSell) || (isAll && amountPlayerHas < 1)) {
+        if ((userCount < fined) || (isAll && userCount < 1)) {
             event.setResult(Result.NOT_ENOUGH_ITEMS);
+        }
+        else if (shopSpace >= 0 && shopSpace < fined) {
+            event.setResult(Result.OUT_OF_SPACE);
         }
         else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
             event.setResult(Result.OUT_OF_MONEY);
-        }
-        else if (amountShopCanStore >= 0 && amountShopCanStore < amountFinal) {
-            event.setResult(Result.OUT_OF_SPACE);
         }
 
         // Call custom event
@@ -100,7 +106,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             shop.save();
         }
         product.getCurrency().give(player, price);
-        product.take(player, amountToSell);
+        product.take(player, fined);
         return true;
     }
 }

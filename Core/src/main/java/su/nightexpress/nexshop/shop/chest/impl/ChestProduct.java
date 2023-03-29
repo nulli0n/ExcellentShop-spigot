@@ -155,11 +155,12 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
     @Override
     public void setItem(@NotNull ItemStack item) {
         this.item = new ItemStack(item);
-        this.item.setAmount(1);
+        //this.item.setAmount(1);
     }
 
     @Override
-    public @NotNull ItemStack getPreview() {
+    @NotNull
+    public ItemStack getPreview() {
         return this.getItem();
     }
 

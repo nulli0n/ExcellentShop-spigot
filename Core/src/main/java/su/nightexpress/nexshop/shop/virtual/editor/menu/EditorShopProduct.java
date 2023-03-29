@@ -273,7 +273,7 @@ public class EditorShopProduct extends AbstractEditorMenu<ExcellentShop, Virtual
         map.put(VirtualEditorType.PRODUCT_CHANGE_DISCOUNT, 16);
 
         map.put(VirtualEditorType.PRODUCT_CHANGE_ITEM, 2);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_ITEM_META, 4);
+        // TODO map.put(VirtualEditorType.PRODUCT_CHANGE_ITEM_META, 4);
         map.put(VirtualEditorType.PRODUCT_CHANGE_PREVIEW, 6);
 
         map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE, 22);

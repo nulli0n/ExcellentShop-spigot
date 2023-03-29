@@ -89,20 +89,23 @@ public class ChestProductStock extends ProductStock<ChestProduct> {
         if (this.getShop().isAdminShop()) return -1;
 
         Inventory inventory = this.getShop().getInventory();
+        ChestProduct product = this.getProduct();
 
         // Для покупки со стороны игрока, возвращаем количество реальных предметов в контейнере.
         if (tradeType == TradeType.BUY) {
-            return Stream.of(inventory.getContents()).filter(has -> has != null && this.getProduct().isItemMatches(has))
+            double totalItems = Stream.of(inventory.getContents()).filter(has -> has != null && product.isItemMatches(has))
                 .mapToInt(ItemStack::getAmount).sum();
+            return (int) Math.floor(totalItems / (double) product.getUnitAmount());
         }
         // Для продажи со стороны игрока, возвращаем количество в свободных и идентичных стопках для предмета.
         else {
             ItemStack item = this.getProduct().getItem();
-            int productSize = (int) Stream.of(inventory.getContents())
-                .filter(itemHas -> itemHas == null || itemHas.getType().isAir() || this.getProduct().isItemMatches(itemHas)).count();
-            int maxSpace = productSize * item.getMaxStackSize();
+            double totalSlots = (int) Stream.of(inventory.getContents())
+                .filter(itemHas -> itemHas == null || itemHas.getType().isAir() || product.isItemMatches(itemHas)).count();
+            double totalSpace = totalSlots * (double) item.getMaxStackSize();
+            int unitsSpace = (int) Math.ceil(totalSpace / (double) product.getUnitAmount());
 
-            return maxSpace - this.getLeftAmount(TradeType.BUY);
+            return unitsSpace - this.getLeftAmount(TradeType.BUY);
         }
     }
 
@@ -122,7 +125,7 @@ public class ChestProductStock extends ProductStock<ChestProduct> {
         boolean isRemoval = amount < 0;
 
         ItemStack item = this.getProduct().getItem();
-        item.setAmount(Math.abs(amount));
+        item.setAmount(Math.abs(amount * this.getProduct().getUnitAmount()));
         Inventory inventory = this.getShop().getInventory();
 
         if (isRemoval) {

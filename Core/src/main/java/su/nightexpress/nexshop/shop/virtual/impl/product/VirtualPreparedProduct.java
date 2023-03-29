@@ -55,20 +55,26 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
         VirtualShop shop = product.getShop();
 
         int possible = product.getStock().getPossibleAmount(this.getTradeType(), player);//product.getStockAmountLeft(player, this.getTradeType());
-        int amountHas = product.count(player);
-        int amountCan = isAll ? ((possible >= 0 && possible < amountHas) ? possible : amountHas) : possible < 0 ? this.getAmount() : Math.min(possible, this.getAmount());
+        int userHas = product.countUnits(player);//product.count(player);
+        int fined;// = isAll ? ((possible >= 0 && possible < userHas) ? possible : userHas) : possible < 0 ? this.getAmount() : Math.min(possible, this.getAmount());
 
-        this.setAmount(amountCan);
+        if (isAll) {
+            fined = (possible >= 0 && possible < userHas) ? possible : userHas;
+        }
+        else {
+            fined = (possible >= 0 && possible < this.getAmount()) ? possible : this.getAmount();
+        }
+        this.setAmount(fined);
 
         VirtualShopPurchaseEvent event = new VirtualShopPurchaseEvent(player, this);
 
         double price = this.getPrice();
         //double balanceShop = shop.getBank().getBalance(product.getCurrency());
 
-        if ((amountHas < amountCan) || (isAll && amountHas < 1)) {
+        if ((userHas < fined) || (isAll && userHas < 1)) {
             event.setResult(Result.NOT_ENOUGH_ITEMS);
         }
-        else if (!isAll && amountCan < 1) {
+        else if (!isAll && fined < 1) {
             event.setResult(Result.OUT_OF_STOCK);
         }
         else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
@@ -87,7 +93,7 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
         shop.getBank().withdraw(product.getCurrency(), price);
         product.getCurrency().give(player, price);
-        product.take(player, amountCan);
+        product.take(player, fined);
         return true;
     }
 }

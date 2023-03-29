@@ -78,7 +78,7 @@ public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
     @Deprecated
     public void setItem(@NotNull ItemStack item) {
         this.item = new ItemStack(item);
-        this.item.setAmount(1); // TODO
+        //this.item.setAmount(1); // TODO
     }
 
     @Override

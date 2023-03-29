@@ -149,7 +149,7 @@ public enum VirtualEditorType implements EditorButtonType {
     PRODUCT_CHANGE_STOCK_PLAYER_SELL_INITIAL_AMOUNT,
     PRODUCT_CHANGE_STOCK_PLAYER_SELL_RESTOCK_TIME,
     PRODUCT_FREE_SLOT(Material.GREEN_STAINED_GLASS_PANE, "FREE SLOT",
-        EditorButtonType.info("Drop item on me to add it as a product!")),
+        EditorButtonType.click("Drag & Drop to &fAdd Item Product\nRight-Click to &fCreate Command Product")),
     PRODUCT_RESERVED_SLOT(Material.BARRIER, "RESERVED SLOT",
         EditorButtonType.info("This slot is already occuppied by a shop product.")),
     PRODUCT_CHANGE_PRICE_TYPE(Material.COMPARATOR, "Price Type",
