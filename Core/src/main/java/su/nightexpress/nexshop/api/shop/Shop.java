@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -172,9 +171,5 @@ public abstract class Shop<
 
     public boolean isProduct(@NotNull Product<?, ?, ?> product) {
         return this.getProductMap().containsKey(product.getId());
-    }
-
-    public boolean isProduct(@NotNull ItemStack item) {
-        return this.getProducts().stream().anyMatch(product -> product.isItemMatches(item));
     }
 }

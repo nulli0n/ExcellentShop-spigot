@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.virtual.impl;
+package su.nightexpress.nexshop.shop.virtual.impl.shop;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,6 +17,7 @@ import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -95,7 +96,7 @@ public class VirtualShopView extends ShopView<VirtualShop> {
                 lore.add(lineFormat);
             }
 
-            lore.replaceAll(product.replacePlaceholders(player));
+            lore.replaceAll(product.getPlaceholders(player).replacer());
             lore.replaceAll(product.getCurrency().replacePlaceholders());
             meta.setLore(StringUtil.stripEmpty(lore));
             preview.setItemMeta(meta);

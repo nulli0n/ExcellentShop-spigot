@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AbstractMenuAuto;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -36,11 +37,11 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
         this.seeOthers = new WeakHashMap<>();
         this.loreFormat = new HashMap<>();
 
-        this.itemName = StringUtil.color(cfg.getString("Items.Name", Placeholders.LISTING_ITEM_NAME));
-        this.itemLore = StringUtil.color(cfg.getStringList("Items.Lore"));
+        this.itemName = Colorizer.apply(cfg.getString("Items.Name", Placeholders.LISTING_ITEM_NAME));
+        this.itemLore = Colorizer.apply(cfg.getStringList("Items.Lore"));
         this.objectSlots = cfg.getIntArray("Items.Slots");
         for (FormatType formatType : FormatType.values()) {
-            this.loreFormat.put(formatType, StringUtil.color(cfg.getStringList("Lore_Format." + formatType.name())));
+            this.loreFormat.put(formatType, Colorizer.apply(cfg.getStringList("Lore_Format." + formatType.name())));
         }
     }
 

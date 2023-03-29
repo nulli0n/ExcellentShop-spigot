@@ -6,18 +6,10 @@ import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 
-import java.util.function.UnaryOperator;
-
 public class FlatProductPricer extends ProductPricer {
 
     public FlatProductPricer() {
 
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str;
     }
 
     @NotNull

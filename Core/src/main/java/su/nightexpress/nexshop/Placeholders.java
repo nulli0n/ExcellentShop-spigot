@@ -67,8 +67,8 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String PRODUCT_DISCOUNT_ALLOWED  = "%product_discount_allowed%";
     public static final String PRODUCT_DISCOUNT_AMOUNT   = "%product_discount_amount%";
     public static final String PRODUCT_ITEM_META_ENABLED = "%product_item_meta_enabled%";
-    public static final String PRODUCT_ITEM_NAME         = "%product_item_name%";
-    public static final String PRODUCT_ITEM_LORE         = "%product_item_lore%";
+    @Deprecated public static final String PRODUCT_ITEM_NAME         = "%product_item_name%";
+    @Deprecated public static final String PRODUCT_ITEM_LORE         = "%product_item_lore%";
     public static final String PRODUCT_PREVIEW_NAME      = "%product_preview_name%";
     public static final String PRODUCT_PREVIEW_LORE      = "%product_preview_lore%";
     public static final String PRODUCT_CURRENCY          = "%product_currency%";

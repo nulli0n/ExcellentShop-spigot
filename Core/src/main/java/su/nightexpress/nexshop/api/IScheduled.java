@@ -1,8 +1,10 @@
 package su.nightexpress.nexshop.api;
 
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.CollectionsUtil;
+import su.nightexpress.nexshop.ShopAPI;
 
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
@@ -12,10 +14,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -58,17 +56,22 @@ public interface IScheduled {
     void stopScheduler();
 
     @Nullable
-    default ScheduledFuture<?> createScheduler() {
+    default BukkitTask createScheduler() {
         LocalDateTime updateTime = this.getClosestDate();
+        //System.out.println("updateTime: " + updateTime);
         if (updateTime == null || !this.canSchedule()) return null;
 
-        long delay = LocalDateTime.now().until(updateTime, ChronoUnit.MILLIS);
+        //System.out.println("1");
+        long delay = LocalDateTime.now().until(updateTime, ChronoUnit.SECONDS) * 20;
 
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+        BukkitTask task = ShopAPI.PLUGIN.getScheduler().runTaskLater(ShopAPI.PLUGIN, this.getCommand(), delay);
+        return task;
+
+        /*ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
         ScheduledFuture<?> future = service.schedule(this.getCommand(), delay, TimeUnit.MILLISECONDS);
         service.schedule(this::startScheduler, delay + 1000L, TimeUnit.MILLISECONDS);
         service.shutdown();
-        return future;
+        return future;*/
     }
 
     @Nullable

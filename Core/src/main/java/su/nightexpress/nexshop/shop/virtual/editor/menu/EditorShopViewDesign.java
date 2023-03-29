@@ -20,8 +20,8 @@ import su.nexmedia.engine.utils.PDCUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.*;
 

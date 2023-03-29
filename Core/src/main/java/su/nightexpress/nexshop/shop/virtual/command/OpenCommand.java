@@ -3,12 +3,12 @@ package su.nightexpress.nexshop.shop.virtual.command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
             return module.getShops(player).stream().map(VirtualShop::getId).toList();
         }
         if (arg == 2 && player.hasPermission(Perms.VIRTUAL_COMMAND_OPEN_OTHERS)) {
-            return PlayerUtil.getPlayerNames();
+            return CollectionsUtil.playerNames(player);
         }
         return super.getTab(player, arg, args);
     }

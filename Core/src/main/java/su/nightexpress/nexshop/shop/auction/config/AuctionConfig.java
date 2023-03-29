@@ -7,13 +7,16 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.shop.auction.AuctionCategory;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -83,17 +86,20 @@ public class AuctionConfig {
 
         CURRENCIES = new HashMap<>();
         for (String curId : cfg.getSection(path + "Currency")) {
+            String path2 = path + "Currency." + curId + ".";
+            boolean isDefault = cfg.getBoolean(path2 + "Default");
+            boolean isEnabled = cfg.getBoolean(path2 + "Enabled");
+            boolean isPermRequired = cfg.getBoolean(path2 + "Need_Permission");
+
+            if (!isEnabled) continue;
+
             ICurrency currency = manager.plugin().getCurrencyManager().getCurrency(curId);
             if (currency == null) {
                 manager.error("Invalid/Unknown currency provided: '" + curId + "'. Ignoring...");
                 continue;
             }
 
-            String path2 = path + "Currency." + curId + ".";
-            boolean isDefault = cfg.getBoolean(path2 + "Default");
-            boolean isEnabled = cfg.getBoolean(path2 + "Enabled");
-            boolean isPermRequired = cfg.getBoolean(path2 + "Need_Permission");
-            AuctionCurrencySetting setting = new AuctionCurrencySetting(currency, isDefault, isEnabled, isPermRequired);
+            AuctionCurrencySetting setting = new AuctionCurrencySetting(currency, isDefault, isPermRequired);
             CURRENCIES.put(setting.getCurrency().getId(), setting);
         }
 
@@ -107,8 +113,8 @@ public class AuctionConfig {
         }
         LISTINGS_DISABLED_MATERIALS = cfg.getStringSet(path + "Disabled_Materials").stream()
                 .map(String::toUpperCase).collect(Collectors.toSet());
-        LISTINGS_DISABLED_NAMES = StringUtil.color(cfg.getStringSet(path + "Disabled_Names"));
-        LISTINGS_DISABLED_LORES = StringUtil.color(cfg.getStringSet(path + "Disabled_Lores"));
+        LISTINGS_DISABLED_NAMES = Colorizer.apply(cfg.getStringSet(path + "Disabled_Names"));
+        LISTINGS_DISABLED_LORES = Colorizer.apply(cfg.getStringSet(path + "Disabled_Lores"));
 
         path = "Settings.Listings.Price.";
 

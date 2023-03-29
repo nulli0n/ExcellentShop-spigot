@@ -10,8 +10,8 @@ import su.nexmedia.engine.api.menu.AbstractMenuAuto;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.auction.AuctionCategory;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
@@ -33,8 +33,8 @@ public class AuctionCategoryFilterMenu extends AbstractMenuAuto<ExcellentShop, A
     public AuctionCategoryFilterMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager.plugin(), cfg, "");
         this.auctionManager = auctionManager;
-        this.itemName = StringUtil.color(cfg.getString("Items.Name", Placeholders.LISTING_ITEM_NAME));
-        this.itemLore = StringUtil.color(cfg.getStringList("Items.Lore"));
+        this.itemName = Colorizer.apply(cfg.getString("Items.Name", Placeholders.LISTING_ITEM_NAME));
+        this.itemLore = Colorizer.apply(cfg.getStringList("Items.Lore"));
         this.objectSlots = cfg.getIntArray("Items.Slots");
         this.selectedIcon = cfg.getItem("Selected");
 

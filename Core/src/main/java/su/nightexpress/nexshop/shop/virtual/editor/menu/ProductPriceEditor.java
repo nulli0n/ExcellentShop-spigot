@@ -26,7 +26,7 @@ import su.nightexpress.nexshop.shop.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
 import su.nightexpress.nexshop.shop.RangedProductPricer;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -131,7 +131,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
                             this.object.getPricer().setPrice(TradeType.BUY, -1);
                             break;
                         }
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -141,7 +141,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
                             this.object.getPricer().setPrice(TradeType.SELL, -1);
                             break;
                         }
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -152,7 +152,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
                         }
                         else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MAX;
 
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -163,7 +163,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
                         }
                         else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MAX;
 
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -180,12 +180,12 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
 
                         if (e.isLeftClick()) {
                             type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH_DAYS;
-                            EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
+                            EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
                             EditorManager.suggestValues(player, CollectionsUtil.getEnumsList(DayOfWeek.class), true);
                         }
                         else {
                             type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH_TIMES;
-                            EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
+                            EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
                         }
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
@@ -197,7 +197,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
                         }
                         else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL_SELL;
 
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -208,7 +208,7 @@ public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, Virtua
                         }
                         else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP_SELL;
 
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;

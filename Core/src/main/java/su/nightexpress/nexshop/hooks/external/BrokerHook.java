@@ -19,6 +19,7 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import java.math.BigDecimal;
 import java.util.*;
 
+@Deprecated
 public class BrokerHook {
 
     private static VirtualShopBroker virtualShopBroker;
@@ -72,10 +73,10 @@ public class BrokerHook {
             this.virtualShop.getShops().stream()
                     .filter(shop -> shop.hasPermission(player) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
                 products.addAll(shop.getProducts().stream().filter(product -> {
-                    if (!product.isItemMatches(item)) return false;
+                    //if (!product.isItemMatches(item)) return false;
                     if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                     if (tradeType == TradeType.SELL && !product.isSellable()) return false;
-                    if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;
+                    //if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;
                     if (product.getStock().getPossibleAmount(tradeType, player) < amount) return false;
                     return true;
                 }).toList());

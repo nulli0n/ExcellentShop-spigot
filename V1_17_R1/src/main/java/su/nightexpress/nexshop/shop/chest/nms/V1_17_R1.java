@@ -18,7 +18,7 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.Colorizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ public class V1_17_R1 implements ChestNMS {
         armorStand.setInvisible(true);
         armorStand.setInvulnerable(true);
         if (!name.isEmpty()) {
-            armorStand.setCustomName(StringUtil.color(name));
+            armorStand.setCustomName(Colorizer.apply(name));
             armorStand.setCustomNameVisible(true);
         }
         armorStand.setSmall(false);

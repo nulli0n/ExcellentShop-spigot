@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -17,9 +18,11 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProductStock;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualCommandProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualItemProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProductStock;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -28,7 +31,7 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
 
     private static final Map<String, VirtualProduct> PRODUCT_CACHE = new HashMap<>();
 
-    private final VirtualShop shop;
+    private final VirtualShop   shop;
     private final NamespacedKey keyProductCache;
 
     public EditorShopProductList(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
@@ -128,8 +131,8 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
                 if (cursor != null && !cursor.getType().isAir()) {
                     VirtualProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
-                        cached = new VirtualProduct(VirtualShopModule.defaultCurrency, cursor);
-                        cached.setItem(cursor);
+                        cached = new VirtualItemProduct(cursor, VirtualShopModule.defaultCurrency);
+                        //cached.setItem(cursor);
                         cached.setPricer(new FlatProductPricer());
                         cached.setStock(new VirtualProductStock());
                         cached.getStock().unlock();
@@ -162,12 +165,18 @@ public class EditorShopProductList extends AbstractMenu<ExcellentShop> {
         free.setSlots(freeSlots);
         free.setClickHandler((player1, type, e) -> {
             ItemStack cursor = e.getCursor();
-            if (cursor == null || cursor.getType().isAir()) return;
+            boolean hasCursor = cursor != null && !cursor.getType().isAir();
+            //if (cursor == null || cursor.getType().isAir()) return;
 
-            VirtualProduct shopProduct = this.getCachedProduct(cursor);
+            VirtualProduct shopProduct = hasCursor ? this.getCachedProduct(cursor) : null;
             if (shopProduct == null) {
-                shopProduct = new VirtualProduct(VirtualShopModule.defaultCurrency, cursor);
-                shopProduct.setItem(cursor);
+                if (hasCursor) {
+                    shopProduct = new VirtualItemProduct(cursor, VirtualShopModule.defaultCurrency);
+                }
+                else if (e.isRightClick()) {
+                    shopProduct = new VirtualCommandProduct(new ItemStack(Material.COMMAND_BLOCK), VirtualShopModule.defaultCurrency);
+                }
+                else return;
                 shopProduct.setPricer(new FlatProductPricer());
                 shopProduct.setStock(new VirtualProductStock());
                 shopProduct.getStock().unlock();

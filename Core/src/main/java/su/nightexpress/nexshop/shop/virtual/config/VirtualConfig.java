@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.config;
 import com.google.common.collect.Sets;
 import org.bukkit.GameMode;
 import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
@@ -40,12 +40,13 @@ public class VirtualConfig {
     public static final JOption<String>       SHOP_FORMAT_NAME = JOption.create("GUI.Shop_Format.Name", Placeholders.SHOP_NAME,
         "Sets display name for the shop item in the Main Menu.",
         "You can use 'Shop' placeholders here:" + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
+    ).mapReader(Colorizer::apply);
+
     public static final JOption<List<String>> SHOP_FORMAT_LORE = JOption.create("GUI.Shop_Format.Lore",
         Arrays.asList(Placeholders.SHOP_VIRTUAL_DESCRIPTION, "", "#ff9a9a[!] #d4d9d8Need Permission: #ff9a9a" + Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED),
         "Sets lore for the shop item in the Main Menu.",
         "You can use 'Shop' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
+    ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_ALL = JOption.create("GUI.Product_Format.Lore.General.All",
         Arrays.asList(Placeholders.GENERIC_LORE, "", Placeholders.GENERIC_DISCOUNT, "",
@@ -64,7 +65,7 @@ public class VirtualConfig {
         "- %stock_player_buy% - Player limit info for purchase (if present)",
         "- %stock_player_sell% - Player limit info for sale (if present).",
         "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
+    ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_BUY_ONLY = JOption.create("GUI.Product_Format.Lore.General.Buy_Only",
         Arrays.asList(Placeholders.GENERIC_LORE, "", Placeholders.GENERIC_DISCOUNT, "",
@@ -80,7 +81,7 @@ public class VirtualConfig {
         "- %stock_global_buy% - Global stock info for purchase (if present)",
         "- %stock_player_buy% - Player limit info for purchase (if present).",
         "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
+    ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_SELL_ONLY = JOption.create("GUI.Product_Format.Lore.General.Sell_Only",
         Arrays.asList(Placeholders.GENERIC_LORE, "", "%discount%", "",
@@ -96,20 +97,20 @@ public class VirtualConfig {
         "- %stock_global_sell% - Global stock info for sale (if present)",
         "- %stock_player_sell% - Player limit info for sale (if present).",
         "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
+    ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = JOption.create("GUI.Product_Format.Lore.Discount",
         Collections.singletonList("&c&l[!] #C70039&lSALE &e&l" + Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%#C70039&l OFF &c&l[!]"),
         "Sets the discount display format when there is active discounts in the shop applicable to a product.",
         "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
+    ).mapReader(Colorizer::apply);
 
     public static final JOption<Map<StockType, Map<TradeType, List<String>>>> PRODUCT_FORMAT_LORE_STOCK = new JOption<Map<StockType, Map<TradeType, List<String>>>>("GUI.Product_Format.Lore.Stock",
         (cfg, path, def) -> {
             Map<StockType, Map<TradeType, List<String>>> map = new HashMap<>();
             for (StockType stockType : StockType.values()) {
                 for (TradeType tradeType : TradeType.values()) {
-                    List<String> lore = StringUtil.color(cfg.getStringList(path + "." + stockType.name() + "." + tradeType.name()));
+                    List<String> lore = Colorizer.apply(cfg.getStringList(path + "." + stockType.name() + "." + tradeType.name()));
                     map.computeIfAbsent(stockType, k -> new HashMap<>()).put(tradeType, lore);
                 }
             }
@@ -126,15 +127,11 @@ public class VirtualConfig {
         "Sets the stock display format for each Stock and Trade types.",
         "If product stock settings is undefined, format will be skipped.",
         "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    );
-
-    static {
-        PRODUCT_FORMAT_LORE_STOCK.setWriter((cfg, path) -> {
-            PRODUCT_FORMAT_LORE_STOCK.get().forEach((stockType, map1) -> {
-                map1.forEach(((tradeType, lore) -> {
-                    cfg.set(path + "." + stockType.name() + "." + tradeType.name(), lore);
-                }));
-            });
+    ).setWriter((cfg, path, map) -> {
+        map.forEach((stockType, map1) -> {
+            map1.forEach(((tradeType, lore) -> {
+                cfg.set(path + "." + stockType.name() + "." + tradeType.name(), lore);
+            }));
         });
-    }
+    });
 }

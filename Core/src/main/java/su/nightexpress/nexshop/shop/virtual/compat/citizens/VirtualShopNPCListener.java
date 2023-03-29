@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.hooks.external.citizens.CitizensListener;
 import su.nexmedia.engine.utils.ArrayUtil;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 public class VirtualShopNPCListener implements CitizensListener {
 

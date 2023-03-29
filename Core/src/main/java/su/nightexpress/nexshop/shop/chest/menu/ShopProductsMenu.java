@@ -151,7 +151,9 @@ public class ShopProductsMenu extends AbstractMenu<ExcellentShop> {
         boolean canAdd = maxProducts < 0 || hasProducts < maxProducts;
         if (!canAdd) return true;
 
+        if (slotType == SlotType.EMPTY_MENU) return true;
         if (slotType == SlotType.PLAYER || slotType == SlotType.EMPTY_PLAYER) {
+            if (e.isShiftClick()) return true;
             if (PlayerUtil.isBedrockPlayer(player)) {
                 ItemStack item = e.getCurrentItem();
                 if (item == null || item.getType().isAir()) return true;

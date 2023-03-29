@@ -19,7 +19,6 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHook;
 import su.nexmedia.engine.utils.Pair;
-import su.nexmedia.engine.utils.Reflex;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
@@ -37,9 +36,9 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.listener.ChestShopListener;
-import su.nightexpress.nexshop.shop.chest.menu.ShopsSearchMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopsListMenu;
-import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
+import su.nightexpress.nexshop.shop.chest.menu.ShopsSearchMenu;
+import su.nightexpress.nexshop.shop.chest.nms.*;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.*;
@@ -76,19 +75,15 @@ public class ChestShopModule extends ShopModule {
         this.plugin.getLang().saveChanges();
         this.plugin.registerPermissions(ChestPerms.class);
 
-        String pack = ChestNMS.class.getPackage().getName();
-        Class<?> nmsClazz = Reflex.getClass(pack, Version.CURRENT.name());
-        if (nmsClazz != null) {
-            try {
-                this.chestNMS = (ChestNMS) nmsClazz.getConstructor().newInstance();
-                this.displayHandler = new ChestDisplayHandler(this);
-                this.displayHandler.setup();
-            }
-            catch (ReflectiveOperationException ex) {
-                this.error("Could not setup internal NMS handler! Shop display will be disabled.");
-                ex.printStackTrace();
-            }
-        }
+        this.chestNMS = switch (Version.CURRENT) {
+            case V1_17_R1 -> new V1_17_R1();
+            case V1_18_R2 -> new V1_18_R2();
+            case V1_19_R1 -> new V1_19_R1();
+            case V1_19_R2 -> new V1_19_R2();
+            case V1_19_R3 -> new V1_19_R3();
+        };
+        this.displayHandler = new ChestDisplayHandler(this);
+        this.displayHandler.setup();
 
         // Setup Claim Hooks
         if (ChestConfig.SHOP_CREATION_CLAIM_ONLY) {

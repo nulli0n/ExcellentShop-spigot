@@ -1,13 +1,15 @@
-package su.nightexpress.nexshop.shop.virtual.impl;
+package su.nightexpress.nexshop.shop.virtual.impl.product;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.IEditable;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.IScheduled;
 import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.shop.CommandProduct;
+import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
@@ -17,31 +19,24 @@ import su.nightexpress.nexshop.currency.CurrencyId;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.function.UnaryOperator;
 
-public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> implements IEditable {
+public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> implements IEditable {
 
-    private       int                   shopSlot;
-    private       int                   shopPage;
-    private       List<String>          commands;
+    private int shopSlot;
+    private int shopPage;
 
     private EditorShopProduct editor;
 
-    public VirtualProduct(@NotNull ICurrency currency, @NotNull ItemStack item) {
-        this(UUID.randomUUID().toString(), item, currency);
-    }
-
-    public VirtualProduct(@NotNull String id, @NotNull ItemStack preview, @NotNull ICurrency currency) {
-        super(id, preview, currency);
-        this.commands = new ArrayList<>();
+    public VirtualProduct(@NotNull String id, @NotNull ICurrency currency) {
+        super(id, currency);
     }
 
     @NotNull
     public static VirtualProduct read(@NotNull JYML cfg, @NotNull String path, @NotNull String id) {
+        // ------------ OLD DATA START ------------
         if (cfg.contains(path + ".Purchase")) {
             cfg.addMissing(path + ".Currency", cfg.getString(path + ".Purchase.Currency"));
             cfg.addMissing(path + ".Item_Meta_Enabled", cfg.getBoolean(path + ".Purchase.Item_Meta_Enabled"));
@@ -83,28 +78,46 @@ public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, V
             }
             cfg.addMissing(path + ".Stock", stock);
             cfg.remove(path + ".Limit");
-            cfg.saveChanges();
         }
-
-
-
-        ItemStack preview = cfg.getItemEncoded(path + ".Shop_View.Preview");
-        if (preview == null || preview.getType().isAir()) {
-            throw new IllegalStateException("Invalid preview item!");
+        if (cfg.contains(path + ".Reward.Commands")) {
+            cfg.set(path + ".Content.Commands", cfg.getStringList(path + ".Reward.Commands"));
+            cfg.remove(path + ".Reward.Commands");
         }
+        if (cfg.contains(path + ".Reward.Item")) {
+            cfg.setItemEncoded(path + ".Content.Item", cfg.getItemEncoded(path + ".Reward.Item"));
+            cfg.remove(path + ".Reward.Item");
+        }
+        if (cfg.contains(path + ".Shop_View.Preview")) {
+            cfg.setItemEncoded(path + ".Content.Preview", cfg.getItemEncoded(path + ".Shop_View.Preview"));
+            cfg.remove(path + ".Shop_View.Preview");
+        }
+        cfg.saveChanges();
+        // ------------ OLD DATA END ------------
+
         String currencyId = cfg.getString(path + ".Currency", CurrencyId.VAULT);
         ICurrency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);
         if (currency == null) {
             throw new IllegalStateException("Invalid currency!");
         }
-        VirtualProduct product = new VirtualProduct(id, preview, currency);
+
+        List<String> commands = cfg.getStringList(path + ".Content.Commands");
+        ItemStack item = cfg.getItemEncoded(path + ".Content.Item");
+
+        VirtualProduct product;
+        if (item != null && !item.getType().isAir()) {
+            product = new VirtualItemProduct(id, item, currency);
+        }
+        else {
+            ItemStack preview = cfg.getItemEncoded(path + ".Content.Preview");
+            if (preview == null) preview = new ItemStack(Material.COMMAND_BLOCK);
+
+            product = new VirtualCommandProduct(id, preview, commands, currency);
+        }
 
         product.setSlot(cfg.getInt(path + ".Shop_View.Slot", -1));
         product.setPage(cfg.getInt(path + ".Shop_View.Page", -1));
         product.setDiscountAllowed(cfg.getBoolean(path + ".Discount.Allowed"));
-        product.setItemMetaEnabled(cfg.getBoolean(path + ".Item_Meta_Enabled"));
-        product.setItem(cfg.getItemEncoded(path + ".Reward.Item"));
-        product.setCommands(cfg.getStringList(path + ".Reward.Commands"));
+        //product.setItemMetaEnabled(cfg.getBoolean(path + ".Item_Meta_Enabled")); TODO
 
         PriceType priceType = cfg.getEnum(path + ".Price.Type", PriceType.class, PriceType.FLAT);
         product.setPricer(ProductPricer.read(priceType, cfg, path + ".Price"));
@@ -112,28 +125,27 @@ public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, V
         return product;
     }
 
-    @Override
-    public void write(@NotNull JYML cfg, @NotNull String path) {
-        cfg.setItemEncoded(path + ".Shop_View.Preview", this.getPreview());
-        cfg.set(path + ".Shop_View.Slot", this.getSlot());
-        cfg.set(path + ".Shop_View.Page", this.getPage());
-        cfg.set(path + ".Discount.Allowed", this.isDiscountAllowed());
-        cfg.set(path + ".Item_Meta_Enabled", this.isItemMetaEnabled());
-        cfg.set(path + ".Stock", this.getStock());
-        ProductPricer pricer = this.getPricer();
-        cfg.set(path + ".Currency", this.getCurrency().getId());
+    //@Override
+    public static void write(@NotNull VirtualProduct product, @NotNull JYML cfg, @NotNull String path) {
+        cfg.remove(path + ".Content");
+        if (product instanceof CommandProduct commandProduct) {
+            cfg.setItemEncoded(path + ".Content.Preview", commandProduct.getPreview());
+            cfg.set(path + ".Content.Commands", commandProduct.getCommands());
+        }
+        else if (product instanceof ItemProduct itemProduct) {
+            cfg.setItemEncoded(path + ".Content.Item", itemProduct.getItem());
+        }
+        cfg.set(path + ".Shop_View.Slot", product.getSlot());
+        cfg.set(path + ".Shop_View.Page", product.getPage());
+        cfg.set(path + ".Discount.Allowed", product.isDiscountAllowed());
+        //cfg.set(path + ".Item_Meta_Enabled", this.isItemMetaEnabled()); TODO
+        //cfg.set(path + ".Stock", product.getStock());
+        VirtualProductStock.write(product.getStock(), cfg, path + ".Stock");
+        ProductPricer pricer = product.getPricer();
+        cfg.set(path + ".Currency", product.getCurrency().getId());
         cfg.set(path + ".Price.Type", pricer.getType().name());
-        cfg.set(path + ".Price", pricer);
-        cfg.setItemEncoded(path + ".Reward.Item", this.getItem());
-        cfg.set(path + ".Reward.Commands", this.getCommands());
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> super.replacePlaceholders().apply(str
-            .replace(Placeholders.PRODUCT_VIRTUAL_COMMANDS, String.join(DELIMITER_DEFAULT, this.getCommands()))
-        );
+        //cfg.set(path + ".Price", pricer);
+        pricer.write(cfg, path + ".Price");
     }
 
     @Override
@@ -164,11 +176,6 @@ public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, V
         return new VirtualPreparedProduct(this, buyType);
     }
 
-    @Override
-    public boolean isEmpty() {
-        return super.isEmpty() && !this.hasCommands();
-    }
-
     public int getSlot() {
         return this.shopSlot;
     }
@@ -183,18 +190,5 @@ public final class VirtualProduct extends Product<VirtualProduct, VirtualShop, V
 
     public void setPage(int page) {
         this.shopPage = page;
-    }
-
-    @NotNull
-    public List<String> getCommands() {
-        return this.commands;
-    }
-
-    public void setCommands(@NotNull List<String> commands) {
-        this.commands = commands;
-    }
-
-    public boolean hasCommands() {
-        return !this.getCommands().isEmpty();
     }
 }

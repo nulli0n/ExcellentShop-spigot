@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop;
 
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -17,8 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class FloatProductPricer extends RangedProductPricer implements IScheduled {
@@ -26,11 +25,22 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
     private Set<DayOfWeek>   days;
     private Set<LocalTime> times;
 
-    private ScheduledFuture<?> updateTask;
+    private BukkitTask updateTask;
 
     public FloatProductPricer() {
         this.days = new HashSet<>();
         this.times = new HashSet<>();
+
+        this.placeholderMap
+            .add(Placeholders.PRODUCT_PRICER_BUY_MIN, () -> String.valueOf(this.getPriceMin(TradeType.BUY)))
+            .add(Placeholders.PRODUCT_PRICER_BUY_MAX, () -> String.valueOf(this.getPriceMax(TradeType.BUY)))
+            .add(Placeholders.PRODUCT_PRICER_SELL_MIN, () -> String.valueOf(this.getPriceMin(TradeType.SELL)))
+            .add(Placeholders.PRODUCT_PRICER_SELL_MAX, () -> String.valueOf(this.getPriceMax(TradeType.SELL)))
+            .add(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_DAYS, () -> String.join("\n", this.getDays()
+                .stream().map(DayOfWeek::name).toList()))
+            .add(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_TIMES, () -> String.join("\n", this.getTimes()
+                .stream().map(TIME_FORMATTER::format).toList()))
+        ;
     }
 
     @NotNull
@@ -60,21 +70,6 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
     }
 
     @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.PRODUCT_PRICER_BUY_MIN, String.valueOf(this.getPriceMin(TradeType.BUY)))
-            .replace(Placeholders.PRODUCT_PRICER_BUY_MAX, String.valueOf(this.getPriceMax(TradeType.BUY)))
-            .replace(Placeholders.PRODUCT_PRICER_SELL_MIN, String.valueOf(this.getPriceMin(TradeType.SELL)))
-            .replace(Placeholders.PRODUCT_PRICER_SELL_MAX, String.valueOf(this.getPriceMax(TradeType.SELL)))
-            .replace(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_DAYS, String.join(DELIMITER_DEFAULT, this.getDays()
-                .stream().map(DayOfWeek::name).toList()))
-            .replace(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_TIMES, String.join(DELIMITER_DEFAULT, this.getTimes()
-                .stream().map(TIME_FORMATTER::format).toList()))
-            ;
-    }
-
-    @Override
     public void update() {
         ProductPriceData priceData = this.getData();
         boolean hasData = priceData != null;
@@ -101,13 +96,13 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
 
     @Override
     public boolean canSchedule() {
-        return this.updateTask == null || this.updateTask.isDone();
+        return this.updateTask == null || this.updateTask.isCancelled();
     }
 
     @Override
     public void stopScheduler() {
         if (this.updateTask != null) {
-            this.updateTask.cancel(true);
+            this.updateTask.cancel();
         }
     }
 

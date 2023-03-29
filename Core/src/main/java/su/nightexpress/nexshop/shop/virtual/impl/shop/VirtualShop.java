@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.virtual.impl;
+package su.nightexpress.nexshop.shop.virtual.impl.shop;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.lang.LangManager;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Perms;
@@ -17,6 +18,8 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopMain;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -170,7 +173,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         cfg.setItem("Icon", this.getIcon());
         cfg.setIntArray("Citizens.Attached_NPC", this.getCitizensIds());
         cfg.set("Discounts", null);
-        this.discountConfigs.forEach(discountConfig -> discountConfig.write(cfg, "Discounts." + UUID.randomUUID()));
+        this.discountConfigs.forEach(discountConfig -> VirtualDiscount.write(discountConfig, cfg, "Discounts." + UUID.randomUUID()));
 
         this.saveProducts();
     }
@@ -179,7 +182,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         configProducts.set("List", null);
         this.getProducts()
             .stream().sorted(Comparator.comparingInt(VirtualProduct::getSlot).thenComparingInt(VirtualProduct::getPage))
-            .forEach(product -> product.write(configProducts, "List." + product.getId()));
+            .forEach(product -> VirtualProduct.write(product, configProducts, "List." + product.getId()));
         configProducts.saveChanges();
     }
 
@@ -208,7 +211,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
     }
 
     public void setDescription(@NotNull List<String> description) {
-        this.description = StringUtil.color(description);
+        this.description = Colorizer.apply(description);
     }
 
     public boolean hasPermission(@NotNull Player player) {

@@ -15,7 +15,7 @@ import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 public class VirtualShopListener extends AbstractListener<ExcellentShop> {
 

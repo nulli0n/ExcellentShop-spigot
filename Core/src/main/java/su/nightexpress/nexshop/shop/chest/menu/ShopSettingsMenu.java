@@ -55,7 +55,7 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
                 switch (type2) {
                     case SHOP_CHANGE_NAME -> {
                         EditorManager.startEdit(player, shop, type2, input);
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
                         player.closeInventory();
                         return;
                     }

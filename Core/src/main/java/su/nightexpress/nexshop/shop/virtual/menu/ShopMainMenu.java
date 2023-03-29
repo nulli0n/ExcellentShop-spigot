@@ -13,7 +13,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.HashMap;
 import java.util.Map;

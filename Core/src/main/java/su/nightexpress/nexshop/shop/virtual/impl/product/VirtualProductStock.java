@@ -1,13 +1,13 @@
-package su.nightexpress.nexshop.shop.virtual.impl;
+package su.nightexpress.nexshop.shop.virtual.impl.product;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
+import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.TimeUtil;
-import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.event.ShopPurchaseEvent;
 import su.nightexpress.nexshop.api.shop.ProductStock;
 import su.nightexpress.nexshop.api.type.StockType;
@@ -19,7 +19,6 @@ import su.nightexpress.nexshop.data.stock.ProductStockManager;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.UnaryOperator;
 
 public class VirtualProductStock extends ProductStock<VirtualProduct> {
 
@@ -30,6 +29,85 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         this.initialAmount = new HashMap<>();
         this.restockTime = new HashMap<>();
         this.lock();
+
+        String never = LangManager.getPlain(Lang.OTHER_NEVER);
+        String infin = LangManager.getPlain(Lang.OTHER_INFINITY);
+
+        this.placeholderMap
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_INITIAL, () -> {
+                int initialAmount = this.getInitialAmount(StockType.GLOBAL, TradeType.BUY);
+                return initialAmount < 0 ? infin : String.valueOf(initialAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_INITIAL, () -> {
+                int initialAmount = this.getInitialAmount(StockType.GLOBAL, TradeType.SELL);
+                return initialAmount < 0 ? infin : String.valueOf(initialAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_BUY_AMOUNT_INITIAL, () -> {
+                int initialAmount = this.getInitialAmount(StockType.PLAYER, TradeType.BUY);
+                return initialAmount < 0 ? infin : String.valueOf(initialAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_SELL_AMOUNT_INITIAL, () -> {
+                int initialAmount = this.getInitialAmount(StockType.PLAYER, TradeType.SELL);
+                return initialAmount < 0 ? infin : String.valueOf(initialAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT, () -> {
+                int leftAmount = this.getLeftAmount(TradeType.BUY);
+                return leftAmount < 0 ? infin : String.valueOf(leftAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_LEFT, () -> {
+                int leftAmount = this.getLeftAmount(TradeType.SELL);
+                return leftAmount < 0 ? infin : String.valueOf(leftAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_TIME, () -> {
+                long cooldown = this.getRestockCooldown(StockType.GLOBAL, TradeType.BUY) * 1000L;
+                return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_TIME, () -> {
+                long cooldown = this.getRestockCooldown(StockType.GLOBAL, TradeType.SELL) * 1000L;
+                return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_BUY_RESTOCK_TIME, () -> {
+                long cooldown = this.getRestockCooldown(StockType.PLAYER, TradeType.BUY) * 1000L;
+                return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_SELL_RESTOCK_TIME, () -> {
+                long cooldown = this.getRestockCooldown(StockType.PLAYER, TradeType.SELL) * 1000L;
+                return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_DATE, () -> {
+                long restockDate = this.getRestockDate(TradeType.BUY);
+                return restockDate < 0 ? never : restockDate == 0 ? "-" : TimeUtil.formatTimeLeft(restockDate);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_DATE, () -> {
+                long restockDate = this.getRestockDate(TradeType.SELL);
+                return restockDate < 0 ? never : restockDate == 0 ? "-" : TimeUtil.formatTimeLeft(restockDate);
+            })
+        ;
+    }
+
+    @Override
+    @NotNull
+    public PlaceholderMap getPlaceholders(@NotNull Player player) {
+        String never = LangManager.getPlain(Lang.OTHER_NEVER);
+        String infinite = LangManager.getPlain(Lang.OTHER_INFINITY);
+        return new PlaceholderMap(this.getPlaceholders())
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_BUY_AMOUNT_LEFT, () -> {
+                int leftAmount = this.getLeftAmount(TradeType.BUY, player);
+                return leftAmount < 0 ? infinite : String.valueOf(leftAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_SELL_AMOUNT_LEFT, () -> {
+                int leftAmount = this.getLeftAmount(TradeType.SELL, player);
+                return leftAmount < 0 ? infinite : String.valueOf(leftAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_BUY_RESTOCK_DATE, () -> {
+                long restockDate = this.getRestockDate(TradeType.BUY, player);
+                return restockDate < 0 ? never : restockDate == 0 ? "-" : TimeUtil.formatTimeLeft(restockDate);
+            })
+            .add(Placeholders.PRODUCT_STOCK_PLAYER_SELL_RESTOCK_DATE, () -> {
+                long restockDate = this.getRestockDate(TradeType.SELL, player);
+                return restockDate < 0 ? never : restockDate == 0 ? "-" : TimeUtil.formatTimeLeft(restockDate);
+            })
+            ;
     }
 
     @NotNull
@@ -47,75 +125,13 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         return stock;
     }
 
-    @Override
-    public void write(@NotNull JYML cfg, @NotNull String path) {
+    public static void write(@NotNull VirtualProductStock stock, @NotNull JYML cfg, @NotNull String path) {
         for (StockType stockType : StockType.values()) {
             for (TradeType tradeType : TradeType.values()) {
-                cfg.set(path + "." + stockType.name() + "." + tradeType.name() + ".Initial_Amount", this.getInitialAmount(stockType, tradeType));
-                cfg.set(path + "." + stockType.name() + "." + tradeType.name() + ".Restock_Time", this.getRestockCooldown(stockType, tradeType));
+                cfg.set(path + "." + stockType.name() + "." + tradeType.name() + ".Initial_Amount", stock.getInitialAmount(stockType, tradeType));
+                cfg.set(path + "." + stockType.name() + "." + tradeType.name() + ".Restock_Time", stock.getRestockCooldown(stockType, tradeType));
             }
         }
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        ExcellentShop plugin = ShopAPI.PLUGIN;
-
-        int stockGLBuyAmountInit = this.getInitialAmount(StockType.GLOBAL, TradeType.BUY);
-        int stockGLSellAmountInit = this.getInitialAmount(StockType.GLOBAL, TradeType.SELL);
-        int stockPLBuyAmountInit = this.getInitialAmount(StockType.PLAYER, TradeType.BUY);
-        int stockPLSellAmountInit = this.getInitialAmount(StockType.PLAYER, TradeType.SELL);
-
-        int stockGLBuyAmountLeft = this.getLeftAmount(TradeType.BUY);
-        int stockGLSellAmountLeft = this.getLeftAmount(TradeType.SELL);
-
-        long stockGLBuyRestockTime = this.getRestockCooldown(StockType.GLOBAL, TradeType.BUY) * 1000L;
-        long stockGLSellRestockTime = this.getRestockCooldown(StockType.GLOBAL, TradeType.SELL) * 1000L;
-        long stockPLBuyRestockTime = this.getRestockCooldown(StockType.PLAYER, TradeType.BUY) * 1000L;
-        long stockPLSellRestockTime = this.getRestockCooldown(StockType.PLAYER, TradeType.SELL) * 1000L;
-
-        long stockGLBuyRestockDate = this.getRestockDate(TradeType.BUY);
-        long stockGLSellRestockDate = this.getRestockDate(TradeType.SELL);
-
-        String never = plugin.getMessage(Lang.OTHER_NEVER).getLocalized();
-        String infin = plugin.getMessage(Lang.OTHER_INFINITY).getLocalized();
-
-        return str -> str
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_INITIAL, stockGLBuyAmountInit < 0 ? infin : String.valueOf(stockGLBuyAmountInit))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_INITIAL, stockGLSellAmountInit < 0 ? infin : String.valueOf(stockGLSellAmountInit))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_BUY_AMOUNT_INITIAL, stockPLBuyAmountInit < 0 ? infin : String.valueOf(stockPLBuyAmountInit))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_SELL_AMOUNT_INITIAL, stockPLSellAmountInit < 0 ? infin : String.valueOf(stockPLSellAmountInit))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT, stockGLBuyAmountLeft < 0 ? infin : String.valueOf(stockGLBuyAmountLeft))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_LEFT, stockGLSellAmountLeft < 0 ? infin : String.valueOf(stockGLSellAmountLeft))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_TIME, stockGLBuyRestockTime < 0 ? never : TimeUtil.formatTime(stockGLBuyRestockTime))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_TIME, stockGLSellRestockTime < 0 ? never : TimeUtil.formatTime(stockGLSellRestockTime))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_BUY_RESTOCK_TIME, stockPLBuyRestockTime < 0 ? never : TimeUtil.formatTime(stockPLBuyRestockTime))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_SELL_RESTOCK_TIME, stockPLSellRestockTime < 0 ? never : TimeUtil.formatTime(stockPLSellRestockTime))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_DATE, stockGLBuyRestockDate < 0 ? never : stockGLBuyRestockDate == 0 ? "-" : TimeUtil.formatTimeLeft(stockGLBuyRestockDate))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_DATE, stockGLSellRestockDate < 0 ? never : stockGLSellRestockDate == 0 ? "-" : TimeUtil.formatTimeLeft(stockGLSellRestockDate))
-            ;
-    }
-
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders(@NotNull Player player) {
-        ExcellentShop plugin = ShopAPI.PLUGIN;
-
-        int stockPLBuyAmountLeft = this.getLeftAmount(TradeType.BUY, player);
-        int stockPLSellAmountLeft = this.getLeftAmount(TradeType.SELL, player);
-
-        long stockPLBuyRestockDate = this.getRestockDate(TradeType.BUY, player);
-        long stockPLSellRestockDate = this.getRestockDate(TradeType.SELL, player);
-
-        String never = plugin.getMessage(Lang.OTHER_NEVER).getLocalized();
-        String infin = plugin.getMessage(Lang.OTHER_INFINITY).getLocalized();
-
-        return str -> this.replacePlaceholders().apply(str)
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_BUY_AMOUNT_LEFT, stockPLBuyAmountLeft < 0 ? infin : String.valueOf(stockPLBuyAmountLeft))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_SELL_AMOUNT_LEFT, stockPLSellAmountLeft < 0 ? infin : String.valueOf(stockPLSellAmountLeft))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_BUY_RESTOCK_DATE, stockPLBuyRestockDate < 0 ? never : stockPLBuyRestockDate == 0 ? "-" : TimeUtil.formatTimeLeft(stockPLBuyRestockDate))
-            .replace(Placeholders.PRODUCT_STOCK_PLAYER_SELL_RESTOCK_DATE, stockPLSellRestockDate < 0 ? never : stockPLSellRestockDate == 0 ? "-" : TimeUtil.formatTimeLeft(stockPLSellRestockDate))
-            ;
     }
 
     @Nullable

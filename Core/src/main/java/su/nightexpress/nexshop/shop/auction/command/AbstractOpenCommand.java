@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
@@ -36,7 +36,7 @@ abstract class AbstractOpenCommand extends ShopModuleCommand<AuctionManager> {
     @NotNull
     public List<@NotNull String> getTab(@NotNull Player player, int i, @NotNull String[] args) {
         if (i == 1) {
-            return PlayerUtil.getPlayerNames();
+            return CollectionsUtil.playerNames(player);
         }
         return super.getTab(player, i, args);
     }

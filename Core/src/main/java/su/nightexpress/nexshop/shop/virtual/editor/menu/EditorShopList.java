@@ -18,7 +18,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,7 @@ public class EditorShopList extends AbstractEditorMenuAuto<ExcellentShop, Virtua
             else if (type instanceof VirtualEditorType type2) {
                 if (type2 == VirtualEditorType.SHOP_CREATE) {
                     EditorManager.startEdit(player, module, type2, input);
-                    EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_ID).getLocalized());
+                    EditorManager.prompt(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_ID).getLocalized());
                     player.closeInventory();
                 }
             }

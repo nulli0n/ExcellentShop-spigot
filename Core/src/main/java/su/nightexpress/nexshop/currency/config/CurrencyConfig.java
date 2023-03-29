@@ -7,6 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractLoadableItem;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
@@ -28,8 +29,8 @@ public class CurrencyConfig extends AbstractLoadableItem<ExcellentShop> implemen
         super(plugin, cfg);
 
         this.isEnabled = cfg.getBoolean("Enabled", true);
-        this.name = StringUtil.color(cfg.getString("Name", StringUtil.capitalizeFully(this.getId().replace("_", " "))));
-        this.format = StringUtil.color(cfg.getString("Format", Placeholders.GENERIC_PRICE + " " + Placeholders.CURRENCY_NAME));
+        this.name = Colorizer.apply(cfg.getString("Name", StringUtil.capitalizeFully(this.getId().replace("_", " "))));
+        this.format = Colorizer.apply(cfg.getString("Format", Placeholders.GENERIC_PRICE + " " + Placeholders.CURRENCY_NAME));
         this.numberFormat = new DecimalFormat(cfg.getString("Number_Format", "#,###.##"), new DecimalFormatSymbols(Locale.ENGLISH));
 
         ItemStack icon = cfg.getItem("Icon");

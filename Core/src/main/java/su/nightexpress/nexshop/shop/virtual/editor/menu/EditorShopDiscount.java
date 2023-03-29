@@ -12,6 +12,7 @@ import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.AbstractEditorMenu;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.CollectionsUtil;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -21,7 +22,7 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -37,14 +38,14 @@ public class EditorShopDiscount extends AbstractEditorMenu<ExcellentShop, Virtua
         this.shop = shop;
 
         EditorInput<VirtualDiscount, VirtualEditorType> input = (player2, discount2, type, e) -> {
-            String msg = StringUtil.color(e.getMessage());
+            String msg = Colorizer.apply(e.getMessage());
             switch (type) {
                 case DISCOUNT_CHANGE_DISCOUNT -> {
-                    double value = StringUtil.getDouble(StringUtil.colorOff(msg), 0);
+                    double value = StringUtil.getDouble(Colorizer.strip(msg), 0);
                     discount2.setDiscount(value);
                 }
                 case DISCOUNT_CHANGE_DURATION -> {
-                    int value = StringUtil.getInteger(StringUtil.colorOff(msg), 0);
+                    int value = StringUtil.getInteger(Colorizer.strip(msg), 0);
                     discount2.setDuration(value);
                 }
                 case DISCOUNT_CHANGE_DAY -> {
@@ -83,20 +84,20 @@ public class EditorShopDiscount extends AbstractEditorMenu<ExcellentShop, Virtua
             else if (type instanceof VirtualEditorType type2) {
                 switch (type2) {
                     case DISCOUNT_CHANGE_DISCOUNT -> {
-                        EditorManager.tip(player1, plugin.getMessage(VirtualLang.EDITOR_ENTER_AMOUNT).getLocalized());
+                        EditorManager.prompt(player1, plugin.getMessage(VirtualLang.EDITOR_ENTER_AMOUNT).getLocalized());
                         EditorManager.startEdit(player1, discount, type2, input);
                         player1.closeInventory();
                         return;
                     }
                     case DISCOUNT_CHANGE_DURATION -> {
-                        EditorManager.tip(player1, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS).getLocalized());
+                        EditorManager.prompt(player1, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS).getLocalized());
                         EditorManager.startEdit(player1, discount, type2, input);
                         player1.closeInventory();
                         return;
                     }
                     case DISCOUNT_CHANGE_DAY -> {
                         if (e.isLeftClick()) {
-                            EditorManager.tip(player1, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
+                            EditorManager.prompt(player1, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
                             EditorManager.startEdit(player1, discount, type2, input);
                             EditorManager.suggestValues(player1, CollectionsUtil.getEnumsList(DayOfWeek.class), true);
                             player1.closeInventory();
@@ -108,7 +109,7 @@ public class EditorShopDiscount extends AbstractEditorMenu<ExcellentShop, Virtua
                     }
                     case DISCOUNT_CHANGE_TIME -> {
                         if (e.isLeftClick()) {
-                            EditorManager.tip(player1, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
+                            EditorManager.prompt(player1, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
                             EditorManager.startEdit(player1, discount, type2, input);
                             player1.closeInventory();
                             return;

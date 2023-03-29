@@ -14,7 +14,6 @@ import su.nightexpress.nexshop.data.price.ProductPriceManager;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.UnaryOperator;
 
 public class DynamicProductPricer extends RangedProductPricer implements IPurchaseListener {
 
@@ -24,6 +23,17 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
     public DynamicProductPricer() {
         this.priceInitial = new HashMap<>();
         this.priceStep = new HashMap<>();
+
+        this.placeholderMap
+            .add(Placeholders.PRODUCT_PRICER_BUY_MIN, () -> String.valueOf(this.getPriceMin(TradeType.BUY)))
+            .add(Placeholders.PRODUCT_PRICER_BUY_MAX, () -> String.valueOf(this.getPriceMax(TradeType.BUY)))
+            .add(Placeholders.PRODUCT_PRICER_SELL_MIN, () -> String.valueOf(this.getPriceMin(TradeType.SELL)))
+            .add(Placeholders.PRODUCT_PRICER_SELL_MAX, () -> String.valueOf(this.getPriceMax(TradeType.SELL)))
+            .add(Placeholders.PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, () -> NumberUtil.format(this.getInitial(TradeType.BUY)))
+            .add(Placeholders.PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, () -> NumberUtil.format(this.getInitial(TradeType.SELL)))
+            .add(Placeholders.PRODUCT_PRICER_DYNAMIC_STEP_BUY, () -> NumberUtil.format(this.getStep(TradeType.BUY)))
+            .add(Placeholders.PRODUCT_PRICER_DYNAMIC_STEP_SELL, () -> NumberUtil.format(this.getStep(TradeType.SELL)))
+        ;
     }
 
     @NotNull
@@ -50,21 +60,6 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
             cfg.set(path + "." + tradeType.name() + ".Initial", this.getInitial(tradeType));
             cfg.set(path + "." + tradeType.name() + ".Step", this.getStep(tradeType));
         }
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.PRODUCT_PRICER_BUY_MIN, String.valueOf(this.getPriceMin(TradeType.BUY)))
-            .replace(Placeholders.PRODUCT_PRICER_BUY_MAX, String.valueOf(this.getPriceMax(TradeType.BUY)))
-            .replace(Placeholders.PRODUCT_PRICER_SELL_MIN, String.valueOf(this.getPriceMin(TradeType.SELL)))
-            .replace(Placeholders.PRODUCT_PRICER_SELL_MAX, String.valueOf(this.getPriceMax(TradeType.SELL)))
-            .replace(Placeholders.PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, NumberUtil.format(this.getInitial(TradeType.BUY)))
-            .replace(Placeholders.PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, NumberUtil.format(this.getInitial(TradeType.SELL)))
-            .replace(Placeholders.PRODUCT_PRICER_DYNAMIC_STEP_BUY, NumberUtil.format(this.getStep(TradeType.BUY)))
-            .replace(Placeholders.PRODUCT_PRICER_DYNAMIC_STEP_SELL, NumberUtil.format(this.getStep(TradeType.SELL)))
-            ;
     }
 
     @Override

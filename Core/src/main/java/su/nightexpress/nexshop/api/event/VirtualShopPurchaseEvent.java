@@ -3,8 +3,8 @@ package su.nightexpress.nexshop.api.event;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 public class VirtualShopPurchaseEvent extends ShopPurchaseEvent<VirtualProduct> {
 

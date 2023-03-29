@@ -12,17 +12,14 @@ import su.nexmedia.engine.api.menu.AbstractMenu;
 import su.nexmedia.engine.api.menu.MenuClick;
 import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.Pair;
-import su.nexmedia.engine.utils.PlayerUtil;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.*;
 
@@ -38,8 +35,8 @@ public class ShopSellMenu extends AbstractMenu<ExcellentShop> {
     public ShopSellMenu(@NotNull VirtualShopModule module, @NotNull JYML cfg) {
         super(module.plugin(), cfg, "");
         this.module = module;
-        this.itemName = StringUtil.color(cfg.getString("Item.Name", "%item_name%"));
-        this.itemLore = StringUtil.color(cfg.getStringList("Item.Lore"));
+        this.itemName = Colorizer.apply(cfg.getString("Item.Name", "%item_name%"));
+        this.itemLore = Colorizer.apply(cfg.getStringList("Item.Lore"));
         this.itemSlots = cfg.getIntArray("Item.Slots");
 
         MenuClick click = (player, type, e) -> {

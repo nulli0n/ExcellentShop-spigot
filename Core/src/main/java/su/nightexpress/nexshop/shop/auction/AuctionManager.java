@@ -178,14 +178,13 @@ public class AuctionManager extends ShopModule {
 
     @NotNull
     public Set<ICurrency> getCurrencies() {
-        return AuctionConfig.CURRENCIES.values().stream().filter(AuctionCurrencySetting::isEnabled)
+        return AuctionConfig.CURRENCIES.values().stream()
             .map(AuctionCurrencySetting::getCurrency).collect(Collectors.toSet());
     }
 
     @NotNull
     public Set<ICurrency> getCurrencies(@NotNull Player player) {
         return AuctionConfig.CURRENCIES.values().stream()
-            .filter(AuctionCurrencySetting::isEnabled)
             .filter(setting -> setting.hasPermission(player) || setting.isDefault())
             .map(AuctionCurrencySetting::getCurrency).collect(Collectors.toSet());
     }
@@ -317,7 +316,7 @@ public class AuctionManager extends ShopModule {
 
         AuctionListing listing = new AuctionListing(player, item, currency, price);
         this.addListing(listing);
-        this.getDataHandler().addListing(listing, true);
+        this.plugin.runTaskAsync(task -> this.getDataHandler().addListing(listing));
         this.plugin.getMessage(AuctionLang.LISTING_ADD_SUCCESS_INFO)
             .replace(Placeholders.GENERIC_TAX, currency.format(taxPay))
             .replace(listing.replacePlaceholders())
@@ -356,8 +355,10 @@ public class AuctionManager extends ShopModule {
 
         this.removeListing(listing);
         this.addCompletedListing(completedListing);
-        this.getDataHandler().addCompletedListing(completedListing, true);
-        this.getDataHandler().deleteListing(listing, true);
+        this.plugin.runTaskAsync(task -> {
+            this.getDataHandler().addCompletedListing(completedListing);
+            this.getDataHandler().deleteListing(listing);
+        });
         this.plugin.getMessage(AuctionLang.LISTING_BUY_SUCCESS_INFO).replace(listing.replacePlaceholders()).send(buyer);
 
         // Notify the seller about the purchase.
@@ -381,7 +382,7 @@ public class AuctionManager extends ShopModule {
 
         PlayerUtil.addItem(player, listing.getItemStack());
         this.removeListing(listing);
-        this.getDataHandler().deleteListing(listing, true);
+        this.plugin.runTaskAsync(task -> this.getDataHandler().deleteListing(listing));
 
         this.getMainMenu().update();
     }

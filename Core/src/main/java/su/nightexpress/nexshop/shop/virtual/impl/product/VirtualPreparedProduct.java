@@ -1,14 +1,13 @@
-package su.nightexpress.nexshop.shop.virtual.impl;
+package su.nightexpress.nexshop.shop.virtual.impl.product;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.ShopPurchaseEvent.Result;
 import su.nightexpress.nexshop.api.event.VirtualShopPurchaseEvent;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
@@ -19,7 +18,6 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
     @Override
     public boolean buy(@NotNull Player player) {
         if (this.getTradeType() != TradeType.BUY) return false;
-        if (this.getProduct().isEmpty()) return false;
 
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
@@ -43,29 +41,21 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
         }
 
         // Process transaction
-        ItemStack item = product.getItem();
-        for (int stack = 0; stack < this.getAmount(); stack++) {
-            if (!item.getType().isAir()) {
-                PlayerUtil.addItem(player, item);
-            }
-            product.getCommands().forEach(command -> PlayerUtil.dispatchCommand(player, command));
-        }
-
-        shop.getBank().deposit(product.getCurrency(), price);
+        product.delivery(player, this.getAmount());
         product.getCurrency().take(player, price);
+        shop.getBank().deposit(product.getCurrency(), price);
         return true;
     }
 
     @Override
     public boolean sell(@NotNull Player player, boolean isAll) {
         if (this.getTradeType() != TradeType.SELL) return false;
-        if (!this.getProduct().hasItem()) return false;
 
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
 
         int possible = product.getStock().getPossibleAmount(this.getTradeType(), player);//product.getStockAmountLeft(player, this.getTradeType());
-        int amountHas = product.countItem(player);
+        int amountHas = product.count(player);
         int amountCan = isAll ? ((possible >= 0 && possible < amountHas) ? possible : amountHas) : possible < 0 ? this.getAmount() : Math.min(possible, this.getAmount());
 
         this.setAmount(amountCan);
@@ -97,7 +87,7 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
         shop.getBank().withdraw(product.getCurrency(), price);
         product.getCurrency().give(player, price);
-        product.takeItem(player, amountCan);
+        product.take(player, amountCan);
         return true;
     }
 }

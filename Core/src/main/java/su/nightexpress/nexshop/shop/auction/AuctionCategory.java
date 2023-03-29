@@ -4,8 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.StringUtil;
 
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -21,7 +21,7 @@ public class AuctionCategory implements IPlaceholder {
     public AuctionCategory(@NotNull String id, @NotNull String name, @NotNull ItemStack icon,
                            @NotNull Set<String> materials) {
         this.id = id.toLowerCase().replace(" ", "_");
-        this.name = StringUtil.color(name);
+        this.name = Colorizer.apply(name);
         this.icon = new ItemStack(icon);
         this.materials = materials.stream().map(String::toLowerCase).collect(Collectors.toSet());
 
@@ -68,6 +68,6 @@ public class AuctionCategory implements IPlaceholder {
     }
 
     public boolean isItemOfThis(@NotNull String name) {
-        return this.materials.contains(name.toLowerCase()) || this.materials.contains(Placeholders.MASK_ANY);
+        return this.materials.contains(name.toLowerCase()) || this.materials.contains(Placeholders.WILDCARD);
     }
 }

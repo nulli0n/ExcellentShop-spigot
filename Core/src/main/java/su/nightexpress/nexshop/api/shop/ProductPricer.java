@@ -2,9 +2,9 @@ package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.internal.ItemCurrency;
@@ -15,15 +15,18 @@ import su.nightexpress.nexshop.shop.FloatProductPricer;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class ProductPricer implements IPlaceholder, JOption.Writer {
+public abstract class ProductPricer implements Placeholder {
 
     protected final Map<TradeType, Double> priceCurrent;
+    protected final PlaceholderMap placeholderMap;
+
     protected       Product<?, ?, ?>       product;
 
     public ProductPricer() {
         this.priceCurrent = new HashMap<>();
         this.setPrice(TradeType.BUY, -1D);
         this.setPrice(TradeType.SELL, -1D);
+        this.placeholderMap = new PlaceholderMap();
     }
 
     @NotNull
@@ -33,6 +36,14 @@ public abstract class ProductPricer implements IPlaceholder, JOption.Writer {
             case FLOAT -> FloatProductPricer.read(cfg, path);
             case DYNAMIC -> DynamicProductPricer.read(cfg, path);
         };
+    }
+
+    public abstract void write(@NotNull JYML cfg, @NotNull String path);
+
+    @Override
+    @NotNull
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     public abstract void update();
@@ -77,7 +88,7 @@ public abstract class ProductPricer implements IPlaceholder, JOption.Writer {
     }
 
     public double getPriceSellAll(@NotNull Player player) {
-        int amountHas = this.getProduct().countItem(player);
+        int amountHas = this.getProduct().countUnits(player);
         int amountCan = this.getProduct().getStock().getPossibleAmount(TradeType.SELL, player);
 
         int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);

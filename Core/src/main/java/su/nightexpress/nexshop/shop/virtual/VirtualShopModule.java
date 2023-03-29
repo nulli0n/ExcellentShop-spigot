@@ -29,9 +29,9 @@ import su.nightexpress.nexshop.shop.virtual.compat.citizens.VirtualShopTrait;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopList;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShopBank;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShopBank;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopListener;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
@@ -252,12 +252,13 @@ public class VirtualShopModule extends ShopModule {
     }
 
     @Nullable
+    @Deprecated
     public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, int amount, @NotNull TradeType tradeType) {
         Set<VirtualProduct> products = new HashSet<>();
         this.getShops().stream()
             .filter(shop -> shop.hasPermission(player) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
-                if (!product.isItemMatches(item)) return false;
+                // TODO if (!product.isItemMatches(item)) return false;
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                 if (tradeType == TradeType.SELL && !product.isSellable()) return false;
                 //if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;

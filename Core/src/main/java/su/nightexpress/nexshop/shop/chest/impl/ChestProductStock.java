@@ -5,49 +5,36 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
+import su.nexmedia.engine.lang.LangManager;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.event.ShopPurchaseEvent;
 import su.nightexpress.nexshop.api.shop.ProductStock;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public class ChestProductStock extends ProductStock<ChestProduct> {
 
     public ChestProductStock() {
-
-    }
-
-    @Override
-    public void write(@NotNull JYML cfg, @NotNull String path) {
-
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        ExcellentShop plugin = ShopAPI.PLUGIN;
-
-        int stockGLBuyAmountLeft = this.getLeftAmount(TradeType.BUY);
-        int stockGLSellAmountLeft = this.getLeftAmount(TradeType.SELL);
-        String infin = plugin.getMessage(Lang.OTHER_INFINITY).getLocalized();
-
-        return str -> str
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT, stockGLBuyAmountLeft < 0 ? infin : String.valueOf(stockGLBuyAmountLeft))
-            .replace(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_LEFT, stockGLSellAmountLeft < 0 ? infin : String.valueOf(stockGLSellAmountLeft))
-            ;
+        this.placeholderMap
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT, () -> {
+                int leftAmount = this.getLeftAmount(TradeType.BUY);
+                return leftAmount < 0 ? LangManager.getPlain(Lang.OTHER_INFINITY) : String.valueOf(leftAmount);
+            })
+            .add(Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_LEFT, () -> {
+                int leftAmount = this.getLeftAmount(TradeType.SELL);
+                return leftAmount < 0 ? LangManager.getPlain(Lang.OTHER_INFINITY) : String.valueOf(leftAmount);
+            })
+        ;
     }
 
     @Override
     @NotNull
-    public UnaryOperator<String> replacePlaceholders(@NotNull Player player) {
-        return str -> str;
+    public PlaceholderMap getPlaceholders(@NotNull Player player) {
+        return this.getPlaceholders();
     }
 
     @NotNull

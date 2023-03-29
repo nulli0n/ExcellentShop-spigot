@@ -115,7 +115,7 @@ public enum VirtualEditorType implements EditorButtonType {
         EditorButtonType.current("Allowed: &f" + Placeholders.PRODUCT_DISCOUNT_ALLOWED),
         EditorButtonType.info("Sets if the product price can be affected by the shop's discounts."),
         EditorButtonType.click("Left-Click to &fToggle")),
-    PRODUCT_CHANGE_ITEM_META(Material.REPEATER, "Item Meta Enabled",
+    @Deprecated PRODUCT_CHANGE_ITEM_META(Material.REPEATER, "Item Meta Enabled",
         EditorButtonType.current("Enabled: &f" + Placeholders.PRODUCT_ITEM_META_ENABLED),
         EditorButtonType.info("When enabled, the metadata (name, lore, etc) of the product item and item player wants to sell, must be the same."),
         EditorButtonType.warn("Enable this for custom items!"),

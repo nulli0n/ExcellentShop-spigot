@@ -13,6 +13,7 @@ import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.editor.AbstractEditorMenu;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.hooks.Hooks;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -22,7 +23,7 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +40,13 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
         super(plugin, shop, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
 
         EditorInput<VirtualShop, VirtualEditorType> input = (player, shop2, type, e) -> {
-            String msg = StringUtil.color(e.getMessage());
+            String msg = Colorizer.apply(e.getMessage());
             switch (type) {
                 case SHOP_CHANGE_NAME -> shop2.setName(msg);
                 case SHOP_CHANGE_DESCRIPTION -> shop2.getDescription().add(msg);
                 case SHOP_CHANGE_TITLE -> shop2.getView().setTitle(msg);
                 case SHOP_CHANGE_CITIZENS_ID -> {
-                    msg = StringUtil.colorOff(msg);
+                    msg = Colorizer.strip(msg);
                     int inputN = StringUtil.getInteger(msg, -1);
                     if (inputN < 0) {
                         EditorManager.error(player, plugin.getMessage(Lang.EDITOR_ERROR_NUMBER_NOT_INT).getLocalized());
@@ -77,7 +78,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
             else if (type instanceof VirtualEditorType type2) {
                 switch (type2) {
                     case SHOP_CHANGE_NAME -> {
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
                         EditorManager.startEdit(player, shop, type2, input);
                         player.closeInventory();
                         return;
@@ -87,7 +88,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
                             shop.getDescription().clear();
                             break;
                         }
-                        EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_DESCRIPTION).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_DESCRIPTION).getLocalized());
                         EditorManager.startEdit(player, shop, type2, input);
                         player.closeInventory();
                         return;
@@ -104,7 +105,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
 
                         if (e.isLeftClick()) {
                             EditorManager.startEdit(player, shop, type2, input);
-                            EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_NPC_ID).getLocalized());
+                            EditorManager.prompt(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_NPC_ID).getLocalized());
                             player.closeInventory();
                             return;
                         }
@@ -120,7 +121,7 @@ public class EditorShopMain extends AbstractEditorMenu<ExcellentShop, VirtualSho
                     case SHOP_CHANGE_VIEW_DESIGN -> {
                         if (e.isShiftClick()) {
                             if (e.isLeftClick()) {
-                                EditorManager.tip(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_TITLE).getLocalized());
+                                EditorManager.prompt(player, plugin.getMessage(VirtualLang.EDITOR_ENTER_TITLE).getLocalized());
                                 EditorManager.startEdit(player, shop, VirtualEditorType.SHOP_CHANGE_TITLE, input);
                                 player.closeInventory();
                                 return;

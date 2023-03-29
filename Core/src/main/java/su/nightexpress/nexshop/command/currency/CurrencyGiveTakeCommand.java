@@ -4,8 +4,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.command.AbstractCommand;
+import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.NumberUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
@@ -55,7 +55,7 @@ public class CurrencyGiveTakeCommand extends AbstractCommand<ExcellentShop> {
             return new ArrayList<>(this.plugin.getCurrencyManager().getCurrencyIds());
         }
         if (arg == 3) {
-            return PlayerUtil.getPlayerNames();
+            return CollectionsUtil.playerNames(player);
         }
         if (arg == 4) {
             return Arrays.asList("1", "10", "100");

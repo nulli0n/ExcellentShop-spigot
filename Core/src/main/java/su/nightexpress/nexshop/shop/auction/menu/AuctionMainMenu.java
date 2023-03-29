@@ -48,7 +48,7 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
                     case UNCLAIMED_ITEMS -> this.auctionManager.getUnclaimedMenu().open(player, 1);
                     case OWN_LISTINGS -> this.auctionManager.getSellingMenu().open(player, 1);
                     case LISTING_ORDER -> {
-                        setListingOrder(player, CollectionsUtil.switchEnum(getListingOrder(player)));
+                        setListingOrder(player, CollectionsUtil.next(getListingOrder(player)));
                         this.open(player, this.getPage(player));
                     }
                     case CATEGORY_FILTER -> {

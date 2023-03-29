@@ -146,7 +146,7 @@ public class ShopBankMenu extends AbstractMenuAuto<ExcellentShop, ICurrency> {
             };
 
             EditorManager.startEdit(player, currency, type2, input);
-            EditorManager.tip(player2, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_AMOUNT).getLocalized());
+            EditorManager.prompt(player2, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_AMOUNT).getLocalized());
             player.closeInventory();
         };
     }

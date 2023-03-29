@@ -16,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.ICleanable;
-import su.nexmedia.engine.config.EngineConfig;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
@@ -34,7 +33,10 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +46,9 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     private final ChestShopModule module;
 
     private Location        location;
+    private int chunkX;
+    private int chunkZ;
+
     private UUID            ownerId;
     private String          ownerName;
     private OfflinePlayer ownerPlayer;
@@ -137,7 +142,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
             .replace(Placeholders.SHOP_CHEST_LOCATION_X, NumberUtil.format(location.getX()))
             .replace(Placeholders.SHOP_CHEST_LOCATION_Y, NumberUtil.format(location.getY()))
             .replace(Placeholders.SHOP_CHEST_LOCATION_Z, NumberUtil.format(location.getZ()))
-            .replace(Placeholders.SHOP_CHEST_LOCATION_WORLD, EngineConfig.getWorldName(world.getName()))
+            .replace(Placeholders.SHOP_CHEST_LOCATION_WORLD, LangManager.getWorld(world))
             .replace(Placeholders.SHOP_CHEST_IS_ADMIN, LangManager.getBoolean(this.isAdminShop()))
             .replace(Placeholders.SHOP_CHEST_TYPE, plugin.getLangManager().getEnum(this.getType()))
         );
@@ -171,7 +176,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
             cfg.set("Bank." + currencyId, balance);
         });
         this.cfg.set("Products", null);
-        this.getProducts().forEach(product -> product.write(cfg, "Products." + product.getId()));
+        this.getProducts().forEach(product -> ChestProduct.write(product, cfg, "Products." + product.getId()));
     }
 
     @Override
@@ -248,6 +253,10 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         return this.getContainer().getInventory() instanceof DoubleChestInventory;
     }
 
+    public boolean isProduct(@NotNull ItemStack item) {
+        return this.getProducts().stream().anyMatch(product -> product.isItemMatches(item));
+    }
+
     @NotNull
     public Pair<Container, Container> getSides() {
         Container container = this.getContainer();
@@ -295,6 +304,16 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
 
     private void setLocation(@NotNull Location location) {
         this.location = location.clone();
+        this.chunkX = location.getChunk().getX();
+        this.chunkZ = location.getChunk().getZ();
+    }
+
+    public int getChunkX() {
+        return chunkX;
+    }
+
+    public int getChunkZ() {
+        return chunkZ;
     }
 
     @NotNull

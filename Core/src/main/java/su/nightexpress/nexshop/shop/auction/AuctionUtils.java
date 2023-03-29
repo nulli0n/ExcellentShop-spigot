@@ -65,7 +65,7 @@ public class AuctionUtils {
             if (i < 15) {
                 AuctionListing listing = new AuctionListing(UUID.randomUUID(), ownerId, ownerName, item, currency, price, dateCreation, dateExpired);
                 auctionManager.addListing(listing);
-                auctionManager.getDataHandler().addListing(listing, false);
+                auctionManager.getDataHandler().addListing(listing);
             }
             else {
                 LocalDateTime buyed = created.plusDays(Rnd.get(4)).plusHours(Rnd.get(4)).plusMinutes(Rnd.get(15));
@@ -73,7 +73,7 @@ public class AuctionUtils {
 
                 AuctionCompletedListing listing = new AuctionCompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), item, currency, price, dateCreation, Rnd.nextBoolean(), buyDate);
                 auctionManager.addCompletedListing(listing);
-                auctionManager.getDataHandler().addCompletedListing(listing, false);
+                auctionManager.getDataHandler().addCompletedListing(listing);
             }
         }
     }

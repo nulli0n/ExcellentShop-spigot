@@ -51,7 +51,7 @@ public class AuctionUnclaimedMenu extends AbstractAuctionMenu<AuctionCompletedLi
             listing.getCurrency().give(player, listing.getPrice());
             listing.setRewarded(true);
 
-            this.auctionManager.getDataHandler().saveCompletedListing(listing, true);
+            this.plugin.runTaskAsync(task -> this.auctionManager.getDataHandler().saveCompletedListing(listing));
             this.open(player, this.getPage(player), this.seeOthers.getOrDefault(player, player.getUniqueId()));
             this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_CLAIM)
                 .replace(listing.replacePlaceholders())

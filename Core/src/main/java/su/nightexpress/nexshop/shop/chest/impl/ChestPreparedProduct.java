@@ -1,13 +1,11 @@
 package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.api.IPurchaseListener;
+import su.nightexpress.nexshop.api.event.ChestShopPurchaseEvent;
 import su.nightexpress.nexshop.api.event.ShopPurchaseEvent.Result;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
-import su.nightexpress.nexshop.api.event.ChestShopPurchaseEvent;
 import su.nightexpress.nexshop.api.type.TradeType;
 
 public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
@@ -19,7 +17,6 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
     @Override
     public boolean buy(@NotNull Player player) {
         if (this.getTradeType() != TradeType.BUY) return false;
-        if (this.getProduct().isEmpty()) return false;
 
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
@@ -53,13 +50,8 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         }
 
         // Process transaction
-        ItemStack item = product.getItem();
-        for (int stack = 0; stack < amountToBuy; stack++) {
-            PlayerUtil.addItem(player, item);
-        }
-
+        product.delivery(player, amountToBuy);
         product.getCurrency().take(player, price);
-
         return true;
     }
 
@@ -72,7 +64,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
         boolean isAdmin = shop.isAdminShop();
         int amountShopCanStore = product.getStock().getLeftAmount(TradeType.SELL);
-        int amountPlayerHas = product.countItem(player);
+        int amountPlayerHas = product.count(player);
         int amountToSell = isAll ? Math.min((!isAdmin ? amountShopCanStore : amountPlayerHas), amountPlayerHas) : this.getAmount();
         this.setAmount(amountToSell);
 
@@ -108,7 +100,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             shop.save();
         }
         product.getCurrency().give(player, price);
-        product.takeItem(player, amountToSell);
+        product.take(player, amountToSell);
         return true;
     }
 }

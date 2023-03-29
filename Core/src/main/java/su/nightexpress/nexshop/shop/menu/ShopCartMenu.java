@@ -15,13 +15,14 @@ import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -89,8 +90,8 @@ public class ShopCartMenu extends AbstractMenu<ExcellentShop> {
                         double shopBalance = shop.getBank().getBalance(product.getCurrency());
                         double userBalance = product.getCurrency().getBalance(player);
 
-                        if (product.hasItem()) {
-                            ItemStack item = product.getItem();
+                        if (product instanceof ItemProduct itemProduct) {
+                            ItemStack item = itemProduct.getItem();
                             if (tradeType == TradeType.BUY) {
                                 // Allow to buy no more than player can carry.
                                 capacitySpace = PlayerUtil.countItemSpace(player, item);

@@ -149,7 +149,7 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                             }
                             else type2 = Type.PRODUCT_CHANGE_PRICE_BUY_MAX;
                         }
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -167,7 +167,7 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                             }
                             else type2 = Type.PRODUCT_CHANGE_PRICE_SELL_MAX;
                         }
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -184,12 +184,12 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
 
                         if (e.isLeftClick()) {
                             type2 = Type.PRODUCT_CHANGE_PRICE_REFRESH_DAYS;
-                            EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
+                            EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
                             EditorManager.suggestValues(player, CollectionsUtil.getEnumsList(DayOfWeek.class), true);
                         }
                         else {
                             type2 = Type.PRODUCT_CHANGE_PRICE_REFRESH_TIMES;
-                            EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
+                            EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
                         }
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
@@ -201,7 +201,7 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                         }
                         else type2 = Type.PRODUCT_CHANGE_PRICE_INITIAL_SELL;
 
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;
@@ -212,7 +212,7 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                         }
                         else type2 = Type.PRODUCT_CHANGE_PRICE_STEP_SELL;
 
-                        EditorManager.tip(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
+                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
                         EditorManager.startEdit(player, product, type2, input);
                         player.closeInventory();
                         return;

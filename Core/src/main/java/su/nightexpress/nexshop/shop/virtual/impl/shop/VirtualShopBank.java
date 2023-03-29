@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.virtual.impl;
+package su.nightexpress.nexshop.shop.virtual.impl.shop;
 
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.ICurrency;

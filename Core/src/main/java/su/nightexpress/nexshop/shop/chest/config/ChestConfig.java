@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
@@ -31,7 +31,7 @@ public class ChestConfig {
         "You can provide different showcases for different shop types you set in 'Allowed_Containers' option.",
         "Showcase is basically an invisible armor stand with equipped item on the head.",
         "Feel free to use custom-modeled items and such!",
-        Placeholders.URL_ENGINE_ITEMS);
+        Placeholders.URL_ENGINE_ITEMS).setWriter((cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + type, item)));
 
     public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", true,
         "When 'true', creates a client-side hologram above the shop.");
@@ -40,7 +40,8 @@ public class ChestConfig {
 
     public static final JOption<String> EDITOR_TITLE = JOption.create("Shops.Editor_Title", "Shop Editor",
         "Sets title for Editor GUIs."
-    );
+    ).mapReader(Colorizer::apply);
+
     public static boolean        DELETE_INVALID_SHOP_CONFIGS;
     public static ICurrency      DEFAULT_CURRENCY;
     public static final JOption<Set<String>> ALLOWED_CONTAINERS = new JOption<Set<String>>("Shops.Allowed_Containers",
@@ -56,7 +57,7 @@ public class ChestConfig {
     public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name",
         "&a" + Placeholders.Player.NAME + "'s Shop",
         "Default shop name, that will be used on shop creation."
-    );
+    ).mapReader(Colorizer::apply);
 
     public static  double               SHOP_CREATION_COST_CREATE;
     public static  double               SHOP_CREATION_COST_REMOVE;
@@ -89,7 +90,7 @@ public class ChestConfig {
         ALLOWED_CURRENCIES = cfg.getStringSet(path + "Allowed_Currencies").stream().map(String::toLowerCase)
             .map(currencyId -> plugin.getCurrencyManager().getCurrency(currencyId))
             .filter(Objects::nonNull).collect(Collectors.toSet());
-        ADMIN_SHOP_NAME = StringUtil.color(cfg.getString(path + "AdminShop_Name", "MyServerCraft"));
+        ADMIN_SHOP_NAME = Colorizer.apply(cfg.getString(path + "AdminShop_Name", "MyServerCraft"));
 
         path = "Shops.Creation.";
         SHOP_CREATION_COST_CREATE = cfg.getDouble(path + "Cost.Create");
@@ -119,14 +120,10 @@ public class ChestConfig {
         DISPLAY_SLIDE_INTERVAL = cfg.getInt(path + "Title.Slide_Interval", 3);
         DISPLAY_TEXT = new HashMap<>();
         for (ChestShopType type : ChestShopType.values()) {
-            DISPLAY_TEXT.put(type, StringUtil.color(cfg.getStringList(path + "Title.Values." + type.name())));
+            DISPLAY_TEXT.put(type, Colorizer.apply(cfg.getStringList(path + "Title.Values." + type.name())));
         }
 
         cfg.saveChanges();
-    }
-
-    static {
-        DISPLAY_SHOWCASE.setWriter((cfg, path) -> DISPLAY_SHOWCASE.get().forEach((type, item) -> cfg.setItem(path + "." + type, item)));
     }
 
     public static int getMaxShops(@NotNull Player player) {
