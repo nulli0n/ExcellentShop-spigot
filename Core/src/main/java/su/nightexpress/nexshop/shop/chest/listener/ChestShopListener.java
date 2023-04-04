@@ -139,8 +139,8 @@ public class ChestShopListener extends AbstractListener<ExcellentShop> {
                     if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME) {
                         if (!shop.isOwner(player)) {
                             plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
-                            e.setUseInteractedBlock(Result.DENY);
                         }
+                        else e.setUseInteractedBlock(Result.ALLOW);
                         return;
                     }
                 }

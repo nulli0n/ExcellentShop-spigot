@@ -23,7 +23,6 @@ import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.ShopView;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
@@ -33,13 +32,9 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanable {
 
@@ -60,7 +55,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     private Location     displayHologramLoc;
     private Location     displayItemLoc;
 
-    private ShopView<ChestShop> view;
+    private final ChestShopView view;
 
     public ChestShop(@NotNull ChestShopModule module, @NotNull Player owner, @NotNull Container container, @NotNull ChestShopType type) {
         this(module, new JYML(module.getFullPath() + ChestShopModule.DIR_SHOPS, UUID.randomUUID() + ".yml"));
@@ -69,12 +64,13 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         this.setType(type);
         this.setOwner(owner);
         this.setName(Placeholders.Player.replacer(owner).apply(ChestConfig.DEFAULT_NAME.get()));
-        Stream.of(TradeType.values()).forEach(tradeType -> this.setTransactionEnabled(tradeType, true));
+        Arrays.asList(TradeType.values()).forEach(tradeType -> this.setTransactionEnabled(tradeType, true));
     }
 
     public ChestShop(@NotNull ChestShopModule module, @NotNull JYML cfg) {
         super(module.plugin(), cfg);
         this.module = module;
+        this.view = new ChestShopView(this);
     }
 
     @Override
@@ -112,7 +108,6 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         }
 
         this.loadProducts();
-        this.setupView();
         return true;
     }
 
@@ -191,17 +186,11 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     }
 
     @Override
-    public void setupView() {
-        this.view = new ChestShopView(this);
-    }
-
-    @Override
     @NotNull
-    public ShopView<ChestShop> getView() {
+    public ChestShopView getView() {
         return this.view;
     }
 
-    @Override
     @NotNull
     public ShopSettingsMenu getEditor() {
         if (this.settingsMenu == null) {

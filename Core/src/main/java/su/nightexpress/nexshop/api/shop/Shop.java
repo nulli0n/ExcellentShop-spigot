@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractConfigHolder;
-import su.nexmedia.engine.api.manager.IEditable;
 import su.nexmedia.engine.api.manager.IPlaceholder;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.Colorizer;
@@ -20,7 +19,7 @@ import java.util.function.UnaryOperator;
 
 public abstract class Shop<
     S extends Shop<S, P>,
-    P extends Product<P, S, ?>> extends AbstractConfigHolder<ExcellentShop> implements IEditable, IPlaceholder {
+    P extends Product<P, S, ?>> extends AbstractConfigHolder<ExcellentShop> implements IPlaceholder {
 
     protected final Set<Discount>           discounts;
     protected final Map<TradeType, Boolean> transactions;
@@ -73,9 +72,7 @@ public abstract class Shop<
     protected abstract S get();
 
     @NotNull
-    public abstract ShopView<? extends Shop<?, ?>> getView();
-
-    public abstract void setupView();
+    public abstract ShopView<S, P> getView();
 
     @NotNull
     public String getName() {

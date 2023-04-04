@@ -13,16 +13,6 @@ public interface ItemProduct {
 
     void setItem(@NotNull ItemStack item);
 
-    /*@Deprecated
-    default int getUnitAmount() {
-        return this.getItem().getAmount();
-    }*/
-
-
-    /*public boolean hasItem() {
-        return !this.getItem().getType().isAir();
-    }*/
-
     default boolean isItemMatches(@NotNull ItemStack item) {
         return this.isRespectItemMeta() ? this.getItem().isSimilar(item) : this.getItem().getType() == item.getType();
     }

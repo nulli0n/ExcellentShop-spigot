@@ -1,9 +1,10 @@
 package su.nightexpress.nexshop.shop.virtual.impl.product;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
@@ -25,16 +26,18 @@ public class VirtualCommandProduct extends VirtualProduct implements CommandProd
         super(id, currency);
         this.setPreview(preview);
         this.commands = new ArrayList<>(commands);
+        this.commands.replaceAll(cmd -> cmd.replace("[CONSOLE]", "").trim());
 
         this.placeholderMap
-            .add(Placeholders.PRODUCT_VIRTUAL_COMMANDS, String.join("\n", this.getCommands()))
+            .add(Placeholders.PRODUCT_VIRTUAL_COMMANDS, () -> String.join("\n", this.getCommands()))
             ;
     }
 
     @Override
     public void delivery(@NotNull Player player, int count) {
+        ConsoleCommandSender sender = Bukkit.getConsoleSender();
         for (int i = 0; i < count; i++) {
-            this.getCommands().forEach(command -> PlayerUtil.dispatchCommand(player, command));
+            this.getCommands().forEach(command -> Bukkit.dispatchCommand(sender, Placeholders.Player.replacer(player).apply(command)));
         }
     }
 
@@ -73,5 +76,10 @@ public class VirtualCommandProduct extends VirtualProduct implements CommandProd
     @Override
     public boolean hasSpace(@NotNull Player player) {
         return true;
+    }
+
+    @Override
+    public boolean isSellable() {
+        return false;
     }
 }

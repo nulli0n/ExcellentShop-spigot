@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.IEditable;
 import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.IScheduled;
 import su.nightexpress.nexshop.api.currency.ICurrency;
@@ -12,23 +11,22 @@ import su.nightexpress.nexshop.api.shop.CommandProduct;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
-import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyId;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopProduct;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.ProductMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.List;
 
-public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> implements IEditable {
+public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> {
 
     private int shopSlot;
     private int shopPage;
 
-    private EditorShopProduct editor;
+    private ProductMainEditor editor;
 
     public VirtualProduct(@NotNull String id, @NotNull ICurrency currency) {
         super(id, currency);
@@ -106,6 +104,7 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         VirtualProduct product;
         if (item != null && !item.getType().isAir()) {
             product = new VirtualItemProduct(id, item, currency);
+            ((ItemProduct)product).setRespectItemMeta(cfg.getBoolean(path + ".Item_Meta_Enabled"));
         }
         else {
             ItemStack preview = cfg.getItemEncoded(path + ".Content.Preview");
@@ -117,10 +116,7 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         product.setSlot(cfg.getInt(path + ".Shop_View.Slot", -1));
         product.setPage(cfg.getInt(path + ".Shop_View.Page", -1));
         product.setDiscountAllowed(cfg.getBoolean(path + ".Discount.Allowed"));
-        //product.setItemMetaEnabled(cfg.getBoolean(path + ".Item_Meta_Enabled")); TODO
-
-        PriceType priceType = cfg.getEnum(path + ".Price.Type", PriceType.class, PriceType.FLAT);
-        product.setPricer(ProductPricer.read(priceType, cfg, path + ".Price"));
+        product.setPricer(ProductPricer.read(cfg, path + ".Price"));
         product.setStock(VirtualProductStock.read(cfg, path + ".Stock"));
         return product;
     }
@@ -134,11 +130,11 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         }
         else if (product instanceof ItemProduct itemProduct) {
             cfg.setItemEncoded(path + ".Content.Item", itemProduct.getItem());
+            cfg.set(path + ".Item_Meta_Enabled", itemProduct.isRespectItemMeta());
         }
         cfg.set(path + ".Shop_View.Slot", product.getSlot());
         cfg.set(path + ".Shop_View.Page", product.getPage());
         cfg.set(path + ".Discount.Allowed", product.isDiscountAllowed());
-        //cfg.set(path + ".Item_Meta_Enabled", this.isItemMetaEnabled()); TODO
         //cfg.set(path + ".Stock", product.getStock());
         VirtualProductStock.write(product.getStock(), cfg, path + ".Stock");
         ProductPricer pricer = product.getPricer();
@@ -156,11 +152,10 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         }
     }
 
-    @Override
     @NotNull
-    public EditorShopProduct getEditor() {
+    public ProductMainEditor getEditor() {
         if (this.editor == null) {
-            this.editor = new EditorShopProduct(this.getShop().plugin(), this);
+            this.editor = new ProductMainEditor(this.getShop().plugin(), this);
         }
         return this.editor;
     }

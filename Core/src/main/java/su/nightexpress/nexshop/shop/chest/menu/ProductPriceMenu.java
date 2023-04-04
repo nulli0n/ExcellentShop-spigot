@@ -132,9 +132,7 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                     case PRODUCT_CHANGE_PRICE_TYPE -> {
                         Predicate<PriceType> predicate = priceType -> player.hasPermission(ChestPerms.PRICE_TYPE + priceType.name().toLowerCase());
                         PriceType priceType = CollectionsUtil.next(product.getPricer().getType(), predicate);
-
-                        String path = "Products." + product.getId() + ".Price";
-                        product.setPricer(ProductPricer.read(priceType, this.product.getShop().getConfig(), path));
+                        product.setPricer(ProductPricer.from(priceType));
                     }
                     case PRODUCT_CHANGE_PRICE_BUY -> {
                         if (this.product.getPricer().getType() == PriceType.FLAT) {

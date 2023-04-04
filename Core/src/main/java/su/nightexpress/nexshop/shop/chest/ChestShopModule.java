@@ -262,8 +262,6 @@ public class ChestShopModule extends ShopModule {
         Pair<Container, Container> sides = shop.getSides();
         this.getShopsMap().put(sides.getFirst().getLocation(), shop);
         this.getShopsMap().put(sides.getSecond().getLocation(), shop);
-
-        shop.setupView();
         shop.updateDisplay();
     }
 

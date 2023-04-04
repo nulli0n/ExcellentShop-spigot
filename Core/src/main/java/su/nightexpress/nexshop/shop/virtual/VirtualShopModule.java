@@ -7,13 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.hooks.external.citizens.CitizensHook;
 import su.nexmedia.engine.utils.FileUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -24,15 +24,14 @@ import su.nightexpress.nexshop.module.ShopModule;
 import su.nightexpress.nexshop.shop.virtual.command.EditorCommand;
 import su.nightexpress.nexshop.shop.virtual.command.OpenCommand;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
-import su.nightexpress.nexshop.shop.virtual.compat.citizens.VirtualShopNPCListener;
-import su.nightexpress.nexshop.shop.virtual.compat.citizens.VirtualShopTrait;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopList;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShopBank;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopListener;
+import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
 
@@ -47,8 +46,8 @@ public class VirtualShopModule extends ShopModule {
 
     private Map<String, VirtualShop> shops;
     private ShopMainMenu             mainMenu;
-    private ShopSellMenu sellMenu;
-    private EditorShopList           editor;
+    private ShopSellMenu   sellMenu;
+    private ShopListEditor editor;
 
     public VirtualShopModule(@NotNull ExcellentShop plugin) {
         super(plugin, ModuleId.VIRTUAL_SHOP);
@@ -78,8 +77,10 @@ public class VirtualShopModule extends ShopModule {
 
         this.loadShops();
         this.loadMainMenu();
-        this.loadCitizens();
         this.addListener(new VirtualShopListener(this));
+        if (Hooks.hasCitizens()) {
+            this.addListener(new VirtualShopNPCListener(this));
+        }
 
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
             this.sellMenu = new ShopSellMenu(this, JYML.loadOrExtract(plugin, this.getPath() + "sell.menu.yml"));
@@ -89,10 +90,6 @@ public class VirtualShopModule extends ShopModule {
 
     @Override
     protected void onShutdown() {
-        if (Hooks.hasCitizens()) {
-            CitizensHook.unregisterTraits(this.plugin);
-            CitizensHook.unregisterListeners(this.plugin);
-        }
         if (this.editor != null) {
             this.editor.clear();
             this.editor = null;
@@ -113,6 +110,8 @@ public class VirtualShopModule extends ShopModule {
     private void loadShops() {
         for (File folder : FileUtil.getFolders(this.getFullPath() + "shops")) {
             String id = folder.getName();
+
+            // ---------- OLD DATA START ----------
             File fileOld = new File(folder.getAbsolutePath(), folder.getName() + ".yml");
             File fileNew = new File(folder.getAbsolutePath(), "config.yml");
             if (fileOld.exists() && !fileNew.exists()) {
@@ -121,6 +120,7 @@ public class VirtualShopModule extends ShopModule {
                     continue;
                 }
             }
+            // ---------- OLD DATA END ----------
 
             VirtualShop shop = new VirtualShop(this, new JYML(fileNew), id);
             if (shop.load()) {
@@ -145,17 +145,10 @@ public class VirtualShopModule extends ShopModule {
         this.mainMenu = new ShopMainMenu(this);
     }
 
-    private void loadCitizens() {
-        if (!Hooks.hasCitizens()) return;
-        this.info("Detected " + Hooks.CITIZENS + "! Enabling hooks...");
-        CitizensHook.addListener(this.plugin, new VirtualShopNPCListener(this));
-        CitizensHook.registerTrait(this.plugin, VirtualShopTrait.class);
-    }
-
     @NotNull
-    public EditorShopList getEditor() {
+    public ShopListEditor getEditor() {
         if (this.editor == null) {
-            this.editor = new EditorShopList(this);
+            this.editor = new ShopListEditor(this);
         }
         return editor;
     }
@@ -174,8 +167,8 @@ public class VirtualShopModule extends ShopModule {
         shop.setDescription(Arrays.asList("&7Freshly created shop.", "&7Edit me in &a/shop editor"));
         shop.setIcon(new ItemStack(Material.REDSTONE));
         shop.setBank(new VirtualShopBank(shop));
-        shop.setupView();
         shop.save();
+        shop.load();
         this.getShopsMap().put(shop.getId(), shop);
         return true;
     }
@@ -258,7 +251,7 @@ public class VirtualShopModule extends ShopModule {
         this.getShops().stream()
             .filter(shop -> shop.hasPermission(player) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
-                // TODO if (!product.isItemMatches(item)) return false;
+                if (product instanceof ItemProduct itemProduct && !itemProduct.isItemMatches(item)) return false;
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                 if (tradeType == TradeType.SELL && !product.isSellable()) return false;
                 //if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;

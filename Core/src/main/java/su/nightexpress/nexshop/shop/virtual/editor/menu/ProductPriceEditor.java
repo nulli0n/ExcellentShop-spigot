@@ -1,15 +1,11 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.editor.EditorButtonType;
-import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItem;
-import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.editor.AbstractEditorMenu;
+import su.nexmedia.engine.api.editor.EditorLocale;
+import su.nexmedia.engine.api.menu.impl.EditorMenu;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.Colorizer;
@@ -25,245 +21,193 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
 import su.nightexpress.nexshop.shop.RangedProductPricer;
-import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
+import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import java.util.Map;
 
-public class ProductPriceEditor extends AbstractEditorMenu<ExcellentShop, VirtualProduct> {
+public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct> {
+
+    private static final String TEXTURE_PRICE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmI5Mjk5YjcyNGM1ZDM0YWM5M2VkZTc1NjAxZGZlYjBiZGE1NzhkNzBiOGY0ZDdmODJkNzY3NmYwYzZjMTE0YSJ9fX0=";
+    private static final String TEXTURE_BUY = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmY2Yjg1ZjYyNjQ0NGRiZDViZGRmN2E1MjFmZTUyNzQ4ZmU0MzU2NGUwM2ZiZDM1YjZiNWU3OTdkZTk0MmQifX19";
+    private static final String TEXTURE_SELL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTlkYmVkNTIyZThkZTFhNjgxZGRkZDM3ODU0ZWU0MjY3ZWZjNDhiNTk5MTdmOWE5YWNiNDIwZDZmZGI5In19fQ==";
+    private static final String TEXTURE_REFRESH = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJkOTkzNDJiZTY3MTU2Y2VmNDhiNTBhOTcxOTI5ODkyMjJkNTY5YjQ0NjA5Mjg5OWNjMjMzNDc1NDJlNzFhYSJ9fX0=";
+    private static final String TEXTURE_INITIAL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODI0Zjc2OWM5NDUwZjIyZTQ4NGUwODljYTAyZTMyNGZlMzdiMThmNGMxOGVmMjk2MDIxODcxYmE0YWQwYzM5NiJ9fX0=";
+    private static final String TEXTURE_STEP = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2U0ZjJmOTY5OGMzZjE4NmZlNDRjYzYzZDJmM2M0ZjlhMjQxMjIzYWNmMDU4MTc3NWQ5Y2VjZDcwNzUifX19";
+
 
     public ProductPriceEditor(@NotNull VirtualProduct product) {
-        super(product.getShop().plugin(), product, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
+        super(product.getShop().plugin(), product, Placeholders.EDITOR_VIRTUAL_TITLE, 27);
 
-        EditorInput<VirtualProduct, VirtualEditorType> input = (player, product2, type, e) -> {
-            String msg = Colorizer.strip(e.getMessage());
-            switch (type) {
-                case PRODUCT_CHANGE_PRICE_FLAT_SELL, PRODUCT_CHANGE_PRICE_FLAT_BUY -> {
-                    double price = StringUtil.getDouble(msg, -1D, true);
-                    if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_FLAT_BUY) {
-                        product2.getPricer().setPrice(TradeType.BUY, price);
-                    }
-                    else {
-                        product2.getPricer().setPrice(TradeType.SELL, price);
-                    }
+        this.addReturn(22).setClick((viewer, event) -> {
+            this.object.getEditor().open(viewer.getPlayer(), 1);
+        });
+
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_PRICE), EditorLocales.PRODUCT_PRICE_TYPE, 4).setClick((viewer, event) -> {
+            PriceType priceType = CollectionsUtil.next(product.getPricer().getType());
+            product.setPricer(ProductPricer.from(priceType));
+            this.save(viewer);
+        });
+
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BUY), EditorLocales.PRODUCT_PRICE_FLAT_BUY, 10).setClick((viewer, event) -> {
+            ProductPricer pricer = product.getPricer();
+            if (event.getClick() == ClickType.DROP) {
+                if (pricer instanceof RangedProductPricer ranged) {
+                    ranged.setPriceMin(TradeType.BUY, -1);
+                    ranged.setPriceMax(TradeType.BUY, -1);
                 }
-                case PRODUCT_CHANGE_PRICE_BUY_MIN, PRODUCT_CHANGE_PRICE_BUY_MAX, PRODUCT_CHANGE_PRICE_SELL_MIN, PRODUCT_CHANGE_PRICE_SELL_MAX -> {
-                    RangedProductPricer pricer = (RangedProductPricer) product2.getPricer();
-                    double price = StringUtil.getDouble(msg, 0D);
-                    if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MIN) {
-                        pricer.setPriceMin(TradeType.BUY, price);
+                else pricer.setPrice(TradeType.BUY, -1);
+                this.save(viewer);
+            }
+            else {
+                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
+                    double price = StringUtil.getDouble(Colorizer.strip(chat.getMessage()), -1D, true);
+                    if (pricer instanceof RangedProductPricer ranged) {
+                        if (event.isLeftClick()) {
+                            ranged.setPriceMin(TradeType.BUY, price);
+                        }
+                        else ranged.setPriceMax(TradeType.BUY, price);
                     }
-                    else if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MAX) {
-                        pricer.setPriceMax(TradeType.BUY, price);
-                    }
-                    else if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MIN) {
-                        pricer.setPriceMin(TradeType.SELL, price);
-                    }
-                    else {
-                        pricer.setPriceMax(TradeType.SELL, price);
-                    }
+                    else pricer.setPrice(TradeType.BUY, price);
+
+                    product.getShop().saveProducts();
+                    return true;
+                });
+            }
+
+        }).getOptions().setDisplayModifier((viewer, item) -> {
+            ProductPricer pricer = product.getPricer();
+            EditorLocale locale = switch (pricer.getType()) {
+                case FLAT -> EditorLocales.PRODUCT_PRICE_FLAT_BUY;
+                case FLOAT -> EditorLocales.PRODUCT_PRICE_FLOAT_BUY;
+                case DYNAMIC -> EditorLocales.PRODUCT_PRICE_DYNAMIC_BUY;
+            };
+            ItemUtil.mapMeta(item, meta -> {
+                meta.setDisplayName(locale.getLocalizedName());
+                meta.setLore(locale.getLocalizedLore());
+                meta.addItemFlags(ItemFlag.values());
+                ItemUtil.replace(meta, product.replacePlaceholders());
+            });
+        });
+
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_SELL), EditorLocales.PRODUCT_PRICE_FLAT_SELL, 11).setClick((viewer, event) -> {
+            ProductPricer pricer = product.getPricer();
+            if (event.getClick() == ClickType.DROP) {
+                if (pricer instanceof RangedProductPricer ranged) {
+                    ranged.setPriceMin(TradeType.SELL, -1);
+                    ranged.setPriceMax(TradeType.SELL, -1);
                 }
-                case PRODUCT_CHANGE_PRICE_FLOAT_REFRESH_DAYS -> {
-                    FloatProductPricer pricer = (FloatProductPricer) product2.getPricer();
-                    DayOfWeek day = StringUtil.getEnum(msg, DayOfWeek.class).orElse(null);
-                    if (day == null) {
-                        EditorManager.error(player, plugin.getMessage(Lang.EDITOR_ERROR_ENUM).getLocalized());
-                        return false;
+                else pricer.setPrice(TradeType.SELL, -1);
+                this.save(viewer);
+            }
+            else {
+                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
+                    double price = StringUtil.getDouble(Colorizer.strip(chat.getMessage()), -1D, true);
+                    if (pricer instanceof RangedProductPricer ranged) {
+                        if (event.isLeftClick()) {
+                            ranged.setPriceMin(TradeType.SELL, price);
+                        }
+                        else ranged.setPriceMax(TradeType.SELL, price);
                     }
+                    else pricer.setPrice(TradeType.SELL, price);
+
+                    product.getShop().saveProducts();
+                    return true;
+                });
+            }
+
+        }).getOptions().setDisplayModifier((viewer, item) -> {
+            ProductPricer pricer = product.getPricer();
+            EditorLocale locale = switch (pricer.getType()) {
+                case FLAT -> EditorLocales.PRODUCT_PRICE_FLAT_SELL;
+                case FLOAT -> EditorLocales.PRODUCT_PRICE_FLOAT_SELL;
+                case DYNAMIC -> EditorLocales.PRODUCT_PRICE_DYNAMIC_SELL;
+            };
+            ItemUtil.mapMeta(item, meta -> {
+                meta.setDisplayName(locale.getLocalizedName());
+                meta.setLore(locale.getLocalizedLore());
+                meta.addItemFlags(ItemFlag.values());
+                ItemUtil.replace(meta, product.replacePlaceholders());
+            });
+        });
+
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_REFRESH), EditorLocales.PRODUCT_PRICE_FLOAT_REFRESH, 15).setClick((viewer, event) -> {
+            FloatProductPricer pricer = (FloatProductPricer) product.getPricer();
+            if (event.isShiftClick()) {
+                if (event.isLeftClick()) {
+                    pricer.getDays().clear();
+                }
+                else pricer.getTimes().clear();
+                this.save(viewer);
+                return;
+            }
+
+            if (event.isLeftClick()) {
+                EditorManager.suggestValues(viewer.getPlayer(), CollectionsUtil.getEnumsList(DayOfWeek.class), true);
+                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY), chat -> {
+                    DayOfWeek day = StringUtil.getEnum(chat.getMessage(), DayOfWeek.class).orElse(null);
+                    if (day == null) return true;
+
                     pricer.getDays().add(day);
                     pricer.stopScheduler();
                     pricer.startScheduler();
-                }
-                case PRODUCT_CHANGE_PRICE_FLOAT_REFRESH_TIMES -> {
-                    FloatProductPricer pricer = (FloatProductPricer) product2.getPricer();
+                    product.getShop().saveProducts();
+                    return true;
+                });
+            }
+            else {
+                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME), chat -> {
                     try {
-                        pricer.getTimes().add(LocalTime.parse(msg, IScheduled.TIME_FORMATTER));
+                        pricer.getTimes().add(LocalTime.parse(chat.getMessage(), IScheduled.TIME_FORMATTER));
                         pricer.stopScheduler();
                         pricer.startScheduler();
+                        product.getShop().saveProducts();
                     }
-                    catch (DateTimeParseException ex) {
-                        return false;
-                    }
-                }
-                case PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL_BUY, PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL_SELL -> {
-                    DynamicProductPricer pricer = (DynamicProductPricer) product2.getPricer();
-                    double price = StringUtil.getDouble(msg, 0D);
-                    if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL_BUY) {
-                        pricer.setInitial(TradeType.BUY, price);
-                    }
-                    else {
-                        pricer.setInitial(TradeType.SELL, price);
-                    }
-                }
-                case PRODUCT_CHANGE_PRICE_DYNAMIC_STEP_BUY, PRODUCT_CHANGE_PRICE_DYNAMIC_STEP_SELL -> {
-                    DynamicProductPricer pricer = (DynamicProductPricer) product2.getPricer();
-                    double price = StringUtil.getDouble(msg, 0D);
-                    if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP_BUY) {
-                        pricer.setStep(TradeType.BUY, price);
-                    }
-                    else {
-                        pricer.setStep(TradeType.SELL, price);
-                    }
-                }
+                    catch (DateTimeParseException ignored) {}
+                    return true;
+                });
             }
-            product2.getShop().save();
-            return true;
-        };
+        }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.FLOAT);
 
-        MenuClick click = (player, type, e) -> {
-            if (type instanceof MenuItemType type2) {
-                if (type2 == MenuItemType.RETURN) {
-                    this.object.getEditor().open(player, 1);
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_INITIAL), EditorLocales.PRODUCT_PRICE_DYNAMIC_INITIAL, 15).setClick((viewer, event) -> {
+            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
+                DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
+                double price = StringUtil.getDouble(chat.getMessage(), 0D);
+                if (event.isLeftClick()) {
+                    pricer.setInitial(TradeType.BUY, price);
                 }
-            }
-            else if (type instanceof VirtualEditorType type2) {
-                switch (type2) {
-                    case PRODUCT_CHANGE_PRICE_TYPE -> {
-                        PriceType priceType = CollectionsUtil.next(product.getPricer().getType());
-                        String path = "List." + product.getId() + ".Price";// + priceType.name();
-                        product.setPricer(ProductPricer.read(priceType, product.getShop().getConfigProducts(), path));
-                    }
-                    case PRODUCT_CHANGE_PRICE_FLAT_BUY -> {
-                        if (e.isRightClick()) {
-                            this.object.getPricer().setPrice(TradeType.BUY, -1);
-                            break;
-                        }
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_FLAT_SELL -> {
-                        if (e.isRightClick()) {
-                            this.object.getPricer().setPrice(TradeType.SELL, -1);
-                            break;
-                        }
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_FLOAT_BUY, PRODUCT_CHANGE_PRICE_DYNAMIC_BUY -> {
-                        if (e.isLeftClick()) {
-                            type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MIN;
-                        }
-                        else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_BUY_MAX;
+                else pricer.setInitial(TradeType.SELL, price);
 
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_FLOAT_SELL, PRODUCT_CHANGE_PRICE_DYNAMIC_SELL -> {
-                        if (e.isLeftClick()) {
-                            type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MIN;
-                        }
-                        else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_SELL_MAX;
+                product.getShop().saveProducts();
+                return true;
+            });
+        }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.DYNAMIC);
 
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_FLOAT_REFRESH -> {
-                        FloatProductPricer pricer = (FloatProductPricer) product.getPricer();
-                        if (e.isShiftClick()) {
-                            if (e.isLeftClick()) {
-                                pricer.getDays().clear();
-                            }
-                            else pricer.getTimes().clear();
-                            break;
-                        }
-
-                        if (e.isLeftClick()) {
-                            type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH_DAYS;
-                            EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY).getLocalized());
-                            EditorManager.suggestValues(player, CollectionsUtil.getEnumsList(DayOfWeek.class), true);
-                        }
-                        else {
-                            type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH_TIMES;
-                            EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME).getLocalized());
-                        }
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL -> {
-                        if (e.isLeftClick()) {
-                            type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL_BUY;
-                        }
-                        else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL_SELL;
-
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
-                    case PRODUCT_CHANGE_PRICE_DYNAMIC_STEP -> {
-                        if (e.isLeftClick()) {
-                            type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP_BUY;
-                        }
-                        else type2 = VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP_SELL;
-
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE).getLocalized());
-                        EditorManager.startEdit(player, product, type2, input);
-                        player.closeInventory();
-                        return;
-                    }
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_STEP), EditorLocales.PRODUCT_PRICE_DYNAMIC_STEP, 16).setClick((viewer, event) -> {
+            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
+                DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
+                double price = StringUtil.getDouble(chat.getMessage(), 0D);
+                if (event.isLeftClick()) {
+                    pricer.setStep(TradeType.BUY, price);
                 }
-                this.object.getShop().save();
-                this.open(player, 1);
-            }
-        };
+                else pricer.setStep(TradeType.SELL, price);
 
-        this.loadItems(click);
-        this.getItemsMap().values().forEach(menuItem -> {
-            if (menuItem.getType() instanceof VirtualEditorType type) {
-                if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_FLAT_BUY || type == VirtualEditorType.PRODUCT_CHANGE_PRICE_FLAT_SELL) {
-                    menuItem.setVisibilityPolicy(player1 -> this.object.getPricer().getType() == PriceType.FLAT);
-                }
-                else if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_BUY || type == VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_SELL
-                    || type == VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH) {
-                    menuItem.setVisibilityPolicy(player1 -> this.object.getPricer().getType() == PriceType.FLOAT);
-                }
-                else if (type == VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_BUY || type == VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_SELL
-                    || type == VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL || type == VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP) {
-                    menuItem.setVisibilityPolicy(player1 -> this.object.getPricer().getType() == PriceType.DYNAMIC);
-                }
+                product.getShop().saveProducts();
+                return true;
+            });
+        }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.DYNAMIC);
+
+        this.getItems().forEach(menuItem -> {
+            if (menuItem.getOptions().getDisplayModifier() == null) {
+                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, product.replacePlaceholders()));
             }
         });
     }
 
-    @Override
-    public void setTypes(@NotNull Map<EditorButtonType, Integer> map) {
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_TYPE, 4);
-
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_FLAT_BUY, 21);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_FLAT_SELL, 23);
-
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_BUY, 20);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_SELL, 22);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_FLOAT_REFRESH, 24);
-
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_BUY, 19);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_SELL, 21);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL, 23);
-        map.put(VirtualEditorType.PRODUCT_CHANGE_PRICE_DYNAMIC_STEP, 25);
-
-        map.put(MenuItemType.RETURN, 40);
-    }
-
-    @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
-        super.onItemPrepare(player, menuItem, item);
-        ItemUtil.replace(item, this.object.replacePlaceholders());
-    }
-
-    @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent inventoryClickEvent, @NotNull SlotType slotType) {
-        return true;
+    private void save(@NotNull MenuViewer viewer) {
+        this.object.getShop().saveProducts();
+        this.plugin.runTask(task -> this.open(viewer.getPlayer(), viewer.getPage()));
     }
 }

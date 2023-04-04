@@ -1,26 +1,26 @@
 package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItem;
+import su.nexmedia.engine.api.menu.AutoPaged;
 import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.api.menu.WeakMenuItem;
-import su.nexmedia.engine.utils.CollectionsUtil;
+import su.nexmedia.engine.api.menu.click.ClickHandler;
+import su.nexmedia.engine.api.menu.click.ItemClick;
+import su.nexmedia.engine.api.menu.impl.MenuOptions;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.ShopView;
 import su.nightexpress.nexshop.api.type.ShopClickType;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class ChestShopView extends ShopView<ChestShop> {
+public class ChestShopView extends ShopView<ChestShop, ChestProduct> implements AutoPaged<ChestProduct> {
 
     private static int[]        PRODUCT_SLOTS;
     private static List<String> PRODUCT_FORMAT_LORE;
@@ -31,66 +31,80 @@ public class ChestShopView extends ShopView<ChestShop> {
         PRODUCT_SLOTS = cfg.getIntArray("Product_Slots");
         PRODUCT_FORMAT_LORE = Colorizer.apply(cfg.getStringList("Product_Format.Lore.Text"));
 
-        MenuClick click = (player, type, e) -> {
-            if (type instanceof MenuItemType type2) {
-                this.onItemClickDefault(player, type2);
-            }
-        };
+        this.registerHandler(MenuItemType.class)
+            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
+            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
+            .addClick(MenuItemType.CLOSE, (viewer, event) -> this.plugin.runTask(task -> viewer.getPlayer().closeInventory()));
 
-        for (String id : cfg.getSection("Content")) {
-            MenuItem menuItem = cfg.getMenuItem("Content." + id, MenuItemType.class);
-            if (menuItem.getType() != null) {
-                menuItem.setClickHandler(click);
-            }
-            this.addItem(menuItem);
-        }
+        this.load();
 
-        this.setTitle(shop.getName());
+        this.getItems().forEach(menuItem -> {
+            if (menuItem.getOptions().getDisplayModifier() == null) {
+                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.shop.replacePlaceholders()));
+            }
+        });
     }
 
     @Override
-    public void displayProducts(@NotNull Player player, @NotNull Inventory inventory, int page) {
-        int length = PRODUCT_SLOTS.length;
-        List<ChestProduct> list = new ArrayList<>(this.getShop().getProducts());
-        List<List<ChestProduct>> split = CollectionsUtil.split(list, length);
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+        super.onPrepare(viewer, options);
 
-        int pages = split.size();
-        if (pages < 1) list = Collections.emptyList();
-        else list = split.get(page - 1);
+        options.setTitle(this.getShop().getName());
 
-        int count = 0;
-        for (ChestProduct product : list) {
-            ItemStack preview = product.getPreview();
-            ItemMeta meta = preview.getItemMeta();
+        this.getItemsForPage(viewer).forEach(this::addItem);
+    }
 
-            if (meta != null) {
-                List<String> lore = new ArrayList<>();
+    @Override
+    public int[] getObjectSlots() {
+        return PRODUCT_SLOTS;
+    }
 
-                for (String lineFormat : PRODUCT_FORMAT_LORE) {
-                    if (lineFormat.contains(Placeholders.GENERIC_LORE)) {
-                        List<String> list2 = meta.getLore();
-                        if (list2 != null) lore.addAll(list2);
-                        continue;
-                    }
-                    lore.add(lineFormat);
+    @Override
+    @NotNull
+    public List<ChestProduct> getObjects(@NotNull Player player) {
+        return new ArrayList<>(this.getShop().getProducts());
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
+        ItemStack preview = product.getPreview();
+
+        ItemUtil.mapMeta(preview, meta -> {
+            List<String> lore = new ArrayList<>();
+
+            for (String lineFormat : PRODUCT_FORMAT_LORE) {
+                if (lineFormat.contains(Placeholders.GENERIC_LORE)) {
+                    List<String> list2 = meta.getLore();
+                    if (list2 != null) lore.addAll(list2);
+                    continue;
                 }
-
-                lore.replaceAll(product.getPlaceholders(player).replacer());
-                lore.replaceAll(product.getCurrency().replacePlaceholders());
-                meta.setLore(lore);
-                preview.setItemMeta(meta);
+                lore.add(lineFormat);
             }
 
-            WeakMenuItem menuItem = new WeakMenuItem(player, preview, PRODUCT_SLOTS[count++]);
-            menuItem.setPriority(100);
-            menuItem.setClickHandler((player2, type, e) -> {
-                ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
-                if (clickType == null) return;
+            // TODO Use PlaceholderMap
+            lore.replaceAll(product.getPlaceholders(player).replacer());
+            lore.replaceAll(product.getCurrency().replacePlaceholders());
+            meta.setLore(lore);
+        });
 
-                product.prepareTrade(player2, clickType);
-            });
-            this.addItem(menuItem);
-        }
-        this.setPage(player, page, pages);
+        return preview;
+    }
+
+    @Override
+    @NotNull
+    public ItemClick getObjectClick(@NotNull ChestProduct product) {
+        return (viewer, event) -> {
+            ShopClickType clickType = ShopClickType.getByDefault(event.getClick());
+            if (clickType == null) return;
+
+            product.prepareTrade(viewer.getPlayer(), clickType);
+        };
+    }
+
+    @Override
+    @NotNull
+    public Comparator<ChestProduct> getObjectSorter() {
+        return ((o1, o2) -> 0);
     }
 }

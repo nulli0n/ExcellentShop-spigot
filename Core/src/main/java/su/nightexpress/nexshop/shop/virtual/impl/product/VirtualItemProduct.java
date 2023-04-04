@@ -26,7 +26,7 @@ public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
         this.setRespectItemMeta(item.hasItemMeta());
 
         this.placeholderMap
-            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, LangManager.getBoolean(this.isRespectItemMeta()))
+            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, () -> LangManager.getBoolean(this.isRespectItemMeta()))
         ;
     }
 
@@ -75,10 +75,8 @@ public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
     }
 
     @Override
-    @Deprecated
     public void setItem(@NotNull ItemStack item) {
         this.item = new ItemStack(item);
-        //this.item.setAmount(1); // TODO
     }
 
     @Override

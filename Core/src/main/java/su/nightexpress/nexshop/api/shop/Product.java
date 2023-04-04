@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.manager.ICleanable;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.lang.LangManager;
@@ -122,7 +123,11 @@ public abstract class Product<
         PreparedProduct<P> prepared = this.getPrepared(tradeType);
         if (click == ShopClickType.BUY_SINGLE || click == ShopClickType.SELL_SINGLE || isSellAll) {
             prepared.trade(player, isSellAll);
-            shop.open(player, shop.getView().getPage(player)); // Update current shop page
+
+            MenuViewer viewer = shop.getView().getViewer(player);
+            if (viewer != null) {
+                shop.open(player, viewer.getPage()); // Update current shop page
+            }
             return;
         }
         this.openTrade(player, prepared);

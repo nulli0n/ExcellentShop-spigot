@@ -24,7 +24,7 @@ public class VirtualLang {
     public static final LangKey EDITOR_ENTER_DESCRIPTION       = LangKey.of("VirtualShop.Editor.Enter.Description", "&7Enter &adescription&7...");
     public static final LangKey EDITOR_ENTER_NPC_ID            = LangKey.of("VirtualShop.Editor.Enter.NpcId", "&7Enter Citizens id...");
     public static final LangKey EDITOR_ENTER_TITLE             = LangKey.of("VirtualShop.Editor.Enter.Title", "&7Enter shop title...");
-    public static final LangKey EDITOR_ENTER_AMOUNT            = LangKey.of("VirtualShop.Editor.Enter.Amount", "&7Enter new amount...");
+    @Deprecated public static final LangKey EDITOR_ENTER_AMOUNT            = LangKey.of("VirtualShop.Editor.Enter.Amount", "&7Enter new amount...");
     public static final LangKey EDITOR_SHOP_CREATE_ERROR_EXIST = LangKey.of("VirtualShop.Editor.Create.Error.Exist", "&cShop with such ID already exist!");
     public static final LangKey EDITOR_PRODUCT_ENTER_COMMAND   = LangKey.of("VirtualShop.Editor.Product.Enter.Command", "&7Enter new command...");
 }

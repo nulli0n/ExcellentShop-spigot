@@ -178,19 +178,22 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         int amount = event.getPrepared().getAmount();
         Player player = event.getPlayer();
 
-        if (!this.isUnlimited(StockType.GLOBAL, tradeType)) {
-            int amountLeft = this.getLeftAmount(tradeType);
-            int amountLeftOpp = this.getLeftAmount(tradeType.getOpposite());
+        int amountLeft = this.getLeftAmount(tradeType);
+        int amountLeftOpp = this.getLeftAmount(tradeType.getOpposite());
 
+        if (!this.isUnlimited(StockType.GLOBAL, tradeType)) {
             this.setLeftAmount(tradeType, amountLeft - amount);
+        }
+        if (!this.isUnlimited(StockType.GLOBAL, tradeType.getOpposite())) {
             this.setLeftAmount(tradeType.getOpposite(), amountLeftOpp + amount);
         }
-        if (!this.isUnlimited(StockType.PLAYER, tradeType)) {
-            int amountLeft = this.getLeftAmount(tradeType, player);
-            int amountLeftOpp = this.getLeftAmount(tradeType.getOpposite(), player);
 
-            this.setLeftAmount(tradeType, amountLeft - amount, player);
-            this.setLeftAmount(tradeType.getOpposite(), amountLeftOpp + amount, player);
+        if (!this.isUnlimited(StockType.PLAYER, tradeType)) {
+            int userAmountLeft = this.getLeftAmount(tradeType, player);
+            //int amountLeftOpp = this.getLeftAmount(tradeType.getOpposite(), player);
+
+            this.setLeftAmount(tradeType, userAmountLeft - amount, player);
+            //this.setLeftAmount(tradeType.getOpposite(), amountLeftOpp + amount, player);
         }
     }
 

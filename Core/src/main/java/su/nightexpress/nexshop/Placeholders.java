@@ -4,6 +4,7 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
 
     public static final String URL_WIKI              = "https://github.com/nulli0n/ExcellentShop-spigot/wiki/";
     public static final String URL_WIKI_PLACEHOLDERS = URL_WIKI + "Internal-Placeholders";
+    public static final String URL_WIKI_PRODUCT_STOCK = URL_WIKI + "Product-Stock-Feature";
     public static final String URL_ENGINE_ITEMS = "https://github.com/nulli0n/NexEngine-spigot/wiki/Configuration-Tips#item-sections";
 
     public static final String EDITOR_VIRTUAL_TITLE = "Virtual Shop Editor";
@@ -30,8 +31,8 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String SHOP_VIRTUAL_DESCRIPTION         = "%shop_description%";
     public static final String SHOP_VIRTUAL_PERMISSION_REQUIRED = "%shop_permission_required%";
     public static final String SHOP_VIRTUAL_PERMISSION_NODE     = "%shop_permission_node%";
-    public static final String SHOP_VIRTUAL_ICON_NAME           = "%shop_icon_name%";
-    public static final String SHOP_VIRTUAL_ICON_TYPE           = "%shop_icon_type%";
+    @Deprecated public static final String SHOP_VIRTUAL_ICON_NAME           = "%shop_icon_name%";
+    @Deprecated public static final String SHOP_VIRTUAL_ICON_TYPE           = "%shop_icon_type%";
     public static final String SHOP_VIRTUAL_PAGES               = "%shop_pages%";
     public static final String SHOP_VIRTUAL_VIEW_SIZE           = "%shop_view_size%";
     public static final String SHOP_VIRTUAL_VIEW_TITLE          = "%shop_view_title%";

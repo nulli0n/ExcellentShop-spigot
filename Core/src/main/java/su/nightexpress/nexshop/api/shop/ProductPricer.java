@@ -30,11 +30,22 @@ public abstract class ProductPricer implements Placeholder {
     }
 
     @NotNull
-    public static ProductPricer read(@NotNull PriceType priceType, @NotNull JYML cfg, @NotNull String path) {
+    public static ProductPricer read(@NotNull JYML cfg, @NotNull String path) {
+        PriceType priceType = cfg.getEnum(path + ".Type", PriceType.class, PriceType.FLAT);
+
         return switch (priceType) {
             case FLAT -> FlatProductPricer.read(cfg, path);
             case FLOAT -> FloatProductPricer.read(cfg, path);
             case DYNAMIC -> DynamicProductPricer.read(cfg, path);
+        };
+    }
+
+    @NotNull
+    public static ProductPricer from(@NotNull PriceType priceType) {
+        return switch (priceType) {
+            case FLAT -> new FlatProductPricer();
+            case FLOAT -> new FloatProductPricer();
+            case DYNAMIC -> new DynamicProductPricer();
         };
     }
 

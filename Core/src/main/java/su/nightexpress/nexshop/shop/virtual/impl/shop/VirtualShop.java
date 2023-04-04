@@ -13,11 +13,10 @@ import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.ShopView;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopMain;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
@@ -28,39 +27,42 @@ import java.util.stream.IntStream;
 
 public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> implements ICleanable {
 
+    private final VirtualShopModule module;
+    private final VirtualShopView view;
     private final JYML configProducts;
-    private final JYML configView;
+    //private final JYML configView;
 
     private final Set<VirtualDiscount> discountConfigs;
-    private       String               name;
-    private       List<String>        description;
-    private       int                 pages;
-    private       boolean             isPermissionRequired;
-    private       ItemStack           icon;
-    private       int[]               citizensIds = new int[0];
+    private final Set<Integer> npcIds;
 
-    private ShopView<VirtualShop> view;
-    private EditorShopMain        editor;
+    private String       name;
+    private List<String> description;
+    private int          pages;
+    private boolean      isPermissionRequired;
+    private ItemStack    icon;
+
+    private       ShopMainEditor  editor;
 
     public VirtualShop(@NotNull VirtualShopModule module, @NotNull JYML cfg, @NotNull String id) {
         super(module.plugin(), cfg, id);
+        this.module = module;
         this.configProducts = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "products.yml");
-        this.configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "view.yml");
-        this.configView.addMissing("Title", StringUtil.capitalizeFully(this.getId()));
-        this.configView.addMissing("Size", 54);
-        this.configView.saveChanges();
         this.discountConfigs = new HashSet<>();
+        this.npcIds = new HashSet<>();
+
+        JYML configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "view.yml");
+        this.view = new VirtualShopView(this, configView);
     }
 
     @Override
     public boolean load() {
         this.setBank(new VirtualShopBank(this));
-        this.setName(cfg.getString("Name", this.configView.getString("Title", this.getId())));
+        this.setName(cfg.getString("Name", StringUtil.capitalizeUnderscored(this.getId())));
         this.setDescription(cfg.getStringList("Description"));
         this.setPages(cfg.getInt("Pages", 1));
         this.setPermissionRequired(cfg.getBoolean("Permission_Required", false));
         this.setIcon(cfg.getItem("Icon"));
-        this.setCitizensIds(cfg.getIntArray("Citizens.Attached_NPC"));
+        this.getNPCIds().addAll(IntStream.of(cfg.getIntArray("Citizens.Attached_NPC")).boxed().toList());
         for (TradeType buyType : TradeType.values()) {
             this.setTransactionEnabled(buyType, cfg.getBoolean("Transaction_Allowed." + buyType.name(), true));
         }
@@ -68,9 +70,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
             this.addDiscountConfig(VirtualDiscount.read(cfg, "Discounts." + sId));
         }
         this.getDiscountConfigs().forEach(VirtualDiscount::startScheduler);
-
         this.loadProducts();
-        this.setupView();
         return true;
     }
 
@@ -101,10 +101,9 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
             .replace(Placeholders.SHOP_VIRTUAL_ICON_NAME, ItemUtil.getItemName(this.getIcon()))
             .replace(Placeholders.SHOP_VIRTUAL_ICON_TYPE, this.getIcon().getType().name())
             .replace(Placeholders.SHOP_VIRTUAL_PAGES, String.valueOf(this.getPages()))
-            .replace(Placeholders.SHOP_VIRTUAL_VIEW_SIZE, String.valueOf(this.getView().getSize()))
-            .replace(Placeholders.SHOP_VIRTUAL_VIEW_TITLE, this.getView().getTitle())
-            .replace(Placeholders.SHOP_VIRTUAL_NPC_IDS, String.join(", ", IntStream.of(this.getCitizensIds()).boxed()
-                .map(String::valueOf).toList()))
+            .replace(Placeholders.SHOP_VIRTUAL_VIEW_SIZE, String.valueOf(this.getView().getOptions().getSize()))
+            .replace(Placeholders.SHOP_VIRTUAL_VIEW_TITLE, this.getView().getOptions().getTitle())
+            .replace(Placeholders.SHOP_VIRTUAL_NPC_IDS, String.join(", ", this.getNPCIds().stream().map(String::valueOf).toList()))
         );
     }
 
@@ -114,9 +113,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
             if (notify) plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player); // TODO Message
             return false;
         }
-
-        VirtualShopModule module = plugin.getVirtualShop();
-        return module != null && module.isAvailable(player, notify);
+        return this.getModule().isAvailable(player, notify);
     }
 
     @Override
@@ -125,22 +122,15 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         return this;
     }
 
-    @Override
     @NotNull
-    public ShopView<VirtualShop> getView() {
-        return this.view;
+    public VirtualShopModule getModule() {
+        return module;
     }
 
     @Override
-    public void setupView() {
-        this.configView.reload();
-        this.view = new VirtualShopView(this, this.getConfigView());
-        // this.getEditor().rebuild();
-        this.getEditor().getEditorViewDesign().setTitle(this.getView().getTitle());
-        this.getEditor().getEditorViewDesign().setSize(this.getView().getSize());
-
-        this.getEditor().getEditorProducts().setTitle(this.getView().getTitle());
-        this.getEditor().getEditorProducts().setSize(this.getView().getSize());
+    @NotNull
+    public VirtualShopView getView() {
+        return this.view;
     }
 
     @Override
@@ -151,7 +141,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         }
         if (this.view != null) {
             this.view.clear();
-            this.view = null;
         }
         this.products.values().forEach(Product::clear);
         this.products.clear();
@@ -161,9 +150,14 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
 
     @Override
     public void onSave() {
-        configView.set("Title", this.view.getTitle());
-        configView.set("Size", this.view.getSize());
-        configView.saveChanges();
+        this.saveSettings();
+        this.saveProducts();
+    }
+
+    public void saveSettings() {
+        view.getConfig().set("Title", this.view.getOptions().getTitle());
+        view.getConfig().set("Size", this.view.getOptions().getSize());
+        view.getConfig().saveChanges();
 
         cfg.set("Name", this.getName());
         cfg.set("Description", this.getDescription());
@@ -171,11 +165,10 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         cfg.set("Permission_Required", this.isPermissionRequired());
         this.transactions.forEach((type, isAllowed) -> cfg.set("Transaction_Allowed." + type.name(), isAllowed));
         cfg.setItem("Icon", this.getIcon());
-        cfg.setIntArray("Citizens.Attached_NPC", this.getCitizensIds());
+        cfg.setIntArray("Citizens.Attached_NPC", this.getNPCIds().stream().mapToInt(Number::intValue).toArray());
         cfg.set("Discounts", null);
         this.discountConfigs.forEach(discountConfig -> VirtualDiscount.write(discountConfig, cfg, "Discounts." + UUID.randomUUID()));
-
-        this.saveProducts();
+        cfg.saveChanges();
     }
 
     public void saveProducts() {
@@ -191,16 +184,15 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         return this.configProducts;
     }
 
-    @NotNull
+    /*@NotNull
     public JYML getConfigView() {
         return this.configView;
-    }
+    }*/
 
-    @Override
     @NotNull
-    public EditorShopMain getEditor() {
+    public ShopMainEditor getEditor() {
         if (this.editor == null) {
-            this.editor = new EditorShopMain(this.plugin(), this);
+            this.editor = new ShopMainEditor(this.plugin(), this);
         }
         return this.editor;
     }
@@ -245,12 +237,8 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         this.pages = Math.max(1, pages);
     }
 
-    public int[] getCitizensIds() {
-        return this.citizensIds;
-    }
-
-    public void setCitizensIds(int[] npcIds) {
-        this.citizensIds = npcIds;
+    public Set<Integer> getNPCIds() {
+        return this.npcIds;
     }
 
     @NotNull

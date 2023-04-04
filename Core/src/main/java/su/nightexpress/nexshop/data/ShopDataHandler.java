@@ -145,11 +145,11 @@ public class ShopDataHandler extends AbstractUserDataHandler<ExcellentShop, Shop
         long deadlineMs = TimeUtil.toEpochMillis(deadline);
 
         if (SQLQueries.hasTable(this.getConnector(), this.tableStockData)) {
-            String sql = "DELETE FROM " + this.tableStockData + " WHERE " + COL_STOCK_RESTOCK_DATE + " < " + deadlineMs;
+            String sql = "DELETE FROM " + this.tableStockData + " WHERE " + COL_STOCK_RESTOCK_DATE.getName() + " < " + deadlineMs;
             SQLQueries.executeStatement(this.getConnector(), sql);
         }
         if (SQLQueries.hasTable(this.getConnector(), this.tablePriceData)) {
-            String sql = "DELETE FROM " + this.tablePriceData + " WHERE " + COL_PRICE_LAST_UPDATED + " < " + deadlineMs;
+            String sql = "DELETE FROM " + this.tablePriceData + " WHERE " + COL_PRICE_LAST_UPDATED.getName() + " < " + deadlineMs;
             SQLQueries.executeStatement(this.getConnector(), sql);
         }
     }

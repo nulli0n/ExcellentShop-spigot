@@ -1,54 +1,71 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.impl.EditorMenu;
+import su.nexmedia.engine.api.menu.impl.MenuOptions;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
+import su.nexmedia.engine.api.menu.item.ItemOptions;
+import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
+import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.*;
 
-public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
-
-    private final VirtualShop shop;
+public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop> {
 
     private final NamespacedKey keyItemType;
     private final NamespacedKey keyReserved;
 
-    private static final String TYPE_PREFIX = ChatColor.AQUA + "Type: " + ChatColor.GREEN;
+    private static final String TYPE_PREFIX = ChatColor.AQUA + "Type" + ChatColor.GRAY + " [Q/Drop]: " + ChatColor.GREEN;
 
-    public EditorShopViewDesign(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
-        super(plugin, shop.getView().getTitle(), shop.getView().getSize());
+    public ShopViewEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
+        super(plugin, shop, shop.getName(), 54);
         this.keyItemType = new NamespacedKey(plugin, "menu_item_type");
         this.keyReserved = new NamespacedKey(plugin, "reserved_slot");
-        this.shop = shop;
     }
 
     @Override
-    public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
-        this.setPage(player, 1, this.shop.getPages()); // Hack for page items display.
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+        super.onPrepare(viewer, options);
 
-        for (MenuItem menuItem : this.shop.getView().getItemsMap().values()) {
+        viewer.setPages(this.object.getPages());
+        options.setTitle(this.object.getView().getOptions().getTitle());
+        options.setSize(this.object.getView().getOptions().getSize());
+
+        ItemStack reserved = new ItemStack(Material.BARRIER);
+        PDCUtil.set(reserved, this.keyReserved, true);
+        int[] slots = this.object.getProducts().stream().mapToInt(VirtualProduct::getSlot).toArray();
+
+        this.addItem(reserved, EditorLocales.PRODUCT_RESERVED_SLOT, slots).setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
+    }
+
+    @Override
+    public void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
+        super.onReady(viewer, inventory);
+
+        for (MenuItem menuItem : this.object.getView().getItems()) {
             Enum<?> type = menuItem.getType();
             ItemStack item = menuItem.getItem();
-            PDCUtil.set(item, this.keyItemType, type != null ? type.name() : "null");
+            PDCUtil.set(item, this.keyItemType, type.name());
             this.updateItem(item);
 
             for (int slot : menuItem.getSlots()) {
@@ -56,46 +73,22 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
                 inventory.setItem(slot, item);
             }
         }
-
-        ItemStack reserved = VirtualEditorType.PRODUCT_RESERVED_SLOT.getItem();
-        PDCUtil.set(reserved, this.keyReserved, true);
-        for (VirtualProduct product : this.shop.getProducts()) {
-            int slot = product.getSlot();
-            if (slot >= inventory.getSize()) continue;
-            inventory.setItem(slot, reserved);
-        }
-
-        return true;
     }
 
     @Override
-    public void onClick(@NotNull Player player, @Nullable ItemStack item, int slot, @NotNull InventoryClickEvent e) {
-        if (item == null || item.getType().isAir()) return;
+    public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
+        Player player = viewer.getPlayer();
 
-        if (PDCUtil.getBoolean(item, this.keyReserved).orElse(false)) {
-            e.setCancelled(true);
-            return;
-        }
-
-        if (e.getClick() == ClickType.DROP && slot < this.getSize()) {
-            PDCUtil.set(item, this.keyItemType, CollectionsUtil.next(this.getType(item)).name());
-            e.setCancelled(true);
-        }
-        this.updateItem(item);
-    }
-
-    @Override
-    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
         this.plugin.runTask(task -> {
-            this.save(e.getInventory());
-            this.shop.getEditor().open(player, 1);
+            this.save(event.getInventory());
+            this.object.getEditor().open(player, 1);
         });
 
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null) this.removeTypeLore(item);
         }
 
-        super.onClose(player, e);
+        super.onClose(viewer, event);
     }
 
     @NotNull
@@ -138,36 +131,56 @@ public class EditorShopViewDesign extends AbstractMenu<ExcellentShop> {
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             ItemStack item = inventory.getItem(slot);
             if (item == null || item.getType().isAir()) continue;
-            if (PDCUtil.getBoolean(item, this.keyReserved).orElse(false)) continue;
+            if (PDCUtil.getBoolean(item, this.keyReserved).isPresent()) continue;
 
             MenuItemType type = this.getType(item);
             Map<ItemStack, List<Integer>> map = items.computeIfAbsent(type, k -> new HashMap<>());
             map.computeIfAbsent(item, k -> new ArrayList<>()).add(slot);
         }
 
-        JYML cfg = shop.getConfigView();
+        JYML cfg = this.object.getView().getConfig();
         cfg.set("Content", null);
 
         items.forEach((type, map) -> {
-            map.forEach((item2, slots) -> {
-                this.removeTypeLore(item2);
+            map.forEach((itemStack, slots) -> {
+                this.removeTypeLore(itemStack);
 
                 String id = UUID.randomUUID().toString();
                 String path = "Content." + id + ".";
-                String typeRaw = this.getType(item2).name();
+                String typeRaw = this.getType(itemStack).name();
 
-                cfg.setItem(path + "Item.", item2);
-                cfg.setIntArray(path + "Slots", slots.stream().mapToInt(i -> i).toArray());
+                cfg.setItem(path + "Item.", itemStack);
+                cfg.setIntArray(path + "Slots", slots.stream().mapToInt(Number::intValue).toArray());
                 cfg.set(path + "Type", typeRaw);
             });
         });
 
         cfg.saveChanges();
-        shop.setupView();
+        this.object.getView().reload();
     }
 
     @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
-        return false;
+    public void onClick(@NotNull MenuViewer viewer, @Nullable ItemStack item, @NotNull SlotType slotType, int slot, @NotNull InventoryClickEvent event) {
+        super.onClick(viewer, item, slotType, slot, event);
+        event.setCancelled(false);
+
+        if (item == null || item.getType().isAir()) return;
+
+        if (PDCUtil.getBoolean(item, this.keyReserved).isPresent()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (event.getClick() == ClickType.DROP && slot < event.getInventory().getSize()) {
+            PDCUtil.set(item, this.keyItemType, CollectionsUtil.next(this.getType(item)).name());
+            event.setCancelled(true);
+        }
+        this.updateItem(item);
+    }
+
+    @Override
+    public void onDrag(@NotNull MenuViewer viewer, @NotNull InventoryDragEvent event) {
+        super.onDrag(viewer, event);
+        event.setCancelled(false);
     }
 }

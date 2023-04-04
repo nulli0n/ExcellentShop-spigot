@@ -11,7 +11,6 @@ import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
-import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyId;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
@@ -81,9 +80,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
         ChestProduct product = new ChestProduct(id, currency, item);
         //product.setItemMetaEnabled(true);
         //product.setItem(item);
-
-        PriceType priceType = cfg.getEnum(path + ".Price.Type", PriceType.class, PriceType.FLAT);
-        product.setPricer(ProductPricer.read(priceType, cfg, path + ".Price"));
+        product.setPricer(ProductPricer.read(cfg, path + ".Price"));
         product.setStock(new ChestProductStock());
         return product;
     }
