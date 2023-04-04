@@ -119,7 +119,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
     @Override
     public void take(@NotNull Player player, int count) {
         int amount = this.getUnitAmount() * count;
-        PlayerUtil.takeItem(player, this.getItem(), amount);
+        PlayerUtil.takeItem(player, this::isItemMatches, amount);
     }
 
     @Override

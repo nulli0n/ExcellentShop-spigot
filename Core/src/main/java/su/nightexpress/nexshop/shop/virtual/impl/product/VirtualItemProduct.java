@@ -39,7 +39,7 @@ public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
     @Override
     public void take(@NotNull Player player, int count) {
         int amount = this.getUnitAmount() * count;
-        PlayerUtil.takeItem(player, this.getItem(), amount);
+        PlayerUtil.takeItem(player, this::isItemMatches, amount);
     }
 
     @Override
