@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
-import com.google.common.collect.Sets;
 import org.bukkit.GameMode;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.utils.Colorizer;
@@ -16,26 +15,28 @@ public class VirtualConfig {
     public static final JOption<String>      DEFAULT_CURRENCY       = JOption.create("General.Default_Currency", CurrencyId.VAULT,
         "Sets default currency for the Virtual Shop module.",
         "This currency will be used when you create new products or in case, where other currencies are not available.",
-        "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency"
-    );
+        "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");
+
     public static final JOption<Boolean>     MAIN_MENU_ENABLED      = JOption.create("General.Main_Menu_Enabled", true,
-        "When 'true', enables the Main Menu, where you can list all of your Virtual Shops."
-    );
+        "When 'true', enables the Main Menu, where you can list all of your Virtual Shops.");
+
+    public static final JOption<String> SHOP_SHORTCUTS = JOption.create("General.Shop_Shortcuts", "shop",
+        "A list of command aliases for quick access to main menu and shops.", "Split them with a comma.");
+
     public static final JOption<Boolean> SELL_MENU_ENABLED = JOption.create("General.Sell_Menu.Enabled", true,
-        "When 'true' enables the Sell Menu, where you can quickly sell all your items."
-    );
-    public static final JOption<String> SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands", "sellgui",
-        "Custom command aliases to open the Sell Menu. Split them with a comma."
-    );
-    public static final JOption<Set<String>> GEN_DISABLED_GAMEMODES = JOption.create("General.Disabled_In_Gamemodes",
-        Sets.newHashSet(GameMode.CREATIVE.name()),
-        "A list of Game Modes, in which Virtual Shop can not be used.",
-        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/GameMode.html"
-    );
-    public static final JOption<Set<String>> GEN_DISABLED_WORLDS    = JOption.create("General.Disabled_In_Worlds",
-        Sets.newHashSet("world_name", "example_world123"),
-        "A list of worlds, where Virtual Shop will be disabled"
-    );
+        "When 'true' enables the Sell Menu, where you can quickly sell all your items.");
+
+    public static final JOption<String>      SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands", "sellgui",
+        "Custom command aliases to open the Sell Menu. Split them with a comma.");
+
+    public static final JOption<Set<String>> DISABLED_GAMEMODES = JOption.create("General.Disabled_In_Gamemodes",
+        Set.of(GameMode.CREATIVE.name()),
+        "A list of Game Modes, where players can not access shops.",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/GameMode.html");
+
+    public static final JOption<Set<String>> DISABLED_WORLDS    = JOption.create("General.Disabled_In_Worlds",
+        Set.of("world_name", "example_world123"),
+        "A list of worlds, where players can not access shops.");
 
     public static final JOption<String>       SHOP_FORMAT_NAME = JOption.create("GUI.Shop_Format.Name", Placeholders.SHOP_NAME,
         "Sets display name for the shop item in the Main Menu.",

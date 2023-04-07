@@ -4,37 +4,45 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.ICleanable;
-import su.nexmedia.engine.api.manager.IEditable;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.IScheduled;
 import su.nightexpress.nexshop.shop.Discount;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.EditorShopDiscount;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.DiscountMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public class VirtualDiscount implements IScheduled, IEditable, ICleanable, IPlaceholder {
+public class VirtualDiscount implements IScheduled, ICleanable, Placeholder {
 
     private VirtualShop    shop;
     private Set<DayOfWeek> days;
     private Set<LocalTime> times;
-    private double discount;
-    private int duration;
+    private double         discount;
+    private int            duration;
 
     private BukkitTask         updateTask;
-    private EditorShopDiscount editor;
+    private DiscountMainEditor editor;
+
+    private final PlaceholderMap placeholderMap;
 
     public VirtualDiscount() {
         this.setDays(new HashSet<>());
         this.setTimes(new HashSet<>());
+
+        this.placeholderMap = new PlaceholderMap()
+            .add(Placeholders.DISCOUNT_CONFIG_DURATION, () -> TimeUtil.formatTime(this.getDuration() * 1000L))
+            .add(Placeholders.DISCOUNT_CONFIG_DAYS, () -> String.join(", ", this.getDays().stream().map(DayOfWeek::name).toList()))
+            .add(Placeholders.DISCOUNT_CONFIG_TIMES, () -> String.join(", ", this.getTimes().stream().map(TIME_FORMATTER::format).toList()))
+            .add(Placeholders.DISCOUNT_CONFIG_AMOUNT, () -> NumberUtil.format(this.getDiscount()))
+        ;
     }
 
     @NotNull
@@ -58,17 +66,6 @@ public class VirtualDiscount implements IScheduled, IEditable, ICleanable, IPlac
     }
 
     @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.DISCOUNT_CONFIG_DURATION, TimeUtil.formatTime(this.getDuration() * 1000L))
-            .replace(Placeholders.DISCOUNT_CONFIG_DAYS, String.join(DELIMITER_DEFAULT, this.getDays().stream().map(DayOfWeek::name).toList()))
-            .replace(Placeholders.DISCOUNT_CONFIG_TIMES, String.join(DELIMITER_DEFAULT, this.getTimes().stream().map(TIME_FORMATTER::format).toList()))
-            .replace(Placeholders.DISCOUNT_CONFIG_AMOUNT, NumberUtil.format(this.getDiscount()))
-            ;
-    }
-
-    @Override
     public void clear() {
         if (this.updateTask != null) {
             this.updateTask.cancel();
@@ -78,6 +75,12 @@ public class VirtualDiscount implements IScheduled, IEditable, ICleanable, IPlac
             this.editor.clear();
             this.editor = null;
         }
+    }
+
+    @Override
+    @NotNull
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     @Override
@@ -109,10 +112,9 @@ public class VirtualDiscount implements IScheduled, IEditable, ICleanable, IPlac
     }
 
     @NotNull
-    @Override
-    public EditorShopDiscount getEditor() {
+    public DiscountMainEditor getEditor() {
         if (this.editor == null) {
-            this.editor = new EditorShopDiscount(shop, this);
+            this.editor = new DiscountMainEditor(this.getShop(), this);
         }
         return editor;
     }

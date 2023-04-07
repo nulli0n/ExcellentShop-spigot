@@ -57,9 +57,6 @@ public abstract class Shop<
     public abstract boolean canAccess(@NotNull Player player, boolean notify);
 
     public void open(@NotNull Player player, int page) {
-        if (!this.canAccess(player, true)) {
-            return;
-        }
         this.getView().open(player, page);
     }
 

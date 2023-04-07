@@ -18,6 +18,7 @@ import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,8 +38,9 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
             .addClick(MenuItemType.CLOSE, (viewer, event) -> this.plugin.runTask(task -> viewer.getPlayer().closeInventory()))
             .addClick(MenuItemType.RETURN, (viewer, event) -> this.plugin.runTask(task -> {
-                if (this.getShop().getModule().hasMainMenu()) {
-                    this.getShop().getModule().openMainMenu(viewer.getPlayer());
+                ShopMainMenu mainMenu = this.getShop().getModule().getMainMenu();
+                if (mainMenu != null) {
+                    mainMenu.open(viewer.getPlayer(), 1);
                 }
                 else viewer.getPlayer().closeInventory();
             }));

@@ -18,10 +18,11 @@ import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.data.price.ProductPriceManager;
 import su.nightexpress.nexshop.shop.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.FloatProductPricer;
 import su.nightexpress.nexshop.shop.RangedProductPricer;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.time.DayOfWeek;
@@ -45,13 +46,14 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             this.object.getEditor().open(viewer.getPlayer(), 1);
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_PRICE), EditorLocales.PRODUCT_PRICE_TYPE, 4).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_PRICE), VirtualLocales.PRODUCT_PRICE_TYPE, 4).setClick((viewer, event) -> {
             PriceType priceType = CollectionsUtil.next(product.getPricer().getType());
             product.setPricer(ProductPricer.from(priceType));
+            ProductPriceManager.deleteData(product);
             this.save(viewer);
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BUY), EditorLocales.PRODUCT_PRICE_FLAT_BUY, 10).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BUY), VirtualLocales.PRODUCT_PRICE_FLAT_BUY, 10).setClick((viewer, event) -> {
             ProductPricer pricer = product.getPricer();
             if (event.getClick() == ClickType.DROP) {
                 if (pricer instanceof RangedProductPricer ranged) {
@@ -80,9 +82,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
         }).getOptions().setDisplayModifier((viewer, item) -> {
             ProductPricer pricer = product.getPricer();
             EditorLocale locale = switch (pricer.getType()) {
-                case FLAT -> EditorLocales.PRODUCT_PRICE_FLAT_BUY;
-                case FLOAT -> EditorLocales.PRODUCT_PRICE_FLOAT_BUY;
-                case DYNAMIC -> EditorLocales.PRODUCT_PRICE_DYNAMIC_BUY;
+                case FLAT -> VirtualLocales.PRODUCT_PRICE_FLAT_BUY;
+                case FLOAT -> VirtualLocales.PRODUCT_PRICE_FLOAT_BUY;
+                case DYNAMIC -> VirtualLocales.PRODUCT_PRICE_DYNAMIC_BUY;
             };
             ItemUtil.mapMeta(item, meta -> {
                 meta.setDisplayName(locale.getLocalizedName());
@@ -92,7 +94,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             });
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_SELL), EditorLocales.PRODUCT_PRICE_FLAT_SELL, 11).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_SELL), VirtualLocales.PRODUCT_PRICE_FLAT_SELL, 11).setClick((viewer, event) -> {
             ProductPricer pricer = product.getPricer();
             if (event.getClick() == ClickType.DROP) {
                 if (pricer instanceof RangedProductPricer ranged) {
@@ -121,9 +123,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
         }).getOptions().setDisplayModifier((viewer, item) -> {
             ProductPricer pricer = product.getPricer();
             EditorLocale locale = switch (pricer.getType()) {
-                case FLAT -> EditorLocales.PRODUCT_PRICE_FLAT_SELL;
-                case FLOAT -> EditorLocales.PRODUCT_PRICE_FLOAT_SELL;
-                case DYNAMIC -> EditorLocales.PRODUCT_PRICE_DYNAMIC_SELL;
+                case FLAT -> VirtualLocales.PRODUCT_PRICE_FLAT_SELL;
+                case FLOAT -> VirtualLocales.PRODUCT_PRICE_FLOAT_SELL;
+                case DYNAMIC -> VirtualLocales.PRODUCT_PRICE_DYNAMIC_SELL;
             };
             ItemUtil.mapMeta(item, meta -> {
                 meta.setDisplayName(locale.getLocalizedName());
@@ -133,7 +135,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             });
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_REFRESH), EditorLocales.PRODUCT_PRICE_FLOAT_REFRESH, 15).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_REFRESH), VirtualLocales.PRODUCT_PRICE_FLOAT_REFRESH, 15).setClick((viewer, event) -> {
             FloatProductPricer pricer = (FloatProductPricer) product.getPricer();
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
@@ -171,7 +173,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             }
         }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.FLOAT);
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_INITIAL), EditorLocales.PRODUCT_PRICE_DYNAMIC_INITIAL, 15).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_INITIAL), VirtualLocales.PRODUCT_PRICE_DYNAMIC_INITIAL, 15).setClick((viewer, event) -> {
             this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
                 DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
                 double price = StringUtil.getDouble(chat.getMessage(), 0D);
@@ -185,7 +187,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             });
         }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.DYNAMIC);
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_STEP), EditorLocales.PRODUCT_PRICE_DYNAMIC_STEP, 16).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_STEP), VirtualLocales.PRODUCT_PRICE_DYNAMIC_STEP, 16).setClick((viewer, event) -> {
             this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
                 DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
                 double price = StringUtil.getDouble(chat.getMessage(), 0D);

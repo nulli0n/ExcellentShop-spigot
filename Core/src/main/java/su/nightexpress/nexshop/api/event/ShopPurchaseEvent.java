@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop.api.event;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
@@ -9,7 +8,7 @@ import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 
-public abstract class ShopPurchaseEvent<P extends Product<P, ?, ?>> extends Event implements Cancellable {
+public abstract class ShopPurchaseEvent<P extends Product<P, ?, ?>> extends Event {
 
     protected Player             player;
     protected Shop<?, P>         shop;
@@ -18,13 +17,13 @@ public abstract class ShopPurchaseEvent<P extends Product<P, ?, ?>> extends Even
     protected TradeType          tradeType;
     protected Result             result;
 
-    public ShopPurchaseEvent(@NotNull Player player, @NotNull PreparedProduct<P> prepared) {
+    public ShopPurchaseEvent(@NotNull Player player, @NotNull PreparedProduct<P> prepared, @NotNull Result result) {
         this.player = player;
         this.shop = prepared.getShop();
         this.product = prepared.getProduct();
         this.prepared = prepared;
         this.tradeType = prepared.getTradeType();
-        this.result = Result.SUCCESS;
+        this.result = result;//Result.SUCCESS;
     }
 
     @NotNull
@@ -55,20 +54,6 @@ public abstract class ShopPurchaseEvent<P extends Product<P, ?, ?>> extends Even
     @NotNull
     public Result getResult() {
         return this.result;
-    }
-
-    public void setResult(@NotNull Result result) {
-        this.result = result;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return this.getResult() != Result.SUCCESS;
-    }
-
-    @Override
-    public void setCancelled(boolean isCancelled) {
-        this.setResult(Result.FAILURE);
     }
 
     public enum Result {

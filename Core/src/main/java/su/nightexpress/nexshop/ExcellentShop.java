@@ -23,8 +23,7 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
-import su.nightexpress.nexshop.shop.virtual.editor.VirtualEditorType;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 
 public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataHolder<ExcellentShop, ShopUser> {
 
@@ -99,11 +98,10 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     public void loadLang() {
         this.getLangManager().loadMissing(Lang.class);
         this.getLangManager().loadMissing(VirtualLang.class);
-        this.getLangManager().loadEditor(EditorLocales.class);
+        this.getLangManager().loadEditor(VirtualLocales.class);
         this.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
         this.getLangManager().setupEnum(TradeType.class);
         this.getLangManager().setupEnum(PriceType.class);
-        this.getLangManager().setupEditorEnum(VirtualEditorType.class);
         this.getLang().saveChanges();
     }
 

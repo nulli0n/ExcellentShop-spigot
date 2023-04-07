@@ -10,27 +10,27 @@ import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.FileUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.price.ProductPriceManager;
 import su.nightexpress.nexshop.data.stock.ProductStockManager;
 import su.nightexpress.nexshop.module.ModuleId;
 import su.nightexpress.nexshop.module.ShopModule;
-import su.nightexpress.nexshop.shop.virtual.command.EditorCommand;
-import su.nightexpress.nexshop.shop.virtual.command.OpenCommand;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
+import su.nightexpress.nexshop.shop.virtual.command.ShopCommand;
+import su.nightexpress.nexshop.shop.virtual.command.child.EditorCommand;
+import su.nightexpress.nexshop.shop.virtual.command.child.MenuCommand;
+import su.nightexpress.nexshop.shop.virtual.command.child.OpenCommand;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShopBank;
-import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopListener;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
@@ -44,19 +44,21 @@ public class VirtualShopModule extends ShopModule {
 
     public static ICurrency defaultCurrency;
 
-    private Map<String, VirtualShop> shops;
-    private ShopMainMenu             mainMenu;
+    private final Map<String, VirtualShop> shops;
+
+    private ShopMainMenu   mainMenu;
     private ShopSellMenu   sellMenu;
     private ShopListEditor editor;
 
     public VirtualShopModule(@NotNull ExcellentShop plugin) {
         super(plugin, ModuleId.VIRTUAL_SHOP);
+        this.shops = new HashMap<>();
     }
 
     @Override
     protected void onLoad() {
         super.onLoad();
-        this.shops = new HashMap<>();
+        this.plugin.registerPermissions(VirtualPerms.class);
 
         File dir = new File(this.getFullPath() + "shops");
         if (!dir.exists()) {
@@ -71,20 +73,24 @@ public class VirtualShopModule extends ShopModule {
             return;
         }
 
-        this.moduleCommand.addDefaultCommand(new OpenCommand(this));
-        this.moduleCommand.addChildren(new EditorCommand(this));
-
-
         this.loadShops();
         this.loadMainMenu();
-        this.addListener(new VirtualShopListener(this));
         if (Hooks.hasCitizens()) {
             this.addListener(new VirtualShopNPCListener(this));
         }
 
+        this.moduleCommand.addChildren(new OpenCommand(this));
+        this.moduleCommand.addChildren(new EditorCommand(this));
+
+        if (VirtualConfig.MAIN_MENU_ENABLED.get()) {
+            this.moduleCommand.addChildren(new MenuCommand(this));
+        }
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
             this.sellMenu = new ShopSellMenu(this, JYML.loadOrExtract(plugin, this.getPath() + "sell.menu.yml"));
             this.plugin.getCommandManager().registerCommand(new SellMenuCommand(this, VirtualConfig.SELL_MENU_COMMANDS.get().split(",")));
+        }
+        if (!VirtualConfig.SHOP_SHORTCUTS.get().isEmpty()) {
+            this.plugin.getCommandManager().registerCommand(new ShopCommand(this));
         }
     }
 
@@ -102,8 +108,8 @@ public class VirtualShopModule extends ShopModule {
             this.sellMenu.clear();
             this.sellMenu = null;
         }
-        this.shops.values().forEach(VirtualShop::clear);
-        this.shops.clear();
+        this.getShops().forEach(VirtualShop::clear);
+        this.getShopsMap().clear();
         super.onShutdown();
     }
 
@@ -153,10 +159,6 @@ public class VirtualShopModule extends ShopModule {
         return editor;
     }
 
-    public boolean hasMainMenu() {
-        return this.mainMenu != null;
-    }
-
     public boolean createShop(@NotNull String id) {
         if (this.getShopById(id) != null) {
             return false;
@@ -165,7 +167,7 @@ public class VirtualShopModule extends ShopModule {
         VirtualShop shop = new VirtualShop(this, cfg, id);
         shop.setName("&e&l" + StringUtil.capitalizeFully(id.replace("_", " ")));
         shop.setDescription(Arrays.asList("&7Freshly created shop.", "&7Edit me in &a/shop editor"));
-        shop.setIcon(new ItemStack(Material.REDSTONE));
+        shop.setIcon(new ItemStack(Material.CHEST_MINECART));
         shop.setBank(new VirtualShopBank(shop));
         shop.save();
         shop.load();
@@ -174,18 +176,20 @@ public class VirtualShopModule extends ShopModule {
     }
 
     public boolean isAvailable(@NotNull Player player, boolean notify) {
-        if (player.hasPermission(Perms.ADMIN)) return true;
-
-        if (VirtualConfig.GEN_DISABLED_WORLDS.get().contains(player.getWorld().getName())) {
-            if (notify) plugin.getMessage(VirtualLang.OPEN_ERROR_BAD_WORLD).send(player);
-            return false;
+        if (!player.hasPermission(VirtualPerms.BYPASS_WORLDS)) {
+            if (VirtualConfig.DISABLED_WORLDS.get().contains(player.getWorld().getName())) {
+                if (notify) plugin.getMessage(VirtualLang.SHOP_ERROR_BAD_WORLD).send(player);
+                return false;
+            }
         }
 
-        if (VirtualConfig.GEN_DISABLED_GAMEMODES.get().contains(player.getGameMode().name())) {
-            if (notify) plugin.getMessage(VirtualLang.OPEN_ERROR_BAD_GAMEMODE)
-                .replace(Placeholders.GENERIC_TYPE, plugin.getLangManager().getEnum(player.getGameMode()))
-                .send(player);
-            return false;
+        if (!player.hasPermission(VirtualPerms.BYPASS_GAMEMODE)) {
+            if (VirtualConfig.DISABLED_GAMEMODES.get().contains(player.getGameMode().name())) {
+                if (notify) plugin.getMessage(VirtualLang.SHOP_ERROR_BAD_GAMEMODE)
+                    .replace(Placeholders.GENERIC_TYPE, plugin.getLangManager().getEnum(player.getGameMode()))
+                    .send(player);
+                return false;
+            }
         }
 
         return true;
@@ -196,22 +200,9 @@ public class VirtualShopModule extends ShopModule {
         return sellMenu;
     }
 
-    public void openMainMenu(@NotNull Player player) {
-        if (!this.hasMainMenu()) {
-            plugin.getMessage(VirtualLang.MAIN_MENU_ERROR_DISABLED).send(player);
-            return;
-        }
-
-        if (!player.hasPermission(Perms.VIRTUAL_MAIN_MENU)) {
-            plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
-            return;
-        }
-
-        if (!this.isAvailable(player, true)) {
-            return;
-        }
-
-        this.mainMenu.open(player, 1);
+    @Nullable
+    public ShopMainMenu getMainMenu() {
+        return mainMenu;
     }
 
     public boolean delete(@NotNull VirtualShop shop) {

@@ -10,8 +10,8 @@ public class VirtualShopPurchaseEvent extends ShopPurchaseEvent<VirtualProduct> 
 
     private static final HandlerList handlerList = new HandlerList();
 
-    public VirtualShopPurchaseEvent(@NotNull Player player, @NotNull VirtualPreparedProduct prepared) {
-        super(player, prepared);
+    public VirtualShopPurchaseEvent(@NotNull Player player, @NotNull VirtualPreparedProduct prepared, @NotNull Result result) {
+        super(player, prepared, result);
     }
 
     public static HandlerList getHandlerList() {

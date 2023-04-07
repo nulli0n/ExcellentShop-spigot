@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.editor;
 import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nightexpress.nexshop.Placeholders;
 
-public class EditorLocales extends su.nexmedia.engine.api.editor.EditorLocales {
+public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales {
 
     private static final String PREFIX_OLD = "VirtualEditorType.Editor.";
     private static final String PREFIX = "VirtualShop.Editor.";
@@ -279,5 +279,49 @@ public class EditorLocales extends su.nexmedia.engine.api.editor.EditorLocales {
         .text("Step defines how much the price will grow up/down", "on each sale/purchase.").breakLine()
         .noteHeader().notes("More purchases - higher price.", "More sales - lower price").breakLine()
         .actionsHeader().action("Left-Click", "Change Buy").action("Right-Click", "Change Sell")
+        .build();
+
+    public static final EditorLocale DISCOUNT_CREATE = builder(PREFIX_OLD + "DISCOUNT_CREATE")
+        .name("Create Discount")
+        .text("Creates a new discount.").breakLine()
+        .actionsHeader().action("Left-Click", "Create")
+        .build();
+
+    public static final EditorLocale DISCOUNT_OBJECT = builder(PREFIX_OLD + "DISCOUNT_OBJECT")
+        .name("Discount")
+        .currentHeader().current("Amount", Placeholders.DISCOUNT_CONFIG_AMOUNT)
+        .current("Days", Placeholders.DISCOUNT_CONFIG_DAYS).current("Times", Placeholders.DISCOUNT_CONFIG_TIMES).breakLine()
+        .actionsHeader().action("Left-Click", "Edit")
+        .action("Shift-Right", "Delete " + RED + "(No Undo)")
+        .build();
+
+    public static final EditorLocale DISCOUNT_AMOUNT = builder(PREFIX_OLD + "DISCOUNT_CHANGE_DISCOUNT")
+        .name("Amount")
+        .currentHeader().current("Amount", Placeholders.DISCOUNT_CONFIG_AMOUNT + "%").breakLine()
+        .text("Sets the discount amount (in percent).").breakLine()
+        .actionsHeader().action("Left-Click", "Change")
+        .build();
+
+    public static final EditorLocale DISCOUNT_DURATION = builder(PREFIX_OLD + "DISCOUNT_CHANGE_DURATION")
+        .name("Duration")
+        .currentHeader().current("Duration", Placeholders.DISCOUNT_CONFIG_DURATION).breakLine()
+        .text("Sets how long (in seconds) this", "discount will be active.").breakLine()
+        .actionsHeader().action("Left-Click", "Change")
+        .build();
+
+    public static final EditorLocale DISCOUNT_DAYS = builder( PREFIX_OLD + "DISCOUNT_CHANGE_DAY")
+        .name("Active Days")
+        .currentHeader().current("Days", Placeholders.DISCOUNT_CONFIG_DAYS).breakLine()
+        .text("A list of days, when this discount will have effect.").breakLine()
+        .noteHeader().notes("At least one " + ORANGE + "day" + GRAY + " and " + ORANGE + "time" + GRAY + " are required!").breakLine()
+        .actionsHeader().action("Left-Click", "Add Day").action("Right-Click", "Clear List")
+        .build();
+
+    public static final EditorLocale DISCOUNT_TIMES = builder(PREFIX_OLD + "DISCOUNT_CHANGE_TIME")
+        .name("Active Times")
+        .currentHeader().current("Days", Placeholders.DISCOUNT_CONFIG_TIMES).breakLine()
+        .text("A list of times, when this discount will be activated.").breakLine()
+        .noteHeader().notes("At least one " + ORANGE + "day" + GRAY + " and " + ORANGE + "time" + GRAY + " are required!").breakLine()
+        .actionsHeader().action("Left-Click", "Add Time").action("Right-Click", "Clear List")
         .build();
 }

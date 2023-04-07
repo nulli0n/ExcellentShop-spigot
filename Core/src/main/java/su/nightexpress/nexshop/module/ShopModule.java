@@ -118,7 +118,7 @@ public abstract class ShopModule extends AbstractModule<ExcellentShop> {
             format = prepared.replacePlaceholders().apply(format);
             format = shop.replacePlaceholders().apply(format);
 
-            this.print(format);
+            this.print(Colorizer.strip(format));
         }
 
         private void print(@NotNull String text) {

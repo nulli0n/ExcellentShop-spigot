@@ -10,8 +10,8 @@ public class ChestShopPurchaseEvent extends ShopPurchaseEvent<ChestProduct> {
 
     private static final HandlerList handlerList = new HandlerList();
 
-    public ChestShopPurchaseEvent(@NotNull Player player, @NotNull ChestPreparedProduct prepared) {
-        super(player, prepared);
+    public ChestShopPurchaseEvent(@NotNull Player player, @NotNull ChestPreparedProduct prepared, @NotNull Result result) {
+        super(player, prepared, result);
     }
 
     public static HandlerList getHandlerList() {

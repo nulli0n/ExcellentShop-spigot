@@ -31,8 +31,6 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String SHOP_VIRTUAL_DESCRIPTION         = "%shop_description%";
     public static final String SHOP_VIRTUAL_PERMISSION_REQUIRED = "%shop_permission_required%";
     public static final String SHOP_VIRTUAL_PERMISSION_NODE     = "%shop_permission_node%";
-    @Deprecated public static final String SHOP_VIRTUAL_ICON_NAME           = "%shop_icon_name%";
-    @Deprecated public static final String SHOP_VIRTUAL_ICON_TYPE           = "%shop_icon_type%";
     public static final String SHOP_VIRTUAL_PAGES               = "%shop_pages%";
     public static final String SHOP_VIRTUAL_VIEW_SIZE           = "%shop_view_size%";
     public static final String SHOP_VIRTUAL_VIEW_TITLE          = "%shop_view_title%";

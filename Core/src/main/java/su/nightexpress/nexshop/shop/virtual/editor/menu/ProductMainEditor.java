@@ -25,7 +25,7 @@ import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.ArrayList;
@@ -73,11 +73,11 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
             EditorLocale locale;
             ItemStack original;
             if (product instanceof ItemProduct itemProduct) {
-                locale = EditorLocales.PRODUCT_ITEM;
+                locale = VirtualLocales.PRODUCT_ITEM;
                 original = itemProduct.getItem();
             }
             else if (product instanceof CommandProduct commandProduct) {
-                locale = EditorLocales.PRODUCT_PREVIEW;
+                locale = VirtualLocales.PRODUCT_PREVIEW;
                 original = commandProduct.getPreview();
 
             }
@@ -93,14 +93,14 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
             });
         });
 
-        this.addItem(Material.WRITABLE_BOOK, EditorLocales.PRODUCT_RESPECT_ITEM_META, 11).setClick((viewer, event) -> {
+        this.addItem(Material.WRITABLE_BOOK, VirtualLocales.PRODUCT_RESPECT_ITEM_META, 11).setClick((viewer, event) -> {
             if (!(product instanceof ItemProduct itemProduct)) return;
 
             itemProduct.setRespectItemMeta(!itemProduct.isRespectItemMeta());
             this.save(viewer);
         }).getOptions().setVisibilityPolicy(viewer -> product instanceof ItemProduct);
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_COMMAND), EditorLocales.PRODUCT_COMMANDS, 11).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_COMMAND), VirtualLocales.PRODUCT_COMMANDS, 11).setClick((viewer, event) -> {
             if (!(product instanceof CommandProduct commandProduct)) return;
 
             if (event.isRightClick()) {
@@ -108,14 +108,14 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
                 this.save(viewer);
                 return;
             }
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_PRODUCT_ENTER_COMMAND), chat -> {
+            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_COMMAND), chat -> {
                 commandProduct.getCommands().add(Colorizer.strip(chat.getMessage()));
                 product.getShop().saveProducts();
                 return true;
             });
         }).getOptions().setVisibilityPolicy(viewer -> product instanceof CommandProduct);
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), EditorLocales.PRODUCT_PRICE_MANAGER, 12).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.PRODUCT_PRICE_MANAGER, 12).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
                 product.getPricer().update();
                 this.save(viewer);
@@ -132,13 +132,13 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
             }
         });
 
-        this.addItem(Material.GOLD_NUGGET, EditorLocales.PRODUCT_DISCOUNT, 13).setClick((viewer, event) -> {
+        this.addItem(Material.GOLD_NUGGET, VirtualLocales.PRODUCT_DISCOUNT, 13).setClick((viewer, event) -> {
             product.setDiscountAllowed(!product.isDiscountAllowed());
             this.save(viewer);
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), EditorLocales.PRODUCT_GLOBAL_STOCK, 15).setClick(this.getStockClick(StockType.GLOBAL));
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), EditorLocales.PRODUCT_PLAYER_STOCK, 16).setClick(this.getStockClick(StockType.PLAYER));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), VirtualLocales.PRODUCT_GLOBAL_STOCK, 15).setClick(this.getStockClick(StockType.GLOBAL));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), VirtualLocales.PRODUCT_PLAYER_STOCK, 16).setClick(this.getStockClick(StockType.PLAYER));
 
         this.getItems().forEach(menuItem -> {
             if (menuItem.getOptions().getDisplayModifier() == null) {

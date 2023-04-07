@@ -7,15 +7,14 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
@@ -41,7 +40,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
     private boolean      isPermissionRequired;
     private ItemStack    icon;
 
-    private       ShopMainEditor  editor;
+    private ShopMainEditor editor;
 
     public VirtualShop(@NotNull VirtualShopModule module, @NotNull JYML cfg, @NotNull String id) {
         super(module.plugin(), cfg, id);
@@ -96,10 +95,8 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
             .replace(Placeholders.SHOP_BANK_BALANCE, plugin.getCurrencyManager().getCurrencies().stream()
                 .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(DELIMITER_DEFAULT)))
             .replace(Placeholders.SHOP_VIRTUAL_DESCRIPTION, String.join("\n", this.getDescription()))
-            .replace(Placeholders.SHOP_VIRTUAL_PERMISSION_NODE, Perms.PREFIX_VIRTUAL_SHOP + this.getId())
+            .replace(Placeholders.SHOP_VIRTUAL_PERMISSION_NODE, VirtualPerms.PREFIX_SHOP + this.getId())
             .replace(Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED, LangManager.getBoolean(this.isPermissionRequired()))
-            .replace(Placeholders.SHOP_VIRTUAL_ICON_NAME, ItemUtil.getItemName(this.getIcon()))
-            .replace(Placeholders.SHOP_VIRTUAL_ICON_TYPE, this.getIcon().getType().name())
             .replace(Placeholders.SHOP_VIRTUAL_PAGES, String.valueOf(this.getPages()))
             .replace(Placeholders.SHOP_VIRTUAL_VIEW_SIZE, String.valueOf(this.getView().getOptions().getSize()))
             .replace(Placeholders.SHOP_VIRTUAL_VIEW_TITLE, this.getView().getOptions().getTitle())
@@ -110,7 +107,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
     @Override
     public boolean canAccess(@NotNull Player player, boolean notify) {
         if (!this.hasPermission(player)) {
-            if (notify) plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player); // TODO Message
+            if (notify) plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
             return false;
         }
         return this.getModule().isAvailable(player, notify);
@@ -208,7 +205,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
 
     public boolean hasPermission(@NotNull Player player) {
         if (!this.isPermissionRequired()) return true;
-        return player.hasPermission(Perms.PREFIX_VIRTUAL_SHOP + this.getId());
+        return player.hasPermission(VirtualPerms.PREFIX_SHOP + this.getId());
     }
 
     public boolean isPermissionRequired() {

@@ -16,15 +16,10 @@ import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
 
     private final VirtualShopModule module;
-    //private final Map<String, Integer> shopSlots;
 
     public ShopMainMenu(@NotNull VirtualShopModule module) {
         super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getPath() + "main.menu.yml"));
         this.module = module;
-        //this.shopSlots = new HashMap<>();
-        /*this.cfg.getSection("Shops").forEach(shopId -> {
-            this.shopSlots.put(shopId.toLowerCase(), cfg.getInt("Shops." + shopId));
-        });*/
 
         this.registerHandler(MenuItemType.class)
             .addClick(MenuItemType.CLOSE, (viewer, event) -> plugin.runTask(task -> viewer.getPlayer().closeInventory()));
@@ -51,7 +46,11 @@ public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
             menuItem.setPriority(100);
             menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, shop.replacePlaceholders()));
             menuItem.setClick((viewer, event) -> {
-                this.plugin.runTask( task -> shop.open(viewer.getPlayer(), 1));
+                this.plugin.runTask(task -> {
+                    if (shop.canAccess(viewer.getPlayer(), true)) {
+                        shop.open(viewer.getPlayer(), 1);
+                    }
+                });
             });
             this.addItem(menuItem);
         });

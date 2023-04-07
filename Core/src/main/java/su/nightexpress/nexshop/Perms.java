@@ -7,7 +7,6 @@ public class Perms {
 
     public static final String PREFIX = "excellentshop.";
     public static final String PREFIX_AUCTION_CURRENCY = PREFIX + "auction.currency.";
-    public static final String PREFIX_VIRTUAL_SHOP = PREFIX + "virtual.shop.";
 
     private static final PermissionDefault OP = PermissionDefault.OP;
     private static final PermissionDefault TRUE = PermissionDefault.TRUE;
@@ -22,15 +21,6 @@ public class Perms {
     public static final JPermission COMMAND_CURRENCY_TAKE = new JPermission(PREFIX + "command.currency.take", "Access to 'currency take' sub-command.", OP);
     public static final JPermission COMMAND_CURRENCY_CREATE = new JPermission(PREFIX + "command.currency.create", "Access to 'currency create' sub-command.", OP);
     public static final JPermission COMMAND_RELOAD         = new JPermission(PREFIX + "command.reload", "Access to the reload command.", OP);
-
-    public static final JPermission VIRTUAL         = new JPermission(PREFIX + "virtual", "Full access to the Virtual Shop module.");
-    public static final JPermission VIRTUAL_COMMAND = new JPermission(PREFIX + "virtual.command", "Access to all the Virtual Shop commands.");
-    public static final JPermission VIRTUAL_COMMAND_EDITOR  = new JPermission(PREFIX + "virtual.command.editor", "Access to '/virtualshop editor' command.", OP);
-    public static final JPermission VIRTUAL_COMMAND_OPEN        = new JPermission(PREFIX + "virtual.command.open", "Access to '/virtualshop open' command.");
-    public static final JPermission VIRTUAL_COMMAND_OPEN_OTHERS = new JPermission(PREFIX + "virtual.command.open.others", "Access to '/virtualshop open' command on other players.");
-    public static final JPermission VIRTUAL_COMMAND_SELL_MENU = new JPermission(PREFIX + "virtual.command.sellmenu", "Access to the Sell Menu commands.");
-    public static final JPermission VIRTUAL_MAIN_MENU           = new JPermission(PREFIX + "virtual.mainmenu", "Access to the Main Menu of Virtual Shop module.");
-    public static final JPermission VIRTUAL_SHOP                = new JPermission(PREFIX_VIRTUAL_SHOP + Placeholders.WILDCARD, "Access to all the Virtual Shops.");
 
     public static final JPermission AUCTION         = new JPermission(PREFIX + "auction", "Access to all the Auction functions.", OP);
     public static final JPermission AUCTION_COMMAND = new JPermission(PREFIX + "auction.command", "Access to all the Auction commands.", OP);
@@ -56,12 +46,9 @@ public class Perms {
     public static final JPermission AUCTION_LISTING_REMOVE_OTHERS = new JPermission(PREFIX + "auction.listing.remove.others", "Allows to remove other player's listings.", OP);
 
     static {
-        PLUGIN.addChildren(PLUGIN_COMMAND, VIRTUAL, AUCTION);
+        PLUGIN.addChildren(PLUGIN_COMMAND, AUCTION);
         PLUGIN_COMMAND.addChildren(COMMAND_CURRENCY, COMMAND_RELOAD);
         COMMAND_CURRENCY.addChildren(COMMAND_CURRENCY_CREATE, COMMAND_CURRENCY_GIVE, COMMAND_CURRENCY_TAKE);
-
-        VIRTUAL.addChildren(VIRTUAL_COMMAND, VIRTUAL_MAIN_MENU, VIRTUAL_SHOP);
-        VIRTUAL_COMMAND.addChildren(VIRTUAL_COMMAND_EDITOR, VIRTUAL_COMMAND_OPEN, VIRTUAL_COMMAND_OPEN_OTHERS);
 
         AUCTION.addChildren(AUCTION_COMMAND, AUCTION_BYPASS, AUCTION_CURRENCY, AUCTION_LISTING_REMOVE_OTHERS);
         AUCTION_BYPASS.addChildren(AUCTION_BYPASS_LISTING_PRICE, AUCTION_BYPASS_LISTING_TAX,

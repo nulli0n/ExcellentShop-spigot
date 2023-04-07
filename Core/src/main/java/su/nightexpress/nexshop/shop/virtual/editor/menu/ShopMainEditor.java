@@ -18,7 +18,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
@@ -29,9 +29,9 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     private static final String TEXTURE_PAINT = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWU0NDI4MGQ0MmRiMDdiMDEyZWI3NmRlZTczMjQ5Yzg2ZmM3MTJlOGViMTRmYTJiNDQ4NDc3MTRiYmI5NWY4MyJ9fX0=";
     private static final String TEXTURE_DOLLAR = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjBmZmFkMzNkMjkzYjYxNzY1ZmM4NmFiNTU2MDJiOTU1YjllMWU3NTdhOGU4ODVkNTAyYjNkYmJhNTQyNTUxNyJ9fX0=";
 
-    private EditorShopDiscounts editorDiscounts;
-    private ShopViewEditor      viewEditor;
-    private ProductListEditor   productEditor;
+    private ShopViewEditor     viewEditor;
+    private ProductListEditor  productEditor;
+    private DiscountListEditor discountEditor;
 
     public ShopMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
         super(plugin, shop, Placeholders.EDITOR_VIRTUAL_TITLE, 54);
@@ -40,7 +40,7 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             this.plugin.runTask(task -> shop.getModule().getEditor().open(viewer.getPlayer(), 1));
         });
 
-        this.addItem(Material.NAME_TAG, EditorLocales.SHOP_NAME, 12).setClick((viewer, event) -> {
+        this.addItem(Material.NAME_TAG, VirtualLocales.SHOP_NAME, 12).setClick((viewer, event) -> {
             this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME), chat -> {
                 shop.setName(chat.getMessage());
                 this.save(viewer);
@@ -48,7 +48,7 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             });
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOOK), EditorLocales.SHOP_DESCRIPTION, 13).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOOK), VirtualLocales.SHOP_DESCRIPTION, 13).setClick((viewer, event) -> {
             if (event.isRightClick()) {
                 shop.getDescription().clear();
                 this.save(viewer);
@@ -77,14 +77,14 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             item.setType(shop.getIcon().getType());
             item.setItemMeta(shop.getIcon().getItemMeta());
             ItemUtil.mapMeta(item, meta -> {
-                meta.setDisplayName(EditorLocales.SHOP_ICON.getLocalizedName());
-                meta.setLore(EditorLocales.SHOP_ICON.getLocalizedLore());
+                meta.setDisplayName(VirtualLocales.SHOP_ICON.getLocalizedName());
+                meta.setLore(VirtualLocales.SHOP_ICON.getLocalizedLore());
                 meta.addItemFlags(ItemFlag.values());
                 ItemUtil.replace(meta, shop.replacePlaceholders());
             });
         });
 
-        this.addItem(Material.ENDER_PEARL, EditorLocales.SHOP_PAGES, 20).setClick((viewer, event) -> {
+        this.addItem(Material.ENDER_PEARL, VirtualLocales.SHOP_PAGES, 20).setClick((viewer, event) -> {
             if (event.isLeftClick()) {
                 shop.setPages(shop.getPages() + 1);
             }
@@ -94,12 +94,12 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             this.save(viewer);
         });
 
-        this.addItem(Material.REDSTONE, EditorLocales.SHOP_PERMISSION, 24).setClick((viewer, event) -> {
+        this.addItem(Material.REDSTONE, VirtualLocales.SHOP_PERMISSION, 24).setClick((viewer, event) -> {
             shop.setPermissionRequired(!shop.isPermissionRequired());
             this.save(viewer);
         });
 
-        this.addItem(Material.WRITABLE_BOOK, EditorLocales.SHOP_TRADES, 22).setClick((viewer, event) -> {
+        this.addItem(Material.WRITABLE_BOOK, VirtualLocales.SHOP_TRADES, 22).setClick((viewer, event) -> {
             if (event.isLeftClick()) {
                 shop.setTransactionEnabled(TradeType.BUY, !shop.isTransactionEnabled(TradeType.BUY));
             }
@@ -109,7 +109,7 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             this.save(viewer);
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), EditorLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
             if (!Hooks.hasCitizens()) return;
 
             if (event.isRightClick()) {
@@ -128,15 +128,15 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             });
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), EditorLocales.SHOP_DISCOUNTS, 30).setClick((viewer, event) -> {
-            this.plugin.runTask(task -> this.getEditorDiscounts().open(viewer.getPlayer(), 1));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.SHOP_DISCOUNTS, 30).setClick((viewer, event) -> {
+            this.plugin.runTask(task -> this.getDiscountEditor().open(viewer.getPlayer(), 1));
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX), EditorLocales.SHOP_PRODUCTS, 31).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 31).setClick((viewer, event) -> {
             this.plugin.runTask(task -> this.getProductsEditor().open(viewer.getPlayer(), 1));
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_PAINT), EditorLocales.SHOP_VIEW_EDITOR, 32).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_PAINT), VirtualLocales.SHOP_VIEW_EDITOR, 32).setClick((viewer, event) -> {
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
                     this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_TITLE), chat -> {
@@ -172,9 +172,9 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     @Override
     public void clear() {
         super.clear();
-        if (this.editorDiscounts != null) {
-            this.editorDiscounts.clear();
-            this.editorDiscounts = null;
+        if (this.discountEditor != null) {
+            this.discountEditor.clear();
+            this.discountEditor = null;
         }
         if (this.viewEditor != null) {
             this.viewEditor.clear();
@@ -187,11 +187,11 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     }
 
     @NotNull
-    public EditorShopDiscounts getEditorDiscounts() {
-        if (this.editorDiscounts == null) {
-            this.editorDiscounts = new EditorShopDiscounts(this.object);
+    public DiscountListEditor getDiscountEditor() {
+        if (this.discountEditor == null) {
+            this.discountEditor = new DiscountListEditor(this.object);
         }
-        return this.editorDiscounts;
+        return this.discountEditor;
     }
 
     @NotNull

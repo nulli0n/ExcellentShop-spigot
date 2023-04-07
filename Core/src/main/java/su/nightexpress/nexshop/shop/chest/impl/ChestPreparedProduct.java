@@ -2,11 +2,14 @@ package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.ChestShopPurchaseEvent;
 import su.nightexpress.nexshop.api.event.ShopPurchaseEvent.Result;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
 public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
@@ -20,24 +23,28 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
+        ExcellentShop plugin = shop.plugin();
 
         int amountToBuy = this.getAmount();
         int amountShopHas = product.getStock().getLeftAmount(TradeType.BUY);
         double price = this.getPrice();
         double balanceUser = product.getCurrency().getBalance(player);
 
-        ChestShopPurchaseEvent event = new ChestShopPurchaseEvent(player, this);
-
+        Result result = Result.SUCCESS;
         if (balanceUser < price) {
-            event.setResult(Result.TOO_EXPENSIVE);
+            result = Result.TOO_EXPENSIVE;
+            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_TOO_EXPENSIVE).replace(this.replacePlaceholders()).send(player);
         }
         else if (amountShopHas >= 0 && amountToBuy > amountShopHas) {
-            event.setResult(Result.OUT_OF_STOCK);
+            result = Result.OUT_OF_STOCK;
+            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK).replace(this.replacePlaceholders()).send(player);
         }
 
         // Call custom event
-        shop.plugin().getPluginManager().callEvent(event);
-        if (event.isCancelled()) return false;
+        ChestShopPurchaseEvent event = new ChestShopPurchaseEvent(player, this, result);
+        plugin.getPluginManager().callEvent(event);
+
+        if (result != Result.SUCCESS) return false;
 
         product.getStock().onPurchase(event);
         if (product.getPricer() instanceof IPurchaseListener listener) {
@@ -52,6 +59,21 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         // Process transaction
         product.delivery(player, amountToBuy);
         product.getCurrency().take(player, price);
+        shop.getModule().getLogger().logTransaction(event);
+
+        plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_USER)
+            .replace(this.replacePlaceholders())
+            .replace(shop.replacePlaceholders())
+            .send(player);
+
+        Player owner = shop.getOwner().getPlayer();
+        if (owner != null && !shop.isAdminShop()) {
+            plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_OWNER)
+                .replace("%player%", player.getDisplayName())
+                .replace(this.replacePlaceholders())
+                .replace(shop.replacePlaceholders())
+                .send(owner);
+        }
         return true;
     }
 
@@ -61,6 +83,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
+        ExcellentShop plugin = shop.plugin();
 
         boolean isAdmin = shop.isAdminShop();
         int shopSpace = product.getStock().getLeftAmount(TradeType.SELL);
@@ -74,26 +97,28 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         }
         this.setAmount(fined);
 
-        //int amountFinal = this.getAmount();
-
         double price = this.getPrice();
-        //double balanceShop = shop.getBank().getBalance(product.getCurrency());
 
-        ChestShopPurchaseEvent event = new ChestShopPurchaseEvent(player, this);
 
+        Result result = Result.SUCCESS;
         if ((userCount < fined) || (isAll && userCount < 1)) {
-            event.setResult(Result.NOT_ENOUGH_ITEMS);
+            result = Result.NOT_ENOUGH_ITEMS;
+            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS).replace(this.replacePlaceholders()).send(player);
         }
         else if (shopSpace >= 0 && shopSpace < fined) {
-            event.setResult(Result.OUT_OF_SPACE);
+            result = Result.OUT_OF_SPACE;
+            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE).replace(this.replacePlaceholders()).send(player);
         }
         else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
-            event.setResult(Result.OUT_OF_MONEY);
+            result = Result.OUT_OF_MONEY;
+            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS).replace(this.replacePlaceholders()).send(player);
         }
 
         // Call custom event
-        shop.plugin().getPluginManager().callEvent(event);
-        if (event.isCancelled()) return false;
+        ChestShopPurchaseEvent event = new ChestShopPurchaseEvent(player, this, result);
+        plugin.getPluginManager().callEvent(event);
+
+        if (result != Result.SUCCESS) return false;
 
         product.getStock().onPurchase(event);
         if (product.getPricer() instanceof IPurchaseListener listener) {
@@ -107,6 +132,21 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         }
         product.getCurrency().give(player, price);
         product.take(player, fined);
+        shop.getModule().getLogger().logTransaction(event);
+
+        plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_USER)
+            .replace(this.replacePlaceholders())
+            .replace(shop.replacePlaceholders())
+            .send(player);
+
+        Player owner = shop.getOwner().getPlayer();
+        if (owner != null && !shop.isAdminShop()) {
+            plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_OWNER)
+                .replace("%player%", player.getDisplayName())
+                .replace(this.replacePlaceholders())
+                .replace(shop.replacePlaceholders())
+                .send(owner);
+        }
         return true;
     }
 }

@@ -1,13 +1,13 @@
-package su.nightexpress.nexshop.shop.virtual.command;
+package su.nightexpress.nexshop.shop.virtual.command.child;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.List;
@@ -15,8 +15,8 @@ import java.util.Map;
 
 public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
 
-    public OpenCommand(@NotNull VirtualShopModule guiShop) {
-        super(guiShop, new String[]{"open"}, Perms.VIRTUAL_COMMAND_OPEN);
+    public OpenCommand(@NotNull VirtualShopModule module) {
+        super(module, new String[]{"open"}, VirtualPerms.COMMAND_OPEN);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
         if (arg == 1) {
             return module.getShops(player).stream().map(VirtualShop::getId).toList();
         }
-        if (arg == 2 && player.hasPermission(Perms.VIRTUAL_COMMAND_OPEN_OTHERS)) {
+        if (arg == 2) {
             return CollectionsUtil.playerNames(player);
         }
         return super.getTab(player, arg, args);
@@ -50,52 +50,24 @@ public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
 
     @Override
     public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
-        // /virtualshop open
         if (args.length < 2) {
-            if (!(sender instanceof Player player)) {
-                this.errorPlayer(sender);
-                return;
-            }
-            this.module.openMainMenu(player);
+            this.printUsage(sender);
             return;
         }
 
-        VirtualShop virtualShop = this.module.getShopById(args[1]);
-        Player player = plugin.getServer().getPlayer(args.length >= 3 && virtualShop != null ? args[2] : args[1]);
-
-        if (virtualShop == null) {
-            if (player == null) {
-                if (sender instanceof Player || args.length >= 3) {
-                    plugin.getMessage(VirtualLang.OPEN_ERROR_INVALID_SHOP).send(sender);
-                }
-                else {
-                    this.errorPlayer(sender);
-                }
-                return;
-            }
-
-            this.module.openMainMenu(player);
+        VirtualShop shop = this.module.getShopById(args[1]);
+        if (shop == null) {
+            plugin.getMessage(VirtualLang.SHOP_ERROR_INVALID).send(sender);
             return;
         }
 
+        String pName = args.length >= 3 ? args[2] : sender.getName();
+        Player player = plugin.getServer().getPlayer(pName);
         if (player == null) {
-            if (!(sender instanceof  Player player1)) {
-                this.errorPlayer(sender);
-                return;
-            }
-            player = player1;
-        }
-
-        if (!player.equals(sender) && !sender.hasPermission(Perms.VIRTUAL_COMMAND_OPEN_OTHERS)) {
-            this.errorPermission(sender);
+            this.errorPlayer(sender);
             return;
         }
 
-        if (!virtualShop.hasPermission(player)) {
-            this.errorPermission(player);
-            return;
-        }
-
-        virtualShop.open(player, 1);
+        shop.open(player, 1);
     }
 }

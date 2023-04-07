@@ -21,7 +21,7 @@ import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.FlatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualCommandProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualItemProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
@@ -107,8 +107,8 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
 
             ItemStack productIcon = new ItemStack(product.getPreview());
             ItemUtil.mapMeta(productIcon, meta -> {
-                meta.setDisplayName(EditorLocales.PRODUCT_OBJECT.getLocalizedName());
-                meta.setLore(EditorLocales.PRODUCT_OBJECT.getLocalizedLore());
+                meta.setDisplayName(VirtualLocales.PRODUCT_OBJECT.getLocalizedName());
+                meta.setLore(VirtualLocales.PRODUCT_OBJECT.getLocalizedLore());
                 meta.addItemFlags(ItemFlag.values());
                 ItemUtil.replace(meta, product.replacePlaceholders());
             });
@@ -166,7 +166,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         }
 
 
-        MenuItem freeItem = this.addItem(Material.LIME_STAINED_GLASS_PANE, EditorLocales.PRODUCT_FREE_SLOT);
+        MenuItem freeItem = this.addItem(Material.LIME_STAINED_GLASS_PANE, VirtualLocales.PRODUCT_FREE_SLOT);
         freeItem.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
         freeItem.setSlots(freeSlots.stream().mapToInt(Number::intValue).toArray());
         freeItem.setClick((viewer2, event) -> {

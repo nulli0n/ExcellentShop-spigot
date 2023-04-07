@@ -12,6 +12,7 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
+@Deprecated
 public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
 
     private final VirtualShopModule module;
@@ -40,6 +41,8 @@ public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
         if (shop == null) return;
 
         Player player = e.getClicker();
+        if (!shop.canAccess(player, true)) return;
+
         shop.open(player, 1);
     }
 }

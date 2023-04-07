@@ -17,7 +17,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.ArrayList;
@@ -34,8 +34,8 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
         this.addNextPage(44);
         this.addPreviousPage(36);
 
-        this.addCreation(EditorLocales.SHOP_CREATE, 41).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_ID), chat -> {
+        this.addCreation(VirtualLocales.SHOP_CREATE, 41).setClick((viewer, event) -> {
+            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_SHOP_ID), chat -> {
                 if (!module.createShop(StringUtil.lowerCaseUnderscore(chat.getMessage()))) {
                     EditorManager.error(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_SHOP_CREATE_ERROR_EXIST).getLocalized());
                     return false;
@@ -73,8 +73,8 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
     public ItemStack getObjectStack(@NotNull Player player, @NotNull VirtualShop shop) {
         ItemStack item = new ItemStack(shop.getIcon());
         ItemUtil.mapMeta(item, meta -> {
-            meta.setDisplayName(EditorLocales.SHOP_OBJECT.getLocalizedName());
-            meta.setLore(EditorLocales.SHOP_OBJECT.getLocalizedLore());
+            meta.setDisplayName(VirtualLocales.SHOP_OBJECT.getLocalizedName());
+            meta.setLore(VirtualLocales.SHOP_OBJECT.getLocalizedLore());
             meta.addItemFlags(ItemFlag.values());
             ItemUtil.replace(meta, shop.replacePlaceholders());
         });

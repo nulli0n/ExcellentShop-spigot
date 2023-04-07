@@ -24,7 +24,7 @@ import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.shop.virtual.editor.EditorLocales;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
@@ -55,7 +55,7 @@ public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         PDCUtil.set(reserved, this.keyReserved, true);
         int[] slots = this.object.getProducts().stream().mapToInt(VirtualProduct::getSlot).toArray();
 
-        this.addItem(reserved, EditorLocales.PRODUCT_RESERVED_SLOT, slots).setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
+        this.addItem(reserved, VirtualLocales.PRODUCT_RESERVED_SLOT, slots).setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
     }
 
     @Override
