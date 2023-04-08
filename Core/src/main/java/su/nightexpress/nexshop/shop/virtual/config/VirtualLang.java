@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
+import org.bukkit.Sound;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nightexpress.nexshop.Placeholders;
 
@@ -22,17 +23,19 @@ public class VirtualLang {
     public static final LangKey SHOP_ERROR_INVALID      = LangKey.of("VirtualShop.Shop.Error.Invalid", "&cNo such shop!");
 
     public static final LangKey PRODUCT_PURCHASE_SELL    = LangKey.of("VirtualShop.Product.Purchase.Sell",
-        "<! type:\"titles:15:60:15\" !>" +
+        "<! type:\"titles:15:60:15\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
             "\n&a&lSuccessful Sale! " +
             "\n&7You sold &ax" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + " &7for &a" + Placeholders.GENERIC_PRICE + "&7!");
 
     public static final LangKey PRODUCT_PURCHASE_BUY     = LangKey.of("VirtualShop.Product.Purchase.Buy",
-        "<! type:\"titles:15:60:15\" !>" +
+        "<! type:\"titles:15:60:15\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
             "\n&a&lSuccessful Purchase!" +
             "\n &7You bought &ax" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + " &7for &a" + Placeholders.GENERIC_PRICE  +"&7!");
 
-    public static final LangKey SELL_MENU_SOLD = LangKey.of("VirtualShop.SellMenu.Sold",
-        "<! type:\"titles:10:60:20\" !>&a&lItems Sold!\n&7You sold your items!");
+    public static final LangKey SELL_MENU_SOLD = LangKey.of("VirtualShop.SellMenu.SaleResult",
+        "<! prefix:\"false\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
+            "\n&a&lItems Sold:" +
+            "\n" + "&7x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + ": &f" + Placeholders.GENERIC_PRICE);
 
     public static final LangKey EDITOR_SHOP_CREATE_ERROR_EXIST = LangKey.of("VirtualShop.Editor.Create.Error.Exist", "&cShop with such ID already exist!");
     public static final LangKey EDITOR_ENTER_SHOP_ID           = LangKey.of("VirtualShop.Editor.Enter.Id", "&7Enter &a[Shop Identifier]");

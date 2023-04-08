@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.lang.LangManager;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.event.ShopPurchaseEvent;
+import su.nightexpress.nexshop.api.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.ProductStock;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
@@ -43,9 +43,9 @@ public class ChestProductStock extends ProductStock<ChestProduct> {
     }
 
     @Override
-    public void onPurchase(@NotNull ShopPurchaseEvent<?> event) {
-        TradeType tradeType = event.getTradeType();
-        int amount = event.getPrepared().getAmount();
+    public void onPurchase(@NotNull ShopTransactionEvent<?> event) {
+        TradeType tradeType = event.getResult().getTradeType();
+        int amount = event.getResult().getUnits();
         Player player = event.getPlayer();
 
         if (!this.isUnlimited(StockType.GLOBAL, tradeType)) {

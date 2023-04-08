@@ -1,42 +1,8 @@
 Plugin:
   Command_Aliases: 'excellentshop,eshop'
-  Language: en
-  Name: 'ExcellentShop'
-  Prefix: '&e%plugin_name% &8» &7'
 
 Database:
-  Auto_Save_Interval: 20
-  Sync_Interval: -1
-  Type: SQLITE
   Table_Prefix: 'excellentshop'
-  MySQL:
-    Username: root
-    Password: root
-    Host: localhost
-    Database: minecraft
-  SQLite:
-    FileName: data.db
-  Purge:
-    Enabled: false
-    For_Period: 60
-
-General:
-  Buy_With_Full_Inventory: false
-
-GUI:
-  Click_Actions:
-    BUY_SELECTION: LEFT
-    SELL_SELECTION: RIGHT
-    SELL_ALL: SWAP_OFFHAND
-    BUY_SINGLE: SHIFT_LEFT
-    SELL_SINGLE: SHIFT_RIGHT
-
-Sounds:
-  Purchase:
-    Success: ENTITY_EXPERIENCE_ORB_PICKUP
-    Failure: BLOCK_ANVIL_PLACE
-  Cart:
-    Item_Add: ENTITY_ITEM_PICKUP
 
 Modules:
   virtual_shop:

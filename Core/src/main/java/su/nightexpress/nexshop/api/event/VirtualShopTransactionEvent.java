@@ -3,15 +3,15 @@ package su.nightexpress.nexshop.api.event;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
-import su.nightexpress.nexshop.shop.chest.impl.ChestPreparedProduct;
+import su.nightexpress.nexshop.shop.TransactionResult;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
-public class ChestShopPurchaseEvent extends ShopPurchaseEvent<ChestProduct> {
+public class VirtualShopTransactionEvent extends ShopTransactionEvent<VirtualProduct> {
 
     private static final HandlerList handlerList = new HandlerList();
 
-    public ChestShopPurchaseEvent(@NotNull Player player, @NotNull ChestPreparedProduct prepared, @NotNull Result result) {
-        super(player, prepared, result);
+    public VirtualShopTransactionEvent(@NotNull Player player, @NotNull TransactionResult transactionResult) {
+        super(player, transactionResult);
     }
 
     public static HandlerList getHandlerList() {

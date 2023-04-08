@@ -27,6 +27,7 @@ import su.nightexpress.nexshop.shop.virtual.command.child.OpenCommand;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
+import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
@@ -58,6 +59,9 @@ public class VirtualShopModule extends ShopModule {
     @Override
     protected void onLoad() {
         super.onLoad();
+        this.plugin.getLangManager().loadMissing(VirtualLang.class);
+        this.plugin.getLangManager().loadEditor(VirtualLocales.class);
+        this.plugin.getLang().saveChanges();
         this.plugin.registerPermissions(VirtualPerms.class);
 
         File dir = new File(this.getFullPath() + "shops");
@@ -236,18 +240,15 @@ public class VirtualShopModule extends ShopModule {
     }
 
     @Nullable
-    @Deprecated
-    public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, int amount, @NotNull TradeType tradeType) {
+    public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
         Set<VirtualProduct> products = new HashSet<>();
         this.getShops().stream()
-            .filter(shop -> shop.hasPermission(player) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
+            .filter(shop -> shop.canAccess(player, false) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
                 if (product instanceof ItemProduct itemProduct && !itemProduct.isItemMatches(item)) return false;
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                 if (tradeType == TradeType.SELL && !product.isSellable()) return false;
-                //if (tradeType == TradeType.SELL && product.countItem(player) < amount) return false;
-                //if (product.getStock().getPossibleAmount(tradeType, player) < amount) return false;
-                return true;
+                return product.getStock().getPossibleAmount(tradeType, player) != 0;
             }).toList());
         });
 

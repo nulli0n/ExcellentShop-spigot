@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractConfigHolder;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.NumberUtil;
@@ -15,43 +16,37 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.Discount;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 
 public abstract class Shop<
     S extends Shop<S, P>,
-    P extends Product<P, S, ?>> extends AbstractConfigHolder<ExcellentShop> implements IPlaceholder {
+    P extends Product<P, S, ?>> extends AbstractConfigHolder<ExcellentShop> implements Placeholder {
 
     protected final Set<Discount>           discounts;
     protected final Map<TradeType, Boolean> transactions;
     protected final Map<String, P>          products;
+    protected final PlaceholderMap placeholderMap;
 
     protected String      name;
     protected ShopBank<S> bank;
-
-    public Shop(@NotNull ExcellentShop plugin, @NotNull JYML cfg) {
-        super(plugin, cfg);
-        this.discounts = new HashSet<>();
-        this.transactions = new HashMap<>();
-        this.products = new LinkedHashMap<>();
-    }
 
     public Shop(@NotNull ExcellentShop plugin, @NotNull JYML cfg, @NotNull String id) {
         super(plugin, cfg, id);
         this.discounts = new HashSet<>();
         this.transactions = new HashMap<>();
         this.products = new LinkedHashMap<>();
+        this.placeholderMap = new PlaceholderMap()
+            .add(Placeholders.SHOP_ID, this::getId)
+            .add(Placeholders.SHOP_NAME, this::getName)
+            .add(Placeholders.SHOP_BUY_ALLOWED, () -> LangManager.getBoolean(this.isTransactionEnabled(TradeType.BUY)))
+            .add(Placeholders.SHOP_SELL_ALLOWED, () -> LangManager.getBoolean(this.isTransactionEnabled(TradeType.SELL)))
+            .add(Placeholders.SHOP_DISCOUNT_AMOUNT, () -> NumberUtil.format(this.getDiscountPlain()))
+        ;
     }
 
     @Override
     @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.SHOP_ID, this.getId())
-            .replace(Placeholders.SHOP_NAME, this.getName())
-            .replace(Placeholders.SHOP_BUY_ALLOWED, LangManager.getBoolean(this.isTransactionEnabled(TradeType.BUY)))
-            .replace(Placeholders.SHOP_SELL_ALLOWED, LangManager.getBoolean(this.isTransactionEnabled(TradeType.SELL)))
-            .replace(Placeholders.SHOP_DISCOUNT_AMOUNT, NumberUtil.format(this.getDiscountPlain()))
-            ;
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     public abstract boolean canAccess(@NotNull Player player, boolean notify);
@@ -100,7 +95,6 @@ public abstract class Shop<
         this.bank = bank;
     }
 
-    // TODO Add per rank (Player arg)
     @NotNull
     public Set<Discount> getDiscounts() {
         this.discounts.removeIf(Discount::isExpired);

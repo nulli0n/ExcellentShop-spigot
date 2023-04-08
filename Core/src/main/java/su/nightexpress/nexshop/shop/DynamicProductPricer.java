@@ -6,7 +6,7 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.IPurchaseListener;
-import su.nightexpress.nexshop.api.event.ShopPurchaseEvent;
+import su.nightexpress.nexshop.api.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceData;
@@ -98,10 +98,10 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
     }
 
     @Override
-    public void onPurchase(@NotNull ShopPurchaseEvent<?> event) {
-        if (!event.getProduct().getId().equalsIgnoreCase(this.getProduct().getId())) return;
+    public void onPurchase(@NotNull ShopTransactionEvent<?> event) {
+        if (!event.getResult().getProduct().getId().equalsIgnoreCase(this.getProduct().getId())) return;
 
-        TradeType tradeType = event.getTradeType();
+        TradeType tradeType = event.getResult().getTradeType();
         ProductPriceData priceData = this.getData();
         if (priceData != null) {
             if (tradeType == TradeType.BUY) priceData.setPurchases(priceData.getPurchases() + 1);

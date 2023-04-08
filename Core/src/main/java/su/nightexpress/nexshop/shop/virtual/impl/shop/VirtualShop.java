@@ -20,7 +20,6 @@ import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -51,6 +50,18 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
 
         JYML configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "view.yml");
         this.view = new VirtualShopView(this, configView);
+
+        this.placeholderMap
+            .add(Placeholders.SHOP_BANK_BALANCE, () -> plugin.getCurrencyManager().getCurrencies().stream()
+                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
+            .add(Placeholders.SHOP_VIRTUAL_DESCRIPTION, () -> String.join("\n", this.getDescription()))
+            .add(Placeholders.SHOP_VIRTUAL_PERMISSION_NODE, () -> VirtualPerms.PREFIX_SHOP + this.getId())
+            .add(Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED, () -> LangManager.getBoolean(this.isPermissionRequired()))
+            .add(Placeholders.SHOP_VIRTUAL_PAGES, () -> String.valueOf(this.getPages()))
+            .add(Placeholders.SHOP_VIRTUAL_VIEW_SIZE, () -> String.valueOf(this.getView().getOptions().getSize()))
+            .add(Placeholders.SHOP_VIRTUAL_VIEW_TITLE, () -> this.getView().getOptions().getTitle())
+            .add(Placeholders.SHOP_VIRTUAL_NPC_IDS, () -> String.join(", ", this.getNPCIds().stream().map(String::valueOf).toList()))
+            ;
     }
 
     @Override
@@ -86,22 +97,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
                 return null;
             }
         }).filter(Objects::nonNull).forEach(this::addProduct);
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> super.replacePlaceholders().apply(str
-            .replace(Placeholders.SHOP_BANK_BALANCE, plugin.getCurrencyManager().getCurrencies().stream()
-                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(DELIMITER_DEFAULT)))
-            .replace(Placeholders.SHOP_VIRTUAL_DESCRIPTION, String.join("\n", this.getDescription()))
-            .replace(Placeholders.SHOP_VIRTUAL_PERMISSION_NODE, VirtualPerms.PREFIX_SHOP + this.getId())
-            .replace(Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED, LangManager.getBoolean(this.isPermissionRequired()))
-            .replace(Placeholders.SHOP_VIRTUAL_PAGES, String.valueOf(this.getPages()))
-            .replace(Placeholders.SHOP_VIRTUAL_VIEW_SIZE, String.valueOf(this.getView().getOptions().getSize()))
-            .replace(Placeholders.SHOP_VIRTUAL_VIEW_TITLE, this.getView().getOptions().getTitle())
-            .replace(Placeholders.SHOP_VIRTUAL_NPC_IDS, String.join(", ", this.getNPCIds().stream().map(String::valueOf).toList()))
-        );
     }
 
     @Override

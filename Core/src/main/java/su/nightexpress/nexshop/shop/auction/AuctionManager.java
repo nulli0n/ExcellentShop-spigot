@@ -78,6 +78,8 @@ public class AuctionManager extends ShopModule {
         }
 
         this.plugin.getLangManager().loadMissing(AuctionLang.class);
+        this.plugin.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
+        this.plugin.getLang().saveChanges();
         this.plugin.getConfigManager().extractResources(this.getPath() + "/menu/");
 
         this.dataHandler = AuctionDataHandler.getInstance(this);

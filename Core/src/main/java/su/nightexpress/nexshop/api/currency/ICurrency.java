@@ -3,21 +3,11 @@ package su.nightexpress.nexshop.api.currency;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.Placeholders;
 
-import java.util.function.UnaryOperator;
-
-public interface ICurrency extends IPlaceholder {
-
-    @NotNull
-    default UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.CURRENCY_NAME, this.getConfig().getName())
-            .replace(Placeholders.CURRENCY_ID, this.getConfig().getId())
-            ;
-    }
+public interface ICurrency extends Placeholder {
 
     @NotNull ICurrencyConfig getConfig();
 

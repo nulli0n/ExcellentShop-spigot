@@ -13,7 +13,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.api.type.ShopClickType;
+import su.nightexpress.nexshop.api.type.ShopClickAction;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
@@ -77,9 +77,9 @@ public abstract class Product<
     @NotNull
     protected abstract P get();
 
-    public void prepareTrade(@NotNull Player player, @NotNull ShopClickType click) {
+    public void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click) {
         Shop<?, ?> shop = this.getShop();
-        TradeType tradeType = click.getBuyType();
+        TradeType tradeType = click.getTradeType();
         if (!shop.isTransactionEnabled(tradeType)) {
             return;
         }
@@ -89,7 +89,7 @@ public abstract class Product<
                 shop.plugin().getMessage(Lang.SHOP_PRODUCT_ERROR_UNBUYABLE).send(player);
                 return;
             }
-            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY && !this.hasSpace(player)) {
+            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && !this.hasSpace(player)) {
                 this.getShop().plugin().getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player);
                 return;
             }
@@ -119,10 +119,10 @@ public abstract class Product<
             return;
         }
 
-        boolean isSellAll = (click == ShopClickType.SELL_ALL);
-        PreparedProduct<P> prepared = this.getPrepared(tradeType);
-        if (click == ShopClickType.BUY_SINGLE || click == ShopClickType.SELL_SINGLE || isSellAll) {
-            prepared.trade(player, isSellAll);
+        boolean isSellAll = (click == ShopClickAction.SELL_ALL);
+        PreparedProduct<P> prepared = this.getPrepared(tradeType, isSellAll);
+        if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
+            prepared.trade(player);
 
             MenuViewer viewer = shop.getView().getViewer(player);
             if (viewer != null) {
@@ -134,7 +134,7 @@ public abstract class Product<
     }
 
     public void openTrade(@NotNull Player player, @NotNull PreparedProduct<P> prepared) {
-        Config.getCartMenu(prepared.getTradeType()).open(player, prepared);
+        this.getShop().plugin().getCartMenu().open(player, prepared);
     }
 
     public boolean isBuyable() {
@@ -170,7 +170,7 @@ public abstract class Product<
     }
 
     @NotNull
-    public abstract PreparedProduct<P> getPrepared(@NotNull TradeType buyType);
+    public abstract PreparedProduct<P> getPrepared(@NotNull TradeType buyType, boolean all);
 
     public abstract boolean hasSpace(@NotNull Player player);
 

@@ -142,7 +142,7 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
             }
             if (isOwner) return;
 
-            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY && player1.getInventory().firstEmpty() < 0) {
+            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && player1.getInventory().firstEmpty() < 0) {
                 plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player1);
                 return;
             }

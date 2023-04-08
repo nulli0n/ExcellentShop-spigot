@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.WorldGuardHook;
+import su.nightexpress.nexshop.hooks.HookId;
 
 public class WorldGuardFlags implements ClaimHook {
 
@@ -47,7 +48,7 @@ public class WorldGuardFlags implements ClaimHook {
 
     @Override
     public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
-        if (!Hooks.hasWorldGuard()) return true;
+        if (!Hooks.hasPlugin(HookId.WORLD_GUARD)) return true;
 
         ProtectedRegion region = WorldGuardHook.getProtectedRegion(player);
         return region != null && region.getOwners().contains(player.getUniqueId());

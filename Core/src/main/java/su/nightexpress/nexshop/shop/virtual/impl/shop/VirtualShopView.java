@@ -10,12 +10,14 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.api.menu.item.MenuItem;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.ShopView;
-import su.nightexpress.nexshop.api.type.ShopClickType;
+import su.nightexpress.nexshop.api.type.ShopClickAction;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
@@ -116,15 +118,17 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
                     lore.add(lineFormat);
                 }
 
-                // TODO Use PlaceholderMap + Shop Placeholders
-                lore.replaceAll(product.getPlaceholders(player).replacer());
-                lore.replaceAll(product.getCurrency().replacePlaceholders());
+                PlaceholderMap placeholderMap = new PlaceholderMap();
+                placeholderMap.getKeys().addAll(product.getPlaceholders(player).getKeys());
+                placeholderMap.getKeys().addAll(product.getCurrency().getPlaceholders().getKeys());
+                placeholderMap.getKeys().addAll(shop.getPlaceholders().getKeys());
+                lore.replaceAll(placeholderMap.replacer());
                 meta.setLore(StringUtil.stripEmpty(lore));
             });
 
             MenuItem menuItem = new MenuItem(preview, 100, ItemOptions.personalWeak(player), product.getSlot());
             menuItem.setClick((viewer2, e) -> {
-                ShopClickType clickType = ShopClickType.getByDefault(e.getClick());
+                ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(e.getClick());
                 if (clickType == null) return;
 
                 product.prepareTrade(viewer2.getPlayer(), clickType);

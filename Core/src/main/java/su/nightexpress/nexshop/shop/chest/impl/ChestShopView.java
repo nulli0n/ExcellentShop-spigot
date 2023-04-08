@@ -10,11 +10,13 @@ import su.nexmedia.engine.api.menu.click.ClickHandler;
 import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.ShopView;
-import su.nightexpress.nexshop.api.type.ShopClickType;
+import su.nightexpress.nexshop.api.type.ShopClickAction;
+import su.nightexpress.nexshop.config.Config;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -82,9 +84,11 @@ public class ChestShopView extends ShopView<ChestShop, ChestProduct> implements 
                 lore.add(lineFormat);
             }
 
-            // TODO Use PlaceholderMap
-            lore.replaceAll(product.getPlaceholders(player).replacer());
-            lore.replaceAll(product.getCurrency().replacePlaceholders());
+            PlaceholderMap placeholderMap = new PlaceholderMap();
+            placeholderMap.getKeys().addAll(product.getPlaceholders(player).getKeys());
+            placeholderMap.getKeys().addAll(product.getCurrency().getPlaceholders().getKeys());
+            placeholderMap.getKeys().addAll(shop.getPlaceholders().getKeys());
+            lore.replaceAll(placeholderMap.replacer());
             meta.setLore(lore);
         });
 
@@ -95,7 +99,7 @@ public class ChestShopView extends ShopView<ChestShop, ChestProduct> implements 
     @NotNull
     public ItemClick getObjectClick(@NotNull ChestProduct product) {
         return (viewer, event) -> {
-            ShopClickType clickType = ShopClickType.getByDefault(event.getClick());
+            ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
             if (clickType == null) return;
 
             product.prepareTrade(viewer.getPlayer(), clickType);

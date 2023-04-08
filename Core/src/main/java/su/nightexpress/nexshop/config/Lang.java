@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.config;
 
+import org.bukkit.Sound;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
 import su.nightexpress.nexshop.Placeholders;
@@ -37,13 +38,21 @@ public class Lang extends EngineLang {
     public static final LangKey EDITOR_PRODUCT_ENTER_PRICE    = LangKey.of("Editor.Product.Enter.Price", "&7Enter new &aprice");
     public static final LangKey EDITOR_PRODUCT_ENTER_CURRENCY = LangKey.of("Editor.Product.Enter.Currency", "&7Enter &acurrency id");
 
-    public static final LangKey SHOP_PRODUCT_ERROR_UNBUYABLE        = LangKey.of("Shop.Product.Error.Unbuyable", "&cYou can not buy this item!");
-    public static final LangKey SHOP_PRODUCT_ERROR_UNSELLABLE       = LangKey.of("Shop.Product.Error.Unsellable", "&cYou can not sell this item!");
-    public static final LangKey SHOP_PRODUCT_ERROR_OUT_OF_STOCK     = LangKey.of("Shop.Product.Error.OutOfStock", "&cThis product is out of stock!");
-    public static final LangKey SHOP_PRODUCT_ERROR_OUT_OF_SPACE     = LangKey.of("Shop.Product.Error.OutOfSpace", "&cThis shop is out of space!");
-    public static final LangKey SHOP_PRODUCT_ERROR_OUT_OF_FUNDS     = LangKey.of("Shop.Product.Error.OutOfFunds", "&cThis shop is out of money!");
-    public static final LangKey SHOP_PRODUCT_ERROR_FULL_STOCK       = LangKey.of("Shop.Product.Error.FullStock", "&cThis product is full of stock!");
-    public static final LangKey SHOP_PRODUCT_ERROR_FULL_INVENTORY   = LangKey.of("Shop.Product.Error.FullInventory", "&cYou can't buy items while your inventory is full!");
-    public static final LangKey SHOP_PRODUCT_ERROR_TOO_EXPENSIVE    = LangKey.of("Shop.Product.Error.TooExpensive", "{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&lToo Expensive! \n &7You need: &c" + Placeholders.GENERIC_PRICE + "&7!");
-    public static final LangKey SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS = LangKey.of("Shop.Product.Error.NotEnoughItems", "{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&lNot Enough Items! \n &7You need: &cx" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + "&7!");
+    public static final LangKey SHOP_PRODUCT_ERROR_UNBUYABLE      = LangKey.of("Shop.Product.Error.Unbuyable", "&cYou can not buy this item!");
+    public static final LangKey SHOP_PRODUCT_ERROR_UNSELLABLE     = LangKey.of("Shop.Product.Error.Unsellable", "&cYou can not sell this item!");
+    public static final LangKey SHOP_PRODUCT_ERROR_OUT_OF_STOCK   = LangKey.of("Shop.Product.Error.OutOfStock", "&cThis product is out of stock!");
+    public static final LangKey SHOP_PRODUCT_ERROR_OUT_OF_SPACE   = LangKey.of("Shop.Product.Error.OutOfSpace", "&cThis shop is out of space!");
+    public static final LangKey SHOP_PRODUCT_ERROR_OUT_OF_FUNDS   = LangKey.of("Shop.Product.Error.OutOfFunds", "&cThis shop is out of money!");
+    public static final LangKey SHOP_PRODUCT_ERROR_FULL_STOCK     = LangKey.of("Shop.Product.Error.FullStock", "&cThis product is full of stock!");
+    public static final LangKey SHOP_PRODUCT_ERROR_FULL_INVENTORY = LangKey.of("Shop.Product.Error.FullInventory", "&cYou can't buy items while your inventory is full!");
+
+    public static final LangKey SHOP_PRODUCT_ERROR_TOO_EXPENSIVE    = LangKey.of("Shop.Product.Error.TooExpensive",
+        "<! type:\"titles:15:60:15\" sound:\"" + Sound.BLOCK_ANVIL_PLACE.name() + "\" !>" +
+            "\n&c&lToo Expensive! " +
+            "\n &7You need: &c" + Placeholders.GENERIC_PRICE + "&7!");
+
+    public static final LangKey SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS = LangKey.of("Shop.Product.Error.NotEnoughItems",
+        "<! type:\"titles:15:60:15\" sound:\"" + Sound.BLOCK_ANVIL_PLACE.name() + "\" !>" +
+            "\n&c&lNot Enough Items! " +
+            "\n &7You need: &cx" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + "&7!");
 }

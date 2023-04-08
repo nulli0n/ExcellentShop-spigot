@@ -167,8 +167,8 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
 
     @Override
     @NotNull
-    public VirtualPreparedProduct getPrepared(@NotNull TradeType buyType) {
-        return new VirtualPreparedProduct(this, buyType);
+    public VirtualPreparedProduct getPrepared(@NotNull TradeType buyType, boolean all) {
+        return new VirtualPreparedProduct(this, buyType, all);
     }
 
     public int getSlot() {

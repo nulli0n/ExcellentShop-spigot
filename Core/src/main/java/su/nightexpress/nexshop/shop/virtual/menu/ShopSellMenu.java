@@ -7,15 +7,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItem;
-import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.impl.ConfigMenu;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.shop.TransactionResult;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
@@ -23,56 +23,62 @@ import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.*;
 
-public class ShopSellMenu extends AbstractMenu<ExcellentShop> {
+public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
 
     private final VirtualShopModule module;
     private final String       itemName;
     private final List<String> itemLore;
     private final int[] itemSlots;
 
-    private static final Map<Player, List<Pair<ItemStack, VirtualProduct>>> USER_ITEMS = new WeakHashMap<>();
+    private static final Map<Player, Pair<List<ItemStack>, Set<VirtualProduct>>> USER_ITEMS = new WeakHashMap<>();
 
     public ShopSellMenu(@NotNull VirtualShopModule module, @NotNull JYML cfg) {
-        super(module.plugin(), cfg, "");
+        super(module.plugin(), cfg);
         this.module = module;
         this.itemName = Colorizer.apply(cfg.getString("Item.Name", "%item_name%"));
         this.itemLore = Colorizer.apply(cfg.getStringList("Item.Lore"));
         this.itemSlots = cfg.getIntArray("Item.Slots");
 
-        MenuClick click = (player, type, e) -> {
-            if (type instanceof MenuItemType type1) {
-                this.onItemClickDefault(player, type1);
-            }
-            else if (type instanceof ItemType type1) {
-                if (type1 == ItemType.SELL) {
-                    List<Pair<ItemStack, VirtualProduct>> userItems = USER_ITEMS.remove(player);
-                    if (userItems != null && !userItems.isEmpty()) {
-                        userItems.forEach(pair -> {
-                            Collection<ItemStack> left = player.getInventory().addItem(pair.getFirst()).values();
-                            if (left.isEmpty()) {
-                                VirtualPreparedProduct preparedProduct = pair.getSecond().getPrepared(TradeType.SELL);
-                                preparedProduct.setAmount(pair.getFirst().getAmount());
-                                preparedProduct.sell(player, false);
-                            }
-                            else {
-                                left.forEach(item -> PlayerUtil.addItem(player, item));
-                            }
-                        });
-                        player.updateInventory();
-                        plugin.getMessage(VirtualLang.SELL_MENU_SOLD).send(player);
-                    }
-                    player.closeInventory();
-                }
-            }
-        };
+        this.registerHandler(ItemType.class)
+            .addClick(ItemType.SELL, (viewer, e) -> {
+                Player player = viewer.getPlayer();
+                Pair<List<ItemStack>, Set<VirtualProduct>> userItems = USER_ITEMS.remove(player);
+                if (userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
 
-        for (String sId : cfg.getSection("Content")) {
-            MenuItem menuItem = cfg.getMenuItem("Content." + sId, ItemType.class);
-            if (menuItem.getType() != null) {
-                menuItem.setClickHandler(click);
-            }
-            this.addItem(menuItem);
-        }
+                ItemStack[] original = player.getInventory().getContents();
+                player.getInventory().clear();
+
+                List<TransactionResult> profits = new ArrayList<>();
+                userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
+                userItems.getSecond().forEach(product -> {
+                    VirtualPreparedProduct preparedProduct = product.getPrepared(TradeType.SELL, true);
+                    TransactionResult result = preparedProduct.trade(player);
+
+                    if (result.getResult() == TransactionResult.Result.SUCCESS) {
+                        profits.add(result);
+                    }
+                });
+
+                ItemStack[] left = player.getInventory().getContents();
+                player.getInventory().setContents(original);
+                Arrays.asList(left).forEach(item -> {
+                    if (item != null && !item.getType().isAir()) PlayerUtil.addItem(player, item);
+                });
+
+                player.updateInventory();
+                player.closeInventory();
+                if (profits.isEmpty()) return;
+
+                plugin.getMessage(VirtualLang.SELL_MENU_SOLD)
+                    .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (line, list) -> {
+                        profits.forEach(result -> {
+                            list.add(result.replacePlaceholders().apply(line));
+                        });
+                    })
+                    .send(player);
+            });
+
+        this.load();
     }
 
     enum ItemType {
@@ -80,33 +86,30 @@ public class ShopSellMenu extends AbstractMenu<ExcellentShop> {
     }
 
     @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
-        Player player = (Player) e.getWhoClicked();
-        Inventory inventory = e.getInventory();
-        ItemStack item = e.getCurrentItem();
-        if (item == null || item.getType().isAir()) return true;
+    public void onClick(@NotNull MenuViewer viewer, @Nullable ItemStack item, @NotNull SlotType slotType, int slot, @NotNull InventoryClickEvent event) {
+        super.onClick(viewer, item, slotType, slot, event);
+
+        Player player = viewer.getPlayer();
+        Inventory inventory = event.getInventory();
+        if (item == null || item.getType().isAir()) return;
 
         if (slotType == SlotType.PLAYER) {
-            VirtualProduct product = this.module.getBestProductFor(player, item, item.getAmount(), TradeType.SELL);
-            if (product == null) return true;
+            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            if (product == null) return;
 
             int firtSlot = Arrays.stream(this.itemSlots)
-                .filter(slot -> { // Idea tells me there is possible NPE for a single line :/
-                    ItemStack has = inventory.getItem(slot);
+                .filter(slot2 -> { // Idea tells me there is possible NPE for a single line :/
+                    ItemStack has = inventory.getItem(slot2);
                     return has == null || has.getType().isAir();
                 })
                 .findFirst().orElse(-1);
-            if (firtSlot < 0) return true;
-
-            //int toSell = product.getStock().getPossibleAmount(TradeType.SELL, player);
-            //if (toSell == 0) return true;
-            //if (toSell > 0) toSell = item.getAmount();
+            if (firtSlot < 0) return;
 
             ItemStack icon = new ItemStack(item);
             ItemMeta meta = icon.getItemMeta();
-            if (meta == null) return true;
+            if (meta == null) return;
 
-            double price = product.getPricer().getPriceSell() * item.getAmount();// toSell;
+            double price = product.getPricer().getPriceSell() * (item.getAmount() / (double) product.getUnitAmount());
 
             List<String> lore = new ArrayList<>(this.itemLore);
             lore.replaceAll(line -> {
@@ -123,18 +126,21 @@ public class ShopSellMenu extends AbstractMenu<ExcellentShop> {
             icon.setItemMeta(meta);
             inventory.setItem(firtSlot, icon);
 
-            USER_ITEMS.computeIfAbsent(player, k -> new ArrayList<>()).add(Pair.of(new ItemStack(item), product));
+            Pair<List<ItemStack>, Set<VirtualProduct>> pair = USER_ITEMS.computeIfAbsent(player, k -> Pair.of(new ArrayList<>(), new HashSet<>()));
+            pair.getFirst().add(new ItemStack(item));
+            pair.getSecond().add(product);
             item.setAmount(0);
         }
-        return true;
     }
 
     @Override
-    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
-        super.onClose(player, e);
-        List<Pair<ItemStack, VirtualProduct>> userItems = USER_ITEMS.remove(player);
+    public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
+        super.onClose(viewer, event);
+
+        Player player = viewer.getPlayer();
+        Pair<List<ItemStack>, Set<VirtualProduct>> userItems = USER_ITEMS.remove(player);
         if (userItems != null) {
-            userItems.forEach(pair -> PlayerUtil.addItem(player, pair.getFirst()));
+            userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
         }
     }
 }

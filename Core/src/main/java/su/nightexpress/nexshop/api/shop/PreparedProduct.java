@@ -2,35 +2,42 @@ package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.manager.IPlaceholder;
+import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.shop.TransactionResult;
 
-import java.util.function.UnaryOperator;
-
-public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements IPlaceholder {
+public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Placeholder {
 
     private final P         product;
     private final TradeType buyType;
-    private       int       amount;
+    private final boolean all;
+    private final PlaceholderMap placeholderMap;
 
-    public PreparedProduct(@NotNull P product, @NotNull TradeType buyType) {
+    private int units;
+
+    public PreparedProduct(@NotNull P product, @NotNull TradeType buyType, boolean all) {
         this.product = product;
         this.buyType = buyType;
+        this.all = all;
 
-        this.setAmount(1);
+        this.setUnits(1);
+
+        this.placeholderMap = new PlaceholderMap()
+            .add(Placeholders.GENERIC_ITEM, () -> ItemUtil.getItemName(this.getProduct().getPreview()))
+            .add(Placeholders.GENERIC_AMOUNT, () -> String.valueOf(this.getAmount()))
+            .add(Placeholders.GENERIC_UNITS, () -> String.valueOf(this.getUnits()))
+            .add(Placeholders.GENERIC_TYPE, () -> this.getShop().plugin().getLangManager().getEnum(this.getTradeType()))
+            .add(Placeholders.GENERIC_PRICE, () -> this.getProduct().getCurrency().format(this.getPrice()))
+        ;
     }
 
     @Override
     @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        return str -> str
-            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(this.getProduct().getPreview()))
-            .replace(Placeholders.GENERIC_AMOUNT, String.valueOf(this.getAmount()))
-            .replace(Placeholders.GENERIC_TYPE, this.getShop().plugin().getLangManager().getEnum(this.getTradeType()))
-            .replace(Placeholders.GENERIC_PRICE, this.getProduct().getCurrency().format(this.getPrice()))
-            ;
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     @NotNull
@@ -48,25 +55,36 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements IPl
         return this.buyType;
     }
 
-    public int getAmount() {
-        return this.amount;
+    public boolean isAll() {
+        return all;
     }
 
-    public void setAmount(int amount) {
-        this.amount = Math.max(amount, 1);
+    public int getUnits() {
+        return this.units;
+    }
+
+    public void setUnits(int units) {
+        this.units = Math.max(units, 1);
+    }
+
+    public int getAmount() {
+        return this.getProduct().getUnitAmount() * this.getUnits();
     }
 
     public double getPrice() {
-        Product<?, ?, ?> product = this.getProduct();
+        Product<P, ?, ?> product = this.getProduct();
         double price = product.getPricer().getPrice(this.getTradeType());
-        return price * this.getAmount();
+        return price * this.getUnits();
     }
 
-    public boolean trade(@NotNull Player player, boolean isAll) {
-        return this.getTradeType() == TradeType.BUY ? this.buy(player) : this.sell(player, isAll);
+    @NotNull
+    public TransactionResult trade(@NotNull Player player) {
+        return this.getTradeType() == TradeType.BUY ? this.buy(player) : this.sell(player);
     }
 
-    public abstract boolean buy(@NotNull Player player);
+    @NotNull
+    protected abstract TransactionResult buy(@NotNull Player player);
 
-    public abstract boolean sell(@NotNull Player player, boolean isAll);
+    @NotNull
+    protected abstract TransactionResult sell(@NotNull Player player);
 }

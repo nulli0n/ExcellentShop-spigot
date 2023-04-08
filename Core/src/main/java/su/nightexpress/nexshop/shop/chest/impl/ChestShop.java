@@ -2,7 +2,6 @@ package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Container;
@@ -33,19 +32,18 @@ import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanable {
 
     private final ChestShopModule module;
 
-    private Location        location;
-    private int chunkX;
-    private int chunkZ;
+    private Location location;
+    private int      chunkX;
+    private int      chunkZ;
 
-    private UUID            ownerId;
-    private String          ownerName;
+    private UUID          ownerId;
+    private String        ownerName;
     private OfflinePlayer ownerPlayer;
     private ChestShopType type;
 
@@ -68,9 +66,21 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     }
 
     public ChestShop(@NotNull ChestShopModule module, @NotNull JYML cfg) {
-        super(module.plugin(), cfg);
+        super(module.plugin(), cfg, cfg.getFile().getName().replace(".yml", "").toLowerCase());
         this.module = module;
         this.view = new ChestShopView(this);
+
+        this.placeholderMap
+            .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestConfig.ALLOWED_CURRENCIES.stream()
+                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
+            .add(Placeholders.SHOP_CHEST_OWNER, this::getOwnerName)
+            .add(Placeholders.SHOP_CHEST_LOCATION_X, () -> NumberUtil.format(this.getLocation().getX()))
+            .add(Placeholders.SHOP_CHEST_LOCATION_Y, () -> NumberUtil.format(this.getLocation().getY()))
+            .add(Placeholders.SHOP_CHEST_LOCATION_Z, () -> NumberUtil.format(this.getLocation().getZ()))
+            .add(Placeholders.SHOP_CHEST_LOCATION_WORLD, () -> LangManager.getWorld(this.getContainer().getWorld()))
+            .add(Placeholders.SHOP_CHEST_IS_ADMIN, () -> LangManager.getBoolean(this.isAdminShop()))
+            .add(Placeholders.SHOP_CHEST_TYPE, () -> plugin.getLangManager().getEnum(this.getType()))
+        ;
     }
 
     @Override
@@ -122,25 +132,6 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
                 return null;
             }
         }).filter(Objects::nonNull).forEach(this::addProduct);
-    }
-
-    @Override
-    @NotNull
-    public UnaryOperator<String> replacePlaceholders() {
-        Location location = this.getLocation();
-        World world = this.getContainer().getWorld();
-
-        return str -> super.replacePlaceholders().apply(str
-            .replace(Placeholders.SHOP_BANK_BALANCE, ChestConfig.ALLOWED_CURRENCIES.stream()
-                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
-            .replace(Placeholders.SHOP_CHEST_OWNER, this.getOwnerName())
-            .replace(Placeholders.SHOP_CHEST_LOCATION_X, NumberUtil.format(location.getX()))
-            .replace(Placeholders.SHOP_CHEST_LOCATION_Y, NumberUtil.format(location.getY()))
-            .replace(Placeholders.SHOP_CHEST_LOCATION_Z, NumberUtil.format(location.getZ()))
-            .replace(Placeholders.SHOP_CHEST_LOCATION_WORLD, LangManager.getWorld(world))
-            .replace(Placeholders.SHOP_CHEST_IS_ADMIN, LangManager.getBoolean(this.isAdminShop()))
-            .replace(Placeholders.SHOP_CHEST_TYPE, plugin.getLangManager().getEnum(this.getType()))
-        );
     }
 
     @Override
@@ -250,7 +241,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     public Pair<Container, Container> getSides() {
         Container container = this.getContainer();
 
-        if (!(this.getContainer() instanceof Chest chest)) return Pair.of(container, container);
+        //if (!(this.getContainer() instanceof Chest chest)) return Pair.of(container, container);
         if (!this.isDoubleChest()) return Pair.of(container, container);
 
         DoubleChest doubleChest = (DoubleChest) this.getInventory().getHolder();

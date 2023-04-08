@@ -5,7 +5,7 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.manager.AbstractManager;
-import su.nexmedia.engine.api.task.AbstractTask;
+import su.nexmedia.engine.api.server.AbstractTask;
 import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
@@ -84,7 +84,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
     private void addHologram(@NotNull ChestShop shop, @NotNull String name) {
         Location location = shop.getDisplayLocation();
         ItemStack showcase = ChestConfig.DISPLAY_SHOWCASE.get()
-            .getOrDefault(shop.getContainer().getType().name(), ChestConfig.DISPLAY_SHOWCASE.get().get(Placeholders.DEFAULT));
+            .getOrDefault(shop.getLocation().getBlock().getType().name(), ChestConfig.DISPLAY_SHOWCASE.get().get(Placeholders.DEFAULT));
         if (showcase == null) return;
 
         if (!ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) {
