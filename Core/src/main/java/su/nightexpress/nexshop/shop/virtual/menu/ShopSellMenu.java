@@ -43,7 +43,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
             .addClick(ItemType.SELL, (viewer, e) -> {
                 Player player = viewer.getPlayer();
                 Pair<List<ItemStack>, Set<VirtualProduct>> userItems = USER_ITEMS.remove(player);
-                if (userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
+                if (userItems == null || userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
 
                 ItemStack[] original = player.getInventory().getContents();
                 player.getInventory().clear();
