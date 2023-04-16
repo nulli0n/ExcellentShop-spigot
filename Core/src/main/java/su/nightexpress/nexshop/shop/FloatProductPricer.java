@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop;
 
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -13,19 +12,21 @@ import su.nightexpress.nexshop.data.price.ProductPriceData;
 import su.nightexpress.nexshop.data.price.ProductPriceManager;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FloatProductPricer extends RangedProductPricer implements IScheduled {
+public class FloatProductPricer extends RangedProductPricer /*implements IScheduled*/ {
 
     private Set<DayOfWeek>   days;
     private Set<LocalTime> times;
 
-    private BukkitTask updateTask;
+    //private BukkitTask updateTask;
 
     public FloatProductPricer() {
         this.days = new HashSet<>();
@@ -39,7 +40,7 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
             .add(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_DAYS, () -> String.join(", ", this.getDays()
                 .stream().map(DayOfWeek::name).toList()))
             .add(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_TIMES, () -> String.join(", ", this.getTimes()
-                .stream().map(TIME_FORMATTER::format).toList()))
+                .stream().map(IScheduled.TIME_FORMATTER::format).toList()))
         ;
     }
 
@@ -66,7 +67,7 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
             cfg.set(path + "." + tradeType.name() + ".Max", arr[1]);
         }));
         cfg.set(path + ".Refresh.Days", this.getDays().stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
-        cfg.set(path + ".Refresh.Times", this.getTimes().stream().map(TIME_FORMATTER::format).toList());
+        cfg.set(path + ".Refresh.Times", this.getTimes().stream().map(IScheduled.TIME_FORMATTER::format).toList());
     }
 
     @Override
@@ -80,10 +81,21 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
         else {
             this.randomize();
         }
-        this.startScheduler();
+        //this.startScheduler();
     }
 
-    @Override
+    public boolean isUpdateTime() {
+        if (this.getDays().isEmpty()) return false;
+        if (this.getTimes().isEmpty()) return false;
+        if (!this.getDays().contains(LocalDate.now().getDayOfWeek())) return false;
+
+        LocalTime roundNow = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+        return this.getTimes().stream().anyMatch(time -> {
+            return time.truncatedTo(ChronoUnit.MINUTES).equals(roundNow);
+        });
+    }
+
+    /*@Override
     public void startScheduler() {
         this.updateTask = this.createScheduler();
     }
@@ -104,7 +116,7 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
         if (this.updateTask != null) {
             this.updateTask.cancel();
         }
-    }
+    }*/
 
     @Override
     @NotNull
@@ -113,23 +125,23 @@ public class FloatProductPricer extends RangedProductPricer implements ISchedule
     }
 
     @NotNull
-    @Override
+    //@Override
     public Set<DayOfWeek> getDays() {
         return days;
     }
 
-    @Override
+    //@Override
     public void setDays(@NotNull Set<DayOfWeek> days) {
         this.days = days;
     }
 
     @NotNull
-    @Override
+    //@Override
     public Set<LocalTime> getTimes() {
         return times;
     }
 
-    @Override
+    //@Override
     public void setTimes(@NotNull Set<LocalTime> times) {
         this.times = times;
     }

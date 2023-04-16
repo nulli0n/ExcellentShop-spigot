@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.impl.shop;
 
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
+import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.ShopView;
@@ -70,6 +72,10 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
+
+        if (Hooks.hasPlaceholderAPI()) {
+            options.setTitle(PlaceholderAPI.setPlaceholders(viewer.getPlayer(), options.getTitle()));
+        }
 
         viewer.setPages(this.getShop().getPages());
         viewer.finePage();

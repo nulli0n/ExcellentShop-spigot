@@ -153,8 +153,8 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                     if (day == null) return true;
 
                     pricer.getDays().add(day);
-                    pricer.stopScheduler();
-                    pricer.startScheduler();
+                    //pricer.stopScheduler();
+                    //pricer.startScheduler();
                     product.getShop().saveProducts();
                     return true;
                 });
@@ -163,8 +163,8 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                 this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME), chat -> {
                     try {
                         pricer.getTimes().add(LocalTime.parse(chat.getMessage(), IScheduled.TIME_FORMATTER));
-                        pricer.stopScheduler();
-                        pricer.startScheduler();
+                        //pricer.stopScheduler();
+                        //pricer.startScheduler();
                         product.getShop().saveProducts();
                     }
                     catch (DateTimeParseException ignored) {}

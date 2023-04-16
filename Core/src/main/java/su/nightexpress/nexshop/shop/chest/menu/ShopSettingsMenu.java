@@ -102,6 +102,7 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
                             return;
                         }
                         player.closeInventory();
+                        player.updateInventory();
                         shop.getModule().deleteShop(player, shop.getLocation().getBlock());
                         return;
                     }

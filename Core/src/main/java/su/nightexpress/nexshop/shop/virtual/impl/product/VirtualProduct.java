@@ -74,7 +74,7 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
                 stock.setInitialAmount(StockType.PLAYER, tradeType, init);
                 stock.setRestockCooldown(StockType.PLAYER, tradeType, cooldown);
             }
-            cfg.addMissing(path + ".Stock", stock);
+            VirtualProductStock.write(stock, cfg, path + ".Stock");
             cfg.remove(path + ".Limit");
         }
         if (cfg.contains(path + ".Reward.Commands")) {

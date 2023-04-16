@@ -17,6 +17,7 @@ import su.nightexpress.nexshop.data.ShopUserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.hooks.HookId;
 import su.nightexpress.nexshop.module.ModuleManager;
+import su.nightexpress.nexshop.shop.PriceUpdateTask;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
@@ -31,6 +32,8 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     private ShopCartMenu    cartMenu;
     private CurrencyManager currencyManager;
     private ModuleManager   moduleManager;
+
+    private PriceUpdateTask priceUpdateTask;
 
     @Override
     @NotNull
@@ -56,10 +59,17 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
         this.moduleManager = new ModuleManager(this);
         this.moduleManager.setup();
         this.moduleManager.loadModules();
+
+        this.priceUpdateTask = new PriceUpdateTask(this);
+        this.priceUpdateTask.start();
     }
 
     @Override
     public void disable() {
+        if (this.priceUpdateTask != null) {
+            this.priceUpdateTask.stop();
+            this.priceUpdateTask = null;
+        }
         this.cartMenu.clear();
         if (this.moduleManager != null) {
             this.moduleManager.shutdown();

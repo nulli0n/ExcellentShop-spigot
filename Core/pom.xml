@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.3.11</version>
+        <version>4.3.12</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -52,6 +52,13 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -67,22 +74,17 @@
             <version>6.20.0</version>
             <scope>provided</scope>
         </dependency>
-        <!--<dependency>
-            <groupId>com.plotsquared</groupId>
-            <artifactId>PlotSquared-Core</artifactId>
-            <version>6.1.4</version>
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>2.10.10</version>
             <scope>provided</scope>
-        </dependency>-->
+        </dependency>
         <dependency>
             <groupId>org.black_ixx</groupId>
             <artifactId>playerpoints</artifactId>
             <version>3.0.0</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.justisr</groupId>
-            <artifactId>BrokerAPI</artifactId>
-            <version>master-b3cceb6421-1</version>
         </dependency>
         <dependency>
             <groupId>com.sk89q.worldguard</groupId>
@@ -115,32 +117,32 @@
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>NMS</artifactId>
-            <version>4.3.11</version>
+            <version>4.3.12</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_17_R1</artifactId>
-            <version>4.3.11</version>
+            <version>4.3.12</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_18_R2</artifactId>
-            <version>4.3.11</version>
+            <version>4.3.12</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_19</artifactId>
-            <version>4.3.11</version>
+            <version>4.3.12</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_19_R2</artifactId>
-            <version>4.3.11</version>
+            <version>4.3.12</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_19_R3</artifactId>
-            <version>4.3.11</version>
+            <version>4.3.12</version>
         </dependency>
     </dependencies>
 

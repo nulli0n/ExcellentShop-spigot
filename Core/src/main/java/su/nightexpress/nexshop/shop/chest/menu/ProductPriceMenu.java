@@ -85,15 +85,15 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                         return false;
                     }
                     pricer.getDays().add(day);
-                    pricer.stopScheduler();
-                    pricer.startScheduler();
+                    //pricer.stopScheduler();
+                    //pricer.startScheduler();
                 }
                 case PRODUCT_CHANGE_PRICE_REFRESH_TIMES -> {
                     FloatProductPricer pricer = (FloatProductPricer) product2.getPricer();
                     try {
                         pricer.getTimes().add(LocalTime.parse(msg, IScheduled.TIME_FORMATTER));
-                        pricer.stopScheduler();
-                        pricer.startScheduler();
+                        //pricer.stopScheduler();
+                        //pricer.startScheduler();
                     }
                     catch (DateTimeParseException ex) {
                         return false;
