@@ -9,6 +9,7 @@ import su.nexmedia.engine.api.menu.impl.ConfigMenu;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
@@ -54,5 +55,13 @@ public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
             });
             this.addItem(menuItem);
         });
+
+        if (Config.GUI_PLACEHOLDER_API.get()) {
+            this.getItems().forEach(menuItem -> {
+                if (menuItem.getOptions().getDisplayModifier() == null) {
+                    menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item));
+                }
+            });
+        }
     }
 }

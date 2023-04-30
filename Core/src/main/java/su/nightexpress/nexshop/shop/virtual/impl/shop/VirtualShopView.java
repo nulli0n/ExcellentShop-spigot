@@ -64,7 +64,12 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
 
         this.getItems().forEach(menuItem -> {
             if (menuItem.getOptions().getDisplayModifier() == null) {
-                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.shop.replacePlaceholders()));
+                menuItem.getOptions().setDisplayModifier((viewer, item) -> {
+                    ItemUtil.replace(item, this.shop.replacePlaceholders());
+                    if (Config.GUI_PLACEHOLDER_API.get()) {
+                        ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
+                    }
+                });
             }
         });
     }
