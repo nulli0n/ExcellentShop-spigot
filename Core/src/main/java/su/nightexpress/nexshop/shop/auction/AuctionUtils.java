@@ -38,14 +38,13 @@ public class AuctionUtils {
 
         for (int i = 0; i < 20; i++) {
             UUID ownerId = Rnd.get(owners.keySet());
-            if (ownerId == null) continue;
 
             String ownerName = owners.get(ownerId);
 
             ItemStack item = new ItemStack(Rnd.get(materials));
             item.setAmount(Rnd.get(1, item.getMaxStackSize()));
 
-            if ((ItemUtil.isArmor(item) || ItemUtil.isWeapon(item)) && Rnd.chance(30D)) {
+            if ((ItemUtil.isArmor(item) || ItemUtil.isSword(item) || ItemUtil.isTool(item)) && Rnd.chance(30D)) {
                 for (int y = 0; y < Rnd.get(4); y++) {
                     Enchantment enchantment = Rnd.get(Enchantment.values());
                     item.addUnsafeEnchantment(enchantment, Rnd.get(enchantment.getStartLevel(), enchantment.getMaxLevel()));
@@ -53,8 +52,6 @@ public class AuctionUtils {
             }
 
             ICurrency currency = Rnd.get(auctionManager.getCurrencies());
-            if (currency == null) currency = auctionManager.getCurrencyDefault();
-
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
 
             LocalDateTime created = LocalDateTime.now().minusDays(Rnd.get(5)).minusHours(Rnd.get(6)).minusMinutes(Rnd.get(30));

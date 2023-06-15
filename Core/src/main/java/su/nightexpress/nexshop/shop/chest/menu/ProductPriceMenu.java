@@ -16,14 +16,14 @@ import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.IScheduled;
+import su.nightexpress.nexshop.shop.TimeUtils;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.DynamicProductPricer;
-import su.nightexpress.nexshop.shop.FloatProductPricer;
-import su.nightexpress.nexshop.shop.RangedProductPricer;
+import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
+import su.nightexpress.nexshop.shop.price.FloatProductPricer;
+import su.nightexpress.nexshop.shop.price.RangedProductPricer;
 import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 
@@ -91,7 +91,7 @@ public class ProductPriceMenu extends AbstractMenu<ExcellentShop> {
                 case PRODUCT_CHANGE_PRICE_REFRESH_TIMES -> {
                     FloatProductPricer pricer = (FloatProductPricer) product2.getPricer();
                     try {
-                        pricer.getTimes().add(LocalTime.parse(msg, IScheduled.TIME_FORMATTER));
+                        pricer.getTimes().add(LocalTime.parse(msg, TimeUtils.TIME_FORMATTER));
                         //pricer.stopScheduler();
                         //pricer.startScheduler();
                     }

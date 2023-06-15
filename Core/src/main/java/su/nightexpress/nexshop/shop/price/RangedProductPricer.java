@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop;
+package su.nightexpress.nexshop.shop.price;
 
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.ProductPricer;

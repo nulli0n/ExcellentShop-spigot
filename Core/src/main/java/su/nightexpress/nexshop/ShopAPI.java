@@ -2,8 +2,8 @@ package su.nightexpress.nexshop;
 
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.data.ShopDataHandler;
-import su.nightexpress.nexshop.data.ShopUserManager;
+import su.nightexpress.nexshop.data.DataHandler;
+import su.nightexpress.nexshop.data.UserManager;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -13,7 +13,7 @@ public class ShopAPI {
     public static final ExcellentShop PLUGIN = ExcellentShop.getPlugin(ExcellentShop.class);
 
     @NotNull
-    public static ShopDataHandler getDataHandler() {
+    public static DataHandler getDataHandler() {
         return PLUGIN.getData();
     }
 
@@ -35,7 +35,7 @@ public class ShopAPI {
     }
 
     @NotNull
-    public static ShopUserManager getUserManager() {
+    public static UserManager getUserManager() {
         return PLUGIN.getUserManager();
     }
 }

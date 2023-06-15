@@ -7,9 +7,9 @@ import su.nightexpress.nexshop.data.user.ShopUser;
 
 import java.util.UUID;
 
-public class ShopUserManager extends AbstractUserManager<ExcellentShop, ShopUser> {
+public class UserManager extends AbstractUserManager<ExcellentShop, ShopUser> {
 
-    public ShopUserManager(@NotNull ExcellentShop plugin) {
+    public UserManager(@NotNull ExcellentShop plugin) {
         super(plugin, plugin);
     }
 

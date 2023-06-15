@@ -23,7 +23,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.FlatProductPricer;
+import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
@@ -71,7 +71,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         this.view = new ChestShopView(this);
 
         this.placeholderMap
-            .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestConfig.ALLOWED_CURRENCIES.stream()
+            .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestShopModule.ALLOWED_CURRENCIES.stream()
                 .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
             .add(Placeholders.SHOP_CHEST_OWNER, this::getOwnerName)
             .add(Placeholders.SHOP_CHEST_LOCATION_X, () -> NumberUtil.format(this.getLocation().getX()))
@@ -107,13 +107,13 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
             return false;
         }
 
-        this.ownerName = this.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME : this.ownerPlayer.getName();
+        this.ownerName = this.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME.get() : this.ownerPlayer.getName();
         this.setName(cfg.getString("Name", this.getOwnerName()));
 
         for (TradeType tradeType : TradeType.values()) {
             this.setTransactionEnabled(tradeType, cfg.getBoolean("Transaction_Allowed." + tradeType.name(), true));
         }
-        for (ICurrency currency : ChestConfig.ALLOWED_CURRENCIES) {
+        for (ICurrency currency : ChestShopModule.ALLOWED_CURRENCIES) {
             this.getBank().deposit(currency, cfg.getDouble("Bank." + currency.getId()));
         }
 
@@ -199,12 +199,12 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         if (item.getType().isAir() || this.isProduct(item)) {
             return false;
         }
-        if (!ChestConfig.isAllowedItem(item)) {
+        if (!ChestShopModule.isAllowedItem(item)) {
             plugin.getMessage(ChestLang.SHOP_PRODUCT_ERROR_BAD_ITEM).send(player);
             return false;
         }
 
-        ChestProduct shopProduct = new ChestProduct(ChestConfig.DEFAULT_CURRENCY, item);
+        ChestProduct shopProduct = new ChestProduct(ChestShopModule.DEFAULT_CURRENCY, item);
         shopProduct.setStock(new ChestProductStock());
         shopProduct.setPricer(new FlatProductPricer());
         this.addProduct(shopProduct);
@@ -303,7 +303,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
 
     public void setOwner(@NotNull OfflinePlayer player) {
         this.ownerId = player.getUniqueId();
-        this.ownerName = this.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME : player.getName();
+        this.ownerName = this.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME.get() : player.getName();
         this.ownerPlayer = player;
     }
 
@@ -338,7 +338,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     }
 
     public void updateDisplayText() {
-        this.displayText = new ArrayList<>(ChestConfig.getDisplayText(this.getType()));
+        this.displayText = new ArrayList<>(ChestShopModule.getHologramLines(this.getType()));
         this.displayText.replaceAll(this.replacePlaceholders());
     }
 

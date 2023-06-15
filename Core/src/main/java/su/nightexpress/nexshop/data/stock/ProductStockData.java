@@ -10,7 +10,7 @@ public class ProductStockData {
     private final TradeType tradeType;
     private final StockType stockType;
     private final String    shopId;
-    private final String                  productId;
+    private final String    productId;
 
     private int  itemsLeft;
     private long restockDate;

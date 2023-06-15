@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProductPriceManager {
+public class ProductPriceStorage {
 
     private static final Map<String, Map<String, ProductPriceData>> DATAS = new ConcurrentHashMap<>();
 
@@ -23,7 +23,7 @@ public class ProductPriceManager {
     @NotNull
     private static CompletableFuture<Void> loadData(@NotNull String shopId) {
         DATAS.remove(shopId);
-        return CompletableFuture.runAsync(() -> ShopAPI.getDataHandler().getProductPriceData(shopId).forEach(ProductPriceManager::addData));
+        return CompletableFuture.runAsync(() -> ShopAPI.getDataHandler().getProductPriceData(shopId).forEach(ProductPriceStorage::addData));
     }
 
     private static void addData(@NotNull ProductPriceData priceData) {
@@ -44,15 +44,11 @@ public class ProductPriceManager {
 
         addData(priceData);
 
-        ShopAPI.PLUGIN.runTask(c -> {
-            ShopAPI.getDataHandler().createProductPriceData(priceData);
-        }, true);
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().createProductPriceData(priceData));
     }
 
     public static void saveData(@NotNull ProductPriceData priceData) {
-        ShopAPI.PLUGIN.runTask(c -> {
-            ShopAPI.getDataHandler().saveProductPriceData(priceData);
-        }, true);
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().saveProductPriceData(priceData));
     }
 
     public static void deleteData(@NotNull Product<?, ?, ?> product) {
@@ -60,8 +56,6 @@ public class ProductPriceManager {
 
         removeData(product);
 
-        ShopAPI.PLUGIN.runTask(c -> {
-            ShopAPI.getDataHandler().removeProductPriceData(product);
-        }, true);
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().removeProductPriceData(product));
     }
 }

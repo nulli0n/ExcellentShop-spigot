@@ -19,7 +19,7 @@ import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
 import java.util.List;
@@ -75,7 +75,7 @@ public class ShopBankMenu extends AbstractMenuAuto<ExcellentShop, ICurrency> {
     @Override
     @NotNull
     protected List<ICurrency> getObjects(@NotNull Player player) {
-        return ChestConfig.ALLOWED_CURRENCIES.stream().toList();
+        return ChestShopModule.ALLOWED_CURRENCIES.stream().toList();
     }
 
     @Override

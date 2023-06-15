@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.data.user;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.AbstractUser;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.data.stock.ProductStockManager;
+import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 
 import java.util.UUID;
 
@@ -25,13 +25,13 @@ public class ShopUser extends AbstractUser<ExcellentShop> {
         super(plugin, uuid, name, dateCreated, lastOnline);
 
         this.settings = settings;
-        ProductStockManager.loadData(this);
+        ProductStockStorage.loadData(this);
     }
 
     @Override
     public void onUnload() {
         super.onUnload();
-        ProductStockManager.unloadData(this);
+        ProductStockStorage.unloadData(this);
     }
 
     @NotNull

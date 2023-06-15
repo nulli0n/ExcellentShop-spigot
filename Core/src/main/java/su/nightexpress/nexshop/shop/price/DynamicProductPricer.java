@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop;
+package su.nightexpress.nexshop.shop.price;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +10,7 @@ import su.nightexpress.nexshop.api.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceData;
-import su.nightexpress.nexshop.data.price.ProductPriceManager;
+import su.nightexpress.nexshop.data.price.ProductPriceStorage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,10 +90,10 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
         priceData.setLastSellPrice(this.getPrice(TradeType.SELL));
         priceData.setLastUpdated(System.currentTimeMillis());
         if (!hasData) {
-            ProductPriceManager.createData(priceData);
+            ProductPriceStorage.createData(priceData);
         }
         else {
-            ProductPriceManager.saveData(priceData);
+            ProductPriceStorage.saveData(priceData);
         }
     }
 
@@ -118,7 +118,7 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
 
     @Nullable
     public ProductPriceData getData() {
-        return ProductPriceManager.getData(this.getProduct().getShop().getId(), this.getProduct().getId());
+        return ProductPriceStorage.getData(this.getProduct().getShop().getId(), this.getProduct().getId());
     }
 
     public double getInitial(@NotNull TradeType tradeType) {

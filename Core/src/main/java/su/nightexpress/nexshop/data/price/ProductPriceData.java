@@ -8,11 +8,12 @@ public class ProductPriceData {
 
     private final String shopId;
     private final String productId;
-    private       double lastBuyPrice;
+
+    private double lastBuyPrice;
     private double lastSellPrice;
-    private long lastUpdated;
-    private int purchases;
-    private int sales;
+    private long   lastUpdated;
+    private int    purchases;
+    private int    sales;
 
     public ProductPriceData(@NotNull ProductPricer pricer) {
         this(pricer.getProduct().getShop().getId(), pricer.getProduct().getId(),

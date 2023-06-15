@@ -79,7 +79,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         for (String sId : cfg.getSection("Discounts")) {
             this.addDiscountConfig(VirtualDiscount.read(cfg, "Discounts." + sId));
         }
-        this.getDiscountConfigs().forEach(VirtualDiscount::startScheduler);
         this.loadProducts();
         return true;
     }

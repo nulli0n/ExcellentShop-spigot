@@ -19,7 +19,7 @@ import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.shop.FlatProductPricer;
+import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualCommandProduct;
@@ -116,6 +116,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             MenuItem productItem = new MenuItem(productIcon);
             productItem.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
             productItem.setSlots(product.getSlot());
+            productItem.setPriority(200);
             productItem.setClick((viewer2, event) -> {
                 if (!event.isLeftClick() && !event.isRightClick()) return;
 

@@ -1,20 +1,14 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
-import com.google.common.collect.Sets;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.Colorizer;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.currency.CurrencyId;
-import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.hooks.HookId;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.*;
@@ -22,142 +16,132 @@ import java.util.stream.Collectors;
 
 public class ChestConfig {
 
-    public static final JOption<Map<String, ItemStack>> DISPLAY_SHOWCASE = new JOption<Map<String, ItemStack>>("Display.Showcase",
-        (cfg, path, def) -> {
-            return cfg.getSection(path).stream().collect(Collectors.toMap(k -> k, v -> cfg.getItem(path + "." + v)));
-        },
-        () -> Map.of(Placeholders.DEFAULT, new ItemStack(Material.GLASS), Material.CHEST.name(), new ItemStack(Material.WHITE_STAINED_GLASS)),
-        "Sets an item that will be used as a shop showcase.",
-        "You can provide different showcases for different shop types you set in 'Allowed_Containers' option.",
-        "Showcase is basically an invisible armor stand with equipped item on the head.",
-        "Feel free to use custom-modeled items and such!",
-        Placeholders.URL_ENGINE_ITEMS).setWriter((cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + type, item)));
-
-    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled", true,
-        "When 'true', creates a client-side hologram above the shop.");
-    private static Map<ChestShopType, List<String>> DISPLAY_TEXT;
-    public static  int                              DISPLAY_SLIDE_INTERVAL;
-
     public static final JOption<String> EDITOR_TITLE = JOption.create("Shops.Editor_Title", "Shop Editor",
         "Sets title for Editor GUIs."
     ).mapReader(Colorizer::apply);
 
-    public static boolean        DELETE_INVALID_SHOP_CONFIGS;
-    public static ICurrency      DEFAULT_CURRENCY;
-    public static final JOption<Set<String>> ALLOWED_CONTAINERS = new JOption<Set<String>>("Shops.Allowed_Containers",
-        (cfg, path, def) -> cfg.getStringSet(path).stream().map(String::toUpperCase).collect(Collectors.toSet()),
-        () -> Sets.newHashSet(Material.CHEST.name(), Material.TRAPPED_CHEST.name(), Material.BARREL.name(), Material.SHULKER_BOX.name()),
-        "A list of Materials, that can be used for shop creation.",
-        "Only 'Container' block materials, can be used!",
-        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html",
-        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/block/Container.html"
-    );
-    public static Set<ICurrency> ALLOWED_CURRENCIES;
-    public static String         ADMIN_SHOP_NAME;
+    public static final JOption<Boolean> DELETE_INVALID_SHOP_CONFIGS = JOption.create("Shops.Delete_Invalid_Shop_Configs", false,
+        "Sets whether or not invalid shops (that can not be loaded properly) will be auto deleted.");
+
+    public static final JOption<String> ADMIN_SHOP_NAME = JOption.create("Shops.AdminShop_Name", "AdminShop",
+        "Sets the custom name for admin shops instead of default owner's name.");
+
     public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name",
         "&a" + Placeholders.Player.NAME + "'s Shop",
         "Default shop name, that will be used on shop creation."
     ).mapReader(Colorizer::apply);
 
-    public static  double               SHOP_CREATION_COST_CREATE;
-    public static  double               SHOP_CREATION_COST_REMOVE;
-    private static Map<String, Integer> SHOP_CREATION_MAX_PER_RANK;
-    public static  Set<String>          SHOP_CREATION_WORLD_BLACKLIST;
-    public static  boolean              SHOP_CREATION_CLAIM_ONLY;
+    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("Shops.Default_Currency", CurrencyId.VAULT,
+        "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available.",
+        "IMPORTANT: Make sure you have this currency in 'Allowed_Currencies' list!");
 
-    private static Map<String, Integer> SHOP_PRODUCTS_MAX_PER_RANK;
-    public static  Set<String>          SHOP_PRODUCT_DENIED_MATERIALS;
-    public static  Set<String>          SHOP_PRODUCT_DENIED_LORES;
-    public static  Set<String>          SHOP_PRODUCT_DENIED_NAMES;
+    public static final JOption<Set<String>> ALLOWED_CURRENCIES = JOption.create("Shops.Allowed_Currencies",
+        Set.of(CurrencyId.VAULT),
+        "A list of currencies that can be used for Chest Shop products.");
 
-    public static void load(@NotNull ChestShopModule chestShop) {
-        ExcellentShop plugin = chestShop.plugin();
-        JYML cfg = chestShop.getConfig();
-        cfg.initializeOptions(ChestConfig.class);
+    public static final JOption<Set<Material>> ALLOWED_CONTAINERS = JOption.forSet("Shops.Allowed_Containers",
+        str -> Material.getMaterial(str.toUpperCase()),
+        () -> {
+            Set<Material> set = new HashSet<>(Tag.SHULKER_BOXES.getValues());
+            set.add(Material.CHEST);
+            set.add(Material.TRAPPED_CHEST);
+            set.add(Material.BARREL);
+            return set;
+        },
+        "A list of Materials, that can be used for shop creation.",
+        "Only 'Container' block materials, can be used!",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/block/Container.html"
+    ).setWriter((cfg, path, set) -> cfg.set(path, set.stream().map(Enum::name).toList()));
 
-        cfg.addMissing("Shops.Default_Currency", CurrencyId.VAULT);
-        cfg.addMissing("Shops.Delete_Invalid_Shop_Configs", false);
-        cfg.addMissing("Shops.AdminShop_Name", "MyServerCraft");
-        if (!cfg.isConfigurationSection("Display.Title.Values")) {
-            cfg.remove("Display.Title.Values");
-        }
-        cfg.addMissing("Display.Title.Values." + ChestShopType.PLAYER, Arrays.asList("&a%shop_name%", "&7Owner: &6%shop_owner%"));
-        cfg.addMissing("Display.Title.Values." + ChestShopType.ADMIN, Arrays.asList("&a%shop_name%", "&7Server Shop"));
+    public static final JOption<Double> SHOP_CREATION_COST_CREATE = JOption.create("Shops.Creation.Cost.Create", 0D,
+        "Sets how much player have to pay in order to create a chest shop.");
 
-        String path = "Shops.";
-        DELETE_INVALID_SHOP_CONFIGS = cfg.getBoolean(path + "Delete_Invalid_Shop_Configs", false);
-        DEFAULT_CURRENCY = plugin.getCurrencyManager().getCurrency(cfg.getString(path + "Default_Currency", CurrencyId.VAULT));
-        ALLOWED_CURRENCIES = cfg.getStringSet(path + "Allowed_Currencies").stream().map(String::toLowerCase)
-            .map(currencyId -> plugin.getCurrencyManager().getCurrency(currencyId))
-            .filter(Objects::nonNull).collect(Collectors.toSet());
-        ADMIN_SHOP_NAME = Colorizer.apply(cfg.getString(path + "AdminShop_Name", "MyServerCraft"));
+    public static final JOption<Double> SHOP_CREATION_COST_REMOVE = JOption.create("Shops.Creation.Cost.Remove", 0D,
+        "Sets how much player have to pay in order to remove a chest shop.");
 
-        path = "Shops.Creation.";
-        SHOP_CREATION_COST_CREATE = cfg.getDouble(path + "Cost.Create");
-        SHOP_CREATION_COST_REMOVE = cfg.getDouble(path + "Cost.Remove");
-        SHOP_CREATION_WORLD_BLACKLIST = cfg.getStringSet(path + "World_Blacklist");
+    public static final JOption<Set<String>> SHOP_CREATION_WORLD_BLACKLIST = JOption.create("Shops.Creation.World_Blacklist",
+        Set.of("custom_world", "another_world"),
+        "List of worlds, where chest shop creation is not allowed.");
 
-        SHOP_CREATION_MAX_PER_RANK = new HashMap<>();
-        for (String rank : cfg.getSection(path + "Max_Shops_Per_Rank")) {
-            SHOP_CREATION_MAX_PER_RANK.put(rank.toLowerCase(), cfg.getInt(path + "Max_Shops_Per_Rank." + rank));
-        }
+    public static final JOption<Map<String, Integer>> SHOP_CREATION_MAX_PER_RANK = JOption.forMap("Shops.Creation.Max_Shops_Per_Rank",
+        (cfg, path, rank) -> cfg.getInt(path + "." + rank),
+        Map.of(
+            Placeholders.DEFAULT, 10,
+            "vip", 20,
+            "admin", -1
+        ),
+        "Sets how many shops a player with certain rank can create at the same time.",
+        "No extra permissions are required. Simply provide your permisson group names.",
+        "Use '-1' to make unlimited amount."
+    ).setWriter((cfg, path, map) -> map.forEach((rank, amount) -> cfg.set(path + "." + rank, amount)));
 
-        path = "Shops.Creation.In_Player_Claims_Only.";
-        SHOP_CREATION_CLAIM_ONLY = cfg.getBoolean(path + "Enabled");
+    public static final JOption<Boolean> SHOP_CREATION_CLAIM_ONLY = JOption.create("Shops.Creation.In_Player_Claims_Only.Enabled",
+        true,
+        "Sets whether or not players can create shops in their own claims only.",
+        "Supported Plugins: " + HookId.LANDS + ", " + HookId.GRIEF_PREVENTION + ", " + HookId.WORLD_GUARD,
+        "For all other plugins it will simply check if player is able to build at that location.");
 
-        path = "Shops.Products.";
-        SHOP_PRODUCTS_MAX_PER_RANK = new HashMap<>();
-        for (String rank : cfg.getSection(path + "Max_Products_Per_Shop")) {
-            SHOP_PRODUCTS_MAX_PER_RANK.put(rank.toLowerCase(), cfg.getInt(path + "Max_Products_Per_Shop." + rank));
-        }
+    public final static JOption<Map<String, Integer>> SHOP_PRODUCTS_MAX_PER_RANK = JOption.forMap("Shops.Products.Max_Products_Per_Shop",
+        (cfg, path, rank) -> cfg.getInt(path + "." + rank),
+        Map.of(
+            Placeholders.DEFAULT, 5,
+            "vip", 7,
+            "admin", -1
+        ),
+        "Sets how many products a player with certain rank can put in a shop at the same time.",
+        "No extra permissions are required. Simply provide your permisson group names.",
+        "Use '-1' to make unlimited amount."
+    ).setWriter((cfg, path, map) -> map.forEach((rank, amount) -> cfg.set(path + "." + rank, amount)));
 
-        SHOP_PRODUCT_DENIED_MATERIALS = cfg.getStringSet(path + "Material_Blacklist").stream()
-            .map(String::toUpperCase).collect(Collectors.toSet());
-        SHOP_PRODUCT_DENIED_LORES = cfg.getStringSet(path + "Lore_Blacklist");
-        SHOP_PRODUCT_DENIED_NAMES = cfg.getStringSet(path + "Name_Blacklist");
+    public static final JOption<Set<Material>> SHOP_PRODUCT_DENIED_MATERIALS = JOption.forSet("Shops.Products.Material_Blacklist",
+        str -> Material.getMaterial(str.toUpperCase()),
+        Set.of(),
+        "List of Materials that can not be added as shop products.",
+        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html"
+    ).setWriter((cfg, path, set) -> cfg.set(path, set.stream().map(Enum::name).toList()));
 
-        path = "Display.";
-        DISPLAY_SLIDE_INTERVAL = cfg.getInt(path + "Title.Slide_Interval", 3);
-        DISPLAY_TEXT = new HashMap<>();
-        for (ChestShopType type : ChestShopType.values()) {
-            DISPLAY_TEXT.put(type, Colorizer.apply(cfg.getStringList(path + "Title.Values." + type.name())));
-        }
+    public static final JOption<Set<String>> SHOP_PRODUCT_DENIED_LORES = JOption.create("Shops.Products.Lore_Blacklist",
+        Set.of("fuck", "ass hole bitch"),
+        "Items with the following words in their lore will be disallowed from being used as shop products.");
 
-        cfg.saveChanges();
-    }
+    public static final JOption<Set<String>> SHOP_PRODUCT_DENIED_NAMES = JOption.create("Shops.Products.Name_Blacklist",
+        Set.of("shit", "sample text"),
+        "Items with the following words in their names will be disallowed from being used as shop products.");
 
-    public static int getMaxShops(@NotNull Player player) {
-        return Hooks.getGroupValueInt(player, SHOP_CREATION_MAX_PER_RANK, true);
-    }
 
-    public static int getMaxShopProducts(@NotNull Player player) {
-        return Hooks.getGroupValueInt(player, SHOP_PRODUCTS_MAX_PER_RANK, true);
-    }
+    public static final JOption<Map<String, ItemStack>> DISPLAY_SHOWCASE = new JOption<Map<String, ItemStack>>("Display.Showcase",
+        (cfg, path, def) -> {
+            return cfg.getSection(path).stream().collect(Collectors.toMap(k -> k, v -> cfg.getItem(path + "." + v)));
+        },
+        () -> Map.of(
+            Placeholders.DEFAULT, new ItemStack(Material.GLASS),
+            Material.CHEST.name(), new ItemStack(Material.WHITE_STAINED_GLASS)
+        ),
+        "Sets an item that will be used as a shop showcase.",
+        "You can provide different showcases for different shop types you set in 'Allowed_Containers' option.",
+        "Showcase is basically an invisible armor stand with equipped item on the head.",
+        "Feel free to use custom-modeled items and such!",
+        Placeholders.URL_ENGINE_ITEMS
+    ).setWriter((cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + type, item)));
 
-    @NotNull
-    public static List<String> getDisplayText(@NotNull ChestShopType chestType) {
-        return DISPLAY_TEXT.getOrDefault(chestType, Collections.emptyList());
-    }
+    public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled",
+        true,
+        "When 'true', creates a client-side hologram above the shop."
+    );
 
-    public static boolean isAllowedItem(@NotNull ItemStack item) {
-        String type = item.getType().name();
-        if (ChestConfig.SHOP_PRODUCT_DENIED_MATERIALS.contains(type)) {
-            return false;
-        }
+    public static final JOption<Integer> DISPLAY_SLIDE_INTERVAL = JOption.create("Display.Title.Slide_Interval", 3,
+        "Sets interval (in seconds) between hologram line changes.");
 
-        ItemMeta meta = item.getItemMeta();
-        if (meta != null) {
-            if (meta.hasDisplayName()) {
-                String name = meta.getDisplayName();
-                if (ChestConfig.SHOP_PRODUCT_DENIED_NAMES.stream().anyMatch(name::contains)) {
-                    return false;
-                }
-            }
-            List<String> lore = meta.getLore();
-            if (lore != null) {
-                return lore.stream().noneMatch(line -> SHOP_PRODUCT_DENIED_LORES.stream().anyMatch(line::contains));
-            }
-        }
-        return true;
-    }
+    public static final JOption<Map<ChestShopType, List<String>>> DISPLAY_TEXT = JOption.forMap("Display.Title.Values",
+        str -> StringUtil.getEnum(str, ChestShopType.class).orElse(null),
+        (cfg, path, type) -> cfg.getStringList(path + "." + type),
+        Map.of(
+            ChestShopType.ADMIN, Collections.singletonList(Placeholders.SHOP_NAME),
+            ChestShopType.PLAYER, Arrays.asList(Placeholders.SHOP_NAME, "&7Owner: &6" + Placeholders.SHOP_CHEST_OWNER)
+        ),
+        "Sets hologram lines format for player and admin shops.",
+        "You can use 'Chest Shop' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+    ).setWriter((cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)));
+
 }

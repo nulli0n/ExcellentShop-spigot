@@ -11,7 +11,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.IScheduled;
+import su.nightexpress.nexshop.shop.TimeUtils;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
@@ -59,8 +59,6 @@ public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscoun
                 if (day == null) return true;
 
                 discount.getDays().add(day);
-                discount.stopScheduler();
-                discount.startScheduler();
                 shop.saveSettings();
                 return true;
             });
@@ -75,9 +73,7 @@ public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscoun
 
             this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME), chat -> {
                 try {
-                    discount.getTimes().add(LocalTime.parse(Colorizer.strip(chat.getMessage()), IScheduled.TIME_FORMATTER));
-                    discount.stopScheduler();
-                    discount.startScheduler();
+                    discount.getTimes().add(LocalTime.parse(Colorizer.strip(chat.getMessage()), TimeUtils.TIME_FORMATTER));
                     shop.saveSettings();
                 }
                 catch (DateTimeParseException ignored) {}

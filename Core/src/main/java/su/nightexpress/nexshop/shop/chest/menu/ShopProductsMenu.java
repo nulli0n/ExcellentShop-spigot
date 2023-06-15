@@ -15,7 +15,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -67,7 +67,7 @@ public class ShopProductsMenu extends AbstractMenu<ExcellentShop> {
     public boolean onPrepare(@NotNull Player player, @NotNull Inventory inventory) {
         int page = this.getPage(player);
 
-        int maxProducts = ChestConfig.getMaxShopProducts(player);
+        int maxProducts = ChestShopModule.getProductLimit(player);
         if (maxProducts < 0) maxProducts = this.productSlots.length;
 
         PriorityQueue<ChestProduct> queue = new PriorityQueue<>(Comparator.comparing(Product::getId));
@@ -129,7 +129,7 @@ public class ShopProductsMenu extends AbstractMenu<ExcellentShop> {
                         return;
                     }
                     if (e.isLeftClick()) {
-                        List<ICurrency> currencies = new ArrayList<>(ChestConfig.ALLOWED_CURRENCIES);
+                        List<ICurrency> currencies = new ArrayList<>(ChestShopModule.ALLOWED_CURRENCIES);
                         int index = currencies.indexOf(product.getCurrency()) + 1;
                         if (index >= currencies.size()) index = 0;
                         product.setCurrency(currencies.get(index));
@@ -146,7 +146,7 @@ public class ShopProductsMenu extends AbstractMenu<ExcellentShop> {
     @Override
     public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
         Player player = (Player) e.getWhoClicked();
-        int maxProducts = ChestConfig.getMaxShopProducts(player);
+        int maxProducts = ChestShopModule.getProductLimit(player);
         int hasProducts = this.shop.getProducts().size();
         boolean canAdd = maxProducts < 0 || hasProducts < maxProducts;
         if (!canAdd) return true;

@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ProductStockManager {
+public class ProductStockStorage {
 
     private static final Map<String, Map<String, Map<StockType, Map<TradeType, ProductStockData>>>> DATAS = new ConcurrentHashMap<>();
 
@@ -57,18 +57,6 @@ public class ProductStockManager {
             .getOrDefault(stockType, Collections.emptyMap()).remove(tradeType);
     }
 
-    /*@Nullable
-    public static ProductStockData getData(@NotNull ShopUser user, @NotNull IProduct product,
-                                           @NotNull IProductStock.StockType stockType, @NotNull TradeType tradeType) {
-        return getData(user.getId().toString(), product.getId(), stockType, tradeType);
-    }
-
-    @Nullable
-    public static ProductStockData getData(@NotNull IProduct product,
-                                           @NotNull IProductStock.StockType stockType, @NotNull TradeType tradeType) {
-        return getData(product.getShop().getId(), product.getId(), stockType, tradeType);
-    }*/
-
     @Nullable
     public static ProductStockData getData(@NotNull String holder, @NotNull String productId,
                                            @NotNull StockType stockType, @NotNull TradeType tradeType) {
@@ -77,47 +65,17 @@ public class ProductStockManager {
             .getOrDefault(stockType, Collections.emptyMap()).get(tradeType);
     }
 
-    /*public static void createProductStockData(@NotNull ShopUser user, @NotNull ProductStockData stockData) {
-        createProductStockData(user.getId().toString(), stockData);
-    }
-
-    public static void createProductStockData(@NotNull IProduct product, @NotNull ProductStockData stockData) {
-        createProductStockData(product.getShop().getId(), stockData);
-    }*/
-
     public static void createProductStockData(@NotNull String holder, @NotNull ProductStockData stockData) {
         if (getData(holder, stockData.getProductId(), stockData.getStockType(), stockData.getTradeType()) != null) return;
 
         addData(holder, stockData);
 
-        ShopAPI.PLUGIN.runTask(c -> {
-            ShopAPI.getDataHandler().createProductStockData(holder, stockData);
-        }, true);
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().createProductStockData(holder, stockData));
     }
-
-    /*public static void saveProductStockData(@NotNull ShopUser user, @NotNull ProductStockData stockData) {
-        saveProductStockData(user.getId().toString(), stockData);
-    }
-
-    public static void saveProductStockData(@NotNull IProduct product, @NotNull ProductStockData stockData) {
-        saveProductStockData(product.getShop().getId(), stockData);
-    }*/
 
     public static void saveProductStockData(@NotNull String holder, @NotNull ProductStockData stockData) {
-        ShopAPI.PLUGIN.runTask(c -> {
-            ShopAPI.getDataHandler().saveProductStockData(holder, stockData);
-        }, true);
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().saveProductStockData(holder, stockData));
     }
-
-    /*public static void removeProductStockData(@NotNull ShopUser user, @NotNull IProduct product,
-                                              @NotNull IProductStock.StockType stockType, @NotNull TradeType tradeType) {
-        removeProductStockData(user.getId().toString(), product, stockType, tradeType);
-    }
-
-    public static void removeProductStockData(@NotNull IProduct product,
-                                              @NotNull IProductStock.StockType stockType, @NotNull TradeType tradeType) {
-        removeProductStockData(product.getShop().getId(), product, stockType, tradeType);
-    }*/
 
     public static void removeProductStockData(@NotNull String holder, @NotNull Product<?, ?, ?> product,
                                               @NotNull StockType stockType, @NotNull TradeType tradeType) {
@@ -125,8 +83,6 @@ public class ProductStockManager {
 
         removeData(holder, product, stockType, tradeType);
 
-        ShopAPI.PLUGIN.runTask(c -> {
-            ShopAPI.getDataHandler().removeProductStockData(holder, product, stockType, tradeType);
-        }, true);
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().removeProductStockData(holder, product, stockType, tradeType));
     }
 }

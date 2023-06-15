@@ -14,7 +14,7 @@ import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.stock.ProductStockData;
-import su.nightexpress.nexshop.data.stock.ProductStockManager;
+import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -147,22 +147,22 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
                                                  @NotNull StockType stockType, @NotNull TradeType tradeType) {
         // Если лимит не установлен, то и записи в БД нет.
         if (this.isUnlimited(stockType, tradeType)) {
-            ProductStockManager.removeProductStockData(holder, this.getProduct(), stockType, tradeType);
+            ProductStockStorage.removeProductStockData(holder, this.getProduct(), stockType, tradeType);
             return null;
         }
 
         // Получаем запись из БД о текущих лимитах.
         // Если такая есть, проверяем актуальность и пополняем если нужно.
-        ProductStockData stockData = ProductStockManager.getData(holder, this.getProduct().getId(), stockType, tradeType);
+        ProductStockData stockData = ProductStockStorage.getData(holder, this.getProduct().getId(), stockType, tradeType);
         if (stockData != null && stockData.isRestockTime()) {
             if (stockType == StockType.GLOBAL) {
                 stockData.restock(this);
-                ProductStockManager.saveProductStockData(holder, stockData);
+                ProductStockStorage.saveProductStockData(holder, stockData);
             }
             // Для Юзер стока удаляем запись вместо пополнения, чтобы не шло время обновления, пока не будет
             // совершена хотя бы одна покупка.
             else {
-                ProductStockManager.removeProductStockData(holder, this.getProduct(), stockType, tradeType);
+                ProductStockStorage.removeProductStockData(holder, this.getProduct(), stockType, tradeType);
                 return null;
             }
         }
@@ -251,11 +251,11 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         if (stockData == null) {
             stockData = new ProductStockData(this, tradeType, stockType);
             stockData.setItemsLeft(Math.min(initial, amount));
-            ProductStockManager.createProductStockData(holder, stockData);
+            ProductStockStorage.createProductStockData(holder, stockData);
         }
         else {
             stockData.setItemsLeft(Math.min(initial, amount));
-            ProductStockManager.saveProductStockData(holder, stockData);
+            ProductStockStorage.saveProductStockData(holder, stockData);
         }
     }
 

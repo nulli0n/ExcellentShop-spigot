@@ -13,15 +13,15 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.IScheduled;
+import su.nightexpress.nexshop.shop.TimeUtils;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.data.price.ProductPriceManager;
-import su.nightexpress.nexshop.shop.DynamicProductPricer;
-import su.nightexpress.nexshop.shop.FloatProductPricer;
-import su.nightexpress.nexshop.shop.RangedProductPricer;
+import su.nightexpress.nexshop.data.price.ProductPriceStorage;
+import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
+import su.nightexpress.nexshop.shop.price.FloatProductPricer;
+import su.nightexpress.nexshop.shop.price.RangedProductPricer;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
@@ -49,7 +49,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
         this.addItem(ItemUtil.createCustomHead(TEXTURE_PRICE), VirtualLocales.PRODUCT_PRICE_TYPE, 4).setClick((viewer, event) -> {
             PriceType priceType = CollectionsUtil.next(product.getPricer().getType());
             product.setPricer(ProductPricer.from(priceType));
-            ProductPriceManager.deleteData(product);
+            ProductPriceStorage.deleteData(product);
             this.save(viewer);
         });
 
@@ -162,7 +162,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             else {
                 this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME), chat -> {
                     try {
-                        pricer.getTimes().add(LocalTime.parse(chat.getMessage(), IScheduled.TIME_FORMATTER));
+                        pricer.getTimes().add(LocalTime.parse(chat.getMessage(), TimeUtils.TIME_FORMATTER));
                         //pricer.stopScheduler();
                         //pricer.startScheduler();
                         product.getShop().saveProducts();

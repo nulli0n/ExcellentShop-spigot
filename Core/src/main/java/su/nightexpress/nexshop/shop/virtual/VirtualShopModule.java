@@ -15,8 +15,8 @@ import su.nightexpress.nexshop.api.currency.ICurrency;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.data.price.ProductPriceManager;
-import su.nightexpress.nexshop.data.stock.ProductStockManager;
+import su.nightexpress.nexshop.data.price.ProductPriceStorage;
+import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.module.ModuleId;
 import su.nightexpress.nexshop.module.ShopModule;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
@@ -135,14 +135,15 @@ public class VirtualShopModule extends ShopModule {
             VirtualShop shop = new VirtualShop(this, new JYML(fileNew), id);
             if (shop.load()) {
                 this.getShopsMap().put(shop.getId(), shop);
-                ProductStockManager.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
-                ProductPriceManager.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+                //ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
+                //ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
             }
             else {
                 this.error("Shop not loaded: " + shop.getFile().getName());
             }
         }
         this.info("Shops Loaded: " + this.getShopsMap().size());
+        this.updateShopPricesStocks();
     }
 
     private void loadMainMenu() {
@@ -161,6 +162,13 @@ public class VirtualShopModule extends ShopModule {
             this.editor = new ShopListEditor(this);
         }
         return editor;
+    }
+
+    public void updateShopPricesStocks() {
+        this.getShops().forEach(shop -> {
+            ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
+            ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+        });
     }
 
     public boolean createShop(@NotNull String id) {

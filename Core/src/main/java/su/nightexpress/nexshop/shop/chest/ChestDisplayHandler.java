@@ -10,12 +10,14 @@ import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
-import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
@@ -37,7 +39,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         private final Map<ChestShopType, Integer> count = new HashMap<>();
 
         Slider() {
-            super(chestShop.plugin(), ChestConfig.DISPLAY_SLIDE_INTERVAL, false);
+            super(chestShop.plugin(), ChestConfig.DISPLAY_SLIDE_INTERVAL.get(), false);
         }
 
         @Override
@@ -49,7 +51,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
             for (ChestShopType chestType : ChestShopType.values()) {
                 int count = this.count.getOrDefault(chestType, 0) + 1;
-                if (count >= ChestConfig.getDisplayText(chestType).size()) count = 0;
+                if (count >= ChestShopModule.getHologramLines(chestType).size()) count = 0;
                 this.count.put(chestType, count);
             }
         }
@@ -64,7 +66,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         this.holograms = new HashMap<>();
         this.items = new HashMap<>();
 
-        if (ChestConfig.DISPLAY_SLIDE_INTERVAL > 0) {
+        if (ChestConfig.DISPLAY_SLIDE_INTERVAL.get() > 0) {
             this.slider = new Slider();
             this.slider.start();
         }
@@ -104,10 +106,10 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
     private void addItem(@NotNull ChestShop shop) {
         Location location = shop.getDisplayItemLocation();
-        ChestProduct product = Rnd.get(shop.getProducts().stream().toList());
-        ItemStack itemS = product == null ? ChestNMS.UNKNOWN : product.getItem();
+        List<ChestProduct> products = new ArrayList<>(shop.getProducts());
+        ItemStack items = products.isEmpty() ? ChestNMS.UNKNOWN : Rnd.get(products).getItem();
 
-        int item = this.items.computeIfAbsent(shop, i -> chestShop.getNMS().createItem(location, itemS));
+        int item = this.items.computeIfAbsent(shop, i -> chestShop.getNMS().createItem(location, items));
     }
 
     private void deleteItem(@NotNull ChestShop shop) {

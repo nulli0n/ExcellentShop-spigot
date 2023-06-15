@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop;
+package su.nightexpress.nexshop.shop.price;
 
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.server.AbstractTask;
@@ -22,7 +22,15 @@ public class PriceUpdateTask extends AbstractTask<ExcellentShop> {
 
         VirtualShopModule module = plugin.getVirtualShop();
         if (module != null) {
-            module.getShops().forEach(shop -> products.addAll(shop.getProducts()));
+            module.getShops().forEach(shop -> {
+                products.addAll(shop.getProducts());
+
+                shop.getDiscountConfigs().forEach(discount -> {
+                    if (discount.isDiscountTime()) {
+                        discount.update();
+                    }
+                });
+            });
         }
 
         ChestShopModule chestShopModule = plugin.getChestShop();

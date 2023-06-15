@@ -8,9 +8,9 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.internal.ItemCurrency;
-import su.nightexpress.nexshop.shop.DynamicProductPricer;
-import su.nightexpress.nexshop.shop.FlatProductPricer;
-import su.nightexpress.nexshop.shop.FloatProductPricer;
+import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
+import su.nightexpress.nexshop.shop.price.FlatProductPricer;
+import su.nightexpress.nexshop.shop.price.FloatProductPricer;
 
 import java.util.HashMap;
 import java.util.Map;
