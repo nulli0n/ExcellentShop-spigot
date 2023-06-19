@@ -1,7 +1,6 @@
 Enabled: true
 Name: Game Points
 Format: '%price% %currency_name%'
-Number_Format: '#,##0'
 Icon:
   Material: SUNFLOWER
   Amount: 1

@@ -12,18 +12,8 @@ public class AuctionUnclaimedCommand extends AbstractOpenCommand {
 
     public AuctionUnclaimedCommand(@NotNull AuctionManager module) {
         super(module, new String[]{"unclaimed"}, Perms.AUCTION_COMMAND_UNCLAIMED);
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(AuctionLang.COMMAND_UNCLAIMED_DESC).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(AuctionLang.COMMAND_UNCLAIMED_USAGE).getLocalized();
+        this.setDescription(plugin.getMessage(AuctionLang.COMMAND_UNCLAIMED_DESC));
+        this.setUsage(plugin.getMessage(AuctionLang.COMMAND_UNCLAIMED_USAGE));
     }
 
     @Override

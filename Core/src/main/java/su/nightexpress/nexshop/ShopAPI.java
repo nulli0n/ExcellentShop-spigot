@@ -23,7 +23,7 @@ public class ShopAPI {
     }
 
     public static AuctionManager getAuctionManager() {
-        return PLUGIN.getAuctionManager();
+        return PLUGIN.getAuction();
     }
 
     public static VirtualShopModule getVirtualShop() {

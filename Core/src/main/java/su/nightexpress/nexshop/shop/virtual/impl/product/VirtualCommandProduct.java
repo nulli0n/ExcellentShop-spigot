@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
 
 import java.util.ArrayList;
@@ -18,11 +18,11 @@ public class VirtualCommandProduct extends VirtualProduct implements CommandProd
     private       ItemStack    preview;
     private final List<String> commands;
 
-    public VirtualCommandProduct(@NotNull ItemStack preview, @NotNull ICurrency currency) {
+    public VirtualCommandProduct(@NotNull ItemStack preview, @NotNull Currency currency) {
         this(UUID.randomUUID().toString(), preview, new ArrayList<>(), currency);
     }
 
-    public VirtualCommandProduct(@NotNull String id, @NotNull ItemStack preview, @NotNull List<String> commands, @NotNull ICurrency currency) {
+    public VirtualCommandProduct(@NotNull String id, @NotNull ItemStack preview, @NotNull List<String> commands, @NotNull Currency currency) {
         super(id, currency);
         this.setPreview(preview);
         this.commands = new ArrayList<>(commands);

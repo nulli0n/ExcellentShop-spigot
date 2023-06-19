@@ -11,7 +11,7 @@ import su.nexmedia.engine.api.data.sql.column.ColumnType;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
@@ -19,7 +19,10 @@ import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
@@ -72,7 +75,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
                 }
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
-                ICurrency currency = currencyId == null ? this.auctionManager.getCurrencyDefault() : this.plugin().getCurrencyManager().getCurrency(currencyId);
+                Currency currency = currencyId == null ? this.auctionManager.getCurrencyDefault() : this.plugin().getCurrencyManager().getCurrency(currencyId);
                 if (currency == null || !this.auctionManager.getCurrencies().contains(currency)) {
                     this.auctionManager.error("Invalid listing currency '" + currencyId + "'!");
                     return null;
@@ -103,7 +106,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
                 }
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
-                ICurrency currency = currencyId == null ? this.auctionManager.getCurrencyDefault() : this.plugin().getCurrencyManager().getCurrency(currencyId);
+                Currency currency = currencyId == null ? this.auctionManager.getCurrencyDefault() : this.plugin().getCurrencyManager().getCurrency(currencyId);
                 if (currency == null || !this.auctionManager.getCurrencies().contains(currency)) {
                     this.auctionManager.error("Invalid listing currency '" + currencyId + "'!");
                     return null;

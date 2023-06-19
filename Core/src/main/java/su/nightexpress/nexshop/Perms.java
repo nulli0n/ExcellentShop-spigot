@@ -11,8 +11,6 @@ public class Perms {
     private static final PermissionDefault OP = PermissionDefault.OP;
     private static final PermissionDefault TRUE = PermissionDefault.TRUE;
 
-    @Deprecated public static final  String ADMIN  = PREFIX + "admin";
-
     public static final JPermission PLUGIN         = new JPermission(PREFIX + "*", "Full plugin access.");
     public static final JPermission PLUGIN_COMMAND = new JPermission(PREFIX + "command", "Access to all the plugin commands.");
 

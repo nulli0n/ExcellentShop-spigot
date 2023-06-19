@@ -14,10 +14,8 @@ import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.module.ModuleId;
-import su.nightexpress.nexshop.module.ShopModule;
 import su.nightexpress.nexshop.shop.auction.command.*;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.config.AuctionCurrencySetting;
@@ -29,6 +27,7 @@ import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 import su.nightexpress.nexshop.shop.auction.menu.*;
 import su.nightexpress.nexshop.shop.auction.task.AuctionMenuUpdateTask;
+import su.nightexpress.nexshop.shop.module.ShopModule;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,9 +36,11 @@ import java.util.stream.Collectors;
 
 public class AuctionManager extends ShopModule {
 
-    private static final Map<UUID, AuctionListing> LISTINGS_MAP = new ConcurrentHashMap<>();
-    private static final Map<UUID, AuctionCompletedListing> COMPLETED_LISTINGS_MAP = new ConcurrentHashMap<>();
-    private static final Map<UUID, Set<AuctionListing>> PLAYER_LISTINGS_MAP = new ConcurrentHashMap<>();
+    public static final String ID = "auction";
+
+    private static final Map<UUID, AuctionListing>               LISTINGS_MAP                  = new ConcurrentHashMap<>();
+    private static final Map<UUID, AuctionCompletedListing>      COMPLETED_LISTINGS_MAP        = new ConcurrentHashMap<>();
+    private static final Map<UUID, Set<AuctionListing>>          PLAYER_LISTINGS_MAP           = new ConcurrentHashMap<>();
     private static final Map<UUID, Set<AuctionCompletedListing>> PLAYER_COMPLETED_LISTINGS_MAP = new ConcurrentHashMap<>();
 
     public static final Comparator<AbstractAuctionItem> SORT_BY_CREATION = (l1, l2) -> {
@@ -61,7 +62,7 @@ public class AuctionManager extends ShopModule {
     private AuctionMenuUpdateTask menuUpdateTask;
 
     public AuctionManager(@NotNull ExcellentShop plugin) {
-        super(plugin, ModuleId.AUCTION);
+        super(plugin, ID);
     }
 
     @Override
@@ -70,25 +71,25 @@ public class AuctionManager extends ShopModule {
 
         AuctionConfig.load(this);
         if (!this.checkCurrency()) {
-            this.interruptLoad("No Default currency found! Auction will be disabled.");
+            this.error("No Default currency found! Auction will be disabled.");
             return;
         }
 
         this.plugin.getLangManager().loadMissing(AuctionLang.class);
         this.plugin.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
         this.plugin.getLang().saveChanges();
-        this.plugin.getConfigManager().extractResources(this.getPath() + "/menu/");
+        //this.plugin.getConfigManager().extractResources("/" + this.getLocalPath() + "/menu/");
 
         this.dataHandler = AuctionDataHandler.getInstance(this);
         this.dataHandler.setup();
         this.getDataHandler().onSynchronize();
 
-        this.moduleCommand.addDefaultCommand(new AuctionOpenCommand(this));
-        this.moduleCommand.addChildren(new AuctionSellCommand(this));
-        this.moduleCommand.addChildren(new AuctionHistoryCommand(this));
-        this.moduleCommand.addChildren(new AuctionExpiredCommand(this));
-        this.moduleCommand.addChildren(new AuctionSellingCommand(this));
-        this.moduleCommand.addChildren(new AuctionUnclaimedCommand(this));
+        this.command.addDefaultCommand(new AuctionOpenCommand(this));
+        this.command.addChildren(new AuctionSellCommand(this));
+        this.command.addChildren(new AuctionHistoryCommand(this));
+        this.command.addChildren(new AuctionExpiredCommand(this));
+        this.command.addChildren(new AuctionSellingCommand(this));
+        this.command.addChildren(new AuctionUnclaimedCommand(this));
 
         this.addListener(new AuctionListener(this));
 
@@ -166,19 +167,19 @@ public class AuctionManager extends ShopModule {
     }
 
     @NotNull
-    public ICurrency getCurrencyDefault() {
+    public Currency getCurrencyDefault() {
         return AuctionConfig.CURRENCIES.values().stream().filter(AuctionCurrencySetting::isDefault)
             .map(AuctionCurrencySetting::getCurrency).findFirst().orElseThrow();
     }
 
     @NotNull
-    public Set<ICurrency> getCurrencies() {
+    public Set<Currency> getCurrencies() {
         return AuctionConfig.CURRENCIES.values().stream()
             .map(AuctionCurrencySetting::getCurrency).collect(Collectors.toSet());
     }
 
     @NotNull
-    public Set<ICurrency> getCurrencies(@NotNull Player player) {
+    public Set<Currency> getCurrencies(@NotNull Player player) {
         return AuctionConfig.CURRENCIES.values().stream()
             .filter(setting -> setting.hasPermission(player) || setting.isDefault())
             .map(AuctionCurrencySetting::getCurrency).collect(Collectors.toSet());
@@ -211,7 +212,7 @@ public class AuctionManager extends ShopModule {
     }
 
     public boolean canAdd(@NotNull Player player, @NotNull ItemStack item, double price) {
-        Set<ICurrency> currencies = this.getCurrencies(player);
+        Set<Currency> currencies = this.getCurrencies(player);
         if (currencies.isEmpty()) {
             plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
             return false;
@@ -270,7 +271,7 @@ public class AuctionManager extends ShopModule {
         return true;
     }
 
-    public boolean add(@NotNull Player player, @NotNull ItemStack item, @NotNull ICurrency currency, double price) {
+    public boolean add(@NotNull Player player, @NotNull ItemStack item, @NotNull Currency currency, double price) {
         if (AuctionConfig.LISTINGS_PRICE_ROUND_TO_INT.get()) {
             price = NumberUtil.round(price);
         }
@@ -298,7 +299,7 @@ public class AuctionManager extends ShopModule {
         double tax = player.hasPermission(Perms.AUCTION_BYPASS_LISTING_TAX) ? 0D : AuctionConfig.LISTINGS_TAX_ON_LISTING_ADD;
         double taxPay = AuctionUtils.calculateTax(price, tax);
         if (taxPay > 0) {
-            double balance = currency.getBalance(player);
+            double balance = currency.getHandler().getBalance(player);
             if (balance < taxPay) {
                 plugin.getMessage(AuctionLang.LISTING_ADD_ERROR_PRICE_TAX)
                     .replace(Placeholders.GENERIC_TAX, tax)
@@ -306,7 +307,7 @@ public class AuctionManager extends ShopModule {
                     .send(player);
                 return false;
             }
-            currency.take(player, taxPay);
+            currency.getHandler().take(player, taxPay);
         }
 
         AuctionListing listing = new AuctionListing(player, item, currency, price);
@@ -333,7 +334,7 @@ public class AuctionManager extends ShopModule {
         if (this.needEnsureListingExists() && !this.getDataHandler().isListingExist(listing.getId())) return false;
         if (!this.hasListing(listing.getId())) return false;
 
-        double balance = listing.getCurrency().getBalance(buyer);
+        double balance = listing.getCurrency().getHandler().getBalance(buyer);
         double price = listing.getPrice();
         if (balance < price) {
             plugin.getMessage(AuctionLang.LISTING_BUY_ERROR_NOT_ENOUGH_FUNDS)
@@ -343,7 +344,7 @@ public class AuctionManager extends ShopModule {
             return false;
         }
 
-        listing.getCurrency().take(buyer, price);
+        listing.getCurrency().getHandler().take(buyer, price);
         PlayerUtil.addItem(buyer, listing.getItemStack());
 
         AuctionCompletedListing completedListing = new AuctionCompletedListing(listing, buyer);
@@ -395,7 +396,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionMainMenu getMainMenu() {
         if (this.mainMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/main.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "main.yml");
             this.mainMenu = new AuctionMainMenu(this, cfg);
         }
         return this.mainMenu;
@@ -404,7 +405,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionPurchaseConfirmationMenu getPurchaseConfirmationMenu() {
         if (this.purchaseConfirmationMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/purchase_confirm.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "purchase_confirm.yml");
             this.purchaseConfirmationMenu = new AuctionPurchaseConfirmationMenu(this, cfg);
         }
         return purchaseConfirmationMenu;
@@ -413,7 +414,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionExpiredMenu getExpiredMenu() {
         if (this.expiredMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/expired.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "expired.yml");
             this.expiredMenu = new AuctionExpiredMenu(this, cfg);
         }
         return this.expiredMenu;
@@ -422,7 +423,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionHistoryMenu getHistoryMenu() {
         if (this.historyMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/history.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "history.yml");
             this.historyMenu = new AuctionHistoryMenu(this, cfg);
         }
         return this.historyMenu;
@@ -431,7 +432,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionSellingMenu getSellingMenu() {
         if (this.sellingMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/selling.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "selling.yml");
             this.sellingMenu = new AuctionSellingMenu(this, cfg);
         }
         return this.sellingMenu;
@@ -440,7 +441,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionUnclaimedMenu getUnclaimedMenu() {
         if (this.unclaimedMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/unclaimed.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "unclaimed.yml");
             this.unclaimedMenu = new AuctionUnclaimedMenu(this, cfg);
         }
         return this.unclaimedMenu;
@@ -449,7 +450,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionCategoryFilterMenu getCategoryFilterMenu() {
         if (this.categoryFilterMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/category_filter.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "category_filter.yml");
             this.categoryFilterMenu = new AuctionCategoryFilterMenu(this, cfg);
         }
         return categoryFilterMenu;
@@ -458,7 +459,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionCurrencyFilterMenu getCurrencyFilterMenu() {
         if (this.currencyFilterMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/currency_filter.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "currency_filter.yml");
             this.currencyFilterMenu = new AuctionCurrencyFilterMenu(this, cfg);
         }
         return currencyFilterMenu;
@@ -467,7 +468,7 @@ public class AuctionManager extends ShopModule {
     @NotNull
     public AuctionCurrencySelectorMenu getCurrencySelectorMenu() {
         if (this.currencySelectorMenu == null) {
-            JYML cfg = JYML.loadOrExtract(plugin, this.getPath() + "menu/currency_selector.yml");
+            JYML cfg = JYML.loadOrExtract(plugin, this.getLocalPath() + "/menu/", "currency_selector.yml");
             this.currencySelectorMenu = new AuctionCurrencySelectorMenu(this, cfg);
         }
         return currencySelectorMenu;

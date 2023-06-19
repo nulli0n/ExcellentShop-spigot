@@ -13,6 +13,15 @@ public class Config {
 
     public static final String DIR_MENU = "/menu/";
 
+    public static final JOption<Boolean> MODULES_VIRTUAL_SHOP_ENABLED = JOption.create("Modules.VirtualShop.Enabled", true,
+        "Sets whether or not Virtual Shop module is enabled.");
+
+    public static final JOption<Boolean> MODULES_CHEST_SHOP_ENABLED = JOption.create("Modules.ChestShop.Enabled", true,
+        "Sets whether or not Chest Shop module is enabled.");
+
+    public static final JOption<Boolean> MODULES_AUCTION_ENABLED = JOption.create("Modules.Auction.Enabled", true,
+        "Sets whether or not Auction module is enabled.");
+
     public static final JOption<Boolean> GENERAL_BUY_WITH_FULL_INVENTORY = JOption.create("General.Buy_With_Full_Inventory",
         false, "Sets wheter players can purchase items from shop with full inventory.");
 

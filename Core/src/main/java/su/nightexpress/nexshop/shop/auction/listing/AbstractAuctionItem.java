@@ -7,7 +7,7 @@ import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.TimeUtil;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
@@ -20,7 +20,7 @@ public abstract class AbstractAuctionItem implements Placeholder {
     protected       String    ownerName;
     protected       ItemStack itemStack;
     protected       double    price;
-    protected final ICurrency currency;
+    protected final Currency currency;
     protected final long dateCreation;
     protected PlaceholderMap placeholderMap;
 
@@ -29,7 +29,7 @@ public abstract class AbstractAuctionItem implements Placeholder {
             @NotNull UUID owner,
             @NotNull String ownerName,
             @NotNull ItemStack itemStack,
-            ICurrency currency,
+            Currency currency,
             double price,
             long dateCreation
     ) {
@@ -84,7 +84,7 @@ public abstract class AbstractAuctionItem implements Placeholder {
     }
 
     @NotNull
-    public ICurrency getCurrency() {
+    public Currency getCurrency() {
         return currency;
     }
 

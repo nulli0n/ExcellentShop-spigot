@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.api.shop;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +26,11 @@ public abstract class ShopBank<S extends Shop<S, ?>> {
         return balance;
     }
 
-    public abstract boolean deposit(@NotNull ICurrency currency, double amount);
+    public abstract boolean deposit(@NotNull Currency currency, double amount);
 
-    public abstract boolean withdraw(@NotNull ICurrency currency, double amount);
+    public abstract boolean withdraw(@NotNull Currency currency, double amount);
 
-    public abstract double getBalance(@NotNull ICurrency currency);
+    public abstract double getBalance(@NotNull Currency currency);
 
-    public abstract boolean hasEnough(@NotNull ICurrency currency, double amount);
+    public abstract boolean hasEnough(@NotNull Currency currency, double amount);
 }

@@ -11,6 +11,8 @@ softdepend:
   - WorldGuard
   - Lands
   - GamePoints
+  - GemsEconomy
+  - CoinsEngine
   - GriefPrevention
   - EliteMobs
 api-version: 1.17

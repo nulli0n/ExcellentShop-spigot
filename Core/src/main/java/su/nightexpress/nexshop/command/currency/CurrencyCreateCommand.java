@@ -5,40 +5,25 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.command.AbstractCommand;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.currency.config.CurrencyItemConfig;
-import su.nightexpress.nexshop.currency.internal.ItemCurrency;
+import su.nightexpress.nexshop.currency.impl.ItemCurrency;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class CurrencyCreateCommand extends AbstractCommand<ExcellentShop> {
 
     public CurrencyCreateCommand(@NotNull ExcellentShop plugin) {
         super(plugin, new String[]{"create"}, Perms.COMMAND_CURRENCY_CREATE);
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_USAGE).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_DESC).getLocalized();
-    }
-
-    @Override
-    public boolean isPlayerOnly() {
-        return true;
+        this.setDescription(plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_DESC));
+        this.setUsage(plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_USAGE));
+        this.setPlayerOnly(true);
     }
 
     @Override
@@ -51,8 +36,8 @@ public class CurrencyCreateCommand extends AbstractCommand<ExcellentShop> {
     }
 
     @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
-        if (args.length < 3) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
+        if (result.length() < 3) {
             this.printUsage(sender);
             return;
         }
@@ -64,16 +49,15 @@ public class CurrencyCreateCommand extends AbstractCommand<ExcellentShop> {
             return;
         }
 
-        String id = args[2].toLowerCase();
-        ICurrency currency = plugin.getCurrencyManager().getCurrency(id);
+        String id = result.getArg(2).toLowerCase();
+        Currency currency = plugin.getCurrencyManager().getCurrency(id);
         if (currency == null) {
-            CurrencyItemConfig config = new CurrencyItemConfig(plugin, id);
-            config.setItem(item);
-            currency = new ItemCurrency(config);
-            config.save();
-            plugin.getCurrencyManager().registerCurrency(currency);
+            ItemCurrency itemCurrency = new ItemCurrency(plugin, id);
+            itemCurrency.getHandler().setItem(item);
+            itemCurrency.save();
+            plugin.getCurrencyManager().registerCurrency(itemCurrency);
             plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_DONE_NEW)
-                .replace(currency.replacePlaceholders())
+                .replace(itemCurrency.replacePlaceholders())
                 .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
                 .send(sender);
         }
@@ -85,8 +69,8 @@ public class CurrencyCreateCommand extends AbstractCommand<ExcellentShop> {
                 return;
             }
 
-            itemCurrency.getConfig().setItem(item);
-            itemCurrency.getConfig().save();
+            itemCurrency.getHandler().setItem(item);
+            itemCurrency.save();
 
             plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_DONE_REPLACE)
                 .replace(itemCurrency.replacePlaceholders())

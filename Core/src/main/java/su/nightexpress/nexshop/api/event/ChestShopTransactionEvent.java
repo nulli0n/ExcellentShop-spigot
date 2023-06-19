@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.api.event;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.shop.TransactionResult;
+import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 
 public class ChestShopTransactionEvent extends ShopTransactionEvent<ChestProduct> {

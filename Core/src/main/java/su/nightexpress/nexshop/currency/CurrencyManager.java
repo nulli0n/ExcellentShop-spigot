@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.currency;
 
+import me.xanium.gemseconomy.GemsEconomy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
@@ -7,114 +8,97 @@ import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.hooks.external.VaultHook;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.currency.ICurrency;
-import su.nightexpress.nexshop.currency.config.CurrencyConfig;
-import su.nightexpress.nexshop.currency.config.CurrencyItemConfig;
-import su.nightexpress.nexshop.currency.external.GamePointsCurrency;
-import su.nightexpress.nexshop.currency.external.GemsEconomyCurrency;
-import su.nightexpress.nexshop.currency.external.PlayerPointsCurrency;
-import su.nightexpress.nexshop.currency.external.VaultEcoCurrency;
-import su.nightexpress.nexshop.currency.internal.ExpCurrency;
-import su.nightexpress.nexshop.currency.internal.ItemCurrency;
-import su.nightexpress.nexshop.currency.external.EliteMobsCurrency;
-import su.nightexpress.nexshop.hooks.HookId;
+import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.api.currency.CurrencyHandler;
+import su.nightexpress.nexshop.currency.handler.*;
+import su.nightexpress.nexshop.currency.impl.CoinsEngineCurrency;
+import su.nightexpress.nexshop.currency.impl.ConfigCurrency;
+import su.nightexpress.nexshop.currency.impl.ItemCurrency;
+import su.nightexpress.nexshop.hook.HookId;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
     public static final String DIR_DEFAULT = "/currency/default/";
     public static final String DIR_CUSTOM  = "/currency/custom_item/";
 
-    private Map<String, ICurrency> currencyMap;
+    public static final String EXP           = "exp";
+    public static final String VAULT         = "vault";
+
+    private final Map<String, Currency> currencyMap;
 
     public CurrencyManager(@NotNull ExcellentShop plugin) {
         super(plugin);
+        this.currencyMap = new HashMap<>();
     }
 
     @Override
     protected void onLoad() {
-        this.currencyMap = new HashMap<>();
         this.plugin.getConfigManager().extractResources(DIR_DEFAULT);
         this.plugin.getConfigManager().extractResources(DIR_CUSTOM);
 
-        this.loadDefault();
-        this.loadCustom();
-    }
+        this.registerCurrency(EXP, ExpPointsHandler::new);
 
-    private void loadDefault() {
-        CurrencyId.stream().forEach(currencyId -> {
-            switch (currencyId) {
-                case CurrencyId.EXP -> {
-                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.EXP);
-                    config.save();
-                    this.registerCurrency(new ExpCurrency(config));
-                }
-                case CurrencyId.VAULT -> {
-                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.VAULT);
-                    config.save();
-                    if (Hooks.hasVault() && VaultHook.hasEconomy()) {
-                        this.registerCurrency(new VaultEcoCurrency(config));
-                    }
-                }
-                case CurrencyId.GAME_POINTS -> {
-                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.GAME_POINTS);
-                    config.save();
-                    if (Hooks.hasPlugin(HookId.GAME_POINTS)) {
-                        this.registerCurrency(new GamePointsCurrency(config));
-                    }
-                }
-                case CurrencyId.PLAYER_POINTS -> {
-                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.PLAYER_POINTS);
-                    config.save();
-                    if (Hooks.hasPlugin(HookId.PLAYER_POINTS)) {
-                        this.registerCurrency(new PlayerPointsCurrency(config));
-                    }
-                }
-                case CurrencyId.GEMS_ECONOMY -> {
-                    if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
-                        GemsEconomyCurrency.registerCurrencies();
-                    }
-                }
-                case CurrencyId.ELITEMOBS -> {
-                    CurrencyConfig config = this.loadConfigDefault(CurrencyId.ELITEMOBS);
-                    config.save();
-                    if (Hooks.hasPlugin(HookId.ELITEMOBS)) {
-                        this.registerCurrency(new EliteMobsCurrency(config));
-                    }
-                }
-            }
-        });
-    }
-
-    @NotNull
-    private CurrencyConfig loadConfigDefault(@NotNull String id) {
-        JYML cfg = JYML.loadOrExtract(plugin, DIR_DEFAULT + id + ".yml");
-        return new CurrencyConfig(this.plugin, cfg);
-    }
-
-    private void loadCustom() {
-        for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + DIR_CUSTOM, true)) {
-            CurrencyItemConfig config = new CurrencyItemConfig(plugin, cfg);
-            this.registerCurrency(new ItemCurrency(config));
+        if (Hooks.hasVault() && VaultHook.hasEconomy()) {
+            this.registerCurrency(VAULT, VaultEconomyHandler::new);
         }
+        if (Hooks.hasPlugin(HookId.PLAYER_POINTS)) {
+            this.registerCurrency(HookId.PLAYER_POINTS, PlayerPointsHandler::new);
+            this.deprecatedCurrency(HookId.PLAYER_POINTS);
+        }
+        if (Hooks.hasPlugin(HookId.GAME_POINTS)) {
+            this.registerCurrency(HookId.GAME_POINTS, GamePointsHandler::new);
+            this.deprecatedCurrency(HookId.GAME_POINTS);
+        }
+        if (Hooks.hasPlugin(HookId.ELITEMOBS)) {
+            this.registerCurrency(HookId.ELITEMOBS, EliteMobsHandler::new);
+        }
+        if (Hooks.hasPlugin(HookId.COINS_ENGINE)) {
+            CoinsEngineCurrency.getCurrencies().forEach(this::registerCurrency);
+        }
+        if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
+            for (me.xanium.gemseconomy.currency.Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
+                this.registerCurrency("gemseconomy_" + currency.getSingular(), () -> new GemsEconomyHandler(currency));
+            }
+        }
+
+        for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + DIR_CUSTOM, true)) {
+            ItemCurrency currency = new su.nightexpress.nexshop.currency.impl.ItemCurrency(plugin, cfg);
+            if (currency.load()) {
+                this.registerCurrency(currency);
+            }
+        }
+    }
+
+    private void deprecatedCurrency(@NotNull String plugin) {
+        this.plugin.warn("=".repeat(15));
+        this.plugin.warn("Support for the '" + plugin + "' plugin is deprecated!");
+        this.plugin.warn("Please, consider to switch to our new free custom currency " + HookId.COINS_ENGINE + " plugin instead.");
+        this.plugin.warn("=".repeat(15));
     }
 
     @Override
     protected void onShutdown() {
-        if (this.currencyMap != null) {
-            this.currencyMap.clear();
-            this.currencyMap = null;
-        }
+        this.currencyMap.clear();
     }
 
-    public boolean registerCurrency(@NotNull ICurrency currency) {
-        if (currency.getConfig().isEnabled()) {
-            this.currencyMap.put(currency.getId(), currency);
-            this.plugin.info("Registered currency: " + currency.getId());
-            return true;
-        }
-        return false;
+    public boolean registerCurrency(@NotNull String id, @NotNull Supplier<CurrencyHandler> supplier) {
+        JYML cfg = JYML.loadOrExtract(plugin, DIR_DEFAULT + id + ".yml");
+        ConfigCurrency currency = new ConfigCurrency(plugin, cfg, supplier.get());
+        if (!currency.load()) return false;
+
+        return this.registerCurrency(currency);
+    }
+
+    public boolean registerCurrency(@NotNull Currency currency) {
+        this.currencyMap.put(currency.getId(), currency);
+        this.plugin.info("Registered currency: " + currency.getId());
+        return true;
     }
 
     public boolean hasCurrency() {
@@ -122,7 +106,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     @NotNull
-    public Collection<ICurrency> getCurrencies() {
+    public Collection<Currency> getCurrencies() {
         return currencyMap.values();
     }
 
@@ -132,16 +116,12 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     @Nullable
-    public ICurrency getCurrency(@NotNull String id) {
+    public Currency getCurrency(@NotNull String id) {
         return this.currencyMap.get(id.toLowerCase());
     }
 
     @NotNull
-    @Deprecated
-    public ICurrency getCurrencyFirst() {
-        Optional<ICurrency> opt = this.getCurrencies().stream().filter(Objects::nonNull).findFirst();
-        if (opt.isEmpty()) throw new IllegalArgumentException("No currencies are installed!");
-        return opt.get();
+    public Currency getAny() {
+        return this.getCurrencies().stream().findFirst().orElseThrow();
     }
-
 }

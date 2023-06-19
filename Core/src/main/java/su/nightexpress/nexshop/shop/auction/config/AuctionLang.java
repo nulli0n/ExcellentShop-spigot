@@ -1,8 +1,9 @@
 package su.nightexpress.nexshop.shop.auction.config;
 
+import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.api.lang.LangKey;
 
-public class AuctionLang {
+public class AuctionLang implements LangColors {
 
     public static final LangKey COMMAND_OPEN_DESC       = LangKey.of("Auction.Command.Open.Desc", "Open auction.");
     public static final LangKey COMMAND_SELL_DESC       = LangKey.of("Auction.Command.Sell.Desc", "Add item on auction.");

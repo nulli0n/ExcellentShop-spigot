@@ -3,16 +3,16 @@ package su.nightexpress.nexshop.shop.auction.config;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 
 public class AuctionCurrencySetting {
 
-    private final ICurrency currency;
-    private final boolean isDefault;
+    private final Currency currency;
+    private final boolean  isDefault;
     private final boolean isPermissionRequired;
     private final String permission;
 
-    public AuctionCurrencySetting(@NotNull ICurrency currency, boolean isDefault, boolean isPermissionRequired) {
+    public AuctionCurrencySetting(@NotNull Currency currency, boolean isDefault, boolean isPermissionRequired) {
         this.currency = currency;
         this.isDefault = isDefault;
         this.isPermissionRequired = isPermissionRequired;
@@ -20,7 +20,7 @@ public class AuctionCurrencySetting {
     }
 
     @NotNull
-    public ICurrency getCurrency() {
+    public Currency getCurrency() {
         return currency;
     }
 

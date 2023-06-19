@@ -6,13 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ShopAPI;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.currency.CurrencyId;
-import su.nightexpress.nexshop.shop.TimeUtils;
+import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.menu.ProductPriceMenu;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
@@ -25,11 +25,11 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
     private ItemStack item;
     private ProductPriceMenu priceEditor;
 
-    public ChestProduct(@NotNull ICurrency currency, @NotNull ItemStack item) {
+    public ChestProduct(@NotNull Currency currency, @NotNull ItemStack item) {
         this(UUID.randomUUID().toString(), currency, item);
     }
 
-    public ChestProduct(@NotNull String id, @NotNull ICurrency currency, @NotNull ItemStack item) {
+    public ChestProduct(@NotNull String id, @NotNull Currency currency, @NotNull ItemStack item) {
         super(id, currency);
         this.setItem(item);
     }
@@ -66,8 +66,8 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
             cfg.saveChanges();
         }
 
-        String currencyId = cfg.getString(path + ".Currency", CurrencyId.VAULT);
-        ICurrency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);
+        String currencyId = cfg.getString(path + ".Currency", CurrencyManager.VAULT);
+        Currency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);
         if (currency == null || !ChestShopModule.isAllowedCurrency(currency)) {
             currency = ChestShopModule.DEFAULT_CURRENCY;
         }
@@ -105,7 +105,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
     @NotNull
     public ProductPriceMenu getPriceEditor() {
         if (this.priceEditor == null) {
-            this.priceEditor = new ProductPriceMenu(this);
+            this.priceEditor = new ProductPriceMenu(this.getShop().plugin(), this);
         }
         return priceEditor;
     }

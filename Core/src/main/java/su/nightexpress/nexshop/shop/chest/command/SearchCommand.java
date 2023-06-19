@@ -4,39 +4,25 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.module.command.ShopModuleCommand;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.module.ModuleCommand;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-public class SearchCommand extends ShopModuleCommand<ChestShopModule> {
+public class SearchCommand extends ModuleCommand<ChestShopModule> {
 
     private static final List<String> MATERIALS = Stream.of(Material.values())
         .filter(Material::isItem).map(Enum::name).map(String::toLowerCase).toList();
 
     public SearchCommand(@NotNull ChestShopModule module) {
         super(module, new String[]{"search"}, ChestPerms.COMMAND_SEARCH);
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(ChestLang.COMMAND_SEARCH_DESC).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(ChestLang.COMMAND_SEARCH_USAGE).getLocalized();
-    }
-
-    @Override
-    public boolean isPlayerOnly() {
-        return true;
+        this.setDescription(plugin.getMessage(ChestLang.COMMAND_SEARCH_DESC));
+        this.setUsage(plugin.getMessage(ChestLang.COMMAND_SEARCH_USAGE));
+        this.setPlayerOnly(true);
     }
 
     @Override
@@ -49,14 +35,14 @@ public class SearchCommand extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
-        if (args.length != 2) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
+        if (result.length() < 2) {
             this.printUsage(sender);
             return;
         }
 
         Player player = (Player) sender;
-        Material material = Material.getMaterial(args[1].toUpperCase());
+        Material material = Material.getMaterial(result.getArg(1).toUpperCase());
         if (material == null) {
             return;
         }

@@ -4,38 +4,24 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.module.ModuleCommand;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-public class CreateCommand extends ShopModuleCommand<ChestShopModule> {
+public class CreateCommand extends ModuleCommand<ChestShopModule> {
 
     public CreateCommand(@NotNull ChestShopModule module) {
         super(module, new String[]{"create"}, ChestPerms.CREATE);
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(ChestLang.COMMAND_CREATE_DESC).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(ChestLang.COMMAND_CREATE_USAGE).getLocalized();
-    }
-
-    @Override
-    public boolean isPlayerOnly() {
-        return true;
+        this.setDescription(plugin.getMessage(ChestLang.COMMAND_CREATE_DESC));
+        this.setUsage(plugin.getMessage(ChestLang.COMMAND_CREATE_USAGE));
+        this.setPlayerOnly(true);
     }
 
     @Override
@@ -48,10 +34,10 @@ public class CreateCommand extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 100);
-        ChestShopType type = args.length >= 2 ? StringUtil.getEnum(args[1], ChestShopType.class).orElse(ChestShopType.PLAYER) : ChestShopType.PLAYER;
+        ChestShopType type = result.length() >= 2 ? StringUtil.getEnum(result.getArg(1), ChestShopType.class).orElse(ChestShopType.PLAYER) : ChestShopType.PLAYER;
         this.module.createShop(player, block, type);
     }
 }

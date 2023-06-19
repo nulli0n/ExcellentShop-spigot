@@ -12,18 +12,8 @@ public class AuctionExpiredCommand extends AbstractOpenCommand {
 
     public AuctionExpiredCommand(@NotNull AuctionManager module) {
         super(module, new String[]{"expired"}, Perms.AUCTION_COMMAND_EXPIRED);
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(AuctionLang.COMMAND_EXPIRED_USAGE).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(AuctionLang.COMMAND_EXPIRED_DESC).getLocalized();
+        this.setDescription(plugin.getMessage(AuctionLang.COMMAND_EXPIRED_DESC));
+        this.setUsage(plugin.getMessage(AuctionLang.COMMAND_EXPIRED_USAGE));
     }
 
     @Override

@@ -19,7 +19,7 @@ public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
     private final VirtualShopModule module;
 
     public ShopMainMenu(@NotNull VirtualShopModule module) {
-        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getPath() + "main.menu.yml"));
+        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath(), "main.menu.yml"));
         this.module = module;
 
         this.registerHandler(MenuItemType.class)

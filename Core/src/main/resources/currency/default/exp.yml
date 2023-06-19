@@ -1,7 +1,6 @@
 Enabled: true
 Name: Exp
 Format: '%price% %currency_name%'
-Number_Format: '#,##0'
 Icon:
   Material: EXPERIENCE_BOTTLE
   Amount: 1

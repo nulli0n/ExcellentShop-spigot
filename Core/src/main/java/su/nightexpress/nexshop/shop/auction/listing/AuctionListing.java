@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.TimeUtil;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
@@ -17,18 +17,18 @@ public class AuctionListing extends AbstractAuctionItem {
     public AuctionListing(
         @NotNull Player player,
         @NotNull ItemStack itemStack,
-        @NotNull ICurrency currency,
-            double price
+        @NotNull Currency currency,
+        double price
     ) {
         this(
-                UUID.randomUUID(),
-                player.getUniqueId(),
-                player.getDisplayName(),
-                itemStack,
-                currency,
-                price,
-                System.currentTimeMillis(),
-                System.currentTimeMillis() + AuctionConfig.LISTINGS_EXPIRE_IN
+            UUID.randomUUID(),
+            player.getUniqueId(),
+            player.getDisplayName(),
+            itemStack,
+            currency,
+            price,
+            System.currentTimeMillis(),
+            System.currentTimeMillis() + AuctionConfig.LISTINGS_EXPIRE_IN
         );
     }
 
@@ -37,7 +37,7 @@ public class AuctionListing extends AbstractAuctionItem {
             @NotNull UUID owner,
             @NotNull String ownerName,
             @NotNull ItemStack itemStack,
-            @NotNull ICurrency currency,
+            @NotNull Currency currency,
             double price,
             long dateCreation,
             long expireDate

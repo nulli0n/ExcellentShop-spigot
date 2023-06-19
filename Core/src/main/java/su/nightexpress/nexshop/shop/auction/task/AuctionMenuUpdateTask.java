@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.shop.auction.task;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.task.AbstractTask;
+import su.nexmedia.engine.api.server.AbstractTask;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;

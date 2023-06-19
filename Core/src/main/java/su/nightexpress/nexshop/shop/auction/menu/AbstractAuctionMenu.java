@@ -1,12 +1,16 @@
 package su.nightexpress.nexshop.shop.auction.menu;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AbstractMenuAuto;
+import su.nexmedia.engine.api.menu.AutoPaged;
+import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.click.ClickHandler;
+import su.nexmedia.engine.api.menu.impl.ConfigMenu;
+import su.nexmedia.engine.api.menu.impl.MenuOptions;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
@@ -18,7 +22,7 @@ import su.nightexpress.nexshop.shop.auction.listing.AbstractAuctionItem;
 
 import java.util.*;
 
-public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends AbstractMenuAuto<ExcellentShop, A> {
+public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends ConfigMenu<ExcellentShop> implements AutoPaged<A> {
 
     protected AuctionManager auctionManager;
 
@@ -32,7 +36,7 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
     private static final String PLACEHOLDER_LORE_FORMAT = "%lore_format%";
 
     public AbstractAuctionMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
-        super(auctionManager.plugin(), cfg, "");
+        super(auctionManager.plugin(), cfg);
         this.auctionManager = auctionManager;
         this.seeOthers = new WeakHashMap<>();
         this.loreFormat = new HashMap<>();
@@ -43,6 +47,18 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
         for (FormatType formatType : FormatType.values()) {
             this.loreFormat.put(formatType, Colorizer.apply(cfg.getStringList("Lore_Format." + formatType.name())));
         }
+
+        this.registerHandler(MenuItemType.class)
+            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
+            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
+            .addClick(MenuItemType.RETURN, (viewer, event) -> this.auctionManager.getMainMenu().openNextTick(viewer, 1))
+        ;
+    }
+
+    @Override
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+        super.onPrepare(viewer, options);
+        this.getItemsForPage(viewer).forEach(this::addItem);
     }
 
     enum FormatType {
@@ -63,14 +79,16 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
 
     @Override
     @NotNull
-    protected ItemStack getObjectStack(@NotNull Player player, @NotNull A aucItem) {
+    public ItemStack getObjectStack(@NotNull Player player, @NotNull A aucItem) {
         ItemStack item = new ItemStack(aucItem.getItemStack());
         ItemUtil.mapMeta(item, meta -> {
             List<String> lore = StringUtil.replace(this.itemLore, PLACEHOLDER_LORE_FORMAT, false, this.getLoreFormat(player, aucItem));
-            lore.replaceAll(aucItem.replacePlaceholders());
-            meta.setDisplayName(aucItem.replacePlaceholders().apply(this.itemName));
+            meta.setDisplayName(this.itemName);
             meta.setLore(lore);
-            //ItemUtil.replace(meta, aucItem.replacePlaceholders());
+            //lore.replaceAll(aucItem.replacePlaceholders());
+            //meta.setDisplayName(aucItem.replacePlaceholders().apply(this.itemName));
+            //meta.setLore(lore);
+            ItemUtil.replace(meta, aucItem.replacePlaceholders());
         });
         return item;
     }
@@ -78,20 +96,15 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
     @NotNull
     protected List<String> getLoreFormat(@NotNull Player player, @NotNull A aucItem) {
         FormatType formatType = FormatType.PLAYER;
-        if (player.hasPermission(Perms.ADMIN)) formatType = FormatType.ADMIN;
+        if (player.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) formatType = FormatType.ADMIN;
         else if (aucItem.isOwner(player)) formatType = FormatType.OWNER;
 
         return this.loreFormat.getOrDefault(formatType, Collections.emptyList());
     }
 
     @Override
-    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
-        super.onClose(player, e);
-        this.seeOthers.remove(player);
-    }
-
-    @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
-        return true;
+    public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
+        super.onClose(viewer, event);
+        this.seeOthers.remove(viewer.getPlayer());
     }
 }

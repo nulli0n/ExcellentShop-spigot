@@ -16,18 +16,7 @@ public class AuctionOpenCommand extends AbstractOpenCommand {
 
     public AuctionOpenCommand(@NotNull AuctionManager module) {
         super(module, new String[]{"open"}, Perms.AUCTION_COMMAND_OPEN);
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return "";
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(AuctionLang.COMMAND_OPEN_DESC).getLocalized();
+        this.setDescription(plugin.getMessage(AuctionLang.COMMAND_OPEN_DESC));
     }
 
     @Override

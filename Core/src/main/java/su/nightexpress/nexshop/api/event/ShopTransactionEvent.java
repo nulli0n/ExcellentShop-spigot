@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.Product;
-import su.nightexpress.nexshop.shop.TransactionResult;
+import su.nightexpress.nexshop.shop.util.TransactionResult;
 
 public abstract class ShopTransactionEvent<P extends Product<P, ?, ?>> extends Event {
 

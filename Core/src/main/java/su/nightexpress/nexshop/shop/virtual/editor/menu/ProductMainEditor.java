@@ -18,7 +18,7 @@ import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.type.StockType;
@@ -124,7 +124,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
                 this.getEditorPrice().open(viewer.getPlayer(), 1);
             }
             else {
-                List<ICurrency> currencies = new ArrayList<>(plugin.getCurrencyManager().getCurrencies());
+                List<Currency> currencies = new ArrayList<>(plugin.getCurrencyManager().getCurrencies());
                 int index = currencies.indexOf(product.getCurrency()) + 1;
                 if (index >= currencies.size()) index = 0;
                 product.setCurrency(currencies.get(index));

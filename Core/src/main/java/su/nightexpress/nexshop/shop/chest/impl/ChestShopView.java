@@ -19,7 +19,6 @@ import su.nightexpress.nexshop.api.type.ShopClickAction;
 import su.nightexpress.nexshop.config.Config;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class ChestShopView extends ShopView<ChestShop, ChestProduct> implements AutoPaged<ChestProduct> {
@@ -28,7 +27,7 @@ public class ChestShopView extends ShopView<ChestShop, ChestProduct> implements 
     private static List<String> PRODUCT_FORMAT_LORE;
 
     public ChestShopView(@NotNull ChestShop shop) {
-        super(shop, JYML.loadOrExtract(shop.plugin(), shop.getModule().getPath() + "view.yml"));
+        super(shop, JYML.loadOrExtract(shop.plugin(), shop.getModule().getLocalPath(), "view.yml"));
 
         PRODUCT_SLOTS = cfg.getIntArray("Product_Slots");
         PRODUCT_FORMAT_LORE = Colorizer.apply(cfg.getStringList("Product_Format.Lore.Text"));
@@ -104,11 +103,5 @@ public class ChestShopView extends ShopView<ChestShop, ChestProduct> implements 
 
             product.prepareTrade(viewer.getPlayer(), clickType);
         };
-    }
-
-    @Override
-    @NotNull
-    public Comparator<ChestProduct> getObjectSorter() {
-        return ((o1, o2) -> 0);
     }
 }

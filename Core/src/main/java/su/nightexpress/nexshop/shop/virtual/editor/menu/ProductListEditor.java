@@ -9,18 +9,17 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.Menu;
 import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
+import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualCommandProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualItemProduct;
@@ -28,7 +27,10 @@ import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProductStock;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -144,7 +146,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
                 if (cursor != null && !cursor.getType().isAir()) {
                     VirtualProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
-                        cached = new VirtualItemProduct(cursor, VirtualShopModule.defaultCurrency);
+                        cached = new VirtualItemProduct(cursor, plugin.getCurrencyManager().getAny());
                         //cached.setItem(cursor);
                         cached.setPricer(new FlatProductPricer());
                         cached.setStock(new VirtualProductStock());
@@ -179,10 +181,10 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             VirtualProduct product = hasCursor ? this.getCachedProduct(cursor) : null;
             if (product == null) {
                 if (hasCursor) {
-                    product = new VirtualItemProduct(cursor, VirtualShopModule.defaultCurrency);
+                    product = new VirtualItemProduct(cursor, plugin.getCurrencyManager().getAny());
                 }
                 else if (event.isRightClick()) {
-                    product = new VirtualCommandProduct(new ItemStack(Material.COMMAND_BLOCK), VirtualShopModule.defaultCurrency);
+                    product = new VirtualCommandProduct(new ItemStack(Material.COMMAND_BLOCK), plugin.getCurrencyManager().getAny());
                 }
                 else return;
                 product.setPricer(new FlatProductPricer());

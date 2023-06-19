@@ -7,15 +7,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nightexpress.nexshop.data.user.ShopUser;
-import su.nightexpress.nexshop.module.command.ShopModuleCommand;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.menu.AbstractAuctionMenu;
+import su.nightexpress.nexshop.shop.module.ModuleCommand;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-abstract class AbstractOpenCommand extends ShopModuleCommand<AuctionManager> {
+abstract class AbstractOpenCommand extends ModuleCommand<AuctionManager> {
 
     public AbstractOpenCommand(@NotNull AuctionManager module, @NotNull String[] aliases, @Nullable Permission permission) {
         super(module, aliases, permission);

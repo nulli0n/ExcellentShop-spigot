@@ -12,9 +12,8 @@ import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.type.ShopClickAction;
-import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
@@ -29,18 +28,18 @@ public abstract class Product<
     protected final PlaceholderMap placeholderMap;
 
     protected S             shop;
-    protected ICurrency     currency;
+    protected Currency     currency;
     protected ProductPricer pricer;
     protected T             stock;
     protected boolean       isDiscountAllowed;
 
-    public Product(@NotNull String id, @NotNull ICurrency currency) {
+    public Product(@NotNull String id, @NotNull Currency currency) {
         this.id = id.toLowerCase();
         this.setCurrency(currency);
 
         this.placeholderMap = new PlaceholderMap()
             .add(Placeholders.PRODUCT_DISCOUNT_AMOUNT, () -> NumberUtil.format(this.getShop().getDiscountPlain(this)))
-            .add(Placeholders.PRODUCT_CURRENCY, () -> this.getCurrency().getConfig().getName())
+            .add(Placeholders.PRODUCT_CURRENCY, () -> this.getCurrency().getName())
             .add(Placeholders.PRODUCT_PRICE_BUY, () -> NumberUtil.format(this.getPricer().getPriceBuy()))
             .add(Placeholders.PRODUCT_PRICE_BUY_FORMATTED, () -> this.getPricer().getPriceBuy() >= 0 ? getCurrency().format(this.getPricer().getPriceBuy()) : "-")
             .add(Placeholders.PRODUCT_PRICE_SELL, () -> NumberUtil.format(this.getPricer().getPriceSell()))
@@ -138,18 +137,18 @@ public abstract class Product<
     }
 
     public boolean isBuyable() {
-        if (this.getStock().getInitialAmount(StockType.GLOBAL, TradeType.BUY) == 0) {
+        /*if (this.getStock().getLeftAmount(TradeType.BUY) == 0) {
             return false;
-        }
+        }*/
 
         ProductPricer pricer = this.getPricer();
         return pricer.getPriceBuy() >= 0D;
     }
 
     public boolean isSellable() {
-        if (this.getStock().getInitialAmount(StockType.GLOBAL, TradeType.SELL) == 0) {
+        /*if (this.getStock().getLeftAmount(TradeType.SELL) == 0) {
             return false;
-        }
+        }*/
 
         ProductPricer pricer = this.getPricer();
         double priceSell = pricer.getPriceSell();
@@ -236,11 +235,11 @@ public abstract class Product<
     }
 
     @NotNull
-    public ICurrency getCurrency() {
+    public Currency getCurrency() {
         return this.currency;
     }
 
-    public void setCurrency(@NotNull ICurrency currency) {
+    public void setCurrency(@NotNull Currency currency) {
         this.currency = currency;
     }
 

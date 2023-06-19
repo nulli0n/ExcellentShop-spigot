@@ -12,18 +12,8 @@ public class AuctionHistoryCommand extends AbstractOpenCommand {
 
     public AuctionHistoryCommand(@NotNull AuctionManager module) {
         super(module, new String[]{"history"}, Perms.AUCTION_COMMAND_HISTORY);
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(AuctionLang.COMMAND_HISTORY_USAGE).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(AuctionLang.COMMAND_HISTORY_DESC).getLocalized();
+        this.setDescription(plugin.getMessage(AuctionLang.COMMAND_HISTORY_DESC));
+        this.setUsage(plugin.getMessage(AuctionLang.COMMAND_HISTORY_USAGE));
     }
 
     @Override

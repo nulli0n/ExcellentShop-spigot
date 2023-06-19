@@ -1,8 +1,9 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
+import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.api.lang.LangKey;
 
-public class ChestLang {
+public class ChestLang implements LangColors {
 
     public static final LangKey COMMAND_LIST_DESC    = LangKey.of("ChestShop.Command.List.Desc", "Browse your own or other player's shops.");
     public static final LangKey COMMAND_LIST_USAGE   = LangKey.of("ChestShop.Command.List.Usage", "[player]");

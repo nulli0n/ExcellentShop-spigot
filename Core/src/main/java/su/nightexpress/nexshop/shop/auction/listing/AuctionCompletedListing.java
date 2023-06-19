@@ -5,7 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.AuctionUtils;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
@@ -44,7 +44,7 @@ public class AuctionCompletedListing extends AbstractAuctionItem {
         @NotNull String ownerName,
         @NotNull String buyerName,
         @NotNull ItemStack itemStack,
-        @NotNull ICurrency currency,
+        @NotNull Currency currency,
             double price,
         long dateCreation,
         boolean isRewarded,

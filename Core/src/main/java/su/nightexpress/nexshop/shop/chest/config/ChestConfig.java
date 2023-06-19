@@ -7,8 +7,8 @@ import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.currency.CurrencyId;
-import su.nightexpress.nexshop.hooks.HookId;
+import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 
 import java.util.*;
@@ -31,12 +31,12 @@ public class ChestConfig {
         "Default shop name, that will be used on shop creation."
     ).mapReader(Colorizer::apply);
 
-    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("Shops.Default_Currency", CurrencyId.VAULT,
+    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("Shops.Default_Currency", CurrencyManager.VAULT,
         "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available.",
         "IMPORTANT: Make sure you have this currency in 'Allowed_Currencies' list!");
 
     public static final JOption<Set<String>> ALLOWED_CURRENCIES = JOption.create("Shops.Allowed_Currencies",
-        Set.of(CurrencyId.VAULT),
+        Set.of(CurrencyManager.VAULT),
         "A list of currencies that can be used for Chest Shop products.");
 
     public static final JOption<Set<Material>> ALLOWED_CONTAINERS = JOption.forSet("Shops.Allowed_Containers",

@@ -4,18 +4,17 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Perms;
-import su.nightexpress.nexshop.module.command.ShopModuleCommand;
+import su.nexmedia.engine.api.command.CommandResult;
+import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-
-import java.util.Map;
+import su.nightexpress.nexshop.shop.module.ModuleCommand;
 
 @Deprecated
-public class OpenCommand extends ShopModuleCommand<ChestShopModule> {
+public class OpenCommand extends ModuleCommand<ChestShopModule> {
 
     public OpenCommand(@NotNull ChestShopModule module) {
-        super(module, new String[]{"open"}, Perms.ADMIN);
+        super(module, new String[]{"open"}, ChestPerms.COMMAND);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class OpenCommand extends ShopModuleCommand<ChestShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
+    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 10);
         ChestShop shopChest = this.module.getShop(block);

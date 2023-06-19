@@ -1,26 +1,19 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.editor.EditorInput;
-import su.nexmedia.engine.api.menu.AbstractMenu;
-import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItem;
 import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.editor.EditorManager;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
-import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
-public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
+public class ShopSettingsMenu extends PlayerEditorMenu {
 
     private final ChestShop shop;
 
@@ -28,101 +21,82 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
     private ShopBankMenu     bankMenu;
 
     public ShopSettingsMenu(@NotNull ChestShop shop) {
-        super(shop.plugin(), JYML.loadOrExtract(shop.plugin(), shop.getModule().getPath() + "menu/shop_settings.yml"), "");
+        super(shop.plugin(), JYML.loadOrExtract(shop.plugin(), shop.getModule().getLocalPath() + "/menu/", "shop_settings.yml"));
         this.shop = shop;
 
-        EditorInput<ChestShop, Type> input = (player, shop2, type, e) -> {
-            String msg = e.getMessage();
-            switch (type) {
-                case SHOP_CHANGE_NAME -> {
-                    shop2.setName(msg);
-                    shop2.updateDisplayText();
-                }
-            }
+        this.registerHandler(MenuItemType.class)
+            .addClick(MenuItemType.CLOSE, (viewer, event) -> plugin.runTask(task -> viewer.getPlayer().closeInventory()))
+            .addClick(MenuItemType.RETURN, (viewer, event) -> shop.getModule().getListMenu().openNextTick(viewer, 1));
 
-            shop2.save();
-            return true;
-        };
-        
-        MenuClick click = (player, type, e) -> {
-            if (type instanceof MenuItemType type2) {
-                if (type2 == MenuItemType.RETURN) {
-                    shop.getModule().getListMenu().open(player, 1);
+        this.registerHandler(Type.class)
+            .addClick(Type.SHOP_CHANGE_TYPE, (viewer, event) -> {
+                shop.setType(CollectionsUtil.next(shop.getType(), shopType -> shopType.hasPermission(viewer.getPlayer())));
+                this.save(viewer);
+            })
+            .addClick(Type.SHOP_CHANGE_NAME, (viewer, event) -> {
+                this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, wrapper -> {
+                    shop.setName(wrapper.getText());
+                    shop.updateDisplayText();
+                    shop.save();
+                    return true;
+                });
+            })
+            .addClick(Type.SHOP_BANK, (viewer, event) -> {
+                this.getBankMenu().openNextTick(viewer, 1);
+            })
+            .addClick(Type.SHOP_CHANGE_TRANSACTIONS, (viewer, event) -> {
+                if (PlayerUtil.isBedrockPlayer(viewer.getPlayer())) {
+                    boolean isBuy = shop.isTransactionEnabled(TradeType.BUY);
+                    boolean isSell = shop.isTransactionEnabled(TradeType.SELL);
+                    if (isBuy && isSell) {
+                        shop.setTransactionEnabled(TradeType.BUY, false);
+                    }
+                    else if (!isBuy && isSell) {
+                        shop.setTransactionEnabled(TradeType.SELL, false);
+                    }
+                    else if (!isBuy) {
+                        shop.setTransactionEnabled(TradeType.BUY, true);
+                    }
+                    else {
+                        shop.setTransactionEnabled(TradeType.SELL, true);
+                    }
+                    return;
                 }
-                else this.onItemClickDefault(player, type2);
-            }
-            else if (type instanceof Type type2) {
-                switch (type2) {
-                    case SHOP_CHANGE_NAME -> {
-                        EditorManager.startEdit(player, shop, type2, input);
-                        EditorManager.prompt(player, plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME).getLocalized());
-                        player.closeInventory();
-                        return;
-                    }
-                    case SHOP_CHANGE_TYPE -> shop.setType(CollectionsUtil.next(shop.getType(), shopType -> shopType.hasPermission(player)));
-                    case SHOP_BANK -> {
-                        this.getBankMenu().open(player, 1);
-                        return;
-                    }
-                    case SHOP_CHANGE_TRANSACTIONS -> {
-                        if (PlayerUtil.isBedrockPlayer(player)) {
-                            boolean isBuy = shop.isTransactionEnabled(TradeType.BUY);
-                            boolean isSell = shop.isTransactionEnabled(TradeType.SELL);
-                            if (isBuy && isSell) {
-                                shop.setTransactionEnabled(TradeType.BUY, false);
-                            }
-                            else if (!isBuy && isSell) {
-                                shop.setTransactionEnabled(TradeType.SELL, false);
-                            }
-                            else if (!isBuy) {
-                                shop.setTransactionEnabled(TradeType.BUY, true);
-                            }
-                            else {
-                                shop.setTransactionEnabled(TradeType.SELL, true);
-                            }
-                            break;
-                        }
 
-                        if (e.isLeftClick()) {
-                            shop.setTransactionEnabled(TradeType.BUY, !shop.isTransactionEnabled(TradeType.BUY));
-                        }
-                        else if (e.isRightClick()) {
-                            shop.setTransactionEnabled(TradeType.SELL, !shop.isTransactionEnabled(TradeType.SELL));
-                        }
-                    }
-                    case SHOP_CHANGE_PRODUCTS -> {
-                        this.getProductsMenu().open(player, 1);
-                        return;
-                    }
-                    case SHOP_DELETE -> {
-                        if (!e.isShiftClick() && !PlayerUtil.isBedrockPlayer(player)) return;
-                        if (!player.hasPermission(ChestPerms.REMOVE)
-                                || (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS))) {
-                            plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
-                            return;
-                        }
-                        player.closeInventory();
-                        player.updateInventory();
-                        shop.getModule().deleteShop(player, shop.getLocation().getBlock());
-                        return;
-                    }
-                    default -> {
-                        return;
-                    }
+                if (event.isLeftClick()) {
+                    shop.setTransactionEnabled(TradeType.BUY, !shop.isTransactionEnabled(TradeType.BUY));
                 }
-                this.shop.updateDisplay();
-                this.shop.save();
-                this.open(player, 1);
-            }
-        };
+                else if (event.isRightClick()) {
+                    shop.setTransactionEnabled(TradeType.SELL, !shop.isTransactionEnabled(TradeType.SELL));
+                }
+                this.save(viewer);
+            })
+            .addClick(Type.SHOP_CHANGE_PRODUCTS, (viewer, event) -> {
+                this.getProductsMenu().openNextTick(viewer, 1);
+            })
+            .addClick(Type.SHOP_DELETE, (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                if (!event.isShiftClick() && !PlayerUtil.isBedrockPlayer(player)) return;
+                if (!player.hasPermission(ChestPerms.REMOVE)
+                    || (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS))) {
+                    plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
+                    return;
+                }
+                player.closeInventory();
+                player.updateInventory();
+                shop.getModule().deleteShop(player, shop.getLocation().getBlock());
+            });
 
-        for (String sId : cfg.getSection("Content")) {
-            MenuItem menuItem = cfg.getMenuItem("Content." + sId, Type.class);
-            if (menuItem.getType() != null) {
-                menuItem.setClickHandler(click);
-            }
-            this.addItem(menuItem);
-        }
+        this.load();
+
+        this.getItems().forEach(menuItem -> {
+            menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.shop.replacePlaceholders()));
+        });
+    }
+
+    private void save(@NotNull MenuViewer viewer) {
+        this.shop.save();
+        this.openNextTick(viewer, viewer.getPage());
     }
 
     private enum Type {
@@ -161,16 +135,5 @@ public class ShopSettingsMenu extends AbstractMenu<ExcellentShop> {
             this.bankMenu = new ShopBankMenu(this.shop);
         }
         return bankMenu;
-    }
-
-    @Override
-    public void onItemPrepare(@NotNull Player player, @NotNull MenuItem menuItem, @NotNull ItemStack item) {
-        super.onItemPrepare(player, menuItem, item);
-        ItemUtil.replace(item, this.shop.replacePlaceholders());
-    }
-
-    @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
-        return true;
     }
 }

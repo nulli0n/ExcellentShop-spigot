@@ -7,7 +7,7 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.TransactionResult;
+import su.nightexpress.nexshop.shop.util.TransactionResult;
 
 public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Placeholder {
 

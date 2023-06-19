@@ -20,16 +20,16 @@ import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,7 +56,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
     private final ChestShopView view;
 
     public ChestShop(@NotNull ChestShopModule module, @NotNull Player owner, @NotNull Container container, @NotNull ChestShopType type) {
-        this(module, new JYML(module.getFullPath() + ChestShopModule.DIR_SHOPS, UUID.randomUUID() + ".yml"));
+        this(module, new JYML(module.getAbsolutePath() + ChestShopModule.DIR_SHOPS, UUID.randomUUID() + ".yml"));
         this.setBank(new ChestShopBank(this));
         this.setLocation(container.getLocation());
         this.setType(type);
@@ -113,7 +113,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         for (TradeType tradeType : TradeType.values()) {
             this.setTransactionEnabled(tradeType, cfg.getBoolean("Transaction_Allowed." + tradeType.name(), true));
         }
-        for (ICurrency currency : ChestShopModule.ALLOWED_CURRENCIES) {
+        for (Currency currency : ChestShopModule.ALLOWED_CURRENCIES) {
             this.getBank().deposit(currency, cfg.getDouble("Bank." + currency.getId()));
         }
 

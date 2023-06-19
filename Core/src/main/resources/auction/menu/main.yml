@@ -1,0 +1,199 @@
+Title: '#5d6d7e&l        &lAuction House'
+Size: 54
+Inventory_Type: CHEST
+
+Items:
+  Name: '#ffffff%listing_item_name%'
+  Lore:
+    - '%lore_format%'
+  Slots: 10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34
+
+Lore_Format:
+  OWNER:
+    - '&8&o(This is your listing)'
+    - ''
+    - '%listing_item_lore%'
+    - ''
+    - '#9af7ff&lInfo:'
+    - '#9af7ff▪ #ddeceePrice: #9af7ff%listing_price%'
+    - '#9af7ff▪ #ddeceeExpires in: #9af7ff%listing_expires_in%'
+    - ''
+    - '#a5ff9a&lActions:'
+    - '#a5ff9a▪ #ddeceeShift-Right: #a5ff9aRemove Listing'
+  PLAYER:
+    - '%listing_item_lore%'
+    - ''
+    - '#9af7ff&lInfo:'
+    - '#9af7ff▪ #ddeceePrice: #9af7ff%listing_price%'
+    - '#9af7ff▪ #ddeceeSeller: #9af7ff%listing_seller%'
+    - '#9af7ff▪ #ddeceeExpires in: #9af7ff%listing_expires_in%'
+    - ''
+    - '#a5ff9a&lActions:'
+    - '#a5ff9a▪ #ddeceeLeft-Click: #a5ff9aPurchase'
+  ADMIN:
+    - '%listing_item_lore%'
+    - ''
+    - '#9af7ff&lInfo:'
+    - '#9af7ff▪ #ddeceePrice: #9af7ff%listing_price%'
+    - '#9af7ff▪ #ddeceeSeller: #9af7ff%listing_seller%'
+    - '#9af7ff▪ #ddeceeAdded: #9af7ff%listing_date_creation%'
+    - '#9af7ff▪ #ddeceeExpires in: #9af7ff%listing_expires_in%'
+    - ''
+    - '#a5ff9a&lActions:'
+    - '#a5ff9a▪ #ddeceeLeft-Click: #a5ff9aPurchase'
+    - '#a5ff9a▪ #ddeceeShift-Right: #a5ff9aRemove Listing'
+
+Content:
+  expired:
+    Priority: 5
+    Item:
+      Material: 'HOPPER'
+      Name: '#ee9aff&lExpired Items'
+      Lore:
+        - '#ddeceeList of ''expired'' items'
+        - '#ddeceethat have not been sold to anyone.'
+        - '&7'
+        - '#fdba5e[!] #ddeceeYou have #fdba5e%expired_amount% #ddeceeexpired items.'
+        - '&7'
+        - '#ff9a9a[!] #ddeceeDon''t forget to #ff9a9atake#ddecee these'
+        - '#ddeceeitems back, otherwise they can be #ff9a9adeleted#ddecee!'
+    Type: EXPIRED_LISTINGS
+    Slots: 47
+
+  history:
+    Priority: 5
+    Item:
+      Material: 'WRITABLE_BOOK'
+      Name: '#ee9aff&lSales History'
+      Lore:
+        - '#ddeceeList of all items you'
+        - '#ddeceehave sold on auction.'
+    Type: SALES_HISTORY
+    Slots: 51
+
+  unclaimed:
+    Priority: 5
+    Item:
+      Material: 'GOLD_NUGGET'
+      Name: '#ee9aff&lSold & Unclaimed Items'
+      Lore:
+        - '#ddeceeList of items you have sold,'
+        - '#ddeceebut didn''t claim the reward.'
+        - ''
+        - '#fdba5e[!] #ddeceeYou have #fdba5e%unclaimed_amount% #ddeceeunclaimed items.'
+        - ''
+        - '#ff9a9a[!] #ddeceeDon''t forget to #ff9a9aclaim#ddecee your'
+        - '#ddeceerewards, otherwise they can be #ff9a9adeleted#ddecee!'
+    Type: UNCLAIMED_ITEMS
+    Slots: 50
+
+  category:
+    Priority: 5
+    Item:
+      Material: 'COMPASS'
+      Name: '#ee9aff&lItem Categories'
+      Lore:
+        - '#ddeceeSelect listing categories you'
+        - '#ddeceewant to browse here.'
+        - ''
+        - '#a5ff9a[✓] #ddeceeSelected: #a5ff9a%categories%'
+        - ''
+        - '#a5ff9a&lActions:'
+        - '#a5ff9a▪ #ddeceeRight-Click: #a5ff9aReset'
+    Type: CATEGORY_FILTER
+    Slots: 46
+
+  currencies:
+    Priority: 5
+    Item:
+      Material: 'EMERALD'
+      Name: '#ee9aff&lCurrencies'
+      Lore:
+        - '#ddeceeSelect listing currencies you'
+        - '#ddeceewant to browse here.'
+        - ''
+        - '#a5ff9a[✓] #ddeceeSelected: #a5ff9a%currencies%'
+        - ''
+        - '#a5ff9a&lActions:'
+        - '#a5ff9a▪ #ddeceeRight-Click: #a5ff9aReset'
+    Type: CURRENCY_FILTER
+    Slots: 49
+
+  my_items:
+    Priority: 5
+    Item:
+      Material: 'BOOK'
+      Name: '#ee9aff&lMy Items'
+      Lore:
+        - '#ddeceeItems you''re selling now.'
+    Type: OWN_LISTINGS
+    Slots: 48
+
+  sort:
+    Priority: 5
+    Item:
+      Material: 'NAME_TAG'
+      Name: '#ee9aff&lItems Order'
+      Lore:
+        - '#ddeceeItems are displayed'
+        - '#ddeceein a #ee9aff%listing_order% #ddeceeorder.'
+        - ''
+        - '#a5ff9a&lActions:'
+        - '#a5ff9a▪ #ddeceeLeft-Click: #a5ff9aToggle'
+    Type: LISTING_ORDER
+    Slots: 52
+
+  border:
+    Item:
+      Material: BLACK_STAINED_GLASS_PANE
+      Name: '&7'
+    Slots: 0,1,2,3,4,5,6,7,8,9,17,18,26,27,35,36,44,45,53,37,38,39,40,41,42,43
+
+  page_next:
+    Priority: 5
+    Item:
+      Material: 'PLAYER_HEAD'
+      Name: '#e3fbf9(→) &fNext Page'
+      Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19'
+    Slots: 26
+    Type: PAGE_NEXT
+
+  page_previous:
+    Priority: 5
+    Item:
+      Material: 'PLAYER_HEAD'
+      Name: '#e3fbf9(←) &fPrevious Page'
+      Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0='
+    Slots: 18
+    Type: PAGE_PREVIOUS
+
+  info:
+    Priority: 5
+    Item:
+      Material: 'LECTERN'
+      Name: '&6Information'
+      Lore:
+        - '&6&lSelling Items:'
+        - '&6▸ &7Hold item and type'
+        - '  &6/ah sell <price>'
+        - '&7'
+        - '&6&lItem Expire:'
+        - '&6▸ &7When you put an item to'
+        - '  &7auction, it will have &6%expire%'
+        - '  &7to be sold before it will be removed'
+        - '  &7from the auction.'
+        - '&7'
+        - '&6&lTaxes:'
+        - '&6▸ &7You will have to pay'
+        - '&7  &6%tax%% &7of the item price'
+        - '&7  to be able to put in on auction.'
+        - '&7'
+        - '&6&lCancel Items:'
+        - '&6▸ &7Use &6Shift+Right Click'
+        - '&7  to cancel any item you''re selling.'
+      Enchants:
+        fortune: 1
+      Item_Flags:
+        - '*'
+    Type: NONE
+    Slots: 4

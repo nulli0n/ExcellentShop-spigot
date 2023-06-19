@@ -17,7 +17,7 @@ import su.nexmedia.engine.utils.MessageUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.Product;
@@ -110,12 +110,12 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
 
                     Player player = viewer.getPlayer();
                     Product<?, ?, ?> shopProduct = prepared.getProduct();
-                    ICurrency currency = shopProduct.getCurrency();
+                    Currency currency = shopProduct.getCurrency();
 
                     PlaceholderMap placeholderMap = new PlaceholderMap();
                     placeholderMap.getKeys().addAll(currency.getPlaceholders().getKeys());
                     placeholderMap.getKeys().addAll(prepared.getPlaceholders().getKeys());
-                    placeholderMap.add(Placeholders.GENERIC_BALANCE, () -> currency.format(this.balance.computeIfAbsent(player, k -> currency.getBalance(player))));
+                    placeholderMap.add(Placeholders.GENERIC_BALANCE, () -> currency.format(this.balance.computeIfAbsent(player, k -> currency.getHandler().getBalance(player))));
                     ItemUtil.replace(item, placeholderMap.replacer());
                 });
             }
@@ -178,7 +178,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         int capacityCart = this.getCartInventorySpace(prepared);
         int capacityProduct = product.getStock().getPossibleAmount(prepared.getTradeType(), player);
         double shopBalance = shop.getBank().getBalance(product.getCurrency());
-        double userBalance = product.getCurrency().getBalance(player);
+        double userBalance = product.getCurrency().getHandler().getBalance(player);
 
         if (product instanceof ItemProduct itemProduct) {
             ItemStack item = itemProduct.getItem();

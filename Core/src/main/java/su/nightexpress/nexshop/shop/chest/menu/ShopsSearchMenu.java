@@ -2,16 +2,18 @@ package su.nightexpress.nexshop.shop.chest.menu;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AbstractMenuAuto;
-import su.nexmedia.engine.api.menu.MenuClick;
-import su.nexmedia.engine.api.menu.MenuItem;
+import su.nexmedia.engine.api.menu.AutoPaged;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.click.ClickHandler;
+import su.nexmedia.engine.api.menu.click.ItemClick;
+import su.nexmedia.engine.api.menu.impl.ConfigMenu;
+import su.nexmedia.engine.api.menu.impl.MenuOptions;
+import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -21,7 +23,7 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 
 import java.util.*;
 
-public class ShopsSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduct> {
+public class ShopsSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestProduct> {
 
     private final ChestShopModule                module;
     private final Map<Player, List<ChestProduct>> searchCache;
@@ -31,28 +33,26 @@ public class ShopsSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduc
     private final List<String> productLore;
 
     public ShopsSearchMenu(@NotNull ChestShopModule module) {
-        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getPath() + "menu/shops_search.yml"), "");
+        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shops_search.yml"));
         this.module = module;
         this.searchCache = new WeakHashMap<>();
 
         this.productSlots = cfg.getIntArray("Product.Slots");
-        this.productName = Colorizer.apply(cfg.getString("Product.Name", Placeholders.PRODUCT_ITEM_NAME));
+        this.productName = Colorizer.apply(cfg.getString("Product.Name", Placeholders.PRODUCT_PREVIEW_NAME));
         this.productLore = Colorizer.apply(cfg.getStringList("Product.Lore"));
 
-        MenuClick click = (player, type, e) -> {
-            if (type instanceof MenuItemType type2) {
-                this.onItemClickDefault(player, type2);
-            }
-        };
+        this.registerHandler(MenuItemType.class)
+            .addClick(MenuItemType.CLOSE, (viewer, event) -> plugin.runTask(task -> viewer.getPlayer().closeInventory()))
+            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
+            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this));
 
-        for (String sId : cfg.getSection("Content")) {
-            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
+        this.load();
+    }
 
-            if (menuItem.getType() != null) {
-                menuItem.setClickHandler(click);
-            }
-            this.addItem(menuItem);
-        }
+    @Override
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+        super.onPrepare(viewer, options);
+        this.getItemsForPage(viewer).forEach(this::addItem);
     }
 
     public void open(@NotNull Player player, @NotNull Material material) {
@@ -70,20 +70,20 @@ public class ShopsSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduc
     }
 
     @Override
-    protected int[] getObjectSlots() {
+    public int[] getObjectSlots() {
         return this.productSlots;
     }
 
     @Override
     @NotNull
-    protected List<ChestProduct> getObjects(@NotNull Player player) {
+    public List<ChestProduct> getObjects(@NotNull Player player) {
         return new ArrayList<>(this.getSearchResult(player).stream()
             .sorted((p1, p2) -> (int) (p1.getPricer().getPriceBuy() - p2.getPricer().getPriceBuy())).toList());
     }
 
     @Override
     @NotNull
-    protected ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
+    public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
         ItemStack item = new ItemStack(product.getItem());
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return item;
@@ -99,20 +99,15 @@ public class ShopsSearchMenu extends AbstractMenuAuto<ExcellentShop, ChestProduc
 
     @Override
     @NotNull
-    protected MenuClick getObjectClick(@NotNull Player player, @NotNull ChestProduct product) {
-        return (player1, type, e) -> {
-            product.getShop().teleport(player1);
+    public ItemClick getObjectClick(@NotNull ChestProduct product) {
+        return (viewer, event) -> {
+            product.getShop().teleport(viewer.getPlayer());
         };
     }
 
     @Override
-    public void onClose(@NotNull Player player, @NotNull InventoryCloseEvent e) {
-        super.onClose(player, e);
-        this.searchCache.remove(player);
-    }
-
-    @Override
-    public boolean cancelClick(@NotNull InventoryClickEvent e, @NotNull SlotType slotType) {
-        return true;
+    public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
+        super.onClose(viewer, event);
+        this.searchCache.remove(viewer.getPlayer());
     }
 }

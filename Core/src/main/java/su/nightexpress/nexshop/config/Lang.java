@@ -1,12 +1,13 @@
 package su.nightexpress.nexshop.config;
 
 import org.bukkit.Sound;
+import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
 import su.nightexpress.nexshop.Placeholders;
 
 
-public class Lang extends EngineLang {
+public class Lang extends EngineLang implements LangColors {
 
     public static final LangKey COMMAND_CURRENCY_DESC  = LangKey.of("Command.Currency.Desc", "Manage plugin currencies.");
     public static final LangKey COMMAND_CURRENCY_USAGE = LangKey.of("Command.Currency.Usage", "[help]");

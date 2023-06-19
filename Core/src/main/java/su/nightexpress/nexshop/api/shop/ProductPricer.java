@@ -7,7 +7,7 @@ import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.currency.internal.ItemCurrency;
+import su.nightexpress.nexshop.currency.impl.ItemCurrency;
 import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.price.FloatProductPricer;

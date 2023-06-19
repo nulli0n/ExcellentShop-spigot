@@ -5,11 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.ChestShopTransactionEvent;
-import su.nightexpress.nexshop.shop.TransactionResult.Result;
+import su.nightexpress.nexshop.shop.util.TransactionResult.Result;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.TransactionResult;
+import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
 public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
@@ -28,7 +28,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         int amountToBuy = this.getUnits();
         int amountShopHas = product.getStock().getLeftAmount(TradeType.BUY);
         double price = this.getPrice();
-        double balanceUser = product.getCurrency().getBalance(player);
+        double balanceUser = product.getCurrency().getHandler().getBalance(player);
 
         Result result = TransactionResult.Result.SUCCESS;
         if (balanceUser < price) {
@@ -58,7 +58,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
             // Process transaction
             product.delivery(player, amountToBuy);
-            product.getCurrency().take(player, price);
+            product.getCurrency().getHandler().take(player, price);
             shop.getModule().getLogger().logTransaction(event);
 
             plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_USER)
@@ -130,7 +130,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
                 shop.getBank().withdraw(product.getCurrency(), price);
                 shop.save();
             }
-            product.getCurrency().give(player, price);
+            product.getCurrency().getHandler().give(player, price);
             product.take(player, fined);
             shop.getModule().getLogger().logTransaction(event);
 

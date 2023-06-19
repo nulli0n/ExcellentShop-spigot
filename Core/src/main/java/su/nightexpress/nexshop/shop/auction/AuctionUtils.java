@@ -8,7 +8,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nexmedia.engine.utils.random.Rnd;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
@@ -51,7 +51,7 @@ public class AuctionUtils {
                 }
             }
 
-            ICurrency currency = Rnd.get(auctionManager.getCurrencies());
+            Currency currency = Rnd.get(auctionManager.getCurrencies());
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
 
             LocalDateTime created = LocalDateTime.now().minusDays(Rnd.get(5)).minusHours(Rnd.get(6)).minusMinutes(Rnd.get(30));

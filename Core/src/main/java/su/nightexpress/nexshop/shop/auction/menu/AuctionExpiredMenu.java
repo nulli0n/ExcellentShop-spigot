@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.auction.menu;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.*;
+import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 
@@ -15,41 +15,16 @@ public class AuctionExpiredMenu extends AbstractAuctionMenu<AuctionListing> {
     public AuctionExpiredMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager, cfg);
 
-        MenuClick click = (player, type, e) -> {
+        this.registerHandler(ItemType.class)
+            .addClick(ItemType.TAKE_ALL, (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                this.auctionManager.getExpiredListings(player).forEach(listing -> {
+                    this.auctionManager.takeListing(player, listing);
+                });
+                this.openNextTick(viewer, viewer.getPage());
+            });
 
-            if (type instanceof MenuItemType type2) {
-                if (type2 == MenuItemType.RETURN) {
-                    this.auctionManager.getMainMenu().open(player, 1);
-                }
-                else this.onItemClickDefault(player, type2);
-            }
-            else if (type instanceof ItemType type2) {
-                if (type2 == ItemType.TAKE_ALL) {
-                    this.auctionManager.getExpiredListings(player).forEach(listing -> {
-                        this.auctionManager.takeListing(player, listing);
-                    });
-                    this.open(player, 1);
-                }
-            }
-        };
-
-        for (String sId : cfg.getSection("Content")) {
-            MenuItem menuItem = cfg.getMenuItem("Content." + sId, MenuItemType.class);
-
-            if (menuItem.getType() != null) {
-                menuItem.setClickHandler(click);
-            }
-            this.addItem(menuItem);
-        }
-
-        for (String sId : cfg.getSection("Special")) {
-            MenuItem menuItem = cfg.getMenuItem("Special." + sId, ItemType.class);
-
-            if (menuItem.getType() != null) {
-                menuItem.setClickHandler(click);
-            }
-            this.addItem(menuItem);
-        }
+        this.load();
     }
 
     private enum ItemType {
@@ -58,17 +33,18 @@ public class AuctionExpiredMenu extends AbstractAuctionMenu<AuctionListing> {
 
     @Override
     @NotNull
-    protected List<AuctionListing> getObjects(@NotNull Player player) {
+    public List<AuctionListing> getObjects(@NotNull Player player) {
         UUID id = this.seeOthers.getOrDefault(player, player.getUniqueId());
         return this.auctionManager.getExpiredListings(id);
     }
 
     @Override
     @NotNull
-    protected MenuClick getObjectClick(@NotNull Player player, @NotNull AuctionListing item) {
-        return (player1, type, e) -> {
-            this.auctionManager.takeListing(player1, item);
-            this.open(player1, this.getPage(player1));
+    public ItemClick getObjectClick(@NotNull AuctionListing item) {
+        return (viewer, event) -> {
+            Player player = viewer.getPlayer();
+            this.auctionManager.takeListing(player, item);
+            this.openNextTick(viewer, viewer.getPage());
         };
     }
 }

@@ -248,13 +248,14 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         ProductStockData stockData = this.getProductStockData(holder, stockType, tradeType);
 
         int initial = this.getInitialAmount(stockType, tradeType);
+        int itemsLeft = stockType == StockType.GLOBAL ? amount : Math.min(initial, amount);
         if (stockData == null) {
             stockData = new ProductStockData(this, tradeType, stockType);
-            stockData.setItemsLeft(Math.min(initial, amount));
+            stockData.setItemsLeft(itemsLeft);
             ProductStockStorage.createProductStockData(holder, stockData);
         }
         else {
-            stockData.setItemsLeft(Math.min(initial, amount));
+            stockData.setItemsLeft(itemsLeft);
             ProductStockStorage.saveProductStockData(holder, stockData);
         }
     }

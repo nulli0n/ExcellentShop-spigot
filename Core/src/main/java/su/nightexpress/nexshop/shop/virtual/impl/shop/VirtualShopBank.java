@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.shop.virtual.impl.shop;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.currency.ICurrency;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.ShopBank;
 
 public class VirtualShopBank extends ShopBank<VirtualShop> {
@@ -11,22 +11,22 @@ public class VirtualShopBank extends ShopBank<VirtualShop> {
     }
 
     @Override
-    public boolean deposit(@NotNull ICurrency currency, double amount) {
+    public boolean deposit(@NotNull Currency currency, double amount) {
         return true;
     }
 
     @Override
-    public boolean withdraw(@NotNull ICurrency currency, double amount) {
+    public boolean withdraw(@NotNull Currency currency, double amount) {
         return true;
     }
 
     @Override
-    public double getBalance(@NotNull ICurrency currency) {
+    public double getBalance(@NotNull Currency currency) {
         return -1;
     }
 
     @Override
-    public boolean hasEnough(@NotNull ICurrency currency, double amount) {
+    public boolean hasEnough(@NotNull Currency currency, double amount) {
         return true;
     }
 }

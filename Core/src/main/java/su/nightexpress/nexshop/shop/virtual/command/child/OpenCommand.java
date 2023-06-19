@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nightexpress.nexshop.module.command.ShopModuleCommand;
+import su.nightexpress.nexshop.shop.module.ModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
@@ -13,7 +13,7 @@ import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 import java.util.List;
 import java.util.Map;
 
-public class OpenCommand extends ShopModuleCommand<VirtualShopModule> {
+public class OpenCommand extends ModuleCommand<VirtualShopModule> {
 
     public OpenCommand(@NotNull VirtualShopModule module) {
         super(module, new String[]{"open"}, VirtualPerms.COMMAND_OPEN);

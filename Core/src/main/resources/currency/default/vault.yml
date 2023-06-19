@@ -1,7 +1,6 @@
 Enabled: true
 Name: $
 Format: '%currency_name%%price%'
-Number_Format: '#,##0.##'
 Icon:
   Material: SUNFLOWER
   Amount: 1

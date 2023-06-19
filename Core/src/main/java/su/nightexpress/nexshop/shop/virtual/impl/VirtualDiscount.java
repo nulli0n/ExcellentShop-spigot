@@ -9,7 +9,7 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.shop.TimeUtils;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.Discount;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.DiscountMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
