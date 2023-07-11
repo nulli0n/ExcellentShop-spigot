@@ -82,7 +82,7 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
     public ItemStack getObjectStack(@NotNull Player player, @NotNull A aucItem) {
         ItemStack item = new ItemStack(aucItem.getItemStack());
         ItemUtil.mapMeta(item, meta -> {
-            List<String> lore = StringUtil.replace(this.itemLore, PLACEHOLDER_LORE_FORMAT, false, this.getLoreFormat(player, aucItem));
+            List<String> lore = StringUtil.replaceInList(this.itemLore, PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, aucItem));
             meta.setDisplayName(this.itemName);
             meta.setLore(lore);
             //lore.replaceAll(aucItem.replacePlaceholders());

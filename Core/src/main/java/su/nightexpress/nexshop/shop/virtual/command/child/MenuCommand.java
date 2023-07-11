@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.command.child;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nightexpress.nexshop.shop.module.ModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -11,7 +12,6 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 
 import java.util.List;
-import java.util.Map;
 
 public class MenuCommand extends ModuleCommand<VirtualShopModule> {
 
@@ -46,8 +46,8 @@ public class MenuCommand extends ModuleCommand<VirtualShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
-        String pName = args.length >= 2 ? args[1] : sender.getName();
+    public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
+        String pName = result.length() >= 2 ? result.getArg(1) : sender.getName();
         Player player = plugin.getServer().getPlayer(pName);
         if (player == null) {
             this.errorPlayer(sender);

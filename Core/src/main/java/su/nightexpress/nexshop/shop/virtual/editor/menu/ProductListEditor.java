@@ -84,6 +84,8 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         viewer.setPages(shop.getPages());
 
         for (MenuItem item : shop.getView().getItems()) {
+            if (item.getPriority() < 0) continue;
+
             MenuItem clone = new MenuItem(item.getItem());
             clone.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
             clone.setSlots(item.getSlots());

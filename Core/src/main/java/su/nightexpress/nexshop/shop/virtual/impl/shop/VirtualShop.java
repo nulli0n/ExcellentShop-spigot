@@ -4,12 +4,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -23,7 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> implements ICleanable {
+public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> {
 
     private final VirtualShopModule module;
     private final VirtualShopView view;
@@ -124,7 +122,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         return this.view;
     }
 
-    @Override
     public void clear() {
         if (this.editor != null) {
             this.editor.clear();
@@ -133,7 +130,7 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> impleme
         if (this.view != null) {
             this.view.clear();
         }
-        this.products.values().forEach(Product::clear);
+        this.products.values().forEach(VirtualProduct::clear);
         this.products.clear();
         this.discountConfigs.forEach(VirtualDiscount::clear);
         this.discountConfigs.clear();

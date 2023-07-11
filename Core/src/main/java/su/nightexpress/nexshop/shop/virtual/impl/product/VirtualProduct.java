@@ -144,7 +144,6 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         pricer.write(cfg, path + ".Price");
     }
 
-    @Override
     public void clear() {
         if (this.editor != null) {
             this.editor.clear();

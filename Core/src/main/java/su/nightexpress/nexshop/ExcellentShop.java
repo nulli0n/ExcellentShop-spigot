@@ -129,8 +129,8 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     @Override
     public void loadLang() {
         this.getLangManager().loadMissing(Lang.class);
-        this.getLangManager().setupEnum(TradeType.class);
-        this.getLangManager().setupEnum(PriceType.class);
+        this.getLangManager().loadEnum(TradeType.class);
+        this.getLangManager().loadEnum(PriceType.class);
         this.getLang().saveChanges();
     }
 

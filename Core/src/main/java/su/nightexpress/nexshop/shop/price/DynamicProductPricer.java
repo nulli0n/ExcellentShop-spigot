@@ -79,7 +79,7 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
                 double max = this.getPriceMax(tradeType);
 
                 double price = this.getInitial(tradeType) + (difference * this.getStep(tradeType));
-                if (price > max) price = max;
+                if (price > max && max >= 0) price = max;
                 else if (price < min) price = min;
 
                 this.setPrice(tradeType, price);

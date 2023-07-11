@@ -68,7 +68,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
                 UUID id = UUID.fromString(resultSet.getString(COLUMN_AUC_ID.getName()));
                 UUID owner = UUID.fromString(resultSet.getString(COLUMN_OWNER.getName()));
                 String ownerName = resultSet.getString(COLUMN_OWNER_NAME.getName());
-                ItemStack itemStack = ItemUtil.fromBase64(resultSet.getString(COLUMN_ITEM.getName()));
+                ItemStack itemStack = ItemUtil.decompress(resultSet.getString(COLUMN_ITEM.getName()));
                 if (itemStack == null) {
                     this.auctionManager.error("Invalid listing item stack!");
                     return null;
@@ -99,7 +99,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
                 String ownerName = resultSet.getString(COLUMN_OWNER_NAME.getName());
                 String buyerName = resultSet.getString(COLUMN_BUYER_NAME.getName());
 
-                ItemStack itemStack = ItemUtil.fromBase64(resultSet.getString(COLUMN_ITEM.getName()));
+                ItemStack itemStack = ItemUtil.decompress(resultSet.getString(COLUMN_ITEM.getName()));
                 if (itemStack == null) {
                     this.auctionManager.error("Invalid listing item stack!");
                     return null;
@@ -232,7 +232,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             COLUMN_AUC_ID.toValue(listing.getId().toString()),
             COLUMN_OWNER.toValue(listing.getOwner().toString()),
             COLUMN_OWNER_NAME.toValue(listing.getOwnerName()),
-            COLUMN_ITEM.toValue(String.valueOf(ItemUtil.toBase64(listing.getItemStack()))),
+            COLUMN_ITEM.toValue(String.valueOf(ItemUtil.compress(listing.getItemStack()))),
             COLUMN_CURRENCY.toValue(listing.getCurrency().getId()),
             COLUMN_PRICE.toValue(listing.getPrice()),
             COLUMN_EXPIRE_DATE.toValue(listing.getExpireDate()),
@@ -265,7 +265,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             COLUMN_OWNER.toValue(listing.getOwner().toString()),
             COLUMN_OWNER_NAME.toValue(listing.getOwnerName()),
             COLUMN_BUYER_NAME.toValue(listing.getBuyerName()),
-            COLUMN_ITEM.toValue(String.valueOf(ItemUtil.toBase64(listing.getItemStack()))),
+            COLUMN_ITEM.toValue(String.valueOf(ItemUtil.compress(listing.getItemStack()))),
             COLUMN_CURRENCY.toValue(listing.getCurrency().getId()),
             COLUMN_PRICE.toValue(listing.getPrice()),
             COLUMN_IS_PAID.toValue(listing.isRewarded() ? 1 : 0),

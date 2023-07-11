@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.command.child;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nightexpress.nexshop.shop.module.ModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -11,7 +12,6 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.List;
-import java.util.Map;
 
 public class OpenCommand extends ModuleCommand<VirtualShopModule> {
 
@@ -49,19 +49,19 @@ public class OpenCommand extends ModuleCommand<VirtualShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
-        if (args.length < 2) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
+        if (result.length() < 2) {
             this.printUsage(sender);
             return;
         }
 
-        VirtualShop shop = this.module.getShopById(args[1]);
+        VirtualShop shop = this.module.getShopById(result.getArg(1));
         if (shop == null) {
             plugin.getMessage(VirtualLang.SHOP_ERROR_INVALID).send(sender);
             return;
         }
 
-        String pName = args.length >= 3 ? args[2] : sender.getName();
+        String pName = result.length() >= 3 ? result.getArg(2) : sender.getName();
         Player player = plugin.getServer().getPlayer(pName);
         if (player == null) {
             this.errorPlayer(sender);

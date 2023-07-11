@@ -5,8 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractManager;
-import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.hooks.external.VaultHook;
+import su.nexmedia.engine.integration.VaultHook;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
@@ -44,24 +44,24 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
         this.registerCurrency(EXP, ExpPointsHandler::new);
 
-        if (Hooks.hasVault() && VaultHook.hasEconomy()) {
+        if (EngineUtils.hasVault() && VaultHook.hasEconomy()) {
             this.registerCurrency(VAULT, VaultEconomyHandler::new);
         }
-        if (Hooks.hasPlugin(HookId.PLAYER_POINTS)) {
+        if (EngineUtils.hasPlugin(HookId.PLAYER_POINTS)) {
             this.registerCurrency(HookId.PLAYER_POINTS, PlayerPointsHandler::new);
             this.deprecatedCurrency(HookId.PLAYER_POINTS);
         }
-        if (Hooks.hasPlugin(HookId.GAME_POINTS)) {
+        if (EngineUtils.hasPlugin(HookId.GAME_POINTS)) {
             this.registerCurrency(HookId.GAME_POINTS, GamePointsHandler::new);
             this.deprecatedCurrency(HookId.GAME_POINTS);
         }
-        if (Hooks.hasPlugin(HookId.ELITEMOBS)) {
+        if (EngineUtils.hasPlugin(HookId.ELITEMOBS)) {
             this.registerCurrency(HookId.ELITEMOBS, EliteMobsHandler::new);
         }
-        if (Hooks.hasPlugin(HookId.COINS_ENGINE)) {
+        if (EngineUtils.hasPlugin(HookId.COINS_ENGINE)) {
             CoinsEngineCurrency.getCurrencies().forEach(this::registerCurrency);
         }
-        if (Hooks.hasPlugin(HookId.GEMS_ECONOMY)) {
+        if (EngineUtils.hasPlugin(HookId.GEMS_ECONOMY)) {
             for (me.xanium.gemseconomy.currency.Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
                 this.registerCurrency("gemseconomy_" + currency.getSingular(), () -> new GemsEconomyHandler(currency));
             }

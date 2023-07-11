@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.lang.LangMessage;
-import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
@@ -22,7 +21,7 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 public abstract class Product<
     P extends Product<P, S, T>,
     S extends Shop<S, P>,
-    T extends ProductStock<P>> implements ICleanable, Placeholder {
+    T extends ProductStock<P>> implements Placeholder {
 
     protected final String id;
     protected final PlaceholderMap placeholderMap;
@@ -75,6 +74,8 @@ public abstract class Product<
 
     @NotNull
     protected abstract P get();
+
+    public abstract void clear();
 
     public void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click) {
         Shop<?, ?> shop = this.getShop();

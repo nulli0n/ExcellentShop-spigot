@@ -17,7 +17,6 @@ import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -49,12 +48,6 @@ public class DiscountListEditor extends EditorMenu<ExcellentShop, VirtualShop> i
     @NotNull
     public List<VirtualDiscount> getObjects(@NotNull Player player) {
         return new ArrayList<>(this.object.getDiscountConfigs());
-    }
-
-    @Override
-    @NotNull
-    public Comparator<VirtualDiscount> getObjectSorter() {
-        return ((o1, o2) -> 0);
     }
 
     @Override

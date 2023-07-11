@@ -3,12 +3,11 @@ package su.nightexpress.nexshop.shop.virtual.command.child;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.config.Lang;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nightexpress.nexshop.shop.module.ModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-
-import java.util.Map;
 
 public class EditorCommand extends ModuleCommand<VirtualShopModule> {
 
@@ -19,7 +18,7 @@ public class EditorCommand extends ModuleCommand<VirtualShopModule> {
     @Override
     @NotNull
     public String getDescription() {
-        return plugin.getMessage(Lang.CORE_COMMAND_EDITOR_DESC).getLocalized();
+        return plugin.getMessage(VirtualLang.COMMAND_EDITOR_DESC).getLocalized();
     }
 
     @Override
@@ -34,7 +33,7 @@ public class EditorCommand extends ModuleCommand<VirtualShopModule> {
     }
 
     @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
         this.module.getEditor().open(player, 1);
     }

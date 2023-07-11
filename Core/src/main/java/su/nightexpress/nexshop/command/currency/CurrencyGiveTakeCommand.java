@@ -96,7 +96,7 @@ public class CurrencyGiveTakeCommand extends AbstractCommand<ExcellentShop> {
 
         plugin.getMessage(this.mode == Mode.GIVE ? Lang.COMMAND_CURRENCY_GIVE_DONE : Lang.COMMAND_CURRENCY_TAKE_DONE)
             .replace(currency.replacePlaceholders())
-            .replace(Placeholders.Player.replacer(player))
+            .replace(Placeholders.forPlayer(player))
             .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(amount))
             .send(sender);
     }

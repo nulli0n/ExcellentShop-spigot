@@ -14,7 +14,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
@@ -34,7 +33,7 @@ import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanable {
+public class ChestShop extends Shop<ChestShop, ChestProduct> {
 
     private final ChestShopModule module;
 
@@ -61,7 +60,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         this.setLocation(container.getLocation());
         this.setType(type);
         this.setOwner(owner);
-        this.setName(Placeholders.Player.replacer(owner).apply(ChestConfig.DEFAULT_NAME.get()));
+        this.setName(Placeholders.forPlayer(owner).apply(ChestConfig.DEFAULT_NAME.get()));
         Arrays.asList(TradeType.values()).forEach(tradeType -> this.setTransactionEnabled(tradeType, true));
     }
 
@@ -134,7 +133,6 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> implements ICleanab
         }).filter(Objects::nonNull).forEach(this::addProduct);
     }
 
-    @Override
     public void clear() {
         ChestDisplayHandler displayHandler = this.module.getDisplayHandler();
         if (displayHandler != null) {

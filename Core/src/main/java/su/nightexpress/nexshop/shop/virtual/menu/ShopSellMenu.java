@@ -118,7 +118,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
                 return line
                     .replace(Placeholders.GENERIC_PRICE, product.getCurrency().format(price));
             });
-            lore = StringUtil.replace(lore, "%item_lore%", false, ItemUtil.getLore(item));
+            lore = StringUtil.replaceInList(lore, "%item_lore%", ItemUtil.getLore(item));
             lore = StringUtil.stripEmpty(lore);
 
             meta.setDisplayName(this.itemName.replace("%item_name%", ItemUtil.getItemName(item)));

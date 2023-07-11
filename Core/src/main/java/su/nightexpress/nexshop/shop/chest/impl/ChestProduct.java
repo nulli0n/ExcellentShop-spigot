@@ -94,7 +94,6 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
         cfg.setItemEncoded(path + ".Reward.Item", product.getItem());
     }
 
-    @Override
     public void clear() {
         if (this.priceEditor != null) {
             this.priceEditor.clear();

@@ -6,8 +6,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.hooks.Hooks;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.AuctionCategory;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
@@ -28,9 +28,9 @@ public class AuctionConfig {
 
     public static long     LISTINGS_EXPIRE_IN;
     public static long     LISTINGS_PURGE_IN;
-    public static  boolean LISTINGS_ANNOUNCE;
-    private static Map<String, Integer> LISTINGS_PER_RANK;
-    public static Map<String, AuctionCurrencySetting> CURRENCIES;
+    public static  boolean                             LISTINGS_ANNOUNCE;
+    private static PlayerRankMap<Integer>                       LISTINGS_PER_RANK;
+    public static  Map<String, AuctionCurrencySetting> CURRENCIES;
     public static final JOption<Boolean> LISTINGS_PRICE_ROUND_TO_INT = JOption.create("Settings.Listings.Price.Round_To_Integer", false,
         "When 'true', removes decimals from listing's price on sell.");
     private static Map<String, double[]> LISTINGS_PRICE_PER_CURRENCY;
@@ -107,10 +107,7 @@ public class AuctionConfig {
         LISTINGS_EXPIRE_IN = cfg.getLong(path + "Expire_In", 604800) * 1000L;
         LISTINGS_PURGE_IN = TimeUnit.MILLISECONDS.convert(cfg.getLong("Database.Purge.For_Period", 30), TimeUnit.DAYS);
         LISTINGS_ANNOUNCE = cfg.getBoolean(path + "Announce");
-        LISTINGS_PER_RANK = new HashMap<>();
-        for (String rank : cfg.getSection(path + "Listings_Per_Rank")) {
-            LISTINGS_PER_RANK.put(rank.toLowerCase(), cfg.getInt(path + "Listings_Per_Rank." + rank));
-        }
+        LISTINGS_PER_RANK = PlayerRankMap.read(cfg, path + "Listing_Per_Rank", Integer.class).setNegativeBetter(true);
         LISTINGS_DISABLED_MATERIALS = cfg.getStringSet(path + "Disabled_Materials").stream()
                 .map(String::toUpperCase).collect(Collectors.toSet());
         LISTINGS_DISABLED_NAMES = Colorizer.apply(cfg.getStringSet(path + "Disabled_Names"));
@@ -156,7 +153,7 @@ public class AuctionConfig {
     }
 
     public static int getPossibleListings(@NotNull Player player) {
-        return Hooks.getGroupValueInt(player, LISTINGS_PER_RANK, true);
+        return LISTINGS_PER_RANK.getBestValue(player, 0);
     }
 
     public static double getMaterialPriceMin(@NotNull Material material) {

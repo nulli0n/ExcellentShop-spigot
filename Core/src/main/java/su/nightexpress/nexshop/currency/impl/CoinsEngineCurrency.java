@@ -33,6 +33,12 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler {
 
     @Override
     @NotNull
+    public String formatValue(double price) {
+        return this.currency.formatValue(price);
+    }
+
+    @Override
+    @NotNull
     public CurrencyHandler getHandler() {
         return this;
     }
@@ -56,7 +62,8 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler {
     }
 
     @Override
-    public @NotNull ItemStack getIcon() {
+    @NotNull
+    public ItemStack getIcon() {
         return new ItemStack(Material.RAW_GOLD);
     }
 

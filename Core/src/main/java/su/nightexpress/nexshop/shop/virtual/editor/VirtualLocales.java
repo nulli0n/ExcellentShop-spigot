@@ -100,6 +100,9 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .name(Placeholders.PRODUCT_PREVIEW_NAME)
         .text("You can take & put this product in any other", "slot. Or store it in your inventory to", "add it in other pages or even shops!")
         .text("All product settings will be " + GREEN + "saved" + GRAY + "!").breakLine()
+        .text(YELLOW + "&lCurrent Price:")
+        .current("Buy", Placeholders.PRODUCT_PRICE_BUY)
+        .current("Sell", Placeholders.PRODUCT_PRICE_SELL).breakLine()
         .actionsHeader().action("Shift-Left", "Edit").action("Shift-Right", "Delete" + RED + " (No Undo)")
         .build();
 
@@ -148,7 +151,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .name("Commands")
         .currentHeader().text(Placeholders.PRODUCT_VIRTUAL_COMMANDS).breakLine()
         .text("A list of commands to execute when", "player purchases this product.").breakLine()
-        .noteHeader().notes("Use " + ORANGE + Placeholders.Player.NAME + GRAY + " for player name.").breakLine()
+        .noteHeader().notes("Use " + ORANGE + Placeholders.PLAYER_NAME + GRAY + " for player name.").breakLine()
         .actionsHeader().action("Left-Click", "Add Command").action("Right-Click", "Clear List")
         .build();
 

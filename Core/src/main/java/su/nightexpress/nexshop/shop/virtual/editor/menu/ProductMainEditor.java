@@ -8,14 +8,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.editor.EditorLocale;
-import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
@@ -108,8 +105,8 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
                 this.save(viewer);
                 return;
             }
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_COMMAND), chat -> {
-                commandProduct.getCommands().add(Colorizer.strip(chat.getMessage()));
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_COMMAND, wrapper -> {
+                commandProduct.getCommands().add(wrapper.getText());
                 product.getShop().saveProducts();
                 return true;
             });
@@ -162,9 +159,8 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
             boolean isSell = event.isShiftClick();
             boolean isTime = event.isRightClick();
             TradeType tradeType = isSell ? TradeType.SELL : TradeType.BUY;
-            LangMessage message = plugin.getMessage(isTime ? Lang.EDITOR_GENERIC_ENTER_SECONDS : Lang.EDITOR_GENERIC_ENTER_AMOUNT);
-            this.startEdit(viewer.getPlayer(),  message, chat -> {
-                int amount = StringUtil.getInteger(Colorizer.strip(chat.getMessage()), 0, true);
+            this.handleInput(viewer,  isTime ? Lang.EDITOR_GENERIC_ENTER_SECONDS : Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
+                int amount = wrapper.asAnyInt(0);
                 if (isTime) {
                     this.object.getStock().setRestockCooldown(stockType, tradeType, amount);
                 }

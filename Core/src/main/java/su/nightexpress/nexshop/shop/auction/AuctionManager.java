@@ -76,7 +76,7 @@ public class AuctionManager extends ShopModule {
         }
 
         this.plugin.getLangManager().loadMissing(AuctionLang.class);
-        this.plugin.getLangManager().setupEnum(AuctionMainMenu.AuctionSortType.class);
+        this.plugin.getLangManager().loadEnum(AuctionMainMenu.AuctionSortType.class);
         this.plugin.getLang().saveChanges();
         //this.plugin.getConfigManager().extractResources("/" + this.getLocalPath() + "/menu/");
 
@@ -320,7 +320,7 @@ public class AuctionManager extends ShopModule {
 
         if (AuctionConfig.LISTINGS_ANNOUNCE) {
             plugin.getMessage(AuctionLang.LISTING_ADD_SUCCESS_ANNOUNCE)
-                .replace(Placeholders.Player.replacer(player))
+                .replace(Placeholders.forPlayer(player))
                 .replace(listing.replacePlaceholders())
                 .broadcast();
         }

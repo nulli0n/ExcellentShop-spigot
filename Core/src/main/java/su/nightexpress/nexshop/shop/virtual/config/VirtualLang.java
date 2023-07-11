@@ -2,9 +2,12 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.Sound;
 import su.nexmedia.engine.api.lang.LangKey;
+import su.nexmedia.engine.lang.EngineLang;
 import su.nightexpress.nexshop.Placeholders;
 
-public class VirtualLang {
+public class VirtualLang extends EngineLang {
+
+    public static final LangKey COMMAND_EDITOR_DESC = LangKey.of("VirtualShop.Command.Editor.Desc", "Open VirtualShop editor.");
 
     public static final LangKey COMMAND_OPEN_DESC  = LangKey.of("VirtualShop.Command.Open.Desc", "Opens specified shop.");
     public static final LangKey COMMAND_OPEN_USAGE = LangKey.of("VirtualShop.Command.Open.Usage", "[player]");

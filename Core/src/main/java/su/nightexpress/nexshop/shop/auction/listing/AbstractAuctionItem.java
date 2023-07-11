@@ -47,7 +47,7 @@ public abstract class AbstractAuctionItem implements Placeholder {
             .add(Placeholders.LISTING_ITEM_AMOUNT, String.valueOf(this.getItemStack().getAmount()))
             .add(Placeholders.LISTING_ITEM_NAME, ItemUtil.getItemName(this.getItemStack()))
             .add(Placeholders.LISTING_ITEM_LORE, String.join("\n", ItemUtil.getLore(this.getItemStack())))
-            .add(Placeholders.LISTING_ITEM_VALUE, String.valueOf(ItemUtil.toBase64(this.getItemStack())))
+            .add(Placeholders.LISTING_ITEM_VALUE, String.valueOf(ItemUtil.compress(this.getItemStack())))
             .add(Placeholders.LISTING_DELETES_IN, () -> TimeUtil.formatTimeLeft(this.getDeleteDate()))
             .add(Placeholders.LISTING_DELETE_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getDeleteDate())))
         ;

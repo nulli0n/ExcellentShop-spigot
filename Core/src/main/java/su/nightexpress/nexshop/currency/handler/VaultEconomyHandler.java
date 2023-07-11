@@ -2,7 +2,7 @@ package su.nightexpress.nexshop.currency.handler;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.hooks.external.VaultHook;
+import su.nexmedia.engine.integration.VaultHook;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 
 public class VaultEconomyHandler implements CurrencyHandler {

@@ -17,8 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.Version;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.hooks.external.VaultHook;
+import su.nexmedia.engine.integration.VaultHook;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
@@ -37,7 +37,10 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.listener.ChestShopListener;
 import su.nightexpress.nexshop.shop.chest.menu.ShopsListMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopsSearchMenu;
-import su.nightexpress.nexshop.shop.chest.nms.*;
+import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
+import su.nightexpress.nexshop.shop.chest.nms.V1_17_R1;
+import su.nightexpress.nexshop.shop.chest.nms.V1_18_R2;
+import su.nightexpress.nexshop.shop.chest.nms.V1_19_R3;
 import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
 import su.nightexpress.nexshop.shop.module.ShopModule;
 import su.nightexpress.nexshop.shop.util.TransactionLogger;
@@ -88,25 +91,27 @@ public class ChestShopModule extends ShopModule {
         this.plugin.getLang().saveChanges();
         this.plugin.registerPermissions(ChestPerms.class);
 
-        this.chestNMS = switch (Version.CURRENT) {
+        this.chestNMS = switch (Version.getCurrent()) {
+            case V1_19_R1, V1_19_R2, UNKNOWN -> null;
+
             case V1_17_R1 -> new V1_17_R1();
             case V1_18_R2 -> new V1_18_R2();
-            case V1_19_R1 -> new V1_19_R1();
-            case V1_19_R2 -> new V1_19_R2();
             case V1_19_R3 -> new V1_19_R3();
             case V1_20_R1 -> new V1_20_R1();
         };
-        this.displayHandler = new ChestDisplayHandler(this);
-        this.displayHandler.setup();
+        if (this.chestNMS != null) {
+            this.displayHandler = new ChestDisplayHandler(this);
+            this.displayHandler.setup();
+        }
 
         this.logger = new TransactionLogger(this);
 
         // Setup Claim Hooks
         if (ChestConfig.SHOP_CREATION_CLAIM_ONLY.get()) {
             this.claimHooks = new HashSet<>();
-            if (Hooks.hasPlugin(HookId.LANDS)) this.claimHooks.add(new LandsHook(this.plugin));
-            if (Hooks.hasPlugin(HookId.GRIEF_PREVENTION)) this.claimHooks.add(new GriefPreventionHook());
-            if (Hooks.hasPlugin(HookId.WORLD_GUARD)) this.claimHooks.add(new WorldGuardFlags());
+            if (EngineUtils.hasPlugin(HookId.LANDS)) this.claimHooks.add(new LandsHook(this.plugin));
+            if (EngineUtils.hasPlugin(HookId.GRIEF_PREVENTION)) this.claimHooks.add(new GriefPreventionHook());
+            if (EngineUtils.hasPlugin(HookId.WORLD_GUARD)) this.claimHooks.add(new WorldGuardFlags());
         }
 
         this.addListener(new ChestShopListener(this));
@@ -418,11 +423,11 @@ public class ChestShopModule extends ShopModule {
     }
 
     public static int getShopLimit(@NotNull Player player) {
-        return Hooks.getGroupValueInt(player, ChestConfig.SHOP_CREATION_MAX_PER_RANK.get(), true);
+        return ChestConfig.SHOP_CREATION_MAX_PER_RANK.get().getBestValue(player, 0);
     }
 
     public static int getProductLimit(@NotNull Player player) {
-        return Hooks.getGroupValueInt(player, ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get(), true);
+        return ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get().getBestValue(player, 0);
     }
 
     @NotNull
@@ -469,7 +474,7 @@ public class ChestShopModule extends ShopModule {
         if (ChestConfig.SHOP_CREATION_WORLD_BLACKLIST.get().contains(name)) {
             return false;
         }
-        if (Hooks.hasPlugin(HookId.WORLD_GUARD) && !WorldGuardFlags.checkFlag(player, location)) {
+        if (EngineUtils.hasPlugin(HookId.WORLD_GUARD) && !WorldGuardFlags.checkFlag(player, location)) {
             return false;
         }
         return true;

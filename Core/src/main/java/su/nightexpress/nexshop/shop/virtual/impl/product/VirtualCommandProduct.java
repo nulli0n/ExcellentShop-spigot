@@ -37,7 +37,7 @@ public class VirtualCommandProduct extends VirtualProduct implements CommandProd
     public void delivery(@NotNull Player player, int count) {
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
         for (int i = 0; i < count; i++) {
-            this.getCommands().forEach(command -> Bukkit.dispatchCommand(sender, Placeholders.Player.replacer(player).apply(command)));
+            this.getCommands().forEach(command -> Bukkit.dispatchCommand(sender, Placeholders.forPlayer(player).apply(command)));
         }
     }
 

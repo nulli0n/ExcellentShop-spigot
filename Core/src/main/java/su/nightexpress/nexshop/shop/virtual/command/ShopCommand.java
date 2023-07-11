@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.api.command.GeneralCommand;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.shop.Shop;
@@ -14,7 +15,6 @@ import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 
 import java.util.List;
-import java.util.Map;
 
 public class ShopCommand extends GeneralCommand<ExcellentShop> {
 
@@ -52,9 +52,9 @@ public class ShopCommand extends GeneralCommand<ExcellentShop> {
     }
 
     @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args, @NotNull Map<String, String> flags) {
+    public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
-        if (args.length < 1) {
+        if (result.length() < 1) {
             ShopMainMenu mainMenu = this.module.getMainMenu();
             if (mainMenu != null) {
                 if (this.module.isAvailable(player, true)) {
@@ -65,7 +65,7 @@ public class ShopCommand extends GeneralCommand<ExcellentShop> {
             return;
         }
 
-        VirtualShop shop = this.module.getShopById(args[0]);
+        VirtualShop shop = this.module.getShopById(result.getArg(0));
         if (shop == null) {
             plugin.getMessage(VirtualLang.SHOP_ERROR_INVALID).send(sender);
             return;

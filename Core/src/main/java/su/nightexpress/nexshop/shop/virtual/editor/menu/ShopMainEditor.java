@@ -8,15 +8,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.hooks.Hooks;
-import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
@@ -41,8 +40,8 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         });
 
         this.addItem(Material.NAME_TAG, VirtualLocales.SHOP_NAME, 12).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_NAME), chat -> {
-                shop.setName(chat.getMessage());
+            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, wrapper -> {
+                shop.setName(wrapper.getText());
                 this.save(viewer);
                 return true;
             });
@@ -54,8 +53,8 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
                 this.save(viewer);
                 return;
             }
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_DESCRIPTION), chat -> {
-                shop.getDescription().add(Colorizer.apply(chat.getMessage()));
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_DESCRIPTION, wrapper -> {
+                shop.getDescription().add(wrapper.getTextColored());
                 this.save(viewer);
                 return true;
             });
@@ -110,7 +109,7 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         });
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
-            if (!Hooks.hasCitizens()) return;
+            if (!EngineUtils.hasPlugin(HookId.CITIZENS)) return;
 
             if (event.isRightClick()) {
                 shop.getNPCIds().clear();
@@ -118,8 +117,8 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
                 return;
             }
 
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_NPC_ID), chat -> {
-                int id = StringUtil.getInteger(Colorizer.strip(chat.getMessage()), -1);
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, wrapper -> {
+                int id = wrapper.asInt(-1);
                 if (id < 0) return true;
 
                 shop.getNPCIds().add(id);
@@ -139,8 +138,8 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         this.addItem(ItemUtil.createCustomHead(TEXTURE_PAINT), VirtualLocales.SHOP_VIEW_EDITOR, 32).setClick((viewer, event) -> {
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
-                    this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_TITLE), chat -> {
-                        shop.getView().getOptions().setTitle(Colorizer.apply(chat.getMessage()));
+                    this.handleInput(viewer, VirtualLang.EDITOR_ENTER_TITLE, wrapper -> {
+                        shop.getView().getOptions().setTitle(wrapper.getTextColored());
                         this.save(viewer);
                         return true;
                     });

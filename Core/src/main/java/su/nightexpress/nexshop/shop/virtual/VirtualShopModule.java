@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.hooks.Hooks;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.FileUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -16,6 +16,7 @@ import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceStorage;
 import su.nightexpress.nexshop.data.stock.ProductStockStorage;
+import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.module.ShopModule;
 import su.nightexpress.nexshop.shop.util.TransactionLogger;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
@@ -76,7 +77,7 @@ public class VirtualShopModule extends ShopModule {
 
         this.loadShops();
         this.loadMainMenu();
-        if (Hooks.hasCitizens()) {
+        if (EngineUtils.hasPlugin(HookId.CITIZENS)) {
             this.addListener(new VirtualShopNPCListener(this));
         }
 

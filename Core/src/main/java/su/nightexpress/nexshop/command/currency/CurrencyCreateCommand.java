@@ -45,7 +45,7 @@ public class CurrencyCreateCommand extends AbstractCommand<ExcellentShop> {
         Player player = (Player) sender;
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType().isAir()) {
-            plugin.getMessage(Lang.ERROR_ITEM_INVALID).send(sender);
+            plugin.getMessage(Lang.COMMAND_CURRENCY_ERROR_NO_ITEM).send(sender);
             return;
         }
 

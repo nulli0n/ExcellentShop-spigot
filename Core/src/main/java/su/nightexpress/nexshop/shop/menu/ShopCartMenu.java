@@ -13,7 +13,6 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.MessageUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
@@ -170,7 +169,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         Product<?, ?, ?> product = prepared.getProduct();
         Shop<?, ?> shop = product.getShop();
 
-        MessageUtil.sound(player, this.productSound);
+        PlayerUtil.sound(player, this.productSound);
         TradeType tradeType = prepared.getTradeType();
 
         int hasAmount = prepared.getUnits();

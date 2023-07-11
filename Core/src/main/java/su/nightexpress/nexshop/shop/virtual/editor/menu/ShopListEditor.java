@@ -14,13 +14,11 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -35,8 +33,8 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
         this.addPreviousPage(36);
 
         this.addCreation(VirtualLocales.SHOP_CREATE, 41).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_ENTER_SHOP_ID), chat -> {
-                if (!module.createShop(StringUtil.lowerCaseUnderscore(chat.getMessage()))) {
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_SHOP_ID, wrapper -> {
+                if (!module.createShop(StringUtil.lowerCaseUnderscore(wrapper.getTextRaw()))) {
                     EditorManager.error(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_SHOP_CREATE_ERROR_EXIST).getLocalized());
                     return false;
                 }
@@ -54,18 +52,12 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
     @Override
     @NotNull
     public List<VirtualShop> getObjects(@NotNull Player player) {
-        return new ArrayList<>(this.object.getShops());
+        return this.object.getShops().stream().sorted(Comparator.comparing(VirtualShop::getId)).toList();
     }
 
     @Override
     public int[] getObjectSlots() {
         return IntStream.range(0, 36).toArray();
-    }
-
-    @Override
-    @NotNull
-    public Comparator<VirtualShop> getObjectSorter() {
-        return Comparator.comparing(Shop::getId);
     }
 
     @Override

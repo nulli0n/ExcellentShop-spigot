@@ -12,7 +12,7 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.hooks.Hooks;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.ShopView;
@@ -78,7 +78,7 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
 
-        if (Hooks.hasPlaceholderAPI()) {
+        if (EngineUtils.hasPlaceholderAPI()) {
             options.setTitle(PlaceholderAPI.setPlaceholders(viewer.getPlayer(), options.getTitle()));
         }
 
@@ -134,6 +134,9 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
                 placeholderMap.getKeys().addAll(product.getCurrency().getPlaceholders().getKeys());
                 placeholderMap.getKeys().addAll(shop.getPlaceholders().getKeys());
                 lore.replaceAll(placeholderMap.replacer());
+                if (Config.GUI_PLACEHOLDER_API.get()) {
+                    lore.replaceAll(str -> PlaceholderAPI.setPlaceholders(player, str));
+                }
                 meta.setLore(StringUtil.stripEmpty(lore));
             });
 

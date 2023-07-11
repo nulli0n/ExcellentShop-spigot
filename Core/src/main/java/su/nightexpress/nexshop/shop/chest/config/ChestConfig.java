@@ -1,10 +1,13 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nexmedia.engine.api.config.JOption;
+import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.currency.CurrencyManager;
@@ -27,7 +30,7 @@ public class ChestConfig {
         "Sets the custom name for admin shops instead of default owner's name.");
 
     public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name",
-        "&a" + Placeholders.Player.NAME + "'s Shop",
+        LangColors.YELLOW + ChatColor.BOLD + Placeholders.PLAYER_NAME + "'s Shop",
         "Default shop name, that will be used on shop creation."
     ).mapReader(Colorizer::apply);
 
@@ -64,17 +67,17 @@ public class ChestConfig {
         Set.of("custom_world", "another_world"),
         "List of worlds, where chest shop creation is not allowed.");
 
-    public static final JOption<Map<String, Integer>> SHOP_CREATION_MAX_PER_RANK = JOption.forMap("Shops.Creation.Max_Shops_Per_Rank",
-        (cfg, path, rank) -> cfg.getInt(path + "." + rank),
-        Map.of(
+    public static final JOption<PlayerRankMap<Integer>> SHOP_CREATION_MAX_PER_RANK = new JOption<>("Shops.Creation.Max_Shops_Per_Rank",
+        (cfg, path, rank) -> PlayerRankMap.read(cfg, path, Integer.class),
+        new PlayerRankMap<>(Map.of(
             Placeholders.DEFAULT, 10,
             "vip", 20,
             "admin", -1
-        ),
+        )),
         "Sets how many shops a player with certain rank can create at the same time.",
         "No extra permissions are required. Simply provide your permisson group names.",
         "Use '-1' to make unlimited amount."
-    ).setWriter((cfg, path, map) -> map.forEach((rank, amount) -> cfg.set(path + "." + rank, amount)));
+    ).mapReader(map -> map.setNegativeBetter(true)).setWriter((cfg, path, map) -> map.write(cfg, path));
 
     public static final JOption<Boolean> SHOP_CREATION_CLAIM_ONLY = JOption.create("Shops.Creation.In_Player_Claims_Only.Enabled",
         true,
@@ -82,17 +85,17 @@ public class ChestConfig {
         "Supported Plugins: " + HookId.LANDS + ", " + HookId.GRIEF_PREVENTION + ", " + HookId.WORLD_GUARD,
         "For all other plugins it will simply check if player is able to build at that location.");
 
-    public final static JOption<Map<String, Integer>> SHOP_PRODUCTS_MAX_PER_RANK = JOption.forMap("Shops.Products.Max_Products_Per_Shop",
-        (cfg, path, rank) -> cfg.getInt(path + "." + rank),
-        Map.of(
+    public final static JOption<PlayerRankMap<Integer>> SHOP_PRODUCTS_MAX_PER_RANK = new JOption<>("Shops.Products.Max_Products_Per_Shop",
+        (cfg, path, rank) -> PlayerRankMap.read(cfg, path, Integer.class),
+        new PlayerRankMap<>(Map.of(
             Placeholders.DEFAULT, 5,
             "vip", 7,
             "admin", -1
-        ),
+        )),
         "Sets how many products a player with certain rank can put in a shop at the same time.",
         "No extra permissions are required. Simply provide your permisson group names.",
         "Use '-1' to make unlimited amount."
-    ).setWriter((cfg, path, map) -> map.forEach((rank, amount) -> cfg.set(path + "." + rank, amount)));
+    ).mapReader(map -> map.setNegativeBetter(true)).setWriter((cfg, path, map) -> map.write(cfg, path));
 
     public static final JOption<Set<Material>> SHOP_PRODUCT_DENIED_MATERIALS = JOption.forSet("Shops.Products.Material_Blacklist",
         str -> Material.getMaterial(str.toUpperCase()),

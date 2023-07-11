@@ -3,14 +3,13 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.ICleanable;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.Discount;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.DiscountMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
@@ -22,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class VirtualDiscount implements ICleanable, Placeholder {
+public class VirtualDiscount implements Placeholder {
 
     private VirtualShop    shop;
     private Set<DayOfWeek> days;
@@ -67,7 +66,6 @@ public class VirtualDiscount implements ICleanable, Placeholder {
         cfg.set(path + ".Activation.Times", discount.getTimes().stream().map(TimeUtils.TIME_FORMATTER::format).toList());
     }
 
-    @Override
     public void clear() {
         if (this.updateTask != null) {
             this.updateTask.cancel();

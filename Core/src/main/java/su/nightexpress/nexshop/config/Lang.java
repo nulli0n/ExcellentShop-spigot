@@ -25,6 +25,7 @@ public class Lang extends EngineLang implements LangColors {
     public static final LangKey COMMAND_CURRENCY_CREATE_DONE_NEW     = LangKey.of("Command.Currency.Create.Done.New", "Created a new currency &a%currency_id%&7 as &a%item%&7.");
     public static final LangKey COMMAND_CURRENCY_CREATE_DONE_REPLACE = LangKey.of("Command.Currency.Create.Done.Replace", "Replaced item in the currency &a%currency_id%&7 with &a%item%&7.");
     public static final LangKey COMMAND_CURRENCY_CREATE_ERROR_EXIST  = LangKey.of("Command.Currency.Create.Error.Exist", "Currency &c%currency_id%&7 is already exist and is not an Item Currency.");
+    public static final LangKey COMMAND_CURRENCY_ERROR_NO_ITEM = LangKey.of("Command.Currency.Error.NoItem", RED + "You must hold an item to do that!");
 
     public static final LangKey Module_Cmd_Reload = LangKey.of("Module.Cmd.Reload", "Module &a%module% &7reloaded!");
 

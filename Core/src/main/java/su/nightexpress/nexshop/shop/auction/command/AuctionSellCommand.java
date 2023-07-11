@@ -31,7 +31,7 @@ public class AuctionSellCommand extends ModuleCommand<AuctionManager> {
 
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType().isAir()) {
-            this.errorItem(sender);
+            this.plugin.getMessage(AuctionLang.COMMAND_SELL_ERROR_NO_ITEM);
             return;
         }
 
@@ -42,18 +42,22 @@ public class AuctionSellCommand extends ModuleCommand<AuctionManager> {
         }
 
         if (this.module.canAdd(player, item, price)) {
-            if (this.module.getCurrencies(player).size() <= 1) {
-                Currency currency = this.module.getCurrencies(player).stream().findFirst().orElse(null);
-                if (currency == null) return;
+            this.plugin.runTask(task -> {
+                if (!player.isOnline()) return;
 
-                if (!this.module.add(player, item, currency, price)) {
-                    return;
+                if (this.module.getCurrencies(player).size() <= 1) {
+                    Currency currency = this.module.getCurrencies(player).stream().findFirst().orElse(null);
+                    if (currency == null) return;
+
+                    if (!this.module.add(player, item, currency, price)) {
+                        return;
+                    }
                 }
-            }
-            else {
-                this.module.getCurrencySelectorMenu().open(player, item, price);
-            }
-            player.getInventory().setItemInMainHand(null);
+                else {
+                    this.module.getCurrencySelectorMenu().open(player, item, price);
+                }
+                player.getInventory().setItemInMainHand(null);
+            });
         }
     }
 }

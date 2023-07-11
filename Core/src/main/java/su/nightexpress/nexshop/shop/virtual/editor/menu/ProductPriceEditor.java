@@ -8,12 +8,10 @@ import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
@@ -22,6 +20,7 @@ import su.nightexpress.nexshop.data.price.ProductPriceStorage;
 import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.price.FloatProductPricer;
 import su.nightexpress.nexshop.shop.price.RangedProductPricer;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
@@ -64,8 +63,8 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                 this.save(viewer);
             }
             else {
-                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
-                    double price = StringUtil.getDouble(Colorizer.strip(chat.getMessage()), -1D, true);
+                this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
+                    double price = wrapper.asAnyDouble(-1D);
                     if (pricer instanceof RangedProductPricer ranged) {
                         if (event.isLeftClick()) {
                             ranged.setPriceMin(TradeType.BUY, price);
@@ -105,8 +104,8 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                 this.save(viewer);
             }
             else {
-                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
-                    double price = StringUtil.getDouble(Colorizer.strip(chat.getMessage()), -1D, true);
+                this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
+                    double price = wrapper.asAnyDouble(-1D);
                     if (pricer instanceof RangedProductPricer ranged) {
                         if (event.isLeftClick()) {
                             ranged.setPriceMin(TradeType.SELL, price);
@@ -148,8 +147,8 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
             if (event.isLeftClick()) {
                 EditorManager.suggestValues(viewer.getPlayer(), CollectionsUtil.getEnumsList(DayOfWeek.class), true);
-                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY), chat -> {
-                    DayOfWeek day = StringUtil.getEnum(chat.getMessage(), DayOfWeek.class).orElse(null);
+                this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_DAY, wrapper -> {
+                    DayOfWeek day = StringUtil.getEnum(wrapper.getTextRaw(), DayOfWeek.class).orElse(null);
                     if (day == null) return true;
 
                     pricer.getDays().add(day);
@@ -160,9 +159,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                 });
             }
             else {
-                this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME), chat -> {
+                this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, wrapper -> {
                     try {
-                        pricer.getTimes().add(LocalTime.parse(chat.getMessage(), TimeUtils.TIME_FORMATTER));
+                        pricer.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), TimeUtils.TIME_FORMATTER));
                         //pricer.stopScheduler();
                         //pricer.startScheduler();
                         product.getShop().saveProducts();
@@ -174,9 +173,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
         }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.FLOAT);
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_INITIAL), VirtualLocales.PRODUCT_PRICE_DYNAMIC_INITIAL, 15).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
+            this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
                 DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
-                double price = StringUtil.getDouble(chat.getMessage(), 0D);
+                double price = wrapper.asDouble();
                 if (event.isLeftClick()) {
                     pricer.setInitial(TradeType.BUY, price);
                 }
@@ -188,9 +187,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
         }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.DYNAMIC);
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_STEP), VirtualLocales.PRODUCT_PRICE_DYNAMIC_STEP, 16).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_PRODUCT_ENTER_PRICE), chat -> {
+            this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
                 DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
-                double price = StringUtil.getDouble(chat.getMessage(), 0D);
+                double price = wrapper.asDouble();
                 if (event.isLeftClick()) {
                     pricer.setStep(TradeType.BUY, price);
                 }

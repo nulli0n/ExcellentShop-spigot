@@ -23,6 +23,6 @@ public class ModuleCommand<S extends ShopModule> extends GeneralCommand<Excellen
 
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        super.onExecute(sender, result);
+
     }
 }

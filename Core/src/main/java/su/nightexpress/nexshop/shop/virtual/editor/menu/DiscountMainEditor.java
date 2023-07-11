@@ -6,13 +6,12 @@ import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
@@ -31,16 +30,16 @@ public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscoun
         });
 
         this.addItem(Material.GOLD_NUGGET, VirtualLocales.DISCOUNT_AMOUNT, 10).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_AMOUNT), chat -> {
-                discount.setDiscount(StringUtil.getDouble(Colorizer.strip(chat.getMessage()), 0D));
+            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
+                discount.setDiscount(wrapper.asDouble());
                 shop.saveSettings();
                 return true;
             });
         });
 
         this.addItem(Material.REPEATER, VirtualLocales.DISCOUNT_DURATION, 12).setClick((viewer, event) -> {
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_SECONDS), chat -> {
-                discount.setDuration(StringUtil.getInteger(Colorizer.strip(chat.getMessage()), 0));
+            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS, wrapper -> {
+                discount.setDuration(wrapper.asInt());
                 shop.saveSettings();
                 return true;
             });
@@ -54,8 +53,8 @@ public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscoun
             }
 
             EditorManager.suggestValues(viewer.getPlayer(), CollectionsUtil.getEnumsList(DayOfWeek.class), true);
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_DAY), chat -> {
-                DayOfWeek day = StringUtil.getEnum(Colorizer.strip(chat.getMessage()), DayOfWeek.class).orElse(null);
+            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_DAY, wrapper -> {
+                DayOfWeek day = StringUtil.getEnum(wrapper.getTextRaw(), DayOfWeek.class).orElse(null);
                 if (day == null) return true;
 
                 discount.getDays().add(day);
@@ -71,9 +70,9 @@ public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscoun
                 return;
             }
 
-            this.startEdit(viewer.getPlayer(), plugin.getMessage(Lang.EDITOR_GENERIC_ENTER_TIME), chat -> {
+            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, wrapper -> {
                 try {
-                    discount.getTimes().add(LocalTime.parse(Colorizer.strip(chat.getMessage()), TimeUtils.TIME_FORMATTER));
+                    discount.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), TimeUtils.TIME_FORMATTER));
                     shop.saveSettings();
                 }
                 catch (DateTimeParseException ignored) {}
