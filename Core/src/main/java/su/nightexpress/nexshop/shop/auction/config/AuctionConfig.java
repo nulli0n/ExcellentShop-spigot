@@ -107,7 +107,7 @@ public class AuctionConfig {
         LISTINGS_EXPIRE_IN = cfg.getLong(path + "Expire_In", 604800) * 1000L;
         LISTINGS_PURGE_IN = TimeUnit.MILLISECONDS.convert(cfg.getLong("Database.Purge.For_Period", 30), TimeUnit.DAYS);
         LISTINGS_ANNOUNCE = cfg.getBoolean(path + "Announce");
-        LISTINGS_PER_RANK = PlayerRankMap.read(cfg, path + "Listing_Per_Rank", Integer.class).setNegativeBetter(true);
+        LISTINGS_PER_RANK = PlayerRankMap.read(cfg, path + "Listings_Per_Rank", Integer.class).setNegativeBetter(true);
         LISTINGS_DISABLED_MATERIALS = cfg.getStringSet(path + "Disabled_Materials").stream()
                 .map(String::toUpperCase).collect(Collectors.toSet());
         LISTINGS_DISABLED_NAMES = Colorizer.apply(cfg.getStringSet(path + "Disabled_Names"));

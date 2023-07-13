@@ -118,7 +118,7 @@ public class AuctionCurrencySelectorMenu extends ConfigMenu<ExcellentShop> imple
                 return;
             }
 
-            if (this.auctionManager.add(player, prepared.getFirst(), currency, prepared.getSecond())) {
+            if (this.auctionManager.add(player, prepared.getFirst(), currency, prepared.getSecond(), false) != null) {
                 PREPARED_ITEM.remove(player);
             }
             player.closeInventory();
