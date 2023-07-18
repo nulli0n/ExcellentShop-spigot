@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class ShopsListMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestShop> {
+public class ShopListMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestShop> {
 
     private static final String PLACEHOLDER_GLOBAL = "%global%";
 
@@ -41,7 +41,7 @@ public class ShopsListMenu extends ConfigMenu<ExcellentShop> implements AutoPage
     private final List<String> shopLoreOwn;
     private final List<String> shopLoreOthers;
 
-    public ShopsListMenu(@NotNull ChestShopModule module) {
+    public ShopListMenu(@NotNull ChestShopModule module) {
         super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shops_list.yml"));
         this.module = module;
         this.others = new WeakHashMap<>();

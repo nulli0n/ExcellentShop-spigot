@@ -30,12 +30,12 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
 import java.util.*;
 
-public class ChestShopListener extends AbstractListener<ExcellentShop> {
+public class ShopListener extends AbstractListener<ExcellentShop> {
 
     private final ChestShopModule        module;
     private final Map<String, Set<JYML>> unloadedShops;
 
-    public ChestShopListener(@NotNull ChestShopModule module) {
+    public ShopListener(@NotNull ChestShopModule module) {
         super(module.plugin());
         this.module = module;
         this.unloadedShops = new HashMap<>();

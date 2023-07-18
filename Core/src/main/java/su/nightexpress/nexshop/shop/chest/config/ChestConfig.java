@@ -36,11 +36,13 @@ public class ChestConfig {
 
     public static final JOption<String> DEFAULT_CURRENCY = JOption.create("Shops.Default_Currency", CurrencyManager.VAULT,
         "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available.",
-        "IMPORTANT: Make sure you have this currency in 'Allowed_Currencies' list!");
+        "IMPORTANT: Make sure you have this currency in 'Allowed_Currencies' list!"
+    ).mapReader(String::toLowerCase);
 
     public static final JOption<Set<String>> ALLOWED_CURRENCIES = JOption.create("Shops.Allowed_Currencies",
         Set.of(CurrencyManager.VAULT),
-        "A list of currencies that can be used for Chest Shop products.");
+        "A list of currencies that can be used for Chest Shop products."
+    ).mapReader(set -> set.stream().map(String::toLowerCase).collect(Collectors.toSet()));
 
     public static final JOption<Set<Material>> ALLOWED_CONTAINERS = JOption.forSet("Shops.Allowed_Containers",
         str -> Material.getMaterial(str.toUpperCase()),

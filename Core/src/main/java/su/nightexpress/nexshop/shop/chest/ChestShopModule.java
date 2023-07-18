@@ -30,10 +30,10 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.listener.ChestShopListener;
-import su.nightexpress.nexshop.shop.chest.menu.ShopBankMenu;
-import su.nightexpress.nexshop.shop.chest.menu.ShopsListMenu;
-import su.nightexpress.nexshop.shop.chest.menu.ShopsSearchMenu;
+import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
+import su.nightexpress.nexshop.shop.chest.menu.BankMenu;
+import su.nightexpress.nexshop.shop.chest.menu.ShopListMenu;
+import su.nightexpress.nexshop.shop.chest.menu.ShopSearchMenu;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.nms.V1_17_R1;
 import su.nightexpress.nexshop.shop.chest.nms.V1_18_R2;
@@ -45,7 +45,7 @@ import su.nightexpress.nexshop.shop.module.ShopModule;
 import su.nightexpress.nexshop.shop.util.TransactionLogger;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class ChestShopModule extends ShopModule {
@@ -53,15 +53,12 @@ public class ChestShopModule extends ShopModule {
     public static final String ID = "chest_shop";
     public static final String DIR_SHOPS = "/shops/";
 
-    public static Currency       DEFAULT_CURRENCY;
-    public static Set<Currency> ALLOWED_CURRENCIES;
-
     private final Map<UUID, ChestPlayerBank> bankMap;
     private final ShopMap shopMap;
 
-    private ShopsListMenu   listMenu;
-    private ShopsSearchMenu searchMenu;
-    private ShopBankMenu bankMenu;
+    private ShopListMenu   listMenu;
+    private ShopSearchMenu searchMenu;
+    private BankMenu       bankMenu;
 
     private Set<ClaimHook> claimHooks;
     private ChestDisplayHandler displayHandler;
@@ -71,7 +68,7 @@ public class ChestShopModule extends ShopModule {
     public ChestShopModule(@NotNull ExcellentShop plugin) {
         super(plugin, ID);
         this.shopMap = new ShopMap();
-        this.bankMap = new HashMap<>();
+        this.bankMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -79,13 +76,12 @@ public class ChestShopModule extends ShopModule {
         super.onLoad();
         this.getConfig().initializeOptions(ChestConfig.class);
 
-        DEFAULT_CURRENCY = plugin.getCurrencyManager().getCurrency(ChestConfig.DEFAULT_CURRENCY.get());
-        ALLOWED_CURRENCIES = ChestConfig.ALLOWED_CURRENCIES.get().stream().map(String::toLowerCase)
-            .map(currencyId -> plugin.getCurrencyManager().getCurrency(currencyId))
-            .filter(Objects::nonNull).collect(Collectors.toSet());
-
-        if (DEFAULT_CURRENCY == null || ALLOWED_CURRENCIES.isEmpty()) {
-            this.error("No default/allowed currencies!");
+        try {
+            if (ShopUtils.getAllowedCurrencies().isEmpty()) throw new NoSuchElementException();
+            ShopUtils.getDefaultCurrency();
+        }
+        catch (NoSuchElementException e) {
+            this.error("Invalid 'Default_Currency' or 'Allowed_Currencies' has no valid currency.");
             return;
         }
 
@@ -117,11 +113,11 @@ public class ChestShopModule extends ShopModule {
             if (EngineUtils.hasPlugin(HookId.WORLD_GUARD)) this.claimHooks.add(new WorldGuardFlags());
         }
 
-        this.addListener(new ChestShopListener(this));
+        this.addListener(new ShopListener(this));
 
-        this.listMenu = new ShopsListMenu(this);
-        this.searchMenu = new ShopsSearchMenu(this);
-        this.bankMenu = new ShopBankMenu(this);
+        this.listMenu = new ShopListMenu(this);
+        this.searchMenu = new ShopSearchMenu(this);
+        this.bankMenu = new BankMenu(this);
 
         this.command.addChildren(new CreateCommand(this));
         this.command.addChildren(new RemoveCommand(this));
@@ -131,10 +127,14 @@ public class ChestShopModule extends ShopModule {
         this.command.addChildren(new BankCommand(this));
 
         this.plugin.runTaskAsync(task -> {
-            this.plugin.getData().getChestBanks().forEach(bank -> {
-                this.bankMap.put(bank.getHolder(), bank);
-            });
+            this.loadBanks();
             this.plugin.runTask(task2 -> this.loadShops());
+        });
+    }
+
+    public void loadBanks() {
+        this.plugin.getData().getChestDataHandler().getChestBanks().forEach(bank -> {
+            this.getBankMap().put(bank.getHolder(), bank);
         });
     }
 
@@ -158,10 +158,10 @@ public class ChestShopModule extends ShopModule {
         // ----- OLD BANK UPDATE - START -----
         if (cfg.contains("Bank")) {
             ChestPlayerBank bank = this.getPlayerBank(shop.getOwnerId());
-            for (Currency currency : ChestShopModule.ALLOWED_CURRENCIES) {
+            for (Currency currency : ShopUtils.getAllowedCurrencies()) {
                 bank.deposit(currency, cfg.getDouble("Bank." + currency.getId()));
             }
-            this.plugin.getData().saveChestBank(bank);
+            this.plugin.getData().getChestDataHandler().saveChestBank(bank);
             cfg.remove("Bank");
             cfg.saveChanges();
         }
@@ -198,8 +198,8 @@ public class ChestShopModule extends ShopModule {
             this.claimHooks = null;
         }
 
-        this.shopMap.clear();
-        this.bankMap.clear();
+        this.getShopMap().clear();
+        this.getBankMap().clear();
     }
 
     @NotNull
@@ -214,25 +214,30 @@ public class ChestShopModule extends ShopModule {
 
     @NotNull
     public ChestPlayerBank getPlayerBank(@NotNull UUID uuid) {
-        ChestPlayerBank bank = this.bankMap.get(uuid);
+        ChestPlayerBank bank = this.getBankMap().get(uuid);
         if (bank == null) {
             ChestPlayerBank bank2 = new ChestPlayerBank(uuid, new HashMap<>());
-            this.plugin.runTaskAsync(task -> this.plugin.getData().createChestBank(bank2));
-            this.bankMap.put(uuid, bank2);
+            this.plugin.runTaskAsync(task -> this.plugin.getData().getChestDataHandler().createChestBank(bank2));
+            this.getBankMap().put(uuid, bank2);
             return bank2;
         }
         return bank;
     }
 
     public void savePlayerBank(@NotNull UUID uuid) {
-        ChestPlayerBank bank = this.bankMap.get(uuid);
+        ChestPlayerBank bank = this.getBankMap().get(uuid);
         if (bank == null) return;
 
         this.savePlayerBank(bank);
     }
 
     public void savePlayerBank(@NotNull ChestPlayerBank bank) {
-        this.plugin.runTaskAsync(task -> this.plugin.getData().saveChestBank(bank));
+        this.plugin.runTaskAsync(task -> this.plugin.getData().getChestDataHandler().saveChestBank(bank));
+    }
+
+    @NotNull
+    public Map<UUID, ChestPlayerBank> getBankMap() {
+        return this.bankMap;
     }
 
     @NotNull
@@ -246,17 +251,17 @@ public class ChestShopModule extends ShopModule {
     }
 
     @NotNull
-    public ShopsListMenu getListMenu() {
+    public ShopListMenu getListMenu() {
         return this.listMenu;
     }
 
     @NotNull
-    public ShopsSearchMenu getSearchMenu() {
+    public ShopSearchMenu getSearchMenu() {
         return this.searchMenu;
     }
 
     @NotNull
-    public ShopBankMenu getBankMenu() {
+    public BankMenu getBankMenu() {
         return bankMenu;
     }
 
@@ -343,7 +348,7 @@ public class ChestShopModule extends ShopModule {
 
         // TODO Option to withdraw bank for 0 active shops
         if (this.getShopsAmount(player) <= 0) {
-            for (Currency currency : ALLOWED_CURRENCIES) {
+            for (Currency currency : ShopUtils.getAllowedCurrencies()) {
                 this.withdrawFromBank(player, currency, -1);
             }
         }
@@ -370,14 +375,14 @@ public class ChestShopModule extends ShopModule {
 
     public boolean depositToBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double amount) {
         if (!ShopUtils.isAllowedCurrency(currency)) {
-            plugin.getMessage(ChestLang.SHOP_BANK_ERROR_INVALID_CURRENCY).send(player);
+            plugin.getMessage(ChestLang.BANK_ERROR_INVALID_CURRENCY).send(player);
             return false;
         }
 
         if (amount < 0D) amount = currency.getHandler().getBalance(player);
 
         if (currency.getHandler().getBalance(player) < amount) {
-            plugin.getMessage(ChestLang.SHOP_BANK_DEPOSIT_ERROR_NOT_ENOUGH).send(player);
+            plugin.getMessage(ChestLang.BANK_DEPOSIT_ERROR_NOT_ENOUGH).send(player);
             return false;
         }
 
@@ -387,7 +392,7 @@ public class ChestShopModule extends ShopModule {
         bank.deposit(currency, amount);
         this.savePlayerBank(bank);
 
-        plugin.getMessage(ChestLang.SHOP_BANK_DEPOSIT_SUCCESS)
+        plugin.getMessage(ChestLang.BANK_DEPOSIT_SUCCESS)
             .replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))
             .send(player);
         return true;
@@ -399,7 +404,7 @@ public class ChestShopModule extends ShopModule {
 
     public boolean withdrawFromBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double amount) {
         if (!ShopUtils.isAllowedCurrency(currency)) {
-            plugin.getMessage(ChestLang.SHOP_BANK_ERROR_INVALID_CURRENCY).send(player);
+            plugin.getMessage(ChestLang.BANK_ERROR_INVALID_CURRENCY).send(player);
             return false;
         }
 
@@ -407,7 +412,7 @@ public class ChestShopModule extends ShopModule {
         if (amount < 0D) amount = bank.getBalance(currency);
 
         if (!bank.hasEnough(currency, amount)) {
-            plugin.getMessage(ChestLang.SHOP_BANK_WITHDRAW_ERROR_NOT_ENOUGH).send(player);
+            plugin.getMessage(ChestLang.BANK_WITHDRAW_ERROR_NOT_ENOUGH).send(player);
             return false;
         }
 
@@ -415,7 +420,7 @@ public class ChestShopModule extends ShopModule {
         bank.withdraw(currency, amount);
         this.savePlayerBank(bank);
 
-        plugin.getMessage(ChestLang.SHOP_BANK_WITHDRAW_SUCCESS)
+        plugin.getMessage(ChestLang.BANK_WITHDRAW_SUCCESS)
             .replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))
             .send(player);
         return true;

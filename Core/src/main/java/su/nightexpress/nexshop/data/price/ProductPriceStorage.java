@@ -23,7 +23,7 @@ public class ProductPriceStorage {
     @NotNull
     private static CompletableFuture<Void> loadData(@NotNull String shopId) {
         DATAS.remove(shopId);
-        return CompletableFuture.runAsync(() -> ShopAPI.getDataHandler().getProductPriceData(shopId).forEach(ProductPriceStorage::addData));
+        return CompletableFuture.runAsync(() -> ShopAPI.getDataHandler().getVirtualDataHandler().getProductPriceData(shopId).forEach(ProductPriceStorage::addData));
     }
 
     private static void addData(@NotNull ProductPriceData priceData) {
@@ -44,11 +44,11 @@ public class ProductPriceStorage {
 
         addData(priceData);
 
-        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().createProductPriceData(priceData));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().createProductPriceData(priceData));
     }
 
     public static void saveData(@NotNull ProductPriceData priceData) {
-        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().saveProductPriceData(priceData));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().saveProductPriceData(priceData));
     }
 
     public static void deleteData(@NotNull Product<?, ?, ?> product) {
@@ -56,6 +56,6 @@ public class ProductPriceStorage {
 
         removeData(product);
 
-        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().removeProductPriceData(product));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeProductPriceData(product));
     }
 }

@@ -20,13 +20,11 @@ import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
+import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 
-public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency> {
+public class BankMenu extends PlayerEditorMenu implements AutoPaged<Currency> {
 
     private static final String PLACEHOLDER_BANK_BALANCE = "%bank_balance%";
     private static final String PLACEHOLDER_PLAYER_BALANCE = "%player_balance%";
@@ -38,7 +36,7 @@ public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency
 
     private final Map<Player, UUID> others;
 
-    public ShopBankMenu(@NotNull ChestShopModule module) {
+    public BankMenu(@NotNull ChestShopModule module) {
         super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shop_bank.yml"));
         this.module = module;
         this.others = new WeakHashMap<>();
@@ -85,7 +83,7 @@ public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency
     @Override
     @NotNull
     public List<Currency> getObjects(@NotNull Player player) {
-        return ChestShopModule.ALLOWED_CURRENCIES.stream().toList();
+        return new ArrayList<>(ShopUtils.getAllowedCurrencies());
     }
 
     @Override

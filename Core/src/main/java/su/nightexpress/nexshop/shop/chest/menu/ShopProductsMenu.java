@@ -18,7 +18,6 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -126,7 +125,7 @@ public class ShopProductsMenu extends PlayerEditorMenu {
                         return;
                     }
                     if (event.isLeftClick()) {
-                        List<Currency> currencies = new ArrayList<>(ChestShopModule.ALLOWED_CURRENCIES);
+                        List<Currency> currencies = new ArrayList<>(ShopUtils.getAllowedCurrencies());
                         int index = currencies.indexOf(product.getCurrency()) + 1;
                         if (index >= currencies.size()) index = 0;
                         product.setCurrency(currencies.get(index));

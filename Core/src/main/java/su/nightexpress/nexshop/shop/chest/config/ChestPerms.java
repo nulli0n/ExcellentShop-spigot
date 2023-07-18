@@ -16,11 +16,11 @@ public class ChestPerms {
     public static final JPermission SHOP_TYPE  = new JPermission(PREFIX_SHOP_TYPE + Placeholders.WILDCARD);
     public static final JPermission PRICE_TYPE = new JPermission(PREFIX_PRICE_TYPE + Placeholders.WILDCARD);
 
-    public static final JPermission TELEPORT            = new JPermission(PREFIX + "teleport");
-    public static final JPermission TELEPORT_OTHERS     = new JPermission(PREFIX + "teleport.others");
-    public static final JPermission CREATE              = new JPermission(PREFIX + "create");
-    public static final JPermission REMOVE              = new JPermission(PREFIX + "remove");
-    public static final JPermission REMOVE_OTHERS       = new JPermission(PREFIX + "remove.others");
+    public static final JPermission TELEPORT        = new JPermission(PREFIX + "teleport");
+    public static final JPermission TELEPORT_OTHERS = new JPermission(PREFIX + "teleport.others");
+    public static final JPermission CREATE          = new JPermission(PREFIX + "create");
+    public static final JPermission REMOVE          = new JPermission(PREFIX + "remove");
+    public static final JPermission REMOVE_OTHERS   = new JPermission(PREFIX + "remove.others");
 
     public static final JPermission COMMAND_LIST        = new JPermission(PREFIX_COMMAND + "list");
     public static final JPermission COMMAND_SEARCH      = new JPermission(PREFIX_COMMAND + "search");

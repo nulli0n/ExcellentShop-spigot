@@ -12,12 +12,11 @@ import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
-import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.menu.ProductPriceMenu;
+import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.price.FloatProductPricer;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 
 import java.util.UUID;
 
@@ -70,7 +69,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
         String currencyId = cfg.getString(path + ".Currency", CurrencyManager.VAULT);
         Currency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);
         if (currency == null || !ShopUtils.isAllowedCurrency(currency)) {
-            currency = ChestShopModule.DEFAULT_CURRENCY;
+            currency = ShopUtils.getDefaultCurrency();
         }
 
         ItemStack item = cfg.getItemEncoded(path + ".Reward.Item");

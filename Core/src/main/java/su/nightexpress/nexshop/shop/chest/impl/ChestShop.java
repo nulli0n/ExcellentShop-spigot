@@ -30,7 +30,10 @@ import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class ChestShop extends Shop<ChestShop, ChestProduct> {
@@ -61,7 +64,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         this.view = new ChestShopView(this);
 
         this.placeholderMap
-            .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestShopModule.ALLOWED_CURRENCIES.stream()
+            .add(Placeholders.SHOP_BANK_BALANCE, () -> ShopUtils.getAllowedCurrencies().stream()
                 .map(currency -> currency.format(this.getOwnerBank().getBalance(currency))).collect(Collectors.joining(", ")))
             .add(Placeholders.SHOP_CHEST_OWNER, this::getOwnerName)
             .add(Placeholders.SHOP_CHEST_LOCATION_X, () -> NumberUtil.format(this.getLocation().getX()))
@@ -193,7 +196,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
             return false;
         }
 
-        ChestProduct shopProduct = new ChestProduct(ChestShopModule.DEFAULT_CURRENCY, item);
+        ChestProduct shopProduct = new ChestProduct(ShopUtils.getDefaultCurrency(), item);
         shopProduct.setStock(new ChestProductStock());
         shopProduct.setPricer(new FlatProductPricer());
         this.addProduct(shopProduct);

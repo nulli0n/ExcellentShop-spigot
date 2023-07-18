@@ -37,7 +37,7 @@ public class ProductStockStorage {
         DATAS.remove(holder);
 
         return CompletableFuture.runAsync(() -> {
-            ShopAPI.getDataHandler().getProductStockData(holder).forEach(stockData -> {
+            ShopAPI.getDataHandler().getVirtualDataHandler().getProductStockData(holder).forEach(stockData -> {
                 addData(holder, stockData);
             });
         });
@@ -70,11 +70,11 @@ public class ProductStockStorage {
 
         addData(holder, stockData);
 
-        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().createProductStockData(holder, stockData));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().createProductStockData(holder, stockData));
     }
 
     public static void saveProductStockData(@NotNull String holder, @NotNull ProductStockData stockData) {
-        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().saveProductStockData(holder, stockData));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().saveProductStockData(holder, stockData));
     }
 
     public static void removeProductStockData(@NotNull String holder, @NotNull Product<?, ?, ?> product,
@@ -83,6 +83,6 @@ public class ProductStockStorage {
 
         removeData(holder, product, stockType, tradeType);
 
-        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().removeProductStockData(holder, product, stockType, tradeType));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeProductStockData(holder, product, stockType, tradeType));
     }
 }

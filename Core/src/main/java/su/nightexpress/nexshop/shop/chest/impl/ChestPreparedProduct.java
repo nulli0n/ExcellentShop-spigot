@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.chest.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.ChestShopTransactionEvent;
 import su.nightexpress.nexshop.shop.util.TransactionResult.Result;
@@ -69,7 +70,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             Player owner = shop.getOwner().getPlayer();
             if (owner != null && !shop.isAdminShop()) {
                 plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_OWNER)
-                    .replace("%player%", player.getDisplayName())
+                    .replace(Placeholders.forPlayer(player))
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
                     .send(owner);
@@ -142,7 +143,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             Player owner = shop.getOwner().getPlayer();
             if (owner != null && !shop.isAdminShop()) {
                 plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_OWNER)
-                    .replace("%player%", player.getDisplayName())
+                    .replace(Placeholders.forPlayer(player))
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
                     .send(owner);

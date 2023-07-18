@@ -23,7 +23,7 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 
 import java.util.*;
 
-public class ShopsSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestProduct> {
+public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestProduct> {
 
     private final ChestShopModule                module;
     private final Map<Player, List<ChestProduct>> searchCache;
@@ -32,7 +32,7 @@ public class ShopsSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPa
     private final String       productName;
     private final List<String> productLore;
 
-    public ShopsSearchMenu(@NotNull ChestShopModule module) {
+    public ShopSearchMenu(@NotNull ChestShopModule module) {
         super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shops_search.yml"));
         this.module = module;
         this.searchCache = new WeakHashMap<>();
