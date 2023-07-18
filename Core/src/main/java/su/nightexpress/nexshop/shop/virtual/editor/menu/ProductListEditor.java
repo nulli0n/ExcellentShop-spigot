@@ -26,6 +26,7 @@ import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualItemProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProductStock;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.util.ShopUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -148,7 +149,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
                 if (cursor != null && !cursor.getType().isAir()) {
                     VirtualProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
-                        cached = new VirtualItemProduct(cursor, plugin.getCurrencyManager().getAny());
+                        cached = new VirtualItemProduct(cursor, ShopUtils.getDefaultCurrency());
                         //cached.setItem(cursor);
                         cached.setPricer(new FlatProductPricer());
                         cached.setStock(new VirtualProductStock());
@@ -183,10 +184,10 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             VirtualProduct product = hasCursor ? this.getCachedProduct(cursor) : null;
             if (product == null) {
                 if (hasCursor) {
-                    product = new VirtualItemProduct(cursor, plugin.getCurrencyManager().getAny());
+                    product = new VirtualItemProduct(cursor, ShopUtils.getDefaultCurrency());
                 }
                 else if (event.isRightClick()) {
-                    product = new VirtualCommandProduct(new ItemStack(Material.COMMAND_BLOCK), plugin.getCurrencyManager().getAny());
+                    product = new VirtualCommandProduct(new ItemStack(Material.COMMAND_BLOCK), ShopUtils.getDefaultCurrency());
                 }
                 else return;
                 product.setPricer(new FlatProductPricer());

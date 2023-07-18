@@ -6,15 +6,16 @@ import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.currency.CurrencyManager;
 
 import java.util.*;
 
 public class VirtualConfig {
 
-    /*public static final JOption<String>      DEFAULT_CURRENCY       = JOption.create("General.Default_Currency", CurrencyManager.VAULT,
+    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency", CurrencyManager.VAULT,
         "Sets default currency for the Virtual Shop module.",
         "This currency will be used when you create new products or in case, where other currencies are not available.",
-        "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");*/
+        "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");
 
     public static final JOption<Boolean>     MAIN_MENU_ENABLED      = JOption.create("General.Main_Menu_Enabled", true,
         "When 'true', enables the Main Menu, where you can list all of your Virtual Shops.");

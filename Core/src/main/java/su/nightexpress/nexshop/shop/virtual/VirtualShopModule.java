@@ -67,9 +67,7 @@ public class VirtualShopModule extends ShopModule {
 
         File dir = new File(this.getAbsolutePath() + DIR_SHOPS);
         if (!dir.exists()) {
-            System.out.println(dir.getAbsolutePath());
             for (String id : new String[]{"blocks", "brewing", "farmers_market", "fish_market", "food", "hostile_loot", "peaceful_loot", "tools", "weapons", "wool"}) {
-                System.out.println("extract path: '" + (this.getLocalPath() + DIR_SHOPS + id) + "'");
                 this.plugin.getConfigManager().extractResources("/" + this.getLocalPath() + DIR_SHOPS + id);
             }
         }
