@@ -49,7 +49,7 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
             // Process transaction
             product.delivery(player, this.getUnits());
             product.getCurrency().getHandler().take(player, price);
-            shop.getBank().deposit(product.getCurrency(), price);
+            //shop.getBank().deposit(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
             plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_BUY).replace(this.replacePlaceholders()).send(player);
         }
@@ -85,10 +85,10 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
             result = TransactionResult.Result.OUT_OF_STOCK;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK).replace(this.replacePlaceholders()).send(player);
         }
-        else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
+        /*else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
             result = TransactionResult.Result.OUT_OF_MONEY;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS).replace(this.replacePlaceholders()).send(player);
-        }
+        }*/
 
         // Call custom event
         TransactionResult transactionResult = new TransactionResult(product, TradeType.SELL, fined, price, result);
@@ -101,7 +101,7 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
                 listener.onPurchase(event);
             }
 
-            shop.getBank().withdraw(product.getCurrency(), price);
+            //shop.getBank().withdraw(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
             product.getCurrency().getHandler().give(player, price);
             product.take(player, fined);

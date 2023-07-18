@@ -11,6 +11,7 @@ import su.nexmedia.engine.api.data.sql.column.ColumnType;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
@@ -19,15 +20,13 @@ import su.nightexpress.nexshop.data.stock.ProductStockData;
 import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.data.user.UserSettings;
+import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser> {
@@ -47,18 +46,25 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
     private static final SQLColumn COL_PRICE_PURCHASES    = SQLColumn.of("purchases", ColumnType.INTEGER);
     private static final SQLColumn COL_PRICE_SALES        = SQLColumn.of("sales", ColumnType.INTEGER);
 
+    private static final SQLColumn COLUMN_BANK_HOLDER = SQLColumn.of("holder", ColumnType.STRING);
+    private static final SQLColumn COLUMN_BANK_BALANCE = SQLColumn.of("balance", ColumnType.STRING);
+
     private static DataHandler INSTANCE;
 
     private final String                                tableStockData;
     private final String                                tablePriceData;
+    private final String  tableChestBank;
+
     private final Function<ResultSet, ShopUser>         funcUser;
     private final Function<ResultSet, ProductStockData> funcStockData;
     private final Function<ResultSet, ProductPriceData> funcPriceData;
+    private final Function<ResultSet, ChestPlayerBank> funcChestBank;
 
     protected DataHandler(@NotNull ExcellentShop plugin) {
         super(plugin, plugin);
         this.tableStockData = this.getTablePrefix() + "_stock_data";
         this.tablePriceData = this.getTablePrefix() + "_price_data";
+        this.tableChestBank = this.getTablePrefix() + "_chestshop_bank";
 
         this.funcUser = (resultSet) -> {
             try {
@@ -109,6 +115,27 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
                 int sales = resultSet.getInt(COL_PRICE_SALES.getName());
 
                 return new ProductPriceData(shopId, productId, lastBuyPrice, lastSellPrice, lastUpdated, purchases, sales);
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        };
+
+        this.funcChestBank = resultSet -> {
+            try {
+                UUID holder = UUID.fromString(resultSet.getString(COLUMN_BANK_HOLDER.getName()));
+
+                Map<String, Double> balanceRaw = this.gson.fromJson(resultSet.getString(COLUMN_BANK_BALANCE.getName()), new TypeToken<Map<String, Double>>(){}.getType());
+                Map<Currency, Double> balanceMap = new HashMap<>();
+                balanceRaw.forEach((id, amount) -> {
+                    Currency currency = this.plugin().getCurrencyManager().getCurrency(id);
+                    if (currency == null) return;
+
+                    balanceMap.put(currency, amount);
+                });
+
+                return new ChestPlayerBank(holder, balanceMap);
             }
             catch (SQLException e) {
                 e.printStackTrace();
@@ -186,6 +213,8 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
             COL_PRICE_LAST_BUY, COL_PRICE_LAST_SELL, COL_PRICE_LAST_UPDATED,
             COL_PRICE_PURCHASES, COL_PRICE_SALES
         ));
+
+        this.createTable(this.tableChestBank, Arrays.asList(COLUMN_BANK_HOLDER, COLUMN_BANK_BALANCE));
     }
 
     @Override
@@ -195,6 +224,8 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
             module.updateShopPricesStocks();
         }
         this.plugin.getUserManager().getUsersLoaded().forEach(ProductStockStorage::loadData);
+
+        // TODO CHestShop bank
     }
 
     @NotNull
@@ -289,6 +320,38 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
         this.delete(this.tablePriceData,
             SQLCondition.equal(COL_GEN_SHOP_ID.toValue(product.getShop().getId())),
             SQLCondition.equal(COL_GEN_PRODUCT_ID.toValue(product.getId()))
+        );
+    }
+
+    @NotNull
+    public List<ChestPlayerBank> getChestBanks() {
+        return this.load(this.tableChestBank, this.funcChestBank, Collections.emptyList(), Collections.emptyList(), -1);
+    }
+
+    public void createChestBank(@NotNull ChestPlayerBank bank) {
+        Map<String, Double> map = new HashMap<>();
+        bank.getBalanceMap().forEach((cur, amount) -> map.put(cur.getId(), amount));
+
+        this.insert(this.tableChestBank, Arrays.asList(
+            COLUMN_BANK_HOLDER.toValue(bank.getHolder().toString()),
+            COLUMN_BANK_BALANCE.toValue(this.gson.toJson(map))
+        ));
+    }
+
+    public void saveChestBank(@NotNull ChestPlayerBank bank) {
+        Map<String, Double> map = new HashMap<>();
+        bank.getBalanceMap().forEach((cur, amount) -> map.put(cur.getId(), amount));
+
+        this.update(this.tableChestBank, Arrays.asList(
+            COLUMN_BANK_BALANCE.toValue(this.gson.toJson(map))
+            ),
+            SQLCondition.equal(COLUMN_BANK_HOLDER.toValue(bank.getHolder().toString()))
+        );
+    }
+
+    public void removeChestBank(@NotNull UUID holder) {
+        this.delete(this.tableChestBank,
+            SQLCondition.equal(COLUMN_BANK_HOLDER.toValue(holder.toString()))
         );
     }
 }

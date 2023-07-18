@@ -23,6 +23,7 @@ import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.Map;
@@ -176,7 +177,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         int capacityInventory = Integer.MAX_VALUE;
         int capacityCart = this.getCartInventorySpace(prepared);
         int capacityProduct = product.getStock().getPossibleAmount(prepared.getTradeType(), player);
-        double shopBalance = shop.getBank().getBalance(product.getCurrency());
+        double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getOwnerBank().getBalance(product.getCurrency()) : -1D;
         double userBalance = product.getCurrency().getHandler().getBalance(player);
 
         if (product instanceof ItemProduct itemProduct) {

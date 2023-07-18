@@ -24,10 +24,9 @@ public abstract class Shop<
     protected final Set<Discount>           discounts;
     protected final Map<TradeType, Boolean> transactions;
     protected final Map<String, P>          products;
-    protected final PlaceholderMap placeholderMap;
+    protected final PlaceholderMap          placeholderMap;
 
-    protected String      name;
-    protected ShopBank<S> bank;
+    protected String name;
 
     public Shop(@NotNull ExcellentShop plugin, @NotNull JYML cfg, @NotNull String id) {
         super(plugin, cfg, id);
@@ -81,18 +80,6 @@ public abstract class Shop<
 
     public void setTransactionEnabled(@NotNull TradeType tradeType, boolean enabled) {
         this.transactions.put(tradeType, enabled);
-    }
-
-    @NotNull
-    public ShopBank<S> getBank() {
-        if (this.bank == null) {
-            throw new IllegalStateException("Bank is undefined!");
-        }
-        return this.bank;
-    }
-
-    public void setBank(@NotNull ShopBank<S> bank) {
-        this.bank = bank;
     }
 
     @NotNull

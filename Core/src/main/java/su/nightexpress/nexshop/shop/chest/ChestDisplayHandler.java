@@ -13,7 +13,8 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
-import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.chest.util.ShopType;
+import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
     class Slider extends AbstractTask<ExcellentShop> {
 
-        private final Map<ChestShopType, Integer> count = new HashMap<>();
+        private final Map<ShopType, Integer> count = new HashMap<>();
 
         Slider() {
             super(chestShop.plugin(), ChestConfig.DISPLAY_SLIDE_INTERVAL.get(), false);
@@ -49,9 +50,9 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
                 create(shop);
             });
 
-            for (ChestShopType chestType : ChestShopType.values()) {
+            for (ShopType chestType : ShopType.values()) {
                 int count = this.count.getOrDefault(chestType, 0) + 1;
-                if (count >= ChestShopModule.getHologramLines(chestType).size()) count = 0;
+                if (count >= ShopUtils.getHologramLines(chestType).size()) count = 0;
                 this.count.put(chestType, count);
             }
         }

@@ -10,7 +10,6 @@ softdepend:
   - PlayerPoints
   - WorldGuard
   - Lands
-  - GamePoints
   - GemsEconomy
   - CoinsEngine
   - GriefPrevention

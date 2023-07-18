@@ -22,7 +22,7 @@ public class ModuleCommand<S extends ShopModule> extends GeneralCommand<Excellen
     }
 
     @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
+    protected void onExecute(@NotNull CommandSender commandSender, @NotNull CommandResult commandResult) {
 
     }
 }

@@ -19,7 +19,6 @@ import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
@@ -27,7 +26,8 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
-import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.chest.util.ShopType;
+import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 
 import java.util.*;
@@ -40,11 +40,12 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     private Location location;
     private int      chunkX;
     private int      chunkZ;
+    private boolean doubleChest;
 
     private UUID          ownerId;
     private String        ownerName;
     private OfflinePlayer ownerPlayer;
-    private ChestShopType type;
+    private ShopType      type;
 
     private ShopSettingsMenu settingsMenu;
 
@@ -54,16 +55,6 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
 
     private final ChestShopView view;
 
-    public ChestShop(@NotNull ChestShopModule module, @NotNull Player owner, @NotNull Container container, @NotNull ChestShopType type) {
-        this(module, new JYML(module.getAbsolutePath() + ChestShopModule.DIR_SHOPS, UUID.randomUUID() + ".yml"));
-        this.setBank(new ChestShopBank(this));
-        this.setLocation(container.getLocation());
-        this.setType(type);
-        this.setOwner(owner);
-        this.setName(Placeholders.forPlayer(owner).apply(ChestConfig.DEFAULT_NAME.get()));
-        Arrays.asList(TradeType.values()).forEach(tradeType -> this.setTransactionEnabled(tradeType, true));
-    }
-
     public ChestShop(@NotNull ChestShopModule module, @NotNull JYML cfg) {
         super(module.plugin(), cfg, cfg.getFile().getName().replace(".yml", "").toLowerCase());
         this.module = module;
@@ -71,12 +62,12 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
 
         this.placeholderMap
             .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestShopModule.ALLOWED_CURRENCIES.stream()
-                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
+                .map(currency -> currency.format(this.getOwnerBank().getBalance(currency))).collect(Collectors.joining(", ")))
             .add(Placeholders.SHOP_CHEST_OWNER, this::getOwnerName)
             .add(Placeholders.SHOP_CHEST_LOCATION_X, () -> NumberUtil.format(this.getLocation().getX()))
             .add(Placeholders.SHOP_CHEST_LOCATION_Y, () -> NumberUtil.format(this.getLocation().getY()))
             .add(Placeholders.SHOP_CHEST_LOCATION_Z, () -> NumberUtil.format(this.getLocation().getZ()))
-            .add(Placeholders.SHOP_CHEST_LOCATION_WORLD, () -> LangManager.getWorld(this.getContainer().getWorld()))
+            .add(Placeholders.SHOP_CHEST_LOCATION_WORLD, () -> LocationUtil.getWorldName(this.getLocation()))
             .add(Placeholders.SHOP_CHEST_IS_ADMIN, () -> LangManager.getBoolean(this.isAdminShop()))
             .add(Placeholders.SHOP_CHEST_TYPE, () -> plugin.getLangManager().getEnum(this.getType()))
         ;
@@ -84,16 +75,14 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
 
     @Override
     public boolean load() {
-        this.setBank(new ChestShopBank(this));
-
         Location location = cfg.getLocation("Location");
-        if (location == null || !ChestShopModule.isValidContainer(location.getBlock())) {
+        if (location == null || !ShopUtils.isValidContainer(location.getBlock())) {
             this.plugin.error("Shop block is not a valid container!");
             return false;
         }
         this.setLocation(location);
 
-        this.setType(cfg.getEnum("Type", ChestShopType.class, ChestShopType.PLAYER));
+        this.setType(cfg.getEnum("Type", ShopType.class, ShopType.PLAYER));
         try {
             this.ownerId = UUID.fromString(cfg.getString("Owner.Id", ""));
             this.ownerPlayer = plugin.getServer().getOfflinePlayer(this.getOwnerId());
@@ -112,9 +101,9 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         for (TradeType tradeType : TradeType.values()) {
             this.setTransactionEnabled(tradeType, cfg.getBoolean("Transaction_Allowed." + tradeType.name(), true));
         }
-        for (Currency currency : ChestShopModule.ALLOWED_CURRENCIES) {
+        /*for (Currency currency : ChestShopModule.ALLOWED_CURRENCIES) {
             this.getBank().deposit(currency, cfg.getDouble("Bank." + currency.getId()));
-        }
+        }*/
 
         this.loadProducts();
         return true;
@@ -156,9 +145,6 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         this.transactions.forEach((type, isAllowed) -> {
             cfg.set("Transaction_Allowed." + type.name(), isAllowed);
         });
-        this.getBank().getBalance().forEach((currencyId, balance) -> {
-            cfg.set("Bank." + currencyId, balance);
-        });
         this.cfg.set("Products", null);
         this.getProducts().forEach(product -> ChestProduct.write(product, cfg, "Products." + product.getId()));
     }
@@ -188,6 +174,11 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         return this.settingsMenu;
     }
 
+    @NotNull
+    public ChestPlayerBank getOwnerBank() {
+        return this.getModule().getPlayerBank(this);
+    }
+
     @Override
     public boolean canAccess(@NotNull Player player, boolean notify) {
         return true;
@@ -197,7 +188,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         if (item.getType().isAir() || this.isProduct(item)) {
             return false;
         }
-        if (!ChestShopModule.isAllowedItem(item)) {
+        if (!ShopUtils.isAllowedItem(item)) {
             plugin.getMessage(ChestLang.SHOP_PRODUCT_ERROR_BAD_ITEM).send(player);
             return false;
         }
@@ -210,16 +201,16 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     @NotNull
-    public ChestShopType getType() {
+    public ShopType getType() {
         return type;
     }
 
-    public void setType(@NotNull ChestShopType type) {
+    public void setType(@NotNull ShopType type) {
         this.type = type;
     }
 
     public boolean isAdminShop() {
-        return this.getType() == ChestShopType.ADMIN;
+        return this.getType() == ShopType.ADMIN;
     }
 
     @NotNull
@@ -227,39 +218,39 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         return (Container) this.getLocation().getBlock().getState();
     }
 
+    @Deprecated
     public boolean isDoubleChest() {
-        return this.getContainer().getInventory() instanceof DoubleChestInventory;
+        return this.doubleChest;
     }
 
     public boolean isProduct(@NotNull ItemStack item) {
         return this.getProducts().stream().anyMatch(product -> product.isItemMatches(item));
     }
 
+    public void updateContainerInfo() {
+        this.doubleChest = this.getContainer().getInventory() instanceof DoubleChestInventory;
+    }
+
     @NotNull
     public Pair<Container, Container> getSides() {
-        Container container = this.getContainer();
+        if (!this.isDoubleChest()) {
+            Container container = this.getContainer();
+            return Pair.of(container, container);
+        }
 
-        //if (!(this.getContainer() instanceof Chest chest)) return Pair.of(container, container);
-        if (!this.isDoubleChest()) return Pair.of(container, container);
-
-        DoubleChest doubleChest = (DoubleChest) this.getInventory().getHolder();
-        if (doubleChest == null) return Pair.of(container, container);
-
-        Chest left = (Chest) doubleChest.getLeftSide();
-        Chest right = (Chest) doubleChest.getRightSide();
-
-        return Pair.of(left != null ? left : container, right != null ? right : container);
+        DoubleChestInventory inventory = (DoubleChestInventory) this.getInventory();
+        Chest left = (Chest) inventory.getLeftSide().getHolder();
+        Chest right = (Chest) inventory.getRightSide().getHolder();
+        return Pair.of(left != null ? left : this.getContainer(), right != null ? right : this.getContainer());
     }
 
     @NotNull
     public Inventory getInventory() {
-        if (this.isDoubleChest()) {
-            DoubleChest doubleChest = (DoubleChest) this.getContainer().getInventory().getHolder();
-            if (doubleChest != null) {
-                return doubleChest.getInventory();
-            }
+        Inventory inventory = this.getContainer().getInventory();
+        if (this.isDoubleChest() && inventory.getHolder() instanceof DoubleChest doubleChest) {
+            return doubleChest.getInventory();
         }
-        return this.getContainer().getInventory();
+        return inventory;
     }
 
     public void teleport(@NotNull Player player) {
@@ -280,10 +271,10 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         return this.location;
     }
 
-    private void setLocation(@NotNull Location location) {
+    public void setLocation(@NotNull Location location) {
         this.location = location.clone();
-        this.chunkX = location.getChunk().getX();
-        this.chunkZ = location.getChunk().getZ();
+        this.chunkX = location.getBlockX() >> 4;
+        this.chunkZ = location.getBlockZ() >> 4;
     }
 
     public int getChunkX() {
@@ -336,7 +327,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     public void updateDisplayText() {
-        this.displayText = new ArrayList<>(ChestShopModule.getHologramLines(this.getType()));
+        this.displayText = new ArrayList<>(ShopUtils.getHologramLines(this.getType()));
         this.displayText.replaceAll(this.replacePlaceholders());
     }
 

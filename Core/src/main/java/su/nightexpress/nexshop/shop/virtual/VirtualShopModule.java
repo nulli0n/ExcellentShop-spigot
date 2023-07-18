@@ -31,7 +31,6 @@ import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShopBank;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
@@ -183,7 +182,7 @@ public class VirtualShopModule extends ShopModule {
         shop.setName("&e&l" + StringUtil.capitalizeFully(id.replace("_", " ")));
         shop.setDescription(Arrays.asList("&7Freshly created shop.", "&7Edit me in &a/shop editor"));
         shop.setIcon(new ItemStack(Material.CHEST_MINECART));
-        shop.setBank(new VirtualShopBank(shop));
+        //shop.setBank(new VirtualShopBank(shop));
         shop.save();
         shop.load();
         this.getShopsMap().put(shop.getId(), shop);

@@ -12,7 +12,7 @@ import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.chest.util.ShopType;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -136,12 +136,12 @@ public class ChestConfig {
     public static final JOption<Integer> DISPLAY_SLIDE_INTERVAL = JOption.create("Display.Title.Slide_Interval", 3,
         "Sets interval (in seconds) between hologram line changes.");
 
-    public static final JOption<Map<ChestShopType, List<String>>> DISPLAY_TEXT = JOption.forMap("Display.Title.Values",
-        str -> StringUtil.getEnum(str, ChestShopType.class).orElse(null),
+    public static final JOption<Map<ShopType, List<String>>> DISPLAY_TEXT = JOption.forMap("Display.Title.Values",
+        str -> StringUtil.getEnum(str, ShopType.class).orElse(null),
         (cfg, path, type) -> cfg.getStringList(path + "." + type),
         Map.of(
-            ChestShopType.ADMIN, Collections.singletonList(Placeholders.SHOP_NAME),
-            ChestShopType.PLAYER, Arrays.asList(Placeholders.SHOP_NAME, "&7Owner: &6" + Placeholders.SHOP_CHEST_OWNER)
+            ShopType.ADMIN, Collections.singletonList(Placeholders.SHOP_NAME),
+            ShopType.PLAYER, Arrays.asList(Placeholders.SHOP_NAME, "&7Owner: &6" + Placeholders.SHOP_CHEST_OWNER)
         ),
         "Sets hologram lines format for player and admin shops.",
         "You can use 'Chest Shop' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS

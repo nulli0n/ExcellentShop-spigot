@@ -22,6 +22,7 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,7 +61,7 @@ public class ShopProductsMenu extends PlayerEditorMenu {
         Player player = viewer.getPlayer();
         int page = viewer.getPage();
 
-        int maxProducts = ChestShopModule.getProductLimit(player);
+        int maxProducts = ShopUtils.getProductLimit(player);
         if (maxProducts < 0) maxProducts = this.productSlots.length;
 
         PriorityQueue<ChestProduct> queue = new PriorityQueue<>(Comparator.comparing(Product::getId));
@@ -143,7 +144,7 @@ public class ShopProductsMenu extends PlayerEditorMenu {
         super.onClick(viewer, item, slotType, slot, event);
 
         Player player = viewer.getPlayer();
-        int maxProducts = ChestShopModule.getProductLimit(player);
+        int maxProducts = ShopUtils.getProductLimit(player);
         int hasProducts = this.shop.getProducts().size();
         boolean canAdd = maxProducts < 0 || hasProducts < maxProducts;
         if (!canAdd) return;

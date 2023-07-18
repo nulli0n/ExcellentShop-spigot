@@ -19,36 +19,50 @@ import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
-import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.WeakHashMap;
 
 public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency> {
 
     private static final String PLACEHOLDER_BANK_BALANCE = "%bank_balance%";
     private static final String PLACEHOLDER_PLAYER_BALANCE = "%player_balance%";
 
-    private final ChestShop shop;
-
+    private final ChestShopModule module;
     private final int[]        objectSlots;
     private final String       objectName;
     private final List<String> objectLore;
 
-    public ShopBankMenu(@NotNull ChestShop shop) {
-        super(shop.plugin(), JYML.loadOrExtract(shop.plugin(), shop.getModule().getLocalPath() + "/menu/", "shop_bank.yml"));
-        this.shop = shop;
+    private final Map<Player, UUID> others;
+
+    public ShopBankMenu(@NotNull ChestShopModule module) {
+        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shop_bank.yml"));
+        this.module = module;
+        this.others = new WeakHashMap<>();
 
         this.objectSlots = cfg.getIntArray("Currency.Slots");
         this.objectName = Colorizer.apply(cfg.getString("Currency.Name", ""));
         this.objectLore = Colorizer.apply(cfg.getStringList("Currency.Lore"));
 
         this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.CLOSE, (viewer, event) -> plugin.runTask(task -> viewer.getPlayer().closeInventory()))
-            .addClick(MenuItemType.RETURN, (viewer, event) -> this.shop.getEditor().openNextTick(viewer, 1))
+            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
             .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this));
 
         this.load();
+    }
+
+    public void open(@NotNull Player player, @NotNull UUID holder) {
+        this.others.put(player, holder);
+        this.open(player, 1);
+    }
+
+    @NotNull
+    public UUID getHolder(@NotNull Player player) {
+        return this.others.getOrDefault(player, player.getUniqueId());
     }
 
     @Override
@@ -84,7 +98,7 @@ public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency
             ItemUtil.replace(meta, currency.replacePlaceholders());
             ItemUtil.replace(meta, str -> str
                 .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getHandler().getBalance(player)))
-                .replace(PLACEHOLDER_BANK_BALANCE, currency.format(shop.getBank().getBalance(currency))));
+                .replace(PLACEHOLDER_BANK_BALANCE, currency.format(module.getPlayerBank(this.getHolder(player)).getBalance(currency))));
         });
         return icon;
     }
@@ -94,16 +108,18 @@ public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency
     public ItemClick getObjectClick(@NotNull Currency currency) {
         return (viewer, event) -> {
             Player player = viewer.getPlayer();
+            UUID holder = this.getHolder(player);
+            ChestPlayerBank bank = this.module.getPlayerBank(holder);
 
             if (event.getClick() == ClickType.DROP) {
-                this.shop.getModule().depositToShop(player, shop, currency, currency.getHandler().getBalance(player));
-                this.shop.save();
+                this.module.depositToBank(player, holder, currency, currency.getHandler().getBalance(player));
+                this.module.savePlayerBank(bank);
                 this.openNextTick(player, viewer.getPage());
                 return;
             }
             if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                this.shop.getModule().withdrawFromShop(player, shop, currency, this.shop.getBank().getBalance(currency));
-                this.shop.save();
+                this.module.withdrawFromBank(player, holder, currency, bank.getBalance(currency));
+                this.module.savePlayerBank(bank);
                 this.openNextTick(player, viewer.getPage());
                 return;
             }
@@ -132,13 +148,13 @@ public class ShopBankMenu extends PlayerEditorMenu implements AutoPaged<Currency
 
                 boolean result;
                 if (type == Type.DEPOSIT) {
-                    result = shop.getModule().depositToShop(player, shop, currency, amount);
+                    result = this.module.depositToBank(player, holder, currency, amount);
                 }
                 else {
-                    result = shop.getModule().withdrawFromShop(player, shop, currency, amount);
+                    result = this.module.withdrawFromBank(player, holder, currency, amount);
                 }
 
-                this.shop.save();
+                this.module.savePlayerBank(bank);
                 return result;
             });
         };

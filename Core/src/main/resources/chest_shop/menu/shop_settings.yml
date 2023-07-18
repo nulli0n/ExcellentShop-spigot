@@ -77,12 +77,13 @@ Content:
     Item:
       Material: PLAYER_HEAD
       Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjg4OWNmY2JhY2JlNTk4ZThhMWNkODYxMGI0OWZjYjYyNjQ0ZThjYmE5ZDQ5MTFkMTIxMTM0NTA2ZDhlYTFiNyJ9fX0='
-      Name: '#ee9aff&lShop Bank'
+      Name: '#ee9aff&lShop Bank #ddecee(Global)'
       Lore:
         - '#ee9aff▪ #ddeceeBalance: #ee9aff%shop_bank_balance%'
         - ''
-        - '#ddeceeBank is used to store funds of your shop.'
-        - '#ddeceeShop will #a5ff9again#ddecee funds from sales,'
+        - '#ddeceeBank is used to store funds for your shops.'
+        - '#ddeceeIt''s global for all of your shops.'
+        - '#ddeceeBank will #a5ff9again#ddecee funds from sales,'
         - '#ddeceeand #ff9a9aspend#ddecee them for purchases.'
         - ''
         - '#9af7ff&lActions:'

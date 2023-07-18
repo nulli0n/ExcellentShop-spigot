@@ -52,8 +52,8 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             }
 
             if (!shop.isAdminShop()) {
-                shop.getBank().deposit(product.getCurrency(), price);
-                shop.save();
+                shop.getOwnerBank().deposit(product.getCurrency(), price);
+                shop.getModule().savePlayerBank(shop.getOwnerBank());
             }
 
             // Process transaction
@@ -109,7 +109,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             result = TransactionResult.Result.OUT_OF_SPACE;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE).replace(this.replacePlaceholders()).send(player);
         }
-        else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
+        else if (!shop.isAdminShop() && !shop.getOwnerBank().hasEnough(product.getCurrency(), price)) {
             result = TransactionResult.Result.OUT_OF_MONEY;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS).replace(this.replacePlaceholders()).send(player);
         }
@@ -127,8 +127,8 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
             // Process transaction
             if (!isAdmin) {
-                shop.getBank().withdraw(product.getCurrency(), price);
-                shop.save();
+                shop.getOwnerBank().withdraw(product.getCurrency(), price);
+                shop.getModule().savePlayerBank(shop.getOwnerBank());
             }
             product.getCurrency().getHandler().give(player, price);
             product.take(player, fined);

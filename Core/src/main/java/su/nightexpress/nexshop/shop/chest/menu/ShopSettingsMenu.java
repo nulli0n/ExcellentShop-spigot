@@ -4,13 +4,14 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.MenuItemType;
+import su.nexmedia.engine.api.menu.click.ClickHandler;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
 public class ShopSettingsMenu extends PlayerEditorMenu {
@@ -18,14 +19,13 @@ public class ShopSettingsMenu extends PlayerEditorMenu {
     private final ChestShop shop;
 
     private ShopProductsMenu productsMenu;
-    private ShopBankMenu     bankMenu;
 
     public ShopSettingsMenu(@NotNull ChestShop shop) {
         super(shop.plugin(), JYML.loadOrExtract(shop.plugin(), shop.getModule().getLocalPath() + "/menu/", "shop_settings.yml"));
         this.shop = shop;
 
         this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.CLOSE, (viewer, event) -> plugin.runTask(task -> viewer.getPlayer().closeInventory()))
+            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
             .addClick(MenuItemType.RETURN, (viewer, event) -> shop.getModule().getListMenu().openNextTick(viewer, 1));
 
         this.registerHandler(Type.class)
@@ -42,7 +42,7 @@ public class ShopSettingsMenu extends PlayerEditorMenu {
                 });
             })
             .addClick(Type.SHOP_BANK, (viewer, event) -> {
-                this.getBankMenu().openNextTick(viewer, 1);
+                this.shop.getModule().getBankMenu().openNextTick(viewer, 1);
             })
             .addClick(Type.SHOP_CHANGE_TRANSACTIONS, (viewer, event) -> {
                 if (PlayerUtil.isBedrockPlayer(viewer.getPlayer())) {
@@ -114,10 +114,6 @@ public class ShopSettingsMenu extends PlayerEditorMenu {
             this.productsMenu.clear();
             this.productsMenu = null;
         }
-        if (this.bankMenu != null) {
-            this.bankMenu.clear();
-            this.bankMenu = null;
-        }
         super.clear();
     }
 
@@ -127,13 +123,5 @@ public class ShopSettingsMenu extends PlayerEditorMenu {
             this.productsMenu = new ShopProductsMenu(this.shop);
         }
         return this.productsMenu;
-    }
-
-    @NotNull
-    public ShopBankMenu getBankMenu() {
-        if (this.bankMenu == null) {
-            this.bankMenu = new ShopBankMenu(this.shop);
-        }
-        return bankMenu;
     }
 }

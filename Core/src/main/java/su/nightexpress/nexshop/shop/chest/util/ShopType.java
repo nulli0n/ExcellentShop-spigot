@@ -1,10 +1,10 @@
-package su.nightexpress.nexshop.shop.chest.type;
+package su.nightexpress.nexshop.shop.chest.util;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.shop.chest.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 
-public enum ChestShopType {
+public enum ShopType {
     PLAYER, ADMIN;
 
     public boolean hasPermission(@NotNull Player player) {

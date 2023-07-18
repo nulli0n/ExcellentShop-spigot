@@ -20,10 +20,11 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -107,7 +108,7 @@ public class ShopsListMenu extends ConfigMenu<ExcellentShop> implements AutoPage
     @NotNull
     public List<ChestShop> getObjects(@NotNull Player player) {
         String user = this.others.get(player);
-        if (user == null) return this.module.getShops(player);
+        if (user == null) return new ArrayList<>(this.module.getShops(player));
 
         boolean isGlobal = this.isGlobalMode(player);
         return this.module.getShops().stream()

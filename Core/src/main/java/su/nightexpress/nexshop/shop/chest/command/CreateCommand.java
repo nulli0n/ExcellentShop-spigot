@@ -6,10 +6,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.shop.chest.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.type.ChestShopType;
+import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.module.ModuleCommand;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class CreateCommand extends ModuleCommand<ChestShopModule> {
     @NotNull
     public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
         if (arg == 1) {
-            return Stream.of(ChestShopType.values()).filter(type -> type.hasPermission(player)).map(Enum::name).toList();
+            return Stream.of(ShopType.values()).filter(type -> type.hasPermission(player)).map(Enum::name).toList();
         }
         return super.getTab(player, arg, args);
     }
@@ -37,7 +37,7 @@ public class CreateCommand extends ModuleCommand<ChestShopModule> {
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
         Block block = player.getTargetBlock(null, 100);
-        ChestShopType type = result.length() >= 2 ? StringUtil.getEnum(result.getArg(1), ChestShopType.class).orElse(ChestShopType.PLAYER) : ChestShopType.PLAYER;
+        ShopType type = result.length() >= 2 ? StringUtil.getEnum(result.getArg(1), ShopType.class).orElse(ShopType.PLAYER) : ShopType.PLAYER;
         this.module.createShop(player, block, type);
     }
 }

@@ -18,7 +18,6 @@ import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> {
@@ -26,7 +25,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> {
     private final VirtualShopModule module;
     private final VirtualShopView view;
     private final JYML configProducts;
-    //private final JYML configView;
 
     private final Set<VirtualDiscount> discountConfigs;
     private final Set<Integer> npcIds;
@@ -50,8 +48,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> {
         this.view = new VirtualShopView(this, configView);
 
         this.placeholderMap
-            .add(Placeholders.SHOP_BANK_BALANCE, () -> plugin.getCurrencyManager().getCurrencies().stream()
-                .map(currency -> currency.format(this.getBank().getBalance(currency))).collect(Collectors.joining(", ")))
             .add(Placeholders.SHOP_VIRTUAL_DESCRIPTION, () -> String.join("\n", this.getDescription()))
             .add(Placeholders.SHOP_VIRTUAL_PERMISSION_NODE, () -> VirtualPerms.PREFIX_SHOP + this.getId())
             .add(Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED, () -> LangManager.getBoolean(this.isPermissionRequired()))
@@ -64,7 +60,6 @@ public final class VirtualShop extends Shop<VirtualShop, VirtualProduct> {
 
     @Override
     public boolean load() {
-        this.setBank(new VirtualShopBank(this));
         this.setName(cfg.getString("Name", StringUtil.capitalizeUnderscored(this.getId())));
         this.setDescription(cfg.getStringList("Description"));
         this.setPages(cfg.getInt("Pages", 1));

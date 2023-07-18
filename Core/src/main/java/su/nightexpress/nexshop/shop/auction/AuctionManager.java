@@ -290,6 +290,7 @@ public class AuctionManager extends ShopModule {
                     .replace(Placeholders.GENERIC_AMOUNT, currency.format(curPriceMax))
                     .replace(currency.replacePlaceholders())
                     .send(player);
+                if (takeItem) PlayerUtil.addItem(player, item);
                 return null;
             }
             if (curPriceMin > 0 && price < curPriceMin) {
@@ -297,6 +298,7 @@ public class AuctionManager extends ShopModule {
                     .replace(Placeholders.GENERIC_AMOUNT, currency.format(curPriceMin))
                     .replace(currency.replacePlaceholders())
                     .send(player);
+                if (takeItem) PlayerUtil.addItem(player, item);
                 return null;
             }
         }
@@ -310,6 +312,7 @@ public class AuctionManager extends ShopModule {
                     .replace(Placeholders.GENERIC_TAX, tax)
                     .replace(Placeholders.GENERIC_AMOUNT, currency.format(taxPay))
                     .send(player);
+                if (takeItem) PlayerUtil.addItem(player, item);
                 return null;
             }
             currency.getHandler().take(player, taxPay);
