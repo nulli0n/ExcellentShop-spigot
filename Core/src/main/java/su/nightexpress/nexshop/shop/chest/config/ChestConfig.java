@@ -59,6 +59,10 @@ public class ChestConfig {
         "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/block/Container.html"
     ).setWriter((cfg, path, set) -> cfg.set(path, set.stream().map(Enum::name).toList()));
 
+    public static final JOption<Boolean> SHOP_AUTO_BANK = JOption.create("Shops.Auto_Bank", true,
+        "Sets whether or not player's shop bank will be auto-managed without manual operations.",
+        "This means that players will gain/lose their funds instantly for each transaction in their shops.");
+
     public static final JOption<Double> SHOP_CREATION_COST_CREATE = JOption.create("Shops.Creation.Cost.Create", 0D,
         "Sets how much player have to pay in order to create a chest shop.");
 

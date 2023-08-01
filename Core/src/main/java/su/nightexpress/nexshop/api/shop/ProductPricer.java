@@ -74,8 +74,12 @@ public abstract class ProductPricer implements Placeholder {
         this.product = product;
     }
 
+    public double getPricePlain(@NotNull TradeType tradeType) {
+        return this.priceCurrent.computeIfAbsent(tradeType, b -> -1D);
+    }
+
     public double getPrice(@NotNull TradeType tradeType) {
-        double price = this.priceCurrent.computeIfAbsent(tradeType, b -> -1D);
+        double price = this.getPricePlain(tradeType);
 
         if (tradeType == TradeType.BUY && price > 0 && this.getProduct().isDiscountAllowed()) {
             price *= this.getProduct().getShop().getDiscountModifier();

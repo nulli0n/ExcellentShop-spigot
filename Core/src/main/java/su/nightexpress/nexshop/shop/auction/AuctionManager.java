@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.data.StorageType;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
@@ -16,11 +17,13 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.auction.command.*;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.config.AuctionCurrencySetting;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.shop.auction.data.AuctionDataHandler;
+import su.nightexpress.nexshop.shop.auction.hook.ItemsAdderHook;
 import su.nightexpress.nexshop.shop.auction.listener.AuctionListener;
 import su.nightexpress.nexshop.shop.auction.listing.AbstractAuctionItem;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
@@ -190,8 +193,13 @@ public class AuctionManager extends ShopModule {
     }
 
     public boolean isAllowedItem(@NotNull ItemStack item) {
-        if (AuctionConfig.LISTINGS_DISABLED_MATERIALS.contains(item.getType().name())) {
+        if (AuctionConfig.LISTINGS_DISABLED_MATERIALS.contains(item.getType().name().toLowerCase())) {
             return false;
+        }
+        if (EngineUtils.hasPlugin(HookId.ITEMS_ADDER)) {
+            if (AuctionConfig.LISTINGS_DISABLED_MATERIALS.stream().anyMatch(ItemsAdderHook::isCustomItem)) {
+                return false;
+            }
         }
 
         ItemMeta meta = item.getItemMeta();
@@ -366,12 +374,17 @@ public class AuctionManager extends ShopModule {
         this.plugin.getMessage(AuctionLang.LISTING_BUY_SUCCESS_INFO).replace(listing.replacePlaceholders()).send(buyer);
 
         // Notify the seller about the purchase.
-        Player seller = plugin.getServer().getOfflinePlayer(listing.getOwner()).getPlayer();
+        Player seller = plugin.getServer().getPlayer(listing.getOwner());
         if (seller != null) {
-            int unclaimed = this.getUnclaimedListings(seller).size();
-            this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_UNCLAIMED)
-                .replace(Placeholders.GENERIC_AMOUNT, unclaimed)
-                .send(seller);
+            if (AuctionConfig.LISINGS_AUTO_CLAIM.get()) {
+                this.claimRewards(seller, completedListing);
+            }
+            else {
+                int unclaimed = this.getUnclaimedListings(seller).size();
+                this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_UNCLAIMED)
+                    .replace(Placeholders.GENERIC_AMOUNT, unclaimed)
+                    .send(seller);
+            }
         }
 
         this.getMainMenu().update();
@@ -389,6 +402,25 @@ public class AuctionManager extends ShopModule {
         this.plugin.runTaskAsync(task -> this.getDataHandler().deleteListing(listing));
 
         this.getMainMenu().update();
+    }
+
+    public void claimRewards(@NotNull Player player, @NotNull List<AuctionCompletedListing> listings) {
+        this.claimRewards(player, listings.toArray(new AuctionCompletedListing[0]));
+    }
+
+    public void claimRewards(@NotNull Player player, @NotNull AuctionCompletedListing... listings) {
+        for (AuctionCompletedListing listing : listings) {
+            if (listing.isRewarded()) continue;
+
+            listing.getCurrency().getHandler().give(player, listing.getPrice());
+            listing.setRewarded(true);
+
+            this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_CLAIM)
+                .replace(listing.replacePlaceholders())
+                .send(player);
+        }
+
+        this.plugin.runTaskAsync(task -> this.getDataHandler().saveCompletedListings(listings));
     }
 
     public boolean canBeUsedHere(@NotNull Player player) {

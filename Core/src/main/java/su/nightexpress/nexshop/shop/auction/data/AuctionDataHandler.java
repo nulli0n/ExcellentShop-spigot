@@ -136,18 +136,6 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             COLUMN_EXPIRE_DATE, COLUMN_DELETE_DATE, COLUMN_DATE_CREATION
         ));
 
-        /*LinkedHashMap<String, String> aucLis = new LinkedHashMap<>();
-        aucLis.put("aucId", DataTypes.STRING.build(this.getDataType()));
-        aucLis.put("owner", DataTypes.STRING.build(this.getDataType()));
-        aucLis.put("ownerName", DataTypes.STRING.build(this.getDataType()));
-        aucLis.put("itemStack", DataTypes.STRING.build(this.getDataType()));
-        aucLis.put("currency", DataTypes.STRING.build(this.getDataType()));
-        aucLis.put("price", DataTypes.DOUBLE.build(this.getDataType()));
-        aucLis.put("expireDate", DataTypes.LONG.build(this.getDataType()));
-        aucLis.put("deleteDate", DataTypes.LONG.build(this.getDataType()));
-        aucLis.put("dateCreation", DataTypes.LONG.build(this.getDataType()));
-        this.createTable(this.tableListings, aucLis);*/
-
         // Create auction history table
         this.createTable(this.tableCompletedListings, Arrays.asList(
             COLUMN_AUC_ID, COLUMN_OWNER, COLUMN_OWNER_NAME, COLUMN_BUYER_NAME,
@@ -155,30 +143,12 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             COLUMN_BUY_DATE, COLUMN_DATE_CREATION, COLUMN_DELETE_DATE
         ));
 
-        /*LinkedHashMap<String, String> aucHis = new LinkedHashMap<>();
-        aucHis.put("aucId", DataTypes.STRING.build(this.getDataType()));
-        aucHis.put("owner", DataTypes.STRING.build(this.getDataType()));
-        aucHis.put("ownerName", DataTypes.STRING.build(this.getDataType()));
-        aucHis.put("buyerName", DataTypes.STRING.build(this.getDataType()));
-        aucHis.put("itemStack", DataTypes.STRING.build(this.getDataType()));
-        aucHis.put("currency", DataTypes.STRING.build(this.getDataType()));
-        aucHis.put("price", DataTypes.DOUBLE.build(this.getDataType()));
-        aucHis.put("isPaid", DataTypes.BOOLEAN.build(this.getDataType()));
-        aucHis.put("buyDate", DataTypes.LONG.build(this.getDataType()));
-        aucHis.put("dateCreation", DataTypes.LONG.build(this.getDataType()));
-        aucHis.put("deleteDate", DataTypes.LONG.build(this.getDataType()));
-        this.createTable(this.tableCompletedListings, aucHis);*/
-
         this.addColumn(this.tableListings,
             COLUMN_CURRENCY.toValue(this.auctionManager.getCurrencyDefault().getId()),
             COLUMN_DATE_CREATION.toValue(System.currentTimeMillis()));
         this.addColumn(this.tableCompletedListings,
             COLUMN_CURRENCY.toValue(this.auctionManager.getCurrencyDefault().getId()),
             COLUMN_DATE_CREATION.toValue(System.currentTimeMillis()));
-
-        //this.addColumn(this.tableCompletedListings, "currency", DataTypes.LONG.build(this.getDataType()), this.auctionManager.getCurrencyDefault().getId());
-        //this.addColumn(this.tableListings, "dateCreation", DataTypes.LONG.build(this.getDataType()), String.valueOf(System.currentTimeMillis()));
-        //this.addColumn(this.tableCompletedListings, "dateCreation", DataTypes.LONG.build(this.getDataType()), String.valueOf(System.currentTimeMillis()));
     }
 
     @Override
@@ -239,19 +209,6 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             COLUMN_DELETE_DATE.toValue(0L),
             COLUMN_DATE_CREATION.toValue(listing.getDateCreation())
         ));
-
-        /*LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("aucId", listing.getId().toString());
-        map.put("owner", listing.getOwner().toString());
-        map.put("ownerName", listing.getOwnerName());
-        map.put("itemStack", ItemUtil.toBase64(listing.getItemStack()));
-        map.put("currency", listing.getCurrency().getId());
-        map.put("price", String.valueOf(listing.getPrice()));
-        map.put("expireDate", String.valueOf(listing.getExpireDate()));
-        map.put("deleteDate", String.valueOf(0L));
-        map.put("dateCreation", String.valueOf(listing.getDateCreation()));
-
-        this.plugin.runTask(c -> this.addData(this.tableListings, map), async);*/
     }
 
     public void deleteListing(@NotNull AuctionListing listing) {
@@ -273,21 +230,12 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             COLUMN_DELETE_DATE.toValue(0L),
             COLUMN_DATE_CREATION.toValue(listing.getDateCreation())
         ));
+    }
 
-        /*LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("aucId", listing.getId().toString());
-        map.put("owner", listing.getOwner().toString());
-        map.put("ownerName", listing.getOwnerName());
-        map.put("buyerName", listing.getBuyerName());
-        map.put("itemStack", ItemUtil.toBase64(listing.getItemStack()));
-        map.put("currency", listing.getCurrency().getId());
-        map.put("price", String.valueOf(listing.getPrice()));
-        map.put("isPaid", String.valueOf(listing.isRewarded() ? 1 : 0));
-        map.put("buyDate", String.valueOf(listing.getBuyDate()));
-        map.put("deleteDate", String.valueOf(0L));
-        map.put("dateCreation", String.valueOf(listing.getDateCreation()));
-
-        this.plugin.runTask((c) -> this.addData(this.tableCompletedListings, map), async);*/
+    public void saveCompletedListings(@NotNull AuctionCompletedListing... listings) {
+        for (AuctionCompletedListing listing : listings) {
+            this.saveCompletedListing(listing);
+        }
     }
 
     public void saveCompletedListing(@NotNull AuctionCompletedListing historyItem) {
@@ -296,14 +244,6 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
             ),
             SQLCondition.equal(COLUMN_AUC_ID.toValue(historyItem.getId()))
         );
-
-        /*LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("isPaid", String.valueOf(historyItem.isRewarded() ? 1 : 0));
-
-        LinkedHashMap<String, String> mapWhere = new LinkedHashMap<>();
-        mapWhere.put("aucId", historyItem.getId().toString());
-
-        this.plugin.runTask((c) -> this.saveData(tableCompletedListings, map, mapWhere), async);*/
     }
 
     public void deleteCompletedListing(@NotNull AuctionCompletedListing historyItem) {
@@ -312,9 +252,6 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
     }
 
     public boolean isListingExist(@NotNull UUID id) {
-        //Map<String, String> whereMap = new LinkedHashMap<>();
-        //whereMap.put("aucId", id.toString());
-
         return this.contains(this.tableListings,
             Collections.singletonList(COLUMN_AUC_ID),
             SQLCondition.equal(COLUMN_AUC_ID.toValue(id))
@@ -322,9 +259,6 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
     }
 
     public boolean isCompletedListingExist(@NotNull UUID id) {
-        //Map<String, String> whereMap = new LinkedHashMap<>();
-        //whereMap.put("aucId", id.toString());
-
         return this.contains(this.tableCompletedListings,
             Collections.singletonList(COLUMN_AUC_ID),
             SQLCondition.equal(COLUMN_AUC_ID.toValue(id))

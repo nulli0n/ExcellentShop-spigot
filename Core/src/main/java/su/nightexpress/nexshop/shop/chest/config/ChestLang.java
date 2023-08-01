@@ -64,6 +64,14 @@ public class ChestLang extends EngineLang {
         "<! prefix:\"false\" !>" +
             ORANGE + Placeholders.PLAYER_DISPLAY_NAME + LIGHT_YELLOW + " just sold " + ORANGE + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + Placeholders.GENERIC_PRICE + LIGHT_YELLOW + " to your " + ORANGE + Placeholders.SHOP_NAME + LIGHT_YELLOW + " shop.");
 
+    public static final LangKey NOTIFICATION_SHOP_EARNINGS = LangKey.of("ChestShop.Notification.ShopEarnings",
+        "<! prefix:\"false\" !>" +
+            "\n" + LIGHT_YELLOW +
+            "\n" + ORANGE + BOLD + "Chest Shop Notification:" +
+            "\n" + LIGHT_YELLOW + "Since your last online, your shops earned:" +
+            "\n" + ORANGE + "▪ " + Placeholders.GENERIC_AMOUNT +
+            "\n" + LIGHT_YELLOW);
+
     public static final LangKey BANK_ERROR_INVALID_CURRENCY = LangKey.of("ChestShop.Shop.Bank.Error.InvalidCurrency",
         "<! type:\"titles:10:80:10\" !>" +
             "\n" + RED + "&lOperation Failed!" +

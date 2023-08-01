@@ -9,7 +9,11 @@ import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
+import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
+import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
+
+import java.util.List;
 
 public class AuctionListener extends AbstractListener<ExcellentShop> {
 
@@ -23,13 +27,18 @@ public class AuctionListener extends AbstractListener<ExcellentShop> {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSellerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        int unclaimed = this.auctionManager.getUnclaimedListings(player).size();
+        List<AuctionCompletedListing> unclaimed = this.auctionManager.getUnclaimedListings(player);
         int expired = this.auctionManager.getExpiredListings(player).size();
 
-        if (unclaimed > 0) {
-            this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_UNCLAIMED)
-                .replace(Placeholders.GENERIC_AMOUNT, unclaimed)
-                .send(player);
+        if (unclaimed.size() > 0) {
+            if (AuctionConfig.LISINGS_AUTO_CLAIM.get()) {
+                this.auctionManager.claimRewards(player, unclaimed);
+            }
+            else {
+                this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_UNCLAIMED)
+                    .replace(Placeholders.GENERIC_AMOUNT, unclaimed.size())
+                    .send(player);
+            }
         }
         if (expired > 0) {
             this.plugin.getMessage(AuctionLang.NOTIFY_LISTING_EXPIRED)

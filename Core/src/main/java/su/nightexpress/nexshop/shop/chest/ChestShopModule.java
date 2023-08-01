@@ -124,7 +124,9 @@ public class ChestShopModule extends ShopModule {
         this.command.addChildren(new ListCommand(this));
         this.command.addChildren(new SearchCommand(this));
         this.command.addChildren(new OpenCommand(this));
-        this.command.addChildren(new BankCommand(this));
+        if (!ChestConfig.SHOP_AUTO_BANK.get()) {
+            this.command.addChildren(new BankCommand(this));
+        }
 
         this.plugin.runTaskAsync(task -> {
             this.loadBanks();

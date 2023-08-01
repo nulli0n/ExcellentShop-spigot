@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -23,9 +24,12 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
 import java.util.*;
@@ -39,6 +43,30 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
         super(module.plugin());
         this.module = module;
         this.unloadedShops = new HashMap<>();
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!ChestConfig.SHOP_AUTO_BANK.get()) return;
+
+        Player player = event.getPlayer();
+        ChestPlayerBank bank = this.module.getPlayerBank(player);
+        bank.getBalanceMap().forEach((currency, amount) -> {
+            currency.getHandler().give(player, amount);
+        });
+
+        if (bank.getBalanceMap().values().stream().anyMatch(amount -> amount > 0)) {
+            this.plugin.getMessage(ChestLang.NOTIFICATION_SHOP_EARNINGS)
+                .replace(str -> str.contains(Placeholders.GENERIC_AMOUNT), (line, list) -> {
+                    bank.getBalanceMap().forEach((currency, amount) -> {
+                        list.add(currency.replacePlaceholders().apply(line.replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))));
+                    });
+                })
+                .send(player);
+        }
+
+        bank.getBalanceMap().clear();
+        this.module.savePlayerBank(bank);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

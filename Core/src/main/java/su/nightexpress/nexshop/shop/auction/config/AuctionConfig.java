@@ -26,13 +26,19 @@ public class AuctionConfig {
     public static Set<String>       DISABLED_WORLDS;
     public static Set<String>       DISABLED_GAMEMODES;
 
+    public static  Map<String, AuctionCurrencySetting> CURRENCIES;
+
     public static long     LISTINGS_EXPIRE_IN;
     public static long     LISTINGS_PURGE_IN;
     public static  boolean                             LISTINGS_ANNOUNCE;
     private static PlayerRankMap<Integer>                       LISTINGS_PER_RANK;
-    public static  Map<String, AuctionCurrencySetting> CURRENCIES;
+
+    public static final JOption<Boolean> LISINGS_AUTO_CLAIM = JOption.create("Settings.Listings.AutoClaim", false,
+        "Sets whether or not profits from sold listings will be auto-claimed when player is online.");
+
     public static final JOption<Boolean> LISTINGS_PRICE_ROUND_TO_INT = JOption.create("Settings.Listings.Price.Round_To_Integer", false,
         "When 'true', removes decimals from listing's price on sell.");
+
     private static Map<String, double[]> LISTINGS_PRICE_PER_CURRENCY;
     private static  Map<String, double[]> LISTINGS_PRICE_PER_MATERIAL;
     public static  double                LISTINGS_TAX_ON_LISTING_ADD;
@@ -109,7 +115,7 @@ public class AuctionConfig {
         LISTINGS_ANNOUNCE = cfg.getBoolean(path + "Announce");
         LISTINGS_PER_RANK = PlayerRankMap.read(cfg, path + "Listings_Per_Rank", Integer.class).setNegativeBetter(true);
         LISTINGS_DISABLED_MATERIALS = cfg.getStringSet(path + "Disabled_Materials").stream()
-                .map(String::toUpperCase).collect(Collectors.toSet());
+                .map(String::toLowerCase).collect(Collectors.toSet());
         LISTINGS_DISABLED_NAMES = Colorizer.apply(cfg.getStringSet(path + "Disabled_Names"));
         LISTINGS_DISABLED_LORES = Colorizer.apply(cfg.getStringSet(path + "Disabled_Lores"));
 

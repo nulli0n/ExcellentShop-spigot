@@ -47,8 +47,22 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_PRICE), VirtualLocales.PRODUCT_PRICE_TYPE, 4).setClick((viewer, event) -> {
             PriceType priceType = CollectionsUtil.next(product.getPricer().getType());
+
+            double sell = product.getPricer().getPricePlain(TradeType.SELL);
+            double buy = product.getPricer().getPricePlain(TradeType.BUY);
+
             product.setPricer(ProductPricer.from(priceType));
             ProductPriceStorage.deleteData(product);
+
+            if (product.getPricer() instanceof RangedProductPricer pricer) {
+                pricer.setPriceMin(TradeType.BUY, buy);
+                pricer.setPriceMax(TradeType.BUY, buy);
+                pricer.setPriceMin(TradeType.SELL, sell);
+                pricer.setPriceMax(TradeType.SELL, sell);
+            }
+            product.getPricer().setPrice(TradeType.BUY, buy);
+            product.getPricer().setPrice(TradeType.SELL, sell);
+
             this.save(viewer);
         });
 

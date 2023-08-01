@@ -49,6 +49,7 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
         }
 
         this.registerHandler(MenuItemType.class)
+            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
             .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
             .addClick(MenuItemType.RETURN, (viewer, event) -> this.auctionManager.getMainMenu().openNextTick(viewer, 1))

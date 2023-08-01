@@ -11,6 +11,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
@@ -91,6 +92,14 @@ public class ShopSettingsMenu extends PlayerEditorMenu {
 
         this.getItems().forEach(menuItem -> {
             menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.shop.replacePlaceholders()));
+
+            if (menuItem.getType() == Type.SHOP_BANK) {
+                menuItem.getOptions().setVisibilityPolicy(viewer -> {
+                    if (viewer.getPlayer().hasPermission(ChestPerms.COMMAND_BANK_OTHERS)) return true;
+
+                    return !ChestConfig.SHOP_AUTO_BANK.get();
+                });
+            }
         });
     }
 
