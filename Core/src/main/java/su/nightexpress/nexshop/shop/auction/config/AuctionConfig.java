@@ -47,6 +47,16 @@ public class AuctionConfig {
     public static  Set<String>           LISTINGS_DISABLED_NAMES;
     public static  Set<String>           LISTINGS_DISABLED_LORES;
 
+    public static final JOption<Boolean> MENU_CONTAINER_PREVIEW_ENABLED = JOption.create("Menu.Container_Preview.Enabled", true,
+        "Sets whether or not container preview feature is available in Auction GUI.",
+        "This allows players to see content of Shulker Boxes, Chests, Barrels, etc. before purchase.",
+        "Uses Right Mouse Button (RMB).");
+
+    public static final JOption<String> MENU_CONTAINER_PREVIEW_TITLE = JOption.create("Menu.Container_Preview.Title",
+        "Preview",
+        "Sets title for the Preview GUI."
+    ).mapReader(Colorizer::apply);
+
     public static final JOption<Integer> MENU_UPDATE_INTERVAL = JOption.create("Menu.Update_Interval", 1,
         "Sets how often auction menus will be refreshed to players who are viewing them.",
         "Set this to -1 to disable refreshing task. Then menus will be updated only when there are listings changes.");

@@ -1,7 +1,11 @@
 package su.nightexpress.nexshop.shop.auction.menu;
 
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
@@ -25,14 +29,23 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
     private static final Map<Player, Set<AuctionCategory>> CATEGORIES    = new WeakHashMap<>();
     private static final Map<Player, Set<Currency>>       CURRENCIES   = new WeakHashMap<>();
 
-    private static final String PLACEHOLDER_CATEGORIES = "%categories%";
-    private static final String PLACEHOLDER_CURRENCIES = "%currencies%";
-    private static final String PLACEHOLDER_EXPIRED_AMOUNT = "%expired_amount%";
+    private static final String PLACEHOLDER_CATEGORIES       = "%categories%";
+    private static final String PLACEHOLDER_CURRENCIES       = "%currencies%";
+    private static final String PLACEHOLDER_EXPIRED_AMOUNT   = "%expired_amount%";
     private static final String PLACEHOLDER_UNCLAIMED_AMOUNT = "%unclaimed_amount%";
-    private static final String PLACEHOLDER_LISTING_ORDER = "%listing_order%";
+    private static final String PLACEHOLDER_LISTING_ORDER    = "%listing_order%";
+    private static final String PLACEHOLDER_ACTION_PREVIEW = "%action_preview%";
+
+    private final List<String> lorePreview;
 
     public AuctionMainMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager, cfg);
+
+        this.lorePreview = JOption.create("Lore_Format.Action_Preview",
+            List.of("#a5ff9a▪ #ddeceeRight-Click: #a5ff9aPreview Content"),
+            "Sets preview action format for container listings.",
+            "Use placeholder '" + PLACEHOLDER_ACTION_PREVIEW + "' in listing lore format to insert it."
+        ).mapReader(Colorizer::apply).read(cfg);
 
         this.registerHandler(AuctionItemType.class)
             .addClick(AuctionItemType.EXPIRED_LISTINGS, (viewer, event) -> {
@@ -94,6 +107,14 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
         });
     }
 
+    public boolean isContainer(@NotNull AuctionListing listing) {
+        ItemStack item = listing.getItemStack();
+        if (item.getItemMeta() instanceof BlockStateMeta meta) {
+            return meta.getBlockState() instanceof Container container;
+        }
+        return false;
+    }
+
     @NotNull
     public static AuctionSortType getListingOrder(@NotNull Player player) {
         return LISTING_ORDER.computeIfAbsent(player, type -> AuctionSortType.NEWEST);
@@ -127,26 +148,54 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
 
     @Override
     @NotNull
-    public ItemClick getObjectClick(@NotNull AuctionListing item) {
+    public ItemStack getObjectStack(@NotNull Player player, @NotNull AuctionListing listing) {
+        ItemStack item = super.getObjectStack(player, listing);
+        if (AuctionConfig.MENU_CONTAINER_PREVIEW_ENABLED.get()) {
+            ItemUtil.mapMeta(item, meta -> {
+                List<String> lore = meta.getLore();
+                if (lore == null) return;
+
+                List<String> replace = this.isContainer(listing) ? new ArrayList<>(this.lorePreview) : Collections.emptyList();
+                lore = StringUtil.replaceInList(lore, PLACEHOLDER_ACTION_PREVIEW, replace);
+                meta.setLore(lore);
+            });
+        }
+        return item;
+    }
+
+    @Override
+    @NotNull
+    public ItemClick getObjectClick(@NotNull AuctionListing listing) {
         return (viewer, event) -> {
             Player player = viewer.getPlayer();
-            boolean isOwner = item.isOwner(player);
+            boolean isOwner = listing.isOwner(player);
             boolean isBedrock = PlayerUtil.isBedrockPlayer(player);
 
             if ((event.isShiftClick() && event.isRightClick()) || (isOwner && isBedrock)) {
                 if (isOwner|| player.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) {
-                    this.auctionManager.takeListing(player, item);
+                    this.auctionManager.takeListing(player, listing);
                     this.openNextTick(viewer, viewer.getPage());
                 }
                 return;
             }
+
+            if (AuctionConfig.MENU_CONTAINER_PREVIEW_ENABLED.get() && event.isRightClick()) {
+                ItemStack item = listing.getItemStack();
+                if (item.getItemMeta() instanceof BlockStateMeta meta) {
+                    if (meta.getBlockState() instanceof Container container) {
+                        new ContainerPreview(this, container, viewer.getPage()).openNextTick(viewer, 1);
+                        return;
+                    }
+                }
+            }
+
             if (isOwner) return;
 
             if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && player.getInventory().firstEmpty() < 0) {
                 plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player);
                 return;
             }
-            this.auctionManager.getPurchaseConfirmationMenu().open(player, item);
+            this.auctionManager.getPurchaseConfirmationMenu().open(player, listing);
         };
     }
 

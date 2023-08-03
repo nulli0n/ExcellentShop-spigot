@@ -9,6 +9,8 @@ Items:
   Slots: 10,11,12,13,14,15,16,19,20,21,22,23,24,25,28,29,30,31,32,33,34
 
 Lore_Format:
+  Action_Preview:
+    - '#a5ff9a▪ #ddeceeRight-Click: #a5ff9aPreview Content'
   OWNER:
     - '&8&o(This is your listing)'
     - ''
@@ -20,6 +22,7 @@ Lore_Format:
     - ''
     - '#a5ff9a&lActions:'
     - '#a5ff9a▪ #ddeceeShift-Right: #a5ff9aRemove Listing'
+    - '%action_preview%'
   PLAYER:
     - '%listing_item_lore%'
     - ''
@@ -30,6 +33,7 @@ Lore_Format:
     - ''
     - '#a5ff9a&lActions:'
     - '#a5ff9a▪ #ddeceeLeft-Click: #a5ff9aPurchase'
+    - '%action_preview%'
   ADMIN:
     - '%listing_item_lore%'
     - ''
@@ -42,6 +46,7 @@ Lore_Format:
     - '#a5ff9a&lActions:'
     - '#a5ff9a▪ #ddeceeLeft-Click: #a5ff9aPurchase'
     - '#a5ff9a▪ #ddeceeShift-Right: #a5ff9aRemove Listing'
+    - '%action_preview%'
 
 Content:
   expired:
