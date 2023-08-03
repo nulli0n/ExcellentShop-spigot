@@ -11,6 +11,7 @@ import su.nightexpress.nexshop.shop.util.TransactionResult;
 
 public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Placeholder {
 
+    private final Player player;
     private final P         product;
     private final TradeType buyType;
     private final boolean all;
@@ -18,7 +19,8 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
 
     private int units;
 
-    public PreparedProduct(@NotNull P product, @NotNull TradeType buyType, boolean all) {
+    public PreparedProduct(@NotNull Player player, @NotNull P product, @NotNull TradeType buyType, boolean all) {
+        this.player = player;
         this.product = product;
         this.buyType = buyType;
         this.all = all;
@@ -38,6 +40,11 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
     @NotNull
     public PlaceholderMap getPlaceholders() {
         return this.placeholderMap;
+    }
+
+    @NotNull
+    public Player getPlayer() {
+        return player;
     }
 
     @NotNull
@@ -73,18 +80,18 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
 
     public double getPrice() {
         Product<P, ?, ?> product = this.getProduct();
-        double price = product.getPricer().getPrice(this.getTradeType());
+        double price = product.getPricer().getPrice(this.getPlayer(), this.getTradeType());
         return price * this.getUnits();
     }
 
     @NotNull
-    public TransactionResult trade(@NotNull Player player) {
-        return this.getTradeType() == TradeType.BUY ? this.buy(player) : this.sell(player);
+    public TransactionResult trade() {
+        return this.getTradeType() == TradeType.BUY ? this.buy() : this.sell();
     }
 
     @NotNull
-    protected abstract TransactionResult buy(@NotNull Player player);
+    protected abstract TransactionResult buy();
 
     @NotNull
-    protected abstract TransactionResult sell(@NotNull Player player);
+    protected abstract TransactionResult sell();
 }

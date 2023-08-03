@@ -155,6 +155,13 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .actionsHeader().action("Left-Click", "Add Command").action("Right-Click", "Clear List")
         .build();
 
+    public static final EditorLocale PRODUCT_ALLOWED_RANKS = builder(PREFIX + "Product.Allowed_Ranks")
+        .name("Allowed Ranks")
+        .text("List of ranks (permission groups) who", "will have access to this item.").breakLine()
+        .currentHeader().text(Placeholders.PRODUCT_VIRTUAL_ALLOWED_RANKS).breakLine()
+        .actionsHeader().action("Left-Click", "Add Rank").action("Right-Click", "Clear List")
+        .build();
+
     public static final EditorLocale PRODUCT_DISCOUNT = builder(PREFIX_OLD + "PRODUCT_CHANGE_DISCOUNT")
         .name("Discount Allowed")
         .currentHeader().current("Enabled", Placeholders.PRODUCT_DISCOUNT_ALLOWED).breakLine()

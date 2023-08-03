@@ -15,13 +15,14 @@ import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
-    public VirtualPreparedProduct(@NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
-        super(product, tradeType, all);
+    public VirtualPreparedProduct(@NotNull Player player, @NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
+        super(player, product, tradeType, all);
     }
 
     @Override
     @NotNull
-    protected TransactionResult buy(@NotNull Player player) {
+    protected TransactionResult buy() {
+        Player player = this.getPlayer();
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
@@ -58,7 +59,8 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
 
     @Override
     @NotNull
-    protected TransactionResult sell(@NotNull Player player) {
+    protected TransactionResult sell() {
+        Player player = this.getPlayer();
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
         ExcellentShop plugin = shop.plugin();

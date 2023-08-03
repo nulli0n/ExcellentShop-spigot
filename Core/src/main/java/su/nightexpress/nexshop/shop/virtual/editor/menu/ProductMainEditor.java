@@ -134,6 +134,20 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
             this.save(viewer);
         });
 
+        this.addItem(Material.ENDER_PEARL, VirtualLocales.PRODUCT_ALLOWED_RANKS, 14).setClick((viewer, event) -> {
+            if (event.isRightClick()) {
+                product.getAllowedRanks().clear();
+                this.save(viewer);
+                return;
+            }
+
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_RANK, wrapepr -> {
+                product.getAllowedRanks().add(wrapepr.getTextRaw().toLowerCase());
+                product.getShop().saveProducts();
+                return true;
+            });
+        });
+
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), VirtualLocales.PRODUCT_GLOBAL_STOCK, 15).setClick(this.getStockClick(StockType.GLOBAL));
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), VirtualLocales.PRODUCT_PLAYER_STOCK, 16).setClick(this.getStockClick(StockType.PLAYER));
 

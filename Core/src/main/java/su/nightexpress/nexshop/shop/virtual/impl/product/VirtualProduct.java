@@ -1,9 +1,12 @@
 package su.nightexpress.nexshop.shop.virtual.impl.product;
 
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
+import su.nexmedia.engine.utils.PlayerUtil;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
@@ -13,23 +16,28 @@ import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.price.FloatProductPricer;
+import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ProductMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop, VirtualProductStock> {
 
     private int shopSlot;
     private int shopPage;
+    private Set<String> allowedRanks;
 
     private ProductMainEditor editor;
 
     public VirtualProduct(@NotNull String id, @NotNull Currency currency) {
         super(id, currency);
+
+        this.placeholderMap
+            .add(Placeholders.PRODUCT_VIRTUAL_ALLOWED_RANKS, () -> String.join("\n", this.getAllowedRanks()));
     }
 
     @NotNull
@@ -116,6 +124,7 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         product.setSlot(cfg.getInt(path + ".Shop_View.Slot", -1));
         product.setPage(cfg.getInt(path + ".Shop_View.Page", -1));
         product.setDiscountAllowed(cfg.getBoolean(path + ".Discount.Allowed"));
+        product.setAllowedRanks(cfg.getStringSet(path + ".Allowed_Ranks"));
         product.setPricer(ProductPricer.read(cfg, path + ".Price"));
         product.setStock(VirtualProductStock.read(cfg, path + ".Stock"));
         return product;
@@ -135,6 +144,7 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
         cfg.set(path + ".Shop_View.Slot", product.getSlot());
         cfg.set(path + ".Shop_View.Page", product.getPage());
         cfg.set(path + ".Discount.Allowed", product.isDiscountAllowed());
+        cfg.set(path + ".Allowed_Ranks", product.getAllowedRanks());
         //cfg.set(path + ".Stock", product.getStock());
         VirtualProductStock.write(product.getStock(), cfg, path + ".Stock");
         ProductPricer pricer = product.getPricer();
@@ -166,8 +176,15 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
 
     @Override
     @NotNull
-    public VirtualPreparedProduct getPrepared(@NotNull TradeType buyType, boolean all) {
-        return new VirtualPreparedProduct(this, buyType, all);
+    public VirtualPreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all) {
+        return new VirtualPreparedProduct(player, this, buyType, all);
+    }
+
+    public boolean hasAccess(@NotNull Player player) {
+        if (this.getAllowedRanks().isEmpty()) return true;
+
+        Set<String> ranks = PlayerUtil.getPermissionGroups(player);
+        return ranks.stream().anyMatch(rank -> this.getAllowedRanks().contains(rank));
     }
 
     public int getSlot() {
@@ -184,5 +201,14 @@ public abstract class VirtualProduct extends Product<VirtualProduct, VirtualShop
 
     public void setPage(int page) {
         this.shopPage = page;
+    }
+
+    @NotNull
+    public Set<String> getAllowedRanks() {
+        return allowedRanks;
+    }
+
+    public void setAllowedRanks(@NotNull Set<String> allowedRanks) {
+        this.allowedRanks = allowedRanks;
     }
 }

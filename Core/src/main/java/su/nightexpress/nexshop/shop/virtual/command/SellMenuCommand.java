@@ -16,24 +16,11 @@ public class SellMenuCommand extends GeneralCommand<ExcellentShop> {
 
     public SellMenuCommand(@NotNull VirtualShopModule module, @NotNull String[] aliases) {
         super(module.plugin(), aliases, VirtualPerms.COMMAND_SELL_MENU);
+        this.setDescription(plugin.getMessage(VirtualLang.COMMAND_SELL_MENU_DESC));
+        this.setUsage(plugin.getMessage(VirtualLang.COMMAND_SELL_MENU_USAGE));
+        this.setPlayerOnly(true);
+
         this.module = module;
-    }
-
-    @Override
-    @NotNull
-    public String getUsage() {
-        return plugin.getMessage(VirtualLang.COMMAND_SELL_MENU_USAGE).getLocalized();
-    }
-
-    @Override
-    @NotNull
-    public String getDescription() {
-        return plugin.getMessage(VirtualLang.COMMAND_SELL_MENU_DESC).getLocalized();
-    }
-
-    @Override
-    public boolean isPlayerOnly() {
-        return true;
     }
 
     @Override

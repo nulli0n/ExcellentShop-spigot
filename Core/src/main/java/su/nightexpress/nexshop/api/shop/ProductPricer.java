@@ -11,6 +11,8 @@ import su.nightexpress.nexshop.currency.impl.ItemCurrency;
 import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.price.FloatProductPricer;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -74,15 +76,24 @@ public abstract class ProductPricer implements Placeholder {
         this.product = product;
     }
 
+    @Deprecated
     public double getPricePlain(@NotNull TradeType tradeType) {
-        return this.priceCurrent.computeIfAbsent(tradeType, b -> -1D);
+        return this.getPrice(tradeType);
     }
 
     public double getPrice(@NotNull TradeType tradeType) {
-        double price = this.getPricePlain(tradeType);
+        return this.priceCurrent.computeIfAbsent(tradeType, b -> -1D);
+    }
+
+    public double getPrice(@NotNull Player player, @NotNull TradeType tradeType) {
+        double price = this.getPrice(tradeType);
 
         if (tradeType == TradeType.BUY && price > 0 && this.getProduct().isDiscountAllowed()) {
             price *= this.getProduct().getShop().getDiscountModifier();
+        }
+        if (tradeType == TradeType.SELL && this.getProduct() instanceof VirtualProduct) {
+            double sellModifier = VirtualConfig.SELL_RANK_MULTIPLIERS.get().getBestValue(player, 1D);
+            price *= sellModifier;
         }
         return price;
     }
@@ -98,8 +109,16 @@ public abstract class ProductPricer implements Placeholder {
         return this.getPrice(TradeType.BUY);
     }
 
+    public double getPriceBuy(@NotNull Player player) {
+        return this.getPrice(player, TradeType.BUY);
+    }
+
     public double getPriceSell() {
         return this.getPrice(TradeType.SELL);
+    }
+
+    public double getPriceSell(@NotNull Player player) {
+        return this.getPrice(player, TradeType.SELL);
     }
 
     public double getPriceSellAll(@NotNull Player player) {
@@ -107,6 +126,6 @@ public abstract class ProductPricer implements Placeholder {
         int amountCan = this.getProduct().getStock().getPossibleAmount(TradeType.SELL, player);
 
         int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);
-        return balance * this.getPriceSell();
+        return balance * this.getPriceSell(player);
     }
 }

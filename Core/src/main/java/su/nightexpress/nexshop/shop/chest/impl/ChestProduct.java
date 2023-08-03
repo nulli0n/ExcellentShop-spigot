@@ -178,7 +178,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
 
     @Override
     @NotNull
-    public ChestPreparedProduct getPrepared(@NotNull TradeType buyType, boolean all) {
-        return new ChestPreparedProduct(this, buyType, all);
+    public ChestPreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all) {
+        return new ChestPreparedProduct(player, this, buyType, all);
     }
 }

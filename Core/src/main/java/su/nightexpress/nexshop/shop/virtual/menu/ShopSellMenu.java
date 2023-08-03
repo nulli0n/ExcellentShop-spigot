@@ -14,6 +14,7 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -43,39 +44,9 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
             .addClick(ItemType.SELL, (viewer, e) -> {
                 Player player = viewer.getPlayer();
                 Pair<List<ItemStack>, Set<VirtualProduct>> userItems = USER_ITEMS.remove(player);
-                if (userItems == null || userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
+                if (userItems == null) return;
 
-                ItemStack[] original = player.getInventory().getContents();
-                player.getInventory().clear();
-
-                List<TransactionResult> profits = new ArrayList<>();
-                userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
-                userItems.getSecond().forEach(product -> {
-                    VirtualPreparedProduct preparedProduct = product.getPrepared(TradeType.SELL, true);
-                    TransactionResult result = preparedProduct.trade(player);
-
-                    if (result.getResult() == TransactionResult.Result.SUCCESS) {
-                        profits.add(result);
-                    }
-                });
-
-                ItemStack[] left = player.getInventory().getContents();
-                player.getInventory().setContents(original);
-                Arrays.asList(left).forEach(item -> {
-                    if (item != null && !item.getType().isAir()) PlayerUtil.addItem(player, item);
-                });
-
-                player.updateInventory();
-                player.closeInventory();
-                if (profits.isEmpty()) return;
-
-                plugin.getMessage(VirtualLang.SELL_MENU_SOLD)
-                    .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (line, list) -> {
-                        profits.forEach(result -> {
-                            list.add(result.replacePlaceholders().apply(line));
-                        });
-                    })
-                    .send(player);
+                sellAll(player, userItems);
             });
 
         this.load();
@@ -142,5 +113,41 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         if (userItems != null) {
             userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
         }
+    }
+
+    public static void sellAll(@NotNull Player player, @NotNull Pair<List<ItemStack>, Set<VirtualProduct>> userItems) {
+        if (userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
+
+        ItemStack[] original = player.getInventory().getContents();
+        player.getInventory().clear();
+
+        List<TransactionResult> profits = new ArrayList<>();
+        userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
+        userItems.getSecond().forEach(product -> {
+            VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, true);
+            TransactionResult result = preparedProduct.trade();
+
+            if (result.getResult() == TransactionResult.Result.SUCCESS) {
+                profits.add(result);
+            }
+        });
+
+        ItemStack[] left = player.getInventory().getContents();
+        player.getInventory().setContents(original);
+        Arrays.asList(left).forEach(item -> {
+            if (item != null && !item.getType().isAir()) PlayerUtil.addItem(player, item);
+        });
+
+        player.updateInventory();
+        player.closeInventory();
+        if (profits.isEmpty()) return;
+
+        ShopAPI.PLUGIN.getMessage(VirtualLang.SELL_MENU_SOLD)
+            .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (line, list) -> {
+                profits.forEach(result -> {
+                    list.add(result.replacePlaceholders().apply(line));
+                });
+            })
+            .send(player);
     }
 }

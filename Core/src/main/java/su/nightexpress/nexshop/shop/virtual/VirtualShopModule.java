@@ -19,6 +19,7 @@ import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.module.ShopModule;
 import su.nightexpress.nexshop.shop.util.TransactionLogger;
+import su.nightexpress.nexshop.shop.virtual.command.SellAllCommand;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
 import su.nightexpress.nexshop.shop.virtual.command.ShopCommand;
 import su.nightexpress.nexshop.shop.virtual.command.child.EditorCommand;
@@ -91,6 +92,7 @@ public class VirtualShopModule extends ShopModule {
         if (!VirtualConfig.SHOP_SHORTCUTS.get().isEmpty()) {
             this.plugin.getCommandManager().registerCommand(new ShopCommand(this));
         }
+        this.plugin.getCommandManager().registerCommand(new SellAllCommand(this, VirtualConfig.SELL_ALL_COMMANDS.get().split(",")));
     }
 
     @Override
@@ -253,15 +255,17 @@ public class VirtualShopModule extends ShopModule {
         this.getShops().stream()
             .filter(shop -> shop.canAccess(player, false) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
-                if (product instanceof ItemProduct itemProduct && !itemProduct.isItemMatches(item)) return false;
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                 if (tradeType == TradeType.SELL && !product.isSellable()) return false;
+                if (!product.hasAccess(player)) return false;
+                if (!(product instanceof ItemProduct itemProduct)) return false;
+                if (!itemProduct.isItemMatches(item)) return false;
                 return product.getStock().getPossibleAmount(tradeType, player) != 0;
             }).toList());
         });
 
         Comparator<Product<?, ?, ?>> comp = (p1, p2) -> {
-            return (int) (p1.getPricer().getPrice(tradeType) - p2.getPricer().getPrice(tradeType));
+            return (int) (p1.getPricer().getPrice(player, tradeType) - p2.getPricer().getPrice(player, tradeType));
         };
 
         return (tradeType == TradeType.BUY ? products.stream().min(comp) : products.stream().max(comp)).orElse(null);

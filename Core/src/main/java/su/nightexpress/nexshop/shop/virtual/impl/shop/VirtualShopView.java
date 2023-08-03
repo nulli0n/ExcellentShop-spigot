@@ -20,6 +20,7 @@ import su.nightexpress.nexshop.api.type.ShopClickAction;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
@@ -116,6 +117,12 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
                         }
                         continue;
                     }
+                    else if (lineFormat.equalsIgnoreCase("%permission%")) {
+                        if (!product.hasAccess(player)) {
+                            lore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_NO_PERMISSION.get());
+                        }
+                        continue;
+                    }
                     for (StockType stockType : StockType.values()) {
                         for (TradeType tradeType : TradeType.values()) {
                             if (lineFormat.equalsIgnoreCase("%stock_" + stockType.name() + "_" + tradeType.name() + "%")) {
@@ -144,6 +151,11 @@ public class VirtualShopView extends ShopView<VirtualShop, VirtualProduct> {
             menuItem.setClick((viewer2, e) -> {
                 ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(e.getClick());
                 if (clickType == null) return;
+
+                if (!product.hasAccess(player)) {
+                    this.plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
+                    return;
+                }
 
                 product.prepareTrade(viewer2.getPlayer(), clickType);
             });

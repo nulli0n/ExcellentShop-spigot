@@ -2,7 +2,9 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.GameMode;
 import su.nexmedia.engine.api.config.JOption;
+import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
@@ -10,7 +12,7 @@ import su.nightexpress.nexshop.currency.CurrencyManager;
 
 import java.util.*;
 
-public class VirtualConfig {
+public class VirtualConfig implements LangColors {
 
     public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency", CurrencyManager.VAULT,
         "Sets default currency for the Virtual Shop module.",
@@ -23,11 +25,30 @@ public class VirtualConfig {
     public static final JOption<String> SHOP_SHORTCUTS = JOption.create("General.Shop_Shortcuts", "shop",
         "A list of command aliases for quick access to main menu and shops.", "Split them with a comma.");
 
-    public static final JOption<Boolean> SELL_MENU_ENABLED = JOption.create("General.Sell_Menu.Enabled", true,
+    public static final JOption<PlayerRankMap<Double>> SELL_RANK_MULTIPLIERS = new JOption<PlayerRankMap<Double>>("General.Sell_Multipliers",
+        (cfg, path, def) -> PlayerRankMap.read(cfg, path, Double.class),
+        () -> new PlayerRankMap<>(Map.of(
+            "vip", 1.25,
+            "premium", 1.50,
+            "gold", 2.0
+        )),
+        "Here you can define Sell Multipliers for certain ranks.",
+        "If you want to use permission based system instead of rank based, you can use '" + VirtualPerms.PREFIX_SELL_MULTIPLIER + "[name]' permission pattern.",
+        "(make sure to use names different from your permission ranks then)",
+        "Formula: 'sellPrice * sellMultiplier'. So, 1.0 = 100% (no changes), 1.5 = +50%, 0.75 = -25%, etc."
+    ).mapReader(rm -> rm.setCheckAsPermission(VirtualPerms.PREFIX_SELL_MULTIPLIER)).setWriter((cfg, path, rankMap) -> rankMap.write(cfg, path));
+
+    public static final JOption<Boolean> SELL_MENU_ENABLED = JOption.create("General.Sell_Menu.Enabled",
+        true,
         "When 'true' enables the Sell Menu, where you can quickly sell all your items.");
 
-    public static final JOption<String>      SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands", "sellgui",
+    public static final JOption<String>      SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands",
+        "sellgui",
         "Custom command aliases to open the Sell Menu. Split them with a comma.");
+
+    public static final JOption<String>      SELL_ALL_COMMANDS = JOption.create("General.Sell_All.Commands",
+        "sellall",
+        "Custom Sell All command aliases. Split them with a comma.");
 
     public static final JOption<Set<String>> DISABLED_GAMEMODES = JOption.create("General.Disabled_In_Gamemodes",
         Set.of(GameMode.CREATIVE.name()),
@@ -40,19 +61,20 @@ public class VirtualConfig {
 
     public static final JOption<String>       SHOP_FORMAT_NAME = JOption.create("GUI.Shop_Format.Name", Placeholders.SHOP_NAME,
         "Sets display name for the shop item in the Main Menu.",
-        "You can use 'Shop' placeholders here:" + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Shop' placeholders:" + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> SHOP_FORMAT_LORE = JOption.create("GUI.Shop_Format.Lore",
         Arrays.asList(Placeholders.SHOP_VIRTUAL_DESCRIPTION, "", "#ff9a9a[!] #d4d9d8Need Permission: #ff9a9a" + Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED),
         "Sets lore for the shop item in the Main Menu.",
-        "You can use 'Shop' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Shop' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_ALL = JOption.create("GUI.Product_Format.Lore.General.All",
         Arrays.asList(Placeholders.GENERIC_LORE, "", Placeholders.GENERIC_DISCOUNT, "",
             "&eBuy: &6" + Placeholders.PRODUCT_PRICE_BUY_FORMATTED + " &8| &eSell: &6" + Placeholders.PRODUCT_PRICE_SELL_FORMATTED,
             "", "%stock_global_buy%", "%stock_global_sell%", "%stock_player_buy%", "%stock_player_sell%", "",
+            "%permission%", "",
             "&cLeft-Click &8→ &fSelect Quantity &8← &cRight-Click",
             "&cShift-Left &8→ &fBuy &7(Quick) &fSell &8← &cShift-Right",
             "&c[F] Key &8→ &fSell All &7(" + Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED + ")"),
@@ -61,17 +83,19 @@ public class VirtualConfig {
         "Local Placeholders:",
         "- %lore% - Original lore of the product preview item.",
         "- %discount% - Discount info (if present)",
+        "- %permission% - Permission requirement info (if present)",
         "- %stock_global_buy% - Global stock info for purchase (if present)",
         "- %stock_global_sell% - Global stock info for sale (if present)",
         "- %stock_player_buy% - Player limit info for purchase (if present)",
         "- %stock_player_sell% - Player limit info for sale (if present).",
-        "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_BUY_ONLY = JOption.create("GUI.Product_Format.Lore.General.Buy_Only",
         Arrays.asList(Placeholders.GENERIC_LORE, "", Placeholders.GENERIC_DISCOUNT, "",
             "&eBuy: &6" + Placeholders.PRODUCT_PRICE_BUY_FORMATTED,
             "", "%stock_global_buy%", "%stock_player_buy%", "",
+            "%permission%", "",
             "&cLeft-Click &8→ &fSelect Quantity",
             "&cShift-Left &8→ &fQuick Buy"),
         "Sets lore for the product preview item in Virtual Shop GUI.",
@@ -79,15 +103,17 @@ public class VirtualConfig {
         "Local Placeholders:",
         "- %lore% - Original lore of the product preview item.",
         "- %discount% - Discount info (if present)",
+        "- %permission% - Permission requirement info (if present)",
         "- %stock_global_buy% - Global stock info for purchase (if present)",
         "- %stock_player_buy% - Player limit info for purchase (if present).",
-        "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_SELL_ONLY = JOption.create("GUI.Product_Format.Lore.General.Sell_Only",
         Arrays.asList(Placeholders.GENERIC_LORE, "", "%discount%", "",
             "&eSell: &6" + Placeholders.PRODUCT_PRICE_SELL_FORMATTED,
             "", "%stock_global_sell%", "%stock_player_sell%", "",
+            "%permission%", "",
             "&cLeft-Click &8→ &fSelect Quantity",
             "&cShift-Left &8→ &fQuick Sell",
             "&c[F] Key &8→ &fSell All &7(" + Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED + ")"),
@@ -95,15 +121,22 @@ public class VirtualConfig {
         "This lore will be used when only Sell price is available.",
         "Local Placeholders:",
         "- %lore% - Original lore of the product preview item.",
+        "- %permission% - Permission requirement info (if present)",
         "- %stock_global_sell% - Global stock info for sale (if present)",
         "- %stock_player_sell% - Player limit info for sale (if present).",
-        "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = JOption.create("GUI.Product_Format.Lore.Discount",
         Collections.singletonList("&c&l[!] #C70039&lSALE &e&l" + Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%#C70039&l OFF &c&l[!]"),
         "Sets the discount display format when there is active discounts in the shop applicable to a product.",
-        "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
+    ).mapReader(Colorizer::apply);
+
+    public static final JOption<List<String>> PRODUCT_FORMAT_LORE_NO_PERMISSION = JOption.create("GUI.Product_Format.Lore.NoPermission",
+        Collections.singletonList(RED + "[!] " + GRAY + "You don't have " + RED + "permission" + GRAY + " to this item!"),
+        "Text to display in item lore when player has no permission to product.",
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<Map<StockType, Map<TradeType, List<String>>>> PRODUCT_FORMAT_LORE_STOCK = new JOption<Map<StockType, Map<TradeType, List<String>>>>("GUI.Product_Format.Lore.Stock",
@@ -127,7 +160,7 @@ public class VirtualConfig {
     },
         "Sets the stock display format for each Stock and Trade types.",
         "If product stock settings is undefined, format will be skipped.",
-        "You can use 'Product' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).setWriter((cfg, path, map) -> {
         map.forEach((stockType, map1) -> {
             map1.forEach(((tradeType, lore) -> {

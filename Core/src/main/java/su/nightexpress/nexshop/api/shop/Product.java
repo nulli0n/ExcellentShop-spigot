@@ -61,12 +61,22 @@ public abstract class Product<
 
     @NotNull
     public PlaceholderMap getPlaceholders(@NotNull Player player) {
-        PlaceholderMap placeholderMap = new PlaceholderMap(this.getPlaceholders());
+        PlaceholderMap placeholderMap = new PlaceholderMap();
         placeholderMap.getKeys().addAll(this.getStock().getPlaceholders(player).getKeys());
         placeholderMap
-            .add(Placeholders.PRODUCT_PRICE_SELL_ALL, () -> NumberUtil.format(this.getPricer().getPriceSell()))
+            .add(Placeholders.PRODUCT_PRICE_TYPE, () -> getShop().plugin().getLangManager().getEnum(this.getPricer().getType()))
+            .add(Placeholders.PRODUCT_DISCOUNT_ALLOWED, () -> LangManager.getBoolean(this.isDiscountAllowed()))
+            .add(Placeholders.PRODUCT_PREVIEW_NAME, () -> ItemUtil.getItemName(this.getPreview()))
+            .add(Placeholders.PRODUCT_PREVIEW_LORE, () -> String.join("\n", ItemUtil.getLore(this.getPreview())))
+            .add(Placeholders.PRODUCT_DISCOUNT_AMOUNT, () -> NumberUtil.format(this.getShop().getDiscountPlain(this)))
+            .add(Placeholders.PRODUCT_CURRENCY, () -> this.getCurrency().getName())
+            .add(Placeholders.PRODUCT_PRICE_BUY, () -> NumberUtil.format(this.getPricer().getPriceBuy(player)))
+            .add(Placeholders.PRODUCT_PRICE_BUY_FORMATTED, () -> this.getPricer().getPriceBuy(player) >= 0 ? getCurrency().format(this.getPricer().getPriceBuy(player)) : "-")
+            .add(Placeholders.PRODUCT_PRICE_SELL, () -> NumberUtil.format(this.getPricer().getPriceSell(player)))
+            .add(Placeholders.PRODUCT_PRICE_SELL_FORMATTED, () -> this.getPricer().getPriceSell(player) >= 0 ? getCurrency().format(this.getPricer().getPriceSell(player)) : "-")
+            .add(Placeholders.PRODUCT_PRICE_SELL_ALL, () -> NumberUtil.format(this.getPricer().getPriceSellAll(player)))
             .add(Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED, () -> {
-                return this.getPricer().getPriceSell() >= 0 ? this.getCurrency().format(this.getPricer().getPriceSellAll(player)) : "-";
+                return this.getPricer().getPriceSellAll(player) >= 0 ? this.getCurrency().format(this.getPricer().getPriceSellAll(player)) : "-";
             })
         ;
         return placeholderMap;
@@ -120,9 +130,9 @@ public abstract class Product<
         }
 
         boolean isSellAll = (click == ShopClickAction.SELL_ALL);
-        PreparedProduct<P> prepared = this.getPrepared(tradeType, isSellAll);
+        PreparedProduct<P> prepared = this.getPrepared(player, tradeType, isSellAll);
         if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
-            prepared.trade(player);
+            prepared.trade();
 
             MenuViewer viewer = shop.getView().getViewer(player);
             if (viewer != null) {
@@ -170,7 +180,7 @@ public abstract class Product<
     }
 
     @NotNull
-    public abstract PreparedProduct<P> getPrepared(@NotNull TradeType buyType, boolean all);
+    public abstract PreparedProduct<P> getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
     public abstract boolean hasSpace(@NotNull Player player);
 

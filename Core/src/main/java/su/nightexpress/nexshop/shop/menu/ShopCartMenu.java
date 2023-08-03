@@ -54,7 +54,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         this.registerHandler(ButtonType.class)
             .addClick(ButtonType.CONFIRM, (viewer, event) -> {
                 this.getPrepared(viewer).ifPresent(prepared -> {
-                    prepared.trade(viewer.getPlayer());
+                    prepared.trade();
                     this.plugin.runTask(task -> {
                         int page = 1;
                         if (prepared.getProduct() instanceof VirtualProduct virtualProduct) {

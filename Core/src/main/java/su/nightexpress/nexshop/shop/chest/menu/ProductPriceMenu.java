@@ -53,8 +53,8 @@ public class ProductPriceMenu extends PlayerEditorMenu {
             .addClick(Type.PRODUCT_CHANGE_PRICE_TYPE, (viewer, event) -> {
                 Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PRICE_TYPE + priceType.name().toLowerCase());
 
-                double sell = product.getPricer().getPricePlain(TradeType.SELL);
-                double buy = product.getPricer().getPricePlain(TradeType.BUY);
+                double sell = product.getPricer().getPrice(TradeType.SELL);
+                double buy = product.getPricer().getPrice(TradeType.BUY);
 
                 PriceType priceType = CollectionsUtil.next(product.getPricer().getType(), predicate);
                 product.setPricer(ProductPricer.from(priceType));

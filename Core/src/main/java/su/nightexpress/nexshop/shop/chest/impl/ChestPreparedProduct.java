@@ -15,13 +15,14 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 
 public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
-    public ChestPreparedProduct(@NotNull ChestProduct product, @NotNull TradeType tradeType, boolean all) {
-        super(product, tradeType, all);
+    public ChestPreparedProduct(@NotNull Player player, @NotNull ChestProduct product, @NotNull TradeType tradeType, boolean all) {
+        super(player, product, tradeType, all);
     }
 
     @Override
     @NotNull
-    protected TransactionResult buy(@NotNull Player player) {
+    protected TransactionResult buy() {
+        Player player = this.getPlayer();
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
@@ -81,7 +82,8 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
 
     @Override
     @NotNull
-    protected TransactionResult sell(@NotNull Player player) {
+    protected TransactionResult sell() {
+        Player player = this.getPlayer();
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
