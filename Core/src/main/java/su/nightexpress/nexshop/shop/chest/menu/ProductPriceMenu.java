@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class ProductPriceMenu extends PlayerEditorMenu {
+public class ProductPriceMenu extends ConfigEditorMenu {
 
     private final ChestProduct product;
     private final Map<TradeType, Map<PriceType, List<String>>> formatLorePrice;

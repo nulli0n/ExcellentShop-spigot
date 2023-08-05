@@ -15,7 +15,7 @@ import java.util.List;
 public class ListCommand extends ModuleCommand<ChestShopModule> {
 
     public ListCommand(@NotNull ChestShopModule module) {
-        super(module, new String[]{"list", "browse"}, ChestPerms.COMMAND_LIST);
+        super(module, new String[]{"list"}, ChestPerms.COMMAND_LIST);
         this.setDescription(plugin.getMessage(ChestLang.COMMAND_LIST_DESC));
         this.setPlayerOnly(true);
     }
@@ -33,10 +33,19 @@ public class ListCommand extends ModuleCommand<ChestShopModule> {
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
         if (result.length() >= 2) {
-            this.module.getListMenu().open(player, result.getArg(1), 1);
+            this.plugin.getUserManager().getUserDataAsync(result.getArg(1)).thenAccept(user -> {
+                if (user == null) {
+                    this.errorPlayer(sender);
+                    return;
+                }
+
+                this.plugin.runTask(task -> {
+                    this.module.getListMenu().open(player, user.getId(), 1);
+                });
+            });
+            return;
         }
-        else {
-            this.module.getListMenu().open(player, 1);
-        }
+
+        this.module.getListMenu().open(player, 1);
     }
 }

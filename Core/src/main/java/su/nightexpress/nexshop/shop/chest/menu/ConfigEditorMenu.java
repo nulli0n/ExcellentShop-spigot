@@ -11,9 +11,9 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nightexpress.nexshop.ExcellentShop;
 
-public class PlayerEditorMenu extends ConfigMenu<ExcellentShop> {
+public class ConfigEditorMenu extends ConfigMenu<ExcellentShop> {
 
-    public PlayerEditorMenu(@NotNull ExcellentShop plugin, @NotNull JYML cfg) {
+    public ConfigEditorMenu(@NotNull ExcellentShop plugin, @NotNull JYML cfg) {
         super(plugin, cfg);
     }
 

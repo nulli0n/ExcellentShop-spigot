@@ -1,10 +1,8 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.AutoPaged;
@@ -25,6 +23,8 @@ import java.util.*;
 
 public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestProduct> {
 
+    public static final String FILE = "shops_search.yml";
+
     private final ChestShopModule                module;
     private final Map<Player, List<ChestProduct>> searchCache;
 
@@ -33,7 +33,7 @@ public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPag
     private final List<String> productLore;
 
     public ShopSearchMenu(@NotNull ChestShopModule module) {
-        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shops_search.yml"));
+        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getMenusPath(), FILE));
         this.module = module;
         this.searchCache = new WeakHashMap<>();
 
@@ -55,11 +55,19 @@ public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPag
         this.getItemsForPage(viewer).forEach(this::addItem);
     }
 
-    public void open(@NotNull Player player, @NotNull Material material) {
+    public void open(@NotNull Player player, @NotNull String input) {
+        String input2 = input.toLowerCase();
+
         List<ChestProduct> products = new ArrayList<>();
         this.module.getShops().forEach(shop -> {
-            products.addAll(shop.getProducts().stream().filter(product -> product.getItem().getType() == material).toList());
+            products.addAll(shop.getProducts().stream().filter(product -> {
+                ItemStack item = product.getItem();
+                if (item.getType().name().toLowerCase().contains(input2)) return true;
+
+                return ItemUtil.getItemName(item).toLowerCase().contains(input);
+            }).toList());
         });
+
         this.searchCache.put(player, products);
         this.open(player, 1);
     }
@@ -85,15 +93,13 @@ public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPag
     @NotNull
     public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
         ItemStack item = new ItemStack(product.getItem());
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return item;
-
-        meta.setDisplayName(this.productName);
-        meta.setLore(this.productLore);
-        item.setItemMeta(meta);
-
-        ItemUtil.replace(item, product.replacePlaceholders());
-        ItemUtil.replace(item, product.getShop().replacePlaceholders());
+        ItemUtil.mapMeta(item, meta -> {
+            meta.setDisplayName(this.productName);
+            meta.setLore(this.productLore);
+            item.setItemMeta(meta);
+            ItemUtil.replace(meta, product.replacePlaceholders());
+            ItemUtil.replace(meta, product.getShop().replacePlaceholders());
+        });
         return item;
     }
 

@@ -28,7 +28,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class ShopProductsMenu extends PlayerEditorMenu {
+public class ShopProductsMenu extends ConfigEditorMenu {
 
     private final ChestShop shop;
 

@@ -32,6 +32,7 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
 import su.nightexpress.nexshop.shop.chest.menu.BankMenu;
+import su.nightexpress.nexshop.shop.chest.menu.ShopBrowseMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopListMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSearchMenu;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
@@ -52,10 +53,12 @@ public class ChestShopModule extends ShopModule {
 
     public static final String ID = "chest_shop";
     public static final String DIR_SHOPS = "/shops/";
+    public static final String DIR_MENUS = "/menu/";
 
     private final Map<UUID, ChestPlayerBank> bankMap;
     private final ShopMap shopMap;
 
+    private ShopBrowseMenu browseMenu;
     private ShopListMenu   listMenu;
     private ShopSearchMenu searchMenu;
     private BankMenu       bankMenu;
@@ -69,6 +72,16 @@ public class ChestShopModule extends ShopModule {
         super(plugin, ID);
         this.shopMap = new ShopMap();
         this.bankMap = new ConcurrentHashMap<>();
+    }
+
+    @NotNull
+    public String getShopsPath() {
+        return this.getLocalPath() + DIR_SHOPS;
+    }
+
+    @NotNull
+    public String getMenusPath() {
+        return this.getLocalPath() + DIR_MENUS;
     }
 
     @Override
@@ -115,6 +128,7 @@ public class ChestShopModule extends ShopModule {
 
         this.addListener(new ShopListener(this));
 
+        this.browseMenu = new ShopBrowseMenu(this);
         this.listMenu = new ShopListMenu(this);
         this.searchMenu = new ShopSearchMenu(this);
         this.bankMenu = new BankMenu(this);
@@ -122,7 +136,7 @@ public class ChestShopModule extends ShopModule {
         this.command.addChildren(new CreateCommand(this));
         this.command.addChildren(new RemoveCommand(this));
         this.command.addChildren(new ListCommand(this));
-        this.command.addChildren(new SearchCommand(this));
+        this.command.addChildren(new BrowseCommand(this));
         this.command.addChildren(new OpenCommand(this));
         if (!ChestConfig.SHOP_AUTO_BANK.get()) {
             this.command.addChildren(new BankCommand(this));
@@ -185,6 +199,7 @@ public class ChestShopModule extends ShopModule {
         super.onShutdown();
 
         if (this.listMenu != null) this.listMenu.clear();
+        if (this.browseMenu != null) this.browseMenu.clear();
         if (this.searchMenu != null) this.searchMenu.clear();
         if (this.bankMenu != null) this.bankMenu.clear();
 
@@ -250,6 +265,11 @@ public class ChestShopModule extends ShopModule {
     @NotNull
     public ChestNMS getNMS() {
         return chestNMS;
+    }
+
+    @NotNull
+    public ShopBrowseMenu getBrowseMenu() {
+        return browseMenu;
     }
 
     @NotNull
@@ -445,7 +465,12 @@ public class ChestShopModule extends ShopModule {
 
     @NotNull
     public Set<ChestShop> getShops(@NotNull Player player) {
-        return this.getShopMap().get(player.getUniqueId());
+        return this.getShops(player.getUniqueId());
+    }
+
+    @NotNull
+    public Set<ChestShop> getShops(@NotNull UUID ownerId) {
+        return this.getShopMap().get(ownerId);
     }
 
     public int getShopsAmount(@NotNull Player player) {

@@ -15,7 +15,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
-public class ShopSettingsMenu extends PlayerEditorMenu {
+public class ShopSettingsMenu extends ConfigEditorMenu {
 
     private final ChestShop shop;
 

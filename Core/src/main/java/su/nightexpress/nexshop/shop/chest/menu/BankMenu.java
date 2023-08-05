@@ -24,7 +24,7 @@ import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 
 import java.util.*;
 
-public class BankMenu extends PlayerEditorMenu implements AutoPaged<Currency> {
+public class BankMenu extends ConfigEditorMenu implements AutoPaged<Currency> {
 
     private static final String PLACEHOLDER_BANK_BALANCE = "%bank_balance%";
     private static final String PLACEHOLDER_PLAYER_BALANCE = "%player_balance%";

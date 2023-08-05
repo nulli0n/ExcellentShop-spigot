@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -41,6 +42,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     private final ChestShopModule module;
 
     private Location location;
+    private Material blockType;
     private int      chunkX;
     private int      chunkZ;
     private boolean doubleChest;
@@ -221,7 +223,6 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         return (Container) this.getLocation().getBlock().getState();
     }
 
-    @Deprecated
     public boolean isDoubleChest() {
         return this.doubleChest;
     }
@@ -270,6 +271,11 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     @NotNull
+    public Material getBlockType() {
+        return blockType;
+    }
+
+    @NotNull
     public Location getLocation() {
         return this.location;
     }
@@ -278,6 +284,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         this.location = location.clone();
         this.chunkX = location.getBlockX() >> 4;
         this.chunkZ = location.getBlockZ() >> 4;
+        this.blockType = location.getBlock().getType();
     }
 
     public int getChunkX() {

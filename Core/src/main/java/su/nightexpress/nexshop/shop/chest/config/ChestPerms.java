@@ -23,7 +23,7 @@ public class ChestPerms {
     public static final JPermission REMOVE_OTHERS   = new JPermission(PREFIX + "remove.others");
 
     public static final JPermission COMMAND_LIST        = new JPermission(PREFIX_COMMAND + "list");
-    public static final JPermission COMMAND_SEARCH      = new JPermission(PREFIX_COMMAND + "search");
+    public static final JPermission COMMAND_BROWSE      = new JPermission(PREFIX_COMMAND + "browse");
     public static final JPermission COMMAND_OPEN        = new JPermission(PREFIX_COMMAND + "open");
     public static final JPermission COMMAND_BANK        = new JPermission(PREFIX_COMMAND + "bank");
     public static final JPermission COMMAND_BANK_OTHERS = new JPermission(PREFIX_COMMAND + "bank.others");
@@ -38,7 +38,7 @@ public class ChestPerms {
 
         COMMAND.addChildren(
             COMMAND_OPEN,
-            COMMAND_LIST, COMMAND_SEARCH, COMMAND_BANK, COMMAND_BANK_OTHERS
+            COMMAND_LIST, COMMAND_BROWSE, COMMAND_BANK, COMMAND_BANK_OTHERS
         );
     }
 }
