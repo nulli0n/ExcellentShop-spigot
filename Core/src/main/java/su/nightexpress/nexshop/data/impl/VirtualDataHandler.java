@@ -1,6 +1,8 @@
 package su.nightexpress.nexshop.data.impl;
 
+import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.data.sql.SQLColumn;
 import su.nexmedia.engine.api.data.sql.SQLCondition;
 import su.nexmedia.engine.api.data.sql.SQLQueries;
@@ -12,9 +14,12 @@ import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.data.price.ProductPriceData;
+import su.nightexpress.nexshop.data.rotation.ShopRotationData;
 import su.nightexpress.nexshop.data.stock.ProductStockData;
 import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 public class VirtualDataHandler {
@@ -39,18 +45,22 @@ public class VirtualDataHandler {
     private static final SQLColumn COLUMN_PRICE_LAST_UPDATED = SQLColumn.of("lastUpdated", ColumnType.LONG);
     private static final SQLColumn COLUMN_PRICE_PURCHASES    = SQLColumn.of("purchases", ColumnType.INTEGER);
     private static final SQLColumn COLUMN_PRICE_SALES        = SQLColumn.of("sales", ColumnType.INTEGER);
+    private static final SQLColumn COLUMN_ROTATE_PRODUCTS    = SQLColumn.of("products", ColumnType.STRING);
 
     private final DataHandler dataHandler;
     private final String      tableStockData;
     private final String      tablePriceData;
+    private final String      tableRotationData;
 
     private final Function<ResultSet, ProductStockData> funcStockData;
     private final Function<ResultSet, ProductPriceData> funcPriceData;
+    private final Function<ResultSet, ShopRotationData> funcRotateData;
 
     public VirtualDataHandler(@NotNull DataHandler dataHandler) {
         this.dataHandler = dataHandler;
         this.tableStockData = dataHandler.getTablePrefix() + "_stock_data";
         this.tablePriceData = dataHandler.getTablePrefix() + "_price_data";
+        this.tableRotationData = dataHandler.getTablePrefix() + "_rotation_data";
 
         this.funcStockData = resultSet -> {
             try {
@@ -90,6 +100,20 @@ public class VirtualDataHandler {
                 return null;
             }
         };
+
+        this.funcRotateData = resultSet -> {
+            try {
+                String shopId = resultSet.getString(COLUMN_GEN_SHOP_ID.getName());
+                long lastRotated = resultSet.getLong(COLUMN_PRICE_LAST_UPDATED.getName());
+                Set<String> products = dataHandler.gson().fromJson(resultSet.getString(COLUMN_ROTATE_PRODUCTS.getName()), new TypeToken<Set<String>>(){}.getType());
+
+                return new ShopRotationData(shopId, lastRotated, products);
+            }
+            catch (SQLException e) {
+                e.printStackTrace();
+                return null;
+            }
+        };
     }
 
     public void load() {
@@ -102,6 +126,10 @@ public class VirtualDataHandler {
             COLUMN_GEN_SHOP_ID, COLUMN_GEN_PRODUCT_ID,
             COLUMN_PRICE_LAST_BUY, COLUMN_PRICE_LAST_SELL, COLUMN_PRICE_LAST_UPDATED,
             COLUMN_PRICE_PURCHASES, COLUMN_PRICE_SALES
+        ));
+
+        this.dataHandler.createTable(this.tableRotationData, Arrays.asList(
+            COLUMN_GEN_SHOP_ID, COLUMN_PRICE_LAST_UPDATED, COLUMN_ROTATE_PRODUCTS
         ));
     }
 
@@ -117,6 +145,10 @@ public class VirtualDataHandler {
             String sql = "DELETE FROM " + this.tablePriceData + " WHERE " + COLUMN_PRICE_LAST_UPDATED.getName() + " < " + deadlineMs;
             SQLQueries.executeStatement(dataHandler.getConnector(), sql);
         }
+        if (SQLQueries.hasTable(dataHandler.getConnector(), this.tableRotationData)) {
+            String sql = "DELETE FROM " + this.tableRotationData + " WHERE " + COLUMN_PRICE_LAST_UPDATED.getName() + " < " + deadlineMs;
+            SQLQueries.executeStatement(dataHandler.getConnector(), sql);
+        }
     }
 
     public void synchronize() {
@@ -124,6 +156,7 @@ public class VirtualDataHandler {
         if (module != null) {
             module.updateShopPricesStocks();
         }
+        // TODO Rotation data
         this.dataHandler.plugin().getUserManager().getUsersLoaded().forEach(ProductStockStorage::loadData);
     }
 
@@ -141,6 +174,14 @@ public class VirtualDataHandler {
             Collections.emptyList(),
             Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))), -1
         );
+    }
+
+    @Nullable
+    public ShopRotationData getShopRotationData(@NotNull String shopId) {
+        return this.dataHandler.load(this.tableRotationData, this.funcRotateData,
+            Collections.emptyList(),
+            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId)))
+        ).orElse(null);
     }
 
     public void createProductStockData(@NotNull String holder, @NotNull ProductStockData stockData) {
@@ -164,6 +205,14 @@ public class VirtualDataHandler {
             COLUMN_PRICE_LAST_UPDATED.toValue(String.valueOf(priceData.getLastUpdated())),
             COLUMN_PRICE_PURCHASES.toValue(String.valueOf(priceData.getPurchases())),
             COLUMN_PRICE_SALES.toValue(String.valueOf(priceData.getSales()))
+        ));
+    }
+
+    public void createShopRotationData(@NotNull ShopRotationData rotationData) {
+        this.dataHandler.insert(this.tableRotationData, Arrays.asList(
+            COLUMN_GEN_SHOP_ID.toValue(rotationData.getShopId()),
+            COLUMN_PRICE_LAST_UPDATED.toValue(rotationData.getLatestRotation()),
+            COLUMN_ROTATE_PRODUCTS.toValue(dataHandler.gson().toJson(rotationData.getProducts()))
         ));
     }
 
@@ -193,6 +242,15 @@ public class VirtualDataHandler {
         );
     }
 
+    public void saveShopRotationData(@NotNull ShopRotationData rotationData) {
+        this.dataHandler.update(this.tableRotationData, Arrays.asList(
+            COLUMN_PRICE_LAST_UPDATED.toValue(rotationData.getLatestRotation()),
+            COLUMN_ROTATE_PRODUCTS.toValue(dataHandler.gson().toJson(rotationData.getProducts()))
+            ),
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(rotationData.getShopId()))
+        );
+    }
+
     public void removeProductStockData(@NotNull String holder, @NotNull Product<?, ?, ?> product,
                                        @NotNull StockType stockType, @NotNull TradeType tradeType) {
 
@@ -205,10 +263,24 @@ public class VirtualDataHandler {
         );
     }
 
+    public void removeProductStockData(@NotNull VirtualProduct<?, ?> product) {
+
+        this.dataHandler.delete(this.tableStockData,
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
+            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId()))
+        );
+    }
+
     public void removeProductPriceData(@NotNull Product<?, ?, ?> product) {
         this.dataHandler.delete(this.tablePriceData,
             SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
             SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId()))
+        );
+    }
+
+    public void removeShopRotationData(@NotNull VirtualShop<?, ?> shop) {
+        this.dataHandler.delete(this.tableRotationData,
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shop.getId()))
         );
     }
 }

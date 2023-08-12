@@ -65,7 +65,7 @@ public class VirtualConfig implements LangColors {
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> SHOP_FORMAT_LORE = JOption.create("GUI.Shop_Format.Lore",
-        Arrays.asList(Placeholders.SHOP_VIRTUAL_DESCRIPTION, "", "#ff9a9a[!] #d4d9d8Need Permission: #ff9a9a" + Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED),
+        Arrays.asList(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_DESCRIPTION, "", "#ff9a9a[!] #d4d9d8Need Permission: #ff9a9a" + su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_PERMISSION_REQUIRED),
         "Sets lore for the shop item in the Main Menu.",
         "You can use 'Shop' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);

@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.Menu;
@@ -21,33 +22,33 @@ import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualCommandProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualItemProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProductStock;
+import su.nightexpress.nexshop.shop.virtual.impl.product.*;
+import su.nightexpress.nexshop.shop.virtual.impl.product.specific.CommandSpecific;
+import su.nightexpress.nexshop.shop.virtual.impl.product.specific.ItemSpecific;
+import su.nightexpress.nexshop.shop.virtual.impl.product.specific.ProductSpecific;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShopType;
 import su.nightexpress.nexshop.shop.virtual.util.ShopUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
+public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>> {
 
-    private static final Map<String, VirtualProduct> PRODUCT_CACHE = new HashMap<>();
+    private static final Map<String, StaticProduct> PRODUCT_CACHE = new HashMap<>();
 
     private final NamespacedKey keyProductCache;
 
-    public ProductListEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
-        super(shop.plugin(), shop, shop.getName(), 54);
+    public ProductListEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop<?, ?> shop) {
+        super(shop.plugin(), shop, shop.getName() + ": Products Editor", 54);
         this.keyProductCache = new NamespacedKey(plugin, "product_cache");
     }
 
     @NotNull
-    private ItemStack cacheProduct(@NotNull VirtualProduct product) {
+    private ItemStack cacheProduct(@NotNull StaticProduct product) {
         String pId = UUID.randomUUID().toString();
         PRODUCT_CACHE.put(pId, product);
 
@@ -57,7 +58,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     }
 
     @Nullable
-    private VirtualProduct getCachedProduct(@NotNull ItemStack stack) {
+    private StaticProduct getCachedProduct(@NotNull ItemStack stack) {
         String pId = PDCUtil.getString(stack, this.keyProductCache).orElse(null);
         if (pId == null) return null;
 
@@ -78,11 +79,19 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
         options.setTitle(this.object.getView().getOptions().getTitle());
         options.setSize(this.object.getView().getOptions().getSize());
 
-        VirtualShop shop = this.object;
-        Set<Integer> freeSlots = IntStream.range(0, options.getSize()).boxed().collect(Collectors.toSet());
+        VirtualShop<?, ?> shop = this.object;
+        Set<Integer> freeSlots;
 
         int page = viewer.getPage();
-        viewer.setPages(shop.getPages());
+        if (shop instanceof StaticShop staticShop) {
+            viewer.setPages(staticShop.getPages());
+            freeSlots = IntStream.range(0, options.getSize()).boxed().collect(Collectors.toSet());
+        }
+        else if (shop instanceof RotatingShop rotatingShop) {
+            viewer.setPages(100);
+            freeSlots = IntStream.of(rotatingShop.getProductSlots()).boxed().collect(Collectors.toSet());
+        }
+        else return;
 
         for (MenuItem item : shop.getView().getItems()) {
             if (item.getPriority() < 0) continue;
@@ -107,20 +116,39 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             IntStream.of(clone.getSlots()).forEach(freeSlots::remove);
         }
 
-        for (VirtualProduct product : shop.getProducts()) {
-            if (product.getPage() != page) continue;
+        Collection<? extends VirtualProduct<?, ?>> products = shop.getProducts();
+        if (shop instanceof RotatingShop rotatingShop) {
+            int limit = rotatingShop.getProductSlots().length;
+            products = products.stream().skip((long) (page - 1) * limit).limit(limit).collect(Collectors.toSet());
+        }
+
+        int index = 0;
+        for (VirtualProduct<?, ?> product : products) {
+            int slot;
+            if (product instanceof StaticProduct staticProduct) {
+                if (staticProduct.getPage() != page) continue;
+                slot = staticProduct.getSlot();
+            }
+            else if (product instanceof RotatingProduct rotatingProduct) {
+                slot = rotatingProduct.getShop().getProductSlots()[index++];
+            }
+            else continue;
 
             ItemStack productIcon = new ItemStack(product.getPreview());
             ItemUtil.mapMeta(productIcon, meta -> {
-                meta.setDisplayName(VirtualLocales.PRODUCT_OBJECT.getLocalizedName());
-                meta.setLore(VirtualLocales.PRODUCT_OBJECT.getLocalizedLore());
+                EditorLocale locale = shop.getType() == VirtualShopType.STATIC ? VirtualLocales.PRODUCT_OBJECT : VirtualLocales.ROTATING_PRODUCT_OBJECT;
+
+                meta.setDisplayName(locale.getLocalizedName());
+                meta.setLore(locale.getLocalizedLore());
                 meta.addItemFlags(ItemFlag.values());
                 ItemUtil.replace(meta, product.replacePlaceholders());
             });
 
+
+
             MenuItem productItem = new MenuItem(productIcon);
             productItem.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
-            productItem.setSlots(product.getSlot());
+            productItem.setSlots(slot);
             productItem.setPriority(200);
             productItem.setClick((viewer2, event) -> {
                 if (!event.isLeftClick() && !event.isRightClick()) return;
@@ -130,37 +158,40 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
                         product.getEditor().open(viewer2.getPlayer(), 1);
                     }
                     else if (event.isRightClick()) {
-                        shop.removeProduct(product);
+                        shop.removeProduct(product.getId());
                         shop.saveProducts();
                         this.open(viewer2.getPlayer(), page);
                     }
                     return;
                 }
 
+                // Only Static Shops should support free product movement.
+                if (!(shop instanceof StaticShop staticShop)) return;
+                if (!(product instanceof StaticProduct staticProduct)) return;
+
                 // Cache clicked product to item stack
                 // then remove it from the shop
-                ItemStack saved = this.cacheProduct(product);
-                shop.removeProduct(product);
+                ItemStack saved = this.cacheProduct(staticProduct);
+                staticShop.removeProduct(staticProduct);
 
                 // If user wants to replace a clicked product
                 // then create or load cached product from an itemstack
                 // and add it to the shop
                 ItemStack cursor = event.getCursor();
                 if (cursor != null && !cursor.getType().isAir()) {
-                    VirtualProduct cached = this.getCachedProduct(cursor);
+                    StaticProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
-                        cached = new VirtualItemProduct(cursor, ShopUtils.getDefaultCurrency());
-                        //cached.setItem(cursor);
+                        cached = new StaticProduct(new ItemSpecific(cursor), ShopUtils.getDefaultCurrency());
                         cached.setPricer(new FlatProductPricer());
-                        cached.setStock(new VirtualProductStock());
+                        cached.setStock(new VirtualProductStock<>());
                         cached.getStock().unlock();
                     }
                     cached.setSlot(event.getRawSlot());
                     cached.setPage(page);
-                    shop.addProduct(cached);
+                    staticShop.addProduct(cached);
                 }
 
-                shop.saveProducts();
+                staticShop.saveProducts();
 
                 // Set cached item to cursor so player can put it somewhere
                 event.getView().setCursor(null);
@@ -168,7 +199,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
                 viewer2.getPlayer().getOpenInventory().setCursor(saved);
             });
             this.addItem(productItem);
-            freeSlots.remove(product.getSlot());
+            freeSlots.remove(slot);
         }
 
 
@@ -181,22 +212,39 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             boolean hasCursor = cursor != null && !cursor.getType().isAir();
             //if (cursor == null || cursor.getType().isAir()) return;
 
-            VirtualProduct product = hasCursor ? this.getCachedProduct(cursor) : null;
+            VirtualProduct<?, ?> product = hasCursor ? this.getCachedProduct(cursor) : null;
             if (product == null) {
+                ProductSpecific spec;
                 if (hasCursor) {
-                    product = new VirtualItemProduct(cursor, ShopUtils.getDefaultCurrency());
+                    spec = new ItemSpecific(cursor);
                 }
                 else if (event.isRightClick()) {
-                    product = new VirtualCommandProduct(new ItemStack(Material.COMMAND_BLOCK), ShopUtils.getDefaultCurrency());
+                    spec = new CommandSpecific(new ItemStack(Material.COMMAND_BLOCK), new ArrayList<>());
                 }
                 else return;
+
+                if (shop.getType() == VirtualShopType.STATIC) {
+                    product = new StaticProduct(spec, ShopUtils.getDefaultCurrency());
+                }
+                else if (shop.getType() == VirtualShopType.ROTATING) {
+                    product = new RotatingProduct(spec, ShopUtils.getDefaultCurrency());
+                }
+                else return;
+
                 product.setPricer(new FlatProductPricer());
-                product.setStock(new VirtualProductStock());
+                product.setStock(new VirtualProductStock<>());
                 product.getStock().unlock();
             }
-            product.setSlot(event.getRawSlot());
-            product.setPage(page);
-            shop.addProduct(product);
+
+            if (shop instanceof StaticShop staticShop && product instanceof StaticProduct staticProduct) {
+                staticProduct.setSlot(event.getRawSlot());
+                staticProduct.setPage(page);
+                staticShop.addProduct(staticProduct);
+            }
+            else if (shop instanceof RotatingShop rotatingShop && product instanceof RotatingProduct rotatingProduct) {
+                rotatingShop.addProduct(rotatingProduct);
+            }
+
             shop.saveProducts();
             event.getView().setCursor(null);
             this.open(player, page);

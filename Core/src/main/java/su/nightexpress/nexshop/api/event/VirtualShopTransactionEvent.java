@@ -4,9 +4,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 
-public class VirtualShopTransactionEvent extends ShopTransactionEvent<VirtualProduct> {
+public class VirtualShopTransactionEvent extends ShopTransactionEvent<StaticProduct> {
 
     private static final HandlerList handlerList = new HandlerList();
 

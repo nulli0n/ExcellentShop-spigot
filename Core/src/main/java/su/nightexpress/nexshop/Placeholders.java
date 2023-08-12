@@ -5,7 +5,6 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String URL_WIKI               = "https://github.com/nulli0n/ExcellentShop-spigot/wiki/";
     public static final String URL_WIKI_PLACEHOLDERS  = URL_WIKI + "Internal-Placeholders";
     public static final String URL_WIKI_PRODUCT_STOCK = URL_WIKI + "Product-Stock-Feature";
-    public static final String URL_ENGINE_ITEMS       = "https://github.com/nulli0n/NexEngine-spigot/wiki/Configuration-Tips#item-sections";
 
     public static final String EDITOR_VIRTUAL_TITLE = "Virtual Shop Editor";
 
@@ -15,6 +14,7 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String GENERIC_AMOUNT   = "%amount%";
     public static final String GENERIC_UNITS    = "%units%";
     public static final String GENERIC_TYPE     = "%type%";
+    public static final String GENERIC_TIME     = "%time%";
     public static final String GENERIC_PRICE    = "%price%";
     public static final String GENERIC_BALANCE  = "%balance%";
     public static final String GENERIC_DISCOUNT = "%discount%";
@@ -24,19 +24,12 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String CURRENCY_ID   = "%currency_id%";
 
     public static final String SHOP_ID              = "%shop_id%";
+    public static final String SHOP_TYPE            = "%shop_type%";
     public static final String SHOP_NAME            = "%shop_name%";
     public static final String SHOP_BUY_ALLOWED     = "%shop_buy_allowed%";
     public static final String SHOP_SELL_ALLOWED    = "%shop_sell_allowed%";
     public static final String SHOP_DISCOUNT_AMOUNT = "%shop_discount_amount%";
     public static final String SHOP_BANK_BALANCE    = "%shop_bank_balance%";
-
-    public static final String SHOP_VIRTUAL_DESCRIPTION         = "%shop_description%";
-    public static final String SHOP_VIRTUAL_PERMISSION_REQUIRED = "%shop_permission_required%";
-    public static final String SHOP_VIRTUAL_PERMISSION_NODE     = "%shop_permission_node%";
-    public static final String SHOP_VIRTUAL_PAGES               = "%shop_pages%";
-    public static final String SHOP_VIRTUAL_VIEW_SIZE           = "%shop_view_size%";
-    public static final String SHOP_VIRTUAL_VIEW_TITLE          = "%shop_view_title%";
-    public static final String SHOP_VIRTUAL_NPC_IDS             = "%shop_npc_ids%";
 
     public static final String SHOP_CHEST_OWNER          = "%shop_owner%";
     public static final String SHOP_CHEST_LOCATION_X     = "%shop_location_x%";
@@ -72,8 +65,6 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String PRODUCT_PREVIEW_LORE      = "%product_preview_lore%";
     public static final String PRODUCT_CURRENCY          = "%product_currency%";
 
-    public static final String PRODUCT_VIRTUAL_COMMANDS                 = "%product_commands%";
-    public static final String PRODUCT_VIRTUAL_ALLOWED_RANKS            = "%product_allowed_ranks%";
     public static final String PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_INITIAL  = "%product_stock_global_buy_amount_initial%";
     public static final String PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT     = "%product_stock_global_buy_amount_left%";
     public static final String PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_TIME    = "%product_stock_global_buy_restock_time%";

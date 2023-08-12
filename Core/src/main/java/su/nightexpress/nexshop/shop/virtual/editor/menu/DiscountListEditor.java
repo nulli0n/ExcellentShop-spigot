@@ -11,19 +11,18 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class DiscountListEditor extends EditorMenu<ExcellentShop, VirtualShop> implements AutoPaged<VirtualDiscount> {
+public class DiscountListEditor extends EditorMenu<ExcellentShop, StaticShop> implements AutoPaged<VirtualDiscount> {
 
-    public DiscountListEditor(@NotNull VirtualShop shop) {
-        super(shop.plugin(), shop, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
+    public DiscountListEditor(@NotNull StaticShop shop) {
+        super(shop.plugin(), shop, shop.getName() + ": Discounts Editor", 45);
 
         this.addReturn(39).setClick((viewer, event) -> {
             this.plugin.runTask(task -> shop.getEditor().open(viewer.getPlayer(), 1));

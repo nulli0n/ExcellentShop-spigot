@@ -9,12 +9,11 @@ import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -22,11 +21,11 @@ import java.time.format.DateTimeParseException;
 
 public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscount> {
 
-    public DiscountMainEditor(@NotNull VirtualShop shop, @NotNull VirtualDiscount discount) {
-        super(shop.plugin(), discount, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
+    public DiscountMainEditor(@NotNull StaticShop shop, @NotNull VirtualDiscount discount) {
+        super(shop.plugin(), discount, shop.getName() + ": Discount Editor", 45);
 
         this.addReturn(40).setClick((viewer, event) -> {
-           this.plugin.runTask(task -> discount.getShop().getEditor().getDiscountEditor().open(viewer.getPlayer(), 1));
+           this.plugin.runTask(task -> discount.getShop().getEditor().getDiscountEditor(shop).open(viewer.getPlayer(), 1));
         });
 
         this.addItem(Material.GOLD_NUGGET, VirtualLocales.DISCOUNT_AMOUNT, 10).setClick((viewer, event) -> {

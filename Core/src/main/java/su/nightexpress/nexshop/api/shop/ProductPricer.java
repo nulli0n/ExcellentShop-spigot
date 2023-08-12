@@ -12,7 +12,7 @@ import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.price.FloatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -91,7 +91,7 @@ public abstract class ProductPricer implements Placeholder {
         if (tradeType == TradeType.BUY && price > 0 && this.getProduct().isDiscountAllowed()) {
             price *= this.getProduct().getShop().getDiscountModifier();
         }
-        if (tradeType == TradeType.SELL && this.getProduct() instanceof VirtualProduct) {
+        if (tradeType == TradeType.SELL && this.getProduct() instanceof StaticProduct) {
             double sellModifier = VirtualConfig.SELL_RANK_MULTIPLIERS.get().getBestValue(player, 1D);
             price *= sellModifier;
         }

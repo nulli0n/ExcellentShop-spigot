@@ -131,7 +131,7 @@ public class ChestConfig {
         "You can provide different showcases for different shop types you set in 'Allowed_Containers' option.",
         "Showcase is basically an invisible armor stand with equipped item on the head.",
         "Feel free to use custom-modeled items and such!",
-        Placeholders.URL_ENGINE_ITEMS
+        Placeholders.WIKI_ITEMS_URL
     ).setWriter((cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + type, item)));
 
     public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled",

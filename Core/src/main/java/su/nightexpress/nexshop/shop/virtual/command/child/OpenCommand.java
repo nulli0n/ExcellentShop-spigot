@@ -55,7 +55,7 @@ public class OpenCommand extends ModuleCommand<VirtualShopModule> {
             return;
         }
 
-        VirtualShop shop = this.module.getShopById(result.getArg(1));
+        VirtualShop<?, ?> shop = this.module.getShopById(result.getArg(1));
         if (shop == null) {
             plugin.getMessage(VirtualLang.SHOP_ERROR_INVALID).send(sender);
             return;

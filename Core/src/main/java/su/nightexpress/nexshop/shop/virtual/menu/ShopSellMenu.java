@@ -20,7 +20,7 @@ import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
     private final List<String> itemLore;
     private final int[] itemSlots;
 
-    private static final Map<Player, Pair<List<ItemStack>, Set<VirtualProduct>>> USER_ITEMS = new WeakHashMap<>();
+    private static final Map<Player, Pair<List<ItemStack>, Set<StaticProduct>>> USER_ITEMS = new WeakHashMap<>();
 
     public ShopSellMenu(@NotNull VirtualShopModule module, @NotNull JYML cfg) {
         super(module.plugin(), cfg);
@@ -43,7 +43,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         this.registerHandler(ItemType.class)
             .addClick(ItemType.SELL, (viewer, e) -> {
                 Player player = viewer.getPlayer();
-                Pair<List<ItemStack>, Set<VirtualProduct>> userItems = USER_ITEMS.remove(player);
+                Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
                 if (userItems == null) return;
 
                 sellAll(player, userItems);
@@ -65,7 +65,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         if (item == null || item.getType().isAir()) return;
 
         if (slotType == SlotType.PLAYER) {
-            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            StaticProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
             if (product == null) return;
 
             int firtSlot = Arrays.stream(this.itemSlots)
@@ -97,7 +97,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
             icon.setItemMeta(meta);
             inventory.setItem(firtSlot, icon);
 
-            Pair<List<ItemStack>, Set<VirtualProduct>> pair = USER_ITEMS.computeIfAbsent(player, k -> Pair.of(new ArrayList<>(), new HashSet<>()));
+            Pair<List<ItemStack>, Set<StaticProduct>> pair = USER_ITEMS.computeIfAbsent(player, k -> Pair.of(new ArrayList<>(), new HashSet<>()));
             pair.getFirst().add(new ItemStack(item));
             pair.getSecond().add(product);
             item.setAmount(0);
@@ -109,13 +109,13 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         super.onClose(viewer, event);
 
         Player player = viewer.getPlayer();
-        Pair<List<ItemStack>, Set<VirtualProduct>> userItems = USER_ITEMS.remove(player);
+        Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
         if (userItems != null) {
             userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
         }
     }
 
-    public static void sellAll(@NotNull Player player, @NotNull Pair<List<ItemStack>, Set<VirtualProduct>> userItems) {
+    public static void sellAll(@NotNull Player player, @NotNull Pair<List<ItemStack>, Set<StaticProduct>> userItems) {
         if (userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
 
         ItemStack[] original = player.getInventory().getContents();
@@ -124,7 +124,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         List<TransactionResult> profits = new ArrayList<>();
         userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
         userItems.getSecond().forEach(product -> {
-            VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, true);
+            VirtualPreparedProduct<?> preparedProduct = product.getPrepared(player, TradeType.SELL, true);
             TransactionResult result = preparedProduct.trade();
 
             if (result.getResult() == TransactionResult.Result.SUCCESS) {

@@ -1,36 +1,36 @@
-package su.nightexpress.nexshop.shop.virtual.impl.product;
+package su.nightexpress.nexshop.shop.virtual.impl.product.specific;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-public class VirtualCommandProduct extends VirtualProduct implements CommandProduct {
+public class CommandSpecific implements ProductSpecific, CommandProduct {
 
-    private       ItemStack    preview;
+    private   ItemStack    preview;
     private final List<String> commands;
 
-    public VirtualCommandProduct(@NotNull ItemStack preview, @NotNull Currency currency) {
-        this(UUID.randomUUID().toString(), preview, new ArrayList<>(), currency);
-    }
+    private final PlaceholderMap placeholderMap;
 
-    public VirtualCommandProduct(@NotNull String id, @NotNull ItemStack preview, @NotNull List<String> commands, @NotNull Currency currency) {
-        super(id, currency);
+    public CommandSpecific(@NotNull ItemStack preview, @NotNull List<String> commands) {
         this.setPreview(preview);
         this.commands = new ArrayList<>(commands);
-        this.commands.replaceAll(cmd -> cmd.replace("[CONSOLE]", "").trim());
 
-        this.placeholderMap
-            .add(Placeholders.PRODUCT_VIRTUAL_COMMANDS, () -> String.join("\n", this.getCommands()))
-            ;
+        this.placeholderMap = new PlaceholderMap()
+            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.PRODUCT_COMMANDS, () -> String.join("\n", this.getCommands()));
+    }
+
+    @Override
+    @NotNull
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     @Override
@@ -76,10 +76,5 @@ public class VirtualCommandProduct extends VirtualProduct implements CommandProd
     @Override
     public boolean hasSpace(@NotNull Player player) {
         return true;
-    }
-
-    @Override
-    public boolean isSellable() {
-        return false;
     }
 }

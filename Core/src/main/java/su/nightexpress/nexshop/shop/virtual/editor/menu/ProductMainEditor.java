@@ -14,7 +14,6 @@ import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
@@ -23,12 +22,14 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
+import su.nightexpress.nexshop.shop.virtual.impl.product.RotatingProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct> {
+public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<?, ?>> {
 
     private static final String TEXTURE_DOLLAR = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjg4OWNmY2JhY2JlNTk4ZThhMWNkODYxMGI0OWZjYjYyNjQ0ZThjYmE5ZDQ5MTFkMTIxMTM0NTA2ZDhlYTFiNyJ9fX0=";
     private static final String TEXTURE_BOX_1 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmNmNWIxY2ZlZDFjMjdkZDRjM2JlZjZiOTg0NDk5NDczOTg1MWU0NmIzZmM3ZmRhMWNiYzI1YjgwYWIzYiJ9fX0=";
@@ -37,19 +38,30 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
 
     private ProductPriceEditor editorPrice;
 
-    public ProductMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualProduct product) {
-        super(plugin, product, Placeholders.EDITOR_VIRTUAL_TITLE, 27);
+    public ProductMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualProduct<?, ?> product) {
+        super(plugin, product, product.getShop().getName() + ": Product Settings", 27);
 
         this.addReturn(22).setClick((viewer, event) -> {
-            this.plugin.runTask(task -> product.getShop().getEditor().getProductsEditor().open(viewer.getPlayer(), product.getPage()));
+            int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
+            this.plugin.runTask(task -> product.getShop().getEditor().getProductsEditor().open(viewer.getPlayer(), page));
         });
+
+        if (product instanceof RotatingProduct rotatingProduct) {
+            this.addItem(Material.ENDER_EYE, VirtualLocales.PRODUCT_ROTATION_CHANCE, 4).setClick((viewer, event) -> {
+                this.handleInput(viewer, VirtualLang.EDITOR_ENTER_CHANCE, wrapper -> {
+                    rotatingProduct.setRotationChance(wrapper.asDouble());
+                    this.save(viewer);
+                    return true;
+                });
+            });
+        }
 
         this.addItem(new ItemStack(Material.ITEM_FRAME), 10).setClick((viewer, event) -> {
             if (event.isRightClick()) {
-                if (product instanceof ItemProduct itemProduct) {
+                if (product.getSpecific() instanceof ItemProduct itemProduct) {
                     PlayerUtil.addItem(viewer.getPlayer(), itemProduct.getItem());
                 }
-                else if (product instanceof CommandProduct commandProduct) {
+                else if (product.getSpecific() instanceof CommandProduct commandProduct) {
                     PlayerUtil.addItem(viewer.getPlayer(), commandProduct.getPreview());
                 }
                 return;
@@ -58,10 +70,10 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
             ItemStack cursor = event.getCursor();
             if (cursor == null || cursor.getType().isAir()) return;
 
-            if (product instanceof ItemProduct itemProduct) {
+            if (product.getSpecific() instanceof ItemProduct itemProduct) {
                 itemProduct.setItem(cursor);
             }
-            else if (product instanceof CommandProduct commandProduct) {
+            else if (product.getSpecific() instanceof CommandProduct commandProduct) {
                 commandProduct.setPreview(cursor);
             }
             event.getView().setCursor(null);
@@ -69,11 +81,11 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
         }).getOptions().setDisplayModifier((viewer, item) -> {
             EditorLocale locale;
             ItemStack original;
-            if (product instanceof ItemProduct itemProduct) {
+            if (product.getSpecific() instanceof ItemProduct itemProduct) {
                 locale = VirtualLocales.PRODUCT_ITEM;
                 original = itemProduct.getItem();
             }
-            else if (product instanceof CommandProduct commandProduct) {
+            else if (product.getSpecific() instanceof CommandProduct commandProduct) {
                 locale = VirtualLocales.PRODUCT_PREVIEW;
                 original = commandProduct.getPreview();
 
@@ -91,14 +103,14 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
         });
 
         this.addItem(Material.WRITABLE_BOOK, VirtualLocales.PRODUCT_RESPECT_ITEM_META, 11).setClick((viewer, event) -> {
-            if (!(product instanceof ItemProduct itemProduct)) return;
+            if (!(product.getSpecific() instanceof ItemProduct itemProduct)) return;
 
             itemProduct.setRespectItemMeta(!itemProduct.isRespectItemMeta());
             this.save(viewer);
-        }).getOptions().setVisibilityPolicy(viewer -> product instanceof ItemProduct);
+        }).getOptions().setVisibilityPolicy(viewer -> product.getSpecific() instanceof ItemProduct);
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_COMMAND), VirtualLocales.PRODUCT_COMMANDS, 11).setClick((viewer, event) -> {
-            if (!(product instanceof CommandProduct commandProduct)) return;
+            if (!(product.getSpecific() instanceof CommandProduct commandProduct)) return;
 
             if (event.isRightClick()) {
                 commandProduct.getCommands().clear();
@@ -110,7 +122,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct>
                 product.getShop().saveProducts();
                 return true;
             });
-        }).getOptions().setVisibilityPolicy(viewer -> product instanceof CommandProduct);
+        }).getOptions().setVisibilityPolicy(viewer -> product.getSpecific() instanceof CommandProduct);
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.PRODUCT_PRICE_MANAGER, 12).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {

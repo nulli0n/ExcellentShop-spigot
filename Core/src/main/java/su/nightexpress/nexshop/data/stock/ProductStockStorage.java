@@ -3,11 +3,11 @@ package su.nightexpress.nexshop.data.stock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopAPI;
-import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.user.ShopUser;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.Collections;
 import java.util.Map;
@@ -19,7 +19,7 @@ public class ProductStockStorage {
     private static final Map<String, Map<String, Map<StockType, Map<TradeType, ProductStockData>>>> DATAS = new ConcurrentHashMap<>();
 
     @NotNull
-    public static CompletableFuture<Void> loadData(@NotNull Shop<?, ?> shop) {
+    public static CompletableFuture<Void> loadData(@NotNull VirtualShop<?, ?> shop) {
         return loadData(shop.getId());
     }
 
@@ -50,7 +50,7 @@ public class ProductStockStorage {
             .put(stockData.getTradeType(), stockData);
     }
 
-    private static void removeData(@NotNull String holder, @NotNull Product<?, ?, ?> product,
+    private static void removeData(@NotNull String holder, @NotNull VirtualProduct<?, ?> product,
                                    @NotNull StockType stockType, @NotNull TradeType tradeType) {
         DATAS.getOrDefault(holder, Collections.emptyMap())
             .getOrDefault(product.getId(), Collections.emptyMap())
@@ -65,7 +65,7 @@ public class ProductStockStorage {
             .getOrDefault(stockType, Collections.emptyMap()).get(tradeType);
     }
 
-    public static void createProductStockData(@NotNull String holder, @NotNull ProductStockData stockData) {
+    public static void createData(@NotNull String holder, @NotNull ProductStockData stockData) {
         if (getData(holder, stockData.getProductId(), stockData.getStockType(), stockData.getTradeType()) != null) return;
 
         addData(holder, stockData);
@@ -73,16 +73,21 @@ public class ProductStockStorage {
         ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().createProductStockData(holder, stockData));
     }
 
-    public static void saveProductStockData(@NotNull String holder, @NotNull ProductStockData stockData) {
+    public static void saveData(@NotNull String holder, @NotNull ProductStockData stockData) {
         ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().saveProductStockData(holder, stockData));
     }
 
-    public static void removeProductStockData(@NotNull String holder, @NotNull Product<?, ?, ?> product,
-                                              @NotNull StockType stockType, @NotNull TradeType tradeType) {
+    public static void deleteData(@NotNull String holder, @NotNull VirtualProduct<?, ?> product,
+                                  @NotNull StockType stockType, @NotNull TradeType tradeType) {
         if (getData(holder, product.getId(), stockType, tradeType) == null) return;
 
         removeData(holder, product, stockType, tradeType);
 
         ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeProductStockData(holder, product, stockType, tradeType));
+    }
+
+    public static void deleteData(@NotNull VirtualProduct<?, ?> product) {
+        DATAS.values().forEach(map -> map.remove(product.getId()));
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeProductStockData(product));
     }
 }
