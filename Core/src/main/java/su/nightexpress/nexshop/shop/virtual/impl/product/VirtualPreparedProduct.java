@@ -4,18 +4,18 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IPurchaseListener;
-import su.nightexpress.nexshop.shop.util.TransactionResult.Result;
 import su.nightexpress.nexshop.api.event.VirtualShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
+import su.nightexpress.nexshop.shop.util.TransactionResult.Result;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
-public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
+public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends PreparedProduct<P> {
 
-    public VirtualPreparedProduct(@NotNull Player player, @NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
+    public VirtualPreparedProduct(@NotNull Player player, @NotNull P product, @NotNull TradeType tradeType, boolean all) {
         super(player, product, tradeType, all);
     }
 
@@ -23,8 +23,8 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
     @NotNull
     protected TransactionResult buy() {
         Player player = this.getPlayer();
-        VirtualProduct product = this.getProduct();
-        VirtualShop shop = product.getShop();
+        P product = this.getProduct();
+        VirtualShop<?, ?> shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
 
         double price = this.getPrice();
@@ -61,8 +61,8 @@ public class VirtualPreparedProduct extends PreparedProduct<VirtualProduct> {
     @NotNull
     protected TransactionResult sell() {
         Player player = this.getPlayer();
-        VirtualProduct product = this.getProduct();
-        VirtualShop shop = product.getShop();
+        P product = this.getProduct();
+        VirtualShop<?, ?> shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
 
         int possible = product.getStock().getPossibleAmount(this.getTradeType(), player);

@@ -18,12 +18,13 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShopType;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule> implements AutoPaged<VirtualShop> {
+public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule> implements AutoPaged<VirtualShop<?, ?>> {
 
     public ShopListEditor(@NotNull VirtualShopModule module) {
         super(module.plugin(), module, Placeholders.EDITOR_VIRTUAL_TITLE, 45);
@@ -34,7 +35,8 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
 
         this.addCreation(VirtualLocales.SHOP_CREATE, 41).setClick((viewer, event) -> {
             this.handleInput(viewer, VirtualLang.EDITOR_ENTER_SHOP_ID, wrapper -> {
-                if (!module.createShop(StringUtil.lowerCaseUnderscore(wrapper.getTextRaw()))) {
+                VirtualShopType type = event.isLeftClick() ? VirtualShopType.STATIC : VirtualShopType.ROTATING;
+                if (!module.createShop(StringUtil.lowerCaseUnderscore(wrapper.getTextRaw()), type)) {
                     EditorManager.error(viewer.getPlayer(), plugin.getMessage(VirtualLang.EDITOR_SHOP_CREATE_ERROR_EXIST).getLocalized());
                     return false;
                 }
@@ -51,7 +53,7 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
 
     @Override
     @NotNull
-    public List<VirtualShop> getObjects(@NotNull Player player) {
+    public List<VirtualShop<?, ?>> getObjects(@NotNull Player player) {
         return this.object.getShops().stream().sorted(Comparator.comparing(VirtualShop::getId)).toList();
     }
 
@@ -62,7 +64,7 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
 
     @Override
     @NotNull
-    public ItemStack getObjectStack(@NotNull Player player, @NotNull VirtualShop shop) {
+    public ItemStack getObjectStack(@NotNull Player player, @NotNull VirtualShop<?, ?> shop) {
         ItemStack item = new ItemStack(shop.getIcon());
         ItemUtil.mapMeta(item, meta -> {
             meta.setDisplayName(VirtualLocales.SHOP_OBJECT.getLocalizedName());
@@ -75,16 +77,14 @@ public class ShopListEditor extends EditorMenu<ExcellentShop, VirtualShopModule>
 
     @Override
     @NotNull
-    public ItemClick getObjectClick(@NotNull VirtualShop shop) {
+    public ItemClick getObjectClick(@NotNull VirtualShop<?, ?> shop) {
         return (viewer, event) -> {
-            Player player = viewer.getPlayer();
-
             if (event.isShiftClick() && event.isRightClick()) {
                 this.object.delete(shop);
-                this.plugin.runTask(task -> this.open(player, viewer.getPage()));
+                this.openNextTick(viewer, viewer.getPage());
                 return;
             }
-            shop.getEditor().open(player, 1);
+            shop.getEditor().openNextTick(viewer, 1);
         };
     }
 }

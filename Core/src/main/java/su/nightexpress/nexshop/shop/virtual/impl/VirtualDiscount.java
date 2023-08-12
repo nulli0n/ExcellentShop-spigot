@@ -11,7 +11,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.Discount;
 import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.DiscountMainEditor;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 public class VirtualDiscount implements Placeholder {
 
-    private VirtualShop    shop;
+    private StaticShop     shop;
     private Set<DayOfWeek> days;
     private Set<LocalTime> times;
     private double         discount;
@@ -107,14 +107,14 @@ public class VirtualDiscount implements Placeholder {
     }
 
     @NotNull
-    public VirtualShop getShop() {
+    public StaticShop getShop() {
         if (this.shop == null) {
             throw new IllegalStateException("Shop is undefined!");
         }
         return shop;
     }
 
-    public void setShop(@NotNull VirtualShop shop) {
+    public void setShop(@NotNull StaticShop shop) {
         this.shop = shop;
     }
 

@@ -25,19 +25,21 @@ import su.nexmedia.engine.utils.PDCUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 import java.util.*;
 
-public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop> {
+public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>> {
 
     private final NamespacedKey keyItemType;
     private final NamespacedKey keyReserved;
 
     private static final String TYPE_PREFIX = ChatColor.AQUA + "Type" + ChatColor.GRAY + " [Q/Drop]: " + ChatColor.GREEN;
 
-    public ShopViewEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
+    public ShopViewEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop<?, ?> shop) {
         super(plugin, shop, shop.getName(), 54);
         this.keyItemType = new NamespacedKey(plugin, "menu_item_type");
         this.keyReserved = new NamespacedKey(plugin, "reserved_slot");
@@ -47,13 +49,25 @@ public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
 
-        viewer.setPages(this.object.getPages());
+        int pages;
+        int[] slots;
+
+        if (this.object instanceof StaticShop staticShop) {
+            pages = staticShop.getPages();
+            slots = staticShop.getProducts().stream().mapToInt(StaticProduct::getSlot).toArray();
+        }
+        else if (this.object instanceof RotatingShop rotatingShop) {
+            pages = 1;
+            slots = rotatingShop.getProductSlots();
+        }
+        else return;
+
+        viewer.setPages(pages);
         options.setTitle(this.object.getView().getOptions().getTitle());
         options.setSize(this.object.getView().getOptions().getSize());
 
         ItemStack reserved = new ItemStack(Material.BARRIER);
         PDCUtil.set(reserved, this.keyReserved, true);
-        int[] slots = this.object.getProducts().stream().mapToInt(VirtualProduct::getSlot).toArray();
 
         this.addItem(reserved, VirtualLocales.PRODUCT_RESERVED_SLOT, slots).setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
     }

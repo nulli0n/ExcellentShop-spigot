@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
+import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.FileUtil;
 import su.nexmedia.engine.utils.StringUtil;
@@ -15,6 +16,7 @@ import su.nightexpress.nexshop.api.shop.ItemProduct;
 import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceStorage;
+import su.nightexpress.nexshop.data.rotation.ShopRotationStorage;
 import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.module.ShopModule;
@@ -30,36 +32,42 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.*;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
+import su.nightexpress.nexshop.shop.virtual.task.RotationCheckTask;
 
 import java.io.File;
 import java.util.*;
 
 public class VirtualShopModule extends ShopModule {
 
-    public static final String ID = "virtual_shop";
-    public static final String DIR_SHOPS = "/shops/";
+    public static final String ID                 = "virtual_shop";
+    public static final String DIR_SHOPS          = "/shops/";
+    public static final String DIR_ROTATING_SHOPS = "/rotating_shops/";
 
-    private final Map<String, VirtualShop> shops;
+    private final Map<String, StaticShop> staticShopMap;
+    private final Map<String, RotatingShop> rotatingShopMap;
 
     private ShopMainMenu   mainMenu;
     private ShopSellMenu   sellMenu;
     private ShopListEditor editor;
     private TransactionLogger logger;
+    private RotationCheckTask rotationCheckTask;
 
     public VirtualShopModule(@NotNull ExcellentShop plugin) {
         super(plugin, ID);
-        this.shops = new HashMap<>();
+        this.staticShopMap = new HashMap<>();
+        this.rotatingShopMap = new HashMap<>();
     }
 
     @Override
     protected void onLoad() {
         super.onLoad();
         this.plugin.getLangManager().loadMissing(VirtualLang.class);
+        this.plugin.getLangManager().loadEnum(VirtualShopType.class);
         this.plugin.getLangManager().loadEditor(VirtualLocales.class);
         this.plugin.getLang().saveChanges();
         this.cfg.initializeOptions(VirtualConfig.class);
@@ -73,11 +81,23 @@ public class VirtualShopModule extends ShopModule {
             }
         }
 
-        this.loadShops();
+        File dir2 = new File(this.getAbsolutePath() + DIR_ROTATING_SHOPS);
+        if (!dir2.exists()) {
+            for (String id : new String[]{"traveller"}) {
+                this.plugin.getConfigManager().extractResources("/" + this.getLocalPath() + DIR_ROTATING_SHOPS + id);
+            }
+        }
+
+        this.loadStaticShops();
+        this.loadRotatingShops();
         this.loadMainMenu();
+        this.updateShopPricesStocks();
         if (EngineUtils.hasPlugin(HookId.CITIZENS)) {
             this.addListener(new VirtualShopNPCListener(this));
         }
+
+        this.rotationCheckTask = new RotationCheckTask(this);
+        this.rotationCheckTask.start();
 
         this.command.addChildren(new OpenCommand(this));
         this.command.addChildren(new EditorCommand(this));
@@ -97,6 +117,10 @@ public class VirtualShopModule extends ShopModule {
 
     @Override
     protected void onShutdown() {
+        if (this.rotationCheckTask != null) {
+            this.rotationCheckTask.stop();
+            this.rotationCheckTask = null;
+        }
         if (this.editor != null) {
             this.editor.clear();
             this.editor = null;
@@ -109,12 +133,14 @@ public class VirtualShopModule extends ShopModule {
             this.sellMenu.clear();
             this.sellMenu = null;
         }
-        this.getShops().forEach(VirtualShop::clear);
-        this.getShopsMap().clear();
+        this.getStaticShops().forEach(StaticShop::clear);
+        this.getStaticShopMap().clear();
+        this.getRotatingShops().forEach(RotatingShop::clear);
+        this.getRotatingShopMap().clear();
         super.onShutdown();
     }
 
-    private void loadShops() {
+    private void loadStaticShops() {
         for (File folder : FileUtil.getFolders(this.getAbsolutePath() + DIR_SHOPS)) {
             String id = folder.getName();
 
@@ -129,18 +155,30 @@ public class VirtualShopModule extends ShopModule {
             }
             // ---------- OLD DATA END ----------
 
-            VirtualShop shop = new VirtualShop(this, new JYML(fileNew), id);
+            StaticShop shop = new StaticShop(this, new JYML(fileNew), id);
             if (shop.load()) {
-                this.getShopsMap().put(shop.getId(), shop);
-                //ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
-                //ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+                this.getStaticShopMap().put(shop.getId(), shop);
             }
-            else {
-                this.error("Shop not loaded: " + shop.getFile().getName());
-            }
+            else this.error("Shop not loaded: " + shop.getFile().getName());
         }
-        this.info("Shops Loaded: " + this.getShopsMap().size());
-        this.updateShopPricesStocks();
+        this.info("Static Shops Loaded: " + this.getStaticShopMap().size());
+    }
+
+    private void loadRotatingShops() {
+        for (File folder : FileUtil.getFolders(this.getAbsolutePath() + DIR_ROTATING_SHOPS)) {
+            String id = folder.getName();
+            File fileNew = new File(folder.getAbsolutePath(), "config.yml");
+
+            RotatingShop shop = new RotatingShop(this, new JYML(fileNew), id);
+            if (shop.load()) {
+                ShopRotationStorage.loadData(shop).thenRun(() -> {
+                    this.getRotatingShopMap().put(shop.getId(), shop);
+                    shop.tryRotate();
+                });
+            }
+            else this.warn("Shop not loaded: " + shop.getFile().getName());
+        }
+        this.info("Rotating Shops Loaded: " + this.getRotatingShopMap().size());
     }
 
     private void loadMainMenu() {
@@ -167,25 +205,42 @@ public class VirtualShopModule extends ShopModule {
     }
 
     public void updateShopPricesStocks() {
-        this.getShops().forEach(shop -> {
+        this.getStaticShops().forEach(shop -> {
+            ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
+            ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+        });
+        this.getRotatingShops().forEach(shop -> {
             ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
             ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
         });
     }
 
-    public boolean createShop(@NotNull String id) {
-        if (this.getShopById(id) != null) {
-            return false;
+    public boolean createShop(@NotNull String id, @NotNull VirtualShopType type) {
+        id = StringUtil.lowerCaseUnderscore(id);
+        if (this.getShopById(id) != null) return false;
+
+        JYML cfg = new JYML(this.getAbsolutePath() + getDirectory(type) + id, "config.yml");
+
+        VirtualShop<?, ?> shop;
+        if (type == VirtualShopType.STATIC) {
+            shop = new StaticShop(this, cfg, id);
+            this.getStaticShopMap().put(shop.getId(), (StaticShop) shop);
         }
-        JYML cfg = new JYML(this.getAbsolutePath() + DIR_SHOPS + id, "config.yml");
-        VirtualShop shop = new VirtualShop(this, cfg, id);
-        shop.setName("&e&l" + StringUtil.capitalizeFully(id.replace("_", " ")));
-        shop.setDescription(Arrays.asList("&7Freshly created shop.", "&7Edit me in &a/shop editor"));
+        else {
+            RotatingShop rotatingShop = new RotatingShop(this, cfg, id);
+            rotatingShop.setRotationType(RotationType.INTERVAL);
+            rotatingShop.setRotationInterval(86400);
+            rotatingShop.setProductMinAmount(6);
+            rotatingShop.setProductMaxAmount(12);
+            rotatingShop.setProductSlots(new int[] {10,11,12,13,14,15,16});
+            shop = rotatingShop;
+            this.getRotatingShopMap().put(shop.getId(), (RotatingShop) shop);
+        }
+        shop.setName(LangColors.LIGHT_YELLOW + LangColors.BOLD + StringUtil.capitalizeUnderscored(id));
+        shop.setDescription(Arrays.asList(LangColors.GRAY + "Configure in " + LangColors.GREEN + "/vshop editor", ""));
         shop.setIcon(new ItemStack(Material.CHEST_MINECART));
-        //shop.setBank(new VirtualShopBank(shop));
         shop.save();
         shop.load();
-        this.getShopsMap().put(shop.getId(), shop);
         return true;
     }
 
@@ -219,10 +274,18 @@ public class VirtualShopModule extends ShopModule {
         return mainMenu;
     }
 
-    public boolean delete(@NotNull VirtualShop shop) {
-        if (FileUtil.deleteRecursive(this.getAbsolutePath() + DIR_SHOPS + shop.getId())) {
+    @NotNull
+    public static String getDirectory(@NotNull VirtualShopType type) {
+        return type == VirtualShopType.STATIC ? DIR_SHOPS : DIR_ROTATING_SHOPS;
+    }
+
+    public boolean delete(@NotNull VirtualShop<?, ?> shop) {
+        VirtualShopType type = shop.getType();
+        Map<String, ? extends VirtualShop<?, ?>> map = type == VirtualShopType.STATIC ? this.getStaticShopMap() : this.getRotatingShopMap();
+
+        if (FileUtil.deleteRecursive(this.getAbsolutePath() + getDirectory(type) + shop.getId())) {
             shop.clear();
-            this.getShopsMap().remove(shop.getId());
+            map.remove(shop.getId());
             this.loadMainMenu();
             return true;
         }
@@ -230,29 +293,74 @@ public class VirtualShopModule extends ShopModule {
     }
 
     @NotNull
-    public Map<String, VirtualShop> getShopsMap() {
-        return this.shops;
+    public Set<VirtualShop<?, ?>> getShops() {
+        Set<VirtualShop<?, ?>> shops = new HashSet<>();
+        shops.addAll(this.getStaticShops());
+        shops.addAll(this.getRotatingShops());
+        return shops;
     }
 
     @NotNull
-    public Collection<VirtualShop> getShops() {
-        return this.getShopsMap().values();
+    public Collection<VirtualShop<?, ?>> getShops(@NotNull Player player) {
+        return this.getShops(player, this.getShops());
     }
 
     @NotNull
-    public List<VirtualShop> getShops(@NotNull Player player) {
-        return this.getShops().stream().filter(shop -> shop.canAccess(player, false)).toList();
+    public Map<String, StaticShop> getStaticShopMap() {
+        return this.staticShopMap;
+    }
+
+    @NotNull
+    public Collection<StaticShop> getStaticShops() {
+        return this.getStaticShopMap().values();
+    }
+
+    @NotNull
+    public List<StaticShop> getStaticShops(@NotNull Player player) {
+        return this.getShops(player, this.getStaticShops());
     }
 
     @Nullable
-    public VirtualShop getShopById(@NotNull String id) {
-        return this.getShopsMap().get(id.toLowerCase());
+    public StaticShop getStaticShopById(@NotNull String id) {
+        return this.getStaticShopMap().get(id.toLowerCase());
+    }
+
+    @NotNull
+    public Map<String, RotatingShop> getRotatingShopMap() {
+        return rotatingShopMap;
+    }
+
+    @NotNull
+    public Collection<RotatingShop> getRotatingShops() {
+        return this.getRotatingShopMap().values();
+    }
+
+    @NotNull
+    public List<RotatingShop> getRotatingShops(@NotNull Player player) {
+        return this.getShops(player, this.getRotatingShops());
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
-        Set<VirtualProduct> products = new HashSet<>();
-        this.getShops().stream()
+    public RotatingShop getRotatingShopById(@NotNull String shopId) {
+        return this.getRotatingShopMap().get(shopId.toLowerCase());
+    }
+
+    @Nullable
+    public VirtualShop<?, ?> getShopById(@NotNull String shopId) {
+        VirtualShop<? ,?> shop = this.getStaticShopById(shopId);
+        if (shop == null) shop = this.getRotatingShopById(shopId);
+        return shop;
+    }
+
+    @NotNull
+    private <T extends VirtualShop<?, ?>> List<T> getShops(@NotNull Player player, @NotNull Collection<T> shops) {
+        return shops.stream().filter(shop -> shop.canAccess(player, false)).toList();
+    }
+
+    @Nullable
+    public StaticProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
+        Set<StaticProduct> products = new HashSet<>();
+        this.getStaticShops().stream()
             .filter(shop -> shop.canAccess(player, false) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;

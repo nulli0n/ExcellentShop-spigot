@@ -11,7 +11,7 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class ShopCommand extends GeneralCommand<ExcellentShop> {
     @NotNull
     public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
         if (arg == 1) {
-            return this.module.getShops(player).stream().map(Shop::getId).toList();
+            return this.module.getStaticShops(player).stream().map(Shop::getId).toList();
         }
         return super.getTab(player, arg, args);
     }
@@ -65,7 +65,7 @@ public class ShopCommand extends GeneralCommand<ExcellentShop> {
             return;
         }
 
-        VirtualShop shop = this.module.getShopById(result.getArg(0));
+        StaticShop shop = this.module.getStaticShopById(result.getArg(0));
         if (shop == null) {
             plugin.getMessage(VirtualLang.SHOP_ERROR_INVALID).send(sender);
             return;

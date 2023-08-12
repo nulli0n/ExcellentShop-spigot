@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class VirtualProductStock extends ProductStock<VirtualProduct> {
+public class VirtualProductStock<P extends VirtualProduct<P, ?>> extends ProductStock<P> {
 
     private final Map<StockType, Map<TradeType, Integer>> initialAmount;
     private final Map<StockType, Map<TradeType, Integer>> restockTime;
@@ -111,8 +111,8 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
     }
 
     @NotNull
-    public static VirtualProductStock read(@NotNull JYML cfg, @NotNull String path) {
-        VirtualProductStock stock = new VirtualProductStock();
+    public static <P extends VirtualProduct<P, ?>> VirtualProductStock<P> read(@NotNull JYML cfg, @NotNull String path, @NotNull Class<P> cls) {
+        VirtualProductStock<P> stock = new VirtualProductStock<>();
         for (StockType stockType : StockType.values()) {
             for (TradeType tradeType : TradeType.values()) {
                 String path2 = path + "." + stockType.name() + "." + tradeType.name() + ".";
@@ -125,7 +125,7 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         return stock;
     }
 
-    public static void write(@NotNull VirtualProductStock stock, @NotNull JYML cfg, @NotNull String path) {
+    public static void write(@NotNull VirtualProductStock<?> stock, @NotNull JYML cfg, @NotNull String path) {
         for (StockType stockType : StockType.values()) {
             for (TradeType tradeType : TradeType.values()) {
                 cfg.set(path + "." + stockType.name() + "." + tradeType.name() + ".Initial_Amount", stock.getInitialAmount(stockType, tradeType));
@@ -147,7 +147,7 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
                                                  @NotNull StockType stockType, @NotNull TradeType tradeType) {
         // Если лимит не установлен, то и записи в БД нет.
         if (this.isUnlimited(stockType, tradeType)) {
-            ProductStockStorage.removeProductStockData(holder, this.getProduct(), stockType, tradeType);
+            ProductStockStorage.deleteData(holder, this.getProduct(), stockType, tradeType);
             return null;
         }
 
@@ -157,12 +157,12 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         if (stockData != null && stockData.isRestockTime()) {
             if (stockType == StockType.GLOBAL) {
                 stockData.restock(this);
-                ProductStockStorage.saveProductStockData(holder, stockData);
+                ProductStockStorage.saveData(holder, stockData);
             }
             // Для Юзер стока удаляем запись вместо пополнения, чтобы не шло время обновления, пока не будет
             // совершена хотя бы одна покупка.
             else {
-                ProductStockStorage.removeProductStockData(holder, this.getProduct(), stockType, tradeType);
+                ProductStockStorage.deleteData(holder, this.getProduct(), stockType, tradeType);
                 return null;
             }
         }
@@ -252,11 +252,11 @@ public class VirtualProductStock extends ProductStock<VirtualProduct> {
         if (stockData == null) {
             stockData = new ProductStockData(this, tradeType, stockType);
             stockData.setItemsLeft(itemsLeft);
-            ProductStockStorage.createProductStockData(holder, stockData);
+            ProductStockStorage.createData(holder, stockData);
         }
         else {
             stockData.setItemsLeft(itemsLeft);
-            ProductStockStorage.saveProductStockData(holder, stockData);
+            ProductStockStorage.saveData(holder, stockData);
         }
     }
 

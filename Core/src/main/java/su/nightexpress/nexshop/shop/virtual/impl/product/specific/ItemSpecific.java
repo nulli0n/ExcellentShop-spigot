@@ -1,33 +1,33 @@
-package su.nightexpress.nexshop.shop.virtual.impl.product;
+package su.nightexpress.nexshop.shop.virtual.impl.product.specific;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.ItemProduct;
 
-import java.util.UUID;
-
-public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
+public class ItemSpecific implements ProductSpecific, ItemProduct {
 
     private ItemStack item;
-    private boolean respectItemMeta;
+    private     boolean   respectItemMeta;
 
-    public VirtualItemProduct(@NotNull ItemStack item, @NotNull Currency currency) {
-        this(UUID.randomUUID().toString(), item, currency);
-    }
+    private final PlaceholderMap placeholderMap;
 
-    public VirtualItemProduct(@NotNull String id, @NotNull ItemStack item, @NotNull Currency currency) {
-        super(id, currency);
+    public ItemSpecific(@NotNull ItemStack item) {
         this.setItem(item);
         this.setRespectItemMeta(item.hasItemMeta());
 
-        this.placeholderMap
-            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, () -> LangManager.getBoolean(this.isRespectItemMeta()))
-        ;
+        this.placeholderMap = new PlaceholderMap()
+            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, () -> LangManager.getBoolean(this.isRespectItemMeta()));
+    }
+
+    @Override
+    @NotNull
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     @Override
@@ -53,12 +53,10 @@ public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
         return this.getItem();
     }
 
-    @Override
     public boolean isRespectItemMeta() {
         return this.respectItemMeta;
     }
 
-    @Override
     public void setRespectItemMeta(boolean respectItemMeta) {
         this.respectItemMeta = respectItemMeta;
     }
@@ -68,13 +66,11 @@ public class VirtualItemProduct extends VirtualProduct implements ItemProduct {
         return this.getItem().getAmount();
     }
 
-    @Override
     @NotNull
     public ItemStack getItem() {
         return new ItemStack(this.item);
     }
 
-    @Override
     public void setItem(@NotNull ItemStack item) {
         this.item = new ItemStack(item);
     }

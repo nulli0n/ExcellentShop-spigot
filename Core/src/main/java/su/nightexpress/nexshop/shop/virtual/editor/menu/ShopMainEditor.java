@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import org.bukkit.Material;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -8,19 +9,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.EngineUtils;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.RotationType;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
-public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
+public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>> {
 
     private static final String TEXTURE_BOOK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGUxNTU5NDhjYTg1YjA1MTM3ZDJkM2E1YjA4MmY1N2U3NmM2ODFiZmNkZjRmMGRjZjg2ZWFmZjY4MWI5MzY3OCJ9fX0=";
     private static final String TEXTURE_NPC = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJlMGRjOTJkNzg2MmYwNDQzY2M3NzU3Mzc3NzRmNDA3YWFlZmJlMDVlOWM0MzIzMmJiNjkzZDM5YzE4ZmI4OSJ9fX0=";
@@ -32,8 +33,8 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     private ProductListEditor  productEditor;
     private DiscountListEditor discountEditor;
 
-    public ShopMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
-        super(plugin, shop, Placeholders.EDITOR_VIRTUAL_TITLE, 54);
+    public ShopMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop<?, ?> shop) {
+        super(plugin, shop, shop.getName() + ": Settings", 54);
 
         this.addReturn(49).setClick((viewer, event) -> {
             this.plugin.runTask(task -> shop.getModule().getEditor().open(viewer.getPlayer(), 1));
@@ -83,16 +84,6 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             });
         });
 
-        this.addItem(Material.ENDER_PEARL, VirtualLocales.SHOP_PAGES, 20).setClick((viewer, event) -> {
-            if (event.isLeftClick()) {
-                shop.setPages(shop.getPages() + 1);
-            }
-            else if (event.isRightClick()) {
-                shop.setPages(Math.max(1, shop.getPages() - 1));
-            }
-            this.save(viewer);
-        });
-
         this.addItem(Material.REDSTONE, VirtualLocales.SHOP_PERMISSION, 24).setClick((viewer, event) -> {
             shop.setPermissionRequired(!shop.isPermissionRequired());
             this.save(viewer);
@@ -108,28 +99,87 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
             this.save(viewer);
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
-            if (!EngineUtils.hasPlugin(HookId.CITIZENS)) return;
-
-            if (event.isRightClick()) {
-                shop.getNPCIds().clear();
+        if (shop instanceof StaticShop staticShop) {
+            this.addItem(Material.ENDER_PEARL, VirtualLocales.SHOP_PAGES, 20).setClick((viewer, event) -> {
+                if (event.isLeftClick()) {
+                    staticShop.setPages(staticShop.getPages() + 1);
+                }
+                else if (event.isRightClick()) {
+                    staticShop.setPages(Math.max(1, staticShop.getPages() - 1));
+                }
                 this.save(viewer);
-                return;
-            }
-
-            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, wrapper -> {
-                int id = wrapper.asInt(-1);
-                if (id < 0) return true;
-
-                shop.getNPCIds().add(id);
-                this.save(viewer);
-                return true;
             });
-        });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.SHOP_DISCOUNTS, 30).setClick((viewer, event) -> {
-            this.plugin.runTask(task -> this.getDiscountEditor().open(viewer.getPlayer(), 1));
-        });
+            this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
+                if (!EngineUtils.hasPlugin(HookId.CITIZENS)) return;
+
+                if (event.isRightClick()) {
+                    staticShop.getNPCIds().clear();
+                    this.save(viewer);
+                    return;
+                }
+
+                this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, wrapper -> {
+                    int id = wrapper.asInt(-1);
+                    if (id < 0) return true;
+
+                    staticShop.getNPCIds().add(id);
+                    this.save(viewer);
+                    return true;
+                });
+            });
+
+            this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.SHOP_DISCOUNTS, 30).setClick((viewer, event) -> {
+                this.plugin.runTask(task -> this.getDiscountEditor(staticShop).open(viewer.getPlayer(), 1));
+            });
+        }
+
+        if (shop instanceof RotatingShop rotatingShop) {
+            this.addItem(Material.OAK_SIGN, VirtualLocales.SHOP_ROTATION_TYPE, 4).setClick((viewer, event) -> {
+                rotatingShop.setRotationType(CollectionsUtil.next(rotatingShop.getRotationType()));
+                this.save(viewer);
+            });
+
+            this.addItem(Material.CLOCK, VirtualLocales.SHOP_ROTATION_INTERVAL, 20).setClick((viewer, event) -> {
+                if (event.getClick() == ClickType.DROP) {
+                    rotatingShop.rotate();
+                    this.openNextTick(viewer, viewer.getPage());
+                    return;
+                }
+
+                this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
+                    rotatingShop.setRotationInterval(wrapper.asInt());
+                    this.save(viewer);
+                    return true;
+                });
+            }).getOptions().setVisibilityPolicy(viewer -> rotatingShop.getRotationType() == RotationType.INTERVAL);
+
+            this.addItem(Material.CLOCK, VirtualLocales.SHOP_ROTATION_TIMES, 20).setClick((viewer, event) -> {
+                new RotationTimesEditor(plugin, rotatingShop).openNextTick(viewer, 1);
+            }).getOptions().setVisibilityPolicy(viewer -> rotatingShop.getRotationType() == RotationType.FIXED);
+
+            this.addItem(Material.CHEST_MINECART, VirtualLocales.SHOP_ROTATION_PRODUCTS, 30).setClick((viewer, event) -> {
+                if (event.getClick() == ClickType.DROP) {
+                    this.handleInput(viewer, VirtualLang.EDITOR_ENTER_SLOTS, wrapper -> {
+                        rotatingShop.setProductSlots(StringUtil.getIntArray(wrapper.getTextRaw()));
+                        this.save(viewer);
+                        return true;
+                    });
+                    return;
+                }
+
+                this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
+                    if (event.isLeftClick()) {
+                        rotatingShop.setProductMinAmount(wrapper.asInt());
+                    }
+                    else {
+                        rotatingShop.setProductMaxAmount(wrapper.asInt());
+                    }
+                    this.save(viewer);
+                    return true;
+                });
+            });
+        }
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 31).setClick((viewer, event) -> {
             this.plugin.runTask(task -> this.getProductsEditor().open(viewer.getPlayer(), 1));
@@ -186,9 +236,9 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop> {
     }
 
     @NotNull
-    public DiscountListEditor getDiscountEditor() {
+    public DiscountListEditor getDiscountEditor(@NotNull StaticShop staticShop) {
         if (this.discountEditor == null) {
-            this.discountEditor = new DiscountListEditor(this.object);
+            this.discountEditor = new DiscountListEditor(staticShop);
         }
         return this.discountEditor;
     }

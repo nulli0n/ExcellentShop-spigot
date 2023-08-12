@@ -1,7 +1,8 @@
 package su.nightexpress.nexshop.shop.virtual.editor;
 
 import su.nexmedia.engine.api.editor.EditorLocale;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.RotationType;
+import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
 
 public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales {
 
@@ -10,13 +11,15 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale SHOP_CREATE = builder(PREFIX_OLD + "SHOP_CREATE")
         .name("Create Shop")
-        .text("Create a new Virtual Shop.").breakLine()
-        .actionsHeader().action("Left-Click", "Create")
+        .text("Creates new Static or Rotating Shop.").breakLine()
+        .actionsHeader().action("Left-Click", "Create Static").action("Right-Click", "Create Rotating")
         .build();
 
     public static final EditorLocale SHOP_OBJECT = builder(PREFIX_OLD + "SHOP_OBJECT")
         .name(Placeholders.SHOP_NAME)
-        .currentHeader().current("Pages", Placeholders.SHOP_VIRTUAL_PAGES).breakLine()
+        .currentHeader()
+        .current("Type", Placeholders.SHOP_TYPE)
+        .current("Pages", Placeholders.SHOP_PAGES).breakLine()
         .actionsHeader().action("Left-Click", "Edit").action("Shift-Right", "Delete" + RED + " (No Undo)")
         .build();
 
@@ -30,14 +33,14 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale SHOP_DESCRIPTION = builder(PREFIX_OLD + "SHOP_CHANGE_DESCRIPTION")
         .name("Description")
-        .currentHeader().text(Placeholders.SHOP_VIRTUAL_DESCRIPTION).breakLine()
+        .currentHeader().text(Placeholders.SHOP_DESCRIPTION).breakLine()
         .text("Sets the shop description.", "It can be used in main shops menu.").breakLine()
         .actionsHeader().action("Left-Click", "Add Line").action("Right-Click", "Clear List")
         .build();
 
     public static final EditorLocale SHOP_PAGES = builder(PREFIX_OLD + "SHOP_CHANGE_PAGES")
         .name("Pages Amount")
-        .currentHeader().current("Pages", Placeholders.SHOP_VIRTUAL_PAGES).breakLine()
+        .currentHeader().current("Pages", Placeholders.SHOP_PAGES).breakLine()
         .text("Sets amount of pages for the shop.").breakLine()
         .noteHeader().notes("Don't forget to add page items in " + YELLOW + "View Editor" + GRAY + "!").breakLine()
         .actionsHeader().action("Left-Click", "+1 Page").action("Right-Click", "-1 Page")
@@ -52,8 +55,8 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale SHOP_PERMISSION = builder(PREFIX_OLD + "SHOP_CHANGE_PERMISSION")
         .name("Permission Requirement")
-        .currentHeader().current("Enabled", Placeholders.SHOP_VIRTUAL_PERMISSION_REQUIRED)
-        .current("Node", Placeholders.SHOP_VIRTUAL_PERMISSION_NODE).breakLine()
+        .currentHeader().current("Enabled", Placeholders.SHOP_PERMISSION_REQUIRED)
+        .current("Node", Placeholders.SHOP_PERMISSION_NODE).breakLine()
         .text("Sets whether players must have permission", "in order to access/use this shop.").breakLine()
         .actionsHeader().action("Left-Click", "Toggle")
         .build();
@@ -68,7 +71,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale SHOP_ATTACHED_NPCS = builder(PREFIX_OLD + "SHOP_CHANGE_CITIZENS_ID")
         .name("Attached NPCs")
-        .currentHeader().current("NPC IDs", Placeholders.SHOP_VIRTUAL_NPC_IDS).breakLine()
+        .currentHeader().current("NPC IDs", Placeholders.SHOP_NPC_IDS).breakLine()
         .text("A list of NPC Ids attached to this shop.", "Those NPCs will open shop GUI on click.").breakLine()
         .warningHeader().warning("You must have " + RED + "Citizens " + GRAY + "installed!").breakLine()
         .actionsHeader().action("Left-Click", "Add ID").action("Right-Click", "Clear List")
@@ -76,8 +79,8 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale SHOP_VIEW_EDITOR = builder(PREFIX_OLD + "SHOP_CHANGE_VIEW_DESIGN")
         .name("View Editor")
-        .currentHeader().current("Title", Placeholders.SHOP_VIRTUAL_VIEW_TITLE)
-        .current("Size", Placeholders.SHOP_VIRTUAL_VIEW_SIZE).breakLine()
+        .currentHeader().current("Title", Placeholders.SHOP_VIEW_TITLE)
+        .current("Size", Placeholders.SHOP_VIEW_SIZE).breakLine()
         .text("Sets " + YELLOW + "title" + GRAY + " & " + YELLOW + "size" + GRAY + " for the shop GUI.", "Here you can create custom")
         .text("GUI layout for this shop.", "Simply place items in editor and press " + YELLOW + "ESC" + GRAY + " to save.").breakLine()
         .actionsHeader().action("Left-Click", "Open Editor").action("Shift-Left", "Change Title")
@@ -96,13 +99,54 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .actionsHeader().action("Left-Click", "Navigate")
         .build();
 
-    public static final EditorLocale PRODUCT_OBJECT = builder(PREFIX + "Product.Object")
+    public static final EditorLocale SHOP_ROTATION_TYPE = builder(PREFIX + "Shop.Rotation.Type")
+        .name("Rotation: Type")
+        .text("Sets shop rotation type.", "")
+        .text(YELLOW + RotationType.INTERVAL.name() + ": " + GRAY + "Rotation every X minutes.")
+        .text(YELLOW + RotationType.FIXED.name() + ": " + GRAY + "Rotation strictly at specified times.")
+        .breakLine()
+        .currentHeader().current("Type", Placeholders.SHOP_ROTATION_TYPE).breakLine()
+        .actionsHeader().action("Left-Click", "Toggle")
+        .build();
+
+    public static final EditorLocale SHOP_ROTATION_INTERVAL = builder(PREFIX + "Shop.Rotation.Interval")
+        .name("Rotation: Interval")
+        .text("Sets how often (in seconds) shop", "products will be rotated.").breakLine()
+        .currentHeader().current("Interval", Placeholders.SHOP_ROTATION_INTERVAL).breakLine()
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Force Rotate")
+        .build();
+
+    public static final EditorLocale SHOP_ROTATION_TIMES = builder(PREFIX + "Shop.Rotation.Times")
+        .name("Rotation: Times")
+        .text("Here you can define rotation", "times for each day of week.").breakLine()
+        .actionsHeader().action("Left-Click", "Navigate")
+        .build();
+
+    public static final EditorLocale SHOP_ROTATION_PRODUCTS = builder(PREFIX + "Shop.Rotation.Products")
+        .name("Rotation: Products")
+        .text("Sets how many products", "will be used in rotations and", "slots where they will appear.").breakLine()
+        .currentHeader().current("Min", Placeholders.SHOP_ROTATION_MIN_PRODUCTS)
+        .current("Max", Placeholders.SHOP_ROTATION_MAX_PRODUCTS)
+        .current("Slots", Placeholders.SHOP_ROTATION_PRODUCT_SLOTS).breakLine()
+        .actionsHeader().action("Left-Click", "Change Min").action("Right-Click", "Change Max")
+        .action("[Q/Drop] Key", "Change Slots")
+        .build();
+
+    public static final EditorLocale PRODUCT_OBJECT = builder(PREFIX + "Product.Object.Static")
         .name(Placeholders.PRODUCT_PREVIEW_NAME)
         .text("You can take & put this product in any other", "slot. Or store it in your inventory to", "add it in other pages or even shops!")
         .text("All product settings will be " + GREEN + "saved" + GRAY + "!").breakLine()
         .text(YELLOW + "&lCurrent Price:")
         .current("Buy", Placeholders.PRODUCT_PRICE_BUY)
         .current("Sell", Placeholders.PRODUCT_PRICE_SELL).breakLine()
+        .actionsHeader().action("Shift-Left", "Edit").action("Shift-Right", "Delete" + RED + " (No Undo)")
+        .build();
+
+    public static final EditorLocale ROTATING_PRODUCT_OBJECT = builder(PREFIX + "Product.Object.Rotating")
+        .name(Placeholders.PRODUCT_PREVIEW_NAME)
+        .currentHeader().current("Rotation Chance", Placeholders.PRODUCT_ROTATION_CHANCE + "%")
+        .current("Buy Price", Placeholders.PRODUCT_PRICE_BUY)
+        .current("Sell Price", Placeholders.PRODUCT_PRICE_SELL).breakLine()
         .actionsHeader().action("Shift-Left", "Edit").action("Shift-Right", "Delete" + RED + " (No Undo)")
         .build();
 
@@ -116,7 +160,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .text("This slot is occupied by a shop product.")
         .build();
 
-    public static final EditorLocale PRODUCT_PRICE_MANAGER = builder("VirtualShop.Editor.Product.PriceManager")
+    public static final EditorLocale PRODUCT_PRICE_MANAGER = builder(PREFIX + "Product.PriceManager")
         .name("Price Manager")
         .currentHeader().current("Currency", Placeholders.PRODUCT_CURRENCY)
         .current("Buy", Placeholders.PRODUCT_PRICE_BUY).current("Sell", Placeholders.PRODUCT_PRICE_SELL).breakLine()
@@ -125,13 +169,26 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .action("[Q/Drop] Key", "Refresh Price")
         .build();
 
+    public static final EditorLocale PRODUCT_ROTATION_CHANCE = builder(PREFIX + "Product.Rotation.Chance")
+        .name("Rotation Chance")
+        .text("A chance that this product", "will appear in next shop rotation.").breakLine()
+        .currentHeader().current("Chance", Placeholders.PRODUCT_ROTATION_CHANCE + "%").breakLine()
+        .actionsHeader().action("Left-Click", "Change")
+        .build();
+
+    public static final EditorLocale PRODUCT_ROTATION_DAY_TIMES = builder(PREFIX + "Product.Rotation.DayTimes")
+        .name(Placeholders.GENERIC_NAME)
+        .text(Placeholders.GENERIC_TIME).breakLine()
+        .actionsHeader().action("Left-Click", "Add Time").action("Right-Click", "Clear")
+        .build();
+
     public static final EditorLocale PRODUCT_ITEM = builder(PREFIX_OLD + "PRODUCT_CHANGE_ITEM")
         .name("Actual Item")
         .text("Sets the actual product item to sell/purchase.").breakLine()
         .actionsHeader().action("Drag & Drop", "Replace").action("Right-Click", "Get Copy")
         .build();
 
-    public static final EditorLocale PRODUCT_RESPECT_ITEM_META = builder("VirtualShop.Editor.Product.RespectItemMeta")
+    public static final EditorLocale PRODUCT_RESPECT_ITEM_META = builder(PREFIX + "Product.RespectItemMeta")
         .name("Respect Item Meta")
         .currentHeader().current("Enabled", Placeholders.PRODUCT_ITEM_META_ENABLED).breakLine()
         .text("Sets whether product should respect", "meta of the " + YELLOW + "Actual Item" + GRAY + ".")
@@ -149,7 +206,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale PRODUCT_COMMANDS = builder(PREFIX_OLD + "PRODUCT_CHANGE_COMMANDS")
         .name("Commands")
-        .currentHeader().text(Placeholders.PRODUCT_VIRTUAL_COMMANDS).breakLine()
+        .currentHeader().text(Placeholders.PRODUCT_COMMANDS).breakLine()
         .text("A list of commands to execute when", "player purchases this product.").breakLine()
         .noteHeader().notes("Use " + ORANGE + Placeholders.PLAYER_NAME + GRAY + " for player name.").breakLine()
         .actionsHeader().action("Left-Click", "Add Command").action("Right-Click", "Clear List")
@@ -158,7 +215,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
     public static final EditorLocale PRODUCT_ALLOWED_RANKS = builder(PREFIX + "Product.Allowed_Ranks")
         .name("Allowed Ranks")
         .text("List of ranks (permission groups) who", "will have access to this item.").breakLine()
-        .currentHeader().text(Placeholders.PRODUCT_VIRTUAL_ALLOWED_RANKS).breakLine()
+        .currentHeader().text(Placeholders.PRODUCT_ALLOWED_RANKS).breakLine()
         .actionsHeader().action("Left-Click", "Add Rank").action("Right-Click", "Clear List")
         .build();
 

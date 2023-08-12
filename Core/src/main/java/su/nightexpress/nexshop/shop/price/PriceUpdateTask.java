@@ -22,7 +22,7 @@ public class PriceUpdateTask extends AbstractTask<ExcellentShop> {
 
         VirtualShopModule module = plugin.getVirtualShop();
         if (module != null) {
-            module.getShops().forEach(shop -> {
+            module.getStaticShops().forEach(shop -> {
                 products.addAll(shop.getProducts());
 
                 shop.getDiscountConfigs().forEach(discount -> {

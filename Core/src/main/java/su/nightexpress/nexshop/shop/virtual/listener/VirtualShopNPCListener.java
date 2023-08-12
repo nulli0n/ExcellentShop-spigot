@@ -10,9 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
 
-@Deprecated
 public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
 
     private final VirtualShopModule module;
@@ -35,7 +34,7 @@ public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
     private void onClick(@NotNull NPCClickEvent e) {
         int id = e.getNPC().getId();
 
-        VirtualShop shop = this.module.getShops().stream()
+        StaticShop shop = this.module.getStaticShops().stream()
             .filter(shop2 -> shop2.getNPCIds().contains(id))
             .findFirst().orElse(null);
         if (shop == null) return;
