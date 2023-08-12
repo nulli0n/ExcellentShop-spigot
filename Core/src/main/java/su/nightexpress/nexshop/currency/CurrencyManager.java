@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.currency;
 
+import me.TechsCode.UltraEconomy.UltraEconomy;
 import me.xanium.gemseconomy.GemsEconomy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,7 @@ import su.nightexpress.nexshop.currency.handler.*;
 import su.nightexpress.nexshop.currency.impl.CoinsEngineCurrency;
 import su.nightexpress.nexshop.currency.impl.ConfigCurrency;
 import su.nightexpress.nexshop.currency.impl.ItemCurrency;
+import su.nightexpress.nexshop.currency.impl.UltraEconomyCurrency;
 import su.nightexpress.nexshop.hook.HookId;
 
 import java.util.Collection;
@@ -65,6 +67,12 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
             for (me.xanium.gemseconomy.currency.Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
                 this.registerCurrency("gemseconomy_" + currency.getSingular(), () -> new GemsEconomyHandler(currency));
             }
+        }
+
+        if (EngineUtils.hasPlugin(HookId.ULTRA_ECONOMY)) {
+            UltraEconomy.getAPI().getCurrencies().forEach(currency -> {
+                this.registerCurrency(new UltraEconomyCurrency(currency));
+            });
         }
 
         for (JYML cfg : JYML.loadAll(plugin.getDataFolder() + DIR_CUSTOM, true)) {

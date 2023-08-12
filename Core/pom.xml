@@ -45,7 +45,11 @@
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
 
+        <repository>
+            <id>techscode</id>
+            <url>https://repo.techscode.com/repository/maven-releases/</url>
         </repository>
     </repositories>
 
@@ -132,6 +136,11 @@
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_20_R1</artifactId>
             <version>4.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>me.TechsCode</groupId>
+            <artifactId>UltraEconomyAPI</artifactId>
+            <version>2.6.4</version>
         </dependency>
     </dependencies>
 

@@ -14,4 +14,5 @@ softdepend:
   - CoinsEngine
   - GriefPrevention
   - EliteMobs
+  - UltraEconomy
 api-version: 1.17
