@@ -99,6 +99,25 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
             this.save(viewer);
         });
 
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
+            if (!EngineUtils.hasPlugin(HookId.CITIZENS)) return;
+
+            if (event.isRightClick()) {
+                shop.getNPCIds().clear();
+                this.save(viewer);
+                return;
+            }
+
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, wrapper -> {
+                int id = wrapper.asInt(-1);
+                if (id < 0) return true;
+
+                shop.getNPCIds().add(id);
+                this.save(viewer);
+                return true;
+            });
+        });
+
         if (shop instanceof StaticShop staticShop) {
             this.addItem(Material.ENDER_PEARL, VirtualLocales.SHOP_PAGES, 20).setClick((viewer, event) -> {
                 if (event.isLeftClick()) {
@@ -108,25 +127,6 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
                     staticShop.setPages(Math.max(1, staticShop.getPages() - 1));
                 }
                 this.save(viewer);
-            });
-
-            this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
-                if (!EngineUtils.hasPlugin(HookId.CITIZENS)) return;
-
-                if (event.isRightClick()) {
-                    staticShop.getNPCIds().clear();
-                    this.save(viewer);
-                    return;
-                }
-
-                this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, wrapper -> {
-                    int id = wrapper.asInt(-1);
-                    if (id < 0) return true;
-
-                    staticShop.getNPCIds().add(id);
-                    this.save(viewer);
-                    return true;
-                });
             });
 
             this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.SHOP_DISCOUNTS, 30).setClick((viewer, event) -> {

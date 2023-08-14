@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
 import su.nightexpress.nexshop.api.shop.CommandProduct;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class CommandSpecific implements ProductSpecific, CommandProduct {
         this.commands = new ArrayList<>(commands);
 
         this.placeholderMap = new PlaceholderMap()
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.PRODUCT_COMMANDS, () -> String.join("\n", this.getCommands()));
+            .add(Placeholders.PRODUCT_COMMANDS, () -> String.join("\n", this.getCommands()));
     }
 
     @Override

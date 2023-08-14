@@ -12,28 +12,23 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 public final class StaticShop extends VirtualShop<StaticShop, StaticProduct> {
 
     private final Set<VirtualDiscount> discountConfigs;
-    private final Set<Integer> npcIds;
 
     private int pages;
 
     public StaticShop(@NotNull VirtualShopModule module, @NotNull JYML cfg, @NotNull String id) {
         super(module, cfg, id);
         this.discountConfigs = new HashSet<>();
-        this.npcIds = new HashSet<>();
         this.placeholderMap
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_PAGES, () -> String.valueOf(this.getPages()))
-            .add(Placeholders.SHOP_NPC_IDS, () -> String.join(", ", this.getNPCIds().stream().map(String::valueOf).toList()));
+            .add(Placeholders.SHOP_PAGES, () -> String.valueOf(this.getPages()));
     }
 
     @Override
     protected boolean loadAdditionalData() {
         this.setPages(cfg.getInt("Pages", 1));
-        this.getNPCIds().addAll(IntStream.of(cfg.getIntArray("Citizens.Attached_NPC")).boxed().toList());
         for (String sId : cfg.getSection("Discounts")) {
             this.addDiscountConfig(VirtualDiscount.read(cfg, "Discounts." + sId));
         }
@@ -61,7 +56,6 @@ public final class StaticShop extends VirtualShop<StaticShop, StaticProduct> {
     @Override
     protected void saveAdditionalSettings() {
         cfg.set("Pages", this.getPages());
-        cfg.setIntArray("Citizens.Attached_NPC", this.getNPCIds().stream().mapToInt(Number::intValue).toArray());
         cfg.remove("Discounts");
         this.discountConfigs.forEach(discountConfig -> VirtualDiscount.write(discountConfig, cfg, "Discounts." + UUID.randomUUID()));
     }
@@ -85,10 +79,6 @@ public final class StaticShop extends VirtualShop<StaticShop, StaticProduct> {
 
     public void setPages(int pages) {
         this.pages = Math.max(1, pages);
-    }
-
-    public Set<Integer> getNPCIds() {
-        return this.npcIds;
     }
 
     @NotNull

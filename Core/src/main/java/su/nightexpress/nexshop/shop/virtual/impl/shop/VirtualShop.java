@@ -7,7 +7,7 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -16,8 +16,11 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 public abstract class VirtualShop<
     S extends VirtualShop<S, P>,
@@ -26,11 +29,13 @@ public abstract class VirtualShop<
     protected final VirtualShopModule module;
     protected final VirtualShopView<S, P>   view;
     protected final JYML              configProducts;
+    protected final Set<Integer> npcIds;
 
-    protected String       name;
-    protected List<String> description;
+    protected     String       name;
+    protected     List<String> description;
     protected boolean      isPermissionRequired;
-    protected ItemStack    icon;
+    protected     ItemStack    icon;
+
 
     private ShopMainEditor editor;
 
@@ -42,13 +47,16 @@ public abstract class VirtualShop<
         JYML configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "view.yml");
         this.view = new VirtualShopView<>(this.get(), configView);
 
+        this.npcIds = new HashSet<>();
+
         this.placeholderMap
             .add(Placeholders.SHOP_TYPE, () -> plugin.getLangManager().getEnum(this.getType()))
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_DESCRIPTION, () -> String.join("\n", this.getDescription()))
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_PERMISSION_NODE, () -> VirtualPerms.PREFIX_SHOP + this.getId())
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_PERMISSION_REQUIRED, () -> LangManager.getBoolean(this.isPermissionRequired()))
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_VIEW_SIZE, () -> String.valueOf(this.getView().getOptions().getSize()))
-            .add(su.nightexpress.nexshop.shop.virtual.util.Placeholders.SHOP_VIEW_TITLE, () -> this.getView().getOptions().getTitle());
+            .add(Placeholders.SHOP_DESCRIPTION, () -> String.join("\n", this.getDescription()))
+            .add(Placeholders.SHOP_PERMISSION_NODE, () -> VirtualPerms.PREFIX_SHOP + this.getId())
+            .add(Placeholders.SHOP_PERMISSION_REQUIRED, () -> LangManager.getBoolean(this.isPermissionRequired()))
+            .add(Placeholders.SHOP_VIEW_SIZE, () -> String.valueOf(this.getView().getOptions().getSize()))
+            .add(Placeholders.SHOP_VIEW_TITLE, () -> this.getView().getOptions().getTitle())
+            .add(Placeholders.SHOP_NPC_IDS, () -> String.join(", ", this.getNPCIds().stream().map(String::valueOf).toList()));
     }
 
     @Override
@@ -57,6 +65,8 @@ public abstract class VirtualShop<
         this.setDescription(cfg.getStringList("Description"));
         this.setPermissionRequired(cfg.getBoolean("Permission_Required", false));
         this.setIcon(cfg.getItem("Icon"));
+        this.getNPCIds().addAll(IntStream.of(cfg.getIntArray("Citizens.Attached_NPC")).boxed().toList());
+
         for (TradeType buyType : TradeType.values()) {
             this.setTransactionEnabled(buyType, cfg.getBoolean("Transaction_Allowed." + buyType.name(), true));
         }
@@ -138,6 +148,7 @@ public abstract class VirtualShop<
         cfg.set("Description", this.getDescription());
         cfg.set("Permission_Required", this.isPermissionRequired());
         cfg.setItem("Icon", this.getIcon());
+        cfg.setIntArray("Citizens.Attached_NPC", this.getNPCIds().stream().mapToInt(Number::intValue).toArray());
         this.transactions.forEach((type, isAllowed) -> cfg.set("Transaction_Allowed." + type.name(), isAllowed));
         this.saveAdditionalSettings();
         cfg.saveChanges();
@@ -201,5 +212,9 @@ public abstract class VirtualShop<
     public void setIcon(@NotNull ItemStack icon) {
         this.icon = new ItemStack(icon);
         this.icon.setAmount(1);
+    }
+
+    public Set<Integer> getNPCIds() {
+        return this.npcIds;
     }
 }

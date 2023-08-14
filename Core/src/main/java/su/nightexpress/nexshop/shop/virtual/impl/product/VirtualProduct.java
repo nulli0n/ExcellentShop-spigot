@@ -39,6 +39,7 @@ public abstract class VirtualProduct<
         this.allowedRanks = new HashSet<>();
         this.specific = specific;
 
+        this.placeholderMap.add(this.getSpecific().getPlaceholders());
         this.placeholderMap
             .add(Placeholders.PRODUCT_ALLOWED_RANKS, () -> String.join("\n", this.getAllowedRanks()));
     }
