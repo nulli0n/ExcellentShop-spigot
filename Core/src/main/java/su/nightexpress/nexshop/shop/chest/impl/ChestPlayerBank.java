@@ -64,6 +64,11 @@ public class ChestPlayerBank {
     }
 
     public double getBalance(@NotNull Currency currency) {
+        Player player = this.getOnlinePlayer();
+        if (player != null && ChestConfig.SHOP_AUTO_BANK.get()) {
+            return currency.getHandler().getBalance(player);
+        }
+
         return this.getBalanceMap().getOrDefault(currency, 0D);
     }
 

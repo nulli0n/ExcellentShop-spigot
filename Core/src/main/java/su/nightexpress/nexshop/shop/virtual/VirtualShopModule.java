@@ -366,7 +366,7 @@ public class VirtualShopModule extends ShopModule {
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                 if (tradeType == TradeType.SELL && !product.isSellable()) return false;
                 if (!product.hasAccess(player)) return false;
-                if (!(product instanceof ItemProduct itemProduct)) return false;
+                if (!(product.getSpecific() instanceof ItemProduct itemProduct)) return false;
                 if (!itemProduct.isItemMatches(item)) return false;
                 return product.getStock().getPossibleAmount(tradeType, player) != 0;
             }).toList());
