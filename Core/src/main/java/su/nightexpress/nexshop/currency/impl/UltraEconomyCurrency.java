@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 
@@ -15,50 +16,62 @@ import java.util.Optional;
 public class UltraEconomyCurrency implements Currency, CurrencyHandler {
 
     private final me.TechsCode.UltraEconomy.objects.Currency currency;
+    private final PlaceholderMap placeholderMap;
 
     public UltraEconomyCurrency(me.TechsCode.UltraEconomy.objects.Currency currency) {
         this.currency = currency;
+        this.placeholderMap = new PlaceholderMap()
+            .add(Placeholders.CURRENCY_ID, this::getId)
+            .add(Placeholders.CURRENCY_NAME, this::getName);
     }
 
 
     @Override
-    public @NotNull CurrencyHandler getHandler() {
+    @NotNull
+    public CurrencyHandler getHandler() {
         return this;
     }
 
     @Override
-    public @NotNull String getId() {
+    @NotNull
+    public String getId() {
         return ("ultraeconomy_" + currency.getName()).toLowerCase();
     }
 
     @Override
-    public @NotNull String getName() {
+    @NotNull
+    public String getName() {
         return currency.getName().toLowerCase();
     }
 
     @Override
-    public @NotNull String getFormat() {
+    @NotNull
+    public String getFormat() {
         return currency.getFormat().format(0.0);
     }
 
     @Override
-    public @NotNull String format(double price) {
+    @NotNull
+    public String format(double price) {
         return currency.getFormat().format(price);
     }
 
     @Override
-    public @NotNull String formatValue(double price) {
+    @NotNull
+    public String formatValue(double price) {
         return currency.getFormat().format(price);
     }
 
     @Override
-    public @NotNull ItemStack getIcon() {
+    @NotNull
+    public ItemStack getIcon() {
         return currency.getIcon().getAsItemStack().orElseGet(() -> new ItemStack(Material.GOLD_INGOT));
     }
 
     @Override
-    public @NotNull PlaceholderMap getPlaceholders() {
-        return new PlaceholderMap();
+    @NotNull
+    public PlaceholderMap getPlaceholders() {
+        return this.placeholderMap;
     }
 
     @Override

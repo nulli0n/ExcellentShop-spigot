@@ -28,8 +28,7 @@ public class ConfigCurrency extends AbstractConfigHolder<ExcellentShop> implemen
 
         this.placeholderMap = new PlaceholderMap()
             .add(Placeholders.CURRENCY_ID, this::getId)
-            .add(Placeholders.CURRENCY_NAME, this::getName)
-        ;
+            .add(Placeholders.CURRENCY_NAME, this::getName);
     }
 
     @Override

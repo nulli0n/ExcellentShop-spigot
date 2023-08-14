@@ -12,7 +12,7 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
 
@@ -28,7 +28,7 @@ public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
         this.load();
 
         this.cfg.getSection("Shops").forEach(shopId -> {
-            StaticShop shop = module.getStaticShopById(shopId);
+            VirtualShop<?, ?> shop = module.getShopById(shopId);
             if (shop == null) {
                 this.module.error("Invalid shop in the main menu: '" + shopId + "' !");
                 return;
