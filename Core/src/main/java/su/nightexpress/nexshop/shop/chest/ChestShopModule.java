@@ -36,7 +36,6 @@ import su.nightexpress.nexshop.shop.chest.menu.ShopBrowseMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopListMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSearchMenu;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
-import su.nightexpress.nexshop.shop.chest.nms.V1_17_R1;
 import su.nightexpress.nexshop.shop.chest.nms.V1_18_R2;
 import su.nightexpress.nexshop.shop.chest.nms.V1_19_R3;
 import su.nightexpress.nexshop.shop.chest.util.ShopMap;
@@ -104,9 +103,8 @@ public class ChestShopModule extends ShopModule {
         this.plugin.registerPermissions(ChestPerms.class);
 
         this.chestNMS = switch (Version.getCurrent()) {
-            case V1_19_R1, V1_19_R2, UNKNOWN -> null;
+            case V1_17_R1, V1_19_R1, V1_19_R2, UNKNOWN -> null;
 
-            case V1_17_R1 -> new V1_17_R1();
             case V1_18_R2 -> new V1_18_R2();
             case V1_19_R3 -> new V1_19_R3();
             case V1_20_R1 -> new V1_20_R1();

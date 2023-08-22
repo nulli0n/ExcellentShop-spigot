@@ -45,7 +45,7 @@ public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
             MenuItem menuItem = new MenuItem(icon);
             menuItem.setSlots(slot);
             menuItem.setPriority(100);
-            menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, shop.replacePlaceholders()));
+            menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemUtil.replace(item, shop.replacePlaceholders()));
             menuItem.setClick((viewer, event) -> {
                 this.plugin.runTask(task -> {
                     if (shop.canAccess(viewer.getPlayer(), true)) {
@@ -57,11 +57,9 @@ public class ShopMainMenu extends ConfigMenu<ExcellentShop> {
         });
 
         if (Config.GUI_PLACEHOLDER_API.get()) {
-            this.getItems().forEach(menuItem -> {
-                if (menuItem.getOptions().getDisplayModifier() == null) {
-                    menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item));
-                }
-            });
+            this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+                ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
+            }));
         }
     }
 }

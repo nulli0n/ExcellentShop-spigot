@@ -171,10 +171,7 @@ public class VirtualShopModule extends ShopModule {
 
             RotatingShop shop = new RotatingShop(this, new JYML(fileNew), id);
             if (shop.load()) {
-                ShopRotationStorage.loadData(shop).thenRun(() -> {
-                    this.getRotatingShopMap().put(shop.getId(), shop);
-                    shop.tryRotate();
-                });
+                this.getRotatingShopMap().put(shop.getId(), shop);
             }
             else this.warn("Shop not loaded: " + shop.getFile().getName());
         }
@@ -210,8 +207,11 @@ public class VirtualShopModule extends ShopModule {
             ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
         });
         this.getRotatingShops().forEach(shop -> {
-            ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
-            ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+            ShopRotationStorage.loadData(shop).thenRun(() -> {
+                ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
+                ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+                shop.tryRotate();
+            });
         });
     }
 

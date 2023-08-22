@@ -27,6 +27,8 @@ Error:
 Editor:
   Generic:
     Enter:
+      Name: '&7Introduce un &a[Nombre]'
+      Amount: '&7Introduce una &a[Cantidad]'
       Day: '&7Introduce &aun día &7en &ainglés.'
       Time: '&7Introduce &auna hora&7 como: &a18:00:00.'
       Seconds: '&7Introduce &auna cantidad &7de segundos.'
@@ -36,420 +38,6 @@ Editor:
     Enter:
       Price: '&7Introduce un nuevo &aprecio.'
       Currency: '&7Introduce &ala id de una divisa.'
-  VirtualEditorType:
-    SHOP_OBJECT:
-      Name: '%shop_name%'
-      Lore:
-        - '&6&l[?] Descripción:'
-        - '&7Páginas: &f%shop_pages%'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara eliminar &7(Esta acción no se puede deshacer).'
-    SHOP_CREATE:
-      Name: Crear tienda.
-      Lore:
-        - '&6&l[?] Descripción:'
-        - '&7Crea una nueva tienda virtual.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara crear.'
-    SHOP_CHANGE_NAME:
-      Name: Nombre de la tienda.
-      Lore:
-        - '&b&l[?] Nombre actual:'
-        - '&a%shop_name%'
-        - ' '
-        - '&6&l[?] Description:'
-        - '&7Establece el nombre de la tienda.'
-        - '&7Este nombre es usado en las GUIs,'
-        - '&7mensajes, etc.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar.'
-    SHOP_CHANGE_DESCRIPTION:
-      Name: Descripción de la tienda.
-      Lore:
-        - '&b&l[?] Descripción actual:'
-        - '&a%shop_description%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece la descripción de la tienda.'
-        - '&7Es usada principalmente en GUIs.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara añadir una línea.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara borrar.'
-    SHOP_CHANGE_PAGES:
-      Name: Cantidad de páginas.
-      Lore:
-        - '&b&l[?] Cantidad de páginas actual:'
-        - '&a%shop_pages%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece el número de páginas'
-        - '&7que tendrá la tienda.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0No olvides editar el número de páginas'
-        - '&x&F&F&C&3&0&0cuando disminuya el número de productos.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara añadir páginas.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara quitar páginas.'
-    SHOP_CHANGE_ICON:
-      Name: Icono de la tienda.
-      Lore:
-        - '&b&l[?] Icono actual:'
-        - '&a%shop_icon_type%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece un ícono para la tienda.'
-        - '&7Este ícono se muestra en las GUIs.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0No tienes que establecer nombre'
-        - '&x&F&F&C&3&0&0y lore para ello. En su lugar, usa'
-        - '&x&F&F&C&3&0&0el nombre de la tienda y las'
-        - '&x&F&F&C&3&0&0opciones de descripción.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aArrastra y suelta &fpara reemplazar.'
-    SHOP_CHANGE_DISCOUNTS:
-      Name: Descuentos
-      Lore:
-        - '&6&l[?] Descripción:'
-        - '&7Crea y administra los descuentos de la tienda aquí.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara navegar.'
-    SHOP_CHANGE_PRODUCTS:
-      Name: Productos.
-      Lore:
-        - '&6&l[?] Descripción:'
-        - '&7Crea y administra los pruductos de la tienda aquí.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara navegar.'
-    SHOP_CHANGE_PERMISSION:
-      Name: Requisito de permisos.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aActivado: &f%shop_permission_required%'
-        - '&aNodo: &f%shop_permission_node%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece si los jugadores deben tener un'
-        - '&7permiso específico para poder usar esta'
-        - '&7tienda.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara cambiar.'
-    SHOP_CHANGE_TRANSACTIONS:
-      Name: Transacciones habilitadas.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aComprar está activado: &f%shop_buy_allowed%'
-        - '&aVender está activado: &f%shop_sell_allowed%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Activa transacciones específicas en la tienda.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara alternar la compra.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara alternar la venta.'
-    SHOP_CHANGE_CITIZENS_ID:
-      Name: NPCs adjuntos.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%shop_npc_ids%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Una lista de las Ids de NPCs adjuntos'
-        - '&7a esta tienda. Estos NPCs van a'
-        - '&7abrir la interfaz de la tienda cuando'
-        - '&7interactúes con ellos.'
-        - ' '
-        - '&c&l[!] Advertencia:'
-        - '&x&C&7&0&0&3&9Es necesario tener "citizens" instalado.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara añadir un NPC.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara borrar la lista.'
-    SHOP_CHANGE_VIEW_DESIGN:
-      Name: Diseño de la interfaz de la tienda.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aTítulo: &f%shop_view_title%'
-        - '&aTamaño: &f%shop_view_size%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Aquí puedes ver el diseño de la'
-        - '&7interfaz para esta tienda.'
-        - '&7Simplemente añade/quita los'
-        - '&7objetos que quieras y listo.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Presiona la tecla [Q] sobre el objeto para'
-        - '&x&F&F&C&3&0&0cambiar su tipo. Es útil para crear'
-        - '&x&F&F&C&3&0&0botones de página alante y atrás.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara navegar.'
-        - '&x&8&6&d&e&2&aShift-Click-Izdo. &fpara cambiar el título.'
-        - '&x&8&6&d&e&2&aShift-Click-Dcho. &fpara cambiar el tamaño.'
-    DISCOUNT_OBJECT:
-      Name: Descuentos en la tienda.
-      Lore:
-        - '&6&l[?] Descripción:'
-        - '&7Descuento: &f%discount_amount%%'
-        - '&7Días: '
-        - '&7%discount_days%'
-        - '&7Horas:'
-        - '&7%discount_times%'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar'
-        - '&x&8&6&d&e&2&aShift-Click-Dcho. &fpara eliminar &7(Esta acción no se puede deshacer).'
-    DISCOUNT_CREATE:
-      Name: Crear descuento
-      Lore:
-        - '&6&l[?] Descripción:'
-        - '&7Crea una nueva configuración de'
-        - '&7descuento para la tienda.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara crear.'
-    DISCOUNT_CHANGE_DISCOUNT:
-      Name: Cantidad de descuento.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%discount_amount%%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece la cantidad de descuento (En porcentaje).'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar.'
-    DISCOUNT_CHANGE_DURATION:
-      Name: Duración del descuento.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%discount_duration%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7¿Cuánto tiempo durará el descuento?'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar.'
-    DISCOUNT_CHANGE_DAY:
-      Name: Días en las que está disponible el descuento.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%discount_days%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Una lista de los días en los que este'
-        - '&7descuento estará activado.'
-        - ' '
-        - '&c&l[!] Advertencia:'
-        - '&x&C&7&0&0&3&9Tienes que seleccionar como mínimo'
-        - '&x&C&7&0&0&3&9un día y una hora para que el'
-        - '&x&C&7&0&0&3&9descuento funcione.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara añadir un día.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara eliminar.'
-    DISCOUNT_CHANGE_TIME:
-      Name: Horas en las que está disponible el descuento.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%discount_times%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Una lista de las horas, en las que este'
-        - '&7descuento estará activado.'
-        - ' '
-        - '&c&l[!] Advertencia:'
-        - '&x&C&7&0&0&3&9Tienes que seleccionar como mínimo'
-        - '&x&C&7&0&0&3&9un día y una hora para que el'
-        - '&x&C&7&0&0&3&9descuento funcione.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara añadir una hora.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara eliminar.'
-    PRODUCT_OBJECT:
-      Name: '%product_preview_name%'
-      Lore:
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aShift-Click-Izdo. &fpara editar.'
-        - '&x&8&6&d&e&2&aShift-Click-Dcho. &fpara eliminar &7(Esta acción no se puede deshacer).'
-    PRODUCT_CHANGE_PRICE:
-      Name: Gestor de precios.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aCompra: &f%product_price_buy%'
-        - '&aVenta: &f%product_price_sell%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Aquí puedes cambiar el tipo'
-        - '&7y la cantidad del precio.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClic-Izdo. &fpara navegar.'
-        - '&x&8&6&d&e&2&aTecla [Q] &fpara refrescar.'
-    PRODUCT_CHANGE_CURRENCY:
-      Name: Divisa del producto.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%product_currency%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece la divisa del producto.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClic-Izdo. &fpara editar.'
-    PRODUCT_CHANGE_PREVIEW:
-      Name: Vista previa del producto.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%product_preview_name%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece el item que describirá'
-        - '&7este producto.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Si quieres añadir un nombre o'
-        - '&x&F&F&C&3&0&0descripción personalizadas, por favor hazlo'
-        - '&x&F&F&C&3&0&0sobre el nombre y lore de este item.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aArrastra y suelta &fpara reemplazar.'
-        - '&x&8&6&d&e&2&aShift-Click-Izdo. &fpara obtener el item.'
-    PRODUCT_CHANGE_ITEM:
-      Name: Item actual.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%product_item_name%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece el item que el jugador'
-        - '&7puede comprar o vender.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Los objetos personalizados son totalmente compatibles.'
-        - ' '
-        - '&c&l[!] Advertencia:'
-        - '&x&C&7&0&0&3&9Los productos sin un ''item actual'' no pueden'
-        - '&x&C&7&0&0&3&9ser vendidos.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aArrastra y suelta &fpara reemplazar.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara desactivar.'
-        - '&x&8&6&d&e&2&aShift-Click-Izdo. &fpara obtener el item.'
-    PRODUCT_CHANGE_COMMANDS:
-      Name: Comandos del producto.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&a%product_commands%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Una lista de comandos que serán'
-        - '&7ejecutados cuando un jugador'
-        - '&7compre este producto.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara añadir comando.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara eliminar.'
-    PRODUCT_CHANGE_DISCOUNT:
-      Name: Descuentos permitidos.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aPermitidos: &f%product_discount_allowed%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece si el precio del producto puede'
-        - '&7ser afectado por los descuentos de la tienda.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara cambiar.'
-    PRODUCT_CHANGE_ITEM_META:
-      Name: Meta de producto activada.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aHabilitado: &f%product_item_meta_enabled%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Cuando está activado, deben coincidir los metadatos'
-        - '&7(nombre, lore, etc) del producto de la tienda'
-        - '&7y los del producto que el jugador quiere vender'
-        - ' '
-        - '&c&l[!] Advertencia:'
-        - '&x&C&7&0&0&3&9Activa esto para objetos personalizados.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara cambiar.'
-    PRODUCT_CHANGE_STOCK_GLOBAL:
-      Name: Existencias (stock) del item.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aStock de compra inicial: &f%product_stock_global_buy_amount_initial%'
-        - '&aTiempo de reposición de compra: &f%product_stock_global_buy_restock_time%'
-        - '&aStock de venta inicial: &f%product_stock_global_sell_amount_initial%'
-        - '&aTiempo de reposición de venta: &f%product_stock_global_sell_restock_time%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece cuanto del producto'
-        - '&7puede almacenar la tienda.'
-        - '&7Cada vez que un jugador compra/vende un producto,'
-        - '&7la cantidad de stock del producto cambia. Cuando'
-        - '&7queden 0 objetos, no se podrá hacer compra/venta'
-        - '&7hasta que se reabastezca el producto.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Puedes establecer -1 como cantidad inicial'
-        - '&x&F&F&C&3&0&0para que el producto sea ilimitado.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Puedes establecer -1 como tiempo'
-        - '&x&F&F&C&3&0&0para hacer que nunca se haga un reabastecimiento.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar el stock de compra inicial.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara editar el tiempo de reposición de compra.'
-        - '&x&8&6&d&e&2&aShift-Click-Izdo. &fpara editar el stock de venta inicial.'
-        - '&x&8&6&d&e&2&aShift-Click-Dcho. &fpara editar el tiempo de reposición de venta.'
-    PRODUCT_CHANGE_STOCK_PLAYER:
-      Name: Límite de productos para los jugadores.
-      Lore:
-        - '&b&l[?] Actual:'
-        - '&aLímite de compra: &f%product_stock_player_buy_amount_initial%'
-        - '&aTiempo para reiniciar el límite de compra: &f%product_stock_player_buy_restock_time%'
-        - '&aLímite de venta: &f%product_stock_player_sell_amount_initial%'
-        - '&aTiempo para reiniciar el límite de venta: &f%product_stock_player_sell_restock_time%'
-        - ' '
-        - '&6&l[?] Descripción:'
-        - '&7Establece la cantidad de este producto'
-        - '&7que puede comprar un jugador hasta que'
-        - '&7termine el tiempo de espera.'
-        - '&7Si el stock es menor que el'
-        - '&7límite del jugador, el stock'
-        - '&7será usado como el máximo.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Puedes establecer -1 como cantidad'
-        - '&x&F&F&C&3&0&0para hacerlo ilimitado.'
-        - ' '
-        - '&e&l[!] Nota:'
-        - '&x&F&F&C&3&0&0Puedes establecer -1 como tiempo de espera'
-        - '&x&F&F&C&3&0&0para que nunca se actualice automáticamente.'
-        - ' '
-        - '&x&5&5&e&1&3&6&l[>] Acciones:'
-        - '&x&8&6&d&e&2&aClick-Izdo. &fpara editar el límite de compra.'
-        - '&x&8&6&d&e&2&aClick-Dcho. &fpara editar el tiempo reinicio del límite de compra.'
-        - '&x&8&6&d&e&2&aShift-Click-Izdo. &fpara editar el límite de venta.'
-        - '&x&8&6&d&e&2&aShift-Click-Dcho. &fpara editar el tiempo de reinicio del límite de venta.'
 Shop:
   Product:
     Error:
@@ -461,15 +49,608 @@ Shop:
       FullStock: '&cEste producto está lleno de existencias.'
       FullInventory: '&cNo puedes comprar con el inventario lleno.'
       TooExpensive:
-        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&lMuy caro.'
-        - ' &7Necesitas: &c%price%&7'
+        - <! type:"titles:15:60:15" sound:"BLOCK_ANVIL_PLACE" !>
+        - '&c&lDemasiado caro '
+        - ' &7Necesitas: &c%price%&7!'
       NotEnoughItems:
-        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&c&lNo hay objetos suficientes.'
-        - ' &7Necesitas: &cx%amount% %item%&7'
+        - <! type:"titles:15:60:15" sound:"BLOCK_ANVIL_PLACE" !>
+        - '&c&lNo hay objetos suficientes. '
+        - ' &7Necesitas: &cx%amount% %item%&7!'
+TradeType:
+  BUY: Compra
+  SELL: Venta
+PriceType:
+  FLAT: Fijo
+  FLOAT: Rango
+  DYNAMIC: Dinámico
+VirtualShop:
+  Command:
+    Open:
+      Desc: Abre una tienda específica.
+      Usage: '[player]'
+    Menu:
+      Desc: Abre el menú principal.
+      Usage: '[player]'
+    Shop:
+      Desc: Abre la tienda específica o el menú principal.
+      Usage: '[shopId]'
+    SellMenu:
+      Desc: Abre la interfaz de venta.
+      Usage: ''
+  Shop:
+    Error:
+      BadWorld: '&cLa tienda está desactivada en este mundo.'
+      BadGamemode: '&cNo puedes usar la tienda en el &cmodo de juego &e%type%!'
+      Invalid: '&cNo existe esa tienda.'
+  Product:
+    Purchase:
+      Sell:
+        - <! type:"titles:15:60:15" sound:"ENTITY_EXPERIENCE_ORB_PICKUP" !>
+        - '&a&lVenta exitosa '
+        - '&7Vendiste &ax%amount% %item% &7por &a%price%&7.'
+      Buy:
+        - <! type:"titles:15:60:15" sound:"ENTITY_EXPERIENCE_ORB_PICKUP" !>
+        - '&a&lCompra exitosa'
+        - '&7Compraste &ax%amount% %item% &7por &a%price%&7.'
+  SellMenu:
+    SaleResult:
+      - <! prefix:"false" sound:"ENTITY_EXPERIENCE_ORB_PICKUP" !>
+      - '&a&lObjetos vendidos:'
+      - '&7x%amount% %item%: &f%price%'
+  Editor:
+    Create:
+      Error:
+        Exist: '&cYa existe una tienda con esa id.'
+    Enter:
+      Id: '&7Escribe el &a[ID de la tienda]'
+      Description: '&7Escribe la &a[Descripción]'
+      NpcId: '&7Escribe el &a[ID de NPC]'
+      Title: '&7Escribe el &a[Título]'
+      Command: '&7Escribe el &a[Comando]'
+    Shop:
+      Icon:
+        Name: '#ffed6a&lIcono de la tienda'
+        Lore:
+          - '#bdc8c9Establece un ícono para la tienda.'
+          - '#bdc8c9Este ícono se muestra en las GUIs.'
+          - ''
+          - '#ffa76a&lNota:'
+          - '#ffa76a▪ #bdc8c9En lugar del nombre y lore del item, se'
+          - '#bdc8c9usará el #ffa76aNombre de la tienda#bdc8c9 y su #ffa76aDescripción#bdc8c9.'
+          - ''
+          - '#bbff6a&lAcciones:'
+          - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aReemplazar'
+          - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aObtener una copia'
+    Product:
+      Object:
+        Name: '#ffed6a&l%product_preview_name%'
+        Lore:
+          - '#bdc8c9Puedes mover este producto a cualquier otra'
+          - '#bdc8c9ranura. También puedes guardarlo en tu inventario'
+          - '#bdc8c9para añadirlo a otra páginas o tiendas.'
+          - '#bdc8c9Toda la configuración del producto se #bbff6amantendrá#bdc8c9.'
+          - ''
+          - '#bbff6a&lAcciones:'
+          - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aEditar'
+          - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aEliminar#ff6a6a (irreversible)'
+      FreeSlot:
+        Name: '#ffed6a&l#bbff6a&lRanura libre'
+        Lore:
+          - '#bbff6a&lAcciones:'
+          - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aAñadir producto de item'
+          - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aAñadir producto de comando'
+      ReservedSlot:
+        Name: '#ffed6a&l#ff6a6a&lRanura reservada'
+        Lore:
+          - '#bdc8c9Esta ranura está ocupada por un producto de la tienda.'
+      PriceManager:
+        Name: '#ffed6a&lGestor de precios'
+        Lore:
+          - '#ffed6a&lActual:'
+          - '#ffed6a▪ #bdc8c9Divisa: #ffed6a%product_currency%'
+          - '#ffed6a▪ #bdc8c9Comprar: #ffed6a%product_price_buy%'
+          - '#ffed6a▪ #bdc8c9Vender: #ffed6a%product_price_sell%'
+          - ''
+          - '#bdc8c9Gestiona la divisa y el precio'
+          - '#bdc8c9del producto.'
+          - ''
+          - '#bbff6a&lAcciones:'
+          - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar precios'
+          - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar divisas'
+          - '#bbff6a▪ #bdc8c9Tecla [Q/Soltar]: #bbff6aRefrescar precio'
+      RespectItemMeta:
+        Name: '#ffed6a&lRespetar metadatos del item'
+        Lore:
+          - '#ffed6a&lActual:'
+          - '#ffed6a▪ #bdc8c9Enabled: #ffed6a%product_item_meta_enabled%'
+          - ''
+          - '#bdc8c9Establece si el producto debería respetar'
+          - '#bdc8c9los metadatos del #ffed6aItem#bdc8c9.'
+          - '#bdc8c9Esto quiere decir que los jugadores podrán vender'
+          - '#bdc8c9items similares o exactamente iguales.'
+          - ''
+          - '#ffa76a&lNota:'
+          - '#ffa76a▪ #bdc8c9¡Activa esto para objetos personalizados!'
+          - ''
+          - '#bbff6a&lAcciones:'
+          - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
+VirtualEditorType:
+  Editor:
+    SHOP_CREATE:
+      Name: '#ffed6a&lCrear tienda'
+      Lore:
+        - '#bdc8c9Crea una nueva tienda virtual.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCrear'
+    SHOP_OBJECT:
+      Name: '#ffed6a&l%shop_name%'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Páginas: #ffed6a%shop_pages%'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aEditar'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aEliminar#ff6a6a (irreversible)'
+    SHOP_CHANGE_NAME:
+      Name: '#ffed6a&lNombre de la tienda'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Nombre: #ffed6a%shop_name%'
+        - ''
+        - '#bdc8c9Establece el nombre de la tienda.'
+        - '#bdc8c9Se usa en los mensajes, etc.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Este #ffa76ano #bdc8c9es el título del GUI.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
+    SHOP_CHANGE_DESCRIPTION:
+      Name: '#ffed6a&lDescripción de la tienda'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#bdc8c9%shop_description%'
+        - ''
+        - '#bdc8c9Establece la descripción de la tienda.'
+        - '#bdc8c9Se usa en el menú principal.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir línea'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aLimpiar lista'
+    SHOP_CHANGE_PAGES:
+      Name: '#ffed6a&lCantidad de páginas'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Páginas: #ffed6a%shop_pages%'
+        - ''
+        - '#bdc8c9Establece el número de páginas'
+        - '#bdc8c9que tendrá la tienda.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9¡No olvides añadir items desde'
+        - '#bdc8c9el #ffed6aEditor de interfaz#bdc8c9!'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6a+1 Página'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6a-1 Página'
+    SHOP_CHANGE_PERMISSION:
+      Name: '#ffed6a&lRequisito de permisos'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Activado: #ffed6a%shop_permission_required%'
+        - '#ffed6a▪ #bdc8c9Nodo: #ffed6a%shop_permission_node%'
+        - ''
+        - '#bdc8c9Establece si los jugadores deben tener'
+        - '#bdc8c9un permiso específico para poder'
+        - '#bdc8c9usar esta tienda.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
+    SHOP_CHANGE_TRANSACTIONS:
+      Name: '#ffed6a&lTransacciones habilitadas'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Comprar está habilitado: #ffed6a%shop_buy_allowed%'
+        - '#ffed6a▪ #bdc8c9Vender está habilitado: #ffed6a%shop_sell_allowed%'
+        - ''
+        - '#bdc8c9Establece si la #ffed6acompra#bdc8c9 y/o la #ffed6aventa'
+        - '#bdc8c9están permitidas en esta tienda.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar la compra'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aAlternar la venta'
+    SHOP_CHANGE_CITIZENS_ID:
+      Name: '#ffed6a&lNPCs adjuntos'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9NPC IDs: #ffed6a%shop_npc_ids%'
+        - ''
+        - '#bdc8c9Una lista de las IDs de NPCs adjuntos'
+        - '#bdc8c9a esta tienda. Estos NPCs abrirán'
+        - '#bdc8c9la interfaz de la tienda cuando'
+        - '#bdc8c9interactúes con ellos.'
+        - ''
+        - '#ff6a6a&lAdvertencia:'
+        - '#ff6a6a▪ #bdc8c9¡Es necesario tener #ff6a6aCitizens #bdc8c9instalado!'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir ID'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
+    SHOP_CHANGE_VIEW_DESIGN:
+      Name: '#ffed6a&lEditor de interfaz'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Título: #ffed6a%shop_view_title%'
+        - '#ffed6a▪ #bdc8c9Tamaño: #ffed6a%shop_view_size%'
+        - ''
+        - '#bdc8c9Establece el #ffed6atítulo#bdc8c9 y el #ffed6atamaño#bdc8c9 de la'
+        - '#bdc8c9GUI de la tienda. Aquí puedes personalizar'
+        - '#bdc8c9la interfaz (GUI) de esta tienda. Coloca items'
+        - '#bdc8c9en el editor y presiona #ffed6aESC#bdc8c9 para guardar.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAbrir editor'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aCambiar título'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aCambiar tamaño'
+    SHOP_CHANGE_DISCOUNTS:
+      Name: '#ffed6a&lDescuentos'
+      Lore:
+        - '#bdc8c9Crea y administra los descuentos de la tienda aquí.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aNavegar'
+    SHOP_CHANGE_PRODUCTS:
+      Name: '#ffed6a&lProductos'
+      Lore:
+        - '#bdc8c9Crea y administra los pruductos de la tienda aquí.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aNavegar'
+    PRODUCT_CHANGE_ITEM:
+      Name: '#ffed6a&lItem actual'
+      Lore:
+        - '#bdc8c9Establece el item que el jugador'
+        - '#bdc8c9puede comprar o vender.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aReemplazar'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aObtener una copia'
+    PRODUCT_CHANGE_PREVIEW:
+      Name: '#ffed6a&lVista previa del producto'
+      Lore:
+        - '#bdc8c9Establece el item con el que se representará'
+        - '#bdc8c9este producto en la interfaz (GUI).'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Use item with premade name, lore for best results.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aReemplazar'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aObtener una copia'
+    PRODUCT_CHANGE_COMMANDS:
+      Name: '#ffed6a&lComandos del producto'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#bdc8c9%product_commands%'
+        - ''
+        - '#bdc8c9Una lista de comandos que serán'
+        - '#bdc8c9ejecutados cuando un jugador'
+        - '#bdc8c9compre este producto.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Usa #ffa76a%player_name%'
+        - '#bdc8c9 para el nombre del jugador.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir comando'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
+    PRODUCT_CHANGE_DISCOUNT:
+      Name: '#ffed6a&lDescuentos permitidos'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Permitidos: #ffed6a%product_discount_allowed%'
+        - ''
+        - '#bdc8c9Establece si el precio del producto puede'
+        - '#bdc8c9ser afectado por los descuentos de la tienda.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
+    PRODUCT_CHANGE_STOCK_GLOBAL:
+      Name: '#ffed6a&lExistencias globales (stock)'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Compra - Stock inicial: #ffed6a%product_stock_global_buy_amount_initial%'
+        - '#ffed6a▪ #bdc8c9Compra - Tiempo de reposición: #ffed6a%product_stock_global_buy_restock_time%'
+        - '#ffed6a▪ #bdc8c9Venta - Stock inicial: #ffed6a%product_stock_global_sell_amount_initial%'
+        - '#ffed6a▪ #bdc8c9Venta - Tiempo de reposición: #ffed6a%product_stock_global_sell_restock_time%'
+        - ''
+        - '#bdc8c9Establece cuanto del producto puede'
+        - '#bdc8c9almacenar la tienda. Cada vez que se'
+        - '#bdc8c9realiza una transacción, la cantidad de stock'
+        - '#bdc8c9del producto cambia. Cuando queden 0 objetos,'
+        - '#bdc8c9no se podrá hacer compra/venta hasta que se'
+        - '#bdc8c9reabastezca el producto.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como cantidad inicial'
+        - '#bdc8c9para que el producto sea #ffa76ailimitado#bdc8c9.'
+        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como tiempo para'
+        - '#bdc8c9hacer que nunca se reestablezcan las existencias.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCompra - Cambiar stock inicial'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCompra - Cambiar tiempo de reposición'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aVenta - Cambiar stock inicial'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aVenta - Cambiar tiempo de reposición'
+        - '#bbff6a▪ #bdc8c9Tecla [Q/Soltar]: #bbff6aDeshabilitar todo'
+    PRODUCT_CHANGE_STOCK_PLAYER:
+      Name: '#ffed6a&lLímites de jugador (stock)'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Compra - Stock inicial: #ffed6a%product_stock_player_buy_amount_initial%'
+        - '#ffed6a▪ #bdc8c9Compra - Tiempo de reposición: #ffed6a%product_stock_player_buy_restock_time%'
+        - '#ffed6a▪ #bdc8c9Venta - Stock inicial: #ffed6a%product_stock_player_sell_amount_initial%'
+        - '#ffed6a▪ #bdc8c9Venta - Tiempo de reposición: #ffed6a%product_stock_player_sell_restock_time%'
+        - ''
+        - '#bdc8c9Establece cuanto del producto puede'
+        - '#bdc8c9comprar/vender #ffed6acada#bdc8c9 jugador. Cada vez que se'
+        - '#bdc8c9realiza una transacción, la cantidad de stock'
+        - '#bdc8c9del producto cambia. Cuando queden 0 objetos,'
+        - '#bdc8c9no se podrá hacer compra/venta hasta que se'
+        - '#bdc8c9reabastezca el producto.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como cantidad inicial'
+        - '#bdc8c9para que el producto sea #ffa76ailimitado#bdc8c9.'
+        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como tiempo para'
+        - '#bdc8c9hacer que nunca se reestablezcan las existencias.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCompra - Cambiar límite'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCompra - Cambiar tiempo de reposición'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aVenta - Cambiar límite'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aVenta - Cambiar tiempo de reposición'
+        - '#bbff6a▪ #bdc8c9Tecla [Q/Soltar]: #bbff6aDeshabilitar todo'
+    PRODUCT_CHANGE_PRICE_TYPE:
+      Name: '#ffed6a&lTipo de precio'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Actual: #ffed6a%product_price_type%'
+        - ''
+        - '#bdc8c9Cambia el tipo de precio del producto.'
+        - '#bdc8c9Cada tipo tiene configuraciones distintas.'
+        - ''
+        - '#ff6a6a&lAviso:'
+        - '#ff6a6a▪ #bdc8c9¡Al cambiarlo, la configuración anterior se #ff6a6apierde#bdc8c9!'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
+    PRODUCT_CHANGE_PRICE_FLAT_BUY:
+      Name: '#ffed6a&lPrecio de compra'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Actual: #ffed6a%product_price_buy%'
+        - ''
+        - '#bdc8c9Establece el precio de compra del producto.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
+        - '#bdc8c9se pueda comprar el producto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aDeshabilitar'
+    PRODUCT_CHANGE_PRICE_FLAT_SELL:
+      Name: '#ffed6a&lPrecio de venta'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Actual: #ffed6a%product_price_sell%'
+        - ''
+        - '#bdc8c9Establece el precio de venta del producto.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
+        - '#bdc8c9se pueda vender el producto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aDeshabilitar'
+    PRODUCT_CHANGE_PRICE_FLOAT_BUY:
+      Name: '#ffed6a&lPrecio de compra'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_buy_min%'
+        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_buy_max%'
+        - ''
+        - '#bdc8c9Establece un rango de precios para el producto.'
+        - '#bdc8c9El precio de compra final se encontrará entre estos valores.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
+        - '#bdc8c9se pueda comprar el producto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
+    PRODUCT_CHANGE_PRICE_FLOAT_SELL:
+      Name: '#ffed6a&lPrecio de venta'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_sell_min%'
+        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_sell_max%'
+        - ''
+        - '#bdc8c9Establece un rango de precios para el producto.'
+        - '#bdc8c9El precio de venta final se encontrará entre estos valores.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
+        - '#bdc8c9se pueda vender el producto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
+    PRODUCT_CHANGE_PRICE_FLOAT_REFRESH:
+      Name: '#ffed6a&lRefrescar configuración'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Días: #ffed6a%product_pricer_float_refresh_days%'
+        - '#ffed6a▪ #bdc8c9Horas: #ffed6a%product_pricer_float_refresh_times%'
+        - ''
+        - '#bdc8c9Establece los momentos de tiempo en los'
+        - '#bdc8c9que se renovará el precio del producto'
+        - '#bdc8c9Hasta que eso ocurra, se utilizará'
+        - '#bdc8c9el último precio generado.'
+        - ''
+        - '#ff6a6a&lAviso:'
+        - '#ff6a6a▪ #bdc8c9¡Es necesario configurar al menos'
+        - '#bdc8c9un #ff6a6adía#bdc8c9 y una #ff6a6ahora#bdc8c9!'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir día'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aQuitar días'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aAñadir hora'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aQuitar horas'
+    PRODUCT_CHANGE_PRICE_DYNAMIC_BUY:
+      Name: '#ffed6a&lLímites del precio de compra'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_buy_min%'
+        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_buy_max%'
+        - ''
+        - '#bdc8c9Sets the bounds for product buy price.'
+        - '#bdc8c9Final price will be within these values.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
+        - '#bdc8c9se pueda comprar el producto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
+    PRODUCT_CHANGE_PRICE_DYNAMIC_SELL:
+      Name: '#ffed6a&lLímites del precio de venta'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_sell_min%'
+        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_sell_max%'
+        - ''
+        - '#bdc8c9Sets the bounds for product sell price.'
+        - '#bdc8c9Final price will be within these values.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
+        - '#bdc8c9se pueda vender el producto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
+    PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL:
+      Name: '#ffed6a&lPrecio inicial'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Compra: #ffed6a%product_pricer_dynamic_initial_buy%'
+        - '#ffed6a▪ #bdc8c9Venta: #ffed6a%product_pricer_dynamic_initial_sell%'
+        - ''
+        - '#bdc8c9Establece el precio inicial del producto.'
+        - '#bdc8c9Estos serán los valores por defecto.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar compra'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar venta'
+    PRODUCT_CHANGE_PRICE_DYNAMIC_STEP:
+      Name: '#ffed6a&lIncrementos de precio'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Compra: #ffed6a%product_pricer_dynamic_step_buy%'
+        - '#ffed6a▪ #bdc8c9Venta: #ffed6a%product_pricer_dynamic_step_sell%'
+        - ''
+        - '#bdc8c9El incremento define cuanto subira o bajará'
+        - '#bdc8c9el precio con cada compra o venta.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ffa76a▪ #bdc8c9Más compras - mayor precio.'
+        - '#ffa76a▪ #bdc8c9Más ventas - menor precio.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar compra'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar venta'
+    DISCOUNT_CREATE:
+      Name: '#ffed6a&lCrear descuento'
+      Lore:
+        - '#bdc8c9Crea un nuevo descuento.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCrear'
+    DISCOUNT_OBJECT:
+      Name: '#ffed6a&lDescuento'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Cantidad: #ffed6a%discount_amount%'
+        - '#ffed6a▪ #bdc8c9Días: #ffed6a%discount_days%'
+        - '#ffed6a▪ #bdc8c9Horas: #ffed6a%discount_times%'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aEditar'
+        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aEliminar #ff6a6a(irreversible)'
+    DISCOUNT_CHANGE_DISCOUNT:
+      Name: '#ffed6a&lCantidad'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Cantidad: #ffed6a%discount_amount%%'
+        - ''
+        - '#bdc8c9Establece la cantidad de descuento (en porcentaje).'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
+    DISCOUNT_CHANGE_DURATION:
+      Name: '#ffed6a&lDuración'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Duración: #ffed6a%discount_duration%'
+        - ''
+        - '#bdc8c9¿Cuánto tiempo durará el descuento?'
+        - '#bdc8c9En segundos.'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
+    DISCOUNT_CHANGE_DAY:
+      Name: '#ffed6a&lDías activo'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Días: #ffed6a%discount_days%'
+        - ''
+        - '#bdc8c9Una lista de los días en los que este'
+        - '#bdc8c9descuento estará activado.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ff6a6a▪ #bdc8c9¡Es necesario configurar al menos'
+        - '#bdc8c9un #ff6a6adía#bdc8c9 y una #ff6a6ahora#bdc8c9!'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir día'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
+    DISCOUNT_CHANGE_TIME:
+      Name: '#ffed6a&lHoras activo'
+      Lore:
+        - '#ffed6a&lActual:'
+        - '#ffed6a▪ #bdc8c9Horas: #ffed6a%discount_times%'
+        - ''
+        - '#bdc8c9Una lista de las horas en los que este'
+        - '#bdc8c9descuento estará activado.'
+        - ''
+        - '#ffa76a&lNotas:'
+        - '#ff6a6a▪ #bdc8c9¡Es necesario configurar al menos'
+        - '#bdc8c9un #ff6a6adía#bdc8c9 y una #ff6a6ahora#bdc8c9!'
+        - ''
+        - '#bbff6a&lAcciones:'
+        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir hora'
+        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
 ChestShop:
   Command:
     List:
-      Desc: Lista de tus tiendas.
+      Desc: Lista tus tiendas o las de otro jugador.
+      Usage: '[player]'
     Create:
       Desc: Crea una tienda en el cofre que estés mirando.
       Usage: '[type]'
@@ -481,17 +662,14 @@ ChestShop:
   Shop:
     Error:
       NotOwner: '&cNo eres el dueño de esta tienda.'
-    Errpr:
-      Currency:
-        Invalid: '&cEsta divisa es inválida o no está permitida.'
     Creation:
       Info:
         Done:
           - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10; ~sound: BLOCK_NOTE_BLOCK_BELL;}&a&lTienda creada.'
-          - '&7Usa &aShift-Clic &7para entrar en el &amodo edición&7.'
+          - '&7Usa &aShift-Click &7para entrar en el &amodo edición&7.'
       Error:
         AlreadyShop: Este cofre ya es una tienda.
-        NotEmpty: Por favor, sacar todas las cosas del cofre.
+        NotEmpty: Por favor, saca primero todas las cosas del cofre.
         NotAChest: Este bloque no es un cofre.
         BadLocation: No puedes crear una tienda aquí.
         LimitReached: Superaste el límite de tiendas. No puedes crear más.
@@ -506,8 +684,8 @@ ChestShop:
     Trade:
       Buy:
         Info:
-          User: '{message: ~prefix: false;}&eCompraste &6x%amount% %item% &epor &6%price% &een la tienda &6%shop_name%&e. Dueño: &6%shop_owner%&e.'
-          Owner: '{message: ~prefix: false;}&6%player% &eCompraste &6x%amount% %item% &epor &6%price% &een tu tienda &6%shop_name%&e.'
+          User: '{message: ~prefix: false;}&eCompraste &6x%amount% %item% &epor &6%price% &een la tienda &6%shop_name%&e de &6%shop_owner%&e.'
+          Owner: '{message: ~prefix: false;}&6%player% &ecompró &6x%amount% %item% &epor &6%price% &een tu tienda &6%shop_name%&e.'
       Sell:
         Info:
           User: '{message: ~prefix: false;}&eVendiste &6x%amount% %item% &epor &6%price% &ea &6%shop_name%&e. Dueño: &6%shop_owner%&e.'
@@ -517,7 +695,7 @@ ChestShop:
         InvalidCurrency:
           - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
           - '&c&lOperación fallida.'
-          - '&7Esta divisa en inválida o no está permitida!'
+          - '&7¡Esta divisa es inválida o no está permitida!'
       Deposit:
         Success:
           - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
@@ -535,95 +713,14 @@ ChestShop:
           - '&7Retiraste &a%amount% &7del banco de la tienda.'
         NotEnough:
           - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
-          - '&c&lRetiro fallido.'
+          - '&c&lRetirada fallida.'
           - '&7El banco no tiene fondos suficientes.'
   Product:
     Error:
       BadItem: Este objeto no se puede intercambiar.
-  ShopList:
-    Info:
-      Switch: 'Lista de la tienda: %state%&7.'
   Editor:
-    Enter:
-      Name: '&7Escribe el nombre de la tienda...'
-    Tip:
-      Product:
-        Currency:
-          - '&7'
-          - '&b&lSelecciona una divisa &7(Clic)&b&l:'
-          - '&2▸ {json: ~showText: &7Clic para seleccionar; ~runCommand: %currency_id% ;}&a%currency_name% &7(&f%currency_id%&7){end-json}'
-          - '&7'
-      Bank:
-        Exchange: '&7Escribe la divisa y la cantidad...'
-        Currency:
-          - '&7'
-          - '&b&lSelecciona una divisa &7(Clic)&b&l:'
-          - '&2▸ {json: ~showText: &7Clic para seleccionar; ~suggestCommand: %currency_id% ;}&a%currency_name% &7(&f%currency_id%&7){end-json}'
-          - '&7'
-          - '&b&lTips:'
-          - '&2▸ &aUsa &2''-1''&a para depositar/retirar todo.'
-          - '&7'
-          - '&b&lEjemplo:'
-          - '&2▸ &avault 500'
-          - '&7'
-    Bank:
-      InvalidSyntax: '&7Sintaxis incorrecta. Usa &c<currency> <amount>'
     Error:
-      Negative: '&7El número debe ser positivo.'
       ProductLeft: '&cPrimero tienes que sacar todos los objetos de este cofre.'
-VirtualShop:
-  Command:
-    Open:
-      Desc: Abre una tienda específica.
-      Usage: '[shop] [player]'
-    SellMenu:
-      Desc: Abre la interfaz de venta.
-      Usage: ''
-  MainMenu:
-    Error:
-      Disabled: '&cEl menú principal de la tienda está desactivado.'
-  Open:
-    Error:
-      BadWorld: '&cLa tienda está desactivada en este mundo.'
-      BadGamemode: '&cNo puedes usar la tienda en el &cmodo de juego &e%type%!'
-      InvalidShop: '&cNo existe esa tienda.'
-  Product:
-    Purchase:
-      Sell:
-        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&lVenta exitosa '
-        - ' &7Vendiste &ax%amount% %item% &7por &a%price%&7.'
-      Buy:
-        - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}&a&lCompra exitosa '
-        - ' &7Compraste &ax%amount% %item% &7por &a%price%&7.'
-  SellMenu:
-    Sold:
-      - <! type:"titles:10:60:20" !>&a&lObjetos vendidos.
-      - '&7Vendiste tus objetos.'
-  Editor:
-    Enter:
-      Id: '&7Escribe el &aid &7de la tienda...'
-      Name: '&7Escribe el &anombre &7de la tienda...'
-      Description: '&7Escribe la &adescripción&7...'
-      NpcId: '&7Escribe la id de citizens...'
-      Title: '&7Escribe el &atítulo &7de la tienda...'
-      Amount: '&7Escribe la nueva cantidad...'
-    Create:
-      Error:
-        Exist: '&cYa existe una tienda con esa id.'
-    Product:
-      Enter:
-        Command: '&7Escribe el nuevo comando...'
-AuctionSortType:
-  NAME: Nombre
-  MATERIAL: Material
-  SELLER: Vendedor
-  NEWEST: Más reciente
-  OLDEST: Menos reciente
-  MOST_EXPENSIVE: Más caro
-  LEAST_EXPENSIVE: Menos caro
-TradeType:
-  BUY: Compra
-  SELL: Venta
 ChestShopType:
   PLAYER: Jugador
   ADMIN: Admin
@@ -679,7 +776,7 @@ Auction:
         - '{message: ~prefix: false;}'
         - '&8&m-------------&8&l[ &e&lNOTIFICACIÓN DE SUBASTA &8&l]&8&m-------------'
         - '&7     Tienes &e%amount% recompensas sin reclamar&7 de tus listas.'
-        - '&7                 {json: ~showText: &7Clic para reclamar tus recompensas; ~runCommand: /ah unclaimed;}&a&lClic para reclamar ahora.{end-json}'
+        - '&7                 {json: ~showText: &7Clic para reclamar tus recompensas; ~runCommand: /ah unclaimed;}&a&lClick para reclamar ahora.{end-json}'
         - '&8&m-----------------------------------------'
       Expired:
         - '{message: ~prefix: false;}'
@@ -690,3 +787,11 @@ Auction:
       Claim: '&7Reclamaste &a%listing_price%&7 por &a%listing_item_name%&7.'
   Error:
     DisabledWorld: '&cLas subastas están desactivadas en este mundo.'
+AuctionSortType:
+  NAME: Nombre
+  MATERIAL: Material
+  SELLER: Vendedor
+  NEWEST: Más reciente
+  OLDEST: Menos reciente
+  MOST_EXPENSIVE: Más caro
+  LEAST_EXPENSIVE: Menos caro

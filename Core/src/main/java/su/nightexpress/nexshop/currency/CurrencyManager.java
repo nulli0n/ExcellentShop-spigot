@@ -51,11 +51,9 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
         }
         if (EngineUtils.hasPlugin(HookId.PLAYER_POINTS)) {
             this.registerCurrency(HookId.PLAYER_POINTS, PlayerPointsHandler::new);
-            this.deprecatedCurrency(HookId.PLAYER_POINTS);
         }
         if (EngineUtils.hasPlugin(HookId.GAME_POINTS)) {
             this.registerCurrency(HookId.GAME_POINTS, GamePointsHandler::new);
-            this.deprecatedCurrency(HookId.GAME_POINTS);
         }
         if (EngineUtils.hasPlugin(HookId.ELITEMOBS)) {
             this.registerCurrency(HookId.ELITEMOBS, EliteMobsHandler::new);
@@ -83,20 +81,13 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
         }
     }
 
-    private void deprecatedCurrency(@NotNull String plugin) {
-        this.plugin.warn("=".repeat(15));
-        this.plugin.warn("Support for the '" + plugin + "' plugin is deprecated!");
-        this.plugin.warn("Please, consider to switch to our new free custom currency " + HookId.COINS_ENGINE + " plugin instead.");
-        this.plugin.warn("=".repeat(15));
-    }
-
     @Override
     protected void onShutdown() {
         this.currencyMap.clear();
     }
 
     public boolean registerCurrency(@NotNull String id, @NotNull Supplier<CurrencyHandler> supplier) {
-        JYML cfg = JYML.loadOrExtract(plugin, DIR_DEFAULT + id + ".yml");
+        JYML cfg = JYML.loadOrExtract(plugin, DIR_DEFAULT, id.toLowerCase() + ".yml");
         ConfigCurrency currency = new ConfigCurrency(plugin, cfg, supplier.get());
         if (!currency.load()) return false;
 
