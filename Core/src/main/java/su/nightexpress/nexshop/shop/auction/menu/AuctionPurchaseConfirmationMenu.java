@@ -11,8 +11,10 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.ItemOptions;
 import su.nexmedia.engine.api.menu.item.MenuItem;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
 
@@ -53,6 +55,10 @@ public class AuctionPurchaseConfirmationMenu extends ConfigMenu<ExcellentShop> {
                 if (listing == null) return;
 
                 ItemUtil.replace(item, listing.replacePlaceholders());
+
+                if (Config.GUI_PLACEHOLDER_API.get() && EngineUtils.hasPlaceholderAPI()) {
+                    ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
+                }
             });
         });
     }

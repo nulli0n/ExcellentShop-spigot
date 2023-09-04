@@ -87,7 +87,28 @@ public class ProductStockStorage {
     }
 
     public static void deleteData(@NotNull VirtualProduct<?, ?> product) {
-        DATAS.values().forEach(map -> map.remove(product.getId()));
+        //DATAS.values().forEach(map -> map.remove(product.getId()));
+        DATAS.values().forEach(prodMap -> {
+            prodMap.values().forEach(stockMap -> {
+                stockMap.values().forEach(tradeMap -> {
+                    tradeMap.values().removeIf(data -> data.getShopId().equalsIgnoreCase(product.getShop().getId()) && data.getProductId().equalsIgnoreCase(product.getId()));
+                });
+            });
+        });
+
         ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeProductStockData(product));
+    }
+
+    public static void deleteData(@NotNull VirtualShop<?, ?> shop) {
+        DATAS.remove(shop.getId());
+        DATAS.values().forEach(prodMap -> {
+            prodMap.values().forEach(stockMap -> {
+                stockMap.values().forEach(tradeMap -> {
+                    tradeMap.values().removeIf(data -> data.getShopId().equalsIgnoreCase(shop.getId()));
+                });
+            });
+        });
+
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeShopStockData(shop));
     }
 }

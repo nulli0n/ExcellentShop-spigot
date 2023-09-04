@@ -97,6 +97,8 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .name("Products")
         .text("Create and manage shop products here!").breakLine()
         .actionsHeader().action("Left-Click", "Navigate")
+        .action("[Q/Drop] Key", "Reset & Update all Prices")
+        .action("[F/Swap] Key", "Reset all Stocks & Limits")
         .build();
 
     public static final EditorLocale SHOP_ROTATION_TYPE = builder(PREFIX + "Shop.Rotation.Type")

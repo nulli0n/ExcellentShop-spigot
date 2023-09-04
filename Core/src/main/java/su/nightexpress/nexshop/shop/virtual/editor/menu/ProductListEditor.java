@@ -181,7 +181,8 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                 if (cursor != null && !cursor.getType().isAir()) {
                     StaticProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
-                        cached = new StaticProduct(new ItemSpecific(cursor), ShopUtils.getDefaultCurrency());
+                        ItemSpecific specific = new ItemSpecific(cursor);
+                        cached = new StaticProduct(ShopUtils.generateProductId(specific, shop), specific, ShopUtils.getDefaultCurrency());
                         cached.setPricer(new FlatProductPricer());
                         cached.setStock(new VirtualProductStock<>());
                         cached.getStock().unlock();
@@ -224,10 +225,10 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                 else return;
 
                 if (shop.getType() == VirtualShopType.STATIC) {
-                    product = new StaticProduct(spec, ShopUtils.getDefaultCurrency());
+                    product = new StaticProduct(ShopUtils.generateProductId(spec, shop), spec, ShopUtils.getDefaultCurrency());
                 }
                 else if (shop.getType() == VirtualShopType.ROTATING) {
-                    product = new RotatingProduct(spec, ShopUtils.getDefaultCurrency());
+                    product = new RotatingProduct(ShopUtils.generateProductId(spec, shop), spec, ShopUtils.getDefaultCurrency());
                 }
                 else return;
 

@@ -10,6 +10,7 @@ import su.nexmedia.engine.api.data.sql.column.ColumnType;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.api.shop.Product;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.DataHandler;
@@ -271,10 +272,23 @@ public class VirtualDataHandler {
         );
     }
 
+    public void removeShopStockData(@NotNull VirtualShop<?, ?> shop) {
+
+        this.dataHandler.delete(this.tableStockData,
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shop.getId()))
+        );
+    }
+
     public void removeProductPriceData(@NotNull Product<?, ?, ?> product) {
         this.dataHandler.delete(this.tablePriceData,
             SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
             SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId()))
+        );
+    }
+
+    public void removeShopPriceData(@NotNull Shop<?, ?> shop) {
+        this.dataHandler.delete(this.tablePriceData,
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shop.getId()))
         );
     }
 

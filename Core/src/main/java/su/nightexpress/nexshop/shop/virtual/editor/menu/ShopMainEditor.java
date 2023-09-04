@@ -13,6 +13,8 @@ import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.data.price.ProductPriceStorage;
+import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
@@ -182,7 +184,18 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
         }
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 31).setClick((viewer, event) -> {
-            this.plugin.runTask(task -> this.getProductsEditor().open(viewer.getPlayer(), 1));
+            if (event.getClick() == ClickType.DROP) {
+                ProductPriceStorage.deleteData(shop);
+                shop.getProducts().forEach(product -> product.getPricer().update());
+                return;
+            }
+            if (event.getClick() == ClickType.SWAP_OFFHAND) {
+                ProductStockStorage.deleteData(shop);
+                shop.getProducts().forEach(product -> product.getStock().lock());
+                return;
+            }
+
+            this.getProductsEditor().openNextTick(viewer, 1);
         });
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_PAINT), VirtualLocales.SHOP_VIEW_EDITOR, 32).setClick((viewer, event) -> {

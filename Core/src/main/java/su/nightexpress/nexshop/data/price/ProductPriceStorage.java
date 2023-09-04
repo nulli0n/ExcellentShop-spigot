@@ -58,4 +58,9 @@ public class ProductPriceStorage {
 
         ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeProductPriceData(product));
     }
+
+    public static void deleteData(@NotNull Shop<?, ?> shop) {
+        DATAS.remove(shop.getId());
+        ShopAPI.PLUGIN.runTaskAsync(task -> ShopAPI.getDataHandler().getVirtualDataHandler().removeShopPriceData(shop));
+    }
 }

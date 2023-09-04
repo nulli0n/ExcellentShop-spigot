@@ -15,4 +15,5 @@ softdepend:
   - GriefPrevention
   - EliteMobs
   - UltraEconomy
+  - PlaceholderAPI
 api-version: 1.17

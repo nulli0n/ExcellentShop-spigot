@@ -42,6 +42,8 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
         shop.plugin().getPluginManager().callEvent(event);
 
         if (result == TransactionResult.Result.SUCCESS) {
+            plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_BUY).replace(this.replacePlaceholders()).send(player);
+
             product.getStock().onPurchase(event);
             if (product.getPricer() instanceof IPurchaseListener listener) {
                 listener.onPurchase(event);
@@ -52,7 +54,6 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
             product.getCurrency().getHandler().take(player, price);
             //shop.getBank().deposit(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
-            plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_BUY).replace(this.replacePlaceholders()).send(player);
         }
         return transactionResult;
     }
@@ -98,6 +99,8 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
         shop.plugin().getPluginManager().callEvent(event);
 
         if (result == TransactionResult.Result.SUCCESS) {
+            plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_SELL).replace(this.replacePlaceholders()).send(player);
+
             product.getStock().onPurchase(event);
             if (product.getPricer() instanceof IPurchaseListener listener) {
                 listener.onPurchase(event);
@@ -107,7 +110,6 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
             shop.getModule().getLogger().logTransaction(event);
             product.getCurrency().getHandler().give(player, price);
             product.take(player, fined);
-            plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_SELL).replace(this.replacePlaceholders()).send(player);
         }
         return transactionResult;
     }

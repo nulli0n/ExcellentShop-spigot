@@ -14,12 +14,10 @@ import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.menu.impl.ConfigMenu;
 import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.Pair;
-import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.AuctionUtils;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
@@ -53,6 +51,12 @@ public class AuctionCurrencySelectorMenu extends ConfigMenu<ExcellentShop> imple
         ;
 
         this.load();
+
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+            if (Config.GUI_PLACEHOLDER_API.get() && EngineUtils.hasPlaceholderAPI()) {
+                ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
+            }
+        }));
     }
 
     @Override
