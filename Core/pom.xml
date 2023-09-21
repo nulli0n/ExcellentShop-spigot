@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.6.3</version>
+        <version>4.6.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -115,22 +115,22 @@
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>NMS</artifactId>
-            <version>4.6.3</version>
+            <version>4.6.4</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_18_R2</artifactId>
-            <version>4.6.3</version>
+            <version>4.6.4</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_19_R3</artifactId>
-            <version>4.6.3</version>
+            <version>4.6.4</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_20_R1</artifactId>
-            <version>4.6.3</version>
+            <version>4.6.4</version>
         </dependency>
         <dependency>
             <groupId>me.TechsCode</groupId>

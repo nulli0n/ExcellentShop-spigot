@@ -20,6 +20,8 @@ import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.data.price.ProductPriceStorage;
+import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.shop.price.FlatProductPricer;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.*;
@@ -186,6 +188,10 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                         cached.setPricer(new FlatProductPricer());
                         cached.setStock(new VirtualProductStock<>());
                         cached.getStock().unlock();
+
+                        // Delete product price & stock datas for new items in case there was product with similar ID.
+                        ProductPriceStorage.deleteData(cached);
+                        ProductStockStorage.deleteData(cached);
                     }
                     cached.setSlot(event.getRawSlot());
                     cached.setPage(page);
@@ -235,6 +241,10 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                 product.setPricer(new FlatProductPricer());
                 product.setStock(new VirtualProductStock<>());
                 product.getStock().unlock();
+
+                // Delete product price & stock datas for new items in case there was product with similar ID.
+                ProductPriceStorage.deleteData(product);
+                ProductStockStorage.deleteData(product);
             }
 
             if (shop instanceof StaticShop staticShop && product instanceof StaticProduct staticProduct) {

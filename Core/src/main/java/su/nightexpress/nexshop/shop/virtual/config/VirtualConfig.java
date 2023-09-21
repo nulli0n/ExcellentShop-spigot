@@ -42,6 +42,12 @@ public class VirtualConfig implements LangColors {
         true,
         "When 'true' enables the Sell Menu, where you can quickly sell all your items.");
 
+    public static final JOption<Boolean> SELL_MENU_SIMPLIFIED = JOption.create("General.Sell_Menu.Simplified", false,
+        "Sets whether or not Sell Menu should be simplified.",
+        "When simplified, no item and click validation is performed, so menu acts like a regular chest,",
+        "and items will be sold on close instead of button click.",
+        "Also, you should remove all GUI buttons and items to avoid players stealing them.");
+
     public static final JOption<String>      SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands",
         "sellgui",
         "Custom command aliases to open the Sell Menu. Split them with a comma.");

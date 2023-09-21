@@ -53,16 +53,15 @@ public abstract class VirtualProduct<
         }
 
         ItemStack item = cfg.getItemEncoded(path + ".Content.Item");
+        ItemStack preview = cfg.getItemEncoded(path + ".Content.Preview");
+        if (preview == null) preview = item == null ? new ItemStack(Material.COMMAND_BLOCK) : new ItemStack(item);
 
         ProductSpecific spec;
         if (item != null && !item.getType().isAir()) {
-            spec = new ItemSpecific(item);
+            spec = new ItemSpecific(item, preview);
             ((ItemSpecific) spec).setRespectItemMeta(cfg.getBoolean(path + ".Item_Meta_Enabled"));
         }
         else {
-            ItemStack preview = cfg.getItemEncoded(path + ".Content.Preview");
-            if (preview == null) preview = new ItemStack(Material.COMMAND_BLOCK);
-
             List<String> commands = cfg.getStringList(path + ".Content.Commands");
             spec = new CommandSpecific(preview, commands);
         }
@@ -91,8 +90,9 @@ public abstract class VirtualProduct<
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
         cfg.remove(path + ".Content");
+        cfg.setItemEncoded(path + ".Content.Preview", this.getSpecific().getPreview());
         if (this.getSpecific() instanceof CommandProduct commandProduct) {
-            cfg.setItemEncoded(path + ".Content.Preview", commandProduct.getPreview());
+            //cfg.setItemEncoded(path + ".Content.Preview", commandProduct.getPreview());
             cfg.set(path + ".Content.Commands", commandProduct.getCommands());
         }
         else if (this.getSpecific() instanceof ItemProduct itemProduct) {

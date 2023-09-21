@@ -12,12 +12,18 @@ import su.nightexpress.nexshop.api.shop.ItemProduct;
 public class ItemSpecific implements ProductSpecific, ItemProduct {
 
     private ItemStack item;
+    private ItemStack preview;
     private     boolean   respectItemMeta;
 
     private final PlaceholderMap placeholderMap;
 
     public ItemSpecific(@NotNull ItemStack item) {
+        this(item, item);
+    }
+
+    public ItemSpecific(@NotNull ItemStack item, @NotNull ItemStack preview) {
         this.setItem(item);
+        this.setPreview(preview);
         this.setRespectItemMeta(item.hasItemMeta());
 
         this.placeholderMap = new PlaceholderMap()
@@ -50,7 +56,12 @@ public class ItemSpecific implements ProductSpecific, ItemProduct {
     @Override
     @NotNull
     public ItemStack getPreview() {
-        return this.getItem();
+        return new ItemStack(this.preview);
+    }
+
+    @Override
+    public void setPreview(@NotNull ItemStack preview) {
+        this.preview = new ItemStack(preview);
     }
 
     public boolean isRespectItemMeta() {

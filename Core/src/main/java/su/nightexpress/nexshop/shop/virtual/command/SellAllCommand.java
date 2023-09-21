@@ -2,23 +2,13 @@ package su.nightexpress.nexshop.shop.virtual.command;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.command.CommandResult;
 import su.nexmedia.engine.api.command.GeneralCommand;
-import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class SellAllCommand extends GeneralCommand<ExcellentShop> {
 
@@ -35,6 +25,8 @@ public class SellAllCommand extends GeneralCommand<ExcellentShop> {
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
+        this.module.getSellMenu().sellInventory(player, player.getInventory());
+        /*
         Pair<List<ItemStack>, Set<StaticProduct>> userItems = Pair.of(new ArrayList<>(), new HashSet<>());
 
         for (ItemStack item : player.getInventory().getContents()) {
@@ -48,6 +40,6 @@ public class SellAllCommand extends GeneralCommand<ExcellentShop> {
             item.setAmount(0);
         }
 
-        ShopSellMenu.sellAll(player, userItems);
+        ShopSellMenu.sellAll(player, userItems);*/
     }
 }

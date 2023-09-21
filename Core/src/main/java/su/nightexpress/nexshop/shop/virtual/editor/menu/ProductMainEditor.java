@@ -56,41 +56,24 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             });
         }
 
-        this.addItem(new ItemStack(Material.ITEM_FRAME), 10).setClick((viewer, event) -> {
+        boolean isItemProd = product.getSpecific() instanceof ItemProduct itemProduct;
+
+        // Preview button
+        this.addItem(new ItemStack(Material.ITEM_FRAME), isItemProd ? 19 : 10).setClick((viewer, event) -> {
             if (event.isRightClick()) {
-                if (product.getSpecific() instanceof ItemProduct itemProduct) {
-                    PlayerUtil.addItem(viewer.getPlayer(), itemProduct.getItem());
-                }
-                else if (product.getSpecific() instanceof CommandProduct commandProduct) {
-                    PlayerUtil.addItem(viewer.getPlayer(), commandProduct.getPreview());
-                }
+                PlayerUtil.addItem(viewer.getPlayer(), product.getPreview());
                 return;
             }
 
             ItemStack cursor = event.getCursor();
             if (cursor == null || cursor.getType().isAir()) return;
 
-            if (product.getSpecific() instanceof ItemProduct itemProduct) {
-                itemProduct.setItem(cursor);
-            }
-            else if (product.getSpecific() instanceof CommandProduct commandProduct) {
-                commandProduct.setPreview(cursor);
-            }
+            product.getSpecific().setPreview(cursor);
             event.getView().setCursor(null);
             this.save(viewer);
         }).getOptions().setDisplayModifier((viewer, item) -> {
-            EditorLocale locale;
-            ItemStack original;
-            if (product.getSpecific() instanceof ItemProduct itemProduct) {
-                locale = VirtualLocales.PRODUCT_ITEM;
-                original = itemProduct.getItem();
-            }
-            else if (product.getSpecific() instanceof CommandProduct commandProduct) {
-                locale = VirtualLocales.PRODUCT_PREVIEW;
-                original = commandProduct.getPreview();
-
-            }
-            else return;
+            EditorLocale locale = VirtualLocales.PRODUCT_PREVIEW;
+            ItemStack original = product.getSpecific().getPreview();
 
             item.setType(original.getType());
             item.setAmount(original.getAmount());
@@ -101,6 +84,35 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
                 meta.addItemFlags(ItemFlag.values());
             });
         });
+
+        // Real item buttin
+        if (product.getSpecific() instanceof ItemProduct itemProduct) {
+            this.addItem(new ItemStack(Material.ITEM_FRAME), 10).setClick((viewer, event) -> {
+                if (event.isRightClick()) {
+                    PlayerUtil.addItem(viewer.getPlayer(), itemProduct.getItem());
+                    return;
+                }
+
+                ItemStack cursor = event.getCursor();
+                if (cursor == null || cursor.getType().isAir()) return;
+
+                itemProduct.setItem(cursor);
+                event.getView().setCursor(null);
+                this.save(viewer);
+            }).getOptions().setDisplayModifier((viewer, item) -> {
+                EditorLocale locale = VirtualLocales.PRODUCT_ITEM;
+                ItemStack original = itemProduct.getItem();
+
+                item.setType(original.getType());
+                item.setAmount(original.getAmount());
+                item.setItemMeta(original.getItemMeta());
+                ItemUtil.mapMeta(item, meta -> {
+                    meta.setDisplayName(locale.getLocalizedName());
+                    meta.setLore(locale.getLocalizedLore());
+                    meta.addItemFlags(ItemFlag.values());
+                });
+            });
+        }
 
         this.addItem(Material.WRITABLE_BOOK, VirtualLocales.PRODUCT_RESPECT_ITEM_META, 11).setClick((viewer, event) -> {
             if (!(product.getSpecific() instanceof ItemProduct itemProduct)) return;

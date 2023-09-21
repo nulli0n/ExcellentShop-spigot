@@ -9,6 +9,8 @@ public interface ProductSpecific extends Placeholder {
 
     @NotNull ItemStack getPreview();
 
+    void setPreview(@NotNull ItemStack preview);
+
     boolean hasSpace(@NotNull Player player);
 
     void delivery(@NotNull Player player, int count);

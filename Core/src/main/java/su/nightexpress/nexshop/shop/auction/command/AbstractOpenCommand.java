@@ -19,6 +19,7 @@ abstract class AbstractOpenCommand extends ModuleCommand<AuctionManager> {
 
     public AbstractOpenCommand(@NotNull AuctionManager module, @NotNull String[] aliases, @Nullable Permission permission) {
         super(module, aliases, permission);
+        this.setPlayerOnly(true);
     }
 
     @NotNull
@@ -28,17 +29,12 @@ abstract class AbstractOpenCommand extends ModuleCommand<AuctionManager> {
     protected abstract Permission getPermissionsOthers();
 
     @Override
-    public boolean isPlayerOnly() {
-        return true;
-    }
-
-    @Override
     @NotNull
-    public List<@NotNull String> getTab(@NotNull Player player, int i, @NotNull String[] args) {
-        if (i == 1) {
+    public List<@NotNull String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
+        if (arg == 1) {
             return CollectionsUtil.playerNames(player);
         }
-        return super.getTab(player, i, args);
+        return super.getTab(player, arg, args);
     }
 
     @Override

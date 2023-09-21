@@ -34,6 +34,7 @@ public class Perms {
     public static final JPermission AUCTION_COMMAND_HISTORY = new JPermission(PREFIX + "auction.command.history", "Access to '/auction history' command", TRUE);
     public static final JPermission AUCTION_COMMAND_HISTORY_OTHERS = new JPermission(PREFIX + "auction.command.history.others", "Access to '/auction history' command of other players.", OP);
     public static final JPermission AUCTION_COMMAND_OPEN = new JPermission(PREFIX + "auction.command.open", "Access to '/auction [open]' command.", TRUE);
+    public static final JPermission AUCTION_COMMAND_OPEN_OTHERS = new JPermission(PREFIX + "auction.command.open.others", "Access to '/auction [open]' command on other players.", OP);
     public static final JPermission AUCTION_COMMAND_SELL = new JPermission(PREFIX + "auction.command.sell", "Access to '/auction sell' command.", TRUE);
 
     public static final JPermission AUCTION_BYPASS_LISTING_TAX    = new JPermission(PREFIX + "auction.bypass.listing.tax", "Bypass listing taxes.", OP);

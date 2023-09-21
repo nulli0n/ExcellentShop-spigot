@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,6 +19,7 @@ import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
@@ -46,7 +48,9 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
                 Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
                 if (userItems == null) return;
 
-                sellAll(player, userItems);
+                plugin.runTask(task -> {
+                    sellAll(player, userItems);
+                });
             });
 
         this.load();
@@ -57,8 +61,20 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
     }
 
     @Override
+    public void onDrag(@NotNull MenuViewer viewer, @NotNull InventoryDragEvent event) {
+        super.onDrag(viewer, event);
+        if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
+            event.setCancelled(false);
+        }
+    }
+
+    @Override
     public void onClick(@NotNull MenuViewer viewer, @Nullable ItemStack item, @NotNull SlotType slotType, int slot, @NotNull InventoryClickEvent event) {
         super.onClick(viewer, item, slotType, slot, event);
+        if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
+            event.setCancelled(false);
+            return;
+        }
 
         Player player = viewer.getPlayer();
         Inventory inventory = event.getInventory();
@@ -109,10 +125,40 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         super.onClose(viewer, event);
 
         Player player = viewer.getPlayer();
-        Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
-        if (userItems != null) {
-            userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
+
+        if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
+            Inventory inventory = event.getInventory();
+            this.sellInventory(player, inventory);
+
+            for (ItemStack left : inventory.getContents()) {
+                if (left == null || left.getType().isAir() || left.getAmount() < 1) continue;
+
+                PlayerUtil.addItem(player, left);
+            }
         }
+        else {
+            Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
+            if (userItems != null) {
+                userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
+            }
+        }
+    }
+
+    public void sellInventory(@NotNull Player player, @NotNull Inventory inventory) {
+        Pair<List<ItemStack>, Set<StaticProduct>> userItems = Pair.of(new ArrayList<>(), new HashSet<>());
+
+        for (ItemStack item : inventory.getContents()) {
+            if (item == null || item.getType().isAir()) continue;
+
+            StaticProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            if (product == null) continue;
+
+            userItems.getFirst().add(new ItemStack(item));
+            userItems.getSecond().add(product);
+            item.setAmount(0);
+        }
+
+        ShopSellMenu.sellAll(player, userItems);
     }
 
     public static void sellAll(@NotNull Player player, @NotNull Pair<List<ItemStack>, Set<StaticProduct>> userItems) {
@@ -138,7 +184,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
             if (item != null && !item.getType().isAir()) PlayerUtil.addItem(player, item);
         });
 
-        player.updateInventory();
+        //player.updateInventory();
         player.closeInventory();
         if (profits.isEmpty()) return;
 
