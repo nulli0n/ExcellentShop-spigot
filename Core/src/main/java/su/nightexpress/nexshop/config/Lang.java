@@ -1,13 +1,13 @@
 package su.nightexpress.nexshop.config;
 
 import org.bukkit.Sound;
-import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
-import su.nightexpress.nexshop.Placeholders;
 
+import static su.nexmedia.engine.utils.Colors.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 
-public class Lang extends EngineLang implements LangColors {
+public class Lang extends EngineLang {
 
     public static final LangKey COMMAND_CURRENCY_DESC  = LangKey.of("Command.Currency.Desc", "Currency manager.");
     public static final LangKey COMMAND_CURRENCY_USAGE = LangKey.of("Command.Currency.Usage", "[help]");
@@ -27,7 +27,7 @@ public class Lang extends EngineLang implements LangColors {
     public static final LangKey COMMAND_CURRENCY_CREATE_ERROR_EXIST  = LangKey.of("Command.Currency.Create.Error.Exist", "Currency &c%currency_id%&7 is already exist and is not an Item Currency.");
     public static final LangKey COMMAND_CURRENCY_ERROR_NO_ITEM = LangKey.of("Command.Currency.Error.NoItem", RED + "You must hold an item to do that!");
 
-    public static final LangKey MODULE_COMMAND_RELOAD = LangKey.of("Module.Command.Reload", GREEN + Placeholders.GENERIC_NAME + GRAY + " reloaded!");
+    public static final LangKey MODULE_COMMAND_RELOAD = LangKey.of("Module.Command.Reload", GREEN + GENERIC_NAME + GRAY + " reloaded!");
 
     public static final LangKey ERROR_CURRENCY_INVALID = LangKey.of("Error.Currency.Invalid", RED + "Invalid currency!");
 
@@ -70,10 +70,10 @@ public class Lang extends EngineLang implements LangColors {
     public static final LangKey SHOP_PRODUCT_ERROR_TOO_EXPENSIVE = LangKey.of("Shop.Product.Error.TooExpensive",
         "<! type:\"titles:15:60:15\" sound:\"" + Sound.BLOCK_ANVIL_PLACE.name() + "\" !>" +
             "\n" + RED + "&lToo Expensive! " +
-            "\n" + GRAY + "You need: " + RED + Placeholders.GENERIC_PRICE + GRAY + "!");
+            "\n" + GRAY + "You need: " + RED + GENERIC_PRICE + GRAY + "!");
 
     public static final LangKey SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS = LangKey.of("Shop.Product.Error.NotEnoughItems",
         "<! type:\"titles:15:60:15\" sound:\"" + Sound.BLOCK_ANVIL_PLACE.name() + "\" !>" +
             "\n" + RED + "&lNot Enough Items! " +
-            "\n" + GRAY + "You need: " + RED + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + GRAY + "!");
+            "\n" + GRAY + "You need: " + RED + "x" + GENERIC_AMOUNT + " " + GENERIC_ITEM + GRAY + "!");
 }

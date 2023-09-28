@@ -2,17 +2,18 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.GameMode;
 import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerRankMap;
-import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
 
 import java.util.*;
 
-public class VirtualConfig implements LangColors {
+import static su.nexmedia.engine.utils.Colors.*;
+
+public class VirtualConfig {
 
     public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency", CurrencyManager.VAULT,
         "Sets default currency for the Virtual Shop module.",

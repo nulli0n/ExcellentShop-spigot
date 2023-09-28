@@ -4,6 +4,8 @@ import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nightexpress.nexshop.shop.virtual.impl.shop.RotationType;
 import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
 
+import static su.nexmedia.engine.utils.Colors.*;
+
 public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales {
 
     private static final String PREFIX_OLD = "VirtualEditorType.Editor.";

@@ -28,13 +28,13 @@ public class AuctionOpenCommand extends ModuleCommand<AuctionManager> {
             return;
         }
 
-        Player player = PlayerUtil.getPlayer(result.getArg(1));
+        Player player = PlayerUtil.getPlayer(result.getArg(1, sender.getName()));
         if (player == null) {
             this.errorPlayer(sender);
             return;
         }
 
-        if (sender != player && !this.module.canBeUsedHere(player)) return;
+        if (sender == player && !this.module.canBeUsedHere(player)) return;
 
         this.module.getMainMenu().open(player, 1);
     }

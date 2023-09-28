@@ -4,6 +4,8 @@ import org.bukkit.Sound;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
 
+import static su.nexmedia.engine.utils.Colors.*;
+
 public class AuctionLang extends EngineLang {
 
     public static final LangKey COMMAND_OPEN_DESC       = LangKey.of("Auction.Command.Open.Desc", "Open auction.");

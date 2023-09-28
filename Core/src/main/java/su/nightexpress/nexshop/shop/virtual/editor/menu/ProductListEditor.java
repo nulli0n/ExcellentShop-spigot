@@ -190,6 +190,9 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                         cached.getStock().unlock();
 
                         // Delete product price & stock datas for new items in case there was product with similar ID.
+                        if (!cached.hasShop()) {
+                            cached.setShop(staticShop);
+                        }
                         ProductPriceStorage.deleteData(cached);
                         ProductStockStorage.deleteData(cached);
                     }
@@ -220,6 +223,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
             //if (cursor == null || cursor.getType().isAir()) return;
 
             VirtualProduct<?, ?> product = hasCursor ? this.getCachedProduct(cursor) : null;
+            boolean deleteData = false;
             if (product == null) {
                 ProductSpecific spec;
                 if (hasCursor) {
@@ -241,10 +245,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                 product.setPricer(new FlatProductPricer());
                 product.setStock(new VirtualProductStock<>());
                 product.getStock().unlock();
-
-                // Delete product price & stock datas for new items in case there was product with similar ID.
-                ProductPriceStorage.deleteData(product);
-                ProductStockStorage.deleteData(product);
+                deleteData = true;
             }
 
             if (shop instanceof StaticShop staticShop && product instanceof StaticProduct staticProduct) {
@@ -254,6 +255,12 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
             }
             else if (shop instanceof RotatingShop rotatingShop && product instanceof RotatingProduct rotatingProduct) {
                 rotatingShop.addProduct(rotatingProduct);
+            }
+
+            if (deleteData) {
+                // Delete product price & stock datas for new items in case there was product with similar ID.
+                ProductPriceStorage.deleteData(product);
+                ProductStockStorage.deleteData(product);
             }
 
             shop.saveProducts();

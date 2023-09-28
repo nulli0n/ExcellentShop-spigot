@@ -234,7 +234,7 @@ public class AuctionManager extends ShopModule {
             }
         }
 
-        if (!this.isAllowedItem(item)) {
+        if (!this.isAllowedItem(item) || !checkItemModel(item)) {
             plugin.getMessage(AuctionLang.LISTING_ADD_ERROR_BAD_ITEM)
                 .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
                 .send(player);
@@ -277,6 +277,16 @@ public class AuctionManager extends ShopModule {
         }
 
         return true;
+    }
+
+    public static boolean checkItemModel(@NotNull ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasCustomModelData()) return true;
+
+        int model = meta.getCustomModelData();
+
+        Set<Integer> banned = AuctionConfig.LISTINGS_DISABLED_MODELS.get().getOrDefault(item.getType(), Collections.emptySet());
+        return !banned.contains(model);
     }
 
     @Nullable

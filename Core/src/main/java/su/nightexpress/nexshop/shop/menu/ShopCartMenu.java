@@ -14,6 +14,7 @@ import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.values.UniSound;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
@@ -33,8 +34,8 @@ import java.util.WeakHashMap;
 
 public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
 
-    private final int[] productSlots;
-    private final Sound productSound;
+    private final int[]    productSlots;
+    private final UniSound productSound;
 
     private final Map<Player, PreparedProduct<?>> products;
     private final Map<Player, Double>             balance;
@@ -48,7 +49,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         this.products = new WeakHashMap<>();
         this.balance = new WeakHashMap<>();
         this.productSlots = cfg.getIntArray("Product.Slots");
-        this.productSound = JOption.create("Product.Sound", Sound.class, Sound.ENTITY_ITEM_PICKUP,
+        this.productSound = JOption.create("Product.Sound", UniSound.of(Sound.ENTITY_ITEM_PICKUP),
             "Sets sound to play when using 'ADD', 'SET' or 'TAKE' buttons.",
             "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html").read(cfg);
 
@@ -171,7 +172,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         Product<?, ?, ?> product = prepared.getProduct();
         Shop<?, ?> shop = product.getShop();
 
-        PlayerUtil.sound(player, this.productSound);
+        this.productSound.play(player);
         TradeType tradeType = prepared.getTradeType();
 
         int hasAmount = prepared.getUnits();

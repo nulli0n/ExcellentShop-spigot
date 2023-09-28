@@ -88,7 +88,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         Location location = shop.getDisplayLocation();
         ItemStack showcase = ChestConfig.DISPLAY_SHOWCASE.get()
             .getOrDefault(shop.getLocation().getBlock().getType().name(), ChestConfig.DISPLAY_SHOWCASE.get().get(Placeholders.DEFAULT));
-        if (showcase == null) return;
+        if (showcase == null || showcase.getType().isAir()) return;
 
         if (!ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) {
             name = "";
@@ -101,6 +101,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
     private void deleteHologram(@NotNull ChestShop shop) {
         if (!holograms.containsKey(shop)) return;
         int stand = this.holograms.remove(shop);
+        if (stand < 0) return;
 
         chestShop.getNMS().deleteEntity(stand);
     }

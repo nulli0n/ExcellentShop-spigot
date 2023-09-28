@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class AuctionConfig {
 
@@ -46,6 +47,17 @@ public class AuctionConfig {
     public static  Set<String>           LISTINGS_DISABLED_MATERIALS;
     public static  Set<String>           LISTINGS_DISABLED_NAMES;
     public static  Set<String>           LISTINGS_DISABLED_LORES;
+
+    public static final JOption<Map<Material, Set<Integer>>> LISTINGS_DISABLED_MODELS = JOption.forMap("Settings.Listings.Disabled_Models",
+        key -> Material.getMaterial(key.toUpperCase()),
+        (cfg, path, key) -> IntStream.of(cfg.getIntArray(path + "." + key)).boxed().collect(Collectors.toSet()),
+        () -> Map.of(Material.NETHERITE_SWORD, Set.of(1001, 1015)),
+        "List of item's model data values to be disabled from adding in Auction.",
+        "Syntax:",
+        "  ITEM_TYPE: 1,2,3,4,etc",
+        "Example:",
+        "  NETHERITE_SWORD: 1001,1015"
+    ).setWriter((cfg, path, map) -> map.forEach((type, nums) -> cfg.setIntArray(path + "." + type.name(), nums.stream().mapToInt(i -> i).toArray())));
 
     public static final JOption<Boolean> MENU_CONTAINER_PREVIEW_ENABLED = JOption.create("Menu.Container_Preview.Enabled", true,
         "Sets whether or not container preview feature is available in Auction GUI.",

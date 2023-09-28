@@ -20,6 +20,7 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.data.price.ProductPriceStorage;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.nms.v1_20_R1.V1_20_R1;
+import su.nightexpress.nexshop.nms.v1_20_R2.V1_20_R2;
 import su.nightexpress.nexshop.shop.chest.command.*;
 import su.nightexpress.nexshop.shop.chest.compatibility.ClaimHook;
 import su.nightexpress.nexshop.shop.chest.compatibility.GriefPreventionHook;
@@ -103,11 +104,11 @@ public class ChestShopModule extends ShopModule {
         this.plugin.registerPermissions(ChestPerms.class);
 
         this.chestNMS = switch (Version.getCurrent()) {
-            case V1_17_R1, V1_19_R1, V1_19_R2, UNKNOWN -> null;
-
             case V1_18_R2 -> new V1_18_R2();
             case V1_19_R3 -> new V1_19_R3();
             case V1_20_R1 -> new V1_20_R1();
+            case V1_20_R2 -> new V1_20_R2();
+            default -> null;
         };
         if (this.chestNMS != null) {
             this.displayHandler = new ChestDisplayHandler(this);

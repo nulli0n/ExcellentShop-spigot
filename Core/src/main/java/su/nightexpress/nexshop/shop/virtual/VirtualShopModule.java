@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.lang.LangColors;
+import su.nexmedia.engine.utils.Colors;
 import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.FileUtil;
 import su.nexmedia.engine.utils.StringUtil;
@@ -236,8 +236,8 @@ public class VirtualShopModule extends ShopModule {
             shop = rotatingShop;
             this.getRotatingShopMap().put(shop.getId(), (RotatingShop) shop);
         }
-        shop.setName(LangColors.LIGHT_YELLOW + LangColors.BOLD + StringUtil.capitalizeUnderscored(id));
-        shop.setDescription(Arrays.asList(LangColors.GRAY + "Configure in " + LangColors.GREEN + "/vshop editor", ""));
+        shop.setName(Colors.LIGHT_YELLOW + Colors.BOLD + StringUtil.capitalizeUnderscored(id));
+        shop.setDescription(Arrays.asList(Colors.GRAY + "Configure in " + Colors.GREEN + "/vshop editor", ""));
         shop.setIcon(new ItemStack(Material.CHEST_MINECART));
         shop.save();
         shop.load();

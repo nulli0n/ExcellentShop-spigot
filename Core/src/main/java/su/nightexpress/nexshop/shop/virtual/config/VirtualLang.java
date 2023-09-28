@@ -5,6 +5,8 @@ import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
 import su.nightexpress.nexshop.Placeholders;
 
+import static su.nexmedia.engine.utils.Colors.*;
+
 public class VirtualLang extends EngineLang {
 
     public static final LangKey COMMAND_EDITOR_DESC = LangKey.of("VirtualShop.Command.Editor.Desc", "Open VirtualShop editor.");

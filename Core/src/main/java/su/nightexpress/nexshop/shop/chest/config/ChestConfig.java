@@ -1,11 +1,9 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.lang.LangColors;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nexmedia.engine.utils.StringUtil;
@@ -16,6 +14,9 @@ import su.nightexpress.nexshop.shop.chest.util.ShopType;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static su.nexmedia.engine.utils.Colors.BOLD;
+import static su.nexmedia.engine.utils.Colors.YELLOW;
 
 public class ChestConfig {
 
@@ -30,7 +31,7 @@ public class ChestConfig {
         "Sets the custom name for admin shops instead of default owner's name.");
 
     public static final JOption<String> DEFAULT_NAME = JOption.create("Shops.Default_Name",
-        LangColors.YELLOW + ChatColor.BOLD + Placeholders.PLAYER_NAME + "'s Shop",
+        YELLOW + BOLD + Placeholders.PLAYER_NAME + "'s Shop",
         "Default shop name, that will be used on shop creation."
     ).mapReader(Colorizer::apply);
 

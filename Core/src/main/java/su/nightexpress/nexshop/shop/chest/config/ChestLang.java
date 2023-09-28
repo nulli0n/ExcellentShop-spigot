@@ -5,6 +5,8 @@ import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
 import su.nightexpress.nexshop.Placeholders;
 
+import static su.nexmedia.engine.utils.Colors.*;
+
 public class ChestLang extends EngineLang {
 
     public static final LangKey COMMAND_LIST_DESC  = LangKey.of("ChestShop.Command.List.Desc", "List of [player's] shops.");

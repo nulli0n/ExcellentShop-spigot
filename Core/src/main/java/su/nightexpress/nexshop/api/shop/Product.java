@@ -199,6 +199,10 @@ public abstract class Product<
         return this.count(player) / this.getUnitAmount();
     }
 
+    public boolean hasShop() {
+        return this.shop != null;
+    }
+
     @NotNull
     public S getShop() {
         if (this.shop == null) {
