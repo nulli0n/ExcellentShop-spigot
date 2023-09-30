@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.price;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.random.Rnd;
+import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.api.type.PriceType;
@@ -21,12 +21,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FloatProductPricer extends RangedProductPricer /*implements IScheduled*/ {
+public class FloatPricer extends RangedPricer {
 
     private Set<DayOfWeek>   days;
     private Set<LocalTime> times;
 
-    public FloatProductPricer() {
+    public FloatPricer() {
         this.days = new HashSet<>();
         this.times = new HashSet<>();
 
@@ -43,14 +43,16 @@ public class FloatProductPricer extends RangedProductPricer /*implements ISchedu
     }
 
     @NotNull
-    public static FloatProductPricer read(@NotNull JYML cfg, @NotNull String path) {
-        FloatProductPricer pricer = new FloatProductPricer();
+    public static FloatPricer read(@NotNull JYML cfg, @NotNull String path) {
+        FloatPricer pricer = new FloatPricer();
         Map<TradeType, double[]> priceMap = new HashMap<>();
         for (TradeType tradeType : TradeType.values()) {
-            double min = cfg.getDouble(path + "." + tradeType.name() + ".Min", -1D);
+            UniDouble price = UniDouble.read(cfg, path + "." + tradeType.name());
+            pricer.setPrice(tradeType, price);
+            /*double min = cfg.getDouble(path + "." + tradeType.name() + ".Min", -1D);
             double max = cfg.getDouble(path + "." + tradeType.name() + ".Max", -1D);
             pricer.setPriceMin(tradeType, min);
-            pricer.setPriceMax(tradeType, max);
+            pricer.setPriceMax(tradeType, max);*/
         }
         pricer.setDays(TimeUtils.parseDays(cfg.getString(path + ".Refresh.Days", "")));
         pricer.setTimes(TimeUtils.parseTimes(cfg.getStringList(path + ".Refresh.Times")));
@@ -60,9 +62,10 @@ public class FloatProductPricer extends RangedProductPricer /*implements ISchedu
 
     @Override
     public void write(@NotNull JYML cfg, @NotNull String path) {
-        this.priceMinMax.forEach(((tradeType, arr) -> {
-            cfg.set(path + "." + tradeType.name() + ".Min", arr[0]);
-            cfg.set(path + "." + tradeType.name() + ".Max", arr[1]);
+        this.priceRange.forEach(((tradeType, price) -> {
+            price.write(cfg, path + "." + tradeType.name());
+            //cfg.set(path + "." + tradeType.name() + ".Min", price[0]);
+            //cfg.set(path + "." + tradeType.name() + ".Max", price[1]);
         }));
         cfg.set(path + ".Refresh.Days", this.getDays().stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
         cfg.set(path + ".Refresh.Times", this.getTimes().stream().map(TimeUtils.TIME_FORMATTER::format).toList());
@@ -122,8 +125,8 @@ public class FloatProductPricer extends RangedProductPricer /*implements ISchedu
     }
 
     public void randomize() {
-        double buyPrice = Rnd.getDouble(this.getPriceMin(TradeType.BUY), this.getPriceMax(TradeType.BUY));
-        double sellPrice = Rnd.getDouble(this.getPriceMin(TradeType.SELL), this.getPriceMax(TradeType.SELL));
+        double buyPrice = this.getPriceRange(TradeType.BUY).roll();//Rnd.getDouble(this.getPriceMin(TradeType.BUY), this.getPriceMax(TradeType.BUY));
+        double sellPrice = this.getPriceRange(TradeType.SELL).roll();//Rnd.getDouble(this.getPriceMin(TradeType.SELL), this.getPriceMax(TradeType.SELL));
         if (sellPrice > buyPrice && buyPrice >= 0) {
             sellPrice = buyPrice;
         }

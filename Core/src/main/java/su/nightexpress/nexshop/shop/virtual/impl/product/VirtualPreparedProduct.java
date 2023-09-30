@@ -25,7 +25,6 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
         Player player = this.getPlayer();
         P product = this.getProduct();
         VirtualShop<?, ?> shop = product.getShop();
-        ExcellentShop plugin = shop.plugin();
 
         double price = this.getPrice();
         double balance = product.getCurrency().getHandler().getBalance(player);
@@ -39,7 +38,7 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
         // Call custom event
         TransactionResult transactionResult = new TransactionResult(product, TradeType.BUY, this.getUnits(), price, result);
         VirtualShopTransactionEvent event = new VirtualShopTransactionEvent(player, transactionResult);
-        shop.plugin().getPluginManager().callEvent(event);
+        plugin.getPluginManager().callEvent(event);
 
         if (result == TransactionResult.Result.SUCCESS) {
             plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_BUY).replace(this.replacePlaceholders()).send(player);
@@ -64,7 +63,6 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
         Player player = this.getPlayer();
         P product = this.getProduct();
         VirtualShop<?, ?> shop = product.getShop();
-        ExcellentShop plugin = shop.plugin();
 
         int possible = product.getStock().getPossibleAmount(this.getTradeType(), player);
         int userHas = product.countUnits(player);
@@ -96,7 +94,7 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
         // Call custom event
         TransactionResult transactionResult = new TransactionResult(product, TradeType.SELL, fined, price, result);
         VirtualShopTransactionEvent event = new VirtualShopTransactionEvent(player, transactionResult);
-        shop.plugin().getPluginManager().callEvent(event);
+        plugin.getPluginManager().callEvent(event);
 
         if (result == TransactionResult.Result.SUCCESS) {
             plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_SELL).replace(this.replacePlaceholders()).send(player);

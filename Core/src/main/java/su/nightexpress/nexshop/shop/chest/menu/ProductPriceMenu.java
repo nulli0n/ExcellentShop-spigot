@@ -1,7 +1,9 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
+import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
+import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
@@ -9,6 +11,7 @@ import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
@@ -16,9 +19,9 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
-import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
-import su.nightexpress.nexshop.shop.price.FloatProductPricer;
-import su.nightexpress.nexshop.shop.price.RangedProductPricer;
+import su.nightexpress.nexshop.shop.price.DynamicPricer;
+import su.nightexpress.nexshop.shop.price.FloatPricer;
+import su.nightexpress.nexshop.shop.price.RangedPricer;
 import su.nightexpress.nexshop.shop.util.TimeUtils;
 
 import java.time.DayOfWeek;
@@ -59,11 +62,9 @@ public class ProductPriceMenu extends ConfigEditorMenu {
                 PriceType priceType = CollectionsUtil.next(product.getPricer().getType(), predicate);
                 product.setPricer(ProductPricer.from(priceType));
 
-                if (product.getPricer() instanceof RangedProductPricer pricer) {
-                    pricer.setPriceMin(TradeType.BUY, buy);
-                    pricer.setPriceMax(TradeType.BUY, buy);
-                    pricer.setPriceMin(TradeType.SELL, sell);
-                    pricer.setPriceMax(TradeType.SELL, sell);
+                if (product.getPricer() instanceof RangedPricer pricer) {
+                    pricer.setPrice(TradeType.BUY, UniDouble.of(buy, buy));
+                    pricer.setPrice(TradeType.SELL, UniDouble.of(sell, sell));
                 }
                 product.getPricer().setPrice(TradeType.BUY, buy);
                 product.getPricer().setPrice(TradeType.SELL, sell);
@@ -71,52 +72,50 @@ public class ProductPriceMenu extends ConfigEditorMenu {
                 this.save(viewer);
             })
         .addClick(Type.PRODUCT_CHANGE_PRICE_BUY, (viewer, event) -> {
-            if (this.product.getPricer().getType() == PriceType.FLAT) {
-                if (event.isRightClick()) {
-                    this.product.getPricer().setPrice(TradeType.BUY, -1);
-                    this.save(viewer);
-                    return;
+            ProductPricer pricer = this.product.getPricer();
+            if (event.getClick() == ClickType.DROP) {
+                if (pricer instanceof RangedPricer ranged) {
+                    ranged.setPrice(TradeType.BUY, UniDouble.of(-1D, -1D));
                 }
+                pricer.setPrice(TradeType.BUY, -1D);
+                this.save(viewer);
+                return;
             }
 
-            this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                if (this.product.getPricer().getType() == PriceType.FLAT) {
-                    product.getPricer().setPrice(TradeType.BUY, wrapper.asDouble());
+            RangedPricer ranged = pricer instanceof RangedPricer rp ? rp : null;
+            LangKey key = ranged != null ? Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE : Lang.EDITOR_PRODUCT_ENTER_PRICE;
+
+            this.handleInput(viewer, key, wrapper -> {
+                if (pricer.getType() == PriceType.FLAT) {
+                    pricer.setPrice(TradeType.BUY, wrapper.asDouble());
                 }
-                else {
-                    RangedProductPricer pricer = (RangedProductPricer) product.getPricer();
-                    if (event.isLeftClick()) {
-                        pricer.setPriceMin(TradeType.BUY, wrapper.asDouble());
-                    }
-                    else {
-                        pricer.setPriceMax(TradeType.BUY, wrapper.asDouble());
-                    }
+                else if (ranged != null) {
+                    ranged.setPrice(TradeType.BUY, wrapper.asUniDouble());
                 }
                 product.getShop().save();
                 return true;
             });
         })
         .addClick(Type.PRODUCT_CHANGE_PRICE_SELL, (viewer, event) -> {
-            if (this.product.getPricer().getType() == PriceType.FLAT) {
-                if (event.isRightClick()) {
-                    this.product.getPricer().setPrice(TradeType.SELL, -1);
-                    this.save(viewer);
-                    return;
+            ProductPricer pricer = this.product.getPricer();
+            if (event.getClick() == ClickType.DROP) {
+                if (pricer instanceof RangedPricer ranged) {
+                    ranged.setPrice(TradeType.SELL, UniDouble.of(-1D, -1D));
                 }
+                pricer.setPrice(TradeType.SELL, -1D);
+                this.save(viewer);
+                return;
             }
 
-            this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                if (this.product.getPricer().getType() == PriceType.FLAT) {
-                    product.getPricer().setPrice(TradeType.SELL, wrapper.asDouble());
+            RangedPricer ranged = pricer instanceof RangedPricer rp ? rp : null;
+            LangKey key = ranged != null ? Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE : Lang.EDITOR_PRODUCT_ENTER_PRICE;
+
+            this.handleInput(viewer, key, wrapper -> {
+                if (pricer.getType() == PriceType.FLAT) {
+                    pricer.setPrice(TradeType.SELL, wrapper.asDouble());
                 }
-                else {
-                    RangedProductPricer pricer = (RangedProductPricer) product.getPricer();
-                    if (event.isLeftClick()) {
-                        pricer.setPriceMin(TradeType.SELL, wrapper.asDouble());
-                    }
-                    else {
-                        pricer.setPriceMax(TradeType.SELL, wrapper.asDouble());
-                    }
+                else if (ranged != null) {
+                    ranged.setPrice(TradeType.SELL, wrapper.asUniDouble());
                 }
                 product.getShop().save();
                 return true;
@@ -124,7 +123,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
         })
         .addClick(Type.PRODUCT_CHANGE_PRICE_INITIAL, (viewer, event) -> {
             this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
+                DynamicPricer pricer = (DynamicPricer) product.getPricer();
                 TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
                 pricer.setInitial(tradeType, wrapper.asDouble());
@@ -134,7 +133,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
         })
         .addClick(Type.PRODUCT_CHANGE_PRICE_STEP, (viewer, event) -> {
             this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
+                DynamicPricer pricer = (DynamicPricer) product.getPricer();
                 TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
                 pricer.setStep(tradeType, wrapper.asDouble());
@@ -143,7 +142,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
             });
         })
         .addClick(Type.PRODUCT_CHANGE_PRICE_REFRESH, (viewer, event) -> {
-            FloatProductPricer pricer = (FloatProductPricer) product.getPricer();
+            FloatPricer pricer = (FloatPricer) product.getPricer();
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
                     pricer.getDays().clear();

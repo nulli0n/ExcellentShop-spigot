@@ -16,6 +16,7 @@ import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopAPI;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -25,6 +26,7 @@ import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
 
@@ -188,7 +190,19 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         player.closeInventory();
         if (profits.isEmpty()) return;
 
-        ShopAPI.PLUGIN.getMessage(VirtualLang.SELL_MENU_SOLD)
+        Map<Currency, Double> profitMap = new HashMap<>();
+        profits.forEach(result -> {
+            Currency currency = result.getProduct().getCurrency();
+            double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
+            profitMap.put(currency, has);
+        });
+
+        String total = profitMap.entrySet().stream()
+            .map(entry -> entry.getKey().format(entry.getValue()))
+            .collect(Collectors.joining(", "));
+
+        ShopAPI.PLUGIN.getMessage(VirtualLang.SELL_MENU_SALE_RESULT)
+            .replace(Placeholders.GENERIC_TOTAL, total)
             .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (line, list) -> {
                 profits.forEach(result -> {
                     list.add(result.replacePlaceholders().apply(line));

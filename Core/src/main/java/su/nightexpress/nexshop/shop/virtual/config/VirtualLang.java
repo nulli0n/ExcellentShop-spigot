@@ -40,10 +40,10 @@ public class VirtualLang extends EngineLang {
             "\n" + GREEN + BOLD + "Successful Purchase!" +
             "\n " + GRAY + "You bought " + GREEN + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + GRAY + " for " + GREEN + Placeholders.GENERIC_PRICE);
 
-    public static final LangKey SELL_MENU_SOLD = LangKey.of("VirtualShop.SellMenu.SaleResult",
-        "<! prefix:\"false\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
-            "\n&a&lItems Sold:" +
-            "\n" + "&7x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + ": &f" + Placeholders.GENERIC_PRICE);
+    public static final LangKey SELL_MENU_SALE_RESULT = LangKey.of("VirtualShop.SellMenu.SaleResult",
+        "<! prefix:\"false\" type:\"titles:20:80:20\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
+            "\n" + GREEN + BOLD + "Items Sold!" +
+            "\n" + GRAY + "+" + Placeholders.GENERIC_TOTAL);
 
     public static final LangKey EDITOR_SHOP_CREATE_ERROR_EXIST = LangKey.of("VirtualShop.Editor.Create.Error.Exist", RED + "Shop with such ID already exist!");
     public static final LangKey EDITOR_ENTER_SHOP_ID           = LangKey.of("VirtualShop.Editor.Enter.Id", GRAY + "Enter " + GREEN + "[Shop Identifier]");

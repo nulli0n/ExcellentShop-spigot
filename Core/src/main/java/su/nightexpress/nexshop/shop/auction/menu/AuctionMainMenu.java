@@ -103,6 +103,10 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
                     ;
 
                 ItemUtil.replace(item, placeholderMap.replacer());
+
+                if (Config.GUI_PLACEHOLDER_API.get() && EngineUtils.hasPlaceholderAPI()) {
+                    ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
+                }
             });
         });
     }

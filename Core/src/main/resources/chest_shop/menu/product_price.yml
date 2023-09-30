@@ -14,7 +14,7 @@ Format:
           - ''
           - '#9af7ff&lActions:'
           - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange'
-          - '#ff9a9a▪ #ddeceeRight-Click: #ff9a9aDisable'
+          - '#ff9a9a▪ #ddecee[Q/Drop] Key: #ff9a9aDisable'
         FLOAT:
           - '#fffc9a▪ #ddeceeMinimal: #fffc9a%product_pricer_buy_min%'
           - '#fffc9a▪ #ddeceeMaximal: #fffc9a%product_pricer_buy_max%'
@@ -23,8 +23,8 @@ Format:
           - '#ddeceepurchase price from.'
           - ''
           - '#9af7ff&lActions:'
-          - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange Min'
-          - '#9af7ff▪ #ddeceeRight-Click: #9af7ffChange Max'
+          - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange'
+          - '#ff9a9a▪ #ddecee[Q/Drop] Key: #ff9a9aDisable'
         DYNAMIC:
           - '#fffc9a▪ #ddeceeMinimal: #fffc9a%product_pricer_buy_min%'
           - '#fffc9a▪ #ddeceeMaximal: #fffc9a%product_pricer_buy_max%'
@@ -34,8 +34,8 @@ Format:
           - '#ddecee(it will never exceed these values)'
           - ''
           - '#9af7ff&lActions:'
-          - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange Min'
-          - '#9af7ff▪ #ddeceeRight-Click: #9af7ffChange Max'
+          - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffChange'
+          - '#ff9a9a▪ #ddecee[Q/Drop] Key: #ff9a9aDisable'
       SELL:
         FLAT:
           - '#fffc9a▪ #ddeceeCurrent: #fffc9a%product_price_sell%'

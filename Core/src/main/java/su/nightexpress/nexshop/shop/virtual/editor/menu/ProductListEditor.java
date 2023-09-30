@@ -22,7 +22,7 @@ import su.nexmedia.engine.utils.PDCUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.data.price.ProductPriceStorage;
 import su.nightexpress.nexshop.data.stock.ProductStockStorage;
-import su.nightexpress.nexshop.shop.price.FlatProductPricer;
+import su.nightexpress.nexshop.shop.price.FlatPricer;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.*;
 import su.nightexpress.nexshop.shop.virtual.impl.product.specific.CommandSpecific;
@@ -185,7 +185,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                     if (cached == null) {
                         ItemSpecific specific = new ItemSpecific(cursor);
                         cached = new StaticProduct(ShopUtils.generateProductId(specific, shop), specific, ShopUtils.getDefaultCurrency());
-                        cached.setPricer(new FlatProductPricer());
+                        cached.setPricer(new FlatPricer());
                         cached.setStock(new VirtualProductStock<>());
                         cached.getStock().unlock();
 
@@ -242,7 +242,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
                 }
                 else return;
 
-                product.setPricer(new FlatProductPricer());
+                product.setPricer(new FlatPricer());
                 product.setStock(new VirtualProductStock<>());
                 product.getStock().unlock();
                 deleteData = true;

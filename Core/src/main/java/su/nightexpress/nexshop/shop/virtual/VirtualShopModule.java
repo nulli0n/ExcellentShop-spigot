@@ -236,7 +236,7 @@ public class VirtualShopModule extends ShopModule {
             shop = rotatingShop;
             this.getRotatingShopMap().put(shop.getId(), (RotatingShop) shop);
         }
-        shop.setName(Colors.LIGHT_YELLOW + Colors.BOLD + StringUtil.capitalizeUnderscored(id));
+        shop.setName(Colors.YELLOW + Colors.BOLD + StringUtil.capitalizeUnderscored(id));
         shop.setDescription(Arrays.asList(Colors.GRAY + "Configure in " + Colors.GREEN + "/vshop editor", ""));
         shop.setIcon(new ItemStack(Material.CHEST_MINECART));
         shop.save();

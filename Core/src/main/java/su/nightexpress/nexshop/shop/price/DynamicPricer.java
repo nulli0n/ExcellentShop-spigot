@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.utils.NumberUtil;
+import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.ShopTransactionEvent;
@@ -15,12 +16,12 @@ import su.nightexpress.nexshop.data.price.ProductPriceStorage;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DynamicProductPricer extends RangedProductPricer implements IPurchaseListener {
+public class DynamicPricer extends RangedPricer implements IPurchaseListener {
 
     private final Map<TradeType, Double> priceInitial;
     private final Map<TradeType, Double> priceStep;
 
-    public DynamicProductPricer() {
+    public DynamicPricer() {
         this.priceInitial = new HashMap<>();
         this.priceStep = new HashMap<>();
 
@@ -37,15 +38,17 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
     }
 
     @NotNull
-    public static DynamicProductPricer read(@NotNull JYML cfg, @NotNull String path) {
-        DynamicProductPricer pricer = new DynamicProductPricer();
+    public static DynamicPricer read(@NotNull JYML cfg, @NotNull String path) {
+        DynamicPricer pricer = new DynamicPricer();
         for (TradeType tradeType : TradeType.values()) {
-            double min = cfg.getDouble(path + "." + tradeType.name() + ".Min", -1D);
-            double max = cfg.getDouble(path + "." + tradeType.name() + ".Max", -1D);
+            UniDouble price = UniDouble.read(cfg, path + "." + tradeType.name());
+            //double min = cfg.getDouble(path + "." + tradeType.name() + ".Min", -1D);
+            //double max = cfg.getDouble(path + "." + tradeType.name() + ".Max", -1D);
             double init = cfg.getDouble(path + "." + tradeType.name() + ".Initial", 0D);
             double step = cfg.getDouble(path + "." + tradeType.name() + ".Step", 0D);
-            pricer.setPriceMin(tradeType, min);
-            pricer.setPriceMax(tradeType, max);
+            pricer.setPrice(tradeType, price);
+            //pricer.setPriceMin(tradeType, min);
+            //pricer.setPriceMax(tradeType, max);
             pricer.setInitial(tradeType, init);
             pricer.setStep(tradeType, step);
         }
@@ -55,8 +58,9 @@ public class DynamicProductPricer extends RangedProductPricer implements IPurcha
     @Override
     public void write(@NotNull JYML cfg, @NotNull String path) {
         for (TradeType tradeType : TradeType.values()) {
-            cfg.set(path + "." + tradeType.name() + ".Min", this.getPriceMin(tradeType));
-            cfg.set(path + "." + tradeType.name() + ".Max", this.getPriceMax(tradeType));
+            this.getPriceRange(tradeType).write(cfg, path + "." + tradeType.name());
+            //cfg.set(path + "." + tradeType.name() + ".Min", this.getPriceMin(tradeType));
+            //cfg.set(path + "." + tradeType.name() + ".Max", this.getPriceMax(tradeType));
             cfg.set(path + "." + tradeType.name() + ".Initial", this.getInitial(tradeType));
             cfg.set(path + "." + tradeType.name() + ".Step", this.getStep(tradeType));
         }

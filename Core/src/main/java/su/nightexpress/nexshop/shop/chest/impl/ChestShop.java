@@ -29,7 +29,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
-import su.nightexpress.nexshop.shop.price.FlatProductPricer;
+import su.nightexpress.nexshop.shop.price.FlatPricer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -200,7 +200,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
 
         ChestProduct shopProduct = new ChestProduct(ShopUtils.getDefaultCurrency(), item);
         shopProduct.setStock(new ChestProductStock());
-        shopProduct.setPricer(new FlatProductPricer());
+        shopProduct.setPricer(new FlatPricer());
         this.addProduct(shopProduct);
         return true;
     }

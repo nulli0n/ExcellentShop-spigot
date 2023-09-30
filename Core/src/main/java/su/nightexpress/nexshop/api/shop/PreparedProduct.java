@@ -5,12 +5,14 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.ItemUtil;
+import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
 
 public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Placeholder {
 
+    protected final ExcellentShop plugin;
     private final Player player;
     private final P         product;
     private final TradeType buyType;
@@ -20,6 +22,7 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
     private int units;
 
     public PreparedProduct(@NotNull Player player, @NotNull P product, @NotNull TradeType buyType, boolean all) {
+        this.plugin = product.shop.plugin();
         this.player = player;
         this.product = product;
         this.buyType = buyType;
@@ -31,7 +34,7 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
             .add(Placeholders.GENERIC_ITEM, () -> ItemUtil.getItemName(this.getProduct().getPreview()))
             .add(Placeholders.GENERIC_AMOUNT, () -> String.valueOf(this.getAmount()))
             .add(Placeholders.GENERIC_UNITS, () -> String.valueOf(this.getUnits()))
-            .add(Placeholders.GENERIC_TYPE, () -> this.getShop().plugin().getLangManager().getEnum(this.getTradeType()))
+            .add(Placeholders.GENERIC_TYPE, () -> plugin.getLangManager().getEnum(this.getTradeType()))
             .add(Placeholders.GENERIC_PRICE, () -> this.getProduct().getCurrency().format(this.getPrice()))
         ;
     }

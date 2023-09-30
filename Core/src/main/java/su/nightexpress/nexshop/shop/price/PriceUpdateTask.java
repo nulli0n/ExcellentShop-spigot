@@ -39,7 +39,7 @@ public class PriceUpdateTask extends AbstractTask<ExcellentShop> {
         }
 
         products.forEach(product -> {
-            if (product.getPricer() instanceof FloatProductPricer pricer && pricer.isUpdateTime()) {
+            if (product.getPricer() instanceof FloatPricer pricer && pricer.isUpdateTime()) {
                 pricer.randomize();
             }
         });

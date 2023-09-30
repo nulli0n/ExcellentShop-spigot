@@ -6,15 +6,15 @@ import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 
-public class FlatProductPricer extends ProductPricer {
+public class FlatPricer extends ProductPricer {
 
-    public FlatProductPricer() {
+    public FlatPricer() {
 
     }
 
     @NotNull
-    public static FlatProductPricer read(@NotNull JYML cfg, @NotNull String path) {
-        FlatProductPricer pricer = new FlatProductPricer();
+    public static FlatPricer read(@NotNull JYML cfg, @NotNull String path) {
+        FlatPricer pricer = new FlatPricer();
         for (TradeType tradeType : TradeType.values()) {
             pricer.setPrice(tradeType, cfg.getDouble(path + "." + tradeType.name()));
         }

@@ -12,6 +12,7 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.values.UniSound;
@@ -104,24 +105,24 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
 
         this.load();
 
-        this.getItems().forEach(menuItem -> {
-            if (menuItem.getOptions().getDisplayModifier() == null) {
-                menuItem.getOptions().setDisplayModifier((viewer, item) -> {
-                    PreparedProduct<?> prepared = this.getPrepared(viewer).orElse(null);
-                    if (prepared == null) return;
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+            PreparedProduct<?> prepared = this.getPrepared(viewer).orElse(null);
+            if (prepared == null) return;
 
-                    Player player = viewer.getPlayer();
-                    Product<?, ?, ?> shopProduct = prepared.getProduct();
-                    Currency currency = shopProduct.getCurrency();
+            Player player = viewer.getPlayer();
+            Product<?, ?, ?> shopProduct = prepared.getProduct();
+            Currency currency = shopProduct.getCurrency();
 
-                    PlaceholderMap placeholderMap = new PlaceholderMap();
-                    placeholderMap.getKeys().addAll(currency.getPlaceholders().getKeys());
-                    placeholderMap.getKeys().addAll(prepared.getPlaceholders().getKeys());
-                    placeholderMap.add(Placeholders.GENERIC_BALANCE, () -> currency.format(this.balance.computeIfAbsent(player, k -> currency.getHandler().getBalance(player))));
-                    ItemUtil.replace(item, placeholderMap.replacer());
-                });
+            PlaceholderMap placeholderMap = new PlaceholderMap();
+            placeholderMap.getKeys().addAll(currency.getPlaceholders().getKeys());
+            placeholderMap.getKeys().addAll(prepared.getPlaceholders().getKeys());
+            placeholderMap.add(Placeholders.GENERIC_BALANCE, () -> currency.format(this.balance.computeIfAbsent(player, k -> currency.getHandler().getBalance(player))));
+            ItemUtil.replace(item, placeholderMap.replacer());
+
+            if (Config.GUI_PLACEHOLDER_API.get() && EngineUtils.hasPlaceholderAPI()) {
+                ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
             }
-        });
+        }));
     }
 
     @Override

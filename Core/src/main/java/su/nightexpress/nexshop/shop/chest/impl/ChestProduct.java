@@ -14,9 +14,6 @@ import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.shop.chest.menu.ProductPriceMenu;
 import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
-import su.nightexpress.nexshop.shop.price.FlatProductPricer;
-import su.nightexpress.nexshop.shop.price.FloatProductPricer;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
 
 import java.util.UUID;
 
@@ -36,7 +33,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
 
     @NotNull
     public static ChestProduct read(@NotNull JYML cfg, @NotNull String path, @NotNull String id) {
-        if (cfg.contains(path + ".Purchase")) {
+        /*if (cfg.contains(path + ".Purchase")) {
             cfg.addMissing(path + ".Currency", cfg.getString(path + ".Purchase.Currency"));
             double buyMin = cfg.getDouble(path + ".Purchase.BUY.Price_Min");
             double buyMax = cfg.getDouble(path + ".Purchase.BUY.Price_Max");
@@ -64,7 +61,7 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
 
             cfg.remove(path + ".Purchase");
             cfg.saveChanges();
-        }
+        }*/
 
         String currencyId = cfg.getString(path + ".Currency", CurrencyManager.VAULT);
         Currency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);

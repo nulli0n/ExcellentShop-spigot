@@ -8,9 +8,9 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.currency.impl.ItemCurrency;
-import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
-import su.nightexpress.nexshop.shop.price.FlatProductPricer;
-import su.nightexpress.nexshop.shop.price.FloatProductPricer;
+import su.nightexpress.nexshop.shop.price.DynamicPricer;
+import su.nightexpress.nexshop.shop.price.FlatPricer;
+import su.nightexpress.nexshop.shop.price.FloatPricer;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 
@@ -36,18 +36,18 @@ public abstract class ProductPricer implements Placeholder {
         PriceType priceType = cfg.getEnum(path + ".Type", PriceType.class, PriceType.FLAT);
 
         return switch (priceType) {
-            case FLAT -> FlatProductPricer.read(cfg, path);
-            case FLOAT -> FloatProductPricer.read(cfg, path);
-            case DYNAMIC -> DynamicProductPricer.read(cfg, path);
+            case FLAT -> FlatPricer.read(cfg, path);
+            case FLOAT -> FloatPricer.read(cfg, path);
+            case DYNAMIC -> DynamicPricer.read(cfg, path);
         };
     }
 
     @NotNull
     public static ProductPricer from(@NotNull PriceType priceType) {
         return switch (priceType) {
-            case FLAT -> new FlatProductPricer();
-            case FLOAT -> new FloatProductPricer();
-            case DYNAMIC -> new DynamicProductPricer();
+            case FLAT -> new FlatPricer();
+            case FLOAT -> new FloatPricer();
+            case DYNAMIC -> new DynamicPricer();
         };
     }
 
@@ -74,11 +74,6 @@ public abstract class ProductPricer implements Placeholder {
 
     public void setProduct(@NotNull Product<?, ?, ?> product) {
         this.product = product;
-    }
-
-    @Deprecated
-    public double getPricePlain(@NotNull TradeType tradeType) {
-        return this.getPrice(tradeType);
     }
 
     public double getPrice(@NotNull TradeType tradeType) {

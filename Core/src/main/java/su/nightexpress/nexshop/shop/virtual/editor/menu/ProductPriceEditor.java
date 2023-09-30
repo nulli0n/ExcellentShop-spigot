@@ -4,21 +4,23 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.editor.EditorLocale;
+import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.shop.ProductPricer;
 import su.nightexpress.nexshop.api.type.PriceType;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.price.ProductPriceStorage;
-import su.nightexpress.nexshop.shop.price.DynamicProductPricer;
-import su.nightexpress.nexshop.shop.price.FloatProductPricer;
-import su.nightexpress.nexshop.shop.price.RangedProductPricer;
+import su.nightexpress.nexshop.shop.price.DynamicPricer;
+import su.nightexpress.nexshop.shop.price.FloatPricer;
+import su.nightexpress.nexshop.shop.price.RangedPricer;
 import su.nightexpress.nexshop.shop.util.TimeUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
@@ -53,11 +55,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             product.setPricer(ProductPricer.from(priceType));
             ProductPriceStorage.deleteData(product);
 
-            if (product.getPricer() instanceof RangedProductPricer pricer) {
-                pricer.setPriceMin(TradeType.BUY, buy);
-                pricer.setPriceMax(TradeType.BUY, buy);
-                pricer.setPriceMin(TradeType.SELL, sell);
-                pricer.setPriceMax(TradeType.SELL, sell);
+            if (product.getPricer() instanceof RangedPricer pricer) {
+                pricer.setPrice(TradeType.BUY, UniDouble.of(buy, buy));
+                pricer.setPrice(TradeType.SELL, UniDouble.of(sell, sell));
             }
             product.getPricer().setPrice(TradeType.BUY, buy);
             product.getPricer().setPrice(TradeType.SELL, sell);
@@ -67,29 +67,30 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BUY), VirtualLocales.PRODUCT_PRICE_FLAT_BUY, 10).setClick((viewer, event) -> {
             ProductPricer pricer = product.getPricer();
+            // Disable purchase
             if (event.getClick() == ClickType.DROP) {
-                if (pricer instanceof RangedProductPricer ranged) {
-                    ranged.setPriceMin(TradeType.BUY, -1);
-                    ranged.setPriceMax(TradeType.BUY, -1);
+                if (pricer instanceof RangedPricer ranged) {
+                    ranged.setPrice(TradeType.BUY, UniDouble.of(-1D, -1D));
                 }
-                else pricer.setPrice(TradeType.BUY, -1);
+                pricer.setPrice(TradeType.BUY, -1D);
                 this.save(viewer);
+                return;
             }
-            else {
-                this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                    double price = wrapper.asAnyDouble(-1D);
-                    if (pricer instanceof RangedProductPricer ranged) {
-                        if (event.isLeftClick()) {
-                            ranged.setPriceMin(TradeType.BUY, price);
-                        }
-                        else ranged.setPriceMax(TradeType.BUY, price);
-                    }
-                    else pricer.setPrice(TradeType.BUY, price);
 
-                    product.getShop().saveProducts();
-                    return true;
-                });
-            }
+            // Set new price
+            RangedPricer ranged = pricer instanceof RangedPricer rp ? rp : null;
+            LangKey key = ranged != null ? Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE : Lang.EDITOR_PRODUCT_ENTER_PRICE;
+
+            this.handleInput(viewer, key, wrapper -> {
+                if (pricer.getType() == PriceType.FLAT) {
+                    pricer.setPrice(TradeType.BUY, wrapper.asDouble());
+                }
+                else if (ranged != null) {
+                    ranged.setPrice(TradeType.BUY, wrapper.asUniDouble());
+                }
+                product.getShop().saveProducts();
+                return true;
+            });
 
         }).getOptions().setDisplayModifier((viewer, item) -> {
             ProductPricer pricer = product.getPricer();
@@ -108,29 +109,30 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_SELL), VirtualLocales.PRODUCT_PRICE_FLAT_SELL, 11).setClick((viewer, event) -> {
             ProductPricer pricer = product.getPricer();
+            // Disable sell
             if (event.getClick() == ClickType.DROP) {
-                if (pricer instanceof RangedProductPricer ranged) {
-                    ranged.setPriceMin(TradeType.SELL, -1);
-                    ranged.setPriceMax(TradeType.SELL, -1);
+                if (pricer instanceof RangedPricer ranged) {
+                    ranged.setPrice(TradeType.SELL, UniDouble.of(-1D, -1D));
                 }
-                else pricer.setPrice(TradeType.SELL, -1);
+                pricer.setPrice(TradeType.SELL, -1D);
                 this.save(viewer);
+                return;
             }
-            else {
-                this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                    double price = wrapper.asAnyDouble(-1D);
-                    if (pricer instanceof RangedProductPricer ranged) {
-                        if (event.isLeftClick()) {
-                            ranged.setPriceMin(TradeType.SELL, price);
-                        }
-                        else ranged.setPriceMax(TradeType.SELL, price);
-                    }
-                    else pricer.setPrice(TradeType.SELL, price);
 
-                    product.getShop().saveProducts();
-                    return true;
-                });
-            }
+            // Set new price
+            RangedPricer ranged = pricer instanceof RangedPricer rp ? rp : null;
+            LangKey key = ranged != null ? Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE : Lang.EDITOR_PRODUCT_ENTER_PRICE;
+
+            this.handleInput(viewer, key, wrapper -> {
+                if (pricer.getType() == PriceType.FLAT) {
+                    pricer.setPrice(TradeType.SELL, wrapper.asDouble());
+                }
+                else if (ranged != null) {
+                    ranged.setPrice(TradeType.SELL, wrapper.asUniDouble());
+                }
+                product.getShop().saveProducts();
+                return true;
+            });
 
         }).getOptions().setDisplayModifier((viewer, item) -> {
             ProductPricer pricer = product.getPricer();
@@ -148,7 +150,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
         });
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_REFRESH), VirtualLocales.PRODUCT_PRICE_FLOAT_REFRESH, 15).setClick((viewer, event) -> {
-            FloatProductPricer pricer = (FloatProductPricer) product.getPricer();
+            FloatPricer pricer = (FloatPricer) product.getPricer();
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
                     pricer.getDays().clear();
@@ -187,7 +189,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_INITIAL), VirtualLocales.PRODUCT_PRICE_DYNAMIC_INITIAL, 15).setClick((viewer, event) -> {
             this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
+                DynamicPricer pricer = (DynamicPricer) product.getPricer();
                 double price = wrapper.asDouble();
                 if (event.isLeftClick()) {
                     pricer.setInitial(TradeType.BUY, price);
@@ -201,7 +203,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_STEP), VirtualLocales.PRODUCT_PRICE_DYNAMIC_STEP, 16).setClick((viewer, event) -> {
             this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, wrapper -> {
-                DynamicProductPricer pricer = (DynamicProductPricer) product.getPricer();
+                DynamicPricer pricer = (DynamicPricer) product.getPricer();
                 double price = wrapper.asDouble();
                 if (event.isLeftClick()) {
                     pricer.setStep(TradeType.BUY, price);

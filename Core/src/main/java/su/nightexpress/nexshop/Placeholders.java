@@ -10,6 +10,7 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
 
     public static final String GENERIC_NAME     = "%name%";
     public static final String GENERIC_ITEM     = "%item%";
+    public static final String GENERIC_TOTAL = "%total%";
     public static final String GENERIC_LORE     = "%lore%";
     public static final String GENERIC_AMOUNT   = "%amount%";
     public static final String GENERIC_UNITS    = "%units%";

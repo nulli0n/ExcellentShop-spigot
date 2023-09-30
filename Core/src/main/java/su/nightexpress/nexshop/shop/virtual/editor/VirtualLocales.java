@@ -275,7 +275,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .currentHeader().current("Current", Placeholders.PRODUCT_PRICE_BUY).breakLine()
         .text("Sets the product buy price.").breakLine()
         .noteHeader().notes("Negative value makes product unbuyable.").breakLine()
-        .actionsHeader().action("Left-Click", "Change").action("Right-Click", "Disable")
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Disable")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_FLAT_SELL = builder(PREFIX_OLD + "PRODUCT_CHANGE_PRICE_FLAT_SELL")
@@ -283,7 +283,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .currentHeader().current("Current", Placeholders.PRODUCT_PRICE_SELL).breakLine()
         .text("Sets the product sell price.").breakLine()
         .noteHeader().notes("Negative value makes product unsellable.").breakLine()
-        .actionsHeader().action("Left-Click", "Change").action("Right-Click", "Disable")
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Disable")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_FLOAT_BUY = builder(PREFIX_OLD + "PRODUCT_CHANGE_PRICE_FLOAT_BUY")
@@ -292,7 +292,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .current("Min", Placeholders.PRODUCT_PRICER_BUY_MIN).current("Max", Placeholders.PRODUCT_PRICER_BUY_MAX).breakLine()
         .text("Sets the bounds for product buy price.", "Final price will be within these values.").breakLine()
         .noteHeader().notes("Negative value makes product unbuyable.").breakLine()
-        .actionsHeader().action("Left-Click", "Change Min").action("Right-Click", "Change Max")
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Disable")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_FLOAT_SELL = builder(PREFIX_OLD + "PRODUCT_CHANGE_PRICE_FLOAT_SELL")
@@ -301,7 +301,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .current("Min", Placeholders.PRODUCT_PRICER_SELL_MIN).current("Max", Placeholders.PRODUCT_PRICER_SELL_MAX).breakLine()
         .text("Sets the bounds for product sell price.", "Final price will be within these values.").breakLine()
         .noteHeader().notes("Negative value makes product unsellable.").breakLine()
-        .actionsHeader().action("Left-Click", "Change Min").action("Right-Click", "Change Max")
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Disable")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_FLOAT_REFRESH = builder(PREFIX_OLD + "PRODUCT_CHANGE_PRICE_FLOAT_REFRESH")
@@ -321,7 +321,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .current("Min", Placeholders.PRODUCT_PRICER_BUY_MIN).current("Max", Placeholders.PRODUCT_PRICER_BUY_MAX).breakLine()
         .text("Sets the bounds for product buy price.", "Final price will be within these values.").breakLine()
         .noteHeader().notes("Negative value makes product unbuyable.").breakLine()
-        .actionsHeader().action("Left-Click", "Change Min").action("Right-Click", "Change Max")
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Disable")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_DYNAMIC_SELL = builder(PREFIX_OLD + "PRODUCT_CHANGE_PRICE_DYNAMIC_SELL")
@@ -330,7 +330,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .current("Min", Placeholders.PRODUCT_PRICER_SELL_MIN).current("Max", Placeholders.PRODUCT_PRICER_SELL_MAX).breakLine()
         .text("Sets the bounds for product sell price.", "Final price will be within these values.").breakLine()
         .noteHeader().notes("Negative value makes product unsellable.").breakLine()
-        .actionsHeader().action("Left-Click", "Change Min").action("Right-Click", "Change Max")
+        .actionsHeader().action("Left-Click", "Change").action("[Q/Drop] Key", "Disable")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_DYNAMIC_INITIAL = builder(PREFIX_OLD + "PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL")
