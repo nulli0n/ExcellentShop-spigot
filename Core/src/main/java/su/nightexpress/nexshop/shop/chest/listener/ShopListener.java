@@ -70,29 +70,29 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onShopInteract(PlayerInteractEvent e) {
-        Block block = e.getClickedBlock();
+    public void onShopInteract(PlayerInteractEvent event) {
+        Block block = event.getClickedBlock();
         if (block == null) return;
 
         ChestShop shop = this.module.getShop(block);
         if (shop == null) return;
 
-        Player player = e.getPlayer();
-        Action action = e.getAction();
-        boolean isDenied = e.useInteractedBlock() == Result.DENY;
-        e.setUseInteractedBlock(Result.DENY);
+        Player player = event.getPlayer();
+        Action action = event.getAction();
+        boolean isDenied = event.useInteractedBlock() == Result.DENY;
+        event.setUseInteractedBlock(Result.DENY);
 
         if (action == Action.RIGHT_CLICK_BLOCK) {
             if (player.isSneaking()) {
                 if (isDenied) return;
 
-                ItemStack item = e.getItem();
+                ItemStack item = event.getItem();
                 if (item != null) {
-                    if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME) {
+                    if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME || item.getType() == Material.HOPPER) {
                         if (!shop.isOwner(player)) {
                             plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
                         }
-                        else e.setUseInteractedBlock(Result.ALLOW);
+                        else event.setUseInteractedBlock(Result.ALLOW);
                         return;
                     }
                 }
@@ -112,7 +112,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
                 }
             }
             else if (!isDenied) {
-                e.setUseInteractedBlock(Result.ALLOW);
+                event.setUseInteractedBlock(Result.ALLOW);
             }
         }
     }
@@ -178,41 +178,53 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopHopperTakeAdd(InventoryMoveItemEvent e) {
-        Inventory to = e.getDestination();
-        Inventory from = e.getSource();
+    public void onShopHopperTakeAdd(InventoryMoveItemEvent event) {
+        Inventory target = event.getDestination();
+        Inventory from = event.getSource();
 
         // Prevent to steal items from the chest shop.
-        if (to.getType() == InventoryType.HOPPER && from.getType() == InventoryType.CHEST) {
+        if (target.getType() == InventoryType.HOPPER && from.getType() == InventoryType.CHEST) {
             ChestShop shop = this.module.getShop(from);
             if (shop != null) {
-                e.setCancelled(true);
+                event.setCancelled(true);
                 return;
             }
         }
 
         // Prevent to put different from a product items to the chest shop.
-        if (to.getType() == InventoryType.CHEST && from.getType() == InventoryType.HOPPER) {
-            ChestShop shop = this.module.getShop(to);
+        if (target.getType() == InventoryType.CHEST && from.getType() == InventoryType.HOPPER) {
+            ChestShop shop = this.module.getShop(target);
             if (shop == null) return;
 
-            ItemStack item = e.getItem();
+            ItemStack item = event.getItem();
             if (!shop.isProduct(item)) {
-                e.setCancelled(true);
+                event.setCancelled(true);
             }
         }
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopBadProductClick(InventoryClickEvent e) {
-        if (e.getInventory().getType() != InventoryType.CHEST) return;
-
-        ChestShop shop = this.module.getShop(e.getInventory());
+    public void onShopBadProductClick(InventoryClickEvent event) {
+        Inventory inventory = event.getInventory();
+        ChestShop shop = this.module.getShop(inventory);
         if (shop == null) return;
 
-        ItemStack item = e.getCurrentItem();
-        if (e.getAction() == InventoryAction.HOTBAR_SWAP || (item != null && !item.getType().isAir() && !shop.isProduct(item))) {
-            e.setCancelled(true);
+        if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
+            event.setCancelled(true);
+            return;
+        }
+
+        boolean isShopInv = event.getRawSlot() < inventory.getSize();
+
+        ItemStack cursor = event.getCursor();
+        if (cursor != null && !cursor.getType().isAir() && isShopInv && !shop.isProduct(cursor)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        ItemStack item = event.getCurrentItem();
+        if (item != null && !item.getType().isAir() && !isShopInv && !shop.isProduct(item)) {
+            event.setCancelled(true);
         }
     }
 

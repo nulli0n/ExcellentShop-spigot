@@ -63,7 +63,11 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
                         if (prepared.getProduct() instanceof StaticProduct virtualProduct) {
                             page = virtualProduct.getPage();
                         }
-                        prepared.getShop().open(viewer.getPlayer(), page);
+
+                        if (Config.GENERAL_CLOSE_GUI_AFTER_TRADE.get()) {
+                            viewer.getPlayer().closeInventory();
+                        }
+                        else prepared.getShop().open(viewer.getPlayer(), page);
                     });
                 });
             })

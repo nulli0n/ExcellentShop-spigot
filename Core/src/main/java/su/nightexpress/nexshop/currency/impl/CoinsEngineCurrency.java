@@ -1,18 +1,20 @@
 package su.nightexpress.nexshop.currency.impl;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
+import su.nightexpress.coinsengine.data.impl.CoinsUser;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
+import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
-public class CoinsEngineCurrency implements Currency, CurrencyHandler {
+public class CoinsEngineCurrency implements Currency, CurrencyHandler, OfflineCurrencyHandler {
 
     private final su.nightexpress.coinsengine.api.currency.Currency currency;
 
@@ -64,7 +66,7 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler {
     @Override
     @NotNull
     public ItemStack getIcon() {
-        return new ItemStack(Material.RAW_GOLD);
+        return this.currency.getIcon();
     }
 
     @Override
@@ -79,12 +81,40 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler {
     }
 
     @Override
+    public double getBalance(@NotNull UUID playerId) {
+        CoinsUser user = CoinsEngineAPI.getUserData(playerId);
+        if (user == null) return 0D;
+
+        return user.getCurrencyData(this.currency).getBalance();
+    }
+
+    @Override
     public void give(@NotNull Player player, double amount) {
         CoinsEngineAPI.addBalance(player, this.currency, amount);
     }
 
     @Override
+    public void give(@NotNull UUID playerId, double amount) {
+        CoinsEngineAPI.getUserDataAsync(playerId).thenAccept(user -> {
+            if (user == null) return;
+
+            user.getCurrencyData(this.currency).addBalance(amount);
+            CoinsEngineAPI.getUserManager().saveUser(user);
+        });
+    }
+
+    @Override
     public void take(@NotNull Player player, double amount) {
         CoinsEngineAPI.removeBalance(player, this.currency, amount);
+    }
+
+    @Override
+    public void take(@NotNull UUID playerId, double amount) {
+        CoinsEngineAPI.getUserDataAsync(playerId).thenAccept(user -> {
+            if (user == null) return;
+
+            user.getCurrencyData(this.currency).removeBalance(amount);
+            CoinsEngineAPI.getUserManager().saveUser(user);
+        });
     }
 }

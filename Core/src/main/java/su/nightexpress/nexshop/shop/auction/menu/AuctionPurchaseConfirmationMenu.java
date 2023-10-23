@@ -16,7 +16,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
+import su.nightexpress.nexshop.shop.auction.listing.ActiveListing;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -26,7 +26,7 @@ public class AuctionPurchaseConfirmationMenu extends ConfigMenu<ExcellentShop> {
     private final AuctionManager auctionManager;
     private final int            itemSlot;
 
-    private final Map<Player, AuctionListing> cache;
+    private final Map<Player, ActiveListing> cache;
 
     public AuctionPurchaseConfirmationMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager.plugin(), cfg);
@@ -37,7 +37,7 @@ public class AuctionPurchaseConfirmationMenu extends ConfigMenu<ExcellentShop> {
         this.registerHandler(MenuItemType.class)
             .addClick(MenuItemType.CONFIRMATION_ACCEPT, (viewer, event) -> {
                 Player player = viewer.getPlayer();
-                AuctionListing listing = this.cache.get(player);
+                ActiveListing listing = this.cache.get(player);
                 if (listing != null) {
                     this.auctionManager.buy(player, listing);
                 }
@@ -51,7 +51,7 @@ public class AuctionPurchaseConfirmationMenu extends ConfigMenu<ExcellentShop> {
 
         this.getItems().forEach(menuItem -> {
             menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-                AuctionListing listing = this.cache.get(viewer.getPlayer());
+                ActiveListing listing = this.cache.get(viewer.getPlayer());
                 if (listing == null) return;
 
                 ItemUtil.replace(item, listing.replacePlaceholders());
@@ -63,7 +63,7 @@ public class AuctionPurchaseConfirmationMenu extends ConfigMenu<ExcellentShop> {
         });
     }
 
-    public void open(@NotNull Player player, @NotNull AuctionListing listing) {
+    public void open(@NotNull Player player, @NotNull ActiveListing listing) {
         this.cache.put(player, listing);
         this.open(player, 1);
     }
@@ -71,7 +71,7 @@ public class AuctionPurchaseConfirmationMenu extends ConfigMenu<ExcellentShop> {
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
-        AuctionListing listing = this.cache.get(viewer.getPlayer());
+        ActiveListing listing = this.cache.get(viewer.getPlayer());
         if (listing == null) return;
 
         ItemStack item = new ItemStack(listing.getItemStack()); // Copy to prevent modifying

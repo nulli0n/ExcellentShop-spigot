@@ -25,6 +25,9 @@ public class Config {
     public static final JOption<Boolean> GENERAL_BUY_WITH_FULL_INVENTORY = JOption.create("General.Buy_With_Full_Inventory",
         false, "Sets wheter players can purchase items from shop with full inventory.");
 
+    public static final JOption<Boolean> GENERAL_CLOSE_GUI_AFTER_TRADE = JOption.create("General.Close_GUI_After_Trade",
+        false, "Sets whether or not Shop GUI should be closed when you sold/bought items.");
+
     public static final JOption<Boolean> GUI_PLACEHOLDER_API = JOption.create("GUI.Use_PlaceholderAPI", false,
         "Sets whether PlaceholderAPI placeholders will be applied to non-product items in Shop GUIs.");
 

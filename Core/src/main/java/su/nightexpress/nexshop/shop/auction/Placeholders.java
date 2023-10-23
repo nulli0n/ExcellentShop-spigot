@@ -18,6 +18,4 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
 
     public static final String CATEGORY_ID   = "%category_id%";
     public static final String CATEGORY_NAME = "%category_name%";
-    public static final String CATEGORY_ICON_NAME = "%category_icon_name%";
-    public static final String CATEGORY_ICON_LORE = "%category_icon_lore%";
 }

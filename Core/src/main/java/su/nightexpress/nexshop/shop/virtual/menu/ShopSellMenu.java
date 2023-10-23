@@ -87,7 +87,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
             if (product == null) return;
 
             int firtSlot = Arrays.stream(this.itemSlots)
-                .filter(slot2 -> { // Idea tells me there is possible NPE for a single line :/
+                .filter(slot2 -> {
                     ItemStack has = inventory.getItem(slot2);
                     return has == null || has.getType().isAir();
                 })

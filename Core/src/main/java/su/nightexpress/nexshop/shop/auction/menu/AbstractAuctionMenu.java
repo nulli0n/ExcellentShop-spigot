@@ -20,11 +20,12 @@ import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.Placeholders;
-import su.nightexpress.nexshop.shop.auction.listing.AbstractAuctionItem;
+import su.nightexpress.nexshop.shop.auction.listing.AbstractListing;
+import su.nightexpress.nexshop.shop.auction.menu.type.AuctionItemType;
 
 import java.util.*;
 
-public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends ConfigMenu<ExcellentShop> implements AutoPaged<A> {
+public abstract class AbstractAuctionMenu<A extends AbstractListing> extends ConfigMenu<ExcellentShop> implements AutoPaged<A> {
 
     protected AuctionManager auctionManager;
 
@@ -55,6 +56,20 @@ public abstract class AbstractAuctionMenu<A extends AbstractAuctionItem> extends
             .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
             .addClick(MenuItemType.RETURN, (viewer, event) -> this.auctionManager.getMainMenu().openNextTick(viewer, 1));
+
+        this.registerHandler(AuctionItemType.class)
+            .addClick(AuctionItemType.EXPIRED_LISTINGS, (viewer, event) -> {
+                this.auctionManager.getExpiredMenu().openNextTick(viewer, 1);
+            })
+            .addClick(AuctionItemType.SALES_HISTORY, (viewer, event) -> {
+                this.auctionManager.getHistoryMenu().openNextTick(viewer, 1);
+            })
+            .addClick(AuctionItemType.UNCLAIMED_ITEMS, (viewer, event) -> {
+                this.auctionManager.getUnclaimedMenu().openNextTick(viewer, 1);
+            })
+            .addClick(AuctionItemType.OWN_LISTINGS, (viewer, event) -> {
+                this.auctionManager.getSellingMenu().openNextTick(viewer, 1);
+            });
     }
 
     @Override

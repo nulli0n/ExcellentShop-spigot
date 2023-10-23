@@ -101,7 +101,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
             MenuItem clone = new MenuItem(item.getItem());
             clone.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
             clone.setSlots(item.getSlots());
-            clone.setPriority(100);
+            clone.setPriority(item.getPriority());
             clone.setType(item.getType());
             clone.setClick((viewer2, event) -> {
                 if (clone.getType() == MenuItemType.RETURN) {
@@ -151,7 +151,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, VirtualShop<?, 
             MenuItem productItem = new MenuItem(productIcon);
             productItem.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
             productItem.setSlots(slot);
-            productItem.setPriority(200);
+            productItem.setPriority(Integer.MAX_VALUE);
             productItem.setClick((viewer2, event) -> {
                 if (!event.isLeftClick() && !event.isRightClick()) return;
 

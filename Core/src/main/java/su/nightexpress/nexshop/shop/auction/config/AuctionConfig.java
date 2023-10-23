@@ -2,19 +2,17 @@ package su.nightexpress.nexshop.shop.auction.config;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.shop.auction.AuctionCategory;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -73,10 +71,7 @@ public class AuctionConfig {
         "Sets how often auction menus will be refreshed to players who are viewing them.",
         "Set this to -1 to disable refreshing task. Then menus will be updated only when there are listings changes.");
 
-    public static Map<String, AuctionCategory> CATEGORIES_MAP;
-
     public static void load(@NotNull AuctionManager manager) {
-        JYML cfgCategories = JYML.loadOrExtract(manager.plugin(), manager.getLocalPath(), "categories.yml");
         JYML cfg = manager.getConfig();
         cfg.initializeOptions(AuctionConfig.class);
 
@@ -112,7 +107,7 @@ public class AuctionConfig {
         DISABLED_GAMEMODES = cfg.getStringSet(path + "Disabled_Gamemodes").stream()
                 .map(String::toUpperCase).collect(Collectors.toSet());
 
-        CURRENCIES = new HashMap<>();
+        CURRENCIES = new LinkedHashMap<>();
         for (String curId : cfg.getSection(path + "Currency")) {
             String path2 = path + "Currency." + curId + ".";
             boolean isDefault = cfg.getBoolean(path2 + "Default");
@@ -167,16 +162,6 @@ public class AuctionConfig {
         LISTINGS_TAX_ON_LISTING_ADD = cfg.getDouble(path + "On_Listing_Add", 0D);
         LISTINGS_TAX_ON_LISTING_PURCHASE = cfg.getDouble(path + "On_Listing_Purchase", 0D);
 
-        CATEGORIES_MAP = new HashMap<>();
-        for (String sId : cfgCategories.getSection("")) {
-            String path2 = sId + ".";
-            String cName = cfgCategories.getString(path2 + "Name", sId);
-            ItemStack cIcon = cfgCategories.getItem(path2 + "Icon");
-            Set<String> cMaterials = cfgCategories.getStringSet(path2 + "Materials");
-            AuctionCategory category = new AuctionCategory(sId, cName, cIcon, cMaterials);
-            CATEGORIES_MAP.put(category.getId(), category);
-        }
-
         cfg.saveChanges();
     }
 
@@ -206,10 +191,5 @@ public class AuctionConfig {
 
     private static double getCurrencyPriceLimit(@NotNull Currency currency, int index) {
         return LISTINGS_PRICE_PER_CURRENCY.getOrDefault(currency.getId(), new double[]{-1, -1})[index];
-    }
-
-    @NotNull
-    public static Collection<AuctionCategory> getCategories() {
-        return CATEGORIES_MAP.values();
     }
 }

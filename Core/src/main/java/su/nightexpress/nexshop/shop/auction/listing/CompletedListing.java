@@ -12,13 +12,13 @@ import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
 import java.util.UUID;
 
-public class AuctionCompletedListing extends AbstractAuctionItem {
+public class CompletedListing extends AbstractListing {
 
     private final String buyerName;
     private boolean      isRewarded;
     private final long   buyDate;
 
-    public AuctionCompletedListing(@NotNull AuctionListing listing, @NotNull Player buyer) {
+    public CompletedListing(@NotNull ActiveListing listing, @NotNull Player buyer) {
         this(
                 UUID.randomUUID(),
                 listing.getOwner(),
@@ -38,7 +38,7 @@ public class AuctionCompletedListing extends AbstractAuctionItem {
         }
     }
 
-    public AuctionCompletedListing(
+    public CompletedListing(
         @NotNull UUID id,
         @NotNull UUID owner,
         @NotNull String ownerName,

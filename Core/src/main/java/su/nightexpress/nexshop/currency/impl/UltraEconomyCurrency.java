@@ -10,10 +10,12 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
+import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public class UltraEconomyCurrency implements Currency, CurrencyHandler {
+public class UltraEconomyCurrency implements Currency, CurrencyHandler, OfflineCurrencyHandler {
 
     private final me.TechsCode.UltraEconomy.objects.Currency currency;
     private final PlaceholderMap placeholderMap;
@@ -76,7 +78,7 @@ public class UltraEconomyCurrency implements Currency, CurrencyHandler {
 
     @Override
     public double getBalance(@NotNull Player player) {
-        return getAccount(player).map(value -> value.getBalance(currency).getOnHand()).orElse(0.0);
+        return getAccount(player).map(value -> value.getBalance(currency).getOnHand()).orElse(0D);
     }
 
     @Override
@@ -91,5 +93,24 @@ public class UltraEconomyCurrency implements Currency, CurrencyHandler {
 
     private Optional<Account> getAccount(@NotNull Player player) {
         return UltraEconomy.getInstance().getAccounts().name(player.getName());
+    }
+
+    @Override
+    public double getBalance(@NotNull UUID playerId) {
+        return getAccount(playerId).map(value -> value.getBalance(currency).getOnHand()).orElse(0D);
+    }
+
+    @Override
+    public void give(@NotNull UUID playerId, double amount) {
+        getAccount(playerId).ifPresent(value -> value.getBalance(currency).addHand(amount));
+    }
+
+    @Override
+    public void take(@NotNull UUID playerId, double amount) {
+        getAccount(playerId).ifPresent(value -> value.getBalance(currency).removeHand(amount));
+    }
+
+    private Optional<Account> getAccount(@NotNull UUID playerId) {
+        return UltraEconomy.getInstance().getAccounts().uuid(playerId);
     }
 }

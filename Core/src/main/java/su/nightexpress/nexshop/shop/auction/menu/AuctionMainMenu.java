@@ -5,38 +5,41 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.Perms;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.auction.AuctionCategory;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
+import su.nightexpress.nexshop.shop.auction.listing.ActiveListing;
+import su.nightexpress.nexshop.shop.auction.listing.ListingCategory;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
+public class AuctionMainMenu extends AbstractAuctionMenu<ActiveListing> {
 
-    private static final Map<Player, AuctionSortType>      LISTING_ORDER = new WeakHashMap<>();
-    private static final Map<Player, Set<AuctionCategory>> CATEGORIES    = new WeakHashMap<>();
-    private static final Map<Player, Set<Currency>>       CURRENCIES   = new WeakHashMap<>();
+    private static final Map<Player, AuctionSortType> LISTING_ORDER = new WeakHashMap<>();
+    private static final Map<Player, ListingCategory> CATEGORY      = new WeakHashMap<>();
+    private static final Map<Player, Currency>        CURRENCY      = new WeakHashMap<>();
 
     private static final String PLACEHOLDER_CATEGORIES       = "%categories%";
     private static final String PLACEHOLDER_CURRENCIES       = "%currencies%";
     private static final String PLACEHOLDER_EXPIRED_AMOUNT   = "%expired_amount%";
     private static final String PLACEHOLDER_UNCLAIMED_AMOUNT = "%unclaimed_amount%";
     private static final String PLACEHOLDER_LISTING_ORDER    = "%listing_order%";
-    private static final String PLACEHOLDER_ACTION_PREVIEW = "%action_preview%";
+    private static final String PLACEHOLDER_ACTION_PREVIEW   = "%action_preview%";
 
     private final List<String> lorePreview;
+    private final String loreListUnselected;
+    private final String loreListSelected;
 
     public AuctionMainMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
         super(auctionManager, cfg);
@@ -47,37 +50,41 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
             "Use placeholder '" + PLACEHOLDER_ACTION_PREVIEW + "' in listing lore format to insert it."
         ).mapReader(Colorizer::apply).read(cfg);
 
-        this.registerHandler(AuctionItemType.class)
-            .addClick(AuctionItemType.EXPIRED_LISTINGS, (viewer, event) -> {
-                this.auctionManager.getExpiredMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.SALES_HISTORY, (viewer, event) -> {
-                this.auctionManager.getHistoryMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.UNCLAIMED_ITEMS, (viewer, event) -> {
-                this.auctionManager.getUnclaimedMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.OWN_LISTINGS, (viewer, event) -> {
-                this.auctionManager.getSellingMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.LISTING_ORDER, (viewer, event) -> {
+        this.loreListSelected = JOption.create("Lore_Format.List.Selected",
+            Colors.GREEN + "✔ " + Placeholders.GENERIC_NAME
+        ).mapReader(Colorizer::apply).read(cfg);
+
+        this.loreListUnselected = JOption.create("Lore_Format.List.Unselected",
+            Colors.GRAY + "   " + Placeholders.GENERIC_NAME
+        ).mapReader(Colorizer::apply).read(cfg);
+
+        cfg.saveChanges();
+
+        this.registerHandler(FilterType.class)
+            .addClick(FilterType.LISTING_ORDER, (viewer, event) -> {
                 Player player = viewer.getPlayer();
                 setListingOrder(player, CollectionsUtil.next(getListingOrder(player)));
                 this.openNextTick(viewer, viewer.getPage());
             })
-            .addClick(AuctionItemType.CATEGORY_FILTER, (viewer, event) -> {
-                if (event.isRightClick()) {
-                    CATEGORIES.remove(viewer.getPlayer());
-                    this.openNextTick(viewer, viewer.getPage());
-                }
-                else this.auctionManager.getCategoryFilterMenu().openNextTick(viewer, 1);
+            .addClick(FilterType.CATEGORY_FILTER, (viewer, event) -> {
+                List<ListingCategory> categories = new ArrayList<>(this.auctionManager.getCategories());
+                ListingCategory current = this.getCategory(viewer.getPlayer());
+                ListingCategory selected = CollectionsUtil.shifted(categories, categories.indexOf(current), event.isLeftClick() ? 1 : -1);
+                CATEGORY.put(viewer.getPlayer(), selected);
+                this.openNextTick(viewer, viewer.getPage());
             })
-            .addClick(AuctionItemType.CURRENCY_FILTER, (viewer, event) -> {
-                if (event.isRightClick()) {
-                    CURRENCIES.remove(viewer.getPlayer());
+            .addClick(FilterType.CURRENCY_FILTER, (viewer, event) -> {
+                if (event.isShiftClick() && event.isRightClick()) {
+                    CURRENCY.remove(viewer.getPlayer());
                     this.openNextTick(viewer, viewer.getPage());
+                    return;
                 }
-                else this.auctionManager.getCurrencyFilterMenu().openNextTick(viewer, 1);
+
+                List<Currency> currencies = new ArrayList<>(this.auctionManager.getCurrencies(viewer.getPlayer()));
+                Currency current = this.getCurrency(viewer.getPlayer());
+                Currency selected = CollectionsUtil.shifted(currencies, currencies.indexOf(current), event.isLeftClick() ? 1 : -1);
+                CURRENCY.put(viewer.getPlayer(), selected);
+                this.openNextTick(viewer, viewer.getPage());
             });
 
         this.load();
@@ -85,19 +92,27 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
         this.getItems().forEach(menuItem -> {
             menuItem.getOptions().addDisplayModifier((viewer, item) -> {
                 Player player = viewer.getPlayer();
-                String categories = getCategories(player).stream().map(AuctionCategory::getName).collect(Collectors.joining(", "));
-                String currencies = getCurrencies(player).stream().map(Currency::getName).collect(Collectors.joining(", "));
-                if (categories.isEmpty()) categories = LangManager.getPlain(Lang.OTHER_NONE);
-                if (currencies.isEmpty()) currencies = LangManager.getPlain(Lang.OTHER_NONE);
 
-                String finalCategories = categories;
-                String finalCurrencies = currencies;
+                String categoryList = this.auctionManager.getCategories().stream().map(category -> {
+                    if (this.getCategory(player) == category) {
+                        return this.loreListSelected.replace(Placeholders.GENERIC_NAME, category.getName());
+                    }
+                    return this.loreListUnselected.replace(Placeholders.GENERIC_NAME, category.getName());
+                }).collect(Collectors.joining("\n"));
+
+                String currencyList = this.auctionManager.getCurrencies(player).stream().map(currency -> {
+                    if (this.getCurrency(player) == currency) {
+                        return this.loreListSelected.replace(Placeholders.GENERIC_NAME, currency.getName());
+                    }
+                    return this.loreListUnselected.replace(Placeholders.GENERIC_NAME, currency.getName());
+                }).collect(Collectors.joining("\n"));
+
                 PlaceholderMap placeholderMap = new PlaceholderMap()
                     .add("%tax%", () -> NumberUtil.format(AuctionConfig.LISTINGS_TAX_ON_LISTING_ADD))
                     .add("%expire%", () -> TimeUtil.formatTime(AuctionConfig.LISTINGS_EXPIRE_IN))
                     .add(PLACEHOLDER_LISTING_ORDER, () -> plugin.getLangManager().getEnum(getListingOrder(player)))
-                    .add(PLACEHOLDER_CATEGORIES, () -> finalCategories)
-                    .add(PLACEHOLDER_CURRENCIES, () -> finalCurrencies)
+                    .add(PLACEHOLDER_CATEGORIES, () -> categoryList)
+                    .add(PLACEHOLDER_CURRENCIES, () -> currencyList)
                     .add(PLACEHOLDER_EXPIRED_AMOUNT, () -> NumberUtil.format(auctionManager.getExpiredListings(player).size()))
                     .add(PLACEHOLDER_UNCLAIMED_AMOUNT, () -> NumberUtil.format(auctionManager.getUnclaimedListings(player).size()))
                     ;
@@ -111,7 +126,7 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
         });
     }
 
-    public boolean isContainer(@NotNull AuctionListing listing) {
+    public boolean isContainer(@NotNull ActiveListing listing) {
         ItemStack item = listing.getItemStack();
         if (item.getItemMeta() instanceof BlockStateMeta meta) {
             return meta.getBlockState() instanceof Container container;
@@ -128,31 +143,31 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
         LISTING_ORDER.put(player, sortType);
     }
 
-    @NotNull
-    public static Set<Currency> getCurrencies(@NotNull Player player) {
-        return CURRENCIES.computeIfAbsent(player, k -> new HashSet<>());
+    @Nullable
+    public Currency getCurrency(@NotNull Player player) {
+        return CURRENCY.get(player);
     }
 
     @NotNull
-    public static Set<AuctionCategory> getCategories(@NotNull Player player) {
-        return CATEGORIES.computeIfAbsent(player, k -> new HashSet<>());
+    public ListingCategory getCategory(@NotNull Player player) {
+        return CATEGORY.getOrDefault(player, this.auctionManager.getDefaultCategory());
     }
 
     @Override
     @NotNull
-    public List<AuctionListing> getObjects(@NotNull Player player) {
-        Set<AuctionCategory> categories = getCategories(player);
-        Set<Currency> currencies = getCurrencies(player);
+    public List<ActiveListing> getObjects(@NotNull Player player) {
+        ListingCategory category = this.getCategory(player);
+        Currency currencies = this.getCurrency(player);
 
         return this.auctionManager.getActiveListings().stream()
-            .filter(listing -> categories.isEmpty() || categories.stream().anyMatch(category -> category.isItemOfThis(listing.getItemStack())))
-            .filter(listing -> currencies.isEmpty() || currencies.contains(listing.getCurrency()))
+            .filter(listing -> category.isItemOfThis(listing.getItemStack()))
+            .filter(listing -> currencies == null || currencies == listing.getCurrency())
             .sorted(getListingOrder(player).getComparator()).toList();
     }
 
     @Override
     @NotNull
-    public ItemStack getObjectStack(@NotNull Player player, @NotNull AuctionListing listing) {
+    public ItemStack getObjectStack(@NotNull Player player, @NotNull ActiveListing listing) {
         ItemStack item = super.getObjectStack(player, listing);
         if (AuctionConfig.MENU_CONTAINER_PREVIEW_ENABLED.get()) {
             ItemUtil.mapMeta(item, meta -> {
@@ -169,7 +184,7 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
 
     @Override
     @NotNull
-    public ItemClick getObjectClick(@NotNull AuctionListing listing) {
+    public ItemClick getObjectClick(@NotNull ActiveListing listing) {
         return (viewer, event) -> {
             Player player = viewer.getPlayer();
             boolean isOwner = listing.isOwner(player);
@@ -203,14 +218,10 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
         };
     }
 
-    private enum AuctionItemType {
-        EXPIRED_LISTINGS,
-        SALES_HISTORY,
-        UNCLAIMED_ITEMS,
+    private enum FilterType {
         LISTING_ORDER,
         CATEGORY_FILTER,
         CURRENCY_FILTER,
-        OWN_LISTINGS,
     }
 
     public enum AuctionSortType {
@@ -242,14 +253,14 @@ public class AuctionMainMenu extends AbstractAuctionMenu<AuctionListing> {
         }),
         ;
 
-        private final Comparator<AuctionListing> comparator;
+        private final Comparator<ActiveListing> comparator;
 
-        AuctionSortType(@NotNull Comparator<AuctionListing> comparator) {
+        AuctionSortType(@NotNull Comparator<ActiveListing> comparator) {
             this.comparator = comparator;
         }
 
         @NotNull
-        public Comparator<AuctionListing> getComparator() {
+        public Comparator<ActiveListing> getComparator() {
             return this.comparator;
         }
     }

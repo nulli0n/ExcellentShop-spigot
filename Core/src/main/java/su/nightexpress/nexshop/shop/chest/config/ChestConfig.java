@@ -64,6 +64,16 @@ public class ChestConfig {
         "Sets whether or not player's shop bank will be auto-managed without manual operations.",
         "This means that players will gain/lose their funds instantly for each transaction in their shops.");
 
+    public static final JOption<Boolean> SHOP_OFFLINE_TRANSACTIONS = JOption.create("Shops.OfflineTransactions",
+        false,
+        "[EXPERIMENTAL FEATURE]",
+        "Sets whether or not plugin will try to withdraw / deposit currency directly",
+        "to shop owner's account when player is offline and the shop bank don't have enough funds.",
+        "Example: Even if you have 'Auto_Bank' option enabled, players still will be unable to sell items",
+        "to offline shops until someone purchased something from them (so the bank is filled up a bit).",
+        "This setting will fix that.",
+        "NOTE: Not all supported currencies (and/or their plugins) are available for this feature.");
+
     public static final JOption<Double> SHOP_CREATION_COST_CREATE = JOption.create("Shops.Creation.Cost.Create", 0D,
         "Sets how much player have to pay in order to create a chest shop.");
 

@@ -5,8 +5,11 @@ import me.xanium.gemseconomy.account.Account;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
+import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
 
-public class GemsEconomyHandler implements CurrencyHandler {
+import java.util.UUID;
+
+public class GemsEconomyHandler implements CurrencyHandler, OfflineCurrencyHandler {
 
     private final me.xanium.gemseconomy.currency.Currency currency;
 
@@ -35,9 +38,38 @@ public class GemsEconomyHandler implements CurrencyHandler {
         account.withdraw(this.currency, amount);
     }
 
+    @Override
+    public double getBalance(@NotNull UUID playerId) {
+        Account account = GemsEconomy.getInstance().getAccountManager().getAccount(playerId);
+        validateAccount(account, playerId);
+        return account.getBalance(this.currency);
+    }
+
+    @Override
+    public void give(@NotNull UUID playerId, double amount) {
+        Account account = GemsEconomy.getInstance().getAccountManager().getAccount(playerId);
+        validateAccount(account, playerId);
+        account.deposit(this.currency, amount);
+    }
+
+    @Override
+    public void take(@NotNull UUID playerId, double amount) {
+        Account account = GemsEconomy.getInstance().getAccountManager().getAccount(playerId);
+        validateAccount(account, playerId);
+        account.withdraw(this.currency, amount);
+    }
+
     private <T> void validateAccount(T account, Player player) {
         if (account == null) {
             throw new IllegalStateException("Cannot find GemsEconomy account for player: " + player.getName() + ". "
+                + "Please report this error to the author of GemsEconomy at: "
+                + "https://github.com/Ghost-chu/GemsEconomy/issues");
+        }
+    }
+
+    private <T> void validateAccount(T account, UUID player) {
+        if (account == null) {
+            throw new IllegalStateException("Cannot find GemsEconomy account for player: " + player + ". "
                 + "Please report this error to the author of GemsEconomy at: "
                 + "https://github.com/Ghost-chu/GemsEconomy/issues");
         }

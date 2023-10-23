@@ -13,8 +13,8 @@ import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
+import su.nightexpress.nexshop.shop.auction.listing.CompletedListing;
+import su.nightexpress.nexshop.shop.auction.listing.ActiveListing;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -44,9 +44,9 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
 
     private final AuctionManager                               auctionManager;
     private final String                                       tableListings;
-    private final String                                       tableCompletedListings;
-    private final Function<ResultSet, AuctionListing>          funcListing;
-    private final Function<ResultSet, AuctionCompletedListing> funcCompletedListing;
+    private final String                                tableCompletedListings;
+    private final Function<ResultSet, ActiveListing>    funcListing;
+    private final Function<ResultSet, CompletedListing> funcCompletedListing;
 
     @NotNull
     public static AuctionDataHandler getInstance(@NotNull AuctionManager auctionManager) {
@@ -85,7 +85,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
                 long expireDate = resultSet.getLong(COLUMN_EXPIRE_DATE.getName());
                 long dateCreation = resultSet.getLong(COLUMN_DATE_CREATION.getName());
 
-                return new AuctionListing(id, owner, ownerName, itemStack, currency, price, dateCreation, expireDate);
+                return new ActiveListing(id, owner, ownerName, itemStack, currency, price, dateCreation, expireDate);
             }
             catch (SQLException e) {
                 return null;
@@ -117,7 +117,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
                 long buyDate = resultSet.getLong(COLUMN_BUY_DATE.getName());
                 long dateCreation = resultSet.getLong(COLUMN_DATE_CREATION.getName());
 
-                return new AuctionCompletedListing(id, owner, ownerName, buyerName, itemStack, currency, price, dateCreation, isNotified, buyDate);
+                return new CompletedListing(id, owner, ownerName, buyerName, itemStack, currency, price, dateCreation, isNotified, buyDate);
             }
             catch (SQLException e) {
                 return null;
@@ -179,8 +179,8 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
 
     @Override
     public void onSynchronize() {
-        List<AuctionListing> listings = this.getListings();
-        List<AuctionCompletedListing> completedListings = this.getCompletedListings();
+        List<ActiveListing> listings = this.getListings();
+        List<CompletedListing> completedListings = this.getCompletedListings();
 
         this.auctionManager.clearListings();
         listings.forEach(this.auctionManager::addListing);
@@ -188,16 +188,16 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
     }
 
     @NotNull
-    public List<AuctionListing> getListings() {
+    public List<ActiveListing> getListings() {
         return this.load(this.tableListings, this.funcListing, Collections.emptyList(), Collections.emptyList(), -1);
     }
 
     @NotNull
-    public List<AuctionCompletedListing> getCompletedListings() {
+    public List<CompletedListing> getCompletedListings() {
         return this.load(this.tableCompletedListings, this.funcCompletedListing, Collections.emptyList(), Collections.emptyList(), -1);
     }
 
-    public void addListing(@NotNull AuctionListing listing) {
+    public void addListing(@NotNull ActiveListing listing) {
         this.insert(this.tableListings, Arrays.asList(
             COLUMN_AUC_ID.toValue(listing.getId().toString()),
             COLUMN_OWNER.toValue(listing.getOwner().toString()),
@@ -211,12 +211,12 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
         ));
     }
 
-    public void deleteListing(@NotNull AuctionListing listing) {
+    public void deleteListing(@NotNull ActiveListing listing) {
         String sql = "DELETE FROM " + this.tableListings + " WHERE `aucId` = '" + listing.getId() + "'";
         SQLQueries.executeStatement(this.getConnector(), sql);
     }
 
-    public void addCompletedListing(@NotNull AuctionCompletedListing listing) {
+    public void addCompletedListing(@NotNull CompletedListing listing) {
         this.insert(this.tableCompletedListings, Arrays.asList(
             COLUMN_AUC_ID.toValue(listing.getId().toString()),
             COLUMN_OWNER.toValue(listing.getOwner().toString()),
@@ -232,13 +232,13 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
         ));
     }
 
-    public void saveCompletedListings(@NotNull AuctionCompletedListing... listings) {
-        for (AuctionCompletedListing listing : listings) {
+    public void saveCompletedListings(@NotNull CompletedListing... listings) {
+        for (CompletedListing listing : listings) {
             this.saveCompletedListing(listing);
         }
     }
 
-    public void saveCompletedListing(@NotNull AuctionCompletedListing historyItem) {
+    public void saveCompletedListing(@NotNull CompletedListing historyItem) {
         this.update(this.tableCompletedListings, Collections.singletonList(
             COLUMN_IS_PAID.toValue(historyItem.isRewarded() ? 1 : 0)
             ),
@@ -246,7 +246,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
         );
     }
 
-    public void deleteCompletedListing(@NotNull AuctionCompletedListing historyItem) {
+    public void deleteCompletedListing(@NotNull CompletedListing historyItem) {
         String sql = "DELETE FROM " + this.tableCompletedListings + " WHERE `aucId` = '" + historyItem.getId() + "'";
         SQLQueries.executeStatement(this.getConnector(), sql);
     }

@@ -98,13 +98,8 @@ Content:
       Material: 'COMPASS'
       Name: '#ee9aff&lItem Categories'
       Lore:
-        - '#ddeceeSelect listing categories you'
-        - '#ddeceewant to browse here.'
-        - ''
-        - '#a5ff9a[✓] #ddeceeSelected: #a5ff9a%categories%'
-        - ''
-        - '#a5ff9a&lActions:'
-        - '#a5ff9a▪ #ddeceeRight-Click: #a5ff9aReset'
+        - '#ddeceeSelect listings category:'
+        - '%categories%'
     Type: CATEGORY_FILTER
     Slots: 46
 
@@ -114,13 +109,11 @@ Content:
       Material: 'EMERALD'
       Name: '#ee9aff&lCurrencies'
       Lore:
-        - '#ddeceeSelect listing currencies you'
-        - '#ddeceewant to browse here.'
-        - ''
-        - '#a5ff9a[✓] #ddeceeSelected: #a5ff9a%currencies%'
+        - '#ddeceeSelect listings currency:'
+        - '%currencies%'
         - ''
         - '#a5ff9a&lActions:'
-        - '#a5ff9a▪ #ddeceeRight-Click: #a5ff9aReset'
+        - '#a5ff9a▪ #ddeceeShift+RMB: #a5ff9aReset'
     Type: CURRENCY_FILTER
     Slots: 49
 

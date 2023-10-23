@@ -1,38 +1,47 @@
-package su.nightexpress.nexshop.shop.auction;
+package su.nightexpress.nexshop.shop.auction.listing;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.StringUtil;
+import su.nightexpress.nexshop.shop.auction.Placeholders;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class AuctionCategory implements Placeholder {
+public class ListingCategory implements Placeholder {
 
     private final String      id;
     private final String      name;
-    private final ItemStack  icon;
+    private final boolean isDefault;
     private final Set<String> materials;
 
     private final PlaceholderMap placeholderMap;
 
-    public AuctionCategory(@NotNull String id, @NotNull String name, @NotNull ItemStack icon,
+    public ListingCategory(@NotNull String id,
+                           @NotNull String name,
+                           boolean isDefault,
                            @NotNull Set<String> materials) {
-        this.id = id.toLowerCase().replace(" ", "_");
+        this.id = StringUtil.lowerCaseUnderscore(id);
         this.name = Colorizer.apply(name);
-        this.icon = new ItemStack(icon);
+        this.isDefault = isDefault;
         this.materials = materials.stream().map(String::toLowerCase).collect(Collectors.toSet());
         this.placeholderMap = new PlaceholderMap()
             .add(Placeholders.CATEGORY_ID, this::getId)
-            .add(Placeholders.CATEGORY_NAME, this::getName)
-            .add(Placeholders.CATEGORY_ICON_NAME, () -> ItemUtil.getItemName(this.getIcon()))
-            .add(Placeholders.CATEGORY_ICON_LORE, () -> String.join("\n", ItemUtil.getLore(this.getIcon())));
+            .add(Placeholders.CATEGORY_NAME, this::getName);
+    }
 
-        ItemUtil.replace(this.icon, this.replacePlaceholders());
+    @NotNull
+    public static ListingCategory read(@NotNull JYML cfg, @NotNull String path, @NotNull String id) {
+        String name = cfg.getString(path + ".Name", StringUtil.capitalizeUnderscored(id));
+        boolean isDefault = cfg.getBoolean(path + ".Default");
+        Set<String> materials = cfg.getStringSet(path + ".Materials");
+
+        return new ListingCategory(id, name, isDefault, materials);
     }
 
     @Override
@@ -51,9 +60,8 @@ public class AuctionCategory implements Placeholder {
         return this.name;
     }
 
-    @NotNull
-    public ItemStack getIcon() {
-        return new ItemStack(this.icon);
+    public boolean isDefault() {
+        return this.isDefault;
     }
 
     @NotNull

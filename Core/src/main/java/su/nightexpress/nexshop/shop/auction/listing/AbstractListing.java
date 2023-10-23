@@ -13,7 +13,7 @@ import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
 import java.util.UUID;
 
-public abstract class AbstractAuctionItem implements Placeholder {
+public abstract class AbstractListing implements Placeholder {
 
     protected final UUID      id;
     protected       UUID      owner;
@@ -24,7 +24,7 @@ public abstract class AbstractAuctionItem implements Placeholder {
     protected final long dateCreation;
     protected PlaceholderMap placeholderMap;
 
-    public AbstractAuctionItem(
+    public AbstractListing(
             @NotNull UUID id,
             @NotNull UUID owner,
             @NotNull String ownerName,

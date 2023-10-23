@@ -10,11 +10,11 @@ import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 
 import java.util.UUID;
 
-public class AuctionListing extends AbstractAuctionItem {
+public class ActiveListing extends AbstractListing {
 
     private final long expireDate;
 
-    public AuctionListing(
+    public ActiveListing(
         @NotNull Player player,
         @NotNull ItemStack itemStack,
         @NotNull Currency currency,
@@ -32,7 +32,7 @@ public class AuctionListing extends AbstractAuctionItem {
         );
     }
 
-    public AuctionListing(
+    public ActiveListing(
             @NotNull UUID id,
             @NotNull UUID owner,
             @NotNull String ownerName,

@@ -11,7 +11,7 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
+import su.nightexpress.nexshop.shop.auction.listing.CompletedListing;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class AuctionListener extends AbstractListener<ExcellentShop> {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onSellerJoin(PlayerJoinEvent e) {
         Player player = e.getPlayer();
-        List<AuctionCompletedListing> unclaimed = this.auctionManager.getUnclaimedListings(player);
+        List<CompletedListing> unclaimed = this.auctionManager.getUnclaimedListings(player);
         int expired = this.auctionManager.getExpiredListings(player).size();
 
         if (unclaimed.size() > 0) {

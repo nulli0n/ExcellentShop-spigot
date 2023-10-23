@@ -11,8 +11,8 @@ import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.shop.auction.config.AuctionConfig;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionCompletedListing;
-import su.nightexpress.nexshop.shop.auction.listing.AuctionListing;
+import su.nightexpress.nexshop.shop.auction.listing.CompletedListing;
+import su.nightexpress.nexshop.shop.auction.listing.ActiveListing;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -60,7 +60,7 @@ public class AuctionUtils {
 
 
             if (i < 15) {
-                AuctionListing listing = new AuctionListing(UUID.randomUUID(), ownerId, ownerName, item, currency, price, dateCreation, dateExpired);
+                ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, item, currency, price, dateCreation, dateExpired);
                 auctionManager.addListing(listing);
                 auctionManager.getDataHandler().addListing(listing);
             }
@@ -68,7 +68,7 @@ public class AuctionUtils {
                 LocalDateTime buyed = created.plusDays(Rnd.get(4)).plusHours(Rnd.get(4)).plusMinutes(Rnd.get(15));
                 long buyDate = TimeUtil.toEpochMillis(buyed);
 
-                AuctionCompletedListing listing = new AuctionCompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), item, currency, price, dateCreation, Rnd.nextBoolean(), buyDate);
+                CompletedListing listing = new CompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), item, currency, price, dateCreation, Rnd.nextBoolean(), buyDate);
                 auctionManager.addCompletedListing(listing);
                 auctionManager.getDataHandler().addCompletedListing(listing);
             }

@@ -159,10 +159,13 @@ public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
             map.forEach((itemStack, slots) -> {
                 this.removeTypeLore(itemStack);
 
+                MenuItemType itemType = this.getType(itemStack);
+
                 String id = UUID.randomUUID().toString();
                 String path = "Content." + id + ".";
-                String typeRaw = this.getType(itemStack).name();
+                String typeRaw = itemType.name();
 
+                cfg.set(path + "Priority", itemType != MenuItemType.NONE ? 100 : 0);
                 cfg.setItem(path + "Item.", itemStack);
                 cfg.setIntArray(path + "Slots", slots.stream().mapToInt(Number::intValue).toArray());
                 cfg.set(path + "Type", typeRaw);

@@ -1,19 +1,10 @@
 default:
-  Name: '&fAll'
-  Icon:
-    Material: CHEST
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'All'
+  Default: true
   Materials:
     - '*'
 brewing:
-  Name: '&fBrewing'
-  Icon:
-    Material: POTION
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Brewing'
   Materials:
     - BLAZE_POWDER
     - BREWING_STAND
@@ -31,12 +22,7 @@ brewing:
     - RABBIT_FOOT
     - SPLASH_POTION
 building_blocks:
-  Name: '&fBuilding Blocks'
-  Icon:
-    Material: BRICKS
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Building Blocks'
   Materials:
     - ACACIA_LOG
     - ACACIA_PLANKS
@@ -430,12 +416,7 @@ building_blocks:
     - YELLOW_TERRACOTTA
     - YELLOW_WOOL
 combat:
-  Name: '&fCombat'
-  Icon:
-    Material: GOLDEN_SWORD
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Combat'
   Materials:
     - ARROW
     - BOW
@@ -477,12 +458,7 @@ combat:
     - TURTLE_HELMET
     - WOODEN_SWORD
 decorations:
-  Name: '&fDecorations'
-  Icon:
-    Material: RED_TULIP
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Decorations'
   Materials:
     - ACACIA_FENCE
     - ACACIA_LEAVES
@@ -803,12 +779,7 @@ decorations:
     - YELLOW_STAINED_GLASS_PANE
     - ZOMBIE_HEAD
 tools:
-  Name: '&fTools'
-  Icon:
-    Material: IRON_AXE
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Tools'
   Materials:
     - CLOCK
     - COMPASS
@@ -844,12 +815,7 @@ tools:
     - WOODEN_PICKAXE
     - WOODEN_SHOVEL
 food:
-  Name: '&fFood'
-  Icon:
-    Material: APPLE
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Food'
   Materials:
     - APPLE
     - BAKED_POTATO
@@ -890,12 +856,7 @@ food:
     - SWEET_BERRIES
     - TROPICAL_FISH
 redstone:
-  Name: '&fRedstone'
-  Icon:
-    Material: REDSTONE
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Redstone'
   Materials:
     - ACACIA_BUTTON
     - ACACIA_DOOR
@@ -975,12 +936,7 @@ redstone:
     - WARPED_PRESSURE_PLATE
     - WARPED_TRAPDOOR
 transportation:
-  Name: '&fTransportation'
-  Icon:
-    Material: POWERED_RAIL
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Transportation'
   Materials:
     - ACACIA_BOAT
     - ACACIA_CHEST_BOAT
@@ -1010,12 +966,7 @@ transportation:
     - TNT_MINECART
     - WARPED_FUNGUS_ON_A_STICK
 misc:
-  Name: '&fMisc'
-  Icon:
-    Material: LAVA_BUCKET
-    Name: '%category_name%'
-    Item_Flags:
-      - '*'
+  Name: 'Misc'
   Materials:
     - ALLAY_SPAWN_EGG
     - AMETHYST_SHARD
