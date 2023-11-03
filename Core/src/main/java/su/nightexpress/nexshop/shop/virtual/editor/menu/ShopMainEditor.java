@@ -36,15 +36,15 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
     private DiscountListEditor discountEditor;
 
     public ShopMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop<?, ?> shop) {
-        super(plugin, shop, shop.getName() + ": Settings", 54);
+        super(plugin, shop, "Shop Editor: " + shop.getId(), 54);
 
         this.addReturn(49).setClick((viewer, event) -> {
-            this.plugin.runTask(task -> shop.getModule().getEditor().open(viewer.getPlayer(), 1));
+            shop.getModule().getEditor().openNextTick(viewer.getPlayer(), 1);
         });
 
         this.addItem(Material.NAME_TAG, VirtualLocales.SHOP_NAME, 12).setClick((viewer, event) -> {
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, wrapper -> {
-                shop.setName(wrapper.getText());
+                shop.setName(wrapper.getTextColored());
                 this.save(viewer);
                 return true;
             });
@@ -92,18 +92,12 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
         });
 
         this.addItem(Material.WRITABLE_BOOK, VirtualLocales.SHOP_TRADES, 22).setClick((viewer, event) -> {
-            if (event.isLeftClick()) {
-                shop.setTransactionEnabled(TradeType.BUY, !shop.isTransactionEnabled(TradeType.BUY));
-            }
-            else if (event.isRightClick()) {
-                shop.setTransactionEnabled(TradeType.SELL, !shop.isTransactionEnabled(TradeType.SELL));
-            }
+            TradeType type = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
+            shop.setTransactionEnabled(type, !shop.isTransactionEnabled(type));
             this.save(viewer);
         });
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 8).setClick((viewer, event) -> {
-            if (!EngineUtils.hasPlugin(HookId.CITIZENS)) return;
-
             if (event.isRightClick()) {
                 shop.getNPCIds().clear();
                 this.save(viewer);
@@ -118,21 +112,17 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
                 this.save(viewer);
                 return true;
             });
-        });
+        }).getOptions().setVisibilityPolicy(viewer -> EngineUtils.hasPlugin(HookId.CITIZENS));
 
         if (shop instanceof StaticShop staticShop) {
             this.addItem(Material.ENDER_PEARL, VirtualLocales.SHOP_PAGES, 20).setClick((viewer, event) -> {
-                if (event.isLeftClick()) {
-                    staticShop.setPages(staticShop.getPages() + 1);
-                }
-                else if (event.isRightClick()) {
-                    staticShop.setPages(Math.max(1, staticShop.getPages() - 1));
-                }
+                int add = event.isLeftClick() ? 1 : -1;
+                staticShop.setPages(staticShop.getPages() + add);
                 this.save(viewer);
             });
 
             this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.SHOP_DISCOUNTS, 30).setClick((viewer, event) -> {
-                this.plugin.runTask(task -> this.getDiscountEditor(staticShop).open(viewer.getPlayer(), 1));
+                this.getDiscountEditor(staticShop).openNextTick(viewer.getPlayer(), 1);
             });
         }
 
@@ -219,16 +209,14 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
             this.getViewEditor().open(viewer.getPlayer(), 1);
         });
 
-        this.getItems().forEach(menuItem -> {
-            if (menuItem.getOptions().getDisplayModifier() == null) {
-                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, shop.replacePlaceholders()));
-            }
-        });
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+            ItemUtil.replace(item, shop.replacePlaceholders());
+        }));
     }
 
     private void save(@NotNull MenuViewer viewer) {
         this.object.saveSettings();
-        this.plugin.runTask(task -> this.open(viewer.getPlayer(), viewer.getPage()));
+        this.openNextTick(viewer.getPlayer(), viewer.getPage());
     }
 
     @Override

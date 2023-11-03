@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
@@ -12,13 +13,14 @@ import su.nightexpress.nexshop.shop.util.TransactionResult;
 
 public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Placeholder {
 
-    protected final ExcellentShop plugin;
-    private final Player player;
-    private final P         product;
-    private final TradeType buyType;
-    private final boolean all;
-    private final PlaceholderMap placeholderMap;
+    protected final ExcellentShop  plugin;
+    private final   Player         player;
+    private final   P              product;
+    private final   TradeType      buyType;
+    private final   boolean        all;
+    private final   PlaceholderMap placeholderMap;
 
+    private Inventory inventory;
     private int units;
 
     public PreparedProduct(@NotNull Player player, @NotNull P product, @NotNull TradeType buyType, boolean all) {
@@ -28,6 +30,7 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
         this.buyType = buyType;
         this.all = all;
 
+        this.setInventory(player.getInventory());
         this.setUnits(1);
 
         this.placeholderMap = new PlaceholderMap()
@@ -67,6 +70,15 @@ public abstract class PreparedProduct<P extends Product<P, ?, ?>> implements Pla
 
     public boolean isAll() {
         return all;
+    }
+
+    @NotNull
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public void setInventory(@NotNull Inventory inventory) {
+        this.inventory = inventory;
     }
 
     public int getUnits() {

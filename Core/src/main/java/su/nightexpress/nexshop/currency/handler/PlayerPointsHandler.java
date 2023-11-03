@@ -2,21 +2,16 @@ package su.nightexpress.nexshop.currency.handler;
 
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.black_ixx.playerpoints.PlayerPointsAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
-import su.nightexpress.nexshop.hook.HookId;
 
 public class PlayerPointsHandler implements CurrencyHandler {
 
     private final PlayerPointsAPI api;
 
     public PlayerPointsHandler() {
-        PlayerPoints points = (PlayerPoints) Bukkit.getPluginManager().getPlugin(HookId.PLAYER_POINTS);
-        if (points == null) throw new IllegalStateException("Plugin is null!");
-
-        this.api = points.getAPI();
+        this.api = PlayerPoints.getInstance().getAPI();
     }
 
     @Override

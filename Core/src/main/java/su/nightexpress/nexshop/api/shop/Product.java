@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.lang.LangMessage;
@@ -171,9 +172,7 @@ public abstract class Product<
         // to prevent money duplication.
         // If this product can not be purchased, these checks are useless.
         if (this.getShop().isTransactionEnabled(TradeType.BUY) && this.isBuyable()) {
-            if (priceSell > pricer.getPriceBuy()) {
-                return false;
-            }
+            return priceSell <= pricer.getPriceBuy();
         }
 
         return true;
@@ -182,21 +181,41 @@ public abstract class Product<
     @NotNull
     public abstract PreparedProduct<P> getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
-    public abstract boolean hasSpace(@NotNull Player player);
-
     public abstract int getUnitAmount();
 
     @NotNull
     public abstract ItemStack getPreview();
 
-    public abstract void delivery(@NotNull Player player, int count);
+    public final void delivery(@NotNull Player player, int count) {
+        this.delivery(player.getInventory(), count);
+    }
 
-    public abstract void take(@NotNull Player player, int count);
+    public final void take(@NotNull Player player, int count) {
+        this.delivery(player.getInventory(), count);
+    }
 
-    public abstract int count(@NotNull Player player);
+    public final int count(@NotNull Player player) {
+        return this.count(player.getInventory());
+    }
+
+    public boolean hasSpace(@NotNull Player player) {
+        return this.hasSpace(player.getInventory());
+    }
+
+    public abstract void delivery(@NotNull Inventory inventory, int count);
+
+    public abstract void take(@NotNull Inventory inventory, int count);
+
+    public abstract int count(@NotNull Inventory inventory);
+
+    public abstract boolean hasSpace(@NotNull Inventory inventory);
 
     public int countUnits(@NotNull Player player) {
-        return this.count(player) / this.getUnitAmount();
+        return this.countUnits(player.getInventory());
+    }
+
+    public int countUnits(@NotNull Inventory inventory) {
+        return this.count(inventory) / this.getUnitAmount();
     }
 
     public boolean hasShop() {

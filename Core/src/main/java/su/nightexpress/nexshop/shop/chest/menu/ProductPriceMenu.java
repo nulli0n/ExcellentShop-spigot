@@ -54,7 +54,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
 
         this.registerHandler(Type.class)
             .addClick(Type.PRODUCT_CHANGE_PRICE_TYPE, (viewer, event) -> {
-                Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PRICE_TYPE + priceType.name().toLowerCase());
+                Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PREFIX_PRICE_TYPE + priceType.name().toLowerCase());
 
                 double sell = product.getPricer().getPrice(TradeType.SELL);
                 double buy = product.getPricer().getPrice(TradeType.BUY);

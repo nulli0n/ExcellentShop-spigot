@@ -8,13 +8,13 @@ import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.data.impl.CoinsUser;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
-import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
+import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class CoinsEngineCurrency implements Currency, CurrencyHandler, OfflineCurrencyHandler {
+public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyOfflineHandler {
 
     private final su.nightexpress.coinsengine.api.currency.Currency currency;
 

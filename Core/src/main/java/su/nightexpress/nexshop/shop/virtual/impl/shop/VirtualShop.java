@@ -26,25 +26,27 @@ public abstract class VirtualShop<
     S extends VirtualShop<S, P>,
     P extends VirtualProduct<P, S>> extends Shop<S, P> {
 
-    protected final VirtualShopModule module;
-    protected final VirtualShopView<S, P>   view;
-    protected final JYML              configProducts;
-    protected final Set<Integer> npcIds;
+    protected static final String FILE_PRODUCTS = "products.yml";
+    protected static final String FILE_VIEW = "view.yml";
 
-    protected     String       name;
-    protected     List<String> description;
+    protected final VirtualShopModule     module;
+    protected final VirtualShopView<S, P> view;
+    protected final JYML                  configProducts;
+    protected final Set<Integer>          npcIds;
+
+    protected String       name;
+    protected List<String> description;
     protected boolean      isPermissionRequired;
-    protected     ItemStack    icon;
-
+    protected ItemStack    icon;
 
     private ShopMainEditor editor;
 
     public VirtualShop(@NotNull VirtualShopModule module, @NotNull JYML cfg, @NotNull String id) {
         super(module.plugin(), cfg, id);
         this.module = module;
-        this.configProducts = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "products.yml");
+        this.configProducts = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), FILE_PRODUCTS);
 
-        JYML configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), "view.yml");
+        JYML configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), FILE_VIEW);
         this.view = new VirtualShopView<>(this.get(), configView);
 
         this.npcIds = new HashSet<>();

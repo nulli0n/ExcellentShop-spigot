@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.impl.product.specific;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
@@ -34,7 +35,9 @@ public class CommandSpecific implements ProductSpecific, CommandProduct {
     }
 
     @Override
-    public void delivery(@NotNull Player player, int count) {
+    public void delivery(@NotNull Inventory inventory, int count) {
+        if (!(inventory.getHolder() instanceof Player player)) return;
+
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
         for (int i = 0; i < count; i++) {
             this.getCommands().forEach(command -> Bukkit.dispatchCommand(sender, Placeholders.forPlayer(player).apply(command)));
@@ -42,12 +45,12 @@ public class CommandSpecific implements ProductSpecific, CommandProduct {
     }
 
     @Override
-    public void take(@NotNull Player player, int count) {
+    public void take(@NotNull Inventory inventory, int count) {
 
     }
 
     @Override
-    public int count(@NotNull Player player) {
+    public int count(@NotNull Inventory inventory) {
         return 0;
     }
 
@@ -74,7 +77,7 @@ public class CommandSpecific implements ProductSpecific, CommandProduct {
     }
 
     @Override
-    public boolean hasSpace(@NotNull Player player) {
+    public boolean hasSpace(@NotNull Inventory inventory) {
         return true;
     }
 }

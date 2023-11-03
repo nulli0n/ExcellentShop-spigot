@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
@@ -107,20 +108,25 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
     }
 
     @Override
-    public void delivery(@NotNull Player player, int count) {
+    public void delivery(@NotNull Inventory inventory, int count) {
         int amount = this.getUnitAmount() * count;
-        PlayerUtil.addItem(player, this.getItem(), amount);
+        su.nightexpress.nexshop.shop.virtual.util.ShopUtils.addItem(inventory, this.getItem(), amount);
     }
 
     @Override
-    public void take(@NotNull Player player, int count) {
+    public void take(@NotNull Inventory inventory, int count) {
         int amount = this.getUnitAmount() * count;
-        PlayerUtil.takeItem(player, this::isItemMatches, amount);
+        su.nightexpress.nexshop.shop.virtual.util.ShopUtils.takeItem(inventory, this::isItemMatches, amount);
     }
 
     @Override
-    public int count(@NotNull Player player) {
-        return PlayerUtil.countItem(player, this::isItemMatches);
+    public int count(@NotNull Inventory inventory) {
+        return su.nightexpress.nexshop.shop.virtual.util.ShopUtils.countItem(inventory, this::isItemMatches);
+    }
+
+    @Override
+    public boolean hasSpace(@NotNull Inventory inventory) {
+        return su.nightexpress.nexshop.shop.virtual.util.ShopUtils.countItemSpace(inventory, this.getItem()) > 0;
     }
 
     @Override
@@ -132,11 +138,6 @@ public class ChestProduct extends Product<ChestProduct, ChestShop, ChestProductS
     @Override
     public int getUnitAmount() {
         return this.getItem().getAmount();
-    }
-
-    @Override
-    public boolean hasSpace(@NotNull Player player) {
-        return PlayerUtil.countItemSpace(player, this.getItem()) > 0;
     }
 
     @NotNull

@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
@@ -23,6 +24,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
     @NotNull
     protected TransactionResult buy() {
         Player player = this.getPlayer();
+        Inventory inventory = this.getInventory();
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
@@ -59,7 +61,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
             }
 
             // Process transaction
-            product.delivery(player, amountToBuy);
+            product.delivery(inventory, amountToBuy);
             product.getCurrency().getHandler().take(player, price);
             shop.getModule().getLogger().logTransaction(event);
 
@@ -84,13 +86,14 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
     @NotNull
     protected TransactionResult sell() {
         Player player = this.getPlayer();
+        Inventory inventory = this.getInventory();
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
         ExcellentShop plugin = shop.plugin();
 
         boolean isAdmin = shop.isAdminShop();
         int shopSpace = product.getStock().getLeftAmount(TradeType.SELL);
-        int userCount = product.countUnits(player);
+        int userCount = product.countUnits(inventory);
         int fined;
         if (this.isAll()) {
             fined = Math.min((!isAdmin ? shopSpace : userCount), userCount);
@@ -134,7 +137,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
                 shop.getModule().savePlayerBank(shop.getOwnerBank());
             }
             product.getCurrency().getHandler().give(player, price);
-            product.take(player, fined);
+            product.take(inventory, fined);
             shop.getModule().getLogger().logTransaction(event);
 
             plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_USER)

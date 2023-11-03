@@ -12,18 +12,20 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.impl.ConfigMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.*;
+import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualPreparedProduct;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,7 +37,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
     private final List<String> itemLore;
     private final int[] itemSlots;
 
-    private static final Map<Player, Pair<List<ItemStack>, Set<StaticProduct>>> USER_ITEMS = new WeakHashMap<>();
+    private static final Map<Player, List<ItemStack>> USER_ITEMS = new WeakHashMap<>();
 
     public ShopSellMenu(@NotNull VirtualShopModule module, @NotNull JYML cfg) {
         super(module.plugin(), cfg);
@@ -45,14 +47,16 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         this.itemSlots = cfg.getIntArray("Item.Slots");
 
         this.registerHandler(ItemType.class)
-            .addClick(ItemType.SELL, (viewer, e) -> {
+            .addClick(ItemType.SELL, (viewer, event) -> {
                 Player player = viewer.getPlayer();
-                Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
+                List<ItemStack> userItems = USER_ITEMS.remove(player);
                 if (userItems == null) return;
 
-                plugin.runTask(task -> {
-                    sellAll(player, userItems);
-                });
+                Inventory inventory = plugin.getServer().createInventory(null, 54, "dummy");
+                inventory.addItem(userItems.toArray(new ItemStack[0]));
+
+                this.sellWithReturn(player, inventory);
+                this.plugin.runTask(task -> player.closeInventory());
             });
 
         this.load();
@@ -115,9 +119,8 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
             icon.setItemMeta(meta);
             inventory.setItem(firtSlot, icon);
 
-            Pair<List<ItemStack>, Set<StaticProduct>> pair = USER_ITEMS.computeIfAbsent(player, k -> Pair.of(new ArrayList<>(), new HashSet<>()));
-            pair.getFirst().add(new ItemStack(item));
-            pair.getSecond().add(product);
+            List<ItemStack> userItems = USER_ITEMS.computeIfAbsent(player, k -> new ArrayList<>());
+            userItems.add(new ItemStack(item));
             item.setAmount(0);
         }
     }
@@ -129,85 +132,56 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
         Player player = viewer.getPlayer();
 
         if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
-            Inventory inventory = event.getInventory();
-            this.sellInventory(player, inventory);
-
-            for (ItemStack left : inventory.getContents()) {
-                if (left == null || left.getType().isAir() || left.getAmount() < 1) continue;
-
-                PlayerUtil.addItem(player, left);
-            }
+            this.sellWithReturn(player, event.getInventory());
         }
         else {
-            Pair<List<ItemStack>, Set<StaticProduct>> userItems = USER_ITEMS.remove(player);
+            List<ItemStack> userItems = USER_ITEMS.remove(player);
             if (userItems != null) {
-                userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
+                userItems.forEach(item -> PlayerUtil.addItem(player, item));
             }
         }
     }
 
-    public void sellInventory(@NotNull Player player, @NotNull Inventory inventory) {
-        Pair<List<ItemStack>, Set<StaticProduct>> userItems = Pair.of(new ArrayList<>(), new HashSet<>());
+    public void sellWithReturn(@NotNull Player player, @NotNull Inventory inventory) {
+        this.sellAll(player, inventory);
 
+        for (ItemStack left : inventory.getContents()) {
+            if (left == null || left.getType().isAir() || left.getAmount() < 1) continue;
+
+            PlayerUtil.addItem(player, left);
+        }
+    }
+
+    public void sellAll(@NotNull Player player) {
+        this.sellAll(player, player.getInventory());
+    }
+
+    public void sellAll(@NotNull Player player, @NotNull Inventory inventory) {
+        Map<Currency, Double> profitMap = new HashMap<>();
         for (ItemStack item : inventory.getContents()) {
             if (item == null || item.getType().isAir()) continue;
 
             StaticProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
             if (product == null) continue;
 
-            userItems.getFirst().add(new ItemStack(item));
-            userItems.getSecond().add(product);
-            item.setAmount(0);
-        }
-
-        ShopSellMenu.sellAll(player, userItems);
-    }
-
-    public static void sellAll(@NotNull Player player, @NotNull Pair<List<ItemStack>, Set<StaticProduct>> userItems) {
-        if (userItems.getFirst().isEmpty() || userItems.getSecond().isEmpty()) return;
-
-        ItemStack[] original = player.getInventory().getContents();
-        player.getInventory().clear();
-
-        List<TransactionResult> profits = new ArrayList<>();
-        userItems.getFirst().forEach(item -> PlayerUtil.addItem(player, item));
-        userItems.getSecond().forEach(product -> {
             VirtualPreparedProduct<?> preparedProduct = product.getPrepared(player, TradeType.SELL, true);
+            preparedProduct.setInventory(inventory);
+
             TransactionResult result = preparedProduct.trade();
-
             if (result.getResult() == TransactionResult.Result.SUCCESS) {
-                profits.add(result);
+                Currency currency = result.getProduct().getCurrency();
+                double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
+                profitMap.put(currency, has);
             }
-        });
-
-        ItemStack[] left = player.getInventory().getContents();
-        player.getInventory().setContents(original);
-        Arrays.asList(left).forEach(item -> {
-            if (item != null && !item.getType().isAir()) PlayerUtil.addItem(player, item);
-        });
-
-        //player.updateInventory();
-        player.closeInventory();
-        if (profits.isEmpty()) return;
-
-        Map<Currency, Double> profitMap = new HashMap<>();
-        profits.forEach(result -> {
-            Currency currency = result.getProduct().getCurrency();
-            double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
-            profitMap.put(currency, has);
-        });
+        }
+        if (profitMap.isEmpty()) return;
 
         String total = profitMap.entrySet().stream()
             .map(entry -> entry.getKey().format(entry.getValue()))
             .collect(Collectors.joining(", "));
 
-        ShopAPI.PLUGIN.getMessage(VirtualLang.SELL_MENU_SALE_RESULT)
+        this.plugin.getMessage(VirtualLang.SELL_MENU_SALE_RESULT)
             .replace(Placeholders.GENERIC_TOTAL, total)
-            .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (line, list) -> {
-                profits.forEach(result -> {
-                    list.add(result.replacePlaceholders().apply(line));
-                });
-            })
             .send(player);
     }
 }

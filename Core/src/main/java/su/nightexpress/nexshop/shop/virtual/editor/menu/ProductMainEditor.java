@@ -35,19 +35,20 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
     private static final String TEXTURE_BOX_1 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmNmNWIxY2ZlZDFjMjdkZDRjM2JlZjZiOTg0NDk5NDczOTg1MWU0NmIzZmM3ZmRhMWNiYzI1YjgwYWIzYiJ9fX0=";
     private static final String TEXTURE_BOX_2 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTY4MmRlNzJiZjYxYzZkMjMzNjRlMmZlMmQ3Y2MyOGRkZjgzMTQ1ZDE4ZjE5Mzg1N2QzNjljZjlkZjY5MiJ9fX0=";
     private static final String TEXTURE_COMMAND = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmQwZjQwNjFiZmI3NjdhN2Y5MjJhNmNhNzE3NmY3YTliMjA3MDliZDA1MTI2OTZiZWIxNWVhNmZhOThjYTU1YyJ9fX0=";
+    private static final String TEXTURE_META = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmMzODU1MGI1ZGFjOWVmYWZhODg5OTQ1YWVjM2JjZDE3OGNiODgwODA2ZWI3ZTcxMmQxYmQ5NmE2MWRmMjNmNiJ9fX0=";
 
     private ProductPriceEditor editorPrice;
 
     public ProductMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualProduct<?, ?> product) {
-        super(plugin, product, product.getShop().getName() + ": Product Settings", 27);
+        super(plugin, product, "Product Editor (Shop Id: " + product.getShop().getId() + ")", 54);
 
-        this.addReturn(22).setClick((viewer, event) -> {
+        this.addReturn(49).setClick((viewer, event) -> {
             int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
-            this.plugin.runTask(task -> product.getShop().getEditor().getProductsEditor().open(viewer.getPlayer(), page));
+            product.getShop().getEditor().getProductsEditor().openNextTick(viewer.getPlayer(), page);
         });
 
         if (product instanceof RotatingProduct rotatingProduct) {
-            this.addItem(Material.ENDER_EYE, VirtualLocales.PRODUCT_ROTATION_CHANCE, 4).setClick((viewer, event) -> {
+            this.addItem(Material.ENDER_EYE, VirtualLocales.PRODUCT_ROTATION_CHANCE, 8).setClick((viewer, event) -> {
                 this.handleInput(viewer, VirtualLang.EDITOR_ENTER_CHANCE, wrapper -> {
                     rotatingProduct.setRotationChance(wrapper.asDouble());
                     this.save(viewer);
@@ -59,7 +60,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
         boolean isItemProd = product.getSpecific() instanceof ItemProduct itemProduct;
 
         // Preview button
-        this.addItem(new ItemStack(Material.ITEM_FRAME), isItemProd ? 19 : 10).setClick((viewer, event) -> {
+        this.addItem(new ItemStack(Material.ITEM_FRAME), isItemProd ? 5 : 4).setClick((viewer, event) -> {
             if (event.isRightClick()) {
                 PlayerUtil.addItem(viewer.getPlayer(), product.getPreview());
                 return;
@@ -87,7 +88,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
 
         // Real item buttin
         if (product.getSpecific() instanceof ItemProduct itemProduct) {
-            this.addItem(new ItemStack(Material.ITEM_FRAME), 10).setClick((viewer, event) -> {
+            this.addItem(new ItemStack(Material.ITEM_FRAME), 3).setClick((viewer, event) -> {
                 if (event.isRightClick()) {
                     PlayerUtil.addItem(viewer.getPlayer(), itemProduct.getItem());
                     return;
@@ -114,14 +115,14 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             });
         }
 
-        this.addItem(Material.WRITABLE_BOOK, VirtualLocales.PRODUCT_RESPECT_ITEM_META, 11).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_META), VirtualLocales.PRODUCT_RESPECT_ITEM_META, 19).setClick((viewer, event) -> {
             if (!(product.getSpecific() instanceof ItemProduct itemProduct)) return;
 
             itemProduct.setRespectItemMeta(!itemProduct.isRespectItemMeta());
             this.save(viewer);
         }).getOptions().setVisibilityPolicy(viewer -> product.getSpecific() instanceof ItemProduct);
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_COMMAND), VirtualLocales.PRODUCT_COMMANDS, 11).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_COMMAND), VirtualLocales.PRODUCT_COMMANDS, 19).setClick((viewer, event) -> {
             if (!(product.getSpecific() instanceof CommandProduct commandProduct)) return;
 
             if (event.isRightClick()) {
@@ -136,7 +137,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             });
         }).getOptions().setVisibilityPolicy(viewer -> product.getSpecific() instanceof CommandProduct);
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.PRODUCT_PRICE_MANAGER, 12).setClick((viewer, event) -> {
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.PRODUCT_PRICE_MANAGER, 21).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
                 product.getPricer().update();
                 this.save(viewer);
@@ -153,12 +154,12 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             }
         });
 
-        this.addItem(Material.GOLD_NUGGET, VirtualLocales.PRODUCT_DISCOUNT, 13).setClick((viewer, event) -> {
+        this.addItem(Material.NAME_TAG, VirtualLocales.PRODUCT_DISCOUNT, 23).setClick((viewer, event) -> {
             product.setDiscountAllowed(!product.isDiscountAllowed());
             this.save(viewer);
         });
 
-        this.addItem(Material.ENDER_PEARL, VirtualLocales.PRODUCT_ALLOWED_RANKS, 14).setClick((viewer, event) -> {
+        this.addItem(Material.GOLDEN_HELMET, VirtualLocales.PRODUCT_ALLOWED_RANKS, 25).setClick((viewer, event) -> {
             if (event.isRightClick()) {
                 product.getAllowedRanks().clear();
                 this.save(viewer);
@@ -172,8 +173,8 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             });
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), VirtualLocales.PRODUCT_GLOBAL_STOCK, 15).setClick(this.getStockClick(StockType.GLOBAL));
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), VirtualLocales.PRODUCT_PLAYER_STOCK, 16).setClick(this.getStockClick(StockType.PLAYER));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), VirtualLocales.PRODUCT_GLOBAL_STOCK, 38).setClick(this.getStockClick(StockType.GLOBAL));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), VirtualLocales.PRODUCT_PLAYER_STOCK, 42).setClick(this.getStockClick(StockType.PLAYER));
 
         this.getItems().forEach(menuItem -> {
             if (menuItem.getOptions().getDisplayModifier() == null) {

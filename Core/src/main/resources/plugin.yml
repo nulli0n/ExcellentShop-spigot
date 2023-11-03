@@ -1,7 +1,7 @@
 name: ExcellentShop
 main: su.nightexpress.nexshop.ExcellentShop
 version: '${project.version}'
-description: Advanced 3 in 1 shop plugin with a lot of cool features!
+description: Advanced 4 in 1 shop plugin with a lot of cool features!
 author: NightExpress
 depend: [ NexEngine ]
 softdepend:
@@ -10,10 +10,11 @@ softdepend:
   - PlayerPoints
   - WorldGuard
   - Lands
+  - AdvancedRegionMarket
   - GemsEconomy
   - CoinsEngine
   - GriefPrevention
   - EliteMobs
   - UltraEconomy
   - PlaceholderAPI
-api-version: 1.17
+api-version: 1.18

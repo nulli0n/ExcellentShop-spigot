@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.api.currency;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.Placeholders;
@@ -31,6 +32,14 @@ public interface Currency extends Placeholder {
     default void take(@NotNull Player player, double amount) {
         this.getHandler().take(player, amount);
     }*/
+
+    @Nullable
+    default CurrencyOfflineHandler getOfflineHandler() {
+        if (this instanceof CurrencyOfflineHandler handler) return handler;
+        if (this.getHandler() instanceof CurrencyOfflineHandler handler) return handler;
+
+        return null;
+    }
 
     @NotNull CurrencyHandler getHandler();
 

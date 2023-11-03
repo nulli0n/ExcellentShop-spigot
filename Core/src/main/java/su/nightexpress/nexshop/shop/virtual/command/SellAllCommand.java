@@ -25,21 +25,6 @@ public class SellAllCommand extends GeneralCommand<ExcellentShop> {
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
-        this.module.getSellMenu().sellInventory(player, player.getInventory());
-        /*
-        Pair<List<ItemStack>, Set<StaticProduct>> userItems = Pair.of(new ArrayList<>(), new HashSet<>());
-
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null || item.getType().isAir()) continue;
-
-            StaticProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
-            if (product == null) continue;
-
-            userItems.getFirst().add(new ItemStack(item));
-            userItems.getSecond().add(product);
-            item.setAmount(0);
-        }
-
-        ShopSellMenu.sellAll(player, userItems);*/
+        this.module.getSellMenu().sellAll(player);
     }
 }

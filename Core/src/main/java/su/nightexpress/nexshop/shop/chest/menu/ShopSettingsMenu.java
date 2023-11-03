@@ -83,8 +83,7 @@ public class ShopSettingsMenu extends ConfigEditorMenu {
                     plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
                     return;
                 }
-                player.closeInventory();
-                player.updateInventory();
+                this.plugin.runTask(task -> player.closeInventory());
                 shop.getModule().deleteShop(player, shop.getLocation().getBlock());
             });
 

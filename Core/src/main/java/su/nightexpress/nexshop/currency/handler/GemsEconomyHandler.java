@@ -5,11 +5,11 @@ import me.xanium.gemseconomy.account.Account;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
-import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
+import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
 
 import java.util.UUID;
 
-public class GemsEconomyHandler implements CurrencyHandler, OfflineCurrencyHandler {
+public class GemsEconomyHandler implements CurrencyHandler, CurrencyOfflineHandler {
 
     private final me.xanium.gemseconomy.currency.Currency currency;
 

@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual.impl.product;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
@@ -144,18 +145,23 @@ public abstract class VirtualProduct<
     }
 
     @Override
-    public void delivery(@NotNull Player player, int count) {
-        this.getSpecific().delivery(player, count);
+    public void delivery(@NotNull Inventory inventory, int count) {
+        this.getSpecific().delivery(inventory, count);
     }
 
     @Override
-    public void take(@NotNull Player player, int count) {
-        this.getSpecific().take(player, count);
+    public void take(@NotNull Inventory inventory, int count) {
+        this.getSpecific().take(inventory, count);
     }
 
     @Override
-    public int count(@NotNull Player player) {
-        return this.getSpecific().count(player);
+    public int count(@NotNull Inventory inventory) {
+        return this.getSpecific().count(inventory);
+    }
+
+    @Override
+    public boolean hasSpace(@NotNull Inventory inventory) {
+        return this.getSpecific().hasSpace(inventory);
     }
 
     @Override
@@ -167,11 +173,6 @@ public abstract class VirtualProduct<
     @Override
     public int getUnitAmount() {
         return this.getSpecific().getUnitAmount();
-    }
-
-    @Override
-    public boolean hasSpace(@NotNull Player player) {
-        return this.getSpecific().hasSpace(player);
     }
 
     @NotNull

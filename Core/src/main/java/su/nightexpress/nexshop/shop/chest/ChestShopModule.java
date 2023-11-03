@@ -31,6 +31,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.listener.RegionMarketListener;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
 import su.nightexpress.nexshop.shop.chest.menu.BankMenu;
 import su.nightexpress.nexshop.shop.chest.menu.ShopBrowseMenu;
@@ -47,6 +48,8 @@ import su.nightexpress.nexshop.shop.util.TransactionLogger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ChestShopModule extends ShopModule {
@@ -126,6 +129,9 @@ public class ChestShopModule extends ShopModule {
         }
 
         this.addListener(new ShopListener(this));
+        if (EngineUtils.hasPlugin(HookId.ADVANCED_REGION_MARKET)) {
+            this.addListener(new RegionMarketListener(this.plugin, this));
+        }
 
         this.browseMenu = new ShopBrowseMenu(this);
         this.listMenu = new ShopListMenu(this);
@@ -158,6 +164,13 @@ public class ChestShopModule extends ShopModule {
             this.loadShop(shopConfig);
         }
         this.info("Shops Loaded: " + this.getShops().size());
+    }
+
+    public void removeInvalidShops() {
+        Set<ChestShop> invalid = this.getShopMap().getAll().stream().filter(Predicate.not(ChestShop::isValid))
+            .collect(Collectors.toCollection(HashSet::new));
+
+        invalid.forEach(this::removeShop);
     }
 
     public boolean loadShop(@NotNull JYML cfg) {

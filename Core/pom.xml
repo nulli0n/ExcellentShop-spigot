@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.6.9</version>
+        <version>4.6.10</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -67,6 +67,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>net.alex9849.arm</groupId>
+            <artifactId>AdvancedRegionMarket</artifactId>
+            <version>3.5.3</version>
+        </dependency>
+        <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
             <version>2.10.10</version>
@@ -75,7 +80,7 @@
         <dependency>
             <groupId>org.black_ixx</groupId>
             <artifactId>playerpoints</artifactId>
-            <version>3.0.0</version>
+            <version>3.2.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -115,27 +120,27 @@
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>NMS</artifactId>
-            <version>4.6.9</version>
+            <version>4.6.10</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_18_R2</artifactId>
-            <version>4.6.9</version>
+            <version>4.6.10</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_19_R3</artifactId>
-            <version>4.6.9</version>
+            <version>4.6.10</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_20_R1</artifactId>
-            <version>4.6.9</version>
+            <version>4.6.10</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_20_R2</artifactId>
-            <version>4.6.9</version>
+            <version>4.6.10</version>
         </dependency>
         <dependency>
             <groupId>me.TechsCode</groupId>

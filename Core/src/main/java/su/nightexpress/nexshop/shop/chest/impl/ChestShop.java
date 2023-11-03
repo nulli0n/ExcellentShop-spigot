@@ -218,6 +218,10 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         return this.getType() == ShopType.ADMIN;
     }
 
+    public boolean isValid() {
+        return ShopUtils.isValidContainer(this.getLocation().getBlock());
+    }
+
     @NotNull
     public Container getContainer() {
         return (Container) this.getLocation().getBlock().getState();

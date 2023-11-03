@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public interface OfflineCurrencyHandler {
+public interface CurrencyOfflineHandler {
 
     double getBalance(@NotNull UUID playerId);
 

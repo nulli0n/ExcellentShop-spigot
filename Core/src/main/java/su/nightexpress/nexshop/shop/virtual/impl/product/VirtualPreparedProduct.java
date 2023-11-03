@@ -1,8 +1,8 @@
 package su.nightexpress.nexshop.shop.virtual.impl.product;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.event.VirtualShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.PreparedProduct;
@@ -23,6 +23,7 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
     @NotNull
     protected TransactionResult buy() {
         Player player = this.getPlayer();
+        Inventory inventory = this.getInventory();
         P product = this.getProduct();
         VirtualShop<?, ?> shop = product.getShop();
 
@@ -49,7 +50,7 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
             }
 
             // Process transaction
-            product.delivery(player, this.getUnits());
+            product.delivery(inventory, this.getUnits());
             product.getCurrency().getHandler().take(player, price);
             //shop.getBank().deposit(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
@@ -61,11 +62,12 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
     @NotNull
     protected TransactionResult sell() {
         Player player = this.getPlayer();
+        Inventory inventory = this.getInventory();
         P product = this.getProduct();
         VirtualShop<?, ?> shop = product.getShop();
 
         int possible = product.getStock().getPossibleAmount(this.getTradeType(), player);
-        int userHas = product.countUnits(player);
+        int userHas = product.countUnits(inventory);
         int fined;
         if (this.isAll()) {
             fined = (possible >= 0 && possible < userHas) ? possible : userHas;
@@ -107,7 +109,7 @@ public class VirtualPreparedProduct<P extends VirtualProduct<P, ?>> extends Prep
             //shop.getBank().withdraw(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
             product.getCurrency().getHandler().give(player, price);
-            product.take(player, fined);
+            product.take(inventory, fined);
         }
         return transactionResult;
     }

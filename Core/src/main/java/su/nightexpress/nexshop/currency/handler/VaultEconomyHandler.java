@@ -6,11 +6,11 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.integration.VaultHook;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
-import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
+import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
 
 import java.util.UUID;
 
-public class VaultEconomyHandler implements CurrencyHandler, OfflineCurrencyHandler {
+public class VaultEconomyHandler implements CurrencyHandler, CurrencyOfflineHandler {
 
     @Override
     public double getBalance(@NotNull Player player) {

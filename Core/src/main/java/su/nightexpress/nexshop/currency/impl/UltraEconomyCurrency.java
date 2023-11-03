@@ -10,12 +10,12 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
-import su.nightexpress.nexshop.api.currency.OfflineCurrencyHandler;
+import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
 
 import java.util.Optional;
 import java.util.UUID;
 
-public class UltraEconomyCurrency implements Currency, CurrencyHandler, OfflineCurrencyHandler {
+public class UltraEconomyCurrency implements Currency, CurrencyHandler, CurrencyOfflineHandler {
 
     private final me.TechsCode.UltraEconomy.objects.Currency currency;
     private final PlaceholderMap placeholderMap;
