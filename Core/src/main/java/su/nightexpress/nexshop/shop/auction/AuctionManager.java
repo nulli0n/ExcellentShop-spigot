@@ -307,9 +307,6 @@ public class AuctionManager extends ShopModule {
 
     @Nullable
     public ActiveListing add(@NotNull Player player, @NotNull ItemStack item, @NotNull Currency currency, double price, boolean takeItem) {
-        if (AuctionConfig.LISTINGS_PRICE_ROUND_TO_INT.get()) {
-            price = NumberUtil.round(price);
-        }
         if (takeItem) {
             player.getInventory().setItemInMainHand(null);
         }

@@ -8,6 +8,7 @@ import su.nexmedia.engine.api.command.CommandResult;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.shop.auction.AuctionManager;
+import su.nightexpress.nexshop.shop.auction.AuctionUtils;
 import su.nightexpress.nexshop.shop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.shop.module.ModuleCommand;
 
@@ -35,7 +36,7 @@ public class AuctionSellCommand extends ModuleCommand<AuctionManager> {
             return;
         }
 
-        double price = result.getDouble(1, 0);
+        double price = AuctionUtils.finePrice(result.getDouble(1, 0));
         if (price <= 0) {
             this.errorNumber(sender, result.getArg(1));
             return;

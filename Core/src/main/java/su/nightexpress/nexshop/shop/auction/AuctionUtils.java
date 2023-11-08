@@ -78,4 +78,11 @@ public class AuctionUtils {
     public static double calculateTax(double price, double taxPercent) {
         return price * (taxPercent / 100D);
     }
+
+    public static double finePrice(double price) {
+        if (AuctionConfig.LISTINGS_PRICE_ROUND_TO_INT.get()) {
+            return NumberUtil.round((int) price);
+        }
+        return price;
+    }
 }

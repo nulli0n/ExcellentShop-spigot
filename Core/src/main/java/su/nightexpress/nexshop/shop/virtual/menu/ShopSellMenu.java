@@ -158,6 +158,8 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
 
     public void sellAll(@NotNull Player player, @NotNull Inventory inventory) {
         Map<Currency, Double> profitMap = new HashMap<>();
+        Map<ItemStack, TransactionResult> resultMap = new HashMap<>();
+
         for (ItemStack item : inventory.getContents()) {
             if (item == null || item.getType().isAir()) continue;
 
@@ -172,6 +174,7 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
                 Currency currency = result.getProduct().getCurrency();
                 double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
                 profitMap.put(currency, has);
+                resultMap.put(item, result);
             }
         }
         if (profitMap.isEmpty()) return;
@@ -182,6 +185,14 @@ public class ShopSellMenu extends ConfigMenu<ExcellentShop> {
 
         this.plugin.getMessage(VirtualLang.SELL_MENU_SALE_RESULT)
             .replace(Placeholders.GENERIC_TOTAL, total)
+            .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (str, list) -> {
+                resultMap.forEach((item, result) -> {
+                    list.add(str
+                        .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
+                        .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
+                    );
+                });
+            })
             .send(player);
     }
 }

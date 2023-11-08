@@ -39,7 +39,7 @@ public class ExpPointsHandler implements CurrencyHandler {
 
     @Override
     public double getBalance(@NotNull Player player) {
-        return player.getTotalExperience();
+        return player.getLevel();
     }
 
     @Override
