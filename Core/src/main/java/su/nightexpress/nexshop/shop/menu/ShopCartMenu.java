@@ -12,6 +12,7 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
+import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
@@ -25,6 +26,7 @@ import su.nightexpress.nexshop.api.shop.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
@@ -42,7 +44,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
     private final Map<Player, Double>             balance;
 
     private enum ButtonType {
-        CONFIRM, DECLINE, ADD, SET, TAKE
+        CONFIRM, DECLINE, ADD, SET, TAKE, SET_CUSTOM
     }
 
     public ShopCartMenu(@NotNull ExcellentShop plugin) {
@@ -86,25 +88,50 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
                 MenuItem menuItem = this.getItem(viewer, event.getRawSlot());
                 if (!(menuItem instanceof ShopCartItem cartItem)) return;
 
-                this.getPrepared(viewer).ifPresent(prepared -> prepared.setUnits(prepared.getUnits() + cartItem.getUnits()));
-                this.validateAmount(viewer);
-                this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
+                this.getPrepared(viewer).ifPresent(prepared -> {
+                    prepared.setUnits(prepared.getUnits() + cartItem.getUnits());
+                    this.open(viewer.getPlayer(), prepared);
+                });
+                //this.validateAmount(viewer);
+                //this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
             })
             .addClick(ButtonType.SET, (viewer, event) -> {
                 MenuItem menuItem = this.getItem(viewer, event.getRawSlot());
                 if (!(menuItem instanceof ShopCartItem cartItem)) return;
 
-                this.getPrepared(viewer).ifPresent(prepared -> prepared.setUnits(cartItem.getUnits()));
-                this.validateAmount(viewer);
-                this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
+                this.getPrepared(viewer).ifPresent(prepared -> {
+                    prepared.setUnits(cartItem.getUnits());
+                    this.open(viewer.getPlayer(), prepared);
+                });
+                //this.validateAmount(viewer);
+                //this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
             })
             .addClick(ButtonType.TAKE, (viewer, event) -> {
                 MenuItem menuItem = this.getItem(viewer, event.getRawSlot());
                 if (!(menuItem instanceof ShopCartItem cartItem)) return;
 
-                this.getPrepared(viewer).ifPresent(prepared -> prepared.setUnits(prepared.getUnits() - cartItem.getUnits()));
-                this.validateAmount(viewer);
-                this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
+                this.getPrepared(viewer).ifPresent(prepared -> {
+                    prepared.setUnits(prepared.getUnits() - cartItem.getUnits());
+                    this.open(viewer.getPlayer(), prepared);
+                });
+                //this.validateAmount(viewer);
+                //this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
+            })
+            .addClick(ButtonType.SET_CUSTOM, (viewer, event) -> {
+                PreparedProduct<?> prepared = this.getPrepared(viewer).orElse(null);
+                if (prepared == null) return;
+
+                Player player = viewer.getPlayer();
+                this.plugin.runTask(task -> {
+                    player.closeInventory();
+
+                    plugin.getMessage(Lang.SHOP_CART_ENTER_AMOUNT).send(player);
+                    EditorManager.startEdit(player, wrapper -> {
+                        prepared.setUnits(wrapper.asInt());
+                        this.open(player, prepared);
+                        return true;
+                    });
+                });
             });
 
         this.load();
@@ -151,6 +178,7 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
 
     public void open(@NotNull Player player, @NotNull PreparedProduct<?> prepared) {
         this.products.put(player, prepared);
+        this.validateAmount(player, prepared);
         this.open(player, 1);
     }
 
@@ -174,6 +202,10 @@ public class ShopCartMenu extends ConfigMenu<ExcellentShop> {
         if (prepared == null) return;
 
         Player player = viewer.getPlayer();
+        this.validateAmount(player, prepared);
+    }
+
+    private void validateAmount(@NotNull Player player, @NotNull PreparedProduct<?> prepared) {
         Product<?, ?, ?> product = prepared.getProduct();
         Shop<?, ?> shop = product.getShop();
 

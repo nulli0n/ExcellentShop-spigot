@@ -1,9 +1,8 @@
 Title: '#5d6d7e&lShop'
-Size: 45
-Use_Mini_Message: false
+Size: 27
 Inventory_Type: CHEST
 
-Product_Slots: 20,21,22,23,24
+Product_Slots: 11,12,13,14,15
 Product_Format:
   Lore:
     Text:
@@ -31,33 +30,17 @@ Content:
         - '#ee9aff▪ #ddeceeCan Buy: #ee9aff%shop_buy_allowed%'
         - '#ee9aff▪ #ddeceeCan Sell: #ee9aff%shop_sell_allowed%'
 
-  pane:
-    Priority: 0
-    Slots: 0,1,2,3,5,6,7,8,36,37,38,39,41,42,43,44
-    Type: NONE
-    Item:
-      Material: BLACK_STAINED_GLASS_PANE
-
   pane2:
     Priority: -1
-    Slots: 20,21,22,23,24
+    Slots: 11,12,13,14,15
     Type: NONE
     Item:
       Material: GRAY_DYE
       Name: '#5d6d7e<Empty Slot>'
 
-  return:
-    Priority: 5
-    Slots: 40
-    Type: CLOSE
-    Item:
-      Material: PLAYER_HEAD
-      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==
-      Name: '#FF5733(✕) &lExit'
-
   page_next:
     Priority: 5
-    Slots: 41
+    Slots: 17
     Type: PAGE_NEXT
     Item:
       Material: PLAYER_HEAD
@@ -66,7 +49,7 @@ Content:
 
   page_previous:
     Priority: 5
-    Slots: 39
+    Slots: 9
     Type: PAGE_PREVIOUS
     Item:
       Material: PLAYER_HEAD

@@ -14,6 +14,7 @@ import su.nexmedia.engine.api.menu.item.MenuItem;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.ShopView;
 import su.nightexpress.nexshop.api.type.ShopClickAction;
@@ -191,7 +192,16 @@ public class VirtualShopView<
 
         MenuItem menuItem = new MenuItem(preview, Integer.MAX_VALUE, ItemOptions.personalWeak(player), slot);
         menuItem.setClick((viewer2, event) -> {
+            Player player2 = viewer2.getPlayer();
+            boolean isBedrock = PlayerUtil.isBedrockPlayer(player2);
+            boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
+            boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
+
             ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
+            if (isBedrock) {
+                if (isBuyable && !isSellable) clickType = ShopClickAction.BUY_SELECTION;
+                else if (isSellable && !isBuyable) clickType = ShopClickAction.SELL_SELECTION;
+            }
             if (clickType == null) return;
 
             if (!product.hasAccess(player)) {
@@ -205,7 +215,7 @@ public class VirtualShopView<
                 return;
             }
 
-            product.prepareTrade(viewer2.getPlayer(), clickType);
+            product.prepareTrade(player2, clickType);
         });
         this.addItem(menuItem);
     }

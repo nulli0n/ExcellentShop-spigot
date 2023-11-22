@@ -74,8 +74,25 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
             .add(Placeholders.SHOP_CHEST_LOCATION_Z, () -> NumberUtil.format(this.getLocation().getZ()))
             .add(Placeholders.SHOP_CHEST_LOCATION_WORLD, () -> LocationUtil.getWorldName(this.getLocation()))
             .add(Placeholders.SHOP_CHEST_IS_ADMIN, () -> LangManager.getBoolean(this.isAdminShop()))
-            .add(Placeholders.SHOP_CHEST_TYPE, () -> plugin.getLangManager().getEnum(this.getType()))
-        ;
+            .add(Placeholders.SHOP_CHEST_TYPE, () -> plugin.getLangManager().getEnum(this.getType()));
+
+        for (int slot = 0; slot < 27; slot++) {
+            int index = slot;
+            this.placeholderMap.add(Placeholders.SHOP_CHEST_PRODUCT_PRICE_BUY.apply(slot), () -> {
+                List<ChestProduct> products = new ArrayList<>(this.getProducts());
+                if (products.size() <= index) return "-";
+
+                ChestProduct product = products.get(index);
+                return product.getCurrency().format(product.getPricer().getPriceBuy());
+            });
+            this.placeholderMap.add(Placeholders.SHOP_CHEST_PRODUCT_PRICE_SELL.apply(slot), () -> {
+                List<ChestProduct> products = new ArrayList<>(this.getProducts());
+                if (products.size() <= index) return "-";
+
+                ChestProduct product = products.get(index);
+                return product.getCurrency().format(product.getPricer().getPriceSell());
+            });
+        }
     }
 
     @Override

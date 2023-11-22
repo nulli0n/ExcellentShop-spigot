@@ -59,6 +59,11 @@ public class Lang extends EngineLang {
         "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" +
             RED + BOLD + "Sorry! " + GRAY + "You have to clean up your inventory before purchase!");
 
+    public static final LangKey SHOP_CART_ENTER_AMOUNT = LangKey.of("Shop.Cart.EnterAmount",
+        "<! type:\"titles:20:1200:20\" !>" +
+            "\n" + GREEN + BOLD + "< Custom Amount >" +
+            "\n" + GRAY + "Enter your amount");
+
     public static final LangKey EDITOR_GENERIC_ENTER_NAME      = LangKey.of("Editor.Generic.Enter.Name", GRAY + "Enter " + GREEN + "[Name]");
     public static final LangKey EDITOR_GENERIC_ENTER_AMOUNT    = LangKey.of("Editor.Generic.Enter.Amount", GRAY + "Enter " + GREEN + "[Amount]");
     public static final LangKey EDITOR_GENERIC_ENTER_DAY       = LangKey.of("Editor.Generic.Enter.Day", GRAY + "Enter " + GREEN + "[English Day Name]");

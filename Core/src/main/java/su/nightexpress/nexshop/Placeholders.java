@@ -1,5 +1,7 @@
 package su.nightexpress.nexshop;
 
+import java.util.function.Function;
+
 public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
 
     public static final String URL_WIKI               = "https://github.com/nulli0n/ExcellentShop-spigot/wiki/";
@@ -39,6 +41,9 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String SHOP_CHEST_LOCATION_WORLD = "%shop_location_world%";
     public static final String SHOP_CHEST_IS_ADMIN       = "%shop_is_admin%";
     public static final String SHOP_CHEST_TYPE           = "%shop_type%";
+
+    public static final Function<Integer, String> SHOP_CHEST_PRODUCT_PRICE_BUY = slot -> "%shop_product_price_buy_" + slot + "%";
+    public static final Function<Integer, String> SHOP_CHEST_PRODUCT_PRICE_SELL = slot -> "%shop_product_price_sell_" + slot + "%";
 
     public static final String PRODUCT_PRICE_TYPE               = "%product_price_type%";
     public static final String PRODUCT_PRICE_BUY                = "%product_price_buy%";

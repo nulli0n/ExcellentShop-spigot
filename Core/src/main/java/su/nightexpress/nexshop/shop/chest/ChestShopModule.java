@@ -22,10 +22,7 @@ import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.nms.v1_20_R1.V1_20_R1;
 import su.nightexpress.nexshop.nms.v1_20_R2.V1_20_R2;
 import su.nightexpress.nexshop.shop.chest.command.*;
-import su.nightexpress.nexshop.shop.chest.compatibility.ClaimHook;
-import su.nightexpress.nexshop.shop.chest.compatibility.GriefPreventionHook;
-import su.nightexpress.nexshop.shop.chest.compatibility.LandsHook;
-import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
+import su.nightexpress.nexshop.shop.chest.compatibility.*;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
@@ -126,6 +123,7 @@ public class ChestShopModule extends ShopModule {
             if (EngineUtils.hasPlugin(HookId.LANDS)) this.claimHooks.add(new LandsHook(this.plugin));
             if (EngineUtils.hasPlugin(HookId.GRIEF_PREVENTION)) this.claimHooks.add(new GriefPreventionHook());
             if (EngineUtils.hasPlugin(HookId.WORLD_GUARD)) this.claimHooks.add(new WorldGuardFlags());
+            if (EngineUtils.hasPlugin(HookId.KINGDOMS)) this.claimHooks.add(new KingdomsHook());
         }
 
         this.addListener(new ShopListener(this));

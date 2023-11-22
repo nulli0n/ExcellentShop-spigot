@@ -36,6 +36,8 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
 
     private PriceUpdateTask priceUpdateTask;
 
+    // TODO use Dummy currency to allow product load, but dont save it in config
+
     @Override
     @NotNull
     protected ExcellentShop getSelf() {

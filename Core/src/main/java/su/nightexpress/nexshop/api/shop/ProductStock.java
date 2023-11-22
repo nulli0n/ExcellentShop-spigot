@@ -9,6 +9,7 @@ import su.nightexpress.nexshop.api.IPurchaseListener;
 import su.nightexpress.nexshop.api.type.StockType;
 import su.nightexpress.nexshop.api.type.TradeType;
 
+@Deprecated // TODO Split by Shop Stock & Plyer Limit
 public abstract class ProductStock<P extends Product<P, ?, ?>> implements Placeholder, IPurchaseListener {
 
     protected final PlaceholderMap placeholderMap;
