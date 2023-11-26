@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.sql.SQLColumn;
 import su.nexmedia.engine.api.data.sql.SQLCondition;
 import su.nexmedia.engine.api.data.sql.column.ColumnType;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
@@ -61,10 +60,11 @@ public class ChestDataHandler {
     }
 
     public void synchronize() {
-        ChestShopModule module = ShopAPI.getChestShop();
+        ChestShopModule module = this.dataHandler.plugin().getChestShop();
         if (module != null) {
             module.getBankMap().clear();
             module.loadBanks();
+            module.loadShopData();
         }
     }
 

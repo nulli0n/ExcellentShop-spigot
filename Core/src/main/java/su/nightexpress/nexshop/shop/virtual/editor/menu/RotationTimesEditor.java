@@ -2,7 +2,6 @@ package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.menu.AutoPaged;
@@ -10,14 +9,14 @@ import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.ItemReplacer;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
+import su.nightexpress.nexshop.shop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -63,16 +62,11 @@ public class RotationTimesEditor extends EditorMenu<ExcellentShop, RotatingShop>
     @NotNull
     public ItemStack getObjectStack(@NotNull Player player, @NotNull DayOfWeek day) {
         ItemStack item = new ItemStack(Material.CLOCK, day.ordinal() + 1);
-        ItemUtil.mapMeta(item, meta -> {
-            meta.setDisplayName(VirtualLocales.PRODUCT_ROTATION_DAY_TIMES.getLocalizedName());
-            meta.setLore(VirtualLocales.PRODUCT_ROTATION_DAY_TIMES.getLocalizedLore());
-            meta.addItemFlags(ItemFlag.values());
-            ItemUtil.replace(meta, str -> str
-                .replace(Placeholders.GENERIC_NAME, StringUtil.capitalizeFully(day.name()))
-                .replace(Placeholders.GENERIC_TIME, object.getRotationTimes(day).stream()
-                    .map(time -> time.format(TimeUtils.TIME_FORMATTER)).collect(Collectors.joining("\n")))
-            );
-        });
+        ItemReplacer.create(item).readLocale(VirtualLocales.PRODUCT_ROTATION_DAY_TIMES).hideFlags().trimmed()
+            .replace(Placeholders.GENERIC_NAME, () -> StringUtil.capitalizeFully(day.name()))
+            .replace(Placeholders.GENERIC_TIME, () -> object.getRotationTimes(day).stream()
+                .map(time -> time.format(ShopUtils.TIME_FORMATTER)).collect(Collectors.joining("\n")))
+            .writeMeta();
         return item;
     }
 
@@ -83,7 +77,7 @@ public class RotationTimesEditor extends EditorMenu<ExcellentShop, RotatingShop>
             if (event.isLeftClick()) {
                 this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, wrapper -> {
                     try {
-                        this.object.getRotationTimes(day).add(LocalTime.parse(wrapper.getTextRaw(), TimeUtils.TIME_FORMATTER));
+                        this.object.getRotationTimes(day).add(LocalTime.parse(wrapper.getTextRaw(), ShopUtils.TIME_FORMATTER));
                         this.object.saveSettings();
                         this.openNextTick(viewer, viewer.getPage());
                     }

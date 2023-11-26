@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.data.UserManager;
-import su.nightexpress.nexshop.shop.auction.AuctionManager;
+import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 

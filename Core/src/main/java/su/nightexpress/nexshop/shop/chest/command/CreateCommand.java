@@ -10,7 +10,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.shop.module.ModuleCommand;
+import su.nightexpress.nexshop.module.ModuleCommand;
 
 import java.util.List;
 import java.util.stream.Stream;

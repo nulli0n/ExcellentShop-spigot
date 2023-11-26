@@ -25,21 +25,21 @@ import su.nexmedia.engine.utils.PDCUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 
 import java.util.*;
 
-public class ShopViewEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>> {
+public class ShopViewEditor extends EditorMenu<ExcellentShop, AbstractVirtualShop<?>> {
 
     private final NamespacedKey keyItemType;
     private final NamespacedKey keyReserved;
 
     private static final String TYPE_PREFIX = ChatColor.AQUA + "Type" + ChatColor.GRAY + " [Q/Drop]: " + ChatColor.GREEN;
 
-    public ShopViewEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop<?, ?> shop) {
+    public ShopViewEditor(@NotNull ExcellentShop plugin, @NotNull AbstractVirtualShop<?> shop) {
         super(plugin, shop, shop.getName(), 54);
         this.keyItemType = new NamespacedKey(plugin, "menu_item_type");
         this.keyReserved = new NamespacedKey(plugin, "reserved_slot");

@@ -16,9 +16,12 @@ import su.nexmedia.engine.utils.EngineUtils;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.data.price.ProductPriceStorage;
+import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.shop.TransactionLogger;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.module.AbstractShopModule;
 import su.nightexpress.nexshop.nms.v1_20_R1.V1_20_R1;
 import su.nightexpress.nexshop.nms.v1_20_R2.V1_20_R2;
 import su.nightexpress.nexshop.shop.chest.command.*;
@@ -39,9 +42,6 @@ import su.nightexpress.nexshop.shop.chest.nms.V1_18_R2;
 import su.nightexpress.nexshop.shop.chest.nms.V1_19_R3;
 import su.nightexpress.nexshop.shop.chest.util.ShopMap;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
-import su.nightexpress.nexshop.shop.module.ShopModule;
-import su.nightexpress.nexshop.shop.util.TransactionLogger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +49,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ChestShopModule extends ShopModule {
+public class ChestShopModule extends AbstractShopModule implements ShopModule {
 
     public static final String ID = "chest_shop";
     public static final String DIR_SHOPS = "/shops/";
@@ -89,13 +89,9 @@ public class ChestShopModule extends ShopModule {
         super.onLoad();
         this.getConfig().initializeOptions(ChestConfig.class);
 
-        try {
-            if (ShopUtils.getAllowedCurrencies().isEmpty()) throw new NoSuchElementException();
-            ShopUtils.getDefaultCurrency();
-        }
-        catch (NoSuchElementException e) {
-            this.error("Invalid 'Default_Currency' or 'Allowed_Currencies' has no valid currency.");
-            return;
+        if (this.getDefaultCurrency() == CurrencyManager.DUMMY) {
+            this.error("You have invalid currency set in 'Default_Currency' setting AND/OR have no valid currency in 'Allowed_Currencies' setting.");
+            this.error("You must fix this issue to make your shops working properly.");
         }
 
         this.plugin.getLangManager().loadMissing(ChestLang.class);
@@ -162,6 +158,15 @@ public class ChestShopModule extends ShopModule {
             this.loadShop(shopConfig);
         }
         this.info("Shops Loaded: " + this.getShops().size());
+
+        this.plugin.runTaskAsync(task -> this.loadShopData());
+    }
+
+    public void loadShopData() {
+        this.getShops().forEach(shop -> {
+            shop.getPricer().load();
+            shop.getStock().load();
+        });
     }
 
     public void removeInvalidShops() {
@@ -184,7 +189,7 @@ public class ChestShopModule extends ShopModule {
         // ----- OLD BANK UPDATE - START -----
         if (cfg.contains("Bank")) {
             ChestPlayerBank bank = this.getPlayerBank(shop.getOwnerId());
-            for (Currency currency : ShopUtils.getAllowedCurrencies()) {
+            for (Currency currency : ChestUtils.getAllowedCurrencies()) {
                 bank.deposit(currency, cfg.getDouble("Bank." + currency.getId()));
             }
             this.plugin.getData().getChestDataHandler().saveChestBank(bank);
@@ -194,7 +199,8 @@ public class ChestShopModule extends ShopModule {
         // ----- OLD BANK UPDATE - END -----
 
         this.addShop(shop);
-        ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
+        //shop.getPricer().load();
+        //ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
         return true;
     }
 
@@ -268,6 +274,15 @@ public class ChestShopModule extends ShopModule {
     }
 
     @NotNull
+    public Currency getDefaultCurrency() {
+        Currency currency = this.plugin.getCurrencyManager().getCurrency(ChestConfig.DEFAULT_CURRENCY.get());
+        if (currency != null) return currency;
+
+        return this.plugin.getCurrencyManager().getCurrencies()
+            .stream().filter(cur -> ChestConfig.ALLOWED_CURRENCIES.get().contains(cur.getId())).findFirst().orElse(CurrencyManager.DUMMY);
+    }
+
+    @NotNull
     public TransactionLogger getLogger() {
         return logger;
     }
@@ -298,7 +313,7 @@ public class ChestShopModule extends ShopModule {
     }
 
     public boolean createShop(@NotNull Player player, @NotNull Block block, @NotNull ShopType type) {
-        if (!ShopUtils.isValidContainer(block)) {
+        if (!ChestUtils.isValidContainer(block)) {
             plugin.getMessage(ChestLang.SHOP_CREATION_ERROR_NOT_A_CHEST).send(player);
             return false;
         }
@@ -323,7 +338,7 @@ public class ChestShopModule extends ShopModule {
             return false;
         }
 
-        int shopLimit = ShopUtils.getShopLimit(player);
+        int shopLimit = ChestUtils.getShopLimit(player);
         int shopAmount = this.getShopsAmount(player);
         if (shopLimit > 0 && shopAmount >= shopLimit) {
             plugin.getMessage(ChestLang.SHOP_CREATION_ERROR_LIMIT_REACHED).send(player);
@@ -380,7 +395,7 @@ public class ChestShopModule extends ShopModule {
 
         // TODO Option to withdraw bank for 0 active shops
         if (this.getShopsAmount(player) <= 0) {
-            for (Currency currency : ShopUtils.getAllowedCurrencies()) {
+            for (Currency currency : ChestUtils.getAllowedCurrencies()) {
                 this.withdrawFromBank(player, currency, -1);
             }
         }
@@ -406,7 +421,7 @@ public class ChestShopModule extends ShopModule {
     }
 
     public boolean depositToBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double amount) {
-        if (!ShopUtils.isAllowedCurrency(currency)) {
+        if (!ChestUtils.isAllowedCurrency(currency)) {
             plugin.getMessage(ChestLang.BANK_ERROR_INVALID_CURRENCY).send(player);
             return false;
         }
@@ -435,7 +450,7 @@ public class ChestShopModule extends ShopModule {
     }
 
     public boolean withdrawFromBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double amount) {
-        if (!ShopUtils.isAllowedCurrency(currency)) {
+        if (!ChestUtils.isAllowedCurrency(currency)) {
             plugin.getMessage(ChestLang.BANK_ERROR_INVALID_CURRENCY).send(player);
             return false;
         }

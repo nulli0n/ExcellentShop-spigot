@@ -12,10 +12,7 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.currency.handler.*;
-import su.nightexpress.nexshop.currency.impl.CoinsEngineCurrency;
-import su.nightexpress.nexshop.currency.impl.ConfigCurrency;
-import su.nightexpress.nexshop.currency.impl.ItemCurrency;
-import su.nightexpress.nexshop.currency.impl.UltraEconomyCurrency;
+import su.nightexpress.nexshop.currency.impl.*;
 import su.nightexpress.nexshop.hook.HookId;
 
 import java.util.Collection;
@@ -31,6 +28,8 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
     public static final String EXP           = "exp";
     public static final String VAULT         = "vault";
+
+    public static final DummyCurrency DUMMY = new DummyCurrency();
 
     private final Map<String, Currency> currencyMap;
 
@@ -51,9 +50,6 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
         }
         if (EngineUtils.hasPlugin(HookId.PLAYER_POINTS)) {
             this.registerCurrency(HookId.PLAYER_POINTS, PlayerPointsHandler::new);
-        }
-        if (EngineUtils.hasPlugin(HookId.GAME_POINTS)) {
-            this.registerCurrency(HookId.GAME_POINTS, GamePointsHandler::new);
         }
         if (EngineUtils.hasPlugin(HookId.ELITEMOBS)) {
             this.registerCurrency(HookId.ELITEMOBS, EliteMobsHandler::new);
@@ -95,28 +91,33 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     public boolean registerCurrency(@NotNull Currency currency) {
-        this.currencyMap.put(currency.getId(), currency);
+        this.getCurrencyMap().put(currency.getId(), currency);
         this.plugin.info("Registered currency: " + currency.getId());
         return true;
     }
 
     public boolean hasCurrency() {
-        return !this.currencyMap.isEmpty();
+        return !this.getCurrencyMap().isEmpty();
+    }
+
+    @NotNull
+    public Map<String, Currency> getCurrencyMap() {
+        return currencyMap;
     }
 
     @NotNull
     public Collection<Currency> getCurrencies() {
-        return currencyMap.values();
+        return this.getCurrencyMap().values();
     }
 
     @NotNull
     public Set<String> getCurrencyIds() {
-        return this.currencyMap.keySet();
+        return this.getCurrencyMap().keySet();
     }
 
     @Nullable
     public Currency getCurrency(@NotNull String id) {
-        return this.currencyMap.get(id.toLowerCase());
+        return this.getCurrencyMap().get(id.toLowerCase());
     }
 
     @NotNull

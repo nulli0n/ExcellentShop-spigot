@@ -14,7 +14,6 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.nms.ChestNMS;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +51,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
 
             for (ShopType chestType : ShopType.values()) {
                 int count = this.count.getOrDefault(chestType, 0) + 1;
-                if (count >= ShopUtils.getHologramLines(chestType).size()) count = 0;
+                if (count >= ChestUtils.getHologramLines(chestType).size()) count = 0;
                 this.count.put(chestType, count);
             }
         }
@@ -109,7 +108,7 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
     private void addItem(@NotNull ChestShop shop) {
         Location location = shop.getDisplayItemLocation();
         List<ChestProduct> products = new ArrayList<>(shop.getProducts());
-        ItemStack items = products.isEmpty() ? ChestNMS.UNKNOWN : Rnd.get(products).getItem();
+        ItemStack items = products.isEmpty() ? ChestNMS.UNKNOWN : Rnd.get(products).getPreview();
 
         int item = this.items.computeIfAbsent(shop, i -> chestShop.getNMS().createItem(location, items));
     }
@@ -131,7 +130,9 @@ public class ChestDisplayHandler extends AbstractManager<ExcellentShop> {
         //System.out.println("display set");
         if (!chest.getDisplayText().isEmpty()) {
             int count = this.slider != null ? this.slider.getCount(chest) : 0;
-            this.addHologram(chest, chest.getDisplayText().get(count));
+            if (chest.getDisplayText().size() > count) {
+                this.addHologram(chest, chest.getDisplayText().get(count));
+            }
         }
         this.addItem(chest);
     }

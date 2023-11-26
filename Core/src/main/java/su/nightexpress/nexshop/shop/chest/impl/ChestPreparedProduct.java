@@ -5,24 +5,23 @@ import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.IPurchaseListener;
-import su.nightexpress.nexshop.api.event.ChestShopTransactionEvent;
-import su.nightexpress.nexshop.shop.util.TransactionResult.Result;
-import su.nightexpress.nexshop.api.shop.PreparedProduct;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.util.TransactionResult;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
+import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.Transaction.Result;
 
-public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
+public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> {
 
-    public ChestPreparedProduct(@NotNull Player player, @NotNull ChestProduct product, @NotNull TradeType tradeType, boolean all) {
-        super(player, product, tradeType, all);
+    public ChestPreparedProduct(@NotNull ExcellentShop plugin, @NotNull Player player, @NotNull ChestProduct product, @NotNull TradeType tradeType, boolean all) {
+        super(plugin, player, product, tradeType, all);
     }
 
     @Override
     @NotNull
-    protected TransactionResult buy() {
+    protected Transaction buy() {
         Player player = this.getPlayer();
         Inventory inventory = this.getInventory();
         ChestProduct product = this.getProduct();
@@ -30,39 +29,37 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         ExcellentShop plugin = shop.plugin();
 
         int amountToBuy = this.getUnits();
-        int amountShopHas = product.getStock().getLeftAmount(TradeType.BUY);
+        int amountShopHas = shop.getStock().count(product, TradeType.BUY);
         double price = this.getPrice();
         double balanceUser = product.getCurrency().getHandler().getBalance(player);
 
-        Result result = TransactionResult.Result.SUCCESS;
+        Result result = Transaction.Result.SUCCESS;
         if (balanceUser < price) {
-            result = TransactionResult.Result.TOO_EXPENSIVE;
+            result = Transaction.Result.TOO_EXPENSIVE;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_TOO_EXPENSIVE).replace(this.replacePlaceholders()).send(player);
         }
         else if (amountShopHas >= 0 && amountToBuy > amountShopHas) {
-            result = TransactionResult.Result.OUT_OF_STOCK;
+            result = Transaction.Result.OUT_OF_STOCK;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK).replace(this.replacePlaceholders()).send(player);
         }
 
         // Call custom event
-        TransactionResult transactionResult = new TransactionResult(product, TradeType.BUY, amountToBuy, price, result);
-        ChestShopTransactionEvent event = new ChestShopTransactionEvent(player, transactionResult);
+        Transaction transaction = new Transaction(product, TradeType.BUY, amountToBuy, price, result);
+        ShopTransactionEvent event = new ShopTransactionEvent(player, transaction);
         plugin.getPluginManager().callEvent(event);
 
-        if (result == TransactionResult.Result.SUCCESS) {
-            product.getStock().onPurchase(event);
-            if (product.getPricer() instanceof IPurchaseListener listener) {
-                listener.onPurchase(event);
-            }
+        if (result == Transaction.Result.SUCCESS) {
+            shop.getPricer().onTransaction(event);
+            shop.getStock().onTransaction(event);
 
             if (!shop.isAdminShop()) {
-                shop.getOwnerBank().deposit(product.getCurrency(), price);
+                shop.getOwnerBank().deposit(product.getCurrency(), transaction.getPrice());
                 shop.getModule().savePlayerBank(shop.getOwnerBank());
             }
 
             // Process transaction
-            product.delivery(inventory, amountToBuy);
-            product.getCurrency().getHandler().take(player, price);
+            product.delivery(inventory, transaction.getUnits());
+            product.getCurrency().getHandler().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
 
             plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_USER)
@@ -79,12 +76,12 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
                     .send(owner);
             }
         }
-        return transactionResult;
+        return transaction;
     }
 
     @Override
     @NotNull
-    protected TransactionResult sell() {
+    protected Transaction sell() {
         Player player = this.getPlayer();
         Inventory inventory = this.getInventory();
         ChestProduct product = this.getProduct();
@@ -92,7 +89,7 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         ExcellentShop plugin = shop.plugin();
 
         boolean isAdmin = shop.isAdminShop();
-        int shopSpace = product.getStock().getLeftAmount(TradeType.SELL);
+        int shopSpace = shop.getStock().count(product, TradeType.SELL);
         int userCount = product.countUnits(inventory);
         int fined;
         if (this.isAll()) {
@@ -106,38 +103,36 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
         double price = this.getPrice();
 
 
-        Result result = TransactionResult.Result.SUCCESS;
+        Result result = Transaction.Result.SUCCESS;
         if ((userCount < fined) || (this.isAll() && userCount < 1)) {
-            result = TransactionResult.Result.NOT_ENOUGH_ITEMS;
+            result = Transaction.Result.NOT_ENOUGH_ITEMS;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS).replace(this.replacePlaceholders()).send(player);
         }
         else if (shopSpace >= 0 && shopSpace < fined) {
-            result = TransactionResult.Result.OUT_OF_SPACE;
+            result = Transaction.Result.OUT_OF_SPACE;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE).replace(this.replacePlaceholders()).send(player);
         }
         else if (!shop.isAdminShop() && !shop.getOwnerBank().hasEnough(product.getCurrency(), price)) {
-            result = TransactionResult.Result.OUT_OF_MONEY;
+            result = Transaction.Result.OUT_OF_MONEY;
             plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS).replace(this.replacePlaceholders()).send(player);
         }
 
         // Call custom event
-        TransactionResult transactionResult = new TransactionResult(product, TradeType.SELL, fined, price, result);
-        ChestShopTransactionEvent event = new ChestShopTransactionEvent(player, transactionResult);
+        Transaction transaction = new Transaction(product, TradeType.SELL, fined, price, result);
+        ShopTransactionEvent event = new ShopTransactionEvent(player, transaction);
         plugin.getPluginManager().callEvent(event);
 
-        if (result == TransactionResult.Result.SUCCESS) {
-            product.getStock().onPurchase(event);
-            if (product.getPricer() instanceof IPurchaseListener listener) {
-                listener.onPurchase(event);
-            }
+        if (result == Transaction.Result.SUCCESS) {
+            shop.getPricer().onTransaction(event);
+            shop.getStock().onTransaction(event);
 
             // Process transaction
             if (!isAdmin) {
-                shop.getOwnerBank().withdraw(product.getCurrency(), price);
+                shop.getOwnerBank().withdraw(product.getCurrency(), transaction.getPrice());
                 shop.getModule().savePlayerBank(shop.getOwnerBank());
             }
-            product.getCurrency().getHandler().give(player, price);
-            product.take(inventory, fined);
+            product.getCurrency().getHandler().give(player, transaction.getPrice());
+            product.take(inventory, transaction.getUnits());
             shop.getModule().getLogger().logTransaction(event);
 
             plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_USER)
@@ -154,6 +149,6 @@ public class ChestPreparedProduct extends PreparedProduct<ChestProduct> {
                     .send(owner);
             }
         }
-        return transactionResult;
+        return transaction;
     }
 }

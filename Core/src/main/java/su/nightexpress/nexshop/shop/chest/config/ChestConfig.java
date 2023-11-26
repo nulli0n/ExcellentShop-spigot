@@ -10,6 +10,7 @@ import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
 
 import java.util.*;
@@ -114,12 +115,14 @@ public class ChestConfig {
         "Use '-1' to make unlimited amount."
     ).mapReader(map -> map.setNegativeBetter(true)).setWriter((cfg, path, map) -> map.write(cfg, path));
 
-    public static final JOption<Set<Material>> SHOP_PRODUCT_DENIED_MATERIALS = JOption.forSet("Shops.Products.Material_Blacklist",
-        str -> Material.getMaterial(str.toUpperCase()),
-        Set.of(),
-        "List of Materials that can not be added as shop products.",
-        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html"
-    ).setWriter((cfg, path, set) -> cfg.set(path, set.stream().map(Enum::name).toList()));
+    public static final JOption<Set<String>> SHOP_PRODUCT_BANNED_ITEMS = JOption.create("Shops.Products.Material_Blacklist",
+        Set.of(
+            Material.BARRIER.name()
+        ),
+        "List of items that can not be added as shop products.",
+        "For vanilla items, use material names: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html",
+        "Supported Plugins: " + String.join(", ", ProductHandlerRegistry.getPluginItemNames())
+    ).mapReader(set -> set.stream().map(String::toLowerCase).collect(Collectors.toSet()));
 
     public static final JOption<Set<String>> SHOP_PRODUCT_DENIED_LORES = JOption.create("Shops.Products.Lore_Blacklist",
         Set.of("fuck", "ass hole bitch"),

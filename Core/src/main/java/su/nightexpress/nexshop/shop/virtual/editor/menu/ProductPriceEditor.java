@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.editor.menu;
 
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemFlag;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nexmedia.engine.api.lang.LangKey;
@@ -9,28 +8,28 @@ import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.CollectionsUtil;
+import su.nexmedia.engine.utils.ItemReplacer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.ProductPricer;
-import su.nightexpress.nexshop.api.type.PriceType;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.data.price.ProductPriceStorage;
-import su.nightexpress.nexshop.shop.price.DynamicPricer;
-import su.nightexpress.nexshop.shop.price.FloatPricer;
-import su.nightexpress.nexshop.shop.price.RangedPricer;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
+import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.shop.impl.price.DynamicPricer;
+import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
+import su.nightexpress.nexshop.shop.impl.price.RangedPricer;
+import su.nightexpress.nexshop.shop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.specific.ItemSpecific;
+import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct<?, ?>> {
+public class ProductPriceEditor extends EditorMenu<ExcellentShop, AbstractVirtualProduct<?>> {
 
     private static final String TEXTURE_PRICE   = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmI5Mjk5YjcyNGM1ZDM0YWM5M2VkZTc1NjAxZGZlYjBiZGE1NzhkNzBiOGY0ZDdmODJkNzY3NmYwYzZjMTE0YSJ9fX0=";
     private static final String TEXTURE_BUY     = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmY2Yjg1ZjYyNjQ0NGRiZDViZGRmN2E1MjFmZTUyNzQ4ZmU0MzU2NGUwM2ZiZDM1YjZiNWU3OTdkZTk0MmQifX19";
@@ -39,7 +38,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
     private static final String TEXTURE_INITIAL = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODI0Zjc2OWM5NDUwZjIyZTQ4NGUwODljYTAyZTMyNGZlMzdiMThmNGMxOGVmMjk2MDIxODcxYmE0YWQwYzM5NiJ9fX0=";
     private static final String TEXTURE_STEP    = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2U0ZjJmOTY5OGMzZjE4NmZlNDRjYzYzZDJmM2M0ZjlhMjQxMjIzYWNmMDU4MTc3NWQ5Y2VjZDcwNzUifX19";
 
-    public ProductPriceEditor(@NotNull VirtualProduct<?, ?> product) {
+    public ProductPriceEditor(@NotNull AbstractVirtualProduct<?> product) {
         super(product.getShop().plugin(), product, product.getShop().getName() + ": Product Price Settings", 27);
 
         this.addReturn(22).setClick((viewer, event) -> {
@@ -52,27 +51,27 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             double sell = product.getPricer().getPrice(TradeType.SELL);
             double buy = product.getPricer().getPrice(TradeType.BUY);
 
-            product.setPricer(ProductPricer.from(priceType));
-            ProductPriceStorage.deleteData(product);
+            product.setPricer(AbstractProductPricer.from(priceType));
+            product.getShop().getPricer().deleteData(product);
 
             if (product.getPricer() instanceof RangedPricer pricer) {
                 pricer.setPrice(TradeType.BUY, UniDouble.of(buy, buy));
                 pricer.setPrice(TradeType.SELL, UniDouble.of(sell, sell));
             }
-            product.getPricer().setPrice(TradeType.BUY, buy);
-            product.getPricer().setPrice(TradeType.SELL, sell);
+            product.setPrice(TradeType.BUY, buy);
+            product.setPrice(TradeType.SELL, sell);
 
             this.save(viewer);
         });
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BUY), VirtualLocales.PRODUCT_PRICE_FLAT_BUY, 10).setClick((viewer, event) -> {
-            ProductPricer pricer = product.getPricer();
+            AbstractProductPricer pricer = product.getPricer();
             // Disable purchase
             if (event.getClick() == ClickType.DROP) {
                 if (pricer instanceof RangedPricer ranged) {
                     ranged.setPrice(TradeType.BUY, UniDouble.of(-1D, -1D));
                 }
-                pricer.setPrice(TradeType.BUY, -1D);
+                product.setPrice(TradeType.BUY, -1D);
                 this.save(viewer);
                 return;
             }
@@ -83,7 +82,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
             this.handleInput(viewer, key, wrapper -> {
                 if (pricer.getType() == PriceType.FLAT) {
-                    pricer.setPrice(TradeType.BUY, wrapper.asDouble());
+                    product.setPrice(TradeType.BUY, wrapper.asDouble());
                 }
                 else if (ranged != null) {
                     ranged.setPrice(TradeType.BUY, wrapper.asUniDouble());
@@ -93,29 +92,26 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             });
 
         }).getOptions().setDisplayModifier((viewer, item) -> {
-            ProductPricer pricer = product.getPricer();
+            AbstractProductPricer pricer = product.getPricer();
             EditorLocale locale = switch (pricer.getType()) {
                 case FLAT -> VirtualLocales.PRODUCT_PRICE_FLAT_BUY;
                 case FLOAT -> VirtualLocales.PRODUCT_PRICE_FLOAT_BUY;
                 case DYNAMIC -> VirtualLocales.PRODUCT_PRICE_DYNAMIC_BUY;
             };
-            ItemUtil.mapMeta(item, meta -> {
-                meta.setDisplayName(locale.getLocalizedName());
-                meta.setLore(locale.getLocalizedLore());
-                meta.addItemFlags(ItemFlag.values());
-                ItemUtil.replace(meta, product.replacePlaceholders());
-            });
+            ItemReplacer.create(item).readLocale(locale).hideFlags().trimmed()
+                .replace(product.replacePlaceholders())
+                .writeMeta();
         });
 
-        if (product.getSpecific() instanceof ItemSpecific) {
+        if (product.getPacker() instanceof ItemPacker) {
             this.addItem(ItemUtil.createCustomHead(TEXTURE_SELL), VirtualLocales.PRODUCT_PRICE_FLAT_SELL, 11).setClick((viewer, event) -> {
-                ProductPricer pricer = product.getPricer();
+                AbstractProductPricer pricer = product.getPricer();
                 // Disable sell
                 if (event.getClick() == ClickType.DROP) {
                     if (pricer instanceof RangedPricer ranged) {
                         ranged.setPrice(TradeType.SELL, UniDouble.of(-1D, -1D));
                     }
-                    pricer.setPrice(TradeType.SELL, -1D);
+                    product.setPrice(TradeType.SELL, -1D);
                     this.save(viewer);
                     return;
                 }
@@ -126,7 +122,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
 
                 this.handleInput(viewer, key, wrapper -> {
                     if (pricer.getType() == PriceType.FLAT) {
-                        pricer.setPrice(TradeType.SELL, wrapper.asDouble());
+                        product.setPrice(TradeType.SELL, wrapper.asDouble());
                     }
                     else if (ranged != null) {
                         ranged.setPrice(TradeType.SELL, wrapper.asUniDouble());
@@ -136,18 +132,15 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                 });
 
             }).getOptions().setDisplayModifier((viewer, item) -> {
-                ProductPricer pricer = product.getPricer();
+                AbstractProductPricer pricer = product.getPricer();
                 EditorLocale locale = switch (pricer.getType()) {
                     case FLAT -> VirtualLocales.PRODUCT_PRICE_FLAT_SELL;
                     case FLOAT -> VirtualLocales.PRODUCT_PRICE_FLOAT_SELL;
                     case DYNAMIC -> VirtualLocales.PRODUCT_PRICE_DYNAMIC_SELL;
                 };
-                ItemUtil.mapMeta(item, meta -> {
-                    meta.setDisplayName(locale.getLocalizedName());
-                    meta.setLore(locale.getLocalizedLore());
-                    meta.addItemFlags(ItemFlag.values());
-                    ItemUtil.replace(meta, product.replacePlaceholders());
-                });
+                ItemReplacer.create(item).readLocale(locale).hideFlags().trimmed()
+                    .replace(product.replacePlaceholders())
+                    .writeMeta();
             });
         }
 
@@ -169,8 +162,6 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
                     if (day == null) return true;
 
                     pricer.getDays().add(day);
-                    //pricer.stopScheduler();
-                    //pricer.startScheduler();
                     product.getShop().saveProducts();
                     return true;
                 });
@@ -178,9 +169,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             else {
                 this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, wrapper -> {
                     try {
-                        pricer.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), TimeUtils.TIME_FORMATTER));
-                        //pricer.stopScheduler();
-                        //pricer.startScheduler();
+                        pricer.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), ShopUtils.TIME_FORMATTER));
                         product.getShop().saveProducts();
                     }
                     catch (DateTimeParseException ignored) {}
@@ -217,11 +206,9 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, VirtualProduct
             });
         }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.DYNAMIC);
 
-        this.getItems().forEach(menuItem -> {
-            if (menuItem.getOptions().getDisplayModifier() == null) {
-                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, product.replacePlaceholders()));
-            }
-        });
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+            ItemReplacer.replace(item, product.replacePlaceholders());
+        }));
     }
 
     private void save(@NotNull MenuViewer viewer) {

@@ -20,7 +20,7 @@ import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
-import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 
 import java.util.*;
 
@@ -83,7 +83,7 @@ public class BankMenu extends ConfigEditorMenu implements AutoPaged<Currency> {
     @Override
     @NotNull
     public List<Currency> getObjects(@NotNull Player player) {
-        return new ArrayList<>(ShopUtils.getAllowedCurrencies());
+        return new ArrayList<>(ChestUtils.getAllowedCurrencies());
     }
 
     @Override

@@ -10,10 +10,10 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
+import su.nightexpress.nexshop.shop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -71,7 +71,7 @@ public class DiscountMainEditor extends EditorMenu<ExcellentShop, VirtualDiscoun
 
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, wrapper -> {
                 try {
-                    discount.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), TimeUtils.TIME_FORMATTER));
+                    discount.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), ShopUtils.TIME_FORMATTER));
                     shop.saveSettings();
                 }
                 catch (DateTimeParseException ignored) {}

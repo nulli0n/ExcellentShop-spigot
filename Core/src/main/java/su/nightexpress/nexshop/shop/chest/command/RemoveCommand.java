@@ -8,7 +8,7 @@ import su.nexmedia.engine.api.command.CommandResult;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.module.ModuleCommand;
+import su.nightexpress.nexshop.module.ModuleCommand;
 
 public class RemoveCommand extends ModuleCommand<ChestShopModule> {
 

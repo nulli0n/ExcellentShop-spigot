@@ -61,7 +61,7 @@ public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPag
         List<ChestProduct> products = new ArrayList<>();
         this.module.getShops().forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
-                ItemStack item = product.getItem();
+                ItemStack item = product.getPreview();
                 if (item.getType().name().toLowerCase().contains(input2)) return true;
 
                 return ItemUtil.getItemName(item).toLowerCase().contains(input);
@@ -86,13 +86,13 @@ public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPag
     @NotNull
     public List<ChestProduct> getObjects(@NotNull Player player) {
         return new ArrayList<>(this.getSearchResult(player).stream()
-            .sorted((p1, p2) -> (int) (p1.getPricer().getPriceBuy() - p2.getPricer().getPriceBuy())).toList());
+            .sorted((p1, p2) -> (int) (p1.getPricer().getBuyPrice() - p2.getPricer().getBuyPrice())).toList());
     }
 
     @Override
     @NotNull
     public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
-        ItemStack item = new ItemStack(product.getItem());
+        ItemStack item = new ItemStack(product.getPreview());
         ItemUtil.mapMeta(item, meta -> {
             meta.setDisplayName(this.productName);
             meta.setLore(this.productLore);

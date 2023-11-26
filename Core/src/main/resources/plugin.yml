@@ -6,15 +6,16 @@ author: NightExpress
 depend: [ NexEngine ]
 softdepend:
   - Vault
-  - Citizens
+  - CoinsEngine
   - PlayerPoints
+  - GemsEconomy
+  - UltraEconomy
+  - EliteMobs
+  - Citizens
   - WorldGuard
   - Lands
   - AdvancedRegionMarket
-  - GemsEconomy
-  - CoinsEngine
   - GriefPrevention
-  - EliteMobs
-  - UltraEconomy
+  - Oraxen
   - PlaceholderAPI
 api-version: 1.18

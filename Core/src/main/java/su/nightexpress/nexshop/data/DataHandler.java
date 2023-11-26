@@ -16,6 +16,7 @@ import su.nightexpress.nexshop.data.user.UserSettings;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -102,6 +103,15 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
 
     @Override
     public void onSynchronize() {
+        Collection<ShopUser> users = this.plugin.getUserManager().getUsersLoaded();
+        users.forEach(user -> {
+            ShopUser fresh = this.getUser(user.getId());
+            if (fresh == null) return;
+
+            user.getProductLimitMap().clear();
+            user.getProductLimitMap().putAll(fresh.getProductLimitMap());
+        });
+
         if (this.getVirtualDataHandler() != null) this.getVirtualDataHandler().synchronize();
         if (this.getChestDataHandler() != null) this.getChestDataHandler().synchronize();
     }

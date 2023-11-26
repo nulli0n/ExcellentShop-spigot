@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.7.0</version>
+        <version>4.7.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -20,28 +20,28 @@
         <repository>
             <id>sk89q-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
-
         </repository>
+
         <repository>
             <id>everything</id>
             <url>https://repo.citizensnpcs.co/</url>
-
         </repository>
+
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
-
         </repository>
+
         <repository>
             <id>rosewood-repo</id>
             <url>https://repo.rosewooddev.io/repository/public/</url>
-
         </repository>
+
         <repository>
             <id>intellectualsites snapshots</id>
             <url>https://mvn.intellectualsites.com/content/repositories/snapshots/</url>
-
         </repository>
+
         <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
@@ -51,6 +51,8 @@
             <id>techscode</id>
             <url>https://repo.techscode.com/repository/maven-releases/</url>
         </repository>
+
+
     </repositories>
 
     <dependencies>
@@ -76,6 +78,11 @@
             <artifactId>placeholderapi</artifactId>
             <version>2.10.10</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.th0rgal.oraxen</groupId>
+            <artifactId>Oraxen</artifactId>
+            <version>1.162.0</version>
         </dependency>
         <dependency>
             <groupId>org.black_ixx</groupId>
@@ -110,7 +117,7 @@
         <dependency>
             <groupId>com.github.LoneDev6</groupId>
             <artifactId>api-itemsadder</artifactId>
-            <version>3.5.0b</version>
+            <version>3.6.2-beta-r3-b</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -126,27 +133,27 @@
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>NMS</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.1</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_18_R2</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.1</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_19_R3</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.1</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_20_R1</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.1</version>
         </dependency>
         <dependency>
             <groupId>su.nightexpress.excellentshop</groupId>
             <artifactId>V1_20_R2</artifactId>
-            <version>4.7.0</version>
+            <version>4.7.1</version>
         </dependency>
         <dependency>
             <groupId>me.TechsCode</groupId>

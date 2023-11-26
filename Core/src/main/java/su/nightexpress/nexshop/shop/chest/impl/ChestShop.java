@@ -14,30 +14,38 @@ import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.Pair;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
-import su.nightexpress.nexshop.shop.price.FlatPricer;
+import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.shop.impl.AbstractShop;
+import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class ChestShop extends Shop<ChestShop, ChestProduct> {
+public class ChestShop extends AbstractShop<ChestProduct> {
 
     private final ChestShopModule module;
 
@@ -59,14 +67,16 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     private Location     displayItemLoc;
 
     private final ChestShopView view;
+    private final ChestStock stock;
 
     public ChestShop(@NotNull ChestShopModule module, @NotNull JYML cfg) {
         super(module.plugin(), cfg, cfg.getFile().getName().replace(".yml", "").toLowerCase());
         this.module = module;
-        this.view = new ChestShopView(this);
+        this.view = new ChestShopView(this.plugin, this);
+        this.stock = new ChestStock(this.plugin, this);
 
         this.placeholderMap
-            .add(Placeholders.SHOP_BANK_BALANCE, () -> ShopUtils.getAllowedCurrencies().stream()
+            .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestUtils.getAllowedCurrencies().stream()
                 .map(currency -> currency.format(this.getOwnerBank().getBalance(currency))).collect(Collectors.joining(", ")))
             .add(Placeholders.SHOP_CHEST_OWNER, this::getOwnerName)
             .add(Placeholders.SHOP_CHEST_LOCATION_X, () -> NumberUtil.format(this.getLocation().getX()))
@@ -76,29 +86,24 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
             .add(Placeholders.SHOP_CHEST_IS_ADMIN, () -> LangManager.getBoolean(this.isAdminShop()))
             .add(Placeholders.SHOP_CHEST_TYPE, () -> plugin.getLangManager().getEnum(this.getType()));
 
-        for (int slot = 0; slot < 27; slot++) {
-            int index = slot;
-            this.placeholderMap.add(Placeholders.SHOP_CHEST_PRODUCT_PRICE_BUY.apply(slot), () -> {
-                List<ChestProduct> products = new ArrayList<>(this.getProducts());
-                if (products.size() <= index) return "-";
+        List<ChestProduct> products = new ArrayList<>(this.getProducts());
+        for (TradeType tradeType : TradeType.values()) {
+            for (int slot = 0; slot < 27; slot++) {
+                int index = slot;
+                this.placeholderMap.add(Placeholders.SHOP_CHEST_PRODUCT_PRICE.apply(tradeType, slot), () -> {
+                    if (products.size() <= index) return "-";
 
-                ChestProduct product = products.get(index);
-                return product.getCurrency().format(product.getPricer().getPriceBuy());
-            });
-            this.placeholderMap.add(Placeholders.SHOP_CHEST_PRODUCT_PRICE_SELL.apply(slot), () -> {
-                List<ChestProduct> products = new ArrayList<>(this.getProducts());
-                if (products.size() <= index) return "-";
-
-                ChestProduct product = products.get(index);
-                return product.getCurrency().format(product.getPricer().getPriceSell());
-            });
+                    ChestProduct product = products.get(index);
+                    return product.getCurrency().format(product.getPricer().getPrice(tradeType));
+                });
+            }
         }
     }
 
     @Override
     public boolean load() {
         Location location = cfg.getLocation("Location");
-        if (location == null || !ShopUtils.isValidContainer(location.getBlock())) {
+        if (location == null || !ChestUtils.isValidContainer(location.getBlock())) {
             this.plugin.error("Shop block is not a valid container!");
             return false;
         }
@@ -132,16 +137,49 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     private void loadProducts() {
-        this.cfg.getSection("Products").stream().map(id -> {
-            try {
-                return ChestProduct.read(cfg, "Products." + id, id);
+        this.cfg.getSection("Products").forEach(id -> {
+            ChestProduct product = this.loadProduct(id, "Products." + id);
+            if (product == null) {
+                this.plugin.warn("Product not loaded: '" + id + "' in '" + this.getId() + "' shop.");
+                return;
             }
-            catch (Exception e) {
-                this.plugin.error("Could not load '" + id + "' product in '" + getId() + "' shop!");
-                e.printStackTrace();
-                return null;
-            }
-        }).filter(Objects::nonNull).forEach(this::addProduct);
+            this.addProduct(product);
+        });
+    }
+
+    @Nullable
+    private ChestProduct loadProduct(@NotNull String id, @NotNull String path) {
+        String currencyId = cfg.getString(path + ".Currency", CurrencyManager.VAULT);
+        Currency currency = this.plugin.getCurrencyManager().getCurrency(currencyId);
+        if (currency == null || !ChestUtils.isAllowedCurrency(currency)) {
+            currency = this.getModule().getDefaultCurrency();
+        }
+
+        String itemOld = cfg.getString(path + ".Reward.Item");
+        if (itemOld != null) {
+            cfg.remove(path + ".Reward.Item");
+            cfg.set(path + ".Content.Item", itemOld);
+        }
+
+        String handlerId = cfg.getString(path + ".Handler", VanillaItemHandler.NAME);
+        ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
+        if (handler == null) {
+            handler = ProductHandlerRegistry.forBukkitItem();
+            this.getModule().warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Using default one...");
+        }
+
+        ProductPacker packer = handler.createPacker();
+        if (!packer.load(cfg, path)) {
+            this.getModule().warn("Invalid data for '" + id + "' product in '" + this.getId() + "' shop.");
+            return null;
+        }
+        if (packer instanceof ItemPacker itemPacker) {
+            itemPacker.setUsePreview(false);
+        }
+
+        ChestProduct product = new ChestProduct(id, this, currency, handler, packer);
+        product.setPricer(AbstractProductPricer.read(cfg, path + ".Price"));
+        return product;
     }
 
     public void clear() {
@@ -167,14 +205,13 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         this.transactions.forEach((type, isAllowed) -> {
             cfg.set("Transaction_Allowed." + type.name(), isAllowed);
         });
-        this.cfg.set("Products", null);
-        this.getProducts().forEach(product -> ChestProduct.write(product, cfg, "Products." + product.getId()));
+        this.saveProducts();
     }
 
     @Override
-    @NotNull
-    protected ChestShop get() {
-        return this;
+    public void saveProducts() {
+        this.cfg.set("Products", null);
+        this.getProducts().forEach(product -> product.write(cfg, "Products." + product.getId()));
     }
 
     @NotNull
@@ -186,6 +223,12 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     @NotNull
     public ChestShopView getView() {
         return this.view;
+    }
+
+    @NotNull
+    @Override
+    public ChestStock getStock() {
+        return stock;
     }
 
     @NotNull
@@ -206,19 +249,33 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
         return true;
     }
 
+    @Override
+    public void addProduct(@NotNull Product product) {
+        if (product instanceof ChestProduct chestProduct) {
+            this.addProduct(chestProduct);
+        }
+    }
+
     public boolean createProduct(@NotNull Player player, @NotNull ItemStack item) {
         if (item.getType().isAir() || this.isProduct(item)) {
             return false;
         }
-        if (!ShopUtils.isAllowedItem(item)) {
+        if (!ChestUtils.isAllowedItem(item)) {
             plugin.getMessage(ChestLang.SHOP_PRODUCT_ERROR_BAD_ITEM).send(player);
             return false;
         }
 
-        ChestProduct shopProduct = new ChestProduct(ShopUtils.getDefaultCurrency(), item);
-        shopProduct.setStock(new ChestProductStock());
-        shopProduct.setPricer(new FlatPricer());
-        this.addProduct(shopProduct);
+        String id = UUID.randomUUID().toString();
+
+        ProductHandler handler = ProductHandlerRegistry.getHandler(item);
+        ProductPacker packer = handler.createPacker();
+        if (packer instanceof ItemPacker itemPacker) {
+            itemPacker.load(item);
+        }
+
+        Currency currency = this.getModule().getDefaultCurrency();
+        ChestProduct product = new ChestProduct(id, this, currency, handler, packer);
+        this.addProduct(product);
         return true;
     }
 
@@ -236,7 +293,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     public boolean isValid() {
-        return ShopUtils.isValidContainer(this.getLocation().getBlock());
+        return ChestUtils.isValidContainer(this.getLocation().getBlock());
     }
 
     @NotNull
@@ -249,7 +306,9 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     public boolean isProduct(@NotNull ItemStack item) {
-        return this.getProducts().stream().anyMatch(product -> product.isItemMatches(item));
+        return this.getProducts().stream().anyMatch(product -> {
+            return product.getPacker() instanceof ItemPacker handler && handler.isItemMatches(item);
+        });
     }
 
     public void updateContainerInfo() {
@@ -358,7 +417,7 @@ public class ChestShop extends Shop<ChestShop, ChestProduct> {
     }
 
     public void updateDisplayText() {
-        this.displayText = new ArrayList<>(ShopUtils.getHologramLines(this.getType()));
+        this.displayText = new ArrayList<>(ChestUtils.getHologramLines(this.getType()));
         this.displayText.replaceAll(this.replacePlaceholders());
     }
 

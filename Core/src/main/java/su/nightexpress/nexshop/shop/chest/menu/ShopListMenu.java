@@ -18,7 +18,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
@@ -84,7 +84,7 @@ public class ShopListMenu extends ConfigMenu<ExcellentShop> implements AutoPaged
     @NotNull
     public List<ChestShop> getObjects(@NotNull Player player) {
         UUID ownerId = this.getOwnerId(player);
-        return this.module.getShops(ownerId).stream().sorted(Comparator.comparing(Shop::getName)).toList();
+        return this.module.getShops(ownerId).stream().sorted(Comparator.comparing(AbstractShop::getName)).toList();
     }
 
     @Override

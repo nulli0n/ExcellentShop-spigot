@@ -13,7 +13,7 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 
 import java.util.ArrayList;
 import java.util.List;

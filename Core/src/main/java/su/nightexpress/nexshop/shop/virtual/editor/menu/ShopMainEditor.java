@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.shop.virtual.editor.menu;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,19 +10,17 @@ import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.data.price.ProductPriceStorage;
-import su.nightexpress.nexshop.data.stock.ProductStockStorage;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.RotationType;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.StaticShop;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
+import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.type.RotationType;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 
-public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>> {
+public class ShopMainEditor extends EditorMenu<ExcellentShop, AbstractVirtualShop<?>> {
 
     private static final String TEXTURE_BOOK = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGUxNTU5NDhjYTg1YjA1MTM3ZDJkM2E1YjA4MmY1N2U3NmM2ODFiZmNkZjRmMGRjZjg2ZWFmZjY4MWI5MzY3OCJ9fX0=";
     private static final String TEXTURE_NPC = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJlMGRjOTJkNzg2MmYwNDQzY2M3NzU3Mzc3NzRmNDA3YWFlZmJlMDVlOWM0MzIzMmJiNjkzZDM5YzE4ZmI4OSJ9fX0=";
@@ -35,7 +32,7 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
     private ProductListEditor  productEditor;
     private DiscountListEditor discountEditor;
 
-    public ShopMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualShop<?, ?> shop) {
+    public ShopMainEditor(@NotNull ExcellentShop plugin, @NotNull AbstractVirtualShop<?> shop) {
         super(plugin, shop, "Shop Editor: " + shop.getId(), 54);
 
         this.addReturn(49).setClick((viewer, event) -> {
@@ -78,12 +75,9 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
         }).getOptions().setDisplayModifier((viewer, item) -> {
             item.setType(shop.getIcon().getType());
             item.setItemMeta(shop.getIcon().getItemMeta());
-            ItemUtil.mapMeta(item, meta -> {
-                meta.setDisplayName(VirtualLocales.SHOP_ICON.getLocalizedName());
-                meta.setLore(VirtualLocales.SHOP_ICON.getLocalizedLore());
-                meta.addItemFlags(ItemFlag.values());
-                ItemUtil.replace(meta, shop.replacePlaceholders());
-            });
+            ItemReplacer.create(item).readLocale(VirtualLocales.SHOP_ICON).hideFlags().trimmed()
+                .replace(shop.replacePlaceholders())
+                .writeMeta();
         });
 
         this.addItem(Material.REDSTONE, VirtualLocales.SHOP_PERMISSION, 24).setClick((viewer, event) -> {
@@ -175,13 +169,12 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 31).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
-                ProductPriceStorage.deleteData(shop);
-                shop.getProducts().forEach(product -> product.getPricer().update());
+                shop.getPricer().deleteData();
+                this.plugin.runTaskAsync(task -> shop.getPricer().updatePrices());
                 return;
             }
             if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                ProductStockStorage.deleteData(shop);
-                shop.getProducts().forEach(product -> product.getStock().lock());
+                shop.getStock().deleteData();
                 return;
             }
 
@@ -210,7 +203,7 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, VirtualShop<?, ?>>
         });
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemUtil.replace(item, shop.replacePlaceholders());
+            ItemReplacer.replace(item, shop.replacePlaceholders());
         }));
     }
 

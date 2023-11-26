@@ -3,49 +3,50 @@ package su.nightexpress.nexshop.shop.virtual.editor.menu;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.editor.EditorLocale;
 import su.nexmedia.engine.api.menu.click.ItemClick;
 import su.nexmedia.engine.api.menu.impl.EditorMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
+import su.nexmedia.engine.editor.EditorManager;
+import su.nexmedia.engine.utils.ItemReplacer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.CommandProduct;
-import su.nightexpress.nexshop.api.shop.ItemProduct;
-import su.nightexpress.nexshop.api.type.StockType;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.stock.StockValues;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.product.RotatingProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.product.VirtualProduct;
+import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ProductMainEditor extends EditorMenu<ExcellentShop, AbstractVirtualProduct<?>> {
 
-public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<?, ?>> {
-
-    private static final String TEXTURE_DOLLAR = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjg4OWNmY2JhY2JlNTk4ZThhMWNkODYxMGI0OWZjYjYyNjQ0ZThjYmE5ZDQ5MTFkMTIxMTM0NTA2ZDhlYTFiNyJ9fX0=";
-    private static final String TEXTURE_BOX_1 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmNmNWIxY2ZlZDFjMjdkZDRjM2JlZjZiOTg0NDk5NDczOTg1MWU0NmIzZmM3ZmRhMWNiYzI1YjgwYWIzYiJ9fX0=";
-    private static final String TEXTURE_BOX_2 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTY4MmRlNzJiZjYxYzZkMjMzNjRlMmZlMmQ3Y2MyOGRkZjgzMTQ1ZDE4ZjE5Mzg1N2QzNjljZjlkZjY5MiJ9fX0=";
-    private static final String TEXTURE_COMMAND = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmQwZjQwNjFiZmI3NjdhN2Y5MjJhNmNhNzE3NmY3YTliMjA3MDliZDA1MTI2OTZiZWIxNWVhNmZhOThjYTU1YyJ9fX0=";
-    private static final String TEXTURE_META = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmMzODU1MGI1ZGFjOWVmYWZhODg5OTQ1YWVjM2JjZDE3OGNiODgwODA2ZWI3ZTcxMmQxYmQ5NmE2MWRmMjNmNiJ9fX0=";
+    private static final String TEXTURE_DOLLAR  = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjg4OWNmY2JhY2JlNTk4ZThhMWNkODYxMGI0OWZjYjYyNjQ0ZThjYmE5ZDQ5MTFkMTIxMTM0NTA2ZDhlYTFiNyJ9fX0=";
+    private static final String TEXTURE_BOX_1   = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmNmNWIxY2ZlZDFjMjdkZDRjM2JlZjZiOTg0NDk5NDczOTg1MWU0NmIzZmM3ZmRhMWNiYzI1YjgwYWIzYiJ9fX0=";
+    private static final String TEXTURE_BOX_2   = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTY4MmRlNzJiZjYxYzZkMjMzNjRlMmZlMmQ3Y2MyOGRkZjgzMTQ1ZDE4ZjE5Mzg1N2QzNjljZjlkZjY5MiJ9fX0=";
 
     private ProductPriceEditor editorPrice;
 
-    public ProductMainEditor(@NotNull ExcellentShop plugin, @NotNull VirtualProduct<?, ?> product) {
-        super(plugin, product, "Product Editor (Shop Id: " + product.getShop().getId() + ")", 54);
+    public ProductMainEditor(@NotNull ExcellentShop plugin, @NotNull AbstractVirtualProduct<?> product) {
+        super(plugin, product, "Product Editor (Shop: " + product.getShop().getId() + ")", 54);
 
         this.addReturn(49).setClick((viewer, event) -> {
             int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
             product.getShop().getEditor().getProductsEditor().openNextTick(viewer.getPlayer(), page);
         });
+
+        for (ProductHandler handler : ProductHandlerRegistry.getHandlerMap().values()) {
+            handler.loadEditor(this, product);
+        }
 
         if (product instanceof RotatingProduct rotatingProduct) {
             this.addItem(Material.ENDER_EYE, VirtualLocales.PRODUCT_ROTATION_CHANCE, 8).setClick((viewer, event) -> {
@@ -57,10 +58,28 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             });
         }
 
-        boolean isItemProd = product.getSpecific() instanceof ItemProduct itemProduct;
+        /*this.addItem(Material.ANVIL, VirtualLocales.PRODUCT_HANDLER, 1).setClick((viewer, event) -> {
+            EditorManager.suggestValues(viewer.getPlayer(), ProductHandlerRegistry.getHandlerMap().keySet(), true);
+            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_RANK, wrapepr -> {
+                ProductHandler handler = ProductHandlerRegistry.getHandler(wrapepr.getTextRaw());
+                if (handler != null) {
+                    product.setHandler(handler);
+                    product.getShop().saveProducts();
+                }
+                return true;
+            });
+        });*/
+
+        ProductPacker packer = product.getPacker();
+
+        boolean usePreview = !(packer instanceof ItemPacker) || ((ItemPacker)packer).isUsePreview();
+        int slot = 4;
+        if (packer instanceof ItemPacker itemPacker && itemPacker.isUsePreview()) {
+            slot = 3;
+        }
 
         // Preview button
-        this.addItem(new ItemStack(Material.ITEM_FRAME), isItemProd ? 5 : 4).setClick((viewer, event) -> {
+        this.addItem(new ItemStack(Material.ITEM_FRAME), slot).setClick((viewer, event) -> {
             if (event.isRightClick()) {
                 PlayerUtil.addItem(viewer.getPlayer(), product.getPreview());
                 return;
@@ -69,88 +88,35 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             ItemStack cursor = event.getCursor();
             if (cursor == null || cursor.getType().isAir()) return;
 
-            product.getSpecific().setPreview(cursor);
+            product.getPacker().setPreview(cursor);
             event.getView().setCursor(null);
             this.save(viewer);
-        }).getOptions().setDisplayModifier((viewer, item) -> {
-            EditorLocale locale = VirtualLocales.PRODUCT_PREVIEW;
-            ItemStack original = product.getSpecific().getPreview();
-
+        }).getOptions().setVisibilityPolicy(viewer -> usePreview).setDisplayModifier((viewer, item) -> {
+            ItemStack original = product.getPacker().getPreview();
             item.setType(original.getType());
             item.setAmount(original.getAmount());
             item.setItemMeta(original.getItemMeta());
-            ItemUtil.mapMeta(item, meta -> {
-                meta.setDisplayName(locale.getLocalizedName());
-                meta.setLore(locale.getLocalizedLore());
-                meta.addItemFlags(ItemFlag.values());
-            });
+            ItemReplacer.create(item).readLocale(VirtualLocales.PRODUCT_PREVIEW).hideFlags().writeMeta();
         });
-
-        // Real item buttin
-        if (product.getSpecific() instanceof ItemProduct itemProduct) {
-            this.addItem(new ItemStack(Material.ITEM_FRAME), 3).setClick((viewer, event) -> {
-                if (event.isRightClick()) {
-                    PlayerUtil.addItem(viewer.getPlayer(), itemProduct.getItem());
-                    return;
-                }
-
-                ItemStack cursor = event.getCursor();
-                if (cursor == null || cursor.getType().isAir()) return;
-
-                itemProduct.setItem(cursor);
-                event.getView().setCursor(null);
-                this.save(viewer);
-            }).getOptions().setDisplayModifier((viewer, item) -> {
-                EditorLocale locale = VirtualLocales.PRODUCT_ITEM;
-                ItemStack original = itemProduct.getItem();
-
-                item.setType(original.getType());
-                item.setAmount(original.getAmount());
-                item.setItemMeta(original.getItemMeta());
-                ItemUtil.mapMeta(item, meta -> {
-                    meta.setDisplayName(locale.getLocalizedName());
-                    meta.setLore(locale.getLocalizedLore());
-                    meta.addItemFlags(ItemFlag.values());
-                });
-            });
-        }
-
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_META), VirtualLocales.PRODUCT_RESPECT_ITEM_META, 19).setClick((viewer, event) -> {
-            if (!(product.getSpecific() instanceof ItemProduct itemProduct)) return;
-
-            itemProduct.setRespectItemMeta(!itemProduct.isRespectItemMeta());
-            this.save(viewer);
-        }).getOptions().setVisibilityPolicy(viewer -> product.getSpecific() instanceof ItemProduct);
-
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_COMMAND), VirtualLocales.PRODUCT_COMMANDS, 19).setClick((viewer, event) -> {
-            if (!(product.getSpecific() instanceof CommandProduct commandProduct)) return;
-
-            if (event.isRightClick()) {
-                commandProduct.getCommands().clear();
-                this.save(viewer);
-                return;
-            }
-            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_COMMAND, wrapper -> {
-                commandProduct.getCommands().add(wrapper.getText());
-                product.getShop().saveProducts();
-                return true;
-            });
-        }).getOptions().setVisibilityPolicy(viewer -> product.getSpecific() instanceof CommandProduct);
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.PRODUCT_PRICE_MANAGER, 21).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
-                product.getPricer().update();
+                product.getShop().getPricer().updatePrice(product);
                 this.save(viewer);
             }
             else if (event.isLeftClick()) {
                 this.getEditorPrice().open(viewer.getPlayer(), 1);
             }
             else {
-                List<Currency> currencies = new ArrayList<>(plugin.getCurrencyManager().getCurrencies());
-                int index = currencies.indexOf(product.getCurrency()) + 1;
-                if (index >= currencies.size()) index = 0;
-                product.setCurrency(currencies.get(index));
-                this.save(viewer);
+                EditorManager.suggestValues(viewer.getPlayer(), plugin.getCurrencyManager().getCurrencyIds(), true);
+                this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_CURRENCY, wrapper -> {
+                    Currency currency = this.plugin.getCurrencyManager().getCurrency(wrapper.getTextRaw());
+                    if (currency != null) {
+                        product.setCurrency(currency);
+                        product.getShop().saveProducts();
+                    }
+                    return true;
+                });
             }
         });
 
@@ -173,23 +139,23 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             });
         });
 
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), VirtualLocales.PRODUCT_GLOBAL_STOCK, 38).setClick(this.getStockClick(StockType.GLOBAL));
-        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), VirtualLocales.PRODUCT_PLAYER_STOCK, 42).setClick(this.getStockClick(StockType.PLAYER));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_1), VirtualLocales.PRODUCT_GLOBAL_STOCK, 38).setClick(this.getStockClick(product.getStockValues()));
+        this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX_2), VirtualLocales.PRODUCT_PLAYER_STOCK, 42).setClick(this.getStockClick(product.getLimitValues()));
 
-        this.getItems().forEach(menuItem -> {
-            if (menuItem.getOptions().getDisplayModifier() == null) {
-                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, product.replacePlaceholders()));
-            }
-        });
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+            ItemReplacer.create(item).readMeta().trimmed()
+                .replace(product.getPlaceholders())
+                .writeMeta();
+        }));
     }
 
     @NotNull
-    private ItemClick getStockClick(@NotNull StockType stockType) {
+    private ItemClick getStockClick(@NotNull StockValues values) {
         return (viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
                 for (TradeType tradeType : TradeType.values()) {
-                    this.object.getStock().setInitialAmount(stockType, tradeType, -1);
-                    this.object.getStock().setRestockCooldown(stockType, tradeType, 0);
+                    values.setInitialAmount(tradeType, -1);
+                    values.setRestockTime(tradeType, 0);
                 }
                 this.save(viewer);
                 return;
@@ -201,9 +167,11 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, VirtualProduct<
             this.handleInput(viewer,  isTime ? Lang.EDITOR_GENERIC_ENTER_SECONDS : Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
                 int amount = wrapper.asAnyInt(0);
                 if (isTime) {
-                    this.object.getStock().setRestockCooldown(stockType, tradeType, amount);
+                    values.setRestockTime(tradeType, amount);
                 }
-                else this.object.getStock().setInitialAmount(stockType, tradeType, amount);
+                else {
+                    values.setInitialAmount(tradeType, amount);
+                }
                 this.object.getShop().saveProducts();
                 return true;
             });

@@ -114,11 +114,6 @@ Settings:
       default: 10
       vip: 15
       admins: -1
-    # List of Materials that can not be added on the Auction.
-    # https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
-    Disabled_Materials:
-      - BARRIER
-      - BEDROCK
     # List of words, which when contained in item name, can not be added on the Auction.
     Disabled_Names:
       - item name

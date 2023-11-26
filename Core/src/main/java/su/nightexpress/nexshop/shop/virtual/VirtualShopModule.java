@@ -12,15 +12,17 @@ import su.nexmedia.engine.utils.FileUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.ItemProduct;
-import su.nightexpress.nexshop.api.shop.Product;
-import su.nightexpress.nexshop.api.type.TradeType;
-import su.nightexpress.nexshop.data.price.ProductPriceStorage;
-import su.nightexpress.nexshop.data.rotation.ShopRotationStorage;
-import su.nightexpress.nexshop.data.stock.ProductStockStorage;
+import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.shop.TransactionLogger;
+import su.nightexpress.nexshop.api.shop.VirtualShop;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.shop.module.ShopModule;
-import su.nightexpress.nexshop.shop.util.TransactionLogger;
+import su.nightexpress.nexshop.module.AbstractShopModule;
+import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.command.SellAllCommand;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
 import su.nightexpress.nexshop.shop.virtual.command.ShopCommand;
@@ -32,30 +34,31 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
-import su.nightexpress.nexshop.shop.virtual.impl.product.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.*;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopMainMenu;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopSellMenu;
-import su.nightexpress.nexshop.shop.virtual.task.RotationCheckTask;
+import su.nightexpress.nexshop.shop.virtual.menu.MainMenu;
+import su.nightexpress.nexshop.shop.virtual.menu.SellMenu;
+import su.nightexpress.nexshop.shop.virtual.type.RotationType;
+import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 
 import java.io.File;
 import java.util.*;
 
-public class VirtualShopModule extends ShopModule {
+public class VirtualShopModule extends AbstractShopModule implements ShopModule {
 
     public static final String ID                 = "virtual_shop";
     public static final String DIR_SHOPS          = "/shops/";
     public static final String DIR_ROTATING_SHOPS = "/rotating_shops/";
 
-    private final Map<String, StaticShop> staticShopMap;
+    private final Map<String, StaticShop>   staticShopMap;
     private final Map<String, RotatingShop> rotatingShopMap;
 
-    private ShopMainMenu   mainMenu;
-    private ShopSellMenu   sellMenu;
+    private MainMenu       mainMenu;
+    private SellMenu       sellMenu;
     private ShopListEditor editor;
     private TransactionLogger logger;
-    private RotationCheckTask rotationCheckTask;
 
     public VirtualShopModule(@NotNull ExcellentShop plugin) {
         super(plugin, ID);
@@ -67,7 +70,7 @@ public class VirtualShopModule extends ShopModule {
     protected void onLoad() {
         super.onLoad();
         this.plugin.getLangManager().loadMissing(VirtualLang.class);
-        this.plugin.getLangManager().loadEnum(VirtualShopType.class);
+        this.plugin.getLangManager().loadEnum(ShopType.class);
         this.plugin.getLangManager().loadEditor(VirtualLocales.class);
         this.plugin.getLang().saveChanges();
         this.cfg.initializeOptions(VirtualConfig.class);
@@ -91,13 +94,11 @@ public class VirtualShopModule extends ShopModule {
         this.loadStaticShops();
         this.loadRotatingShops();
         this.loadMainMenu();
-        this.updateShopPricesStocks();
+        this.plugin.runTaskAsync(task -> this.loadShopData());
+
         if (EngineUtils.hasPlugin(HookId.CITIZENS)) {
             this.addListener(new VirtualShopNPCListener(this));
         }
-
-        this.rotationCheckTask = new RotationCheckTask(this);
-        this.rotationCheckTask.start();
 
         this.command.addChildren(new OpenCommand(this));
         this.command.addChildren(new EditorCommand(this));
@@ -106,7 +107,7 @@ public class VirtualShopModule extends ShopModule {
             this.command.addChildren(new MenuCommand(this));
         }
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
-            this.sellMenu = new ShopSellMenu(this, JYML.loadOrExtract(plugin, this.getLocalPath(), "sell.menu.yml"));
+            this.sellMenu = new SellMenu(this, JYML.loadOrExtract(plugin, this.getLocalPath(), "sell.menu.yml"));
             this.plugin.getCommandManager().registerCommand(new SellMenuCommand(this, VirtualConfig.SELL_MENU_COMMANDS.get().split(",")));
         }
         if (!VirtualConfig.SHOP_SHORTCUTS.get().isEmpty()) {
@@ -117,10 +118,6 @@ public class VirtualShopModule extends ShopModule {
 
     @Override
     protected void onShutdown() {
-        if (this.rotationCheckTask != null) {
-            this.rotationCheckTask.stop();
-            this.rotationCheckTask = null;
-        }
         if (this.editor != null) {
             this.editor.clear();
             this.editor = null;
@@ -185,44 +182,27 @@ public class VirtualShopModule extends ShopModule {
         }
 
         if (!VirtualConfig.MAIN_MENU_ENABLED.get()) return;
-        this.mainMenu = new ShopMainMenu(this);
+        this.mainMenu = new MainMenu(this);
     }
 
-    @NotNull
-    public TransactionLogger getLogger() {
-        return logger;
-    }
-
-    @NotNull
-    public ShopListEditor getEditor() {
-        if (this.editor == null) {
-            this.editor = new ShopListEditor(this);
-        }
-        return editor;
-    }
-
-    public void updateShopPricesStocks() {
-        this.getStaticShops().forEach(shop -> {
-            ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
-            ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
-        });
-        this.getRotatingShops().forEach(shop -> {
-            ShopRotationStorage.loadData(shop).thenRun(() -> {
-                ProductStockStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getStock().unlock()));
-                ProductPriceStorage.loadData(shop).thenRun(() -> shop.getProducts().forEach(product -> product.getPricer().update()));
-                shop.tryRotate();
-            });
+    public void loadShopData() {
+        this.getShops().forEach(shop -> {
+            shop.getPricer().load();
+            shop.getStock().load();
+            if (shop instanceof RotatingShop rotatingShop) {
+                rotatingShop.loadData();
+            }
         });
     }
 
-    public boolean createShop(@NotNull String id, @NotNull VirtualShopType type) {
+    public boolean createShop(@NotNull String id, @NotNull ShopType type) {
         id = StringUtil.lowerCaseUnderscore(id);
         if (this.getShopById(id) != null) return false;
 
         JYML cfg = new JYML(this.getAbsolutePath() + getDirectory(type) + id, "config.yml");
 
-        VirtualShop<?, ?> shop;
-        if (type == VirtualShopType.STATIC) {
+        AbstractVirtualShop<?> shop;
+        if (type == ShopType.STATIC) {
             shop = new StaticShop(this, cfg, id);
             this.getStaticShopMap().put(shop.getId(), (StaticShop) shop);
         }
@@ -265,23 +245,43 @@ public class VirtualShopModule extends ShopModule {
     }
 
     @NotNull
-    public ShopSellMenu getSellMenu() {
+    public ShopListEditor getEditor() {
+        if (this.editor == null) {
+            this.editor = new ShopListEditor(this);
+        }
+        return editor;
+    }
+
+    @Override
+    @NotNull
+    public Currency getDefaultCurrency() {
+        Currency currency = this.plugin.getCurrencyManager().getCurrency(VirtualConfig.DEFAULT_CURRENCY.get());
+        return currency == null ? CurrencyManager.DUMMY : currency;
+    }
+
+    @NotNull
+    public TransactionLogger getLogger() {
+        return logger;
+    }
+
+    @NotNull
+    public SellMenu getSellMenu() {
         return sellMenu;
     }
 
     @Nullable
-    public ShopMainMenu getMainMenu() {
+    public MainMenu getMainMenu() {
         return mainMenu;
     }
 
     @NotNull
-    public static String getDirectory(@NotNull VirtualShopType type) {
-        return type == VirtualShopType.STATIC ? DIR_SHOPS : DIR_ROTATING_SHOPS;
+    public static String getDirectory(@NotNull ShopType type) {
+        return type == ShopType.STATIC ? DIR_SHOPS : DIR_ROTATING_SHOPS;
     }
 
-    public boolean delete(@NotNull VirtualShop<?, ?> shop) {
-        VirtualShopType type = shop.getType();
-        Map<String, ? extends VirtualShop<?, ?>> map = type == VirtualShopType.STATIC ? this.getStaticShopMap() : this.getRotatingShopMap();
+    public boolean delete(@NotNull VirtualShop shop) {
+        ShopType type = shop.getType();
+        Map<String, ? extends VirtualShop> map = type == ShopType.STATIC ? this.getStaticShopMap() : this.getRotatingShopMap();
 
         if (FileUtil.deleteRecursive(this.getAbsolutePath() + getDirectory(type) + shop.getId())) {
             shop.clear();
@@ -293,15 +293,15 @@ public class VirtualShopModule extends ShopModule {
     }
 
     @NotNull
-    public Set<VirtualShop<?, ?>> getShops() {
-        Set<VirtualShop<?, ?>> shops = new HashSet<>();
+    public Set<VirtualShop> getShops() {
+        Set<VirtualShop> shops = new HashSet<>();
         shops.addAll(this.getStaticShops());
         shops.addAll(this.getRotatingShops());
         return shops;
     }
 
     @NotNull
-    public Collection<VirtualShop<?, ?>> getShops(@NotNull Player player) {
+    public Collection<VirtualShop> getShops(@NotNull Player player) {
         return this.getShops(player, this.getShops());
     }
 
@@ -346,14 +346,14 @@ public class VirtualShopModule extends ShopModule {
     }
 
     @Nullable
-    public VirtualShop<?, ?> getShopById(@NotNull String shopId) {
-        VirtualShop<? ,?> shop = this.getStaticShopById(shopId);
+    public VirtualShop getShopById(@NotNull String shopId) {
+        VirtualShop shop = this.getStaticShopById(shopId);
         if (shop == null) shop = this.getRotatingShopById(shopId);
         return shop;
     }
 
     @NotNull
-    private <T extends VirtualShop<?, ?>> List<T> getShops(@NotNull Player player, @NotNull Collection<T> shops) {
+    private <T extends VirtualShop> List<T> getShops(@NotNull Player player, @NotNull Collection<T> shops) {
         return shops.stream().filter(shop -> shop.canAccess(player, false)).toList();
     }
 
@@ -366,14 +366,14 @@ public class VirtualShopModule extends ShopModule {
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
                 if (tradeType == TradeType.SELL && !product.isSellable()) return false;
                 if (!product.hasAccess(player)) return false;
-                if (!(product.getSpecific() instanceof ItemProduct itemProduct)) return false;
-                if (!itemProduct.isItemMatches(item)) return false;
-                return product.getStock().getPossibleAmount(tradeType, player) != 0;
+                if (!(product.getPacker() instanceof ItemPacker handler)) return false;
+                if (!handler.isItemMatches(item)) return false;
+                return product.getAvailableAmount(player, tradeType) != 0;
             }).toList());
         });
 
-        Comparator<Product<?, ?, ?>> comp = (p1, p2) -> {
-            return (int) (p1.getPricer().getPrice(player, tradeType) - p2.getPricer().getPrice(player, tradeType));
+        Comparator<AbstractProduct<?>> comp = (p1, p2) -> {
+            return (int) (p1.getPrice(player, tradeType) - p2.getPrice(player, tradeType));
         };
 
         return (tradeType == TradeType.BUY ? products.stream().min(comp) : products.stream().max(comp)).orElse(null);

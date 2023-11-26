@@ -13,16 +13,16 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.ProductPricer;
-import su.nightexpress.nexshop.api.type.PriceType;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
-import su.nightexpress.nexshop.shop.price.DynamicPricer;
-import su.nightexpress.nexshop.shop.price.FloatPricer;
-import su.nightexpress.nexshop.shop.price.RangedPricer;
-import su.nightexpress.nexshop.shop.util.TimeUtils;
+import su.nightexpress.nexshop.shop.impl.price.DynamicPricer;
+import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
+import su.nightexpress.nexshop.shop.impl.price.RangedPricer;
+import su.nightexpress.nexshop.shop.util.ShopUtils;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -60,24 +60,24 @@ public class ProductPriceMenu extends ConfigEditorMenu {
                 double buy = product.getPricer().getPrice(TradeType.BUY);
 
                 PriceType priceType = CollectionsUtil.next(product.getPricer().getType(), predicate);
-                product.setPricer(ProductPricer.from(priceType));
+                product.setPricer(AbstractProductPricer.from(priceType));
 
                 if (product.getPricer() instanceof RangedPricer pricer) {
                     pricer.setPrice(TradeType.BUY, UniDouble.of(buy, buy));
                     pricer.setPrice(TradeType.SELL, UniDouble.of(sell, sell));
                 }
-                product.getPricer().setPrice(TradeType.BUY, buy);
-                product.getPricer().setPrice(TradeType.SELL, sell);
+                product.setPrice(TradeType.BUY, buy);
+                product.setPrice(TradeType.SELL, sell);
 
                 this.save(viewer);
             })
         .addClick(Type.PRODUCT_CHANGE_PRICE_BUY, (viewer, event) -> {
-            ProductPricer pricer = this.product.getPricer();
+            AbstractProductPricer pricer = this.product.getPricer();
             if (event.getClick() == ClickType.DROP) {
                 if (pricer instanceof RangedPricer ranged) {
                     ranged.setPrice(TradeType.BUY, UniDouble.of(-1D, -1D));
                 }
-                pricer.setPrice(TradeType.BUY, -1D);
+                product.setPrice(TradeType.BUY, -1D);
                 this.save(viewer);
                 return;
             }
@@ -87,7 +87,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
 
             this.handleInput(viewer, key, wrapper -> {
                 if (pricer.getType() == PriceType.FLAT) {
-                    pricer.setPrice(TradeType.BUY, wrapper.asDouble());
+                    product.setPrice(TradeType.BUY, wrapper.asDouble());
                 }
                 else if (ranged != null) {
                     ranged.setPrice(TradeType.BUY, wrapper.asUniDouble());
@@ -97,12 +97,12 @@ public class ProductPriceMenu extends ConfigEditorMenu {
             });
         })
         .addClick(Type.PRODUCT_CHANGE_PRICE_SELL, (viewer, event) -> {
-            ProductPricer pricer = this.product.getPricer();
+            AbstractProductPricer pricer = this.product.getPricer();
             if (event.getClick() == ClickType.DROP) {
                 if (pricer instanceof RangedPricer ranged) {
                     ranged.setPrice(TradeType.SELL, UniDouble.of(-1D, -1D));
                 }
-                pricer.setPrice(TradeType.SELL, -1D);
+                product.setPrice(TradeType.SELL, -1D);
                 this.save(viewer);
                 return;
             }
@@ -112,7 +112,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
 
             this.handleInput(viewer, key, wrapper -> {
                 if (pricer.getType() == PriceType.FLAT) {
-                    pricer.setPrice(TradeType.SELL, wrapper.asDouble());
+                    product.setPrice(TradeType.SELL, wrapper.asDouble());
                 }
                 else if (ranged != null) {
                     ranged.setPrice(TradeType.SELL, wrapper.asUniDouble());
@@ -168,7 +168,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
             else {
                 this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, wrapper -> {
                     try {
-                        pricer.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), TimeUtils.TIME_FORMATTER));
+                        pricer.getTimes().add(LocalTime.parse(wrapper.getTextRaw(), ShopUtils.TIME_FORMATTER));
                         product.getShop().save();
                         return true;
                     }

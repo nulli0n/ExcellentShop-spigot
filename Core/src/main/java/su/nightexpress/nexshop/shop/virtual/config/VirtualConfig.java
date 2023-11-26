@@ -4,14 +4,17 @@ import org.bukkit.GameMode;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerRankMap;
-import su.nightexpress.nexshop.api.type.StockType;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nexmedia.engine.utils.StringUtil;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.shop.virtual.util.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.Placeholders;
 
 import java.util.*;
 
 import static su.nexmedia.engine.utils.Colors.*;
+import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
 
 public class VirtualConfig {
 
@@ -20,7 +23,7 @@ public class VirtualConfig {
         "This currency will be used when you create new products or in case, where other currencies are not available.",
         "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");
 
-    public static final JOption<Boolean>     MAIN_MENU_ENABLED      = JOption.create("General.Main_Menu_Enabled", true,
+    public static final JOption<Boolean> MAIN_MENU_ENABLED = JOption.create("General.Main_Menu_Enabled", true,
         "When 'true', enables the Main Menu, where you can list all of your Virtual Shops.");
 
     public static final JOption<String> SHOP_SHORTCUTS = JOption.create("General.Shop_Shortcuts", "shop",
@@ -49,11 +52,11 @@ public class VirtualConfig {
         "and items will be sold on close instead of button click.",
         "Also, you should remove all GUI buttons and items to avoid players stealing them.");
 
-    public static final JOption<String>      SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands",
+    public static final JOption<String> SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands",
         "sellgui",
         "Custom command aliases to open the Sell Menu. Split them with a comma.");
 
-    public static final JOption<String>      SELL_ALL_COMMANDS = JOption.create("General.Sell_All.Commands",
+    public static final JOption<String> SELL_ALL_COMMANDS = JOption.create("General.Sell_All.Commands",
         "sellall",
         "Custom Sell All command aliases. Split them with a comma.");
 
@@ -62,11 +65,11 @@ public class VirtualConfig {
         "A list of Game Modes, where players can not access shops.",
         "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/GameMode.html");
 
-    public static final JOption<Set<String>> DISABLED_WORLDS    = JOption.create("General.Disabled_In_Worlds",
+    public static final JOption<Set<String>> DISABLED_WORLDS = JOption.create("General.Disabled_In_Worlds",
         Set.of("world_name", "example_world123"),
         "A list of worlds, where players can not access shops.");
 
-    public static final JOption<String>       SHOP_FORMAT_NAME = JOption.create("GUI.Shop_Format.Name", Placeholders.SHOP_NAME,
+    public static final JOption<String> SHOP_FORMAT_NAME = JOption.create("GUI.Shop_Format.Name", Placeholders.SHOP_NAME,
         "Sets display name for the shop item in the Main Menu.",
         "You can use 'Shop' placeholders:" + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
@@ -181,33 +184,53 @@ public class VirtualConfig {
         "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
-    public static final JOption<Map<StockType, Map<TradeType, List<String>>>> PRODUCT_FORMAT_LORE_STOCK = new JOption<Map<StockType, Map<TradeType, List<String>>>>("GUI.Product_Format.Lore.Stock",
-        (cfg, path, def) -> {
-            Map<StockType, Map<TradeType, List<String>>> map = new HashMap<>();
-            for (StockType stockType : StockType.values()) {
-                for (TradeType tradeType : TradeType.values()) {
-                    List<String> lore = Colorizer.apply(cfg.getStringList(path + "." + stockType.name() + "." + tradeType.name()));
-                    map.computeIfAbsent(stockType, k -> new HashMap<>()).put(tradeType, lore);
-                }
-            }
+    public static final JOption<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_STOCK = JOption.forMap("GUI.Product_Format.Lore.Stock.GLOBAL",
+        (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
+        (cfg, path, type) -> Colorizer.apply(cfg.getStringList(path + "." + type)),
+        () -> {
+            Map<TradeType, List<String>> map = new HashMap<>();
+            map.put(TradeType.BUY,
+                Collections.singletonList(
+                    CYAN + "Buy Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(BUY) + GRAY + ")"
+                )
+            );
+
+            map.put(TradeType.SELL,
+                Collections.singletonList(
+                    CYAN + "Sell Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(SELL) + GRAY + ")"
+                )
+            );
             return map;
         },
-        () -> {
-        Map<StockType, Map<TradeType, List<String>>> map = new HashMap<>();
-        map.computeIfAbsent(StockType.GLOBAL, k -> new HashMap<>()).put(TradeType.BUY, Collections.singletonList(CYAN + "Buy Stock: " + CYAN + Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT + GRAY + "/" + CYAN + Placeholders.PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_INITIAL + GRAY + " (⟳ &f" + Placeholders.PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_DATE + GRAY + ")"));
-        map.computeIfAbsent(StockType.GLOBAL, k -> new HashMap<>()).put(TradeType.SELL, Collections.singletonList(CYAN + "Sell Stock: " + CYAN + Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_LEFT + GRAY + "/" + CYAN + Placeholders.PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_INITIAL + GRAY + " (⟳ &f" + Placeholders.PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_DATE + GRAY + ")"));
-        map.computeIfAbsent(StockType.PLAYER, k -> new HashMap<>()).put(TradeType.BUY, Collections.singletonList(RED + "Buy Limit: " + RED + Placeholders.PRODUCT_STOCK_PLAYER_BUY_AMOUNT_LEFT + GRAY + "/" + RED + Placeholders.PRODUCT_STOCK_PLAYER_BUY_AMOUNT_INITIAL + GRAY + " (⟳ &f" + Placeholders.PRODUCT_STOCK_PLAYER_BUY_RESTOCK_DATE + GRAY + ")"));
-        map.computeIfAbsent(StockType.PLAYER, k -> new HashMap<>()).put(TradeType.SELL, Collections.singletonList(RED + "Sell Limit: " + RED + Placeholders.PRODUCT_STOCK_PLAYER_SELL_AMOUNT_LEFT + GRAY + "/" + RED + Placeholders.PRODUCT_STOCK_PLAYER_SELL_AMOUNT_INITIAL + GRAY + " (⟳ &f" + Placeholders.PRODUCT_STOCK_PLAYER_SELL_RESTOCK_DATE + GRAY + ")"));
-        return map;
-    },
-        "Sets the stock display format for each Stock and Trade types.",
-        "If product stock settings is undefined, format will be skipped.",
+        "Sets display format for product Stock.",
+        "If product stock settings is undefined, it will be skipped.",
         "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).setWriter((cfg, path, map) -> {
-        map.forEach((stockType, map1) -> {
-            map1.forEach(((tradeType, lore) -> {
-                cfg.set(path + "." + stockType.name() + "." + tradeType.name(), lore);
-            }));
-        });
-    });
+    ).setWriter((cfg, path, map) -> map.forEach((tradeType, lore) -> {
+        cfg.set(path + "." + tradeType.name(), lore);
+    }));
+
+    public static final JOption<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_LIMIT = JOption.forMap("GUI.Product_Format.Lore.Stock.PLAYER",
+        (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
+        (cfg, path, type) -> Colorizer.apply(cfg.getStringList(path + "." + type)),
+        () -> {
+            Map<TradeType, List<String>> map = new HashMap<>();
+            map.put(TradeType.BUY,
+                Collections.singletonList(
+                    RED + "Buy Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(BUY) + GRAY + ")"
+                )
+            );
+
+            map.put(TradeType.SELL,
+                Collections.singletonList(
+                    RED + "Sell Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(SELL) + GRAY + ")"
+                )
+            );
+            return map;
+        },
+        "Sets display format for product Player Limits.",
+        "If product limit settings is undefined, it will be skipped.",
+        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
+    ).setWriter((cfg, path, map) -> map.forEach((tradeType, lore) -> {
+        cfg.set(path + "." + tradeType.name(), lore);
+    }));
 }

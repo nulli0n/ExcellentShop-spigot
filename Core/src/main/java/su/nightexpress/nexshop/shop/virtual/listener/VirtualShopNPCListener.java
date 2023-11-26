@@ -9,8 +9,8 @@ import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.shop.VirtualShop;
 
 public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
 
@@ -21,25 +21,25 @@ public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
         this.module = module;
     }
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onLeftClick(NPCLeftClickEvent e) {
-        this.onClick(e);
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onLeftClick(NPCLeftClickEvent event) {
+        this.onClick(event);
     }
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onRightClick(NPCRightClickEvent e) {
-        this.onClick(e);
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onRightClick(NPCRightClickEvent event) {
+        this.onClick(event);
     }
 
-    private void onClick(@NotNull NPCClickEvent e) {
-        int id = e.getNPC().getId();
+    private void onClick(@NotNull NPCClickEvent event) {
+        int id = event.getNPC().getId();
 
-        VirtualShop<?, ?> shop = this.module.getShops().stream()
+        VirtualShop shop = this.module.getShops().stream()
             .filter(shop2 -> shop2.getNPCIds().contains(id))
             .findFirst().orElse(null);
         if (shop == null) return;
 
-        Player player = e.getClicker();
+        Player player = event.getClicker();
         if (!shop.canAccess(player, true)) return;
 
         shop.open(player, 1);

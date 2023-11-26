@@ -1,5 +1,8 @@
 package su.nightexpress.nexshop;
 
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
@@ -42,9 +45,9 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String SHOP_CHEST_IS_ADMIN       = "%shop_is_admin%";
     public static final String SHOP_CHEST_TYPE           = "%shop_type%";
 
-    public static final Function<Integer, String> SHOP_CHEST_PRODUCT_PRICE_BUY = slot -> "%shop_product_price_buy_" + slot + "%";
-    public static final Function<Integer, String> SHOP_CHEST_PRODUCT_PRICE_SELL = slot -> "%shop_product_price_sell_" + slot + "%";
+    public static final BiFunction<TradeType, Integer, String> SHOP_CHEST_PRODUCT_PRICE  = (tradeType, slot) -> "%shop_product_price_" + tradeType.getLowerCase() + "_" + slot + "%";
 
+    public static final String PRODUCT_HANDLER = "%product_handler%";
     public static final String PRODUCT_PRICE_TYPE               = "%product_price_type%";
     public static final String PRODUCT_PRICE_BUY                = "%product_price_buy%";
     public static final String PRODUCT_PRICE_BUY_FORMATTED      = "%product_price_buy_formatted%";
@@ -71,22 +74,32 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String PRODUCT_PREVIEW_LORE      = "%product_preview_lore%";
     public static final String PRODUCT_CURRENCY          = "%product_currency%";
 
-    public static final String PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_INITIAL  = "%product_stock_global_buy_amount_initial%";
-    public static final String PRODUCT_STOCK_GLOBAL_BUY_AMOUNT_LEFT     = "%product_stock_global_buy_amount_left%";
-    public static final String PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_TIME    = "%product_stock_global_buy_restock_time%";
-    public static final String PRODUCT_STOCK_GLOBAL_BUY_RESTOCK_DATE    = "%product_stock_global_buy_restock_date%";
-    public static final String PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_INITIAL = "%product_stock_global_sell_amount_initial%";
-    public static final String PRODUCT_STOCK_GLOBAL_SELL_AMOUNT_LEFT    = "%product_stock_global_sell_amount_left%";
-    public static final String PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_TIME   = "%product_stock_global_sell_restock_time%";
-    public static final String PRODUCT_STOCK_GLOBAL_SELL_RESTOCK_DATE   = "%product_stock_global_sell_restock_date%";
-    public static final String PRODUCT_STOCK_PLAYER_BUY_AMOUNT_INITIAL  = "%product_stock_player_buy_amount_initial%";
-    public static final String PRODUCT_STOCK_PLAYER_BUY_AMOUNT_LEFT     = "%product_stock_player_buy_amount_left%";
-    public static final String PRODUCT_STOCK_PLAYER_BUY_RESTOCK_TIME    = "%product_stock_player_buy_restock_time%";
-    public static final String PRODUCT_STOCK_PLAYER_BUY_RESTOCK_DATE    = "%product_stock_player_buy_restock_date%";
-    public static final String PRODUCT_STOCK_PLAYER_SELL_AMOUNT_INITIAL = "%product_stock_player_sell_amount_initial%";
-    public static final String PRODUCT_STOCK_PLAYER_SELL_AMOUNT_LEFT    = "%product_stock_player_sell_amount_left%";
-    public static final String PRODUCT_STOCK_PLAYER_SELL_RESTOCK_TIME   = "%product_stock_player_sell_restock_time%";
-    public static final String PRODUCT_STOCK_PLAYER_SELL_RESTOCK_DATE   = "%product_stock_player_sell_restock_date%";
+    /*public static final String PRODUCT_STOCK_BUY_AMOUNT_INITIAL  = "%product_stock_global_buy_amount_initial%";
+    public static final String PRODUCT_STOCK_BUY_AMOUNT_LEFT     = "%product_stock_global_buy_amount_left%";
+    public static final String PRODUCT_STOCK_BUY_RESTOCK_TIME    = "%product_stock_global_buy_restock_time%";
+    public static final String PRODUCT_STOCK_BUY_RESTOCK_DATE    = "%product_stock_global_buy_restock_date%";
+    public static final String PRODUCT_STOCK_SELL_AMOUNT_INITIAL = "%product_stock_global_sell_amount_initial%";
+    public static final String PRODUCT_STOCK_SELL_AMOUNT_LEFT    = "%product_stock_global_sell_amount_left%";
+    public static final String PRODUCT_STOCK_SELL_RESTOCK_TIME   = "%product_stock_global_sell_restock_time%";
+    public static final String PRODUCT_STOCK_SELL_RESTOCK_DATE   = "%product_stock_global_sell_restock_date%";
+    public static final String PRODUCT_LIMIT_BUY_AMOUNT_INITIAL  = "%product_stock_player_buy_amount_initial%";
+    public static final String PRODUCT_LIMIT_BUY_AMOUNT_LEFT     = "%product_stock_player_buy_amount_left%";
+    public static final String PRODUCT_LIMIT_BUY_RESTOCK_TIME    = "%product_stock_player_buy_restock_time%";
+    public static final String PRODUCT_LIMIT_BUY_RESTOCK_DATE    = "%product_stock_player_buy_restock_date%";
+    public static final String PRODUCT_LIMIT_SELL_AMOUNT_INITIAL = "%product_stock_player_sell_amount_initial%";
+    public static final String PRODUCT_LIMIT_SELL_AMOUNT_LEFT    = "%product_stock_player_sell_amount_left%";
+    public static final String PRODUCT_LIMIT_SELL_RESTOCK_TIME   = "%product_stock_player_sell_restock_time%";
+    public static final String PRODUCT_LIMIT_SELL_RESTOCK_DATE   = "%product_stock_player_sell_restock_date%";*/
+
+    public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_INITIAL = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_initial%";
+    public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_LEFT    = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_left%";
+    public static final Function<TradeType, String> PRODUCT_STOCK_RESTOCK_TIME   = type -> "%product_stock_global_" + type.getLowerCase() + "_restock_time%";
+    public static final Function<TradeType, String> PRODUCT_STOCK_RESTOCK_DATE   = type -> "%product_stock_global_" + type.getLowerCase() + "_restock_date%";
+
+    public static final Function<TradeType, String> PRODUCT_LIMIT_AMOUNT_INITIAL = type -> "%product_stock_player_" + type.getLowerCase() + "_amount_initial%";
+    public static final Function<TradeType, String> PRODUCT_LIMIT_AMOUNT_LEFT    = type -> "%product_stock_player_" + type.getLowerCase() + "_amount_left%";
+    public static final Function<TradeType, String> PRODUCT_LIMIT_RESTOCK_TIME   = type -> "%product_stock_player_" + type.getLowerCase() + "_restock_time%";
+    public static final Function<TradeType, String> PRODUCT_LIMIT_RESTOCK_DATE   = type -> "%product_stock_player_" + type.getLowerCase() + "_restock_date%";
 
     public static final String DISCOUNT_CONFIG_AMOUNT   = "%discount_amount%";
     public static final String DISCOUNT_CONFIG_DURATION = "%discount_duration%";

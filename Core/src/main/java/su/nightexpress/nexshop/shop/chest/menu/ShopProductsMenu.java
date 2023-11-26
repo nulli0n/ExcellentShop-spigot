@@ -16,12 +16,12 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.Product;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.util.ShopUtils;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -60,10 +60,10 @@ public class ShopProductsMenu extends ConfigEditorMenu {
         Player player = viewer.getPlayer();
         int page = viewer.getPage();
 
-        int maxProducts = ShopUtils.getProductLimit(player);
+        int maxProducts = ChestUtils.getProductLimit(player);
         if (maxProducts < 0) maxProducts = this.productSlots.length;
 
-        PriorityQueue<ChestProduct> queue = new PriorityQueue<>(Comparator.comparing(Product::getId));
+        PriorityQueue<ChestProduct> queue = new PriorityQueue<>(Comparator.comparing(AbstractProduct::getId));
         queue.addAll(this.shop.getProducts());
 
         int productCount = 0;
@@ -110,7 +110,7 @@ public class ShopProductsMenu extends ConfigEditorMenu {
                 item.setClick((viewer2, event) -> {
                     if (event.isShiftClick()) {
                         if (event.isRightClick()) {
-                            if (product.getStock().getLeftAmount(TradeType.BUY) > 0) {
+                            if (shop.getStock().count(product, TradeType.BUY) > 0) {
                                 plugin.getMessage(ChestLang.EDITOR_ERROR_PRODUCT_LEFT).send(viewer2.getPlayer());
                                 return;
                             }
@@ -125,7 +125,7 @@ public class ShopProductsMenu extends ConfigEditorMenu {
                         return;
                     }
                     if (event.isLeftClick()) {
-                        List<Currency> currencies = new ArrayList<>(ShopUtils.getAllowedCurrencies());
+                        List<Currency> currencies = new ArrayList<>(ChestUtils.getAllowedCurrencies());
                         int index = currencies.indexOf(product.getCurrency()) + 1;
                         if (index >= currencies.size()) index = 0;
                         product.setCurrency(currencies.get(index));
@@ -143,7 +143,7 @@ public class ShopProductsMenu extends ConfigEditorMenu {
         super.onClick(viewer, item, slotType, slot, event);
 
         Player player = viewer.getPlayer();
-        int maxProducts = ShopUtils.getProductLimit(player);
+        int maxProducts = ChestUtils.getProductLimit(player);
         int hasProducts = this.shop.getProducts().size();
         boolean canAdd = maxProducts < 0 || hasProducts < maxProducts;
         if (!canAdd) return;

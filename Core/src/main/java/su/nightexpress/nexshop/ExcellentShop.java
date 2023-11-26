@@ -6,8 +6,10 @@ import su.nexmedia.engine.NexPlugin;
 import su.nexmedia.engine.api.command.GeneralCommand;
 import su.nexmedia.engine.api.data.UserDataHolder;
 import su.nexmedia.engine.command.list.ReloadSubCommand;
-import su.nightexpress.nexshop.api.type.PriceType;
-import su.nightexpress.nexshop.api.type.TradeType;
+import su.nexmedia.engine.utils.EngineUtils;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.command.currency.CurrencyMainCommand;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
@@ -16,11 +18,13 @@ import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.data.UserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.shop.auction.AuctionManager;
+import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
-import su.nightexpress.nexshop.shop.menu.ShopCartMenu;
-import su.nightexpress.nexshop.shop.price.PriceUpdateTask;
+import su.nightexpress.nexshop.shop.impl.handler.ItemsAdderHandler;
+import su.nightexpress.nexshop.shop.impl.handler.OraxenItemHandler;
+import su.nightexpress.nexshop.shop.menu.CartMenu;
+import su.nightexpress.nexshop.shop.task.ShopUpdateTask;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataHolder<ExcellentShop, ShopUser> {
@@ -28,15 +32,13 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     private DataHandler dataHandler;
     private UserManager userManager;
 
-    private ShopCartMenu    cartMenu;
+    private CartMenu        cartMenu;
     private CurrencyManager currencyManager;
     private VirtualShopModule virtualShop;
     private ChestShopModule chestShop;
     private AuctionManager auction;
 
-    private PriceUpdateTask priceUpdateTask;
-
-    // TODO use Dummy currency to allow product load, but dont save it in config
+    private ShopUpdateTask shopUpdateTask;
 
     @Override
     @NotNull
@@ -54,15 +56,16 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
 
     @Override
     public void enable() {
-        this.cartMenu = new ShopCartMenu(this);
+        this.cartMenu = new CartMenu(this);
 
         this.currencyManager = new CurrencyManager(this);
         this.currencyManager.setup();
-
         if (!this.currencyManager.hasCurrency()) {
             this.error("No currencies are available! Plugin will be disabled.");
             return;
         }
+
+        this.registerProductHandlers();
 
         if (Config.MODULES_VIRTUAL_SHOP_ENABLED.get()) {
             this.virtualShop = new VirtualShopModule(this);
@@ -77,15 +80,15 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
             this.auction.setup();
         }
 
-        this.priceUpdateTask = new PriceUpdateTask(this);
-        this.priceUpdateTask.start();
+        this.shopUpdateTask = new ShopUpdateTask(this);
+        this.shopUpdateTask.start();
     }
 
     @Override
     public void disable() {
-        if (this.priceUpdateTask != null) {
-            this.priceUpdateTask.stop();
-            this.priceUpdateTask = null;
+        if (this.shopUpdateTask != null) {
+            this.shopUpdateTask.stop();
+            this.shopUpdateTask = null;
         }
         this.cartMenu.clear();
         if (this.virtualShop != null) {
@@ -103,6 +106,18 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
         if (this.currencyManager != null) {
             this.currencyManager.shutdown();
             this.currencyManager = null;
+        }
+    }
+
+    private void registerProductHandlers() {
+        ProductHandlerRegistry.register(ProductHandlerRegistry.BUKKIT_ITEM);
+        ProductHandlerRegistry.register(ProductHandlerRegistry.BUKKIT_COMMAND);
+
+        if (EngineUtils.hasPlugin(HookId.ORAXEN)) {
+            ProductHandlerRegistry.register(new OraxenItemHandler());
+        }
+        if (EngineUtils.hasPlugin(HookId.ITEMS_ADDER)) {
+            ProductHandlerRegistry.register(new ItemsAdderHandler());
         }
     }
 
@@ -170,7 +185,7 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
     }
 
     @NotNull
-    public ShopCartMenu getCartMenu() {
+    public CartMenu getCartMenu() {
         return cartMenu;
     }
 

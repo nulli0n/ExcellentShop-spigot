@@ -4,7 +4,7 @@ import org.bukkit.event.inventory.ClickType;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.utils.CollectionsUtil;
 import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.api.type.ShopClickAction;
+import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 
 import java.util.HashMap;
 import java.util.Map;
