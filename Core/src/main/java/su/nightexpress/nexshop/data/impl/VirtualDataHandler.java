@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.data.impl;
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.data.AbstractUser;
 import su.nexmedia.engine.api.data.sql.SQLColumn;
 import su.nexmedia.engine.api.data.sql.SQLCondition;
 import su.nexmedia.engine.api.data.sql.SQLQueries;
@@ -25,7 +24,6 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class VirtualDataHandler {
 
@@ -147,33 +145,49 @@ public class VirtualDataHandler {
 
         // ---- UPDATE OLD DATA - START ----
 
-        this.dataHandler.load(
-            this.tableStockDataOld,
-            this.funcStockData,
-            Collections.emptyList(),
-            Arrays.asList(
-                SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("GLOBAL"))
-            ),
-            -1
-        ).forEach(this::insertStockData);
-
-        Set<UUID> playerIds = this.dataHandler.getUsers().stream().map(AbstractUser::getId).collect(Collectors.toSet());
-        playerIds.forEach(id -> {
+        if (SQLQueries.hasTable(this.dataHandler.getConnector(), this.tableStockDataOld)) {
             this.dataHandler.load(
                 this.tableStockDataOld,
                 this.funcStockData,
                 Collections.emptyList(),
                 Arrays.asList(
-                    SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("PLAYER")),
-                    SQLCondition.equal(COLUMN_GEN_HOLDER.toValue(id.toString()))
+                    SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("GLOBAL"))
                 ),
                 -1
-            ).forEach(data -> this.insertPlayerLimit(id, data));
-        });
+            ).forEach(this::insertStockData);
 
-        this.dataHandler.delete(this.tableStockDataOld, SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("GLOBAL")));
-        this.dataHandler.delete(this.tableStockDataOld, SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("PLAYER")));
+            Function<ResultSet, UUID> function = resultSet -> {
+                try {
+                    return UUID.fromString(resultSet.getString("uuid"));
+                }
+                catch (SQLException exception) {
+                    exception.printStackTrace();
+                }
+                return null;
+            };
 
+            List<UUID> playerIds = this.dataHandler.load(this.dataHandler.getTablePrefix() + "_users",
+                function,
+                Arrays.asList(SQLColumn.of("uuid", ColumnType.STRING)),
+                Collections.emptyList(), -1);
+
+            //Set<UUID> playerIds = this.dataHandler.getUsers().stream().map(AbstractUser::getId).collect(Collectors.toSet());
+            playerIds.forEach(id -> {
+                this.dataHandler.load(
+                    this.tableStockDataOld,
+                    this.funcStockData,
+                    Collections.emptyList(),
+                    Arrays.asList(
+                        SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("PLAYER")),
+                        SQLCondition.equal(COLUMN_GEN_HOLDER.toValue(id.toString()))
+                    ),
+                    -1
+                ).forEach(data -> this.insertPlayerLimit(id, data));
+            });
+
+            this.dataHandler.delete(this.tableStockDataOld, SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("GLOBAL")));
+            this.dataHandler.delete(this.tableStockDataOld, SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("PLAYER")));
+        }
         // ---- UPDATE OLD DATA - END ----
     }
 

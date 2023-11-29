@@ -169,8 +169,10 @@ public class ShopMainEditor extends EditorMenu<ExcellentShop, AbstractVirtualSho
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 31).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
-                shop.getPricer().deleteData();
-                this.plugin.runTaskAsync(task -> shop.getPricer().updatePrices());
+                this.plugin.runTaskAsync(task -> {
+                    shop.getPricer().deleteData();
+                    shop.getPricer().updatePrices();
+                });
                 return;
             }
             if (event.getClick() == ClickType.SWAP_OFFHAND) {

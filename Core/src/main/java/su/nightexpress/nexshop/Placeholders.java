@@ -15,7 +15,7 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
 
     public static final String GENERIC_NAME     = "%name%";
     public static final String GENERIC_ITEM     = "%item%";
-    public static final String GENERIC_TOTAL = "%total%";
+    public static final String GENERIC_TOTAL    = "%total%";
     public static final String GENERIC_LORE     = "%lore%";
     public static final String GENERIC_AMOUNT   = "%amount%";
     public static final String GENERIC_UNITS    = "%units%";
@@ -73,23 +73,6 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String PRODUCT_PREVIEW_NAME      = "%product_preview_name%";
     public static final String PRODUCT_PREVIEW_LORE      = "%product_preview_lore%";
     public static final String PRODUCT_CURRENCY          = "%product_currency%";
-
-    /*public static final String PRODUCT_STOCK_BUY_AMOUNT_INITIAL  = "%product_stock_global_buy_amount_initial%";
-    public static final String PRODUCT_STOCK_BUY_AMOUNT_LEFT     = "%product_stock_global_buy_amount_left%";
-    public static final String PRODUCT_STOCK_BUY_RESTOCK_TIME    = "%product_stock_global_buy_restock_time%";
-    public static final String PRODUCT_STOCK_BUY_RESTOCK_DATE    = "%product_stock_global_buy_restock_date%";
-    public static final String PRODUCT_STOCK_SELL_AMOUNT_INITIAL = "%product_stock_global_sell_amount_initial%";
-    public static final String PRODUCT_STOCK_SELL_AMOUNT_LEFT    = "%product_stock_global_sell_amount_left%";
-    public static final String PRODUCT_STOCK_SELL_RESTOCK_TIME   = "%product_stock_global_sell_restock_time%";
-    public static final String PRODUCT_STOCK_SELL_RESTOCK_DATE   = "%product_stock_global_sell_restock_date%";
-    public static final String PRODUCT_LIMIT_BUY_AMOUNT_INITIAL  = "%product_stock_player_buy_amount_initial%";
-    public static final String PRODUCT_LIMIT_BUY_AMOUNT_LEFT     = "%product_stock_player_buy_amount_left%";
-    public static final String PRODUCT_LIMIT_BUY_RESTOCK_TIME    = "%product_stock_player_buy_restock_time%";
-    public static final String PRODUCT_LIMIT_BUY_RESTOCK_DATE    = "%product_stock_player_buy_restock_date%";
-    public static final String PRODUCT_LIMIT_SELL_AMOUNT_INITIAL = "%product_stock_player_sell_amount_initial%";
-    public static final String PRODUCT_LIMIT_SELL_AMOUNT_LEFT    = "%product_stock_player_sell_amount_left%";
-    public static final String PRODUCT_LIMIT_SELL_RESTOCK_TIME   = "%product_stock_player_sell_restock_time%";
-    public static final String PRODUCT_LIMIT_SELL_RESTOCK_DATE   = "%product_stock_player_sell_restock_date%";*/
 
     public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_INITIAL = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_initial%";
     public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_LEFT    = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_left%";

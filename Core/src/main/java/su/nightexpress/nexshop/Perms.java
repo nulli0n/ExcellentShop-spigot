@@ -14,28 +14,28 @@ public class Perms {
     public static final JPermission PLUGIN         = new JPermission(PREFIX + "*", "Full plugin access.");
     public static final JPermission PLUGIN_COMMAND = new JPermission(PREFIX + "command", "Access to all the plugin commands.");
 
-    public static final JPermission COMMAND_CURRENCY = new JPermission(PREFIX + "command.currency", "Access to 'currency' sub-command without children commands.", OP);
-    public static final JPermission COMMAND_CURRENCY_GIVE = new JPermission(PREFIX + "command.currency.give", "Access to 'currency give' sub-command.", OP);
-    public static final JPermission COMMAND_CURRENCY_TAKE = new JPermission(PREFIX + "command.currency.take", "Access to 'currency take' sub-command.", OP);
+    public static final JPermission COMMAND_CURRENCY        = new JPermission(PREFIX + "command.currency", "Access to 'currency' sub-command without children commands.", OP);
+    public static final JPermission COMMAND_CURRENCY_GIVE   = new JPermission(PREFIX + "command.currency.give", "Access to 'currency give' sub-command.", OP);
+    public static final JPermission COMMAND_CURRENCY_TAKE   = new JPermission(PREFIX + "command.currency.take", "Access to 'currency take' sub-command.", OP);
     public static final JPermission COMMAND_CURRENCY_CREATE = new JPermission(PREFIX + "command.currency.create", "Access to 'currency create' sub-command.", OP);
-    public static final JPermission COMMAND_RELOAD         = new JPermission(PREFIX + "command.reload", "Access to the reload command.", OP);
+    public static final JPermission COMMAND_RELOAD          = new JPermission(PREFIX + "command.reload", "Access to the reload command.", OP);
 
     public static final JPermission AUCTION         = new JPermission(PREFIX + "auction", "Access to all the Auction functions.", OP);
     public static final JPermission AUCTION_COMMAND = new JPermission(PREFIX + "auction.command", "Access to all the Auction commands.", OP);
     public static final JPermission AUCTION_BYPASS  = new JPermission(PREFIX + "auction.bypass", "Bypass all the Auction restrictions.", OP);
     public static final JPermission AUCTION_CURRENCY = new JPermission(PREFIX_AUCTION_CURRENCY + Placeholders.WILDCARD, "Allows to use all enabled currencies on Auction.", OP);
 
-    public static final JPermission AUCTION_COMMAND_EXPIRED = new JPermission(PREFIX + "auction.command.expired", "Access to '/auction expired' command", TRUE);
-    public static final JPermission AUCTION_COMMAND_EXPIRED_OTHERS = new JPermission(PREFIX + "auction.command.expired.others", "Access to '/auction expired' of other players.", OP);
-    public static final JPermission AUCTION_COMMAND_SELLING = new JPermission(PREFIX + "auction.command.selling", "Access to '/auction selling' command", TRUE);
-    public static final JPermission AUCTION_COMMAND_SELLING_OTHERS = new JPermission(PREFIX + "auction.command.selling.others", "Access to '/auction selling' command of other players.", OP);
-    public static final JPermission AUCTION_COMMAND_UNCLAIMED = new JPermission(PREFIX + "auction.command.unclaimed", "Access to '/auction unclaimed' command", TRUE);
+    public static final JPermission AUCTION_COMMAND_EXPIRED          = new JPermission(PREFIX + "auction.command.expired", "Access to '/auction expired' command", TRUE);
+    public static final JPermission AUCTION_COMMAND_EXPIRED_OTHERS   = new JPermission(PREFIX + "auction.command.expired.others", "Access to '/auction expired' of other players.", OP);
+    public static final JPermission AUCTION_COMMAND_SELLING          = new JPermission(PREFIX + "auction.command.selling", "Access to '/auction selling' command", TRUE);
+    public static final JPermission AUCTION_COMMAND_SELLING_OTHERS   = new JPermission(PREFIX + "auction.command.selling.others", "Access to '/auction selling' command of other players.", OP);
+    public static final JPermission AUCTION_COMMAND_UNCLAIMED        = new JPermission(PREFIX + "auction.command.unclaimed", "Access to '/auction unclaimed' command", TRUE);
     public static final JPermission AUCTION_COMMAND_UNCLAIMED_OTHERS = new JPermission(PREFIX + "auction.command.unclaimed.others", "Access to '/auction unclaimed' command of other players.", OP);
-    public static final JPermission AUCTION_COMMAND_HISTORY = new JPermission(PREFIX + "auction.command.history", "Access to '/auction history' command", TRUE);
-    public static final JPermission AUCTION_COMMAND_HISTORY_OTHERS = new JPermission(PREFIX + "auction.command.history.others", "Access to '/auction history' command of other players.", OP);
-    public static final JPermission AUCTION_COMMAND_OPEN = new JPermission(PREFIX + "auction.command.open", "Access to '/auction [open]' command.", TRUE);
-    public static final JPermission AUCTION_COMMAND_OPEN_OTHERS = new JPermission(PREFIX + "auction.command.open.others", "Access to '/auction [open]' command on other players.", OP);
-    public static final JPermission AUCTION_COMMAND_SELL = new JPermission(PREFIX + "auction.command.sell", "Access to '/auction sell' command.", TRUE);
+    public static final JPermission AUCTION_COMMAND_HISTORY          = new JPermission(PREFIX + "auction.command.history", "Access to '/auction history' command", TRUE);
+    public static final JPermission AUCTION_COMMAND_HISTORY_OTHERS   = new JPermission(PREFIX + "auction.command.history.others", "Access to '/auction history' command of other players.", OP);
+    public static final JPermission AUCTION_COMMAND_OPEN             = new JPermission(PREFIX + "auction.command.open", "Access to '/auction [open]' command.", TRUE);
+    public static final JPermission AUCTION_COMMAND_OPEN_OTHERS      = new JPermission(PREFIX + "auction.command.open.others", "Access to '/auction [open]' command on other players.", OP);
+    public static final JPermission AUCTION_COMMAND_SELL             = new JPermission(PREFIX + "auction.command.sell", "Access to '/auction sell' command.", TRUE);
 
     public static final JPermission AUCTION_BYPASS_LISTING_TAX    = new JPermission(PREFIX + "auction.bypass.listing.tax", "Bypass listing taxes.", OP);
     public static final JPermission AUCTION_BYPASS_LISTING_PRICE  = new JPermission(PREFIX + "auction.bypass.listing.price", "Bypass listing price limits.", OP);

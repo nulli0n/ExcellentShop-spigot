@@ -13,6 +13,7 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.ItemReplacer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
@@ -43,11 +44,9 @@ public class ChestShopView extends ConfigMenu<ExcellentShop> implements AutoPage
 
         this.load();
 
-        this.getItems().forEach(menuItem -> {
-            if (menuItem.getOptions().getDisplayModifier() == null) {
-                menuItem.getOptions().setDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.shop.replacePlaceholders()));
-            }
-        });
+        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+            ItemReplacer.replace(item, this.shop.replacePlaceholders());
+        }));
     }
 
     @Override
@@ -105,7 +104,9 @@ public class ChestShopView extends ConfigMenu<ExcellentShop> implements AutoPage
             ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
             if (clickType == null) return;
 
-            product.prepareTrade(viewer.getPlayer(), clickType);
+            this.plugin.runTask(task -> {
+                product.prepareTrade(viewer.getPlayer(), clickType);
+            });
         };
     }
 }

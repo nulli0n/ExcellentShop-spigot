@@ -169,22 +169,20 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
                     }
                     continue;
                 }
-                //for (StockType stockType : StockType.values()) {
-                    for (TradeType tradeType : TradeType.values()) {
-                        if (lineFormat.equalsIgnoreCase("%stock_global_" + tradeType.name() + "%")) {
-                            if (!product.getStockValues().isUnlimited(tradeType)) {
-                                lore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_STOCK.get().getOrDefault(tradeType, Collections.emptyList()));
-                            }
-                            continue Label_Format;
+                for (TradeType tradeType : TradeType.values()) {
+                    if (lineFormat.equalsIgnoreCase("%stock_global_" + tradeType.name() + "%")) {
+                        if (!product.getStockValues().isUnlimited(tradeType)) {
+                            lore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_STOCK.get().getOrDefault(tradeType, Collections.emptyList()));
                         }
-                        if (lineFormat.equalsIgnoreCase("%stock_player_" + tradeType.name() + "%")) {
-                            if (!product.getLimitValues().isUnlimited(tradeType)) {
-                                lore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT.get().getOrDefault(tradeType, Collections.emptyList()));
-                            }
-                            continue Label_Format;
-                        }
+                        continue Label_Format;
                     }
-                //}
+                    if (lineFormat.equalsIgnoreCase("%stock_player_" + tradeType.name() + "%")) {
+                        if (!product.getLimitValues().isUnlimited(tradeType)) {
+                            lore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT.get().getOrDefault(tradeType, Collections.emptyList()));
+                        }
+                        continue Label_Format;
+                    }
+                }
                 lore.add(lineFormat);
             }
 
@@ -200,14 +198,15 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
         });
 
         MenuItem menuItem = new MenuItem(preview, Integer.MAX_VALUE, ItemOptions.personalWeak(player), slot);
-        menuItem.setClick((viewer2, event) -> {
-            Player player2 = viewer2.getPlayer();
+        menuItem.setClick((viewer, event) -> {
+            Player player2 = viewer.getPlayer();
             boolean isBedrock = PlayerUtil.isBedrockPlayer(player2);
-            boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
-            boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
 
             ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
             if (isBedrock) {
+                boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
+                boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
+
                 if (isBuyable && !isSellable) clickType = ShopClickAction.BUY_SELECTION;
                 else if (isSellable && !isBuyable) clickType = ShopClickAction.SELL_SELECTION;
             }
@@ -220,11 +219,14 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
 
             // In case if some "smart" guy have shop GUI opened during the rotation.
             if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) {
-                this.openNextTick(viewer2, viewer2.getPage());
+                this.openNextTick(viewer, viewer.getPage());
                 return;
             }
 
-            product.prepareTrade(player2, clickType);
+            ShopClickAction finalClickType = clickType;
+            this.plugin.runTask(task -> {
+                product.prepareTrade(player2, finalClickType);
+            });
         });
         this.addItem(menuItem);
     }

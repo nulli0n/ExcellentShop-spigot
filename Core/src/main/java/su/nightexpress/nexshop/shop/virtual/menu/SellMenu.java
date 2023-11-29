@@ -12,10 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.impl.ConfigMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
@@ -189,6 +186,7 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
                 resultMap.forEach((item, result) -> {
                     list.add(str
                         .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
+                        .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
                         .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
                     );
                 });
