@@ -14,9 +14,9 @@ public class StockData {
     private int  itemsLeft;
     private long restockDate;
 
-    public StockData(@NotNull VirtualProduct product, @NotNull TradeType tradeType) {
+    public StockData(@NotNull VirtualProduct product, @NotNull StockValues values, @NotNull TradeType tradeType) {
         this(tradeType, product.getShop().getId(), product.getId(), 0, 0);
-        this.restock(product);
+        this.restock(values);
     }
 
     public StockData(
@@ -32,8 +32,8 @@ public class StockData {
         this.restockDate = restockDate;
     }
 
-    public void restock(@NotNull VirtualProduct product) {
-        StockValues values = product.getStockValues();
+    public void restock(@NotNull StockValues values) {
+        //StockValues values = product.getStockValues();
 
         this.itemsLeft = values.getInitialAmount(this.getTradeType());
         if (values.isRestockable(this.getTradeType())) {
@@ -73,5 +73,16 @@ public class StockData {
 
     public boolean isRestockTime() {
         return this.getRestockDate() >= 0 && System.currentTimeMillis() > this.getRestockDate();
+    }
+
+    @Override
+    public String toString() {
+        return "StockData{" +
+            "tradeType=" + tradeType +
+            ", shopId='" + shopId + '\'' +
+            ", productId='" + productId + '\'' +
+            ", itemsLeft=" + itemsLeft +
+            ", restockDate=" + restockDate +
+            '}';
     }
 }

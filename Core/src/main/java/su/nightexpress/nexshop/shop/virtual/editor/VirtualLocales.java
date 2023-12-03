@@ -275,7 +275,7 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .currentHeader()
         .current("Buy Initial", Placeholders.PRODUCT_STOCK_AMOUNT_INITIAL.apply(TradeType.BUY) + GRAY + " (" + WHITE + LMB + GRAY + ")")
         .current("Buy Restock", Placeholders.PRODUCT_STOCK_RESTOCK_TIME.apply(TradeType.BUY) + GRAY + " (" + WHITE + RMB + GRAY + ")")
-        .current("Sell Initial", Placeholders.PRODUCT_STOCK_AMOUNT_INITIAL.apply(TradeType.BUY) + GRAY + " (" + WHITE + "Shift-Left" + GRAY + ")")
+        .current("Sell Initial", Placeholders.PRODUCT_STOCK_AMOUNT_INITIAL.apply(TradeType.SELL) + GRAY + " (" + WHITE + "Shift-Left" + GRAY + ")")
         .current("Sell Restock", Placeholders.PRODUCT_STOCK_RESTOCK_TIME.apply(TradeType.SELL) + GRAY + " (" + WHITE + "Shift-Right" + GRAY + ")")
         .emptyLine()
         .text("(" + WHITE + DROP_KEY + GRAY + " to disable all)")

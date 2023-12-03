@@ -151,12 +151,12 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
         StockData data = this.getDataMap(type).get(product.getId());
         if (data == null) {
-            data = new StockData(product, type);
+            data = new StockData(product, product.getStockValues(), type);
             data.setItemsLeft(values.getInitialAmount(type));
             this.createData(data);
         }
         else if (data.isRestockTime()) {
-            data.restock(product);
+            data.restock(product.getStockValues());
             this.saveData(data);
         }
         return data;
@@ -229,7 +229,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         if (data == null) return false;
 
         if (force || data.isRestockTime()) {
-            data.restock(product);
+            data.restock(product.getStockValues());
             this.saveData(data);
             return true;
         }

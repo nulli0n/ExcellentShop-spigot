@@ -94,12 +94,12 @@ public class ShopUser extends AbstractUser<ExcellentShop> implements Transaction
 
         StockData data = this.getProductLimit(product.getId(), tradeType);
         if (data == null) {
-            data = new StockData(product, tradeType);
+            data = new StockData(product, product.getLimitValues(), tradeType);
             data.setItemsLeft(values.getInitialAmount(tradeType));
             this.createProductLimit(data);
         }
         else if (data.isRestockTime()) {
-            data.restock(product);
+            data.restock(product.getLimitValues());
             this.saveProductLimit(data);
         }
         return data;

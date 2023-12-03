@@ -29,6 +29,8 @@ public class ItemsAdderPacker extends AbstractPluginItemPacker {
     @Override
     @Nullable
     public String getItemId(@NotNull ItemStack item) {
+        if (item.getType().isAir()) return null;
+
         CustomStack stack = CustomStack.byItemStack(item);
         return stack == null ? null : stack.getNamespacedID();
     }

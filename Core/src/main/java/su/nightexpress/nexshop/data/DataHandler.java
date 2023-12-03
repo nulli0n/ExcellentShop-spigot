@@ -35,9 +35,9 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
 
     protected DataHandler(@NotNull ExcellentShop plugin) {
         super(plugin, plugin);
-        if (Config.MODULES_VIRTUAL_SHOP_ENABLED.get()) {
+        //if (Config.MODULES_VIRTUAL_SHOP_ENABLED.get()) {
             this.virtualDataHandler = new VirtualDataHandler(this);
-        }
+        //}
         if (Config.MODULES_CHEST_SHOP_ENABLED.get()) {
             this.chestDataHandler = new ChestDataHandler(this);
         }
