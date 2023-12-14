@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.currency.impl;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractConfigHolder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
@@ -33,11 +34,13 @@ public class ConfigCurrency extends AbstractConfigHolder<ExcellentShop> implemen
 
     @Override
     public boolean load() {
-        if (!this.cfg.getBoolean("Enabled")) return false;
+        boolean enabled = JOption.create("Enabled", true).read(cfg);
+        if (!enabled) return false;
 
-        this.name = Colorizer.apply(cfg.getString("Name", StringUtil.capitalizeUnderscored(this.getId())));
-        this.format = Colorizer.apply(cfg.getString("Format", Placeholders.GENERIC_PRICE + " " + Placeholders.CURRENCY_NAME));
-        this.icon = cfg.getItem("Icon");
+        this.name = Colorizer.apply(JOption.create("Name", StringUtil.capitalizeUnderscored(this.getId())).read(cfg));
+        this.format = Colorizer.apply(JOption.create("Format", Placeholders.GENERIC_PRICE + " " + Placeholders.CURRENCY_NAME).read(cfg));
+        this.icon = JOption.create("Icon", new ItemStack(Material.GOLD_INGOT)).read(cfg);
+        this.cfg.saveChanges();
         return true;
     }
 

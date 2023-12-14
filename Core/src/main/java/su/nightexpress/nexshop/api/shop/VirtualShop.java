@@ -15,6 +15,10 @@ import java.util.Set;
 
 public interface VirtualShop extends Shop {
 
+    boolean isLoaded();
+
+    void setLoaded(boolean loaded);
+
     boolean hasPermission(@NotNull Player player);
 
     @NotNull ShopType getType();

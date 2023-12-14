@@ -40,12 +40,12 @@ public class ListCommand extends ModuleCommand<ChestShopModule> {
                 }
 
                 this.plugin.runTask(task -> {
-                    this.module.getListMenu().open(player, user.getId(), 1);
+                    this.module.listShops(player, user.getId());
                 });
             });
             return;
         }
 
-        this.module.getListMenu().open(player, 1);
+        this.module.listShops(player);
     }
 }

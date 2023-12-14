@@ -125,15 +125,27 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, AbstractVirtual
             this.save(viewer);
         });
 
-        this.addItem(Material.GOLDEN_HELMET, VirtualLocales.PRODUCT_ALLOWED_RANKS, 25).setClick((viewer, event) -> {
+        this.addItem(Material.GOLDEN_HELMET, VirtualLocales.PRODUCT_RANKS_AND_PERMS, 25).setClick((viewer, event) -> {
+            boolean isPerm = event.isShiftClick();
+
             if (event.isRightClick()) {
-                product.getAllowedRanks().clear();
+                if (isPerm) {
+                    product.getRequiredPermissions().clear();
+                }
+                else {
+                    product.getAllowedRanks().clear();
+                }
                 this.save(viewer);
                 return;
             }
 
-            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_RANK, wrapepr -> {
-                product.getAllowedRanks().add(wrapepr.getTextRaw().toLowerCase());
+            this.handleInput(viewer, isPerm ? VirtualLang.EDITOR_ENTER_PERMISSION : VirtualLang.EDITOR_ENTER_RANK, wrapepr -> {
+                if (isPerm) {
+                    product.getRequiredPermissions().add(wrapepr.getTextRaw());
+                }
+                else {
+                    product.getAllowedRanks().add(wrapepr.getTextRaw().toLowerCase());
+                }
                 product.getShop().saveProducts();
                 return true;
             });

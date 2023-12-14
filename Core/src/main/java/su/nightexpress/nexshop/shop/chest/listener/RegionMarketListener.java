@@ -1,6 +1,9 @@
 package su.nightexpress.nexshop.shop.chest.listener;
 
+import net.alex9849.arm.adapters.WGRegion;
 import net.alex9849.arm.events.RestoreRegionEvent;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +22,16 @@ public class RegionMarketListener extends AbstractListener<ExcellentShop> {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onRegionReset(RestoreRegionEvent event) {
-        this.module.removeInvalidShops();
+        World world = event.getRegion().getRegionworld();
+        WGRegion region = event.getRegion().getRegion();
+
+        this.module.getShops().forEach(shop -> {
+            Location location = shop.getLocation();
+            if (location.getWorld() != world) return;
+
+            if (region.contains(location.getBlockX(), location.getBlockY(), location.getBlockZ())) {
+                this.module.removeShop(shop);
+            }
+        });
     }
 }

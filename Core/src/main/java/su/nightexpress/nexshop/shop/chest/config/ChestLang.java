@@ -3,9 +3,9 @@ package su.nightexpress.nexshop.shop.chest.config;
 import org.bukkit.Sound;
 import su.nexmedia.engine.api.lang.LangKey;
 import su.nexmedia.engine.lang.EngineLang;
-import su.nightexpress.nexshop.Placeholders;
 
 import static su.nexmedia.engine.utils.Colors.*;
+import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
 
 public class ChestLang extends EngineLang {
 
@@ -25,12 +25,12 @@ public class ChestLang extends EngineLang {
 
     public static final LangKey COMMAND_OPEN_DESC = LangKey.of("ChestShop.Command.Open.Desc", "Open inventory of the target shop.");
 
-    public static final LangKey SHOP_ERROR_NOT_OWNER = LangKey.of("ChestShop.Shop.Error.NotOwner", RED + "You're not the owner of this shop!");
+    public static final LangKey SHOP_ERROR_NOT_OWNER = LangKey.of("ChestShop.Shop.Error.NotOwner", RED + "You don't own this shop!");
 
     public static final LangKey SHOP_CREATION_INFO_DONE = LangKey.of("ChestShop.Shop.Creation.Info.Done",
         "<! type:\"titles:10:80:10\" sound:\"" + Sound.BLOCK_NOTE_BLOCK_BELL.name() + "\" !>" +
-            "\n" + GREEN + "&lShop Created!" +
-            "\n" + GRAY + "Do " + GREEN + "Right-Click" + GRAY + " while sneaking for " + GREEN + "Settings");
+            "\n" + GREEN + BOLD + "Shop Created!" +
+            "\n" + GREEN + "Right-Click" + GRAY + " while sneaking to open settings.");
 
     public static final LangKey SHOP_CREATION_ERROR_ALREADY_SHOP     = LangKey.of("ChestShop.Shop.Creation.Error.AlreadyShop", RED + "This chest is already shop!");
     public static final LangKey SHOP_CREATION_ERROR_NOT_EMPTY        = LangKey.of("ChestShop.Shop.Creation.Error.NotEmpty", RED + "Please remove all items from the chest first.");
@@ -43,7 +43,7 @@ public class ChestLang extends EngineLang {
 
     public static final LangKey SHOP_REMOVAL_INFO_DONE = LangKey.of("ChestShop.Shop.Removal.Info.Done",
         "<! type:\"titles:10:60:10\" sound:\"" + Sound.ENTITY_GENERIC_EXPLODE.name() + "\" !>" +
-            "\n" + RED + "&lShop Removed!" +
+            "\n" + RED + BOLD + "Shop Removed!" +
             "\n" + GRAY);
 
     public static final LangKey SHOP_REMOVAL_ERROR_NOT_A_SHOP = LangKey.of("ChestShop.Shop.Removal.Error.NotAShop", RED + "This block is not a shop!");
@@ -52,26 +52,26 @@ public class ChestLang extends EngineLang {
 
     public static final LangKey SHOP_TRADE_BUY_INFO_USER = LangKey.of("ChestShop.Shop.Trade.Buy.Info.User",
         "<! prefix:\"false\" !>" +
-            LIGHT_YELLOW + "You bought " + ORANGE + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + Placeholders.GENERIC_PRICE + LIGHT_YELLOW + " from " + ORANGE + Placeholders.SHOP_NAME + LIGHT_YELLOW + " shop.");
+            LIGHT_YELLOW + "You bought " + ORANGE + "x" + GENERIC_AMOUNT + " " + GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + GENERIC_PRICE + LIGHT_YELLOW + " from " + ORANGE + SHOP_NAME + LIGHT_YELLOW + " shop.");
 
     public static final LangKey SHOP_TRADE_BUY_INFO_OWNER = LangKey.of("ChestShop.Shop.Trade.Buy.Info.Owner",
         "<! prefix:\"false\" !>" +
-            ORANGE + Placeholders.PLAYER_DISPLAY_NAME + LIGHT_YELLOW + " just bought " + ORANGE + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + Placeholders.GENERIC_PRICE + LIGHT_YELLOW + " from your " + ORANGE + Placeholders.SHOP_NAME + LIGHT_YELLOW + " shop.");
+            ORANGE + PLAYER_DISPLAY_NAME + LIGHT_YELLOW + " bought " + ORANGE + "x" + GENERIC_AMOUNT + " " + GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + GENERIC_PRICE + LIGHT_YELLOW + " from your " + ORANGE + SHOP_NAME + LIGHT_YELLOW + " shop.");
 
     public static final LangKey SHOP_TRADE_SELL_INFO_USER = LangKey.of("ChestShop.Shop.Trade.Sell.Info.User",
         "<! prefix:\"false\" !>" +
-            LIGHT_YELLOW + "You sold " + ORANGE + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + Placeholders.GENERIC_PRICE + LIGHT_YELLOW + " to " + ORANGE + Placeholders.SHOP_NAME + LIGHT_YELLOW + " shop.");
+            LIGHT_YELLOW + "You sold " + ORANGE + "x" + GENERIC_AMOUNT + " " + GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + GENERIC_PRICE + LIGHT_YELLOW + " to " + ORANGE + SHOP_NAME + LIGHT_YELLOW + " shop.");
 
     public static final LangKey SHOP_TRADE_SELL_INFO_OWNER = LangKey.of("ChestShop.Shop.Trade.Sell.Info.Owner",
         "<! prefix:\"false\" !>" +
-            ORANGE + Placeholders.PLAYER_DISPLAY_NAME + LIGHT_YELLOW + " just sold " + ORANGE + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + Placeholders.GENERIC_PRICE + LIGHT_YELLOW + " to your " + ORANGE + Placeholders.SHOP_NAME + LIGHT_YELLOW + " shop.");
+            ORANGE + PLAYER_DISPLAY_NAME + LIGHT_YELLOW + " sold " + ORANGE + "x" + GENERIC_AMOUNT + " " + GENERIC_ITEM + LIGHT_YELLOW + " for " + ORANGE + GENERIC_PRICE + LIGHT_YELLOW + " to your " + ORANGE + SHOP_NAME + LIGHT_YELLOW + " shop.");
 
     public static final LangKey NOTIFICATION_SHOP_EARNINGS = LangKey.of("ChestShop.Notification.ShopEarnings",
         "<! prefix:\"false\" !>" +
             "\n" + LIGHT_YELLOW +
             "\n" + ORANGE + BOLD + "Chest Shop Notification:" +
             "\n" + LIGHT_YELLOW + "Since your last online, your shops earned:" +
-            "\n" + ORANGE + "▪ " + Placeholders.GENERIC_AMOUNT +
+            "\n" + ORANGE + "▪ " + GENERIC_AMOUNT +
             "\n" + LIGHT_YELLOW);
 
     public static final LangKey SEARCH_ENTER_ITEM = LangKey.of("ChestShop.Search.ItemPrompt",
@@ -81,28 +81,28 @@ public class ChestLang extends EngineLang {
 
     public static final LangKey BANK_ERROR_INVALID_CURRENCY = LangKey.of("ChestShop.Shop.Bank.Error.InvalidCurrency",
         "<! type:\"titles:10:80:10\" !>" +
-            "\n" + RED + "&lOperation Failed!" +
+            "\n" + RED + BOLD + "Operation Failed!" +
             "\n" + GRAY + "This currency is invalid or is not allowed!");
 
     public static final LangKey BANK_DEPOSIT_SUCCESS = LangKey.of("ChestShop.Shop.Bank.Deposit.Success",
         "<! type:\"titles:10:80:10\" !>" +
-            "\n" + GREEN + "&lSuccessful Deposit!" +
-            "\n" + GRAY + "You deposit " + GREEN + Placeholders.GENERIC_AMOUNT + GRAY + " to shop bank!");
+            "\n" + GREEN + BOLD + "Successful Deposit!" +
+            "\n" + GRAY + "You deposit " + GREEN + GENERIC_AMOUNT + GRAY + " to shop bank!");
 
     public static final LangKey BANK_DEPOSIT_ERROR_NOT_ENOUGH = LangKey.of("ChestShop.Shop.Bank.Deposit.Error.NotEnough",
         "<! type:\"titles:10:80:10\" !>" +
-            "\n" + RED + "&lUnable to Deposit!" +
+            "\n" + RED + BOLD + "Unable to Deposit!" +
             "\n" + GRAY + "You don't have enough funds!");
 
     public static final LangKey BANK_WITHDRAW_SUCCESS = LangKey.of("ChestShop.Shop.Bank.Withdraw.Success",
         "<! type:\"titles:10:80:10\" !>" +
-            "\n" + GREEN + "&lSuccessful Withdraw!" +
-            "\n" + GRAY + "You withdraw " + GREEN + Placeholders.GENERIC_AMOUNT + GRAY + " from shop bank!");
+            "\n" + GREEN + BOLD + "Successful Withdraw!" +
+            "\n" + GRAY + "You withdraw " + GREEN + GENERIC_AMOUNT + GRAY + " from shop bank!");
 
     public static final LangKey BANK_WITHDRAW_ERROR_NOT_ENOUGH = LangKey.of("ChestShop.Shop.Bank.Withdraw.NotEnough",
         "<! type:\"titles:10:80:10\" !>" +
-            "\n" + RED + "&lUnable to Withdraw!" +
+            "\n" + RED + BOLD + "Unable to Withdraw!" +
             "\n" + GRAY + "Bank don't have enough funds!");
 
-    public static final LangKey EDITOR_ERROR_PRODUCT_LEFT = LangKey.of("ChestShop.Editor.Error.ProductLeft", "&cFirst you have to take all of this product from the chest!");
+    public static final LangKey EDITOR_ERROR_PRODUCT_LEFT = LangKey.of("ChestShop.Editor.Error.ProductLeft", RED + "You must take all of this product from the chest!");
 }

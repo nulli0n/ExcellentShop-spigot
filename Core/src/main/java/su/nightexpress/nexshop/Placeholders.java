@@ -30,22 +30,9 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String CURRENCY_ID   = "%currency_id%";
 
     public static final String SHOP_ID              = "%shop_id%";
-    public static final String SHOP_TYPE            = "%shop_type%";
     public static final String SHOP_NAME            = "%shop_name%";
     public static final String SHOP_BUY_ALLOWED     = "%shop_buy_allowed%";
     public static final String SHOP_SELL_ALLOWED    = "%shop_sell_allowed%";
-    public static final String SHOP_DISCOUNT_AMOUNT = "%shop_discount_amount%";
-    public static final String SHOP_BANK_BALANCE    = "%shop_bank_balance%";
-
-    public static final String SHOP_CHEST_OWNER          = "%shop_owner%";
-    public static final String SHOP_CHEST_LOCATION_X     = "%shop_location_x%";
-    public static final String SHOP_CHEST_LOCATION_Y     = "%shop_location_y%";
-    public static final String SHOP_CHEST_LOCATION_Z     = "%shop_location_z%";
-    public static final String SHOP_CHEST_LOCATION_WORLD = "%shop_location_world%";
-    public static final String SHOP_CHEST_IS_ADMIN       = "%shop_is_admin%";
-    public static final String SHOP_CHEST_TYPE           = "%shop_type%";
-
-    public static final BiFunction<TradeType, Integer, String> SHOP_CHEST_PRODUCT_PRICE  = (tradeType, slot) -> "%shop_product_price_" + tradeType.getLowerCase() + "_" + slot + "%";
 
     public static final String PRODUCT_HANDLER = "%product_handler%";
     public static final String PRODUCT_PRICE_TYPE               = "%product_price_type%";

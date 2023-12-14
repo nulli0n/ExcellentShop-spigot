@@ -28,6 +28,7 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
     protected StockValues stockValues;
     protected StockValues limitValues;
     protected Set<String> allowedRanks;
+    protected Set<String> requiredPermissions;
     protected boolean     discountAllowed;
 
     protected ProductMainEditor editor;
@@ -36,6 +37,7 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
                                   @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
         super(shop.plugin(), id, shop, currency, handler, packer);
         this.allowedRanks = new HashSet<>();
+        this.requiredPermissions = new HashSet<>();
         this.stockValues = new StockValues();
         this.limitValues = new StockValues();
 
@@ -56,13 +58,15 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         return new PlaceholderMap()
             .add(Placeholders.PRODUCT_DISCOUNT_AMOUNT, () -> NumberUtil.format(this.getShop().getDiscountPlain(this)))
             .add(Placeholders.PRODUCT_DISCOUNT_ALLOWED, () -> LangManager.getBoolean(this.isDiscountAllowed()))
-            .add(Placeholders.PRODUCT_ALLOWED_RANKS, () -> String.join("\n", this.getAllowedRanks()));
+            .add(Placeholders.PRODUCT_ALLOWED_RANKS, () -> String.join("\n", this.getAllowedRanks()))
+            .add(Placeholders.PRODUCT_REQUIRED_PERMISSIONS, () -> String.join("\n", this.getRequiredPermissions()));
     }
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
         cfg.set(path + ".Handler", this.getHandler().getName());
         this.getPacker().write(cfg, path);
         cfg.set(path + ".Allowed_Ranks", this.getAllowedRanks());
+        cfg.set(path + ".Required_Permissions", this.getRequiredPermissions());
         if (this.getCurrency() != CurrencyManager.DUMMY) {
             cfg.set(path + ".Currency", this.getCurrency().getId());
         }
@@ -99,10 +103,20 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
 
     @Override
     public boolean hasAccess(@NotNull Player player) {
-        if (this.getAllowedRanks().isEmpty()) return true;
+        if (!this.getRequiredPermissions().isEmpty()) {
+            if (this.getRequiredPermissions().stream().noneMatch(player::hasPermission)) {
+                return false;
+            }
+        }
 
-        Set<String> ranks = PlayerUtil.getPermissionGroups(player);
-        return ranks.stream().anyMatch(rank -> this.getAllowedRanks().contains(rank));
+        if (!this.getAllowedRanks().isEmpty()) {
+            Set<String> ranks = PlayerUtil.getPermissionGroups(player);
+            if (ranks.stream().noneMatch(rank -> this.getAllowedRanks().contains(rank))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
@@ -145,6 +159,15 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
 
     public void setAllowedRanks(@NotNull Set<String> allowedRanks) {
         this.allowedRanks = allowedRanks;
+    }
+
+    @NotNull
+    public Set<String> getRequiredPermissions() {
+        return requiredPermissions;
+    }
+
+    public void setRequiredPermissions(@NotNull Set<String> requiredPermissions) {
+        this.requiredPermissions = requiredPermissions;
     }
 
     @Override

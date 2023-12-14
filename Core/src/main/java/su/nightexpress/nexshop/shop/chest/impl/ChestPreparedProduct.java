@@ -5,13 +5,12 @@ import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.Transaction.Result;
+import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
 
 public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> {
 
@@ -23,10 +22,8 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
     @NotNull
     protected Transaction buy() {
         Player player = this.getPlayer();
-        Inventory inventory = this.getInventory();
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
-        ExcellentShop plugin = shop.plugin();
 
         int amountToBuy = this.getUnits();
         int amountShopHas = shop.getStock().count(product, TradeType.BUY);
@@ -36,17 +33,18 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         Result result = Transaction.Result.SUCCESS;
         if (balanceUser < price) {
             result = Transaction.Result.TOO_EXPENSIVE;
-            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_TOO_EXPENSIVE).replace(this.replacePlaceholders()).send(player);
         }
         else if (amountShopHas >= 0 && amountToBuy > amountShopHas) {
             result = Transaction.Result.OUT_OF_STOCK;
-            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK).replace(this.replacePlaceholders()).send(player);
         }
 
         // Call custom event
-        Transaction transaction = new Transaction(product, TradeType.BUY, amountToBuy, price, result);
-        ShopTransactionEvent event = new ShopTransactionEvent(player, transaction);
+        Transaction transaction = new Transaction(plugin, product, this.getTradeType(), amountToBuy, price, result);
+        ShopTransactionEvent event = new ShopTransactionEvent(player, shop, transaction);
         plugin.getPluginManager().callEvent(event);
+
+        result = event.getTransaction().getResult();
+        transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
             shop.getPricer().onTransaction(event);
@@ -58,7 +56,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             }
 
             // Process transaction
-            product.delivery(inventory, transaction.getUnits());
+            product.delivery(this.getInventory(), transaction.getUnits());
             product.getCurrency().getHandler().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
 
@@ -76,6 +74,8 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
                     .send(owner);
             }
         }
+
+
         return transaction;
     }
 
@@ -86,7 +86,6 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         Inventory inventory = this.getInventory();
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
-        ExcellentShop plugin = shop.plugin();
 
         boolean isAdmin = shop.isAdminShop();
         int shopSpace = shop.getStock().count(product, TradeType.SELL);
@@ -106,21 +105,21 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         Result result = Transaction.Result.SUCCESS;
         if ((userCount < fined) || (this.isAll() && userCount < 1)) {
             result = Transaction.Result.NOT_ENOUGH_ITEMS;
-            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS).replace(this.replacePlaceholders()).send(player);
         }
         else if (shopSpace >= 0 && shopSpace < fined) {
             result = Transaction.Result.OUT_OF_SPACE;
-            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE).replace(this.replacePlaceholders()).send(player);
         }
         else if (!shop.isAdminShop() && !shop.getOwnerBank().hasEnough(product.getCurrency(), price)) {
             result = Transaction.Result.OUT_OF_MONEY;
-            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS).replace(this.replacePlaceholders()).send(player);
         }
 
         // Call custom event
-        Transaction transaction = new Transaction(product, TradeType.SELL, fined, price, result);
-        ShopTransactionEvent event = new ShopTransactionEvent(player, transaction);
+        Transaction transaction = new Transaction(plugin, product, this.getTradeType(), fined, price, result);
+        ShopTransactionEvent event = new ShopTransactionEvent(player, shop, transaction);
         plugin.getPluginManager().callEvent(event);
+
+        result = event.getTransaction().getResult();
+        transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
             shop.getPricer().onTransaction(event);

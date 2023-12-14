@@ -23,17 +23,17 @@ public class ShopMap {
     }
 
     @Nullable
-    public ChestShop get(@NotNull Location location) {
+    public ChestShop getByLocation(@NotNull Location location) {
         return this.byLocation.get(location);
     }
 
     @NotNull
     public Collection<ChestShop> getAll() {
-        return this.byLocation.values();
+        return new HashSet<>(this.byLocation.values());
     }
 
     @NotNull
-    public Set<ChestShop> get(@NotNull UUID holderId) {
+    public Set<ChestShop> getByOwner(@NotNull UUID holderId) {
         return this.byHolder.computeIfAbsent(holderId, k -> new HashSet<>());
     }
 
@@ -41,7 +41,7 @@ public class ShopMap {
         var sides = shop.getSides();
         this.byLocation.put(sides.getFirst().getLocation(), shop);
         this.byLocation.put(sides.getSecond().getLocation(), shop);
-        this.get(shop.getOwnerId()).add(shop);
+        this.getByOwner(shop.getOwnerId()).add(shop);
     }
 
     public void remove(@NotNull ChestShop shop) {
@@ -52,6 +52,6 @@ public class ShopMap {
 
     public void remove(@NotNull Location location) {
         ChestShop shop = this.byLocation.remove(location);
-        if (shop != null) this.get(shop.getOwnerId()).remove(shop);
+        if (shop != null) this.getByOwner(shop.getOwnerId()).remove(shop);
     }
 }

@@ -26,7 +26,7 @@ public abstract class AbstractPluginItemPacker extends AbstractItemPacker implem
     @Override
     public boolean load(@NotNull JYML cfg, @NotNull String path) {
         String itemId = cfg.getString(path + ".Content.ItemId");
-        if (itemId == null || !this.isValidId(itemId)) {
+        if (itemId == null/* || !this.isValidId(itemId)*/) {
             ShopAPI.PLUGIN.error("Invalid item id: '" + itemId + "'.");
             return false;
         }
@@ -48,6 +48,7 @@ public abstract class AbstractPluginItemPacker extends AbstractItemPacker implem
         cfg.set(path + ".Content.Amount", this.getAmount());
     }
 
+    @Override
     @NotNull
     public String getItemId() {
         return itemId;

@@ -13,9 +13,7 @@ import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
-import su.nightexpress.nexshop.shop.chest.util.ShopType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -35,11 +33,6 @@ public class ChestUtils {
 
     public static int getProductLimit(@NotNull Player player) {
         return ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get().getBestValue(player, 0);
-    }
-
-    @NotNull
-    public static List<String> getHologramLines(@NotNull ShopType chestType) {
-        return ChestConfig.DISPLAY_TEXT.get().getOrDefault(chestType, Collections.emptyList());
     }
 
     public static boolean isAllowedCurrency(@NotNull Currency currency) {

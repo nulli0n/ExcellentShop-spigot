@@ -7,14 +7,9 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.7.2</version>
+    <version>4.8.0</version>
     <modules>
         <module>Core</module>
-        <module>NMS</module>
-        <module>V1_18_R2</module>
-        <module>V1_19_R3</module>
-        <module>V1_20_R1</module>
-        <module>V1_20_R2</module>
     </modules>
 
     <properties>

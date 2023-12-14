@@ -17,6 +17,7 @@ import su.nightexpress.nexshop.api.shop.ShopModule;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
@@ -95,6 +96,7 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
         this.loadRotatingShops();
         this.loadMainMenu();
         this.plugin.runTaskAsync(task -> this.loadShopData());
+        this.plugin.runTaskLater(task -> this.validateShopProducts(), 100L);
 
         if (EngineUtils.hasPlugin(HookId.CITIZENS)) {
             this.addListener(new VirtualShopNPCListener(this));
@@ -192,6 +194,19 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
             if (shop instanceof RotatingShop rotatingShop) {
                 rotatingShop.loadData();
             }
+        });
+    }
+
+    public void validateShopProducts() {
+        this.getShops().forEach(shop -> {
+            shop.getProductMap().values().removeIf(product -> {
+                if (product.getPacker() instanceof PluginItemPacker packer && !packer.isValidId(packer.getItemId())) {
+                    this.error("Invalid item id for '" + product.getId() + "' product in '" + shop.getId() + "' shop!");
+                    return true;
+                }
+                return false;
+            });
+            shop.setLoaded(true);
         });
     }
 

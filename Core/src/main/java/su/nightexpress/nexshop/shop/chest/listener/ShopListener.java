@@ -1,6 +1,9 @@
 package su.nightexpress.nexshop.shop.chest.listener;
 
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -15,34 +18,29 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractListener;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
-import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-
-import java.util.*;
 
 public class ShopListener extends AbstractListener<ExcellentShop> {
 
     private final ChestShopModule        module;
-    private final Map<String, Set<JYML>> unloadedShops;
+    //private final Map<String, Set<JYML>> unloadedShops;
 
     public ShopListener(@NotNull ChestShopModule module) {
         super(module.plugin());
         this.module = module;
-        this.unloadedShops = new HashMap<>();
+        //this.unloadedShops = new HashMap<>();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -98,7 +96,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
                 }
 
                 if (shop.isOwner(player) || player.hasPermission(ChestPerms.MODULE)) {
-                    shop.getEditor().open(player, 1);
+                    shop.openMenu(player);
                 }
                 else {
                     plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
@@ -118,30 +116,27 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopBreak(BlockBreakEvent e) {
-        Block block = e.getBlock();
-        Player player = e.getPlayer();
+    public void onShopBreak(BlockBreakEvent event) {
+        Block block = event.getBlock();
+        Player player = event.getPlayer();
 
         ChestShop shop = this.module.getShop(block);
         if (shop == null) return;
 
         if (!shop.isOwner(player)) {
-            e.setCancelled(true);
+            event.setCancelled(true);
             plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
             return;
         }
 
-        if (player.getGameMode() == GameMode.CREATIVE) {
-            e.setCancelled(true);
-            return;
+        if (player.getGameMode() == GameMode.CREATIVE || !this.module.deleteShop(player, block)) {
+            event.setCancelled(true);
         }
-
-        this.module.deleteShop(player, block);
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    public void onShopExpansion(BlockPlaceEvent e) {
-        Block block = e.getBlockPlaced();
+    public void onShopExpansion(BlockPlaceEvent event) {
+        Block block = event.getBlockPlaced();
         this.plugin.runTask(task -> {
             if (!(block.getState() instanceof Chest chest)) return;
             if (!(chest.getInventory() instanceof DoubleChestInventory inventory)) return;
@@ -153,6 +148,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
             if ((shopLeft == null && shopRight == null)) return;
 
             ChestShop shop = shopRight == null ? shopLeft : shopRight;
+            shop.updateLocation(shop.getLocation());
             this.module.addShop(shop);
         });
     }
@@ -228,7 +224,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    /*@EventHandler(priority = EventPriority.MONITOR)
     public void onDataWorldLoad(WorldLoadEvent e) {
         this.unloadedShops.getOrDefault(e.getWorld().getName(), Collections.emptySet()).forEach(this.module::loadShop);
     }
@@ -240,5 +236,5 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
             this.module.unloadShop(shop);
             this.unloadedShops.computeIfAbsent(world.getName(), k -> new HashSet<>()).add(shop.getConfig());
         });
-    }
+    }*/
 }

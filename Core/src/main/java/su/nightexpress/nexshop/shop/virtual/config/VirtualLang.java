@@ -51,7 +51,9 @@ public class VirtualLang extends EngineLang {
     public static final LangKey EDITOR_ENTER_NPC_ID            = LangKey.of("VirtualShop.Editor.Enter.NpcId", GRAY + "Enter " + GREEN + "[NPC ID]");
     public static final LangKey EDITOR_ENTER_TITLE             = LangKey.of("VirtualShop.Editor.Enter.Title", GRAY + "Enter " + GREEN + "[Title]");
     public static final LangKey EDITOR_ENTER_COMMAND           = LangKey.of("VirtualShop.Editor.Enter.Command", GRAY + "Enter " + GREEN + "[Command]");
-    public static final LangKey EDITOR_ENTER_CHANCE           = LangKey.of("VirtualShop.Editor.Enter.Chance", GRAY + "Enter " + GREEN + "[Chance]");
-    public static final LangKey EDITOR_ENTER_SLOTS           = LangKey.of("VirtualShop.Editor.Enter.Slots", GRAY + "Enter " + GREEN + "[Slots] -> [1,2,5,etc]");
+    public static final LangKey EDITOR_ENTER_CHANCE            = LangKey.of("VirtualShop.Editor.Enter.Chance", GRAY + "Enter " + GREEN + "[Chance]");
+    public static final LangKey EDITOR_ENTER_SLOTS             = LangKey.of("VirtualShop.Editor.Enter.Slots", GRAY + "Enter " + GREEN + "[Slots] -> [1,2,5,etc]");
     public static final LangKey EDITOR_ENTER_RANK              = LangKey.of("VirtualShop.Editor.Enter.Rank", GRAY + "Enter " + GREEN + "[Rank Name]");
+    public static final LangKey EDITOR_ENTER_PERMISSION        = LangKey.of("VirtualShop.Editor.Enter.Permission", GRAY + "Enter " + GREEN + "[Permission Node]");
+
 }

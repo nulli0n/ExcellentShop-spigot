@@ -17,5 +17,6 @@ softdepend:
   - AdvancedRegionMarket
   - GriefPrevention
   - Oraxen
+  - ItemsAdder
   - PlaceholderAPI
 api-version: 1.18

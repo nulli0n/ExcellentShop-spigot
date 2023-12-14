@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.shop.chest.menu;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.ItemReplacer;
 import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -38,8 +38,8 @@ public class ShopBrowseMenu extends ConfigMenu<ExcellentShop> implements AutoPag
     private final List<String> objectLore;
     private final int[]        objectSlots;
 
-    public ShopBrowseMenu(@NotNull ChestShopModule module) {
-        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getMenusPath(), FILE));
+    public ShopBrowseMenu(@NotNull ExcellentShop plugin, @NotNull ChestShopModule module) {
+        super(plugin, JYML.loadOrExtract(plugin, module.getMenusPath(), FILE));
         this.module = module;
 
         this.objectName = Colorizer.apply(cfg.getString("Player.Name", Placeholders.PLAYER_NAME));
@@ -92,18 +92,19 @@ public class ShopBrowseMenu extends ConfigMenu<ExcellentShop> implements AutoPag
     @NotNull
     public ItemStack getObjectStack(@NotNull Player player, @NotNull OfflinePlayer owner) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
+
         ItemUtil.mapMeta(item, meta -> {
             if (meta instanceof SkullMeta skullMeta) {
                 skullMeta.setOwningPlayer(owner);
             }
-            meta.setDisplayName(this.objectName);
-            meta.setLore(this.objectLore);
-            meta.addItemFlags(ItemFlag.values());
-            ItemUtil.replace(meta, str -> str
-                .replace(Placeholders.PLAYER_NAME, String.valueOf(owner.getName()))
-                .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(this.module.getShops(owner.getUniqueId()).size()))
-            );
         });
+
+        ItemReplacer.create(item).hideFlags().trimmed()
+            .setDisplayName(this.objectName).setLore(this.objectLore)
+            .replace(Placeholders.PLAYER_NAME, String.valueOf(owner.getName()))
+            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(this.module.getShops(owner.getUniqueId()).size()))
+            .writeMeta();
+
         return item;
     }
 
@@ -111,7 +112,7 @@ public class ShopBrowseMenu extends ConfigMenu<ExcellentShop> implements AutoPag
     @NotNull
     public ItemClick getObjectClick(@NotNull OfflinePlayer owner) {
         return (viewer, event) -> {
-            this.module.getListMenu().open(viewer.getPlayer(), owner.getUniqueId(), 1);
+            this.plugin.runTask(task -> this.module.listShops(viewer.getPlayer(), owner.getUniqueId()));
         };
     }
 }

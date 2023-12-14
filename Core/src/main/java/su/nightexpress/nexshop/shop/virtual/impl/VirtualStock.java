@@ -186,7 +186,13 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     }
 
     public void deleteData() {
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().deleteStockData(shop));
+        this.dataMap.clear();
+        this.plugin.runTaskAsync(task -> {
+            this.plugin.getData().getVirtualDataHandler().deleteStockData(shop);
+            this.plugin.getUserManager().getUsersLoaded().forEach(user -> {
+                this.shop.getProducts().forEach(user::deleteProductLimit);
+            });
+        });
     }
 
     @Override

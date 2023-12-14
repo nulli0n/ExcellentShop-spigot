@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual;
 
 public class Placeholders extends su.nightexpress.nexshop.Placeholders {
 
+    public static final String SHOP_TYPE            = "%shop_type%";
     public static final String SHOP_DESCRIPTION         = "%shop_description%";
     public static final String SHOP_PERMISSION_REQUIRED = "%shop_permission_required%";
     public static final String SHOP_PERMISSION_NODE     = "%shop_permission_node%";
@@ -9,6 +10,7 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
     public static final String SHOP_VIEW_SIZE           = "%shop_view_size%";
     public static final String SHOP_VIEW_TITLE          = "%shop_view_title%";
     public static final String SHOP_NPC_IDS             = "%shop_npc_ids%";
+    public static final String SHOP_DISCOUNT_AMOUNT = "%shop_discount_amount%";
     public static final String SHOP_NEXT_ROTATION_DATE  = "%shop_next_rotation_date%";
     public static final String SHOP_NEXT_ROTATION_IN    = "%shop_next_rotation_in%";
     public static final String SHOP_ROTATION_TYPE       = "%shop_rotation_type%";
@@ -18,9 +20,9 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
     public static final String SHOP_ROTATION_MAX_PRODUCTS  = "%shop_rotation_max_products%";
     public static final String SHOP_ROTATION_PRODUCT_SLOTS = "%shop_rotation_product_slots%";
 
-    public static final String PRODUCT_COMMANDS        = "%product_commands%";
-    public static final String PRODUCT_ALLOWED_RANKS   = "%product_allowed_ranks%";
-    public static final String PRODUCT_ROTATION_CHANCE = "%product_rotation_chance%";
-
+    public static final String PRODUCT_COMMANDS             = "%product_commands%";
+    public static final String PRODUCT_ALLOWED_RANKS        = "%product_allowed_ranks%";
+    public static final String PRODUCT_REQUIRED_PERMISSIONS = "%product_required_permissions%";
+    public static final String PRODUCT_ROTATION_CHANCE      = "%product_rotation_chance%";
 
 }

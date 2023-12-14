@@ -50,7 +50,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
         }
 
         this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.RETURN, (viewer, event) -> product.getShop().getEditor().getProductsMenu().openNextTick(viewer, 1));
+            .addClick(MenuItemType.RETURN, (viewer, event) -> plugin.runTask(task -> product.getShop().openProductsMenu(viewer.getPlayer())));
 
         this.registerHandler(Type.class)
             .addClick(Type.PRODUCT_CHANGE_PRICE_TYPE, (viewer, event) -> {

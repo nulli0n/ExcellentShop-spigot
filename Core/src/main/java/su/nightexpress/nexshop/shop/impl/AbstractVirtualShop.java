@@ -51,6 +51,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     protected final Set<Discount>     discounts;
     protected final Set<Integer>      npcIds;
 
+    protected boolean loaded;
     protected String       name;
     protected List<String> description;
     protected boolean      isPermissionRequired;
@@ -157,6 +158,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
         product.loadAdditional(cfg, path);
         product.setAllowedRanks(cfg.getStringSet(path + ".Allowed_Ranks"));
+        product.setRequiredPermissions(cfg.getStringSet(path + ".Required_Permissions"));
         product.setPricer(AbstractProductPricer.read(cfg, path + ".Price"));
         product.setStockValues(StockValues.read(cfg, path + ".Stock.GLOBAL"));
         product.setLimitValues(StockValues.read(cfg, path + ".Stock.PLAYER"));
@@ -212,12 +214,34 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     }
 
     @Override
+    public void open(@NotNull Player player, int page) {
+        if (!this.isLoaded()) {
+            return;
+        }
+
+        super.open(player, page);
+    }
+
+    @Override
     public boolean canAccess(@NotNull Player player, boolean notify) {
+        if (!this.isLoaded()) {
+            return false;
+        }
+
         if (!this.hasPermission(player)) {
             if (notify) plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
             return false;
         }
         return this.getModule().isAvailable(player, notify);
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 
     @NotNull

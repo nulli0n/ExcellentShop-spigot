@@ -10,5 +10,7 @@ public interface PluginItemPacker {
 
     boolean isValidId(@NotNull String itemId);
 
+    @NotNull String getItemId();
+
     @Nullable String getItemId(@NotNull ItemStack itemStack);
 }

@@ -15,11 +15,6 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
 
     private ProductPriceMenu priceEditor;
 
-    /*@Deprecated
-    public ChestProduct(@NotNull ChestShop shop, @NotNull Currency currency, @NotNull ItemStack item) {
-        this(UUID.randomUUID().toString(), shop, currency, ProductHandlerRegistry.forBukkitItem(), VanillaItemPacker.forChestShop(item));
-    }*/
-
     public ChestProduct(@NotNull String id, @NotNull ChestShop shop, @NotNull Currency currency,
                         @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
         super(shop.plugin(), id, shop, currency, handler, packer);

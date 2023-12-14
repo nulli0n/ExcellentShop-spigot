@@ -5,6 +5,7 @@ import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
@@ -16,8 +17,8 @@ import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static su.nexmedia.engine.utils.Colors.BOLD;
-import static su.nexmedia.engine.utils.Colors.YELLOW;
+import static su.nexmedia.engine.utils.Colors2.*;
+import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
 
 public class ChestConfig {
 
@@ -133,10 +134,8 @@ public class ChestConfig {
         "Items with the following words in their names will be disallowed from being used as shop products.");
 
 
-    public static final JOption<Map<String, ItemStack>> DISPLAY_SHOWCASE = new JOption<Map<String, ItemStack>>("Display.Showcase",
-        (cfg, path, def) -> {
-            return cfg.getSection(path).stream().collect(Collectors.toMap(k -> k, v -> cfg.getItem(path + "." + v)));
-        },
+    public static final JOption<Map<String, ItemStack>> DISPLAY_SHOWCASE = JOption.forMap("Display.Showcase",
+        (cfg, path, id) -> cfg.getItem(path + "." + id),
         () -> Map.of(
             Placeholders.DEFAULT, new ItemStack(Material.GLASS),
             Material.CHEST.name(), new ItemStack(Material.WHITE_STAINED_GLASS)
@@ -148,23 +147,35 @@ public class ChestConfig {
         Placeholders.WIKI_ITEMS_URL
     ).setWriter((cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + type, item)));
 
+    public static final JOption<Integer> DISPLAY_UPDATE_INTERVAL = JOption.create("Display.Update_Interval",
+        3,
+        "Defines update interval for shop displays (in seconds).");
+
+    public static final JOption<Integer> DISPLAY_VISIBLE_DISTANCE = JOption.create("Display.Visible_Distance",
+        10,
+        "Sets shop display visibility distance.",
+        "Players will see shop displays when they are close enough.");
+
     public static final JOption<Boolean> DISPLAY_HOLOGRAM_ENABLED = JOption.create("Display.Title.Enabled",
         true,
         "When 'true', creates a client-side hologram above the shop."
     );
 
-    public static final JOption<Integer> DISPLAY_SLIDE_INTERVAL = JOption.create("Display.Title.Slide_Interval", 3,
-        "Sets interval (in seconds) between hologram line changes.");
+    public static final JOption<Double> DISPLAY_HOLOGRAM_LINE_GAP = JOption.create("Display.Hologram.LineGap",
+        0.3D,
+        "Sets distance between hologram lines."
+    );
 
-    public static final JOption<Map<ShopType, List<String>>> DISPLAY_TEXT = JOption.forMap("Display.Title.Values",
+    public static final JOption<Map<ShopType, List<String>>> DISPLAY_HOLOGRAM_TEXT = JOption.forMap("Display.Title.Values",
         str -> StringUtil.getEnum(str, ShopType.class).orElse(null),
         (cfg, path, type) -> cfg.getStringList(path + "." + type),
         Map.of(
-            ShopType.ADMIN, Collections.singletonList(Placeholders.SHOP_NAME),
-            ShopType.PLAYER, Arrays.asList(Placeholders.SHOP_NAME, "&7Owner: &6" + Placeholders.SHOP_CHEST_OWNER)
+            ShopType.ADMIN, Arrays.asList(SHOP_NAME, CYAN + "Right-Click" + GRAY + " to open!"),
+            ShopType.PLAYER, Arrays.asList(SHOP_NAME, CYAN + "Right-Click" + GRAY + " to open!")
         ),
-        "Sets hologram lines format for player and admin shops.",
-        "You can use 'Chest Shop' placeholders here: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "Sets hologram text format for player and admin shops.",
+        "You can use 'Chest Shop' internal placeholders: " + URL_WIKI_PLACEHOLDERS,
+        EngineUtils.PLACEHOLDER_API + " is also supported here."
     ).setWriter((cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)));
 
 }

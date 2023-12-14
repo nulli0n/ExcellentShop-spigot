@@ -6,35 +6,41 @@ import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.MenuItemType;
 import su.nexmedia.engine.api.menu.click.ClickHandler;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
+import su.nexmedia.engine.api.menu.link.Linked;
+import su.nexmedia.engine.api.menu.link.ViewLink;
 import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.ItemReplacer;
 import su.nexmedia.engine.utils.PlayerUtil;
+import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
-public class ShopSettingsMenu extends ConfigEditorMenu {
+public class ShopSettingsMenu extends ConfigEditorMenu implements Linked<ChestShop> {
 
-    private final ChestShop shop;
+    public static final String FILE = "shop_settings.yml";
 
-    private ShopProductsMenu productsMenu;
+    private final ViewLink<ChestShop> link;
 
-    public ShopSettingsMenu(@NotNull ChestShop shop) {
-        super(shop.plugin(), JYML.loadOrExtract(shop.plugin(), shop.getModule().getLocalPath() + "/menu/", "shop_settings.yml"));
-        this.shop = shop;
+    public ShopSettingsMenu(@NotNull ExcellentShop plugin, @NotNull ChestShopModule module) {
+        super(plugin, JYML.loadOrExtract(plugin, module.getMenusPath(), FILE));
+        this.link = new ViewLink<>();
 
         this.registerHandler(MenuItemType.class)
             .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-            .addClick(MenuItemType.RETURN, (viewer, event) -> shop.getModule().getListMenu().openNextTick(viewer, 1));
+            .addClick(MenuItemType.RETURN, (viewer, event) -> plugin.runTask(task -> module.listShops(viewer.getPlayer())));
 
         this.registerHandler(Type.class)
             .addClick(Type.SHOP_CHANGE_TYPE, (viewer, event) -> {
+                ChestShop shop = this.getShop(viewer);
                 shop.setType(CollectionsUtil.next(shop.getType(), shopType -> shopType.hasPermission(viewer.getPlayer())));
                 this.save(viewer);
             })
             .addClick(Type.SHOP_CHANGE_NAME, (viewer, event) -> {
+                ChestShop shop = this.getShop(viewer);
                 this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, wrapper -> {
                     shop.setName(wrapper.getText());
                     shop.updateDisplayText();
@@ -43,9 +49,10 @@ public class ShopSettingsMenu extends ConfigEditorMenu {
                 });
             })
             .addClick(Type.SHOP_BANK, (viewer, event) -> {
-                this.shop.getModule().getBankMenu().openNextTick(viewer, 1);
+                module.getBankMenu().openNextTick(viewer, 1);
             })
             .addClick(Type.SHOP_CHANGE_TRANSACTIONS, (viewer, event) -> {
+                ChestShop shop = this.getShop(viewer);
                 if (PlayerUtil.isBedrockPlayer(viewer.getPlayer())) {
                     boolean isBuy = shop.isTransactionEnabled(TradeType.BUY);
                     boolean isSell = shop.isTransactionEnabled(TradeType.SELL);
@@ -73,24 +80,22 @@ public class ShopSettingsMenu extends ConfigEditorMenu {
                 this.save(viewer);
             })
             .addClick(Type.SHOP_CHANGE_PRODUCTS, (viewer, event) -> {
-                this.getProductsMenu().openNextTick(viewer, 1);
+                this.plugin.runTask(task -> this.getShop(viewer).openProductsMenu(viewer.getPlayer()));
             })
             .addClick(Type.SHOP_DELETE, (viewer, event) -> {
                 Player player = viewer.getPlayer();
                 if (!event.isShiftClick() && !PlayerUtil.isBedrockPlayer(player)) return;
-                if (!player.hasPermission(ChestPerms.REMOVE)
-                    || (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS))) {
-                    plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
-                    return;
-                }
+
                 this.plugin.runTask(task -> player.closeInventory());
-                shop.getModule().deleteShop(player, shop.getLocation().getBlock());
+                module.deleteShop(player, this.getShop(viewer));
             });
 
         this.load();
 
         this.getItems().forEach(menuItem -> {
-            menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.shop.replacePlaceholders()));
+            menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+                ItemReplacer.replace(item, this.getShop(viewer).replacePlaceholders());
+            });
 
             if (menuItem.getType() == Type.SHOP_BANK) {
                 menuItem.getOptions().setVisibilityPolicy(viewer -> {
@@ -102,8 +107,19 @@ public class ShopSettingsMenu extends ConfigEditorMenu {
         });
     }
 
+    @NotNull
+    @Override
+    public ViewLink<ChestShop> getLink() {
+        return link;
+    }
+
+    @NotNull
+    private ChestShop getShop(@NotNull MenuViewer viewer) {
+        return this.getLink().get(viewer);
+    }
+
     private void save(@NotNull MenuViewer viewer) {
-        this.shop.save();
+        this.getShop(viewer).save();
         this.openNextTick(viewer, viewer.getPage());
     }
 
@@ -114,22 +130,5 @@ public class ShopSettingsMenu extends ConfigEditorMenu {
         SHOP_CHANGE_PRODUCTS,
         SHOP_BANK,
         SHOP_DELETE,
-    }
-
-    @Override
-    public void clear() {
-        if (this.productsMenu != null) {
-            this.productsMenu.clear();
-            this.productsMenu = null;
-        }
-        super.clear();
-    }
-
-    @NotNull
-    public ShopProductsMenu getProductsMenu() {
-        if (this.productsMenu == null) {
-            this.productsMenu = new ShopProductsMenu(this.shop);
-        }
-        return this.productsMenu;
     }
 }

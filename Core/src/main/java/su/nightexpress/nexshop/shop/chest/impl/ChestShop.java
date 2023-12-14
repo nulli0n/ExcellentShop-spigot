@@ -16,11 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.LocationUtil;
-import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.Pair;
-import su.nightexpress.nexshop.Placeholders;
+import su.nexmedia.engine.utils.random.Rnd;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
@@ -29,21 +27,18 @@ import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
-import su.nightexpress.nexshop.shop.chest.ChestDisplayHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
+import su.nightexpress.nexshop.shop.chest.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.menu.ShopSettingsMenu;
+import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class ChestShop extends AbstractShop<ChestProduct> {
 
@@ -60,11 +55,10 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private OfflinePlayer ownerPlayer;
     private ShopType      type;
 
-    private ShopSettingsMenu settingsMenu;
-
     private List<String> displayText;
-    private Location     displayHologramLoc;
-    private Location     displayItemLoc;
+    private Location displayTextLocation;
+    private Location displayItemLocation;
+    private Location displayShowcaseLocation;
 
     private final ChestShopView view;
     private final ChestStock stock;
@@ -75,29 +69,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         this.view = new ChestShopView(this.plugin, this);
         this.stock = new ChestStock(this.plugin, this);
 
-        this.placeholderMap
-            .add(Placeholders.SHOP_BANK_BALANCE, () -> ChestUtils.getAllowedCurrencies().stream()
-                .map(currency -> currency.format(this.getOwnerBank().getBalance(currency))).collect(Collectors.joining(", ")))
-            .add(Placeholders.SHOP_CHEST_OWNER, this::getOwnerName)
-            .add(Placeholders.SHOP_CHEST_LOCATION_X, () -> NumberUtil.format(this.getLocation().getX()))
-            .add(Placeholders.SHOP_CHEST_LOCATION_Y, () -> NumberUtil.format(this.getLocation().getY()))
-            .add(Placeholders.SHOP_CHEST_LOCATION_Z, () -> NumberUtil.format(this.getLocation().getZ()))
-            .add(Placeholders.SHOP_CHEST_LOCATION_WORLD, () -> LocationUtil.getWorldName(this.getLocation()))
-            .add(Placeholders.SHOP_CHEST_IS_ADMIN, () -> LangManager.getBoolean(this.isAdminShop()))
-            .add(Placeholders.SHOP_CHEST_TYPE, () -> plugin.getLangManager().getEnum(this.getType()));
-
-        List<ChestProduct> products = new ArrayList<>(this.getProducts());
-        for (TradeType tradeType : TradeType.values()) {
-            for (int slot = 0; slot < 27; slot++) {
-                int index = slot;
-                this.placeholderMap.add(Placeholders.SHOP_CHEST_PRODUCT_PRICE.apply(tradeType, slot), () -> {
-                    if (products.size() <= index) return "-";
-
-                    ChestProduct product = products.get(index);
-                    return product.getCurrency().format(product.getPricer().getPrice(tradeType));
-                });
-            }
-        }
+        this.placeholderMap.add(Placeholders.forShop(this));
     }
 
     @Override
@@ -107,30 +79,24 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             this.plugin.error("Shop block is not a valid container!");
             return false;
         }
-        this.setLocation(location);
+        this.updateLocation(location);
 
-        this.setType(cfg.getEnum("Type", ShopType.class, ShopType.PLAYER));
         try {
             this.ownerId = UUID.fromString(cfg.getString("Owner.Id", ""));
             this.ownerPlayer = plugin.getServer().getOfflinePlayer(this.getOwnerId());
-            if (this.ownerPlayer.getName() == null) {
-                throw new IllegalArgumentException("Invalid owner!");
-            }
+            this.ownerName = this.ownerPlayer.getName() == null ? "?" : this.ownerPlayer.getName();
         }
-        catch (IllegalArgumentException e) {
-            this.plugin.error("Shop owner is invalid!");
+        catch (IllegalArgumentException exception) {
+            this.plugin.error("Invalid UUID of the shop owner!");
             return false;
         }
 
-        this.ownerName = this.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME.get() : this.ownerPlayer.getName();
         this.setName(cfg.getString("Name", this.getOwnerName()));
+        this.setType(cfg.getEnum("Type", ShopType.class, ShopType.PLAYER));
 
         for (TradeType tradeType : TradeType.values()) {
             this.setTransactionEnabled(tradeType, cfg.getBoolean("Transaction_Allowed." + tradeType.name(), true));
         }
-        /*for (Currency currency : ChestShopModule.ALLOWED_CURRENCIES) {
-            this.getBank().deposit(currency, cfg.getDouble("Bank." + currency.getId()));
-        }*/
 
         this.loadProducts();
         return true;
@@ -182,16 +148,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return product;
     }
 
+    @Override
     public void clear() {
-        ChestDisplayHandler displayHandler = this.module.getDisplayHandler();
+        DisplayHandler displayHandler = this.module.getDisplayHandler();
         if (displayHandler != null) {
             displayHandler.remove(this);
         }
 
-        if (this.settingsMenu != null) {
-            this.settingsMenu.clear();
-            this.settingsMenu = null;
-        }
         this.products.values().forEach(ChestProduct::clear);
         this.products.clear();
     }
@@ -210,8 +173,43 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @Override
     public void saveProducts() {
-        this.cfg.set("Products", null);
+        this.cfg.remove("Products");
         this.getProducts().forEach(product -> product.write(cfg, "Products." + product.getId()));
+    }
+
+    public void updateLocation(@NotNull Location location) {
+        this.location = location.clone();
+        this.chunkX = location.getBlockX() >> 4;
+        this.chunkZ = location.getBlockZ() >> 4;
+        this.blockType = location.getBlock().getType();
+        this.doubleChest = this.getContainer().getInventory() instanceof DoubleChestInventory;
+        this.updateDisplayLocations();
+    }
+
+    private void updateDisplayLocations() {
+        Location location;
+        Location invLocation = this.getInventory().getLocation();
+        if (invLocation == null || !this.isDoubleChest()) {
+            location = LocationUtil.getCenter(this.getLocation(), false);
+        }
+        else {
+            location = invLocation.clone().add(0.5, 0, 0.5);
+        }
+
+        double height = location.getBlock().getBoundingBox().getHeight();
+        double heightOff = 1D - height;
+
+        this.displayTextLocation = location.clone().add(0, 1.5D - heightOff, 0);
+        this.displayItemLocation = location.clone().add(0, height, 0);
+        this.displayShowcaseLocation = location.clone().add(0, -0.35D - heightOff, 0);
+    }
+
+    public void openMenu(@NotNull Player player) {
+        this.getModule().getSettingsMenu().open(player, this, 1);
+    }
+
+    public void openProductsMenu(@NotNull Player player) {
+        this.getModule().getProductsMenu().open(player, this, 1);
     }
 
     @NotNull
@@ -229,14 +227,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     @Override
     public ChestStock getStock() {
         return stock;
-    }
-
-    @NotNull
-    public ShopSettingsMenu getEditor() {
-        if (this.settingsMenu == null) {
-            this.settingsMenu = new ShopSettingsMenu(this);
-        }
-        return this.settingsMenu;
     }
 
     @NotNull
@@ -292,10 +282,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return this.getType() == ShopType.ADMIN;
     }
 
-    public boolean isValid() {
-        return ChestUtils.isValidContainer(this.getLocation().getBlock());
-    }
-
     @NotNull
     public Container getContainer() {
         return (Container) this.getLocation().getBlock().getState();
@@ -309,10 +295,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return this.getProducts().stream().anyMatch(product -> {
             return product.getPacker() instanceof ItemPacker handler && handler.isItemMatches(item);
         });
-    }
-
-    public void updateContainerInfo() {
-        this.doubleChest = this.getContainer().getInventory() instanceof DoubleChestInventory;
     }
 
     @NotNull
@@ -360,13 +342,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return this.location;
     }
 
-    public void setLocation(@NotNull Location location) {
-        this.location = location.clone();
-        this.chunkX = location.getBlockX() >> 4;
-        this.chunkZ = location.getBlockZ() >> 4;
-        this.blockType = location.getBlock().getType();
-    }
-
     public int getChunkX() {
         return chunkX;
     }
@@ -382,7 +357,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     public void setOwner(@NotNull OfflinePlayer player) {
         this.ownerId = player.getUniqueId();
-        this.ownerName = this.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME.get() : player.getName();
+        this.ownerName = player.getName();
         this.ownerPlayer = player;
     }
 
@@ -400,15 +375,21 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return this.getOwnerId().equals(player.getUniqueId());
     }
 
-    /*@Override
-    public boolean isDisplayCreated() {
-        return this.displayCreated;
+    @Nullable
+    public ItemStack getDisplayProduct() {
+        Set<ChestProduct> products = new HashSet<>(this.getProducts());
+        return products.isEmpty() ? null : Rnd.get(products).getPreview();
     }
 
-    @Override
-    public void setDisplayCreated(boolean displayCreated) {
-        this.displayCreated = displayCreated;
-    }*/
+    @Nullable
+    public ItemStack getShowcaseItem() {
+        var map = ChestConfig.DISPLAY_SHOWCASE.get();
+
+        ItemStack showcase = map.getOrDefault(this.getBlockType().name().toLowerCase(), map.get(Placeholders.DEFAULT));
+        if (showcase == null || showcase.getType().isAir()) return null;
+
+        return showcase;
+    }
 
     @NotNull
     public List<String> getDisplayText() {
@@ -417,51 +398,22 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public void updateDisplayText() {
-        this.displayText = new ArrayList<>(ChestUtils.getHologramLines(this.getType()));
+        this.displayText = new ArrayList<>(ChestConfig.DISPLAY_HOLOGRAM_TEXT.get().getOrDefault(this.getType(), Collections.emptyList()));
         this.displayText.replaceAll(this.replacePlaceholders());
     }
 
-    public void updateDisplay() {
-        this.displayHologramLoc = null;
-        this.displayItemLoc = null;
-
-        this.updateDisplayText();
-
-        ChestDisplayHandler displayHandler = this.module.getDisplayHandler();
-        if (displayHandler != null) {
-            displayHandler.remove(this);
-            displayHandler.create(this);
-        }
-    }
-
-    private double getDisplayYOffset() {
-        if (this.getContainer() instanceof Chest) {
-            return -1D;
-        }
-        else return -0.85D;
+    @NotNull
+    public Location getDisplayTextLocation() {
+        return this.displayTextLocation;
     }
 
     @NotNull
-    public Location getDisplayLocation() {
-        if (this.displayHologramLoc == null) {
-            Location invLocation = this.getInventory().getLocation();
-            if (invLocation == null || !this.isDoubleChest()) {
-                Location center = LocationUtil.getCenter(this.getLocation().clone());
-                this.displayHologramLoc = center.add(0, this.getDisplayYOffset(), 0);
-            }
-            else {
-                this.displayHologramLoc = invLocation.add(0.5, -0.5, 0.5);
-            }
-        }
-        return this.displayHologramLoc;
+    public Location getDisplayShowcaseLocation() {
+        return this.displayShowcaseLocation;
     }
 
     @NotNull
     public Location getDisplayItemLocation() {
-        if (this.displayItemLoc == null) {
-            Location glassLocation = this.getDisplayLocation();
-            this.displayItemLoc = glassLocation.clone().add(0, 1.4, 0);
-        }
-        return this.displayItemLoc;
+        return this.displayItemLocation;
     }
 }

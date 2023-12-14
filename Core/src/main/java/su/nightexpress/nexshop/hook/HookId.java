@@ -2,6 +2,8 @@ package su.nightexpress.nexshop.hook;
 
 public class HookId {
 
+    public static final String PROTOCOL_LIB = "ProtocolLib";
+
     public static final String PLAYER_POINTS = "PlayerPoints";
     public static final String COINS_ENGINE  = "CoinsEngine";
     public static final String GEMS_ECONOMY  = "GemsEconomy";

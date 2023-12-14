@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.7.2</version>
+        <version>4.8.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -52,6 +52,10 @@
             <url>https://repo.techscode.com/repository/maven-releases/</url>
         </repository>
 
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
 
     </repositories>
 
@@ -97,6 +101,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>5.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>com.github.cryptomorin</groupId>
             <artifactId>kingdoms</artifactId>
             <version>1.16.8.1.1</version>
@@ -129,31 +139,6 @@
             <groupId>su.nightexpress.coinsengine</groupId>
             <artifactId>CoinsEngine</artifactId>
             <version>2.0.8</version>
-        </dependency>
-        <dependency>
-            <groupId>su.nightexpress.excellentshop</groupId>
-            <artifactId>NMS</artifactId>
-            <version>4.7.2</version>
-        </dependency>
-        <dependency>
-            <groupId>su.nightexpress.excellentshop</groupId>
-            <artifactId>V1_18_R2</artifactId>
-            <version>4.7.2</version>
-        </dependency>
-        <dependency>
-            <groupId>su.nightexpress.excellentshop</groupId>
-            <artifactId>V1_19_R3</artifactId>
-            <version>4.7.2</version>
-        </dependency>
-        <dependency>
-            <groupId>su.nightexpress.excellentshop</groupId>
-            <artifactId>V1_20_R1</artifactId>
-            <version>4.7.2</version>
-        </dependency>
-        <dependency>
-            <groupId>su.nightexpress.excellentshop</groupId>
-            <artifactId>V1_20_R2</artifactId>
-            <version>4.7.2</version>
         </dependency>
         <dependency>
             <groupId>me.TechsCode</groupId>
