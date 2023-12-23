@@ -18,11 +18,11 @@ import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
+import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.module.AbstractShopModule;
-import su.nightexpress.nexshop.shop.impl.AbstractProduct;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.command.SellAllCommand;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
@@ -36,7 +36,6 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.MainMenu;
@@ -373,9 +372,9 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
     }
 
     @Nullable
-    public StaticProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
-        Set<StaticProduct> products = new HashSet<>();
-        this.getStaticShops().stream()
+    public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
+        Set<VirtualProduct> products = new HashSet<>();
+        this.getShops().stream()
             .filter(shop -> shop.canAccess(player, false) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
             products.addAll(shop.getProducts().stream().filter(product -> {
                 if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
@@ -387,7 +386,7 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
             }).toList());
         });
 
-        Comparator<AbstractProduct<?>> comp = (p1, p2) -> {
+        Comparator<VirtualProduct> comp = (p1, p2) -> {
             return (int) (p1.getPrice(player, tradeType) - p2.getPrice(player, tradeType));
         };
 

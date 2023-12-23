@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.Shop;
@@ -12,7 +13,7 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
 
-public interface Product {
+public interface Product extends Placeholder {
 
     void clear();
 
@@ -75,6 +76,8 @@ public interface Product {
     default boolean hasSpace(@NotNull Inventory inventory) {
         return this.getPacker().hasSpace(inventory);
     }
+
+    @NotNull PreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
     int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType);
 

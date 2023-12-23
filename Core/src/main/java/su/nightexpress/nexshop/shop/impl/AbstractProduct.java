@@ -88,9 +88,9 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         ;
         return placeholderMap;
     }
-    @NotNull
 
-    public abstract PreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
+    //@NotNull
+    //public abstract PreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
     @Override
     public void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click) {

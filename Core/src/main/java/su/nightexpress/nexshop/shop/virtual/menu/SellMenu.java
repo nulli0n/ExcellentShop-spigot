@@ -16,12 +16,12 @@ import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 
 import java.util.*;
@@ -84,7 +84,7 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
         if (item == null || item.getType().isAir()) return;
 
         if (slotType == SlotType.PLAYER) {
-            StaticProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
             if (product == null) return;
 
             int firtSlot = Arrays.stream(this.itemSlots)
@@ -160,18 +160,20 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
         for (ItemStack item : inventory.getContents()) {
             if (item == null || item.getType().isAir()) continue;
 
-            StaticProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
             if (product == null) continue;
 
             VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, true);
             preparedProduct.setInventory(inventory);
+
+            ItemStack copy = new ItemStack(item);
 
             Transaction result = preparedProduct.trade();
             if (result.getResult() == Transaction.Result.SUCCESS) {
                 Currency currency = result.getProduct().getCurrency();
                 double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
                 profitMap.put(currency, has);
-                resultMap.put(item, result);
+                resultMap.put(copy, result);
             }
         }
         if (profitMap.isEmpty()) return;

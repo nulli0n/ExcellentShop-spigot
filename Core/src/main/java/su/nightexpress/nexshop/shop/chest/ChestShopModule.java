@@ -15,7 +15,6 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.integration.VaultHook;
 import su.nexmedia.engine.utils.EngineUtils;
-import su.nexmedia.engine.utils.LocationUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
@@ -336,7 +335,7 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
             return false;
         }
 
-        if (!this.checkCreationLocation(player, block.getLocation())) {
+        if (!this.checkCreationLocation(player, block)) {
             plugin.getMessage(ChestLang.SHOP_CREATION_ERROR_BAD_LOCATION).send(player);
             return false;
         }
@@ -546,12 +545,21 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
         return this.getShop(location) != null;
     }
 
-    public boolean checkCreationLocation(@NotNull Player player, @NotNull Location location) {
-        if (ChestConfig.SHOP_CREATION_WORLD_BLACKLIST.get().contains(LocationUtil.getWorldName(location))) {
+    public boolean checkCreationLocation(@NotNull Player player, @NotNull Block block) {
+        if (ChestConfig.SHOP_CREATION_WORLD_BLACKLIST.get().contains(block.getWorld().getName())) {
             return false;
         }
+
+        if (ChestConfig.SHOP_CREATION_CHECK_BUILD.get()) {
+            Block placed = block.getRelative(BlockFace.UP);
+            ItemStack item = new ItemStack(Material.CHEST);
+            BlockPlaceEvent event = new BlockPlaceEvent(placed, placed.getState(), block, item, player, true, EquipmentSlot.HAND);
+            plugin.getPluginManager().callEvent(event);
+            if (event.isCancelled()) return false;
+        }
+
         if (EngineUtils.hasPlugin(HookId.WORLD_GUARD)) {
-            return WorldGuardFlags.checkFlag(player, location);
+            return WorldGuardFlags.checkFlag(player, block.getLocation());
         }
         return true;
     }
@@ -559,12 +567,6 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
     public boolean checkCreationClaim(@NotNull Player player, @NotNull Block block) {
         if (!ChestConfig.SHOP_CREATION_CLAIM_ONLY.get()) return true;
         if (player.hasPermission(ChestPerms.BYPASS_CREATION_CLAIMS)) return true;
-
-        Block placed = block.getRelative(BlockFace.UP);
-        ItemStack item = new ItemStack(Material.CHEST);
-        BlockPlaceEvent event = new BlockPlaceEvent(placed, placed.getState(), block, item, player, true, EquipmentSlot.HAND);
-        plugin.getPluginManager().callEvent(event);
-        if (event.isCancelled()) return false;
 
         return this.claimHooks.isEmpty() || this.claimHooks.stream().anyMatch(claim -> claim.isInOwnClaim(player, block));
     }

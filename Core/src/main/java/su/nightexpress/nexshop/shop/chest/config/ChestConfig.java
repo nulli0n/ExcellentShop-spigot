@@ -98,11 +98,14 @@ public class ChestConfig {
         "Use '-1' to make unlimited amount."
     ).mapReader(map -> map.setNegativeBetter(true)).setWriter((cfg, path, map) -> map.write(cfg, path));
 
-    public static final JOption<Boolean> SHOP_CREATION_CLAIM_ONLY = JOption.create("Shops.Creation.In_Player_Claims_Only.Enabled",
+    public static final JOption<Boolean> SHOP_CREATION_CHECK_BUILD = JOption.create("Shops.Creation.Check_Build_Access",
         true,
+        "Sets whether or not plugin should check if player is able to build where shop is about to be created.");
+
+    public static final JOption<Boolean> SHOP_CREATION_CLAIM_ONLY = JOption.create("Shops.Creation.In_Player_Claims_Only.Enabled",
+        false,
         "Sets whether or not players can create shops in their own claims only.",
-        "Supported Plugins: " + HookId.LANDS + ", " + HookId.GRIEF_PREVENTION + ", " + HookId.WORLD_GUARD,
-        "For all other plugins it will simply check if player is able to build at that location.");
+        "Supported Plugins: " + HookId.LANDS + ", " + HookId.GRIEF_PREVENTION + ", " + HookId.WORLD_GUARD + ", " + HookId.KINGDOMS);
 
     public final static JOption<PlayerRankMap<Integer>> SHOP_PRODUCTS_MAX_PER_RANK = new JOption<>("Shops.Products.Max_Products_Per_Shop",
         (cfg, path, rank) -> PlayerRankMap.read(cfg, path, Integer.class),
