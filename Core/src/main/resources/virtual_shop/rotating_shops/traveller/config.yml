@@ -1,0 +1,17 @@
+Name: '#ffeea2&lTraveller Shop'
+Description:
+- '#d4d9d8Simple rotating shop'
+- ''
+Permission_Required: false
+Rotation:
+  Type: INTERVAL
+  Interval: 86400
+  Products:
+    Min_Amount: 15
+    Max_Amount: 15
+    Slots: 10,11,12,13,14,15,16,20,21,22,23,24,30,31,32
+Transaction_Allowed:
+  SELL: true
+  BUY: true
+Icon:
+  Material: ENDER_EYE

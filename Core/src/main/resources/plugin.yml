@@ -1,0 +1,22 @@
+name: ExcellentShop
+main: su.nightexpress.nexshop.ExcellentShop
+version: '${project.version}'
+description: Advanced 4 in 1 shop plugin with a lot of cool features!
+author: NightExpress
+depend: [ NexEngine ]
+softdepend:
+  - Vault
+  - CoinsEngine
+  - PlayerPoints
+  - GemsEconomy
+  - UltraEconomy
+  - EliteMobs
+  - Citizens
+  - WorldGuard
+  - Lands
+  - AdvancedRegionMarket
+  - GriefPrevention
+  - Oraxen
+  - ItemsAdder
+  - PlaceholderAPI
+api-version: 1.18
