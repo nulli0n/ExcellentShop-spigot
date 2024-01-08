@@ -93,6 +93,7 @@ public class DisplayHandler {
         Set<Integer> entityIds = this.entityIdMap.computeIfAbsent(shop.getId(), k -> new HashSet<>());
         ChestProduct product = shop.getRandomProduct();
 
+
         if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) {
             //List<String> text = new ArrayList<>(shop.getDisplayText());
             List<String> text = shop.getDisplayText();
