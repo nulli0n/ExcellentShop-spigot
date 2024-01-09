@@ -40,7 +40,7 @@ public class ChestShopView extends ConfigMenu<ExcellentShop> implements AutoPage
         this.registerHandler(MenuItemType.class)
             .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
-            .addClick(MenuItemType.CLOSE, (viewer, event) -> this.plugin.runTask(task -> viewer.getPlayer().closeInventory()));
+            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this));
 
         this.load();
 

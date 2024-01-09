@@ -1,5 +1,8 @@
 package su.nightexpress.nexshop.hook;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class HookId {
 
     public static final String PROTOCOL_LIB = "ProtocolLib";
@@ -20,4 +23,8 @@ public class HookId {
 
     public static final String ORAXEN      = "Oraxen";
     public static final String ITEMS_ADDER = "ItemsAdder";
+
+    public static List<String> getItemPluginNames() {
+        return Arrays.asList(ORAXEN, ITEMS_ADDER);
+    }
 }

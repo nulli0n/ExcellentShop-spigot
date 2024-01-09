@@ -55,17 +55,6 @@ public class ProductHandlerRegistry {
         return set;
     }
 
-    @NotNull
-    public static Collection<String> getPluginItemNames() {
-        Set<String> set = new HashSet<>();
-        getHandlers().forEach(handler -> {
-            if (handler.createPacker() instanceof PluginItemPacker pluginItem) {
-                set.add(handler.getName());
-            }
-        });
-        return set;
-    }
-
     @Nullable
     public static ProductHandler getHandler(@NotNull String name) {
         return getHandlerMap().get(name.toLowerCase());

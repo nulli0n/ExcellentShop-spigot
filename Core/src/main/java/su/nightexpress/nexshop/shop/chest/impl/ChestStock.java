@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop.chest.impl;
 
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -9,13 +8,13 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.lang.LangManager;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.shop.impl.AbstractStock;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.shop.impl.AbstractStock;
 import su.nightexpress.nexshop.shop.util.ShopUtils;
 
 import java.util.stream.Stream;
@@ -46,7 +45,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
 
         TradeType tradeType = event.getTransaction().getTradeType();
         int amount = event.getTransaction().getUnits();
-        Player player = event.getPlayer();
+        //Player player = event.getPlayer();
 
         if (!this.getShop().isAdminShop()) {
             if (tradeType == TradeType.BUY) {
@@ -54,12 +53,6 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
             }
             else this.store(product, amount, tradeType);
         }
-    }
-
-    @Override
-    @NotNull
-    public ChestShop getShop() {
-        return this.shop;
     }
 
     @Override

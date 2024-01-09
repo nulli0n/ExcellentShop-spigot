@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
+import com.google.common.collect.Lists;
 import org.bukkit.GameMode;
 import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.utils.Colorizer;
@@ -11,22 +12,28 @@ import su.nightexpress.nexshop.shop.virtual.Placeholders;
 
 import java.util.*;
 
-import static su.nexmedia.engine.utils.Colors.*;
+import static su.nexmedia.engine.utils.Colors2.*;
 import static su.nightexpress.nexshop.Placeholders.*;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
 
 public class VirtualConfig {
 
-    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency", CurrencyManager.VAULT,
+    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency",
+        CurrencyManager.VAULT,
         "Sets default currency for the Virtual Shop module.",
         "This currency will be used when you create new products or in case, where other currencies are not available.",
         "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");
 
-    public static final JOption<Boolean> MAIN_MENU_ENABLED = JOption.create("General.Main_Menu_Enabled", true,
+    public static final JOption<Boolean> MAIN_MENU_ENABLED = JOption.create("General.Main_Menu.Enabled",
+        true,
         "When 'true', enables the Main Menu, where you can list all of your Virtual Shops.");
 
-    public static final JOption<String> SHOP_SHORTCUTS = JOption.create("General.Shop_Shortcuts", "shop",
+    public static final JOption<Boolean> MAIN_MENU_HIDE_NO_PERM_SHOPS = JOption.create("General.Main_Menu.Hide_No_Permission_Shops",
+        true,
+        "Sets whether or not shops not accessible for a player will be hidden from him in the Main GUI.");
+
+    public static final JOption<String> SHOP_SHORTCUTS = JOption.create("General.Shop_Shortcuts",
+        "shop",
         "A list of command aliases for quick access to main menu and shops.", "Split them with a comma.");
 
     public static final JOption<PlayerRankMap<Double>> SELL_RANK_MULTIPLIERS = new JOption<PlayerRankMap<Double>>("General.Sell_Multipliers",
@@ -75,33 +82,31 @@ public class VirtualConfig {
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> SHOP_FORMAT_LORE = JOption.create("GUI.Shop_Format.Lore",
-        Arrays.asList(
-            Placeholders.SHOP_DESCRIPTION,
-            "",
-            RED + "[!] " + GRAY + "Need Permission: " + RED + Placeholders.SHOP_PERMISSION_REQUIRED
+        Lists.newArrayList(
+            Placeholders.SHOP_DESCRIPTION
         ),
         "Sets lore for the shop item in the Main Menu.",
-        "You can use 'Shop' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
+        "You can use 'Virtual Shop' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
     ).mapReader(Colorizer::apply);
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_ALL = JOption.create("GUI.Product_Format.Lore.General.All",
         Arrays.asList(
-            Placeholders.GENERIC_LORE,
+            "%permission%",
             "",
-            Placeholders.GENERIC_DISCOUNT,
+            GENERIC_LORE,
             "",
-            LIGHT_YELLOW + "▪ " + GRAY + "Buy: " + LIGHT_YELLOW + Placeholders.PRODUCT_PRICE_BUY_FORMATTED + DARK_GRAY + " (Left-Click)",
-            LIGHT_YELLOW + "▪ " + GRAY + "Sell: " + LIGHT_YELLOW + Placeholders.PRODUCT_PRICE_SELL_FORMATTED + DARK_GRAY + " (Right-Click)",
-            LIGHT_YELLOW + "▪ " + GRAY + "Sell All: " + LIGHT_YELLOW + Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED + DARK_GRAY + " (F/Swap Key)",
+            GENERIC_DISCOUNT,
             "",
-            DARK_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + DARK_GRAY + " for quick buy/sell)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_BUY_FORMATTED + GRAY + " (Left-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_FORMATTED + GRAY + " (Right-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell All: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_ALL_FORMATTED + GRAY + " (F/Swap Key)",
+            "",
+            LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick buy/sell)",
             "",
             "%stock_global_buy%",
             "%stock_global_sell%",
             "%stock_player_buy%",
-            "%stock_player_sell%",
-            "",
-            "%permission%"
+            "%stock_player_sell%"
         ),
         "Sets lore for the product preview item in Virtual Shop GUI.",
         "This lore will be used when both Buy and Sell prices are available.",
@@ -118,18 +123,18 @@ public class VirtualConfig {
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_BUY_ONLY = JOption.create("GUI.Product_Format.Lore.General.Buy_Only",
         Arrays.asList(
-            Placeholders.GENERIC_LORE,
+            "%permission%",
             "",
-            Placeholders.GENERIC_DISCOUNT,
+            GENERIC_LORE,
             "",
-            LIGHT_YELLOW + "▪ " + GRAY + "Buy: " + LIGHT_YELLOW + Placeholders.PRODUCT_PRICE_BUY_FORMATTED + DARK_GRAY + " (Left-Click)",
+            GENERIC_DISCOUNT,
             "",
-            DARK_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + DARK_GRAY + " for quick buy)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_BUY_FORMATTED + GRAY + " (Left-Click)",
+            "",
+            LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick buy)",
             "",
             "%stock_global_buy%",
-            "%stock_player_buy%",
-            "",
-            "%permission%"
+            "%stock_player_buy%"
         ),
         "Sets lore for the product preview item in Virtual Shop GUI.",
         "This lore will be used when only Buy price is available.",
@@ -144,19 +149,19 @@ public class VirtualConfig {
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_SELL_ONLY = JOption.create("GUI.Product_Format.Lore.General.Sell_Only",
         Arrays.asList(
-            Placeholders.GENERIC_LORE,
+            "%permission%",
             "",
-            Placeholders.GENERIC_DISCOUNT,
+            GENERIC_LORE,
             "",
-            LIGHT_YELLOW + "▪ " + GRAY + "Sell: " + LIGHT_YELLOW + Placeholders.PRODUCT_PRICE_SELL_FORMATTED + DARK_GRAY + " (Right-Click)",
-            LIGHT_YELLOW + "▪ " + GRAY + "Sell All: " + LIGHT_YELLOW + Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED + DARK_GRAY + " (F/Swap Key)",
+            GENERIC_DISCOUNT,
             "",
-            DARK_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + DARK_GRAY + " for quick sell)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_FORMATTED + GRAY + " (Right-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell All: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_ALL_FORMATTED + GRAY + " (F/Swap Key)",
+            "",
+            LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick sell)",
             "",
             "%stock_global_sell%",
-            "%stock_player_sell%",
-            "",
-            "%permission%"
+            "%stock_player_sell%"
         ),
         "Sets lore for the product preview item in Virtual Shop GUI.",
         "This lore will be used when only Sell price is available.",
@@ -170,7 +175,7 @@ public class VirtualConfig {
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = JOption.create("GUI.Product_Format.Lore.Discount",
         Collections.singletonList(
-            LIME + "[!] " + GRAY + "There is " + LIME + Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%" + GRAY + " discount on this item!"
+            LIGHT_GREEN + "[!] " + LIGHT_GRAY + "There is " + LIGHT_GREEN + Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%" + LIGHT_GRAY + " discount on this item!"
         ),
         "Sets the discount display format when there is active discounts in the shop applicable to a product.",
         "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
@@ -178,7 +183,7 @@ public class VirtualConfig {
 
     public static final JOption<List<String>> PRODUCT_FORMAT_LORE_NO_PERMISSION = JOption.create("GUI.Product_Format.Lore.NoPermission",
         Collections.singletonList(
-            RED + "[!] " + GRAY + "You don't have " + RED + "permission" + GRAY + " to this item!"
+            RED + "[!] " + LIGHT_GRAY + "You don't have " + RED + "permission" + LIGHT_GRAY + " to this item!"
         ),
         "Text to display in item lore when player has no permission to product.",
         "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
@@ -191,13 +196,13 @@ public class VirtualConfig {
             Map<TradeType, List<String>> map = new HashMap<>();
             map.put(TradeType.BUY,
                 Collections.singletonList(
-                    CYAN + "▪ " + GRAY + "Buy Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(BUY) + GRAY + ")"
+                    CYAN + "▪ " + LIGHT_GRAY + "Buy Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + LIGHT_GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(BUY) + GRAY + ")"
                 )
             );
 
             map.put(TradeType.SELL,
                 Collections.singletonList(
-                    CYAN + "▪ " + GRAY + "Sell Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(SELL) + GRAY + ")"
+                    CYAN + "▪ " + LIGHT_GRAY + "Sell Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + LIGHT_GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(SELL) + GRAY + ")"
                 )
             );
             return map;
@@ -216,13 +221,13 @@ public class VirtualConfig {
             Map<TradeType, List<String>> map = new HashMap<>();
             map.put(TradeType.BUY,
                 Collections.singletonList(
-                    RED + "▪ " + GRAY + "Buy Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(BUY) + GRAY + ")"
+                    RED + "▪ " + LIGHT_GRAY + "Buy Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + LIGHT_GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(BUY) + GRAY + ")"
                 )
             );
 
             map.put(TradeType.SELL,
                 Collections.singletonList(
-                    RED + "▪ " + GRAY + "Sell Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(SELL) + GRAY + ")"
+                    RED + "▪ " + LIGHT_GRAY + "Sell Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + LIGHT_GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(SELL) + GRAY + ")"
                 )
             );
             return map;

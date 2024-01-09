@@ -1,18 +1,21 @@
-Title: '#5d6d7e&lSell GUI'
-Size: 54
+Settings:
+  Title: '&lSell GUI'
+  Size: 54
+  Inventory_Type: CHEST
+  Auto_Refresh: 0
 
 Content:
   sell:
     Item:
       Material: PLAYER_HEAD
-      Head_Texture: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTc5YTVjOTVlZTE3YWJmZWY0NWM4ZGMyMjQxODk5NjQ5NDRkNTYwZjE5YTQ0ZjE5ZjhhNDZhZWYzZmVlNDc1NiJ9fX0='
+      Head_Texture: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTc5YTVjOTVlZTE3YWJmZWY0NWM4ZGMyMjQxODk5NjQ5NDRkNTYwZjE5YTQ0ZjE5ZjhhNDZhZWYzZmVlNDc1NiJ9fX0=
       Name: '#a5ff9a&lSELL ALL!'
     Type: SELL
     Slots: 49
     Priority: 5
 
 Item:
-  Name: '%item_name%'
+  Name: '#ffffff%item_name%'
   Lore:
     - '%item_lore%'
     - ''

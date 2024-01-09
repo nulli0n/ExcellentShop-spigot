@@ -9,7 +9,7 @@ import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.auction.AuctionManager;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
+import su.nightexpress.nexshop.hook.HookId;
 
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class AuctionConfig {
         ),
         "List of items that can not be added as shop products.",
         "For vanilla items, use material names: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html",
-        "Supported Plugins: " + String.join(", ", ProductHandlerRegistry.getPluginItemNames())
+        "Supported Plugins: " + String.join(", ", HookId.getItemPluginNames())
     ).mapReader(set -> set.stream().map(String::toLowerCase).collect(Collectors.toSet()));
 
     public static  Set<String>           LISTINGS_DISABLED_NAMES;

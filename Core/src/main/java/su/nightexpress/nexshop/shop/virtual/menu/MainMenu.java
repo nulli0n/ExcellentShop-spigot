@@ -48,6 +48,9 @@ public class MainMenu extends ConfigMenu<ExcellentShop> {
             menuItem.setSlots(slot);
             menuItem.setPriority(100);
             menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemReplacer.replace(item, shop.replacePlaceholders()));
+            if (VirtualConfig.MAIN_MENU_HIDE_NO_PERM_SHOPS.get()) {
+                menuItem.getOptions().setVisibilityPolicy(viewer -> shop.canAccess(viewer.getPlayer(), false));
+            }
             menuItem.setClick((viewer, event) -> {
                 if (shop.canAccess(viewer.getPlayer(), true)) {
                     shop.openNextTick(viewer.getPlayer(), 1);

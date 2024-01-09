@@ -95,7 +95,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
                     }
                 }
 
-                if (shop.isOwner(player) || player.hasPermission(ChestPerms.MODULE)) {
+                if (shop.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) {
                     shop.openMenu(player);
                 }
                 else {
@@ -154,23 +154,23 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopExplode(BlockExplodeEvent e) {
-        e.blockList().removeIf(this.module::isShop);
+    public void onShopExplode(BlockExplodeEvent event) {
+        event.blockList().removeIf(this.module::isShop);
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopExplode2(EntityExplodeEvent e) {
-        e.blockList().removeIf(this.module::isShop);
+    public void onShopExplode2(EntityExplodeEvent event) {
+        event.blockList().removeIf(this.module::isShop);
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopPiston1(BlockPistonRetractEvent e) {
-        e.setCancelled(e.getBlocks().stream().anyMatch(this.module::isShop));
+    public void onShopPiston1(BlockPistonRetractEvent event) {
+        event.setCancelled(event.getBlocks().stream().anyMatch(this.module::isShop));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopPiston2(BlockPistonExtendEvent e) {
-        e.setCancelled(e.getBlocks().stream().anyMatch(this.module::isShop));
+    public void onShopPiston2(BlockPistonExtendEvent event) {
+        event.setCancelled(event.getBlocks().stream().anyMatch(this.module::isShop));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

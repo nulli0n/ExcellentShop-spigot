@@ -232,6 +232,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
             if (notify) plugin.getMessage(Lang.ERROR_PERMISSION_DENY).send(player);
             return false;
         }
+
         return this.getModule().isAvailable(player, notify);
     }
 
@@ -336,7 +337,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
                 id = ItemUtil.getItemName(itemPacker.getItem());
             }
         }
-        else if (packer instanceof CommandPacker commandPacker) {
+        else if (packer instanceof CommandPacker) {
             id = "command_item";
         }
         else id = UUID.randomUUID().toString();

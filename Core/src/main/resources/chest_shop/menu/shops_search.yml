@@ -1,21 +1,22 @@
-Title: '#5d6d7e&lShop Search'
-Size: 45
-Inventory_Type: CHEST
-Use_Mini_Message: false
+Settings:
+  Title: '#5d6d7e&lShop Search'
+  Size: 45
+  Inventory_Type: CHEST
+  Auto_Refresh: 0
 
 Product:
   Slots: 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35
-  Name: '#ee9aff&l%product_preview_name%'
+  Name: '#ffeea2&l%product_preview_name%'
   Lore:
     - '%product_preview_lore%'
     - ''
-    - '#ee9aff&lFound In:'
-    - '#ee9aff▪ #ddeceeShop: #ee9aff%shop_name% &7(by %shop_owner%)'
-    - '#ee9aff▪ #ddeceeBuy for: #ee9aff%product_price_buy_formatted% &7(%product_stock_global_buy_amount_left% left)'
-    - '#ee9aff▪ #ddeceeSell for: #ee9aff%product_price_sell_formatted% &7(%product_stock_global_sell_amount_left% left)'
+    - '#ffeea2▪ #ddeceeShop: #ffeea2%shop_name% &7(by %shop_owner%)'
+    - '#ffeea2▪ #ddeceeBuy for: #ffeea2%product_price_buy_formatted% &7(%product_stock_global_buy_amount_left% left)'
+    - '#ffeea2▪ #ddeceeSell for: #ffeea2%product_price_sell_formatted% &7(%product_stock_global_sell_amount_left% left)'
     - ''
-    - '#9af7ff&lActions:'
-    - '#9af7ff▪ #ddeceeLeft-Click: #9af7ffTeleport'
+    - '%action_teleport%'
+  Action_Teleport:
+    - '#ffeea2[▶] #ddeceeLeft-Click to #ffeea2teleport#ddecee.'
 
 Content:
   return:

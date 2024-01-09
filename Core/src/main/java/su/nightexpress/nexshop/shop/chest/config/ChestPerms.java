@@ -8,7 +8,7 @@ public class ChestPerms {
 
     public static final String PREFIX            = Perms.PREFIX + "chestshop.";
     public static final String PREFIX_COMMAND    = PREFIX + "command.";
-    public static final String PREFIX_BYPASS = PREFIX + "bypass.";
+    public static final String PREFIX_BYPASS     = PREFIX + "bypass.";
     public static final String PREFIX_PRICE_TYPE = PREFIX + "price.";
     public static final String PREFIX_SHOP_TYPE  = PREFIX + "type.";
 
@@ -23,6 +23,7 @@ public class ChestPerms {
     public static final JPermission CREATE          = new JPermission(PREFIX + "create");
     public static final JPermission REMOVE          = new JPermission(PREFIX + "remove");
     public static final JPermission REMOVE_OTHERS   = new JPermission(PREFIX + "remove.others");
+    public static final JPermission EDIT_OTHERS     = new JPermission(PREFIX + "edit.others");
 
     public static final JPermission COMMAND_LIST        = new JPermission(PREFIX_COMMAND + "list");
     public static final JPermission COMMAND_BROWSE      = new JPermission(PREFIX_COMMAND + "browse");
@@ -37,7 +38,7 @@ public class ChestPerms {
 
         MODULE.addChildren(
             COMMAND, BYPASS, SHOP_TYPE, PRICE_TYPE,
-            CREATE, REMOVE, REMOVE_OTHERS, TELEPORT, TELEPORT_OTHERS
+            CREATE, REMOVE, REMOVE_OTHERS, TELEPORT, TELEPORT_OTHERS, EDIT_OTHERS
         );
 
         COMMAND.addChildren(

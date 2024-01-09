@@ -40,24 +40,28 @@ public class ChestUtils {
     }
 
     public static boolean isAllowedItem(@NotNull ItemStack item) {
-        if (ChestConfig.SHOP_PRODUCT_BANNED_ITEMS.get().contains(item.getType().name().toLowerCase())) {
-            return false;
-        }
+        Set<String> bannedItems = ChestConfig.SHOP_PRODUCT_BANNED_ITEMS.get();
+
+        String material = item.getType().getKey().getKey();
+        if (bannedItems.contains(material)) return false;
+
         for (PluginItemPacker pluginItem : ProductHandlerRegistry.getPluginItemPackers()) {
             String id = pluginItem.getItemId(item);
-            if (id != null && ChestConfig.SHOP_PRODUCT_BANNED_ITEMS.get().contains(id.toLowerCase())) {
+            if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }
         }
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
+
             if (meta.hasDisplayName()) {
                 String name = Colorizer.strip(meta.getDisplayName());
                 if (ChestConfig.SHOP_PRODUCT_DENIED_NAMES.get().stream().anyMatch(name::contains)) {
                     return false;
                 }
             }
+
             List<String> lore = meta.getLore();
             if (lore != null) {
                 return lore.stream().noneMatch(line -> ChestConfig.SHOP_PRODUCT_DENIED_LORES.get().stream().anyMatch(line::contains));
@@ -68,7 +72,8 @@ public class ChestUtils {
 
     public static boolean isValidContainer(@NotNull Block block) {
         if (block.getType() == Material.ENDER_CHEST) return false;
-        if (!(block.getState() instanceof Container container)) return false;
+        if (!(block.getState() instanceof Container)) return false;
+
         return ChestConfig.ALLOWED_CONTAINERS.get().contains(block.getType());
     }
 }

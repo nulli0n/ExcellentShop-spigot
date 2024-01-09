@@ -2,11 +2,6 @@ t1:
   Name: 'Lv. 1'
   Priority: 1
   Permission_Required: false
-  Item:
-    Material: PLAYER_HEAD
-    Name: 'Shop Lv. 1'
-    Lore:
-      - '&7Place to create a shop.'
   Upgrade:
     Allowed: true
     Cost:

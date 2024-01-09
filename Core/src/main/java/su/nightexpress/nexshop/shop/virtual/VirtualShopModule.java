@@ -95,7 +95,7 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
         this.loadRotatingShops();
         this.loadMainMenu();
         this.plugin.runTaskAsync(task -> this.loadShopData());
-        this.plugin.runTaskLater(task -> this.validateShopProducts(), 100L);
+        this.plugin.runTaskLater(task -> this.validateShopProducts(), 100L); // because IA loads too late
 
         if (EngineUtils.hasPlugin(HookId.CITIZENS)) {
             this.addListener(new VirtualShopNPCListener(this));
