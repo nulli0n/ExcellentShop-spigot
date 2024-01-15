@@ -433,6 +433,9 @@ public class AuctionManager extends AbstractShopModule {
 
     public void claimRewards(@NotNull Player player, @NotNull CompletedListing... listings) {
         for (CompletedListing listing : listings) {
+            if (this.needEnsureListingExists() && this.getDataHandler().isCompletedListingClaimed(listing.getId())) {
+                listing.setRewarded(true);
+            }
             if (listing.isRewarded()) continue;
 
             listing.getCurrency().getHandler().give(player, listing.getPrice());

@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.auction.data;
 
+import com.google.common.collect.Lists;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.data.AbstractDataHandler;
@@ -262,6 +263,14 @@ public class AuctionDataHandler extends AbstractDataHandler<ExcellentShop> {
         return this.contains(this.tableCompletedListings,
             Collections.singletonList(COLUMN_AUC_ID),
             SQLCondition.equal(COLUMN_AUC_ID.toValue(id))
+        );
+    }
+
+    public boolean isCompletedListingClaimed(@NotNull UUID id) {
+        return this.contains(this.tableCompletedListings,
+            Lists.newArrayList(COLUMN_AUC_ID, COLUMN_IS_PAID),
+            SQLCondition.equal(COLUMN_AUC_ID.toValue(id)),
+            SQLCondition.equal(COLUMN_IS_PAID.toValue(1))
         );
     }
 }

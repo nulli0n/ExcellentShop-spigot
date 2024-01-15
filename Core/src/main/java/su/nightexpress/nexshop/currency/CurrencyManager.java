@@ -48,12 +48,12 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
         if (EngineUtils.hasVault() && VaultHook.hasEconomy()) {
             this.registerCurrency(VAULT, VaultEconomyHandler::new);
         }
-        if (EngineUtils.hasPlugin(HookId.PLAYER_POINTS)) {
-            this.registerCurrency(HookId.PLAYER_POINTS, PlayerPointsHandler::new);
-        }
-        if (EngineUtils.hasPlugin(HookId.ELITEMOBS)) {
-            this.registerCurrency(HookId.ELITEMOBS, EliteMobsHandler::new);
-        }
+
+        this.registerPluginCurrency(HookId.PLAYER_POINTS, PlayerPointsHandler::new);
+        this.registerPluginCurrency(HookId.BEAST_TOKENS, BeastTokensHandler::new);
+        this.registerPluginCurrency(HookId.VOTING_PLUGIN, VotingPluginHandler::new);
+        this.registerPluginCurrency(HookId.ELITEMOBS, EliteMobsHandler::new);
+
         if (EngineUtils.hasPlugin(HookId.COINS_ENGINE)) {
             CoinsEngineCurrency.getCurrencies().forEach(this::registerCurrency);
         }
@@ -80,6 +80,12 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     @Override
     protected void onShutdown() {
         this.currencyMap.clear();
+    }
+
+    public boolean registerPluginCurrency(@NotNull String id, @NotNull Supplier<CurrencyHandler> supplier) {
+        if (!EngineUtils.hasPlugin(id)) return false;
+
+        return this.registerCurrency(id, supplier);
     }
 
     public boolean registerCurrency(@NotNull String id, @NotNull Supplier<CurrencyHandler> supplier) {
