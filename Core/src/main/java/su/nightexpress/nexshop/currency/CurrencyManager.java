@@ -26,8 +26,8 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     public static final String DIR_DEFAULT = "/currency/default/";
     public static final String DIR_CUSTOM  = "/currency/custom_item/";
 
-    public static final String EXP           = "exp";
-    public static final String VAULT         = "vault";
+    public static final String EXP   = "exp";
+    public static final String VAULT = "vault";
 
     public static final DummyCurrency DUMMY = new DummyCurrency();
 

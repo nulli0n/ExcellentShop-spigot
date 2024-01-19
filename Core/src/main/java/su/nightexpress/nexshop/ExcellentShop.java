@@ -18,6 +18,7 @@ import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.data.UserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.hook.PlaceholderHook;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
@@ -82,10 +83,18 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
 
         this.shopUpdateTask = new ShopUpdateTask(this);
         this.shopUpdateTask.start();
+
+        if (EngineUtils.hasPlaceholderAPI()) {
+            PlaceholderHook.setup(this);
+        }
     }
 
     @Override
     public void disable() {
+        if (EngineUtils.hasPlaceholderAPI()) {
+            PlaceholderHook.shutdown();
+        }
+
         if (this.shopUpdateTask != null) {
             this.shopUpdateTask.stop();
             this.shopUpdateTask = null;

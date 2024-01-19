@@ -18,6 +18,7 @@ import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -30,13 +31,10 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.Discount;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopMenu;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualStock;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopMenu;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> extends AbstractShop<P> implements VirtualShop {
@@ -65,7 +63,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         this.configProducts = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), FILE_PRODUCTS);
 
         JYML configView = new JYML(cfg.getFile().getParentFile().getAbsolutePath(), FILE_VIEW);
-        this.view = new ShopMenu(this.plugin, this, configView);
+        this.view = new ShopMenu(this.plugin, this.module, this, configView);
 
         this.stock = new VirtualStock(this.plugin, this);
 
@@ -163,6 +161,24 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         product.setStockValues(StockValues.read(cfg, path + ".Stock.GLOBAL"));
         product.setLimitValues(StockValues.read(cfg, path + ".Stock.PLAYER"));
         return product;
+    }
+
+    @Override
+    @Nullable
+    public VirtualProduct getBestProduct(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
+        if (!this.canAccess(player, false)) return null;
+        if (!this.isTransactionEnabled(tradeType)) return null;
+
+        var stream = this.getProducts().stream().filter(product -> {
+            if (!product.isTradeable(tradeType) || !product.hasAccess(player)) return false;
+            if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
+            if (!itemPacker.isItemMatches(item)) return false;
+            return product.getAvailableAmount(player, tradeType) != 0;
+        });
+
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(player, tradeType));
+
+        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
     }
 
     @Override

@@ -49,6 +49,7 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String PRODUCT_PRICER_SELL_MAX             = "%product_pricer_sell_max%";
     public static final String PRODUCT_PRICER_FLOAT_REFRESH_DAYS   = "%product_pricer_float_refresh_days%";
     public static final String PRODUCT_PRICER_FLOAT_REFRESH_TIMES  = "%product_pricer_float_refresh_times%";
+    public static final String PRODUCT_PRICER_FLOAT_ROUND_DECIMALS  = "%product_pricer_float_round_decimals%";
     public static final String PRODUCT_PRICER_DYNAMIC_INITIAL_BUY  = "%product_pricer_dynamic_initial_buy%";
     public static final String PRODUCT_PRICER_DYNAMIC_INITIAL_SELL = "%product_pricer_dynamic_initial_sell%";
     public static final String PRODUCT_PRICER_DYNAMIC_STEP_BUY     = "%product_pricer_dynamic_step_buy%";

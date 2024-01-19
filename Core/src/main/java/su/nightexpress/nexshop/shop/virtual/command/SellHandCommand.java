@@ -10,14 +10,14 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 
-public class SellAllCommand extends GeneralCommand<ExcellentShop> {
+public class SellHandCommand extends GeneralCommand<ExcellentShop> {
 
     private final VirtualShopModule module;
 
-    public SellAllCommand(@NotNull VirtualShopModule module, @NotNull String[] aliases) {
-        super(module.plugin(), aliases, VirtualPerms.COMMAND_SELL_ALL);
-        this.setDescription(plugin.getMessage(VirtualLang.COMMAND_SELL_ALL_DESC));
-        this.setUsage(plugin.getMessage(VirtualLang.COMMAND_SELL_ALL_USAGE));
+    public SellHandCommand(@NotNull VirtualShopModule module, @NotNull String[] aliases) {
+        super(module.plugin(), aliases, VirtualPerms.COMMAND_SELL_HAND);
+        this.setDescription(plugin.getMessage(VirtualLang.COMMAND_SELL_HAND_DESC));
+        this.setUsage(plugin.getMessage(VirtualLang.COMMAND_SELL_HAND_USAGE));
         this.setPlayerOnly(true);
         this.module = module;
     }
@@ -25,6 +25,6 @@ public class SellAllCommand extends GeneralCommand<ExcellentShop> {
     @Override
     protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
-        this.module.sellAll(player);
+        this.module.sellSlots(player, player.getInventory().getHeldItemSlot());
     }
 }

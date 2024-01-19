@@ -138,7 +138,7 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
                         }
                         return;
                     }
-                    if (event.isRightClick()) {
+                    if (event.isRightClick() || (PlayerUtil.isBedrockPlayer(player))) {
                         product.getPriceEditor().openNextTick(viewer2.getPlayer(), 1);
                         return;
                     }

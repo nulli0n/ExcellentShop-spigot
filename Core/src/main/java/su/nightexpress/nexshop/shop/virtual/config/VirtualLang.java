@@ -26,6 +26,9 @@ public class VirtualLang extends EngineLang {
     public static final LangKey COMMAND_SELL_ALL_DESC  = LangKey.of("VirtualShop.Command.SellAll.Desc", "Quickly sell all items in inventory.");
     public static final LangKey COMMAND_SELL_ALL_USAGE = LangKey.of("VirtualShop.Command.SellAll.Usage", "");
 
+    public static final LangKey COMMAND_SELL_HAND_DESC  = LangKey.of("VirtualShop.Command.SellHand.Desc", "Quickly sell hand item.");
+    public static final LangKey COMMAND_SELL_HAND_USAGE = LangKey.of("VirtualShop.Command.SellHand.Usage", "");
+
     public static final LangKey SHOP_ERROR_BAD_WORLD    = LangKey.of("VirtualShop.Shop.Error.BadWorld", RED + "You can't use shop in this world!");
     public static final LangKey SHOP_ERROR_BAD_GAMEMODE = LangKey.of("VirtualShop.Shop.Error.BadGamemode", RED + "You can't use shop in current gamemode!");
     public static final LangKey SHOP_ERROR_INVALID      = LangKey.of("VirtualShop.Shop.Error.Invalid", RED + "No such shop!");

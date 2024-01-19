@@ -38,7 +38,7 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
 
     private final VirtualShop shop;
 
-    public ShopMenu(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop, @NotNull JYML cfg) {
+    public ShopMenu(@NotNull ExcellentShop plugin, @NotNull VirtualShopModule module, @NotNull VirtualShop shop, @NotNull JYML cfg) {
         super(plugin, cfg);
         this.shop = shop;
 
@@ -51,8 +51,8 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
             .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
             .addClick(MenuItemType.RETURN, (viewer, event) -> {
-                VirtualShopModule module = this.plugin.getVirtualShop();
-                MainMenu menu = module == null ? null : module.getMainMenu();
+                //VirtualShopModule module = this.plugin.getVirtualShop();
+                MainMenu menu = /*module == null ? null :*/ module.getMainMenu();
                 if (menu == null) {
                     viewer.getPlayer().closeInventory();
                     return;
@@ -60,7 +60,17 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
                 menu.openNextTick(viewer.getPlayer(), 1);
             });
 
+        this.registerHandler(Type.class)
+            .addClick(Type.SELL_ALL, (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                module.sellAll(player, player.getInventory(), shop);
+            });
+
         this.reload();
+    }
+
+    private enum Type {
+        SELL_ALL
     }
 
     @NotNull

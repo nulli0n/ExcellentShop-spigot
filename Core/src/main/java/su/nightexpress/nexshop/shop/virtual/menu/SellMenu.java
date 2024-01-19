@@ -12,20 +12,19 @@ import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.impl.ConfigMenu;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.*;
+import su.nexmedia.engine.utils.Colorizer;
+import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.PlayerUtil;
+import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SellMenu extends ConfigMenu<ExcellentShop> {
 
@@ -52,7 +51,7 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
                 Inventory inventory = plugin.getServer().createInventory(null, 54, "dummy");
                 inventory.addItem(userItems.toArray(new ItemStack[0]));
 
-                this.sellWithReturn(player, inventory);
+                this.module.sellWithReturn(player, inventory);
                 this.plugin.runTask(task -> player.closeInventory());
             });
 
@@ -129,7 +128,7 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
         Player player = viewer.getPlayer();
 
         if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
-            this.sellWithReturn(player, event.getInventory());
+            this.module.sellWithReturn(player, event.getInventory());
         }
         else {
             List<ItemStack> userItems = USER_ITEMS.remove(player);
@@ -139,60 +138,28 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
         }
     }
 
+    @Deprecated
     public void sellWithReturn(@NotNull Player player, @NotNull Inventory inventory) {
-        this.sellAll(player, inventory);
-
-        for (ItemStack left : inventory.getContents()) {
-            if (left == null || left.getType().isAir() || left.getAmount() < 1) continue;
-
-            PlayerUtil.addItem(player, left);
-        }
+        this.module.sellWithReturn(player, inventory);
     }
 
+    @Deprecated
+    public void sellSlots(@NotNull Player player, int... slots) {
+        this.module.sellSlots(player, slots);
+    }
+
+    @Deprecated
     public void sellAll(@NotNull Player player) {
-        this.sellAll(player, player.getInventory());
+        this.module.sellAll(player);
     }
 
+    @Deprecated
     public void sellAll(@NotNull Player player, @NotNull Inventory inventory) {
-        Map<Currency, Double> profitMap = new HashMap<>();
-        Map<ItemStack, Transaction> resultMap = new HashMap<>();
+        this.module.sellAll(player, inventory);
+    }
 
-        for (ItemStack item : inventory.getContents()) {
-            if (item == null || item.getType().isAir()) continue;
-
-            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
-            if (product == null) continue;
-
-            VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, true);
-            preparedProduct.setInventory(inventory);
-
-            ItemStack copy = new ItemStack(item);
-
-            Transaction result = preparedProduct.trade();
-            if (result.getResult() == Transaction.Result.SUCCESS) {
-                Currency currency = result.getProduct().getCurrency();
-                double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
-                profitMap.put(currency, has);
-                resultMap.put(copy, result);
-            }
-        }
-        if (profitMap.isEmpty()) return;
-
-        String total = profitMap.entrySet().stream()
-            .map(entry -> entry.getKey().format(entry.getValue()))
-            .collect(Collectors.joining(", "));
-
-        this.plugin.getMessage(VirtualLang.SELL_MENU_SALE_RESULT)
-            .replace(Placeholders.GENERIC_TOTAL, total)
-            .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (str, list) -> {
-                resultMap.forEach((item, result) -> {
-                    list.add(str
-                        .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
-                        .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
-                        .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
-                    );
-                });
-            })
-            .send(player);
+    @Deprecated
+    public void sellAll(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop) {
+        this.module.sellAll(player, inventory, shop);
     }
 }

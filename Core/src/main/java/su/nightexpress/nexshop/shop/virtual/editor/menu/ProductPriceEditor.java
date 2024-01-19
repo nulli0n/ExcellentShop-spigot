@@ -146,6 +146,12 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, AbstractVirtua
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_REFRESH), VirtualLocales.PRODUCT_PRICE_FLOAT_REFRESH, 15).setClick((viewer, event) -> {
             FloatPricer pricer = (FloatPricer) product.getPricer();
+            if (event.getClick() == ClickType.DROP) {
+                pricer.setRoundDecimals(!pricer.isRoundDecimals());
+                this.save(viewer);
+                return;
+            }
+
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
                     pricer.getDays().clear();

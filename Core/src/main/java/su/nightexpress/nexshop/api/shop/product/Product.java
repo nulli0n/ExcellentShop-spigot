@@ -81,6 +81,10 @@ public interface Product extends Placeholder {
 
     int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType);
 
+    default boolean isTradeable(@NotNull TradeType tradeType) {
+        return tradeType == TradeType.BUY ? this.isBuyable() : this.isSellable();
+    }
+
     boolean isBuyable();
 
     boolean isSellable();

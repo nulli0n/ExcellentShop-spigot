@@ -2,21 +2,20 @@ package su.nightexpress.nexshop.shop.virtual;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.Colors;
-import su.nexmedia.engine.utils.EngineUtils;
-import su.nexmedia.engine.utils.FileUtil;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -25,6 +24,7 @@ import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.module.AbstractShopModule;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.command.SellAllCommand;
+import su.nightexpress.nexshop.shop.virtual.command.SellHandCommand;
 import su.nightexpress.nexshop.shop.virtual.command.SellMenuCommand;
 import su.nightexpress.nexshop.shop.virtual.command.ShopCommand;
 import su.nightexpress.nexshop.shop.virtual.command.child.EditorCommand;
@@ -37,6 +37,7 @@ import su.nightexpress.nexshop.shop.virtual.editor.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopListEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.MainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.SellMenu;
@@ -45,6 +46,7 @@ import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class VirtualShopModule extends AbstractShopModule implements ShopModule {
 
@@ -114,7 +116,12 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
         if (!VirtualConfig.SHOP_SHORTCUTS.get().isEmpty()) {
             this.plugin.getCommandManager().registerCommand(new ShopCommand(this));
         }
-        this.plugin.getCommandManager().registerCommand(new SellAllCommand(this, VirtualConfig.SELL_ALL_COMMANDS.get().split(",")));
+        if (!VirtualConfig.SELL_ALL_COMMANDS.get().isEmpty()) {
+            this.plugin.getCommandManager().registerCommand(new SellAllCommand(this, VirtualConfig.SELL_ALL_COMMANDS.get().split(",")));
+        }
+        if (!VirtualConfig.SELL_HAND_COMMANDS.get().isEmpty()) {
+            this.plugin.getCommandManager().registerCommand(new SellHandCommand(this, VirtualConfig.SELL_HAND_COMMANDS.get().split(",")));
+        }
     }
 
     @Override
@@ -374,22 +381,96 @@ public class VirtualShopModule extends AbstractShopModule implements ShopModule 
     @Nullable
     public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
         Set<VirtualProduct> products = new HashSet<>();
-        this.getShops().stream()
-            .filter(shop -> shop.canAccess(player, false) && shop.isTransactionEnabled(tradeType)).forEach(shop -> {
-            products.addAll(shop.getProducts().stream().filter(product -> {
-                if (tradeType == TradeType.BUY && !product.isBuyable()) return false;
-                if (tradeType == TradeType.SELL && !product.isSellable()) return false;
-                if (!product.hasAccess(player)) return false;
-                if (!(product.getPacker() instanceof ItemPacker handler)) return false;
-                if (!handler.isItemMatches(item)) return false;
-                return product.getAvailableAmount(player, tradeType) != 0;
-            }).toList());
+        this.getShops().forEach(shop -> {
+            VirtualProduct best = shop.getBestProduct(player, item, tradeType);
+            if (best != null) {
+                products.add(best);
+            }
         });
 
-        Comparator<VirtualProduct> comp = (p1, p2) -> {
-            return (int) (p1.getPrice(player, tradeType) - p2.getPrice(player, tradeType));
-        };
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(player, tradeType));
+        return (tradeType == TradeType.BUY ? products.stream().min(comparator) : products.stream().max(comparator)).orElse(null);
+    }
 
-        return (tradeType == TradeType.BUY ? products.stream().min(comp) : products.stream().max(comp)).orElse(null);
+    public static double getSellMultiplier(@NotNull Player player) {
+        return VirtualConfig.SELL_RANK_MULTIPLIERS.get().getBestValue(player, 1D);
+    }
+
+    public void sellWithReturn(@NotNull Player player, @NotNull Inventory inventory) {
+        this.sellAll(player, inventory);
+
+        for (ItemStack left : inventory.getContents()) {
+            if (left == null || left.getType().isAir() || left.getAmount() < 1) continue;
+
+            PlayerUtil.addItem(player, left);
+        }
+    }
+
+    public void sellSlots(@NotNull Player player, int... slots) {
+        Inventory inventory = plugin.getServer().createInventory(null, 54);
+        PlayerInventory playerInventory = player.getInventory();
+
+        for (int index : slots) {
+            ItemStack item = playerInventory.getItem(index);
+            if (item == null || item.getType().isAir()) continue;
+
+            inventory.addItem(new ItemStack(item));
+            item.setAmount(0);
+        }
+
+        this.sellWithReturn(player, inventory);
+    }
+
+    public void sellAll(@NotNull Player player) {
+        this.sellAll(player, player.getInventory());
+    }
+
+    public void sellAll(@NotNull Player player, @NotNull Inventory inventory) {
+        this.sellAll(player, inventory, null);
+    }
+
+    public void sellAll(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop) {
+        Map<Currency, Double> profitMap = new HashMap<>();
+        Map<ItemStack, Transaction> resultMap = new HashMap<>();
+
+        for (ItemStack item : inventory.getContents()) {
+            if (item == null || item.getType().isAir()) continue;
+
+            VirtualProduct product;
+            if (shop == null) product = this.getBestProductFor(player, item, TradeType.SELL);
+            else product = shop.getBestProduct(player, item, TradeType.SELL);
+            if (product == null) continue;
+
+            VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, true);
+            preparedProduct.setInventory(inventory);
+
+            ItemStack copy = new ItemStack(item);
+
+            Transaction result = preparedProduct.trade();
+            if (result.getResult() == Transaction.Result.SUCCESS) {
+                Currency currency = result.getProduct().getCurrency();
+                double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
+                profitMap.put(currency, has);
+                resultMap.put(copy, result);
+            }
+        }
+        if (profitMap.isEmpty()) return;
+
+        String total = profitMap.entrySet().stream()
+            .map(entry -> entry.getKey().format(entry.getValue()))
+            .collect(Collectors.joining(", "));
+
+        this.plugin.getMessage(VirtualLang.SELL_MENU_SALE_RESULT)
+            .replace(Placeholders.GENERIC_TOTAL, total)
+            .replace(str -> str.contains(Placeholders.GENERIC_ITEM), (str, list) -> {
+                resultMap.forEach((item, result) -> {
+                    list.add(str
+                        .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
+                        .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
+                        .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
+                    );
+                });
+            })
+            .send(player);
     }
 }

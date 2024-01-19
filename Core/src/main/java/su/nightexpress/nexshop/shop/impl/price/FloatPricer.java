@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.impl.price;
 
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
+import su.nexmedia.engine.lang.LangManager;
 import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
@@ -12,9 +13,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,6 +21,7 @@ public class FloatPricer extends RangedPricer {
 
     private Set<DayOfWeek>   days;
     private Set<LocalTime> times;
+    private boolean roundDecimals;
 
     public FloatPricer() {
         super(PriceType.FLOAT);
@@ -36,19 +36,21 @@ public class FloatPricer extends RangedPricer {
             .add(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_DAYS, () -> String.join(", ", this.getDays()
                 .stream().map(DayOfWeek::name).toList()))
             .add(Placeholders.PRODUCT_PRICER_FLOAT_REFRESH_TIMES, () -> String.join(", ", this.getTimes()
-                .stream().map(ShopUtils.TIME_FORMATTER::format).toList()));
+                .stream().map(ShopUtils.TIME_FORMATTER::format).toList()))
+            .add(Placeholders.PRODUCT_PRICER_FLOAT_ROUND_DECIMALS, () -> LangManager.getBoolean(this.isRoundDecimals()));
     }
 
     @NotNull
     public static FloatPricer read(@NotNull JYML cfg, @NotNull String path) {
         FloatPricer pricer = new FloatPricer();
-        Map<TradeType, double[]> priceMap = new HashMap<>();
+        //Map<TradeType, double[]> priceMap = new HashMap<>();
         for (TradeType tradeType : TradeType.values()) {
             UniDouble price = UniDouble.read(cfg, path + "." + tradeType.name());
             pricer.setPrice(tradeType, price);
         }
         pricer.setDays(ShopUtils.parseDays(cfg.getString(path + ".Refresh.Days", "")));
         pricer.setTimes(ShopUtils.parseTimes(cfg.getStringList(path + ".Refresh.Times")));
+        pricer.setRoundDecimals(cfg.getBoolean(path + ".Round_Decimals"));
 
         return pricer;
     }
@@ -60,6 +62,7 @@ public class FloatPricer extends RangedPricer {
         }));
         cfg.set(path + ".Refresh.Days", this.getDays().stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
         cfg.set(path + ".Refresh.Times", this.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).toList());
+        cfg.set(path + ".Round_Decimals", this.isRoundDecimals());
     }
 
     public boolean isUpdateTime() {
@@ -89,5 +92,13 @@ public class FloatPricer extends RangedPricer {
 
     public void setTimes(@NotNull Set<LocalTime> times) {
         this.times = times;
+    }
+
+    public boolean isRoundDecimals() {
+        return roundDecimals;
+    }
+
+    public void setRoundDecimals(boolean roundDecimals) {
+        this.roundDecimals = roundDecimals;
     }
 }

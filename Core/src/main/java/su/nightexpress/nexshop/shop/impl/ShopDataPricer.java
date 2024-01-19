@@ -112,7 +112,7 @@ public class ShopDataPricer implements ShopPricer {
     }
 
     private void updateFloat(@NotNull Product product) {
-        if (!(product.getPricer() instanceof FloatPricer pricer)) return;
+        if (!(product.getPricer() instanceof FloatPricer)) return;
 
         PriceData priceData = this.getData(product);
         boolean hasData = priceData != null;
@@ -130,6 +130,10 @@ public class ShopDataPricer implements ShopPricer {
 
         double buyPrice = pricer.getPriceRange(TradeType.BUY).roll();
         double sellPrice = pricer.getPriceRange(TradeType.SELL).roll();
+        if (pricer.isRoundDecimals()) {
+            buyPrice = Math.floor(buyPrice);
+            sellPrice = Math.floor(sellPrice);
+        }
         if (sellPrice > buyPrice && buyPrice >= 0) {
             sellPrice = buyPrice;
         }

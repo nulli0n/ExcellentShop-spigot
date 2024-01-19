@@ -101,6 +101,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, AbstractVirtual
 
         this.addItem(ItemUtil.createCustomHead(TEXTURE_DOLLAR), VirtualLocales.PRODUCT_PRICE_MANAGER, 21).setClick((viewer, event) -> {
             if (event.getClick() == ClickType.DROP) {
+                //product.getShop().getPricer().deleteData(product);
                 product.getShop().getPricer().updatePrice(product);
                 this.save(viewer);
             }

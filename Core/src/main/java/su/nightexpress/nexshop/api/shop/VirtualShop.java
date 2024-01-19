@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.impl.Discount;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 
@@ -68,4 +69,6 @@ public interface VirtualShop extends Shop {
     @NotNull Collection<? extends VirtualProduct> getProducts();
 
     @Nullable VirtualProduct getProductById(@NotNull String id);
+
+    @Nullable VirtualProduct getBestProduct(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType);
 }

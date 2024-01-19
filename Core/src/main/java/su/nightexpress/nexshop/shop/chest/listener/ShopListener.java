@@ -2,12 +2,9 @@ package su.nightexpress.nexshop.shop.chest.listener;
 
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.*;
@@ -28,7 +25,6 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 
@@ -72,7 +68,9 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
         Block block = event.getClickedBlock();
         if (block == null) return;
 
-        ChestShop shop = this.module.getShop(block);
+        this.module.interactShop(event, event.getPlayer(), block);
+
+        /*ChestShop shop = this.module.getShop(block);
         if (shop == null) return;
 
         Player player = event.getPlayer();
@@ -112,7 +110,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
             else if (!isDenied) {
                 event.setUseInteractedBlock(Result.ALLOW);
             }
-        }
+        }*/
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

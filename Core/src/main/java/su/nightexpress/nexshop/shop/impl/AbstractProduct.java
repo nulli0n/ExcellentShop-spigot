@@ -11,12 +11,12 @@ import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
@@ -24,7 +24,7 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.impl.ItemCurrency;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.price.FlatPricer;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product, Placeholder {
 
@@ -126,7 +126,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
                 msgStock = plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK);
             }
             else {
-                if (shop instanceof ChestShop shopChest) {
+                if (shop instanceof ChestShop) {
                     msgStock = plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE);
                 }
                 else msgStock = plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_STOCK);
@@ -162,7 +162,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
                 price *= virtualProduct.getShop().getDiscountModifier();
             }
             if (tradeType == TradeType.SELL) {
-                double sellModifier = VirtualConfig.SELL_RANK_MULTIPLIERS.get().getBestValue(player, 1D);
+                double sellModifier = VirtualShopModule.getSellMultiplier(player);
                 price *= sellModifier;
             }
         }

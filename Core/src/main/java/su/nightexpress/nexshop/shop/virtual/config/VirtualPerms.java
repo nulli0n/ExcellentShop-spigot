@@ -22,6 +22,7 @@ public class VirtualPerms {
     public static final JPermission COMMAND_MENU      = new JPermission(PREFIX_COMMAND + "menu", "Access to '/virtualshop menu' command.");
     public static final JPermission COMMAND_SELL_MENU = new JPermission(PREFIX_COMMAND + "sellmenu", "Access to the Sell Menu commands.");
     public static final JPermission COMMAND_SELL_ALL  = new JPermission(PREFIX_COMMAND + "sellall", "Access to the Sell All command.");
+    public static final JPermission COMMAND_SELL_HAND  = new JPermission(PREFIX_COMMAND + "sellhand", "Access to the Sell Hand command.");
     public static final JPermission COMMAND_SHOP      = new JPermission(PREFIX_COMMAND + "shop", "Access to the Shop Shortcut commands.");
 
     public static final JPermission BYPASS_WORLDS   = new JPermission(PREFIX_BYPASS + "worlds", "Allows to use shops in any world.");
@@ -38,6 +39,7 @@ public class VirtualPerms {
             COMMAND_MENU,
             COMMAND_SELL_MENU,
             COMMAND_SELL_ALL,
+            COMMAND_SELL_HAND,
             COMMAND_SHOP
         );
 

@@ -65,7 +65,13 @@ public class VirtualConfig {
 
     public static final JOption<String> SELL_ALL_COMMANDS = JOption.create("General.Sell_All.Commands",
         "sellall",
-        "Custom Sell All command aliases. Split them with a comma.");
+        "Custom Sell All command aliases. Split them with a comma.",
+        "Leave this empty ('') to disable.");
+
+    public static final JOption<String> SELL_HAND_COMMANDS = JOption.create("General.Sell_Hand.Commands",
+        "sellhand",
+        "Custom Sell Hand command aliases. Split them with a comma.",
+        "Leave this empty ('') to disable.");
 
     public static final JOption<Set<String>> DISABLED_GAMEMODES = JOption.create("General.Disabled_In_Gamemodes",
         Set.of(GameMode.CREATIVE.name()),

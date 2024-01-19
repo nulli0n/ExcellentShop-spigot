@@ -2,11 +2,16 @@ package su.nightexpress.nexshop.shop.chest;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -322,6 +327,64 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
 
     public void listShops(@NotNull Player player, @NotNull UUID target) {
         this.getListMenu().open(player, target, 1);
+    }
+
+    public void interactShop(@NotNull PlayerInteractEvent event, @NotNull Player player, @NotNull Block block) {
+        ChestShop shop = this.getShop(block);
+        if (shop != null) {
+            this.interactShop(event, player, shop);
+            return;
+        }
+
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            if (block.getBlockData() instanceof WallSign directional) {
+                Block backend = block.getRelative(directional.getFacing().getOppositeFace());
+                shop = this.getShop(backend);
+
+                if (shop != null) {
+                    event.setUseInteractedBlock(Event.Result.DENY);
+                    event.setUseItemInHand(Event.Result.DENY);
+                    this.interactShop(event, player, shop);
+                }
+            }
+        }
+    }
+
+    public void interactShop(@NotNull PlayerInteractEvent event, @NotNull Player player, @NotNull ChestShop shop) {
+        boolean originalDeny = event.useInteractedBlock() == Event.Result.DENY;
+        event.setUseInteractedBlock(Event.Result.DENY);
+
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        if (player.isSneaking()) {
+            ItemStack item = event.getItem();
+            if (item != null && !originalDeny) {
+                if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME || item.getType() == Material.HOPPER) {
+                    if (!shop.isOwner(player)) {
+                        plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
+                    }
+                    else event.setUseInteractedBlock(Event.Result.ALLOW);
+                    return;
+                }
+            }
+
+            if (shop.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) {
+                shop.openMenu(player);
+            }
+            else {
+                plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
+            }
+            return;
+        }
+
+        if (shop.isAdminShop() || !shop.isOwner(player)) {
+            if (shop.canAccess(player, true)) {
+                shop.open(player, 1);
+            }
+        }
+        else if (!originalDeny) {
+            event.setUseInteractedBlock(Event.Result.ALLOW);
+        }
     }
 
     public boolean createShop(@NotNull Player player, @NotNull Block block, @NotNull ShopType type) {

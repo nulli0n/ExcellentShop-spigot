@@ -13,6 +13,8 @@ import su.nexmedia.engine.utils.ItemUtil;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -27,6 +29,7 @@ import su.nightexpress.nexshop.shop.util.ShopUtils;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +52,19 @@ public class ProductPriceMenu extends ConfigEditorMenu {
             }
         }
 
+        // TODO Button to force flush prices
+
         this.registerHandler(MenuItemType.class)
             .addClick(MenuItemType.RETURN, (viewer, event) -> plugin.runTask(task -> product.getShop().openProductsMenu(viewer.getPlayer())));
 
         this.registerHandler(Type.class)
+            .addClick(Type.PRODUCT_CHANGE_CURRENCY, (viewer, event) -> {
+                List<Currency> currencies = new ArrayList<>(ChestUtils.getAllowedCurrencies());
+                int index = currencies.indexOf(product.getCurrency()) + 1;
+                if (index >= currencies.size()) index = 0;
+                product.setCurrency(currencies.get(index));
+                this.save(viewer);
+            })
             .addClick(Type.PRODUCT_CHANGE_PRICE_TYPE, (viewer, event) -> {
                 Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PREFIX_PRICE_TYPE + priceType.name().toLowerCase());
 
@@ -143,6 +155,12 @@ public class ProductPriceMenu extends ConfigEditorMenu {
         })
         .addClick(Type.PRODUCT_CHANGE_PRICE_REFRESH, (viewer, event) -> {
             FloatPricer pricer = (FloatPricer) product.getPricer();
+            if (event.getClick() == ClickType.DROP) {
+                pricer.setRoundDecimals(!pricer.isRoundDecimals());
+                this.save(viewer);
+                return;
+            }
+
             if (event.isShiftClick()) {
                 if (event.isLeftClick()) {
                     pricer.getDays().clear();
@@ -208,6 +226,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
     }
 
     private enum Type {
+        PRODUCT_CHANGE_CURRENCY,
         PRODUCT_CHANGE_PRICE_TYPE,
         PRODUCT_CHANGE_PRICE_BUY,
         PRODUCT_CHANGE_PRICE_SELL,
