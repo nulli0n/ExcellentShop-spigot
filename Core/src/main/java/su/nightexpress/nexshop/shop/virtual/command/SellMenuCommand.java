@@ -26,6 +26,6 @@ public class SellMenuCommand extends GeneralCommand<ExcellentShop> {
     @Override
     public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
         Player player = (Player) sender;
-        this.module.getSellMenu().open(player, 1);
+        this.module.openSellMenu(player);
     }
 }

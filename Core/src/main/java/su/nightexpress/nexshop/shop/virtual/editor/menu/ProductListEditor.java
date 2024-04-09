@@ -139,7 +139,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, AbstractVirtual
             EditorLocale locale = shop.getType() == ShopType.STATIC ? VirtualLocales.PRODUCT_OBJECT : VirtualLocales.ROTATING_PRODUCT_OBJECT;
             ItemStack productIcon = new ItemStack(product.getPreview());
             ItemReplacer.create(productIcon).readLocale(locale).hideFlags().trimmed()
-                .replace(product.replacePlaceholders())
+                .replace(product.getPlaceholders())
                 .writeMeta();
 
             MenuItem productItem = new MenuItem(productIcon);
@@ -177,7 +177,12 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, AbstractVirtual
                     StaticProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
                         Currency currency = shop.getModule().getDefaultCurrency();
-                        ProductHandler handler = ProductHandlerRegistry.getHandler(cursor);
+                        ProductHandler handler;
+                        if (event.isShiftClick()) {
+                            handler = ProductHandlerRegistry.BUKKIT_ITEM;
+                        }
+                        else handler = ProductHandlerRegistry.getHandler(cursor);
+
                         ProductPacker packer = handler.createPacker();
                         if (packer instanceof ItemPacker itemPacker) {
                             itemPacker.load(cursor);
@@ -185,7 +190,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, AbstractVirtual
                         cached = staticShop.createProduct(currency, handler, packer);
 
                         shop.getPricer().deleteData(cached);
-                        shop.getStock().deleteData(cached);
+                        shop.getStock().deleteGlobalData(cached);
                     }
                     cached.setSlot(event.getRawSlot());
                     cached.setPage(page);
@@ -215,7 +220,14 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, AbstractVirtual
             VirtualProduct product = hasCursor ? this.getCachedProduct(cursor) : null;
             if (product == null) {
                 Currency currency = shop.getModule().getDefaultCurrency();
-                ProductHandler handler = hasCursor ? ProductHandlerRegistry.getHandler(cursor) : ProductHandlerRegistry.forBukkitCommand();
+                ProductHandler handler;
+                if (event.isShiftClick() && hasCursor) {
+                    handler = ProductHandlerRegistry.BUKKIT_ITEM;
+                }
+                else {
+                    handler = hasCursor ? ProductHandlerRegistry.getHandler(cursor) : ProductHandlerRegistry.forBukkitCommand();
+                }
+
                 ProductPacker packer = handler.createPacker();
                 if (packer instanceof ItemPacker itemPacker && cursor != null) {
                     itemPacker.load(cursor);
@@ -224,7 +236,7 @@ public class ProductListEditor extends EditorMenu<ExcellentShop, AbstractVirtual
 
                 // Delete product price & stock datas for new items in case there was product with similar ID.
                 shop.getPricer().deleteData(product);
-                shop.getStock().deleteData(product);
+                shop.getStock().deleteGlobalData(product);
             }
 
             if (product instanceof StaticProduct staticProduct) {

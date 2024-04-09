@@ -74,6 +74,7 @@ public class ChestShopView extends ConfigMenu<ExcellentShop> implements AutoPage
     public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
         ItemStack preview = product.getPreview();
 
+        // TODO ItemReplacer
         ItemUtil.mapMeta(preview, meta -> {
             List<String> lore = new ArrayList<>();
 
@@ -86,10 +87,11 @@ public class ChestShopView extends ConfigMenu<ExcellentShop> implements AutoPage
                 lore.add(lineFormat);
             }
 
-            PlaceholderMap placeholderMap = new PlaceholderMap();
-            placeholderMap.getKeys().addAll(product.getPlaceholders(player).getKeys());
-            placeholderMap.getKeys().addAll(product.getCurrency().getPlaceholders().getKeys());
-            placeholderMap.getKeys().addAll(shop.getPlaceholders().getKeys());
+            PlaceholderMap placeholderMap = PlaceholderMap.fusion(
+                product.getPlaceholders(player),
+                product.getCurrency().getPlaceholders(),
+                shop.getPlaceholders()
+            );
             lore.replaceAll(placeholderMap.replacer());
             meta.setLore(lore);
         });

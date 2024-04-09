@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.chest;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.lang.LangManager;
@@ -8,9 +9,11 @@ import su.nexmedia.engine.utils.LocationUtil;
 import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -59,18 +62,20 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
             });
         }
 
-        /*for (TradeType tradeType : TradeType.values()) {
-            for (int slot = 0; slot < 27; slot++) {
-                int index = slot;
-                placeholderMap.add(SHOP_PRODUCT_PRICE.apply(tradeType, slot), () -> {
-                    if (products.size() <= index) return "-";
-
-                    ChestProduct product = products.get(index);
-                    return product.getCurrency().format(product.getPricer().getPrice(tradeType));
-                });
-            }
-        }*/
-
         return placeholderMap;
+    }
+
+    public static PlaceholderRelMap<Player> forProductStock(@NotNull ChestProduct product) {
+        PlaceholderRelMap<Player> map = new PlaceholderRelMap<>();
+
+        for (TradeType tradeType : TradeType.values()) {
+            map
+                .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), player -> {
+                    int leftAmount = product.getShop().getStock().countItem(product, tradeType, player);
+                    return leftAmount < 0 ? LangManager.getPlain(Lang.OTHER_INFINITY) : NumberUtil.format(leftAmount);
+                });
+        }
+
+        return map;
     }
 }

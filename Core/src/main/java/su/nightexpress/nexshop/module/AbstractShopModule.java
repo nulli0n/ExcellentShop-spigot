@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop.module;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.manager.AbstractManager;
 import su.nexmedia.engine.command.list.HelpSubCommand;
@@ -17,14 +16,15 @@ public abstract class AbstractShopModule extends AbstractManager<ExcellentShop> 
 
     private final String id;
     private final String name;
+    protected final ModuleCommand<AbstractShopModule> command;
+    protected final JYML cfg;
 
-    protected JYML                              cfg;
-    protected ModuleCommand<AbstractShopModule> command;
-
-    public AbstractShopModule(@NotNull ExcellentShop plugin, @NotNull String id) {
+    public AbstractShopModule(@NotNull ExcellentShop plugin, @NotNull String id, @NotNull String[] aliases) {
         super(plugin);
         this.id = id;
         this.name = StringUtil.capitalizeUnderscored(this.getId());
+        this.command = new ModuleCommand<>(this, aliases, (String) null);
+        this.cfg = JYML.loadOrExtract(plugin, this.getLocalPath(), "settings.yml");
     }
 
     @Override
@@ -42,26 +42,15 @@ public abstract class AbstractShopModule extends AbstractManager<ExcellentShop> 
         }
         // ---------- MOVE OUT OF /MODULES/ END ----------
 
-        this.cfg = JYML.loadOrExtract(plugin, this.getLocalPath(), "settings.yml");
-
-        String[] aliases = JOption.create("Command_Aliases", this.getId(),
-            "List of command aliases that will be registered as main command(s) for this module.",
-            "Split them with commas.")
-            .read(cfg).split(",");
-        if (aliases.length == 0 || aliases[0].isEmpty()) return;
-
-        this.command = new ModuleCommand<>(this, aliases, (String) null);
         this.command.addDefaultCommand(new HelpSubCommand<>(this.plugin));
         this.command.addChildren(new ModuleReloadCommand<>(this));
+
         this.plugin.getCommandManager().registerCommand(this.command);
     }
 
     @Override
     protected void onShutdown() {
-        if (this.command != null) {
-            this.plugin.getCommandManager().unregisterCommand(this.command);
-            this.command = null;
-        }
+        this.plugin.getCommandManager().unregisterCommand(this.command);
     }
 
     @NotNull

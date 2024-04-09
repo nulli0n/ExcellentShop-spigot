@@ -3,36 +3,37 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.lang.LangManager;
-import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.shop.impl.AbstractStock;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.data.object.OwnedStockData;
 import su.nightexpress.nexshop.data.object.StockData;
-import su.nightexpress.nexshop.data.user.ShopUser;
-import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.shop.impl.AbstractStock;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
-    private final Map<TradeType, Map<String, StockData>> dataMap;
+    private final Map<TradeType, Map<String, StockData>>                 globalDataMap;
+    private final Map<UUID, Map<TradeType, Map<String, OwnedStockData>>> playerDataMap;
 
     private boolean locked;
 
     public VirtualStock(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
         super(plugin, shop);
-        this.dataMap = new ConcurrentHashMap<>();
+        this.globalDataMap = new ConcurrentHashMap<>();
+        this.playerDataMap = new ConcurrentHashMap<>();
         this.lock();
     }
 
@@ -40,71 +41,26 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     public void load() {
         List<StockData> dataList = this.plugin.getData().getVirtualDataHandler().getStockDatas(this.getShop().getId());
         dataList.forEach(data -> {
-            this.getDataMap(data.getTradeType()).put(data.getProductId(), data);
+            this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
         });
 
         this.unlock();
         //this.plugin.info("Loaded " + dataList.size() + " product stock datas for '" + shop.getId() + " shop.");
     }
 
-    @NotNull
-    public PlaceholderMap getPlaceholders(@NotNull VirtualProduct product) {
-        String never = LangManager.getPlain(Lang.OTHER_NEVER);
-        String infin = LangManager.getPlain(Lang.OTHER_INFINITY);
+    @Override
+    public void load(@NotNull UUID playerId) {
+        this.playerDataMap.remove(playerId);
 
-        PlaceholderMap placeholderMap = new PlaceholderMap();
-
-        for (TradeType tradeType : TradeType.values()) {
-            placeholderMap
-                .add(Placeholders.PRODUCT_STOCK_AMOUNT_INITIAL.apply(tradeType), () -> {
-                    int initialAmount = product.getStockValues().getInitialAmount(tradeType);
-                    return initialAmount < 0 ? infin : String.valueOf(initialAmount);
-                })
-                .add(Placeholders.PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), () -> {
-                    int leftAmount = this.countItem(product, tradeType);
-                    return leftAmount < 0 ? infin : String.valueOf(leftAmount);
-                })
-                .add(Placeholders.PRODUCT_STOCK_RESTOCK_TIME.apply(tradeType), () -> {
-                    long cooldown = product.getStockValues().getRestockTime(tradeType) * 1000L;
-                    return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
-                })
-                .add(Placeholders.PRODUCT_STOCK_RESTOCK_DATE.apply(tradeType), () -> {
-                    long restockDate = this.getRestockDate(product, tradeType);
-                    return restockDate < 0 ? never : restockDate == 0 ? "-" : TimeUtil.formatTimeLeft(restockDate);
-                })
-                .add(Placeholders.PRODUCT_LIMIT_AMOUNT_INITIAL.apply(tradeType), () -> {
-                    int initialAmount = product.getLimitValues().getInitialAmount(tradeType);
-                    return initialAmount < 0 ? infin : String.valueOf(initialAmount);
-                })
-                .add(Placeholders.PRODUCT_LIMIT_RESTOCK_TIME.apply(tradeType), () -> {
-                    long cooldown = product.getLimitValues().getRestockTime(tradeType) * 1000L;
-                    return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
-                });
-        }
-
-        return placeholderMap;
+        List<OwnedStockData> dataList = this.plugin.getData().getVirtualDataHandler().getPlayerLimits(playerId);
+        dataList.forEach(data -> {
+            this.getPlayerDataMap(playerId, data.getTradeType()).put(data.getProductId(), data);
+        });
     }
 
-    @NotNull
-    public PlaceholderMap getPlaceholders(@NotNull Player player, @NotNull VirtualProduct product) {
-        PlaceholderMap placeholderMap = new PlaceholderMap(this.getPlaceholders(product));
-        ShopUser user = plugin.getUserManager().getUserData(player);
-
-        for (TradeType tradeType : TradeType.values()) {
-            placeholderMap
-                .add(Placeholders.PRODUCT_LIMIT_AMOUNT_LEFT.apply(tradeType), () -> {
-                    StockData data = user.getProductLimit(product, tradeType);
-                    int leftAmount = data == null ? 0 : data.getItemsLeft();
-                    return leftAmount < 0 ? LangManager.getPlain(Lang.OTHER_INFINITY) : String.valueOf(leftAmount);
-                })
-                .add(Placeholders.PRODUCT_LIMIT_RESTOCK_DATE.apply(tradeType), () -> {
-                    StockData data = user.getProductLimit(product, tradeType);
-                    long restockDate = data == null ? 0 : data.getRestockDate();
-                    return restockDate < 0 ? LangManager.getPlain(Lang.OTHER_NEVER) : restockDate == 0 ? "-" : TimeUtil.formatTimeLeft(restockDate);
-                });
-        }
-
-        return placeholderMap;
+    @Override
+    public void unload(@NotNull UUID playerId) {
+        this.playerDataMap.remove(playerId);
     }
 
     public void unlock() {
@@ -120,16 +76,31 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         Transaction result = event.getTransaction();
         if (!(result.getProduct() instanceof VirtualProduct product)) return;
 
+        Player player = event.getPlayer();
         TradeType tradeType = event.getTransaction().getTradeType();
         int amount = event.getTransaction().getUnits();
-        Player player = event.getPlayer();
 
-        StockValues values = product.getStockValues();
-        if (!values.isUnlimited(tradeType)) {
+        StockValues stockValues = product.getStockValues();
+        if (!stockValues.isUnlimited(tradeType)) {
             this.consume(product, amount, tradeType);
         }
-        if (!values.isUnlimited(tradeType.getOpposite())) {
+        if (!stockValues.isUnlimited(tradeType.getOpposite())) {
             this.store(product, amount, tradeType.getOpposite());
+        }
+
+        StockData globalData = this.getGlobalData(product, tradeType);
+        if (globalData != null && globalData.isAwaiting()) {
+            globalData.updateRestockDate(stockValues);
+        }
+
+        StockValues limitValues = product.getLimitValues();
+        if (!limitValues.isUnlimited(tradeType)) {
+            this.consume(product, amount, tradeType, player);
+        }
+
+        StockData playerData = this.getPlayerData(player.getUniqueId(), product, tradeType);
+        if (playerData != null && playerData.isAwaiting()) {
+            playerData.updateRestockDate(limitValues);
         }
     }
 
@@ -140,74 +111,149 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     }
 
     @NotNull
-    private Map<String, StockData> getDataMap(@NotNull TradeType type) {
-        return this.dataMap.computeIfAbsent(type, k -> new ConcurrentHashMap<>());
+    private Map<String, StockData> getGlobalDataMap(@NotNull TradeType type) {
+        return this.globalDataMap.computeIfAbsent(type, k -> new ConcurrentHashMap<>());
+    }
+
+    @NotNull
+    private Map<String, OwnedStockData> getPlayerDataMap(@NotNull UUID playerId, @NotNull TradeType type) {
+        return this.playerDataMap.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).computeIfAbsent(type, k -> new ConcurrentHashMap<>());
     }
 
     @Nullable
-    public StockData getData(@NotNull VirtualProduct product, @NotNull TradeType type) {
+    public StockData getGlobalData(@NotNull VirtualProduct product, @NotNull TradeType type) {
         StockValues values = product.getStockValues();
+        StockData data = this.getGlobalDataMap(type).get(product.getId());
+        Supplier<StockData> supplier = () -> new StockData(product, values, type);
+
+        return this.getData(type, values, data, supplier, this::createGlobalData);
+    }
+
+    @Nullable
+    public OwnedStockData getPlayerData(@NotNull UUID playerId, @NotNull VirtualProduct product, @NotNull TradeType type) {
+        StockValues values = product.getLimitValues();
+        OwnedStockData data = this.getPlayerDataMap(playerId, type).get(product.getId());
+        Supplier<OwnedStockData> supplier = () -> new OwnedStockData(playerId, product, values, type);
+
+        return this.getData(type, values, data, supplier, this::createPlayerData);
+    }
+
+    @Nullable
+    private <T extends StockData> T getData(@NotNull TradeType type,
+                                            @NotNull StockValues values,
+                                            @Nullable T data,
+                                            @NotNull Supplier<T> supplier,
+                                            @NotNull Consumer<T> creator) {
         if (values.isUnlimited(type)) return null;
 
-        StockData data = this.getDataMap(type).get(product.getId());
         if (data == null) {
-            data = new StockData(product, product.getStockValues(), type);
+            data = supplier.get();
             data.setItemsLeft(values.getInitialAmount(type));
-            this.createData(data);
+            creator.accept(data);
         }
         else if (data.isRestockTime()) {
-            data.restock(product.getStockValues());
+            data.restock(values);
             this.saveData(data);
         }
         return data;
     }
 
-    private void createData(@NotNull StockData data) {
-        this.getDataMap(data.getTradeType()).put(data.getProductId(), data);
+    @Nullable
+    public StockData getRelativeData(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
+        return player == null ? this.getGlobalData(product, type) : this.getPlayerData(player.getUniqueId(), product, type);
+    }
+
+    private void createGlobalData(@NotNull StockData data) {
+        this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
         this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().insertStockData(data));
     }
 
-    private void saveData(@NotNull StockData data) {
+    private void createPlayerData(@NotNull OwnedStockData data) {
+        this.getPlayerDataMap(data.getOwnerId(), data.getTradeType()).put(data.getProductId(), data);
+        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().insertPlayerLimit(data));
+    }
+
+    private void saveGlobalData(@NotNull StockData data) {
         this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().saveStockData(data));
     }
 
-    public void deleteData(@NotNull Product product) {
+    private void savePlayerData(@NotNull OwnedStockData data) {
+        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().savePlayerLimit(data));
+    }
+
+    public void deleteGlobalData(@NotNull Product product) {
         for (TradeType tradeType : TradeType.values()) {
-            this.deleteData(product, tradeType);
+            this.deleteGlobalData(product, tradeType);
         }
     }
 
-    public void deleteData(@NotNull Product product, @NotNull TradeType tradeType) {
-        this.getDataMap(tradeType).remove(product.getId());
-        //StockData data = this.getDataMap(tradeType).remove(product.getId());
-        //if (data == null) return;
+    public void deleteGlobalData(@NotNull Product product, @NotNull TradeType tradeType) {
+        this.getGlobalDataMap(tradeType).remove(product.getId());
 
         this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().deleteStockData(product, tradeType));
     }
 
+
+
+    private void deletePlayerLimit(@NotNull VirtualProduct product) {
+        for (TradeType tradeType : TradeType.values()) {
+            this.deletePlayerLimit(product, tradeType);
+        }
+    }
+
+    private void deletePlayerLimit(@NotNull VirtualProduct product, @NotNull TradeType tradeType) {
+        this.playerDataMap.values().forEach(map -> {
+            map.getOrDefault(tradeType, Collections.emptyMap()).remove(product.getId());
+        });
+
+        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(product, tradeType));
+    }
+
+    private void deletePlayerLimit(@NotNull UUID playerId, @NotNull VirtualProduct product, @NotNull TradeType tradeType) {
+        this.getPlayerDataMap(playerId, tradeType).remove(product.getId());
+
+        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(playerId, product, tradeType));
+    }
+
+    private void deletePlayerLimit(@NotNull UUID playerId) {
+        this.playerDataMap.remove(playerId);
+        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(playerId));
+    }
+
+
+
+    private void saveData(@NotNull StockData data) {
+        if (data instanceof OwnedStockData ownedStockData) {
+            this.savePlayerData(ownedStockData);
+        }
+        else this.saveGlobalData(data);
+    }
+
     public void deleteData() {
-        this.dataMap.clear();
+        this.globalDataMap.clear();
+        this.playerDataMap.clear();
         this.plugin.runTaskAsync(task -> {
             this.plugin.getData().getVirtualDataHandler().deleteStockData(shop);
-            this.plugin.getUserManager().getUsersLoaded().forEach(user -> {
-                this.shop.getProducts().forEach(user::deleteProductLimit);
-            });
+            this.plugin.getData().getVirtualDataHandler().deletePlayerLimits(shop);
         });
     }
 
-    @Override
-    public int countItem(@NotNull VirtualProduct product, @NotNull TradeType type) {
-        if (this.isLocked()) return 0;
 
-        StockData data = this.getData(product, type);
-        return data == null ? -1 : data.getItemsLeft();
+    private int getItemsLeft(@Nullable StockData data) {
+        return data == null ? UNLIMITED : data.getItemsLeft();
     }
 
-    @Override
-    public boolean consumeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type) {
+
+    public int countItem(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
+        if (this.isLocked()) return 0;
+
+        return this.getItemsLeft(this.getRelativeData(product, type, player));
+    }
+
+    public boolean consumeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
         if (this.isLocked()) return false;
 
-        StockData data = this.getData(product, type);
+        StockData data = this.getRelativeData(product, type, player);
         if (data == null) return false;
 
         data.setItemsLeft(data.getItemsLeft() - amount);
@@ -215,11 +261,10 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         return true;
     }
 
-    @Override
-    public boolean storeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type) {
+    public boolean storeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
         if (this.isLocked()) return false;
 
-        StockData data = this.getData(product, type);
+        StockData data = this.getRelativeData(product, type, player);
         if (data == null) return false;
 
         data.setItemsLeft(data.getItemsLeft() + amount);
@@ -227,23 +272,28 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         return true;
     }
 
-    @Override
-    public boolean restockItem(@NotNull VirtualProduct product, @NotNull TradeType type, boolean force) {
+    public boolean restockItem(@NotNull VirtualProduct product, @NotNull TradeType type, boolean force, @Nullable Player player) {
         if (this.isLocked()) return false;
 
-        StockData data = this.getDataMap(type).get(product.getId());
+        StockData data = this.getRelativeData(product, type, player);//this.getGlobalDataMap(type).get(product.getId());
         if (data == null) return false;
 
         if (force || data.isRestockTime()) {
-            data.restock(product.getStockValues());
+            data.restock(player == null ? product.getStockValues() : product.getLimitValues());
             this.saveData(data);
             return true;
         }
         return false;
     }
 
+
+
     public long getRestockDate(@NotNull VirtualProduct product, @NotNull TradeType type) {
-        StockData data = this.getData(product, type);
+        return this.getRestockDate(product, type, null);
+    }
+
+    public long getRestockDate(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
+        StockData data = this.getRelativeData(product, type, player);
         return data == null ? 0L : data.getRestockDate();
     }
 

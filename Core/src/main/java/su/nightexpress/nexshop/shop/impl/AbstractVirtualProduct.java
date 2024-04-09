@@ -3,9 +3,6 @@ package su.nightexpress.nexshop.shop.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.lang.LangManager;
-import su.nexmedia.engine.utils.NumberUtil;
 import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
@@ -14,10 +11,8 @@ import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.data.object.StockData;
-import su.nightexpress.nexshop.data.user.ShopUser;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.ProductMainEditor;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.editor.menu.ProductMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 
 import java.util.HashSet;
@@ -41,25 +36,7 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.stockValues = new StockValues();
         this.limitValues = new StockValues();
 
-        this.placeholderMap.add(this.getGenericPlaceholders());
-        this.placeholderMap.add(this.getShop().getStock().getPlaceholders(this));
-    }
-
-    @Override
-    @NotNull
-    public PlaceholderMap getPlaceholders(@NotNull Player player) {
-        return super.getPlaceholders(player)
-            .add(this.getGenericPlaceholders())
-            .add(this.getShop().getStock().getPlaceholders(player, this));
-    }
-
-    @NotNull
-    private PlaceholderMap getGenericPlaceholders() {
-        return new PlaceholderMap()
-            .add(Placeholders.PRODUCT_DISCOUNT_AMOUNT, () -> NumberUtil.format(this.getShop().getDiscountPlain(this)))
-            .add(Placeholders.PRODUCT_DISCOUNT_ALLOWED, () -> LangManager.getBoolean(this.isDiscountAllowed()))
-            .add(Placeholders.PRODUCT_ALLOWED_RANKS, () -> String.join("\n", this.getAllowedRanks()))
-            .add(Placeholders.PRODUCT_REQUIRED_PERMISSIONS, () -> String.join("\n", this.getRequiredPermissions()));
+        this.placeholderRelMap.add(Placeholders.forVirtualProduct(this));
     }
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
@@ -67,7 +44,7 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.getPacker().write(cfg, path);
         cfg.set(path + ".Allowed_Ranks", this.getAllowedRanks());
         cfg.set(path + ".Required_Permissions", this.getRequiredPermissions());
-        if (this.getCurrency() != CurrencyManager.DUMMY) {
+        if (this.getCurrency() != CurrencyManager.DUMMY_CURRENCY) {
             cfg.set(path + ".Currency", this.getCurrency().getId());
         }
         this.getPricer().write(cfg, path + ".Price");
@@ -111,9 +88,7 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
 
         if (!this.getAllowedRanks().isEmpty()) {
             Set<String> ranks = PlayerUtil.getPermissionGroups(player);
-            if (ranks.stream().noneMatch(rank -> this.getAllowedRanks().contains(rank))) {
-                return false;
-            }
+            return ranks.stream().anyMatch(rank -> this.getAllowedRanks().contains(rank));
         }
 
         return true;
@@ -121,11 +96,8 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
 
     @Override
     public int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType) {
-        ShopUser user = this.plugin.getUserManager().getUserData(player);
-        StockData data = user.getProductLimit(this, tradeType);
-
-        int inStock = this.getShop().getStock().count(this, tradeType);
-        int inLimit = data == null ? -1 : data.getItemsLeft();
+        int inStock = this.shop.getStock().count(this, tradeType);
+        int inLimit = this.shop.getStock().count(this, tradeType, player);
 
         // If both, stock & limit, are present, return minimal of them.
         if (inStock >= 0 && inLimit >= 0) return Math.min(inStock, inLimit);

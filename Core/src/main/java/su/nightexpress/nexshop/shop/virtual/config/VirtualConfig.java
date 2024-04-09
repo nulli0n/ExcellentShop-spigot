@@ -7,19 +7,20 @@ import su.nexmedia.engine.utils.Colorizer;
 import su.nexmedia.engine.utils.PlayerRankMap;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 
 import java.util.*;
 
 import static su.nexmedia.engine.utils.Colors2.*;
 import static su.nightexpress.nexshop.Placeholders.*;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
 
 public class VirtualConfig {
 
     public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency",
-        CurrencyManager.VAULT,
+        VaultEconomyHandler.ID,
         "Sets default currency for the Virtual Shop module.",
         "This currency will be used when you create new products or in case, where other currencies are not available.",
         "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");
@@ -36,12 +37,11 @@ public class VirtualConfig {
         "shop",
         "A list of command aliases for quick access to main menu and shops.", "Split them with a comma.");
 
+    // TODO Change to better default examples when switch to nightcore
     public static final JOption<PlayerRankMap<Double>> SELL_RANK_MULTIPLIERS = new JOption<PlayerRankMap<Double>>("General.Sell_Multipliers",
         (cfg, path, def) -> PlayerRankMap.read(cfg, path, Double.class),
         () -> new PlayerRankMap<>(Map.of(
-            "vip", 1.25,
-            "premium", 1.50,
-            "gold", 2.0
+            "vip", 1.0
         )),
         "Here you can define Sell Multipliers for certain ranks.",
         "If you want to use permission based system instead of rank based, you can use '" + VirtualPerms.PREFIX_SELL_MULTIPLIER + "[name]' permission pattern.",
@@ -56,8 +56,7 @@ public class VirtualConfig {
     public static final JOption<Boolean> SELL_MENU_SIMPLIFIED = JOption.create("General.Sell_Menu.Simplified", false,
         "Sets whether or not Sell Menu should be simplified.",
         "When simplified, no item and click validation is performed, so menu acts like a regular chest,",
-        "and items will be sold on close instead of button click.",
-        "Also, you should remove all GUI buttons and items to avoid players stealing them.");
+        "and items will be sold on close instead of button click.");
 
     public static final JOption<String> SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands",
         "sellgui",
@@ -103,8 +102,8 @@ public class VirtualConfig {
             "",
             GENERIC_DISCOUNT,
             "",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_BUY_FORMATTED + GRAY + " (Left-Click)",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_FORMATTED + GRAY + " (Right-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(BUY) + GRAY + " (Left-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(SELL) + GRAY + " (Right-Click)",
             LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell All: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_ALL_FORMATTED + GRAY + " (F/Swap Key)",
             "",
             LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick buy/sell)",
@@ -135,7 +134,7 @@ public class VirtualConfig {
             "",
             GENERIC_DISCOUNT,
             "",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_BUY_FORMATTED + GRAY + " (Left-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(BUY) + GRAY + " (Left-Click)",
             "",
             LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick buy)",
             "",
@@ -161,7 +160,7 @@ public class VirtualConfig {
             "",
             GENERIC_DISCOUNT,
             "",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_FORMATTED + GRAY + " (Right-Click)",
+            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(SELL) + GRAY + " (Right-Click)",
             LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell All: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_ALL_FORMATTED + GRAY + " (F/Swap Key)",
             "",
             LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick sell)",

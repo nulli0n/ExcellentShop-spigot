@@ -1,9 +1,16 @@
 package su.nightexpress.nexshop.data.user;
 
+import org.jetbrains.annotations.NotNull;
+
 public class UserSettings {
 
     private boolean isAuctionBroadcastEnabled;
     private boolean isChestNotificationsEnabled;
+
+    @NotNull
+    public static UserSettings createDefault() {
+        return new UserSettings(true, true);
+    }
 
     public UserSettings(
             boolean isAuctionBroadcastEnabled,

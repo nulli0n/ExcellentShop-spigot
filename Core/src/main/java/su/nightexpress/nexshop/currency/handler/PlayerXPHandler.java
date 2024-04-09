@@ -1,12 +1,28 @@
 package su.nightexpress.nexshop.currency.handler;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 
 import java.util.function.BiFunction;
 
-public class ExpPointsHandler implements CurrencyHandler {
+public class PlayerXPHandler implements CurrencyHandler {
+
+    public static final String ID = "exp";
+
+    @Override
+    @NotNull
+    public String getDefaultName() {
+        return "XP";
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getDefaultIcon() {
+        return new ItemStack(Material.EXPERIENCE_BOTTLE);
+    }
 
     private int getExpRequired(int level) {
         if (level <= 15) return 2 * level + 7;

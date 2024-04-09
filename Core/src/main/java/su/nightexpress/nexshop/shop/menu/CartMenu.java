@@ -1,8 +1,10 @@
 package su.nightexpress.nexshop.shop.menu;
 
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JOption;
@@ -15,32 +17,33 @@ import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nexmedia.engine.editor.EditorManager;
 import su.nexmedia.engine.utils.EngineUtils;
 import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
 import su.nexmedia.engine.utils.values.UniSound;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.WeakHashMap;
+import java.util.*;
+import java.util.stream.IntStream;
+
+import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nexmedia.engine.utils.Colors2.*;
 
 public class CartMenu extends ConfigMenu<ExcellentShop> {
 
-    private final int[]    productSlots;
-    private final UniSound productSound;
-
     private final Map<Player, PreparedProduct> products;
     private final Map<Player, Double>          balance;
+
+    private int[]    productSlots;
+    private UniSound productSound;
 
     private enum ButtonType {
         CONFIRM, DECLINE, ADD, SET, TAKE, SET_CUSTOM
@@ -50,10 +53,6 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
         super(plugin, JYML.loadOrExtract(plugin, Config.DIR_MENU + "product_cart.yml"));
         this.products = new WeakHashMap<>();
         this.balance = new WeakHashMap<>();
-        this.productSlots = cfg.getIntArray("Product.Slots");
-        this.productSound = JOption.create("Product.Sound", UniSound.of(Sound.ENTITY_ITEM_PICKUP),
-            "Sets sound to play when using 'ADD', 'SET' or 'TAKE' buttons.",
-            "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html").read(cfg);
 
         this.registerHandler(ButtonType.class)
             .addClick(ButtonType.CONFIRM, (viewer, event) -> {
@@ -91,8 +90,6 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
                     prepared.setUnits(prepared.getUnits() + cartItem.getUnits());
                     this.open(viewer.getPlayer(), prepared);
                 });
-                //this.validateAmount(viewer);
-                //this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
             })
             .addClick(ButtonType.SET, (viewer, event) -> {
                 MenuItem menuItem = this.getItem(viewer, event.getRawSlot());
@@ -102,8 +99,6 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
                     prepared.setUnits(cartItem.getUnits());
                     this.open(viewer.getPlayer(), prepared);
                 });
-                //this.validateAmount(viewer);
-                //this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
             })
             .addClick(ButtonType.TAKE, (viewer, event) -> {
                 MenuItem menuItem = this.getItem(viewer, event.getRawSlot());
@@ -113,8 +108,6 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
                     prepared.setUnits(prepared.getUnits() - cartItem.getUnits());
                     this.open(viewer.getPlayer(), prepared);
                 });
-                //this.validateAmount(viewer);
-                //this.plugin.runTask(task -> this.open(viewer.getPlayer(), 1));
             })
             .addClick(ButtonType.SET_CUSTOM, (viewer, event) -> {
                 PreparedProduct prepared = this.getPrepared(viewer).orElse(null);
@@ -159,12 +152,20 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
     @NotNull
     protected MenuItem readItem(@NotNull String path) {
         MenuItem menuItem = super.readItem(path);
-        if (menuItem.getType() instanceof ButtonType buttonType) {
+        if (menuItem.getType() instanceof ButtonType) {
             ShopCartItem cartItem = new ShopCartItem(menuItem);
             cartItem.setUnits(cfg.getInt(path + ".Units"));
             return cartItem;
         }
         return menuItem;
+    }
+
+    @Override
+    protected void writeItem(@NotNull MenuItem menuItem, @NotNull String path) {
+        super.writeItem(menuItem, path);
+        if (menuItem instanceof ShopCartItem cartItem) {
+            cfg.set(path + ".Units", cartItem.getUnits());
+        }
     }
 
     @Override
@@ -218,15 +219,10 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
         double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getOwnerBank().getBalance(product.getCurrency()) : -1D;
         double userBalance = product.getCurrency().getHandler().getBalance(player);
 
-        //ItemProduct itemProduct = null;
-        //if (product instanceof ItemProduct ip) itemProduct = ip;
-        //else if (product instanceof IVirtualProduct vp && vp.getSpecific() instanceof ItemProduct ip) itemProduct = ip;
-
-        if (product.getPacker() instanceof ItemPacker handler) {
-            ItemStack item = handler.getItem();
+        if (product.getPacker() instanceof ItemPacker itemPacker) {
             if (tradeType == TradeType.BUY) {
                 // Allow to buy no more than player can carry.
-                capacityInventory = PlayerUtil.countItemSpace(player, item) / product.getUnitAmount();
+                capacityInventory = itemPacker.countSpace(player.getInventory())/*PlayerUtil.countItemSpace(player, item)*/ / product.getUnitAmount();
             }
             else if (tradeType == TradeType.SELL) {
                 // Allow to sell no more than player have in inventory.
@@ -284,6 +280,100 @@ public class CartMenu extends ConfigMenu<ExcellentShop> {
         this.balance.remove(player);
         this.products.remove(player);
         super.onClose(viewer, event);
+    }
+
+    @Override
+    public boolean isCodeCreation() {
+        return true;
+    }
+
+    @Override
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions("Product Cart", 54, InventoryType.CHEST);
+    }
+
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
+
+        ItemStack acceptItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTc5YTVjOTVlZTE3YWJmZWY0NWM4ZGMyMjQxODk5NjQ5NDRkNTYwZjE5YTQ0ZjE5ZjhhNDZhZWYzZmVlNDc1NiJ9fX0=");
+        ItemUtil.mapMeta(acceptItem, meta -> {
+            meta.setDisplayName(LIGHT_GREEN + BOLD + "Accept");
+            meta.setLore(Arrays.asList(
+                LIGHT_GREEN + BOLD + "Details:",
+                LIGHT_GREEN + "▪ " + LIGHT_GRAY + "Quantity: " + LIGHT_GREEN + GENERIC_UNITS,
+                LIGHT_GREEN + "▪ " + LIGHT_GRAY + "Total Amount: " + LIGHT_GREEN + GENERIC_AMOUNT,
+                LIGHT_GREEN + "▪ " + LIGHT_GRAY + "Price: " + LIGHT_GREEN + GENERIC_PRICE,
+                LIGHT_GREEN + "▪ " + LIGHT_GRAY + "Balance: " + LIGHT_GREEN + GENERIC_BALANCE
+            ));
+        });
+        list.add(new MenuItem(acceptItem).setPriority(100).setType(ButtonType.CONFIRM).setSlots(53));
+
+        ItemStack cancelItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==");
+        ItemUtil.mapMeta(cancelItem, meta -> {
+            meta.setDisplayName(LIGHT_RED + BOLD + "Cancel");
+        });
+        list.add(new MenuItem(cancelItem).setPriority(100).setType(ButtonType.DECLINE).setSlots(45));
+
+        ItemStack paneItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemUtil.mapMeta(paneItem, meta -> {
+
+        });
+        list.add(new MenuItem(paneItem).setPriority(1).setSlots(46,47,48,49,50,51,52));
+
+        for (ButtonType buttonType : new ButtonType[] {ButtonType.ADD, ButtonType.TAKE, ButtonType.SET}) {
+
+            int[] units = buttonType == ButtonType.SET ? new int[] {1, 16, 10000} : new int[] {1, 8, 16};
+            int[] slots = buttonType == ButtonType.ADD ? new int[] {42, 43, 44} : buttonType == ButtonType.TAKE ?  new int[] {36, 37, 38} : new int[] {39, 40, 41};
+            String[] textures = buttonType == ButtonType.ADD ?
+                new String[]{
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmQ2NWNlODNmMWFhNWI2ZTg0ZjliMjMzNTk1MTQwZDViNmJlY2ViNjJiNmQwYzY3ZDFhMWQ4MzYyNWZmZCJ9fX0=",
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjJlZTEzNzFkOGYwZjVhOGI3NTljMjkxODYzZDcwNGFkYzQyMWFkNTE5ZjE3NDYyYjg3NzA0ZGJmMWM3OGE0In19fQ==",
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTlmNjJhNDY5YTIwNmFkZDczODg3YzczNjYzNzZhNmM0ZjMzNzdiMmY1Yjk3OTM1MWU5NmFjNjM0NTcyIn19fQ=="
+                } : buttonType == ButtonType.TAKE ?
+                new String[]{
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGQyNDU0ZTRjNjdiMzIzZDViZTk1M2I1YjNkNTQxNzRhYTI3MTQ2MDM3NGVlMjg0MTBjNWFlYWUyYzExZjUifX19",
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTY4MzQ0MGM2NDQ3YzE5NWFhZjc2NGUyN2ExMjU5MjE5ZTkxYzZkOGFiNmJkODlhMTFjYThkMmNjNzk5ZmE4In19fQ==",
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWUzZTRiYzcxZTNhYzMzMDgzNjE4MWVkYTk2YmM2ZjEyOGU1YzUzMTNhYjk1MmM4ZmY2ZGVkNTQ5ZTEzYTUifX19"
+                } :
+                new String[] {
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmY2MTI2OTczNWYxZTQ0NmJlY2ZmMjVmOWNiM2M4MjM2Nzk3MTlhMTVmN2YwZmJjOWEwMzkxMWE2OTJiZGQifX19",
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTc3YTU2Y2U0MTVkN2MzMDgwODcwNmE5NGNjMmJhZmE4OTdjYjdlNDg2Mjg3YzMzN2E0NGFmNDJiOTI4YzQzIn19fQ==",
+                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTNhNDg3YjFmODFjOWVjYzZlMTg4NTdjNjU2NjUyOWU3ZWZhMjNlZWY1OTgxNGZlNTdkNjRkZjhlMmNmMSJ9fX0="
+                };
+            String namePrefix = buttonType == ButtonType.ADD ? LIGHT_GREEN + BOLD + "Add +" : buttonType == ButtonType.TAKE ? LIGHT_RED + BOLD + "Remove -" : LIGHT_BLUE + BOLD + "Set ";
+
+            for (int index = 0; index < 3; index++) {
+                int unitAmount = units[index];
+                String name = namePrefix + (unitAmount == 10000 ? "Max" : String.valueOf(unitAmount));
+
+                ItemStack cartStack = ItemUtil.createCustomHead(textures[index]);
+                ItemUtil.mapMeta(cartStack, meta -> meta.setDisplayName(name));
+
+                ShopCartItem cartItem = new ShopCartItem(new MenuItem(cartStack).setPriority(100).setSlots(slots[index]));
+                cartItem.setType(buttonType);
+                cartItem.setUnits(units[index]);
+                list.add(cartItem);
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    protected void loadAdditional() {
+        this.productSlots = JOption.create("Product.Slots",
+            JYML::getIntArray,
+            IntStream.range(0, 36).toArray()
+        ).setWriter(JYML::setIntArray).read(cfg);
+
+        this.productSound = JOption.create("Product.Sound",
+            UniSound.of(Sound.ENTITY_ITEM_PICKUP),
+            "Sets sound to play when using 'ADD', 'SET' or 'TAKE' buttons.",
+            "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html"
+        ).read(cfg);
     }
 
     private static class ShopCartItem extends MenuItem {

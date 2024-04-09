@@ -216,7 +216,7 @@ public class ProductPriceMenu extends ConfigEditorMenu {
                     ItemUtil.replaceLore(item, "%price_sell%", this.formatLorePrice.get(TradeType.SELL).get(this.product.getPricer().getType()));
                 });
             }
-            menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.product.replacePlaceholders()));
+            menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemUtil.replace(item, this.product.getPlaceholders().replacer()));
         });
     }
 

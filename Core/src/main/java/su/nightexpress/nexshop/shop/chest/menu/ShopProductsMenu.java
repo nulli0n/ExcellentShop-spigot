@@ -97,7 +97,7 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
                     item.setOptions(ItemOptions.personalWeak(player));
                     item.setClick((viewer2, event) -> {
                         ItemStack cursor = event.getCursor();
-                        if (cursor == null || !shop.createProduct(viewer2.getPlayer(), cursor)) return;
+                        if (cursor == null || shop.createProduct(viewer2.getPlayer(), cursor) == null) return;
 
                         event.getView().setCursor(null);
                         PlayerUtil.addItem(viewer2.getPlayer(), cursor);
@@ -119,7 +119,7 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
                 ItemStack productIcon = new ItemStack(product.getPreview());
                 ItemReplacer.create(productIcon).trimmed().hideFlags()
                     .setDisplayName(this.productName).setLore(this.productLore)
-                    .replace(product.replacePlaceholders())
+                    .replace(product.getPlaceholders())
                     .writeMeta();
 
                 MenuItem item = new MenuItem(productIcon);

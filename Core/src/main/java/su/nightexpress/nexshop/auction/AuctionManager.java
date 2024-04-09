@@ -28,6 +28,7 @@ import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.listing.ListingCategory;
 import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.auction.task.AuctionMenuUpdateTask;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.module.AbstractShopModule;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
@@ -65,7 +66,7 @@ public class AuctionManager extends AbstractShopModule {
     private AuctionMenuUpdateTask menuUpdateTask;
 
     public AuctionManager(@NotNull ExcellentShop plugin) {
-        super(plugin, ID);
+        super(plugin, ID, Config.getAuctionAliases());
         this.categoryMap = new LinkedHashMap<>();
     }
 
@@ -336,6 +337,10 @@ public class AuctionManager extends AbstractShopModule {
 
         double tax = player.hasPermission(Perms.AUCTION_BYPASS_LISTING_TAX) ? 0D : AuctionConfig.LISTINGS_TAX_ON_LISTING_ADD;
         double taxPay = AuctionUtils.calculateTax(price, tax);
+        if (!currency.decimalsAllowed()) {
+            taxPay = Math.ceil(taxPay);
+        }
+
         if (taxPay > 0) {
             double balance = currency.getHandler().getBalance(player);
             if (balance < taxPay) {

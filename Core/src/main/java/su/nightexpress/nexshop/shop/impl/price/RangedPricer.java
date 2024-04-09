@@ -3,8 +3,8 @@ package su.nightexpress.nexshop.shop.impl.price;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.utils.values.UniDouble;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
-import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,13 @@ public abstract class RangedPricer extends AbstractProductPricer {
     @NotNull
     public UniDouble getPriceRange(@NotNull TradeType tradeType) {
         return this.priceRange.computeIfAbsent(tradeType, k -> UniDouble.of(-1, -1));
+    }
+
+    public double getPriceAverage(@NotNull TradeType tradeType) {
+        UniDouble range = this.getPriceRange(tradeType);
+        double min = range.getMinValue();
+        double max = range.getMaxValue();
+        return (min + max) / 2D;
     }
 
     public double getPriceMin(@NotNull TradeType tradeType) {

@@ -1,8 +1,15 @@
 package su.nightexpress.nexshop;
 
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import su.nexmedia.engine.utils.ItemUtil;
+import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
+import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
@@ -26,6 +33,9 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String GENERIC_DISCOUNT = "%discount%";
     public static final String GENERIC_TAX      = "%tax%";
 
+    public static final String ITEM_NAME = "%item_name%";
+    public static final String ITEM_LORE = "%item_lore%";
+
     public static final String CURRENCY_NAME = "%currency_name%";
     public static final String CURRENCY_ID   = "%currency_id%";
 
@@ -34,14 +44,15 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String SHOP_BUY_ALLOWED     = "%shop_buy_allowed%";
     public static final String SHOP_SELL_ALLOWED    = "%shop_sell_allowed%";
 
-    public static final String PRODUCT_HANDLER = "%product_handler%";
+    public static final String PRODUCT_HANDLER                  = "%product_handler%";
     public static final String PRODUCT_PRICE_TYPE               = "%product_price_type%";
-    public static final String PRODUCT_PRICE_BUY                = "%product_price_buy%";
-    public static final String PRODUCT_PRICE_BUY_FORMATTED      = "%product_price_buy_formatted%";
-    public static final String PRODUCT_PRICE_SELL               = "%product_price_sell%";
-    public static final String PRODUCT_PRICE_SELL_FORMATTED     = "%product_price_sell_formatted%";
     public static final String PRODUCT_PRICE_SELL_ALL           = "%product_price_sell_all%";
     public static final String PRODUCT_PRICE_SELL_ALL_FORMATTED = "%product_price_sell_all_formatted%";
+
+    public static final Function<TradeType, String> PRODUCT_PRICE           = type -> "%product_price_" + type.getLowerCase() + "%";
+    public static final Function<TradeType, String> PRODUCT_PRICE_FORMATTED = type -> "%product_price_" + type.getLowerCase() + "_formatted%";
+    public static final Function<TradeType, String> PRODUCT_PRICE_AVG       = type -> "%product_price_avg_" + type.getLowerCase() + "%";
+    public static final Function<TradeType, String> PRODUCT_PRICE_AVG_DIFF  = type -> "%product_price_avg_diff_" + type.getLowerCase() + "%";
 
     public static final String PRODUCT_PRICER_BUY_MIN              = "%product_pricer_buy_min%";
     public static final String PRODUCT_PRICER_BUY_MAX              = "%product_pricer_buy_max%";
@@ -76,4 +87,58 @@ public class Placeholders extends su.nexmedia.engine.utils.Placeholders {
     public static final String DISCOUNT_CONFIG_DURATION = "%discount_duration%";
     public static final String DISCOUNT_CONFIG_DAYS     = "%discount_days%";
     public static final String DISCOUNT_CONFIG_TIMES    = "%discount_times%";
+
+    @NotNull
+    public static PlaceholderRelMap<Player> forProduct(@NotNull AbstractProduct<?> product) {
+        PlaceholderRelMap<Player> map = new PlaceholderRelMap<>();
+
+        map
+            .add(Placeholders.PRODUCT_HANDLER, player -> product.getHandler().getName())
+            .add(Placeholders.PRODUCT_CURRENCY, player -> product.getCurrency().getName())
+            .add(Placeholders.PRODUCT_PRICE_TYPE, player -> product.getShop().plugin().getLangManager().getEnum(product.getPricer().getType()))
+            .add(Placeholders.PRODUCT_PRICE_SELL_ALL, player -> NumberUtil.format(player == null ? 0D : product.getPriceSellAll(player)))
+            .add(Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED, player -> {
+                double price = player == null ? 0D : product.getPriceSellAll(player);
+
+                return price >= 0 ? product.getCurrency().format(price) : "-";
+            })
+            .add(Placeholders.PRODUCT_PREVIEW_NAME, player -> ItemUtil.getItemName(product.getPreview()))
+            .add(Placeholders.PRODUCT_PREVIEW_LORE, player -> String.join("\n", ItemUtil.getLore(product.getPreview())));
+
+
+        for (TradeType tradeType : TradeType.values()) {
+
+            map.add(Placeholders.PRODUCT_PRICE.apply(tradeType), player -> {
+                return player == null ? NumberUtil.format(product.getPricer().getPrice(tradeType)) : NumberUtil.format(product.getPrice(player, tradeType));
+            });
+
+            map.add(Placeholders.PRODUCT_PRICE_FORMATTED.apply(tradeType), player -> {
+                AbstractProductPricer pricer = product.getPricer();
+                double price = player == null ? pricer.getPrice(tradeType) : product.getPrice(player, tradeType);
+
+                return price >= 0 ? product.getCurrency().format(price) : "-";
+            });
+
+            // TODO Better format
+            map.add(Placeholders.PRODUCT_PRICE_AVG.apply(tradeType), player -> {
+                AbstractProductPricer pricer = product.getPricer();
+                if (!(pricer instanceof FloatPricer floatPricer)) return NumberUtil.format(pricer.getPrice(tradeType));
+
+                return NumberUtil.format(floatPricer.getPriceAverage(tradeType));
+            });
+
+            map.add(Placeholders.PRODUCT_PRICE_AVG_DIFF.apply(tradeType), player -> {
+                AbstractProductPricer pricer = product.getPricer();
+                if (!(pricer instanceof FloatPricer floatPricer)) return NumberUtil.format(0D);
+
+                double current = floatPricer.getPrice(tradeType);
+                double avg = floatPricer.getPriceAverage(tradeType);
+                double diff = Math.abs(1D - (current / avg)) * 100D;
+                String format = NumberUtil.format(diff) + "%";
+                return current > avg ? "+" + format : "-" + format;
+            });
+        }
+
+        return map;
+    }
 }

@@ -28,6 +28,7 @@ import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.event.ChestShopCreateEvent;
 import su.nightexpress.nexshop.api.shop.event.ChestShopRemoveEvent;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
@@ -39,6 +40,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
 import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.listener.RegionMarketListener;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
@@ -72,7 +74,7 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
     private TransactionLogger logger;
 
     public ChestShopModule(@NotNull ExcellentShop plugin) {
-        super(plugin, ID);
+        super(plugin, ID, Config.getChestShopAliases());
         this.shopMap = new ShopMap();
         this.bankMap = new ConcurrentHashMap<>();
     }
@@ -92,7 +94,7 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
         super.onLoad();
         this.getConfig().initializeOptions(ChestConfig.class);
 
-        if (this.getDefaultCurrency() == CurrencyManager.DUMMY) {
+        if (this.getDefaultCurrency() == CurrencyManager.DUMMY_CURRENCY) {
             this.error("You have invalid currency set in 'Default_Currency' setting AND/OR have no valid currency in 'Allowed_Currencies' setting.");
             this.error("You must fix this issue to make your shops working properly.");
         }
@@ -282,7 +284,7 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
         if (currency != null) return currency;
 
         return this.plugin.getCurrencyManager().getCurrencies()
-            .stream().filter(cur -> ChestConfig.ALLOWED_CURRENCIES.get().contains(cur.getId())).findFirst().orElse(CurrencyManager.DUMMY);
+            .stream().filter(cur -> ChestConfig.ALLOWED_CURRENCIES.get().contains(cur.getId())).findFirst().orElse(CurrencyManager.DUMMY_CURRENCY);
     }
 
     @Override
@@ -388,6 +390,10 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
     }
 
     public boolean createShop(@NotNull Player player, @NotNull Block block, @NotNull ShopType type) {
+        return this.createShop(player, block, type, -1, -1);
+    }
+
+    public boolean createShop(@NotNull Player player, @NotNull Block block, @NotNull ShopType type, double buyPrice, double sellPrice) {
         if (!ChestUtils.isValidContainer(block)) {
             plugin.getMessage(ChestLang.SHOP_CREATION_ERROR_NOT_A_CHEST).send(player);
             return false;
@@ -445,7 +451,13 @@ public class ChestShopModule extends AbstractShopModule implements ShopModule {
         shop.setOwner(player);
         shop.setName(Placeholders.forPlayer(player).apply(ChestConfig.DEFAULT_NAME.get()));
         Arrays.asList(TradeType.values()).forEach(tradeType -> shop.setTransactionEnabled(tradeType, true));
-        shop.createProduct(player, hand);
+
+        ChestProduct product = shop.createProduct(player, hand);
+        if (product != null) {
+            if (buyPrice > 0) product.setPrice(TradeType.BUY, buyPrice);
+            if (sellPrice > 0) product.setPrice(TradeType.SELL, sellPrice);
+        }
+
         shop.save();
 
         this.addShop(shop);

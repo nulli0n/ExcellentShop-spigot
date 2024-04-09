@@ -23,6 +23,7 @@ import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.impl.handler.VanillaCommandHandler;
 import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
@@ -31,6 +32,7 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.menu.ShopMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.Discount;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualStock;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopMenu;
 
@@ -39,6 +41,7 @@ import java.util.stream.IntStream;
 
 public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> extends AbstractShop<P> implements VirtualShop {
 
+    public static final    String CONFIG_NAME   = "config.yml";
     protected static final String FILE_PRODUCTS = "products.yml";
     protected static final String FILE_VIEW     = "view.yml";
 
@@ -49,10 +52,10 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     protected final Set<Discount>     discounts;
     protected final Set<Integer>      npcIds;
 
-    protected boolean loaded;
+    protected boolean      loaded;
     protected String       name;
     protected List<String> description;
-    protected boolean      isPermissionRequired;
+    protected boolean      permissionRequired;
     protected ItemStack    icon;
 
     private ShopMainEditor editor;
@@ -124,10 +127,10 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
     @Nullable
     protected P loadProduct(@NotNull JYML cfg, @NotNull String path, @NotNull String id) {
-        String currencyId = cfg.getString(path + ".Currency", CurrencyManager.VAULT);
+        String currencyId = cfg.getString(path + ".Currency", VaultEconomyHandler.ID);
         Currency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);
         if (currency == null) {
-            currency = CurrencyManager.DUMMY;
+            currency = CurrencyManager.DUMMY_CURRENCY;
             this.getModule().warn("Invalid currency '" + currencyId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change currency in editor.");
         }
 
@@ -173,6 +176,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
             if (!product.isTradeable(tradeType) || !product.hasAccess(player)) return false;
             if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
             if (!itemPacker.isItemMatches(item)) return false;
+            if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) return false;
             return product.getAvailableAmount(player, tradeType) != 0;
         });
 
@@ -188,8 +192,8 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     }
 
     public final void saveSettings() {
-        view.getConfig().set("Title", this.view.getOptions().getTitle());
-        view.getConfig().set("Size", this.view.getOptions().getSize());
+        view.getConfig().set("Settings.Title", this.view.getOptions().getTitle());
+        view.getConfig().set("Settings.Size", this.view.getOptions().getSize());
         view.getConfig().saveChanges();
 
         cfg.set("Name", this.getName());
@@ -309,12 +313,12 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
     @Override
     public boolean isPermissionRequired() {
-        return this.isPermissionRequired;
+        return this.permissionRequired;
     }
 
     @Override
     public void setPermissionRequired(boolean isPermissionRequired) {
-        this.isPermissionRequired = isPermissionRequired;
+        this.permissionRequired = isPermissionRequired;
     }
 
     @Override

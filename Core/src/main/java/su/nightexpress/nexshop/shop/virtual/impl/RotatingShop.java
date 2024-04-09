@@ -16,9 +16,8 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.object.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.util.ShopUtils;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 
@@ -46,13 +45,14 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
         super(module, cfg, id);
         this.rotationTimes = new HashMap<>();
         this.locked = true;
+        this.rotationData = new RotationData(this.getId());
 
         this.placeholderMap
             .add(Placeholders.SHOP_PAGES, () -> {
-                int limit = this.getProductSlots().length;
-                int products = this.getData().getProducts().size();
+                double limit = this.getProductSlots().length;
+                double products = this.getData().getProducts().size();
 
-                return String.valueOf((int) Math.ceil((double) products / (double) limit));
+                return NumberUtil.format(Math.ceil(products / limit));
             })
             .add(Placeholders.SHOP_NEXT_ROTATION_DATE, () -> {
                 LocalDateTime time = this.getNextRotationTime();
@@ -220,7 +220,7 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
         while (amount > 0 && !products.isEmpty()) {
             RotatingProduct product = Rnd.getByWeight(products);
             this.getPricer().deleteData(product);
-            this.getStock().deleteData(product);
+            this.getStock().deleteGlobalData(product);
 
             generated.add(product.getId());
             products.remove(product);

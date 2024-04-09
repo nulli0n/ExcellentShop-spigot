@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual.menu;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
@@ -34,6 +35,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
+
 public class ShopMenu extends ConfigMenu<ExcellentShop> {
 
     private final VirtualShop shop;
@@ -42,17 +45,16 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
         super(plugin, cfg);
         this.shop = shop;
 
-        cfg.addMissing("Title", StringUtil.capitalizeUnderscored(shop.getId()));
-        cfg.addMissing("Size", 54);
-        cfg.saveChanges();
+        /*cfg.addMissing("Settings.Title", StringUtil.capitalizeUnderscored(shop.getId()));
+        cfg.addMissing("Settings.Size", 54);
+        cfg.saveChanges();*/
 
         this.registerHandler(MenuItemType.class)
             .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
             .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
             .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
             .addClick(MenuItemType.RETURN, (viewer, event) -> {
-                //VirtualShopModule module = this.plugin.getVirtualShop();
-                MainMenu menu = /*module == null ? null :*/ module.getMainMenu();
+                MainMenu menu = module.getMainMenu();
                 if (menu == null) {
                     viewer.getPlayer().closeInventory();
                     return;
@@ -92,6 +94,42 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
     }
 
     @Override
+    public boolean isCodeCreation() {
+        return true;
+    }
+
+    @Override
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions(SHOP_NAME, 54, InventoryType.CHEST);
+    }
+
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
+
+        ItemStack backItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmViNTg4YjIxYTZmOThhZDFmZjRlMDg1YzU1MmRjYjA1MGVmYzljYWI0MjdmNDYwNDhmMThmYzgwMzQ3NWY3In19fQ==");
+        ItemUtil.mapMeta(backItem, meta -> meta.setDisplayName("&c&lBack"));
+        list.add(new MenuItem(backItem).setType(MenuItemType.RETURN).setPriority(10).setSlots(49));
+
+        ItemStack nextItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjgyYWQxYjljYjRkZDIxMjU5YzBkNzVhYTMxNWZmMzg5YzNjZWY3NTJiZTM5NDkzMzgxNjRiYWM4NGE5NmUifX19");
+        ItemUtil.mapMeta(nextItem, meta -> meta.setDisplayName("&f&lNext Page →"));
+        list.add(new MenuItem(nextItem).setType(MenuItemType.PAGE_NEXT).setPriority(10).setSlots(50));
+
+        ItemStack prevItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzdhZWU5YTc1YmYwZGY3ODk3MTgzMDE1Y2NhMGIyYTdkNzU1YzYzMzg4ZmYwMTc1MmQ1ZjQ0MTlmYzY0NSJ9fX0=");
+        ItemUtil.mapMeta(prevItem, meta -> meta.setDisplayName("&f&l← Previous Page"));
+        list.add(new MenuItem(prevItem).setType(MenuItemType.PAGE_PREVIOUS).setPriority(10).setSlots(48));
+
+        return list;
+    }
+
+    @Override
+    protected void loadAdditional() {
+        super.loadAdditional();
+    }
+
+    @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         super.onPrepare(viewer, options);
 
@@ -101,14 +139,14 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
         }
 
         if (this.shop instanceof StaticShop staticShop) {
-            this.displayStatic(staticShop, viewer, options);
+            this.displayStatic(staticShop, viewer);
         }
         else if (this.shop instanceof RotatingShop rotatingShop) {
-            this.displayRotating(rotatingShop, viewer, options);
+            this.displayRotating(rotatingShop, viewer);
         }
     }
 
-    private void displayStatic(@NotNull StaticShop shop, @NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+    private void displayStatic(@NotNull StaticShop shop, @NotNull MenuViewer viewer) {
         viewer.setPages(shop.getPages());
         viewer.finePage();
 
@@ -122,7 +160,7 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
         }
     }
 
-    private void displayRotating(@NotNull RotatingShop shop, @NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+    private void displayRotating(@NotNull RotatingShop shop, @NotNull MenuViewer viewer) {
         RotationData data = shop.getData();
         Player player = viewer.getPlayer();
         Set<String> products = data.getProducts();
@@ -162,12 +200,12 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
 
             Label_Format:
             for (String lineFormat : loreFormat) {
-                if (lineFormat.equalsIgnoreCase("%lore%")) {
+                /*if (lineFormat.equalsIgnoreCase("%lore%")) {
                     List<String> list2 = meta.getLore();
                     if (list2 != null) lore.addAll(list2);
                     continue;
                 }
-                else if (lineFormat.equalsIgnoreCase("%discount%")) {
+                else */if (lineFormat.equalsIgnoreCase("%discount%")) {
                     if (this.shop.hasDiscount(product)) {
                         lore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_DISCOUNT.get());
                     }
@@ -196,15 +234,22 @@ public class ShopMenu extends ConfigMenu<ExcellentShop> {
                 lore.add(lineFormat);
             }
 
-            PlaceholderMap placeholderMap = new PlaceholderMap();
-            placeholderMap.getKeys().addAll(product.getPlaceholders(player).getKeys());
-            placeholderMap.getKeys().addAll(product.getCurrency().getPlaceholders().getKeys());
-            placeholderMap.getKeys().addAll(shop.getPlaceholders().getKeys());
+            PlaceholderMap placeholderMap = PlaceholderMap.fusion(
+                product.getPlaceholders(player),
+                product.getCurrency().getPlaceholders(),
+                shop.getPlaceholders()
+            );
+
             lore.replaceAll(placeholderMap.replacer());
+
             if (Config.GUI_PLACEHOLDER_API.get()) {
                 lore.replaceAll(str -> PlaceholderAPI.setPlaceholders(player, str));
             }
-            meta.setLore(StringUtil.stripEmpty(lore));
+            lore = StringUtil.stripEmpty(lore);
+            lore = StringUtil.replaceInList(lore, "%lore%", meta.getLore() == null ? Collections.emptyList() : meta.getLore());
+
+           //meta.setLore(StringUtil.stripEmpty(lore));
+            meta.setLore(lore);
         });
 
         MenuItem menuItem = new MenuItem(preview, Integer.MAX_VALUE, ItemOptions.personalWeak(player), slot);

@@ -151,8 +151,8 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .text(YELLOW + BOLD + "Info:")
         .current("Handler", Placeholders.PRODUCT_HANDLER)
         .current("Currency", Placeholders.PRODUCT_CURRENCY)
-        .current("Buy", Placeholders.PRODUCT_PRICE_BUY)
-        .current("Sell", Placeholders.PRODUCT_PRICE_SELL).emptyLine()
+        .current("Buy", Placeholders.PRODUCT_PRICE.apply(BUY))
+        .current("Sell", Placeholders.PRODUCT_PRICE.apply(SELL)).emptyLine()
         .text("(" + WHITE + "Shift-Left" + GRAY + " to edit)")
         .text("(" + WHITE + "Shift-Right" + GRAY + " to delete" + RED + " (no undo)")
         .build();
@@ -162,15 +162,17 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .currentHeader()
         .current("Rotation Chance", Placeholders.PRODUCT_ROTATION_CHANCE + "%")
         .current("Currency", Placeholders.PRODUCT_CURRENCY)
-        .current("Buy Price", Placeholders.PRODUCT_PRICE_BUY)
-        .current("Sell Price", Placeholders.PRODUCT_PRICE_SELL).emptyLine()
+        .current("Buy Price", Placeholders.PRODUCT_PRICE.apply(BUY))
+        .current("Sell Price", Placeholders.PRODUCT_PRICE.apply(SELL)).emptyLine()
         .text("(" + WHITE + "Shift-Left" + GRAY + " to edit)")
         .text("(" + WHITE + "Shift-Right" + GRAY + " to delete" + RED + " (no undo)")
         .build();
 
     public static final EditorLocale PRODUCT_FREE_SLOT = builder(PREFIX + "Product.FreeSlot")
         .name(GREEN + BOLD + "Free Slot")
-        .text("Drop item from cursor to", "create " + GREEN + "item" + GRAY + " product.").emptyLine()
+        .text("Drop item from cursor to", "create " + GREEN + "item" + GRAY + " product.")
+        .text("Hold Shift to bypass", "custom item detection.")
+        .emptyLine()
         .text("Click with empty cursor to", "create " + GREEN + "command" + GRAY + " product.")
         //.text("(" + WHITE + "Drag & Drop" + GRAY + " to create item product)")
         //.text("(" + WHITE + RMB + GRAY + " to create command product")
@@ -187,8 +189,8 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .currentHeader()
         .current("Type", Placeholders.PRODUCT_PRICE_TYPE)
         .current("Currency", Placeholders.PRODUCT_CURRENCY + GRAY + " (" + WHITE + RMB + GRAY + ")")
-        .current("Buy", Placeholders.PRODUCT_PRICE_BUY)
-        .current("Sell", Placeholders.PRODUCT_PRICE_SELL)
+        .current("Buy", Placeholders.PRODUCT_PRICE.apply(BUY))
+        .current("Sell", Placeholders.PRODUCT_PRICE.apply(SELL))
         .emptyLine()
         .text("(" + WHITE + LMB + GRAY + " to change settings)")
         .text("(" + WHITE + DROP_KEY + GRAY + " to refresh prices)")
@@ -213,6 +215,8 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
         .text("This item will be " + GREEN + "given" + GRAY + " to players", "on buying and " + RED + "taken" + GRAY + " on selling.")
         .emptyLine()
         .text("(" + WHITE + "Drag & Drop" + GRAY + " to replace)")
+        .text("Hold Shift to bypass", "custom item detection.")
+        .emptyLine()
         .text("(" + WHITE + RMB + GRAY + " to get copy)")
         .build();
 
@@ -315,14 +319,14 @@ public class VirtualLocales extends su.nexmedia.engine.api.editor.EditorLocales 
 
     public static final EditorLocale PRODUCT_PRICE_FLAT_BUY = builder(PREFIX + "Product.Price.Flat.Buy")
         .name("Buy Price")
-        .current("Current", Placeholders.PRODUCT_PRICE_BUY + GRAY + " (" + WHITE + LMB + GRAY + ")")
+        .current("Current", Placeholders.PRODUCT_PRICE.apply(BUY) + GRAY + " (" + WHITE + LMB + GRAY + ")")
         .emptyLine()
         .text("(" + WHITE + DROP_KEY + GRAY + " to disable)")
         .build();
 
     public static final EditorLocale PRODUCT_PRICE_FLAT_SELL = builder(PREFIX + "Product.Price.Flat.Sell")
         .name("Sell Price")
-        .current("Current", Placeholders.PRODUCT_PRICE_SELL + GRAY + " (" + WHITE + LMB + GRAY + ")")
+        .current("Current", Placeholders.PRODUCT_PRICE.apply(SELL) + GRAY + " (" + WHITE + LMB + GRAY + ")")
         .emptyLine()
         .text("(" + WHITE + DROP_KEY + GRAY + " to disable)")
         .build();

@@ -10,7 +10,7 @@ import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 
 public interface VirtualProduct extends Product {
 
-    @NotNull PlaceholderMap getPlaceholders(@NotNull Player player);
+    //@NotNull PlaceholderMap getPlaceholders(@NotNull Player player);
 
     boolean hasAccess(@NotNull Player player);
 

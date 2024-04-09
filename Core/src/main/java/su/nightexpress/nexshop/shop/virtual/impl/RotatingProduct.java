@@ -25,8 +25,8 @@ public class RotatingProduct extends AbstractVirtualProduct<RotatingShop> {
                            @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
         super(id, shop, currency, handler, packer);
 
-        this.placeholderMap
-            .add(Placeholders.PRODUCT_ROTATION_CHANCE, () -> NumberUtil.format(this.getRotationChance()));
+        this.placeholderRelMap
+            .add(Placeholders.PRODUCT_ROTATION_CHANCE, player -> NumberUtil.format(this.getRotationChance()));
     }
 
     @Override

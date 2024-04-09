@@ -11,6 +11,7 @@ import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
 
@@ -36,13 +37,13 @@ public class ChestConfig {
     ).mapReader(Colorizer::apply);
 
     public static final JOption<String> DEFAULT_CURRENCY = JOption.create("Shops.Default_Currency",
-        CurrencyManager.VAULT,
+        VaultEconomyHandler.ID,
         "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available.",
         "IMPORTANT: Make sure you have this currency in 'Allowed_Currencies' list!"
     ).mapReader(String::toLowerCase);
 
     public static final JOption<Set<String>> ALLOWED_CURRENCIES = JOption.create("Shops.Allowed_Currencies",
-        Set.of(CurrencyManager.VAULT),
+        Set.of(VaultEconomyHandler.ID),
         "A list of currencies that can be used for Chest Shop products."
     ).mapReader(set -> set.stream().map(String::toLowerCase).collect(Collectors.toSet()));
 

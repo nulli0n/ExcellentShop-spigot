@@ -10,7 +10,6 @@ import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 
@@ -24,7 +23,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
     @NotNull
     protected Transaction buy() {
         Player player = this.getPlayer();
-        ShopUser user = this.plugin.getUserManager().getUserData(player);
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
 
@@ -49,7 +47,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
 
             shop.getPricer().onTransaction(event);
             shop.getStock().onTransaction(event);
-            user.onTransaction(event);
 
             // Process transaction
             product.delivery(this.getInventory(), transaction.getUnits());
@@ -64,7 +61,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
     @NotNull
     protected Transaction sell() {
         Player player = this.getPlayer();
-        ShopUser user = this.plugin.getUserManager().getUserData(player);
         Inventory inventory = this.getInventory();
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
@@ -107,7 +103,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
 
             shop.getPricer().onTransaction(event);
             shop.getStock().onTransaction(event);
-            user.onTransaction(event);
 
             //shop.getBank().withdraw(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);

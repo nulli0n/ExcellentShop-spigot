@@ -9,10 +9,12 @@ import su.nexmedia.engine.api.data.sql.SQLQueries;
 import su.nexmedia.engine.api.data.sql.column.ColumnType;
 import su.nexmedia.engine.utils.StringUtil;
 import su.nexmedia.engine.utils.TimeUtil;
+import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.data.DataHandler;
+import su.nightexpress.nexshop.data.object.OwnedStockData;
 import su.nightexpress.nexshop.data.object.PriceData;
 import su.nightexpress.nexshop.data.object.RotationData;
 import su.nightexpress.nexshop.data.object.StockData;
@@ -27,12 +29,12 @@ import java.util.function.Function;
 
 public class VirtualDataHandler {
 
-    private static final SQLColumn COLUMN_GEN_HOLDER     = SQLColumn.of("holder", ColumnType.STRING);
-    private static final SQLColumn COLUMN_STOCK_TYPE         = SQLColumn.of("stockType", ColumnType.STRING);
+    private static final SQLColumn COLUMN_GEN_HOLDER = SQLColumn.of("holder", ColumnType.STRING);
+    private static final SQLColumn COLUMN_STOCK_TYPE = SQLColumn.of("stockType", ColumnType.STRING);
 
     private static final SQLColumn COLUMN_GEN_SHOP_ID    = SQLColumn.of("shopId", ColumnType.STRING);
     private static final SQLColumn COLUMN_GEN_PRODUCT_ID = SQLColumn.of("productId", ColumnType.STRING);
-    private static final SQLColumn COLUMN_GEN_PLAYER_ID = SQLColumn.of("playerId", ColumnType.STRING);
+    private static final SQLColumn COLUMN_GEN_PLAYER_ID  = SQLColumn.of("playerId", ColumnType.STRING);
 
     private static final SQLColumn COLUMN_STOCK_TRADE_TYPE   = SQLColumn.of("tradeType", ColumnType.STRING);
     private static final SQLColumn COLUMN_STOCK_RESTOCK_DATE = SQLColumn.of("restockDate", ColumnType.LONG);
@@ -44,18 +46,21 @@ public class VirtualDataHandler {
     private static final SQLColumn COLUMN_PRICE_SALES        = SQLColumn.of("sales", ColumnType.INTEGER);
     private static final SQLColumn COLUMN_ROTATE_PRODUCTS    = SQLColumn.of("products", ColumnType.STRING);
 
+    private final ExcellentShop plugin;
     private final DataHandler dataHandler;
     private final String      tableStockDataOld;
-    private final String tableStockData;
-    private final String tablePlayerLimits;
-    private final String tablePriceData;
+    private final String      tableStockData;
+    private final String      tablePlayerLimits;
+    private final String      tablePriceData;
     private final String      tableRotationData;
 
-    private final Function<ResultSet, StockData> funcStockData;
-    private final Function<ResultSet, PriceData>    funcPriceData;
-    private final Function<ResultSet, RotationData> funcRotateData;
+    private final Function<ResultSet, StockData>      stockDataFunction;
+    private final Function<ResultSet, OwnedStockData> ownedStockDataFunction;
+    private final Function<ResultSet, PriceData>      priceDataFunction;
+    private final Function<ResultSet, RotationData>   rotationDataFunction;
 
-    public VirtualDataHandler(@NotNull DataHandler dataHandler) {
+    public VirtualDataHandler(@NotNull ExcellentShop plugin, @NotNull DataHandler dataHandler) {
+        this.plugin = plugin;
         this.dataHandler = dataHandler;
         this.tableStockDataOld = dataHandler.getTablePrefix() + "_stock_data";
         this.tableStockData = dataHandler.getTablePrefix() + "_virtual_stock_data";
@@ -63,13 +68,10 @@ public class VirtualDataHandler {
         this.tablePriceData = dataHandler.getTablePrefix() + "_price_data";
         this.tableRotationData = dataHandler.getTablePrefix() + "_rotation_data";
 
-        this.funcStockData = resultSet -> {
+        this.stockDataFunction = resultSet -> {
             try {
                 TradeType tradeType = StringUtil.getEnum(resultSet.getString(COLUMN_STOCK_TRADE_TYPE.getName()), TradeType.class).orElse(null);
                 if (tradeType == null) return null;
-
-                //StockType stockType = StringUtil.getEnum(resultSet.getString(COLUMN_STOCK_TYPE.getName()), StockType.class).orElse(null);
-                //if (stockType == null) return null;
 
                 String shopId = resultSet.getString(COLUMN_GEN_SHOP_ID.getName());
                 String productId = resultSet.getString(COLUMN_GEN_PRODUCT_ID.getName());
@@ -78,13 +80,33 @@ public class VirtualDataHandler {
 
                 return new StockData(tradeType, shopId, productId, itemsLeft, restockDate);
             }
-            catch (SQLException e) {
-                e.printStackTrace();
+            catch (SQLException exception) {
+                exception.printStackTrace();
                 return null;
             }
         };
 
-        this.funcPriceData = resultSet -> {
+        this.ownedStockDataFunction = resultSet -> {
+            try {
+                TradeType tradeType = StringUtil.getEnum(resultSet.getString(COLUMN_STOCK_TRADE_TYPE.getName()), TradeType.class).orElse(null);
+                if (tradeType == null) return null;
+
+                UUID ownerId = UUID.fromString(resultSet.getString(COLUMN_GEN_PLAYER_ID.getName()));
+
+                String shopId = resultSet.getString(COLUMN_GEN_SHOP_ID.getName());
+                String productId = resultSet.getString(COLUMN_GEN_PRODUCT_ID.getName());
+                int itemsLeft = resultSet.getInt(COLUMN_STOCK_ITEMS_LEFT.getName());
+                long restockDate = resultSet.getLong(COLUMN_STOCK_RESTOCK_DATE.getName());
+
+                return new OwnedStockData(ownerId, tradeType, shopId, productId, itemsLeft, restockDate);
+            }
+            catch (SQLException exception) {
+                exception.printStackTrace();
+                return null;
+            }
+        };
+
+        this.priceDataFunction = resultSet -> {
             try {
                 String shopId = resultSet.getString(COLUMN_GEN_SHOP_ID.getName());
                 String productId = resultSet.getString(COLUMN_GEN_PRODUCT_ID.getName());
@@ -102,7 +124,7 @@ public class VirtualDataHandler {
             }
         };
 
-        this.funcRotateData = resultSet -> {
+        this.rotationDataFunction = resultSet -> {
             try {
                 String shopId = resultSet.getString(COLUMN_GEN_SHOP_ID.getName());
                 long lastRotated = resultSet.getLong(COLUMN_PRICE_LAST_UPDATED.getName());
@@ -129,7 +151,8 @@ public class VirtualDataHandler {
         ));
 
         this.dataHandler.createTable(this.tablePlayerLimits, Arrays.asList(
-            COLUMN_GEN_PLAYER_ID, COLUMN_GEN_SHOP_ID, COLUMN_GEN_PRODUCT_ID,
+            COLUMN_GEN_PLAYER_ID,
+            COLUMN_GEN_SHOP_ID, COLUMN_GEN_PRODUCT_ID,
             COLUMN_STOCK_TRADE_TYPE, COLUMN_STOCK_ITEMS_LEFT, COLUMN_STOCK_RESTOCK_DATE
         ));
 
@@ -148,9 +171,9 @@ public class VirtualDataHandler {
         if (SQLQueries.hasTable(this.dataHandler.getConnector(), this.tableStockDataOld)) {
             this.dataHandler.load(
                 this.tableStockDataOld,
-                this.funcStockData,
+                this.stockDataFunction,
                 Collections.emptyList(),
-                Arrays.asList(
+                List.of(
                     SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("GLOBAL"))
                 ),
                 -1
@@ -168,21 +191,22 @@ public class VirtualDataHandler {
 
             List<UUID> playerIds = this.dataHandler.load(this.dataHandler.getTablePrefix() + "_users",
                 function,
-                Arrays.asList(SQLColumn.of("uuid", ColumnType.STRING)),
+                List.of(SQLColumn.of("uuid", ColumnType.STRING)),
                 Collections.emptyList(), -1);
 
             //Set<UUID> playerIds = this.dataHandler.getUsers().stream().map(AbstractUser::getId).collect(Collectors.toSet());
             playerIds.forEach(id -> {
+                /*id, */
                 this.dataHandler.load(
                     this.tableStockDataOld,
-                    this.funcStockData,
+                    this.ownedStockDataFunction,
                     Collections.emptyList(),
                     Arrays.asList(
                         SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("PLAYER")),
                         SQLCondition.equal(COLUMN_GEN_HOLDER.toValue(id.toString()))
                     ),
                     -1
-                ).forEach(data -> this.insertPlayerLimit(id, data));
+                ).forEach(this::insertPlayerLimit);
             });
 
             this.dataHandler.delete(this.tableStockDataOld, SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("GLOBAL")));
@@ -214,7 +238,7 @@ public class VirtualDataHandler {
     }
 
     public void synchronize() {
-        VirtualShopModule module = this.dataHandler.plugin().getVirtualShop();
+        VirtualShopModule module = this.plugin.getVirtualShop();
         if (module != null) {
             module.loadShopData();
         }
@@ -222,17 +246,19 @@ public class VirtualDataHandler {
 
     @NotNull
     public List<StockData> getStockDatas(@NotNull String shopId) {
-        return this.dataHandler.load(this.tableStockData, this.funcStockData,
+        return this.dataHandler.load(this.tableStockData, this.stockDataFunction,
             Collections.emptyList(),
-            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))), -1
+            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))),
+            -1
         );
     }
 
     @NotNull
-    public List<StockData> getPlayerLimits(@NotNull UUID playerId) {
-        return this.dataHandler.load(this.tablePlayerLimits, this.funcStockData,
+    public List<OwnedStockData> getPlayerLimits(@NotNull UUID playerId) {
+        return this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
             Collections.emptyList(),
-            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString()))), -1
+            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString()))),
+            -1
         );
     }
 
@@ -243,7 +269,7 @@ public class VirtualDataHandler {
 
     @NotNull
     public List<PriceData> getPriceData(@NotNull String shopId) {
-        return this.dataHandler.load(this.tablePriceData, this.funcPriceData,
+        return this.dataHandler.load(this.tablePriceData, this.priceDataFunction,
             Collections.emptyList(),
             Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))), -1
         );
@@ -256,7 +282,7 @@ public class VirtualDataHandler {
 
     @Nullable
     public RotationData getRotationData(@NotNull String shopId) {
-        return this.dataHandler.load(this.tableRotationData, this.funcRotateData,
+        return this.dataHandler.load(this.tableRotationData, this.rotationDataFunction,
             Collections.emptyList(),
             Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId)))
         ).orElse(null);
@@ -273,9 +299,9 @@ public class VirtualDataHandler {
         ));
     }
 
-    public void insertPlayerLimit(@NotNull UUID playerId, @NotNull StockData data) {
+    public void insertPlayerLimit(/*@NotNull UUID playerId, */@NotNull OwnedStockData data) {
         this.dataHandler.insert(this.tablePlayerLimits, Arrays.asList(
-            COLUMN_GEN_PLAYER_ID.toValue(playerId.toString()),
+            COLUMN_GEN_PLAYER_ID.toValue(data.getOwnerId().toString()/*playerId.toString()*/),
             COLUMN_GEN_SHOP_ID.toValue(data.getShopId()),
             COLUMN_GEN_PRODUCT_ID.toValue(data.getProductId()),
             //COLUMN_STOCK_TYPE.toValue(StockType.PLAYER.name()),
@@ -317,13 +343,13 @@ public class VirtualDataHandler {
         );
     }
 
-    public void savePlayerLimit(@NotNull UUID playerId, @NotNull StockData data) {
+    public void savePlayerLimit(/*@NotNull UUID playerId, */@NotNull OwnedStockData data) {
         this.dataHandler.update(this.tablePlayerLimits,
             Arrays.asList(
                 COLUMN_STOCK_ITEMS_LEFT.toValue(data.getItemsLeft()),
                 COLUMN_STOCK_RESTOCK_DATE.toValue(data.getRestockDate())
             ),
-            SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString())),
+            SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(data.getOwnerId().toString()/*playerId.toString()*/)),
             SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(data.getShopId())),
             SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(data.getProductId())),
             SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(data.getTradeType().name()))
@@ -375,6 +401,20 @@ public class VirtualDataHandler {
             SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
             SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId())),
             SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(tradeType.name()))
+        );
+    }
+
+    public void deletePlayerLimit(@NotNull Product product, @NotNull TradeType tradeType) {
+        this.dataHandler.delete(this.tablePlayerLimits,
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
+            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId())),
+            SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(tradeType.name()))
+        );
+    }
+
+    public void deletePlayerLimits(@NotNull Shop shop) {
+        this.dataHandler.delete(this.tablePlayerLimits,
+            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shop.getId()))
         );
     }
 

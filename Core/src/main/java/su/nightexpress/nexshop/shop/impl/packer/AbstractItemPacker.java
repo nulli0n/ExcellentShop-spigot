@@ -42,9 +42,14 @@ public abstract class AbstractItemPacker extends AbstractProductPacker implement
         return ShopUtils.countItem(inventory, this::isItemMatches);
     }
 
-    @Override
+    /*@Override
     public boolean hasSpace(@NotNull Inventory inventory) {
         return ShopUtils.countItemSpace(inventory, this::isItemMatches, this.getItem().getMaxStackSize()) > 0;
+    }*/
+
+    @Override
+    public int countSpace(@NotNull Inventory inventory) {
+        return ShopUtils.countItemSpace(inventory, this::isItemMatches, this.getItem().getMaxStackSize());
     }
 
     @Override

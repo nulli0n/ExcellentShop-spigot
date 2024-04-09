@@ -35,6 +35,18 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
 
     @Override
     @NotNull
+    public String getDefaultName() {
+        return this.getName();
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getDefaultIcon() {
+        return this.currency.getIcon();
+    }
+
+    @Override
+    @NotNull
     public String formatValue(double price) {
         return this.currency.formatValue(price);
     }
@@ -72,7 +84,11 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
     @Override
     @NotNull
     public PlaceholderMap getPlaceholders() {
-        return this.currency.getPlaceholders();
+        PlaceholderMap map = new PlaceholderMap();
+        this.currency.getPlaceholders().getKeys().forEach(pair -> {
+            map.add(pair.getFirst(), pair.getSecond());
+        });
+        return map;
     }
 
     @Override
@@ -99,7 +115,7 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
             if (user == null) return;
 
             user.getCurrencyData(this.currency).addBalance(amount);
-            CoinsEngineAPI.getUserManager().saveUser(user);
+            CoinsEngineAPI.getUserManager().saveAsync(user);
         });
     }
 
@@ -114,7 +130,7 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
             if (user == null) return;
 
             user.getCurrencyData(this.currency).removeBalance(amount);
-            CoinsEngineAPI.getUserManager().saveUser(user);
+            CoinsEngineAPI.getUserManager().saveAsync(user);
         });
     }
 }

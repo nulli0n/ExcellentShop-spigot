@@ -99,7 +99,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, AbstractVirtua
                 case DYNAMIC -> VirtualLocales.PRODUCT_PRICE_DYNAMIC_BUY;
             };
             ItemReplacer.create(item).readLocale(locale).hideFlags().trimmed()
-                .replace(product.replacePlaceholders())
+                .replace(product.getPlaceholders())
                 .writeMeta();
         });
 
@@ -139,7 +139,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, AbstractVirtua
                     case DYNAMIC -> VirtualLocales.PRODUCT_PRICE_DYNAMIC_SELL;
                 };
                 ItemReplacer.create(item).readLocale(locale).hideFlags().trimmed()
-                    .replace(product.replacePlaceholders())
+                    .replace(product.getPlaceholders())
                     .writeMeta();
             });
         }
@@ -213,7 +213,7 @@ public class ProductPriceEditor extends EditorMenu<ExcellentShop, AbstractVirtua
         }).getOptions().setVisibilityPolicy(viewer -> product.getPricer().getType() == PriceType.DYNAMIC);
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemReplacer.replace(item, product.replacePlaceholders());
+            ItemReplacer.replace(item, product.getPlaceholders().replacer());
         }));
     }
 

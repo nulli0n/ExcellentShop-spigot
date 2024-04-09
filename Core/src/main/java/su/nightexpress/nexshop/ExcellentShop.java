@@ -10,7 +10,7 @@ import su.nexmedia.engine.utils.EngineUtils;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.auction.AuctionManager;
-import su.nightexpress.nexshop.command.currency.CurrencyMainCommand;
+import su.nightexpress.nexshop.currency.command.CurrencyCommand;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.CurrencyManager;
@@ -162,7 +162,7 @@ public class ExcellentShop extends NexPlugin<ExcellentShop> implements UserDataH
 
     @Override
     public void registerCommands(@NotNull GeneralCommand<ExcellentShop> mainCommand) {
-        mainCommand.addChildren(new CurrencyMainCommand(this));
+        mainCommand.addChildren(new CurrencyCommand(this));
         mainCommand.addChildren(new ReloadSubCommand<>(this, Perms.COMMAND_RELOAD));
     }
 

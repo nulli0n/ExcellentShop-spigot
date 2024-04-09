@@ -168,7 +168,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, AbstractVirtual
             if (event.getClick() == ClickType.DROP) {
                 for (TradeType tradeType : TradeType.values()) {
                     values.setInitialAmount(tradeType, -1);
-                    values.setRestockTime(tradeType, 0);
+                    values.setRestockSeconds(tradeType, 0);
                 }
                 this.save(viewer);
                 return;
@@ -180,7 +180,7 @@ public class ProductMainEditor extends EditorMenu<ExcellentShop, AbstractVirtual
             this.handleInput(viewer,  isTime ? Lang.EDITOR_GENERIC_ENTER_SECONDS : Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
                 int amount = wrapper.asAnyInt(0);
                 if (isTime) {
-                    values.setRestockTime(tradeType, amount);
+                    values.setRestockSeconds(tradeType, amount);
                 }
                 else {
                     values.setInitialAmount(tradeType, amount);

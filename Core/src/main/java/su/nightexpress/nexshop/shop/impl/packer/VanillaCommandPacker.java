@@ -84,8 +84,13 @@ public class VanillaCommandPacker extends AbstractProductPacker implements Comma
         return 1;
     }
 
-    @Override
+    /*@Override
     public boolean hasSpace(@NotNull Inventory inventory) {
         return true;
+    }*/
+
+    @Override
+    public int countSpace(@NotNull Inventory inventory) {
+        return -1;
     }
 }

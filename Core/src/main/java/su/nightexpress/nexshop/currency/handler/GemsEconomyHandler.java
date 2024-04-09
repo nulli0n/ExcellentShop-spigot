@@ -2,7 +2,9 @@ package su.nightexpress.nexshop.currency.handler;
 
 import me.xanium.gemseconomy.GemsEconomy;
 import me.xanium.gemseconomy.account.Account;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
@@ -15,6 +17,18 @@ public class GemsEconomyHandler implements CurrencyHandler, CurrencyOfflineHandl
 
     public GemsEconomyHandler(@NotNull me.xanium.gemseconomy.currency.Currency currency) {
         this.currency = currency;
+    }
+
+    @Override
+    @NotNull
+    public String getDefaultName() {
+        return this.currency.getSingular();
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getDefaultIcon() {
+        return new ItemStack(Material.EMERALD);
     }
 
     @Override

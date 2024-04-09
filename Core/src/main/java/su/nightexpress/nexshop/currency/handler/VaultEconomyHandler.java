@@ -1,16 +1,39 @@
 package su.nightexpress.nexshop.currency.handler;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.integration.VaultHook;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
 
 import java.util.UUID;
 
 public class VaultEconomyHandler implements CurrencyHandler, CurrencyOfflineHandler {
+
+    public static final String ID = "vault";
+
+    @Override
+    @NotNull
+    public String getDefaultName() {
+        return "Money";
+    }
+
+    @Override
+    @NotNull
+    public String getDefaultFormat() {
+        return "$" + Placeholders.GENERIC_PRICE;
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getDefaultIcon() {
+        return new ItemStack(Material.GOLD_NUGGET);
+    }
 
     @Override
     public double getBalance(@NotNull Player player) {

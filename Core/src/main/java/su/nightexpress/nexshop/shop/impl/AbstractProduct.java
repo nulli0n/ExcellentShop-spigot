@@ -2,12 +2,10 @@ package su.nightexpress.nexshop.shop.impl;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.lang.LangMessage;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.NumberUtil;
 import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
@@ -21,16 +19,16 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.currency.impl.ItemCurrency;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.price.FlatPricer;
+import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
-public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product, Placeholder {
+public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
 
     protected final ExcellentShop plugin;
     protected final String id;
-    protected final PlaceholderMap placeholderMap;
+    protected final PlaceholderRelMap<Player> placeholderRelMap;
 
     protected S                     shop;
     protected Currency              currency;
@@ -38,8 +36,12 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     protected ProductPacker         packer;
     protected AbstractProductPricer pricer;
 
-    public AbstractProduct(@NotNull ExcellentShop plugin, @NotNull String id, @NotNull S shop, @NotNull Currency currency,
-                           @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
+    public AbstractProduct(@NotNull ExcellentShop plugin,
+                           @NotNull String id,
+                           @NotNull S shop,
+                           @NotNull Currency currency,
+                           @NotNull ProductHandler handler,
+                           @NotNull ProductPacker packer) {
         this.plugin = plugin;
         this.id = id.toLowerCase();
         this.shop = shop;
@@ -48,49 +50,17 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         this.setHandler(handler);
         this.packer = packer;
 
-        this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.PRODUCT_HANDLER, () -> this.getHandler().getName())
-            .add(Placeholders.PRODUCT_CURRENCY, () -> this.getCurrency().getName())
-            .add(Placeholders.PRODUCT_PRICE_BUY, () -> NumberUtil.format(this.getPricer().getBuyPrice()))
-            .add(Placeholders.PRODUCT_PRICE_BUY_FORMATTED, () -> this.getPricer().getBuyPrice() >= 0 ? getCurrency().format(this.getPricer().getBuyPrice()) : "-")
-            .add(Placeholders.PRODUCT_PRICE_SELL, () -> NumberUtil.format(this.getPricer().getSellPrice()))
-            .add(Placeholders.PRODUCT_PRICE_SELL_FORMATTED, () -> this.getPricer().getSellPrice() >= 0 ? getCurrency().format(this.getPricer().getSellPrice()) : "-")
-            .add(Placeholders.PRODUCT_PRICE_TYPE, () -> getShop().plugin().getLangManager().getEnum(this.getPricer().getType()))
-            .add(Placeholders.PRODUCT_PREVIEW_NAME, () -> ItemUtil.getItemName(this.getPreview()))
-            .add(Placeholders.PRODUCT_PREVIEW_LORE, () -> String.join("\n", ItemUtil.getLore(this.getPreview())));
+        this.placeholderRelMap = Placeholders.forProduct(this);
     }
 
     @Override
     @NotNull
-    public PlaceholderMap getPlaceholders() {
-        PlaceholderMap map = new PlaceholderMap(this.placeholderMap);
-        map.add(this.getPacker().getPlaceholders());
-        map.add(this.getPricer().getPlaceholders());
+    public PlaceholderMap getPlaceholders(@Nullable Player player) {
+        PlaceholderMap map = this.placeholderRelMap.toNormal(player);
+        map.add(this.getPacker().getPlaceholders()); // Packer can be changed, we can't cache it.
+        map.add(this.getPricer().getPlaceholders()); // Pricer can be changed, we can't cache it.
         return map;
     }
-
-    @NotNull
-    public PlaceholderMap getPlaceholders(@NotNull Player player) {
-        PlaceholderMap placeholderMap = new PlaceholderMap();
-        placeholderMap
-            .add(Placeholders.PRODUCT_PRICE_TYPE, () -> getShop().plugin().getLangManager().getEnum(this.getPricer().getType()))
-            .add(Placeholders.PRODUCT_PREVIEW_NAME, () -> ItemUtil.getItemName(this.getPreview()))
-            .add(Placeholders.PRODUCT_PREVIEW_LORE, () -> String.join("\n", ItemUtil.getLore(this.getPreview())))
-            .add(Placeholders.PRODUCT_CURRENCY, () -> this.getCurrency().getName())
-            .add(Placeholders.PRODUCT_PRICE_BUY, () -> NumberUtil.format(this.getPriceBuy(player)))
-            .add(Placeholders.PRODUCT_PRICE_BUY_FORMATTED, () -> this.getPriceBuy(player) >= 0 ? getCurrency().format(this.getPriceBuy(player)) : "-")
-            .add(Placeholders.PRODUCT_PRICE_SELL, () -> NumberUtil.format(this.getPriceSell(player)))
-            .add(Placeholders.PRODUCT_PRICE_SELL_FORMATTED, () -> this.getPriceSell(player) >= 0 ? getCurrency().format(this.getPriceSell(player)) : "-")
-            .add(Placeholders.PRODUCT_PRICE_SELL_ALL, () -> NumberUtil.format(this.getPriceSellAll(player)))
-            .add(Placeholders.PRODUCT_PRICE_SELL_ALL_FORMATTED, () -> {
-                return this.getPriceSellAll(player) >= 0 ? this.getCurrency().format(this.getPriceSellAll(player)) : "-";
-            })
-        ;
-        return placeholderMap;
-    }
-
-    //@NotNull
-    //public abstract PreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
     @Override
     public void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click) {
@@ -106,7 +76,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
                 return;
             }
             if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && !this.hasSpace(player)) {
-                this.getShop().plugin().getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player);
+                this.plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player);
                 return;
             }
         }
@@ -150,7 +120,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     }
 
     public void openTrade(@NotNull Player player, @NotNull PreparedProduct prepared) {
-        this.getShop().plugin().getCartMenu().open(player, prepared);
+        this.plugin.getCartMenu().open(player, prepared);
     }
 
     @Override
@@ -166,7 +136,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
                 price *= sellModifier;
             }
         }
-        if (this.getCurrency() instanceof ItemCurrency) {
+        if (!this.getCurrency().decimalsAllowed()) {
             price = Math.floor(price);
         }
 
@@ -175,8 +145,8 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public void setPrice(@NotNull TradeType tradeType, double price) {
-        if (this.getCurrency() instanceof ItemCurrency) {
-            price = (int) Math.floor(price);
+        if (!this.getCurrency().decimalsAllowed()) {
+            price = Math.floor(price);
         }
         this.getPricer().setPrice(tradeType, price);
     }

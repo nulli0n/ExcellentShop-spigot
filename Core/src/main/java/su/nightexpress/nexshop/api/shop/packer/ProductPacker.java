@@ -16,7 +16,12 @@ public interface ProductPacker extends Placeholder {
 
     void setPreview(@NotNull ItemStack preview);
 
-    boolean hasSpace(@NotNull Inventory inventory);
+    default boolean hasSpace(@NotNull Inventory inventory) {
+        int space = this.countSpace(inventory);
+        return space != 0;
+    }
+
+    int countSpace(@NotNull Inventory inventory);
 
     void delivery(@NotNull Inventory inventory, int count);
 

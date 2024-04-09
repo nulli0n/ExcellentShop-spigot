@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.impl;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ExcellentShop;
@@ -9,6 +10,8 @@ import su.nightexpress.nexshop.api.shop.stock.Stock;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 
 public abstract class AbstractStock<S extends Shop, P extends Product> implements Stock {
+
+    public static final int UNLIMITED = -1;
 
     protected final ExcellentShop plugin;
     protected final S shop;
@@ -28,34 +31,34 @@ public abstract class AbstractStock<S extends Shop, P extends Product> implement
     protected abstract P findProduct(@NotNull Product product);
 
     @Override
-    public int count(@NotNull Product product, @NotNull TradeType type) {
+    public int count(@NotNull Product product, @NotNull TradeType type, @Nullable Player player) {
         P origin = this.findProduct(product);
-        return origin == null ? 0 : this.countItem(origin, type);
+        return origin == null ? 0 : this.countItem(origin, type, player);
     }
 
-    public abstract int countItem(@NotNull P product, @NotNull TradeType type);
+    public abstract int countItem(@NotNull P product, @NotNull TradeType type, @Nullable Player player);
 
     @Override
-    public boolean consume(@NotNull Product product, int amount, @NotNull TradeType type) {
+    public boolean consume(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player) {
         P origin = this.findProduct(product);
-        return origin != null && this.consumeItem(origin, amount, type);
+        return origin != null && this.consumeItem(origin, amount, type, player);
     }
 
-    public abstract boolean consumeItem(@NotNull P product, int amount, @NotNull TradeType type);
+    public abstract boolean consumeItem(@NotNull P product, int amount, @NotNull TradeType type, @Nullable Player player);
 
     @Override
-    public boolean store(@NotNull Product product, int amount, @NotNull TradeType type) {
+    public boolean store(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player) {
         P origin = this.findProduct(product);
-        return origin != null && this.storeItem(origin, amount, type);
+        return origin != null && this.storeItem(origin, amount, type, player);
     }
 
-    public abstract boolean storeItem(@NotNull P product, int amount, @NotNull TradeType type);
+    public abstract boolean storeItem(@NotNull P product, int amount, @NotNull TradeType type, @Nullable Player player);
 
     @Override
-    public boolean restock(@NotNull Product product, @NotNull TradeType type, boolean force) {
+    public boolean restock(@NotNull Product product, @NotNull TradeType type, boolean force, @Nullable Player player) {
         P origin = this.findProduct(product);
-        return origin != null && this.restockItem(origin, type, force);
+        return origin != null && this.restockItem(origin, type, force, player);
     }
 
-    public abstract boolean restockItem(@NotNull P product, @NotNull TradeType type, boolean force);
+    public abstract boolean restockItem(@NotNull P product, @NotNull TradeType type, boolean force, @Nullable Player player);
 }

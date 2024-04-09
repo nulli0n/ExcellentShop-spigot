@@ -45,16 +45,27 @@ public class StockValues {
     public void write(@NotNull JYML cfg, @NotNull String path) {
         for (TradeType tradeType : TradeType.values()) {
             cfg.set(path + "." + tradeType.name() + ".Initial_Amount", this.getInitialAmount(tradeType));
-            cfg.set(path + "." + tradeType.name() + ".Restock_Time", this.getRestockTime(tradeType));
+            cfg.set(path + "." + tradeType.name() + ".Restock_Time", this.getRestockSeconds(tradeType));
         }
     }
 
     public boolean isUnlimited(@NotNull TradeType type) {
-        return this.getInitialAmount(type) < 0 || this.getRestockTime(type) == 0L;
+        return this.getInitialAmount(type) < 0 || this.getRestockSeconds(type) == 0L;
     }
 
     public boolean isRestockable(@NotNull TradeType type) {
-        return this.getRestockTime(type) >= 0L;
+        return this.getRestockSeconds(type) >= 0L;
+    }
+
+    /**
+     * @return Amount of milliseconds.
+     */
+    public long getRestockTime(@NotNull TradeType tradeType) {
+        return this.getRestockSeconds(tradeType) * 1000L + 100L; // 100L for better visuals
+    }
+
+    public long generateRestockTimestamp(@NotNull TradeType tradeType) {
+        return System.currentTimeMillis() + this.getRestockTime(tradeType);
     }
 
     @NotNull
@@ -75,11 +86,11 @@ public class StockValues {
         this.getInitialAmountMap().put(type, amount);
     }
 
-    public long getRestockTime(@NotNull TradeType type) {
+    public long getRestockSeconds(@NotNull TradeType type) {
         return this.getRestockTimeMap().getOrDefault(type, 0L);
     }
 
-    public void setRestockTime(@NotNull TradeType type, long time) {
+    public void setRestockSeconds(@NotNull TradeType type, long time) {
         this.getRestockTimeMap().put(type, time);
     }
 }

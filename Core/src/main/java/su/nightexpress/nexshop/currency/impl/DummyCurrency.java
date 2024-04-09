@@ -31,6 +31,18 @@ public class DummyCurrency implements Currency, CurrencyHandler {
 
     @Override
     @NotNull
+    public String getDefaultName() {
+        return this.getName();
+    }
+
+    @Override
+    @NotNull
+    public ItemStack getDefaultIcon() {
+        return new ItemStack(Material.SUNFLOWER);
+    }
+
+    @Override
+    @NotNull
     public String getFormat() {
         return Placeholders.GENERIC_AMOUNT + " Dummy";
     }

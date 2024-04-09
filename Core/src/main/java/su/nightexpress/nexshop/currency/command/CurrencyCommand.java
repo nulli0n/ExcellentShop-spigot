@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.command.currency;
+package su.nightexpress.nexshop.currency.command;
 
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -9,17 +9,17 @@ import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.config.Lang;
 
-public class CurrencyMainCommand extends GeneralCommand<ExcellentShop> {
+public class CurrencyCommand extends GeneralCommand<ExcellentShop> {
 
-    public CurrencyMainCommand(@NotNull ExcellentShop plugin) {
+    public CurrencyCommand(@NotNull ExcellentShop plugin) {
         super(plugin, new String[]{"currency"}, Perms.COMMAND_CURRENCY);
         this.setDescription(plugin.getMessage(Lang.COMMAND_CURRENCY_DESC));
         this.setUsage(plugin.getMessage(Lang.COMMAND_CURRENCY_USAGE));
 
         this.addDefaultCommand(new HelpSubCommand<>(this.plugin));
-        this.addChildren(new CurrencyCreateCommand(this.plugin));
-        this.addChildren(new CurrencyGiveTakeCommand(this.plugin, CurrencyGiveTakeCommand.Mode.GIVE));
-        this.addChildren(new CurrencyGiveTakeCommand(this.plugin, CurrencyGiveTakeCommand.Mode.TAKE));
+        this.addChildren(new CreateCommand(this.plugin));
+        this.addChildren(new GiveCommand(this.plugin));
+        this.addChildren(new RemoveCommand(this.plugin));
     }
 
     @Override

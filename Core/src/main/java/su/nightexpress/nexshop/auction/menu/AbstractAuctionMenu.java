@@ -118,6 +118,7 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
             //meta.setLore(lore);
             ItemUtil.replace(meta, aucItem.replacePlaceholders());
         });
+        ItemUtil.setPlaceholderAPI(player, item);
         return item;
     }
 

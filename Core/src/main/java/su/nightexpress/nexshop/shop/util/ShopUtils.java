@@ -46,7 +46,7 @@ public class ShopUtils {
     }
 
     public static int countItemSpace(@NotNull Inventory inventory, @NotNull Predicate<ItemStack> predicate, int maxSize) {
-        return Stream.of(inventory.getContents()).mapToInt(itemHas -> {
+        return Stream.of(inventory.getStorageContents()).mapToInt(itemHas -> {
             if (itemHas == null || itemHas.getType().isAir()) {
                 return maxSize;
             }

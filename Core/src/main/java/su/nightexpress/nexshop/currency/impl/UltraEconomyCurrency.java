@@ -48,6 +48,18 @@ public class UltraEconomyCurrency implements Currency, CurrencyHandler, Currency
 
     @Override
     @NotNull
+    public ItemStack getDefaultIcon() {
+        return currency.getIcon().getAsItemStack().orElse(new ItemStack(Material.GOLD_INGOT));
+    }
+
+    @Override
+    @NotNull
+    public String getDefaultName() {
+        return this.getName();
+    }
+
+    @Override
+    @NotNull
     public String getFormat() {
         return currency.getFormat().format(0.0);
     }

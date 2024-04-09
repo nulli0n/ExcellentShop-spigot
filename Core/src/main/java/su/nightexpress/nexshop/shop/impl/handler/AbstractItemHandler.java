@@ -36,7 +36,12 @@ public abstract class AbstractItemHandler implements ItemHandler {
             ItemStack cursor = event.getCursor();
             if (cursor == null || cursor.getType().isAir()) return;
 
-            ProductHandler handler = ProductHandlerRegistry.getHandler(cursor);
+            ProductHandler handler;
+            if (event.isShiftClick()) {
+                handler = ProductHandlerRegistry.BUKKIT_ITEM;
+            }
+            else handler = ProductHandlerRegistry.getHandler(cursor);
+
             product.setHandler(handler);
             if (product.getPacker() instanceof ItemPacker itemPacker1) {
                 itemPacker1.load(cursor);

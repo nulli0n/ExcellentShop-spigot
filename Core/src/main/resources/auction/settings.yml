@@ -1,9 +1,3 @@
-# Custom module command names. Split commands with a comma.
-# These commands will be registered as the server commands.
-# Do not leave this empty.
-Command_Aliases: auction,auc,ah
-
-# Database settings.
 Database:
   # How often (in seconds) plugin/user data will be saved automatically?
   # Set this to -1 to disable.

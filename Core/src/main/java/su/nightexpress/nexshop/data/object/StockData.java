@@ -33,15 +33,21 @@ public class StockData {
     }
 
     public void restock(@NotNull StockValues values) {
-        //StockValues values = product.getStockValues();
-
         this.itemsLeft = values.getInitialAmount(this.getTradeType());
-        if (values.isRestockable(this.getTradeType())) {
-            this.restockDate = System.currentTimeMillis() + values.getRestockTime(this.getTradeType()) * 1000L;
+        this.restockDate = 0L;
+    }
+
+    public void updateRestockDate(@NotNull StockValues values) {
+        if (values.isRestockable(this.tradeType)) {
+            this.restockDate = values.generateRestockTimestamp(this.tradeType);
         }
         else {
             this.restockDate = -1L;
         }
+    }
+
+    public boolean isAwaiting() {
+        return this.restockDate == 0L;
     }
 
     @NotNull
@@ -72,7 +78,7 @@ public class StockData {
     }
 
     public boolean isRestockTime() {
-        return this.getRestockDate() >= 0 && System.currentTimeMillis() > this.getRestockDate();
+        return this.getRestockDate() > 0 && System.currentTimeMillis() > this.getRestockDate();
     }
 
     @Override

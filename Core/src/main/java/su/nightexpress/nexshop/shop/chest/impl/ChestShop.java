@@ -25,7 +25,7 @@ import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
@@ -115,7 +115,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @Nullable
     private ChestProduct loadProduct(@NotNull String id, @NotNull String path) {
-        String currencyId = cfg.getString(path + ".Currency", CurrencyManager.VAULT);
+        String currencyId = cfg.getString(path + ".Currency", VaultEconomyHandler.ID);
         Currency currency = this.plugin.getCurrencyManager().getCurrency(currencyId);
         if (currency == null || !ChestUtils.isAllowedCurrency(currency)) {
             currency = this.getModule().getDefaultCurrency();
@@ -246,13 +246,14 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
     }
 
-    public boolean createProduct(@NotNull Player player, @NotNull ItemStack item) {
+    @Nullable
+    public ChestProduct createProduct(@NotNull Player player, @NotNull ItemStack item) {
         if (item.getType().isAir() || this.isProduct(item)) {
-            return false;
+            return null;
         }
         if (!ChestUtils.isAllowedItem(item)) {
             plugin.getMessage(ChestLang.SHOP_PRODUCT_ERROR_BAD_ITEM).send(player);
-            return false;
+            return null;
         }
 
         String id = UUID.randomUUID().toString();
@@ -266,7 +267,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         Currency currency = this.getModule().getDefaultCurrency();
         ChestProduct product = new ChestProduct(id, this, currency, handler, packer);
         this.addProduct(product);
-        return true;
+        return product;
     }
 
     @NotNull

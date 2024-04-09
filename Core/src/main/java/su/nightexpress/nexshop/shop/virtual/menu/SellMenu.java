@@ -4,58 +4,73 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nexmedia.engine.api.config.JOption;
 import su.nexmedia.engine.api.config.JYML;
 import su.nexmedia.engine.api.menu.impl.ConfigMenu;
+import su.nexmedia.engine.api.menu.impl.MenuOptions;
 import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nexmedia.engine.api.menu.item.MenuItem;
+import su.nexmedia.engine.api.menu.link.Linked;
+import su.nexmedia.engine.api.menu.link.ViewLink;
+import su.nexmedia.engine.utils.*;
 import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
-public class SellMenu extends ConfigMenu<ExcellentShop> {
+import static su.nightexpress.nexshop.Placeholders.*;
+
+public class SellMenu extends ConfigMenu<ExcellentShop> implements Linked<List<ItemStack>> {
 
     private final VirtualShopModule module;
-    private final String            itemName;
-    private final List<String>      itemLore;
-    private final int[]             itemSlots;
+    private final ViewLink<List<ItemStack>> link;
+    private final boolean simplified;
 
-    private static final Map<Player, List<ItemStack>> USER_ITEMS = new WeakHashMap<>();
+    private String       itemName;
+    private List<String> itemLore;
+    private int[]        itemSlots;
 
-    public SellMenu(@NotNull VirtualShopModule module, @NotNull JYML cfg) {
-        super(module.plugin(), cfg);
+    public SellMenu(@NotNull ExcellentShop plugin, @NotNull VirtualShopModule module, @NotNull JYML cfg) {
+        super(plugin, cfg);
         this.module = module;
-        this.itemName = Colorizer.apply(cfg.getString("Item.Name", "%item_name%"));
-        this.itemLore = Colorizer.apply(cfg.getStringList("Item.Lore"));
-        this.itemSlots = cfg.getIntArray("Item.Slots");
+        this.simplified = VirtualConfig.SELL_MENU_SIMPLIFIED.get();
+        this.link = new ViewLink<>();
 
         this.registerHandler(ItemType.class)
             .addClick(ItemType.SELL, (viewer, event) -> {
                 Player player = viewer.getPlayer();
-                List<ItemStack> userItems = USER_ITEMS.remove(player);
-                if (userItems == null) return;
+                List<ItemStack> items = this.getLink().get(player);
+                if (items == null) return;
 
                 Inventory inventory = plugin.getServer().createInventory(null, 54, "dummy");
-                inventory.addItem(userItems.toArray(new ItemStack[0]));
+                inventory.addItem(items.toArray(new ItemStack[0]));
+                items.clear();
 
                 this.module.sellWithReturn(player, inventory);
                 this.plugin.runTask(task -> player.closeInventory());
             });
 
         this.load();
+
+        // We don't need decorative items in simplified menu without click event restrictions.
+        if (this.simplified) {
+            this.getItems().clear();
+        }
+    }
+
+    @NotNull
+    @Override
+    public ViewLink<List<ItemStack>> getLink() {
+        return link;
     }
 
     enum ItemType {
@@ -63,9 +78,52 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
     }
 
     @Override
+    public boolean isCodeCreation() {
+        return true;
+    }
+
+    @Override
+    public void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
+        super.onReady(viewer, inventory);
+
+        if (this.simplified) return;
+
+        Player player = viewer.getPlayer();
+        List<ItemStack> items = this.getLink().get(player);
+        int index = 0;
+
+        for (ItemStack item : items) {
+            if (index >= this.itemSlots.length) break;
+
+            int slot = this.itemSlots[index++];
+            if (slot >= inventory.getSize()) continue;
+
+            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            if (product == null) continue;
+
+            ItemStack icon = new ItemStack(item);
+            double price = product.getPriceSell(player) * (item.getAmount() / (double) product.getUnitAmount());
+
+            ItemReplacer.create(icon)
+                .trimmed()
+                .setDisplayName(this.itemName)
+                .setLore(this.itemLore)
+                .replaceLoreExact(ITEM_LORE, ItemUtil.getLore(item))
+                .replace(ITEM_NAME, ItemUtil.getItemName(item))
+                .replace(product.getShop().getPlaceholders())
+                .replace(product.getPlaceholders(player))
+                .replace(GENERIC_PRICE, () -> product.getCurrency().format(price))
+                .replace(Colorizer::apply)
+                .writeMeta();
+
+            inventory.setItem(slot, icon);
+        }
+    }
+
+    @Override
     public void onDrag(@NotNull MenuViewer viewer, @NotNull InventoryDragEvent event) {
         super.onDrag(viewer, event);
-        if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
+        if (this.simplified) {
             event.setCancelled(false);
         }
     }
@@ -73,93 +131,79 @@ public class SellMenu extends ConfigMenu<ExcellentShop> {
     @Override
     public void onClick(@NotNull MenuViewer viewer, @Nullable ItemStack item, @NotNull SlotType slotType, int slot, @NotNull InventoryClickEvent event) {
         super.onClick(viewer, item, slotType, slot, event);
-        if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
+        if (this.simplified) {
             event.setCancelled(false);
             return;
         }
 
         Player player = viewer.getPlayer();
-        Inventory inventory = event.getInventory();
         if (item == null || item.getType().isAir()) return;
 
         if (slotType == SlotType.PLAYER) {
             VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
             if (product == null) return;
 
-            int firtSlot = Arrays.stream(this.itemSlots)
-                .filter(slot2 -> {
-                    ItemStack has = inventory.getItem(slot2);
-                    return has == null || has.getType().isAir();
-                })
-                .findFirst().orElse(-1);
-            if (firtSlot < 0) return;
+            List<ItemStack> items = this.getLink().get(player);
+            if (items.size() >= this.itemSlots.length) return;
 
-            ItemStack icon = new ItemStack(item);
-            ItemMeta meta = icon.getItemMeta();
-            if (meta == null) return;
-
-            double price = product.getPricer().getSellPrice() * (item.getAmount() / (double) product.getUnitAmount());
-
-            List<String> lore = new ArrayList<>(this.itemLore);
-            lore.replaceAll(line -> {
-                line = product.getShop().replacePlaceholders().apply(line);
-                line = product.replacePlaceholders().apply(line);
-                return line
-                    .replace(Placeholders.GENERIC_PRICE, product.getCurrency().format(price));
-            });
-            lore = StringUtil.replaceInList(lore, "%item_lore%", ItemUtil.getLore(item));
-            lore = StringUtil.stripEmpty(lore);
-
-            meta.setDisplayName(this.itemName.replace("%item_name%", ItemUtil.getItemName(item)));
-            meta.setLore(lore);
-            icon.setItemMeta(meta);
-            inventory.setItem(firtSlot, icon);
-
-            List<ItemStack> userItems = USER_ITEMS.computeIfAbsent(player, k -> new ArrayList<>());
-            userItems.add(new ItemStack(item));
+            items.add(new ItemStack(item));
             item.setAmount(0);
+            this.openNextTick(viewer, 1);
         }
     }
 
     @Override
     public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
-        super.onClose(viewer, event);
-
         Player player = viewer.getPlayer();
 
-        if (VirtualConfig.SELL_MENU_SIMPLIFIED.get()) {
+        if (this.simplified) {
             this.module.sellWithReturn(player, event.getInventory());
         }
         else {
-            List<ItemStack> userItems = USER_ITEMS.remove(player);
+            List<ItemStack> userItems = this.getLink().get(player);
             if (userItems != null) {
                 userItems.forEach(item -> PlayerUtil.addItem(player, item));
             }
         }
+
+        super.onClose(viewer, event);
     }
 
-    @Deprecated
-    public void sellWithReturn(@NotNull Player player, @NotNull Inventory inventory) {
-        this.module.sellWithReturn(player, inventory);
+    @Override
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions("Sell Menu", 54, InventoryType.CHEST);
     }
 
-    @Deprecated
-    public void sellSlots(@NotNull Player player, int... slots) {
-        this.module.sellSlots(player, slots);
+    @Override
+    protected void loadAdditional() {
+        this.itemName = JOption.create("Item.Name", Colors.WHITE + ITEM_NAME).read(cfg);
+
+        this.itemLore = JOption.create("Item.Lore", List.of(
+            ITEM_LORE,
+            "",
+            Colors.GREEN + Colors.BOLD + "Details:",
+            Colors.GREEN + "▪ " + Colors.GRAY + "Approx Price: " + Colors.GREEN + GENERIC_PRICE,
+            Colors.GREEN + "▪ " + Colors.GRAY + "Found In: " + Colors.GREEN + SHOP_NAME
+        )).read(cfg);
+
+        this.itemSlots = new JOption<int[]>("Item.Slots",
+            JYML::getIntArray,
+            () -> IntStream.range(0, 45).toArray()
+        ).setWriter(JYML::setIntArray).read(cfg);
     }
 
-    @Deprecated
-    public void sellAll(@NotNull Player player) {
-        this.module.sellAll(player);
-    }
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
 
-    @Deprecated
-    public void sellAll(@NotNull Player player, @NotNull Inventory inventory) {
-        this.module.sellAll(player, inventory);
-    }
+        ItemStack sellItem = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTc5YTVjOTVlZTE3YWJmZWY0NWM4ZGMyMjQxODk5NjQ5NDRkNTYwZjE5YTQ0ZjE5ZjhhNDZhZWYzZmVlNDc1NiJ9fX0=");
+        ItemUtil.mapMeta(sellItem, meta -> {
+            meta.setDisplayName(Colors.GREEN + Colors.BOLD + "SELL ALL!");
+        });
+        list.add(new MenuItem(sellItem).setPriority(10).setSlots(49).setType(ItemType.SELL));
 
-    @Deprecated
-    public void sellAll(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop) {
-        this.module.sellAll(player, inventory, shop);
+        return list;
     }
 }

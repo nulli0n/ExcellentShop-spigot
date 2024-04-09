@@ -9,12 +9,17 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.virtual.impl.Discount;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public interface VirtualShop extends Shop {
+
+    @NotNull File getFile();
+
+    boolean load();
 
     boolean isLoaded();
 

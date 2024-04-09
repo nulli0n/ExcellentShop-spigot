@@ -108,6 +108,7 @@ public class AuctionCurrencySelectorMenu extends ConfigMenu<ExcellentShop> imple
             .replace(Placeholders.GENERIC_PRICE, currency.format(price))
             .replace(Placeholders.GENERIC_TAX, currency.format(tax))
         );
+        ItemUtil.setPlaceholderAPI(player, item);
         return item;
     }
 

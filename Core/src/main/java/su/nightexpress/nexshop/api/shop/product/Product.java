@@ -4,16 +4,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
 
 public interface Product extends Placeholder {
+
+    @Override
+    @NotNull
+    default PlaceholderMap getPlaceholders() {
+        return this.getPlaceholders(null);
+    }
+
+    @NotNull PlaceholderMap getPlaceholders(@Nullable Player player);
 
     void clear();
 
@@ -67,6 +77,14 @@ public interface Product extends Placeholder {
 
     default int count(@NotNull Inventory inventory) {
         return this.getPacker().count(inventory);
+    }
+
+    default int countSpace(@NotNull Player player) {
+        return this.countSpace(player.getInventory());
+    }
+
+    default int countSpace(@NotNull Inventory inventory) {
+        return this.getPacker().countSpace(inventory);
     }
 
     default boolean hasSpace(@NotNull Player player) {

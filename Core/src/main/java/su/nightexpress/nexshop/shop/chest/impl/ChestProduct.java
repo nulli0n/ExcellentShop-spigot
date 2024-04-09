@@ -3,11 +3,11 @@ package su.nightexpress.nexshop.shop.chest.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.chest.Placeholders;
 import su.nightexpress.nexshop.shop.chest.menu.ProductPriceMenu;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
 
@@ -19,14 +19,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
                         @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
         super(shop.plugin(), id, shop, currency, handler, packer);
 
-        this.placeholderMap.add(this.getShop().getStock().getPlaceholders(this));
-    }
-
-    @Override
-    @NotNull
-    public PlaceholderMap getPlaceholders(@NotNull Player player) {
-        return super.getPlaceholders(player)
-            .add(this.getShop().getStock().getPlaceholders(this));
+        this.placeholderRelMap.add(Placeholders.forProductStock(this));
     }
 
     public void write(@NotNull JYML cfg, @NotNull String path) {
@@ -54,7 +47,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
 
     @Override
     public int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType) {
-        return this.getShop().getStock().count(this, tradeType);
+        return this.getShop().getStock().count(this, tradeType, player);
     }
 
     @Override

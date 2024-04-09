@@ -15,8 +15,8 @@ public class ChestLang extends EngineLang {
     public static final LangKey COMMAND_BANK_DESC  = LangKey.of("ChestShop.Command.Bank.Desc", "Open [player's] bank.");
     public static final LangKey COMMAND_BANK_USAGE = LangKey.of("ChestShop.Command.Bank.Usage", "[player]");
 
-    public static final LangKey COMMAND_CREATE_DESC  = LangKey.of("ChestShop.Command.Create.Desc", "Creates shop of the chest that you're looking on.");
-    public static final LangKey COMMAND_CREATE_USAGE = LangKey.of("ChestShop.Command.Create.Usage", "[type]");
+    public static final LangKey COMMAND_CREATE_DESC  = LangKey.of("ChestShop.Command.Create.Desc", "Create a shop.");
+    public static final LangKey COMMAND_CREATE_USAGE = LangKey.of("ChestShop.Command.Create.Usage", "[buyPrice] [sellPrice]");
 
     public static final LangKey COMMAND_BROWSE_DESC  = LangKey.of("ChestShop.Command.Browse.Desc", "Player shops GUI.");
     public static final LangKey COMMAND_BROWSE_USAGE = LangKey.of("ChestShop.Command.Browse.Usage", "");
