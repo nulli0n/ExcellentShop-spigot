@@ -2,20 +2,20 @@ package su.nightexpress.nexshop.shop.chest.listener;
 
 import net.alex9849.arm.adapters.WGRegion;
 import net.alex9849.arm.events.RestoreRegionEvent;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.manager.AbstractListener;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.util.BlockPos;
+import su.nightexpress.nightcore.manager.AbstractListener;
 
-public class RegionMarketListener extends AbstractListener<ExcellentShop> {
+public class RegionMarketListener extends AbstractListener<ShopPlugin> {
 
     private final ChestShopModule module;
 
-    public RegionMarketListener(@NotNull ExcellentShop plugin, @NotNull ChestShopModule module) {
+    public RegionMarketListener(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
         super(plugin);
         this.module = module;
     }
@@ -25,11 +25,9 @@ public class RegionMarketListener extends AbstractListener<ExcellentShop> {
         World world = event.getRegion().getRegionworld();
         WGRegion region = event.getRegion().getRegion();
 
-        this.module.getShops().forEach(shop -> {
-            Location location = shop.getLocation();
-            if (location.getWorld() != world) return;
-
-            if (region.contains(location.getBlockX(), location.getBlockY(), location.getBlockZ())) {
+        this.module.getShops(world).forEach(shop -> {
+            BlockPos blockPos = shop.getBlockPos();
+            if (region.contains(blockPos.getX(), blockPos.getY(), blockPos.getZ())) {
                 this.module.removeShop(shop);
             }
         });

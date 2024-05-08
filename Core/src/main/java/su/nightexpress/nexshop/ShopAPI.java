@@ -10,7 +10,7 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 
 public class ShopAPI {
 
-    public static final ExcellentShop PLUGIN = ExcellentShop.getPlugin(ExcellentShop.class);
+    public static final ShopPlugin PLUGIN = ShopPlugin.getPlugin(ShopPlugin.class);
 
     @NotNull
     public static DataHandler getDataHandler() {

@@ -3,16 +3,14 @@ package su.nightexpress.nexshop.shop.virtual.listener;
 import net.citizensnpcs.api.event.NPCClickEvent;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.manager.AbstractListener;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nightcore.manager.AbstractListener;
 
-public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
+public class VirtualShopNPCListener extends AbstractListener<ShopPlugin> {
 
     private final VirtualShopModule module;
 
@@ -34,14 +32,8 @@ public class VirtualShopNPCListener extends AbstractListener<ExcellentShop> {
     private void onClick(@NotNull NPCClickEvent event) {
         int id = event.getNPC().getId();
 
-        VirtualShop shop = this.module.getShops().stream()
-            .filter(shop2 -> shop2.getNPCIds().contains(id))
-            .findFirst().orElse(null);
-        if (shop == null) return;
-
-        Player player = event.getClicker();
-        if (!shop.canAccess(player, true)) return;
-
-        shop.open(player, 1);
+        this.module.getShops().stream().filter(shop -> shop.getNPCIds().contains(id)).findFirst().ifPresent(shop -> {
+            shop.open(event.getClicker());
+        });
     }
 }

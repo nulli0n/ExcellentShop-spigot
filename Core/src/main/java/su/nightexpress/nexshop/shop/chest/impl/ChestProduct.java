@@ -2,47 +2,33 @@ package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.Placeholders;
-import su.nightexpress.nexshop.shop.chest.menu.ProductPriceMenu;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nightcore.config.FileConfig;
 
 public class ChestProduct extends AbstractProduct<ChestShop> {
 
-    private ProductPriceMenu priceEditor;
-
-    public ChestProduct(@NotNull String id, @NotNull ChestShop shop, @NotNull Currency currency,
-                        @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        super(shop.plugin(), id, shop, currency, handler, packer);
+    public ChestProduct(@NotNull ShopPlugin plugin,
+                        @NotNull String id,
+                        @NotNull ChestShop shop,
+                        @NotNull Currency currency,
+                        @NotNull ProductHandler handler,
+                        @NotNull ProductPacker packer) {
+        super(plugin, id, shop, currency, handler, packer);
 
         this.placeholderRelMap.add(Placeholders.forProductStock(this));
     }
 
-    public void write(@NotNull JYML cfg, @NotNull String path) {
-        cfg.set(path + ".Handler", this.getHandler().getName());
-        cfg.set(path + ".Currency", this.getCurrency().getId());
-        this.getPricer().write(cfg, path + ".Price");
-        this.getPacker().write(cfg, path);
-    }
-
-    @Override
-    public void clear() {
-        if (this.priceEditor != null) {
-            this.priceEditor.clear();
-            this.priceEditor = null;
-        }
-    }
-
-    @NotNull
-    public ProductPriceMenu getPriceEditor() {
-        if (this.priceEditor == null) {
-            this.priceEditor = new ProductPriceMenu(this.plugin, this);
-        }
-        return priceEditor;
+    public void write(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".Handler", this.getHandler().getName());
+        config.set(path + ".Currency", this.getCurrency().getId());
+        this.getPricer().write(config, path + ".Price");
+        this.getPacker().write(config, path);
     }
 
     @Override

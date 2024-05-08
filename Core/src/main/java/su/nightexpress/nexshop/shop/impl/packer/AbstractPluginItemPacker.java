@@ -3,9 +3,8 @@ package su.nightexpress.nexshop.shop.impl.packer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
+import su.nightexpress.nightcore.config.FileConfig;
 
 public abstract class AbstractPluginItemPacker extends AbstractItemPacker implements PluginItemPacker {
 
@@ -24,10 +23,9 @@ public abstract class AbstractPluginItemPacker extends AbstractItemPacker implem
     }
 
     @Override
-    public boolean load(@NotNull JYML cfg, @NotNull String path) {
+    public boolean load(@NotNull FileConfig cfg, @NotNull String path) {
         String itemId = cfg.getString(path + ".Content.ItemId");
         if (itemId == null/* || !this.isValidId(itemId)*/) {
-            ShopAPI.PLUGIN.error("Invalid item id: '" + itemId + "'.");
             return false;
         }
         int amount = cfg.getInt(path + ".Content.Amount");
@@ -43,7 +41,7 @@ public abstract class AbstractPluginItemPacker extends AbstractItemPacker implem
     }
 
     @Override
-    protected void writeAdditional(@NotNull JYML cfg, @NotNull String path) {
+    protected void writeAdditional(@NotNull FileConfig cfg, @NotNull String path) {
         cfg.set(path + ".Content.ItemId", this.getItemId());
         cfg.set(path + ".Content.Amount", this.getAmount());
     }

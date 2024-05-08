@@ -1,53 +1,46 @@
 package su.nightexpress.nexshop.shop.chest.command;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.CommandResult;
-import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.module.ModuleCommand;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
+import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
+import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 
-import java.util.List;
 import java.util.UUID;
 
-public class BankCommand extends ModuleCommand<ChestShopModule> {
+public class BankCommand {
 
-    public BankCommand(@NotNull ChestShopModule module) {
-        super(module, new String[]{"bank"}, ChestPerms.COMMAND_BANK);
-        this.setDescription(plugin.getMessage(ChestLang.COMMAND_BANK_DESC));
-        this.setUsage(plugin.getMessage(ChestLang.COMMAND_BANK_USAGE));
-        this.setPlayerOnly(true);
+    private static final String ARG_USER = "user";
+
+    public static void build(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull ChainedNodeBuilder nodeBuilder) {
+        nodeBuilder.addDirect("bank", builder -> builder
+            .permission(ChestPerms.COMMAND_BANK)
+            .description(ChestLang.COMMAND_BANK_DESC)
+            .playerOnly()
+            .withArgument(ArgumentTypes.playerName(ARG_USER).permission(ChestPerms.COMMAND_BANK_OTHERS))
+            .executes((context, arguments) -> execute(plugin, module, context, arguments))
+        );
     }
 
-    @Override
-    @NotNull
-    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
-        if (arg == 1 && player.hasPermission(ChestPerms.COMMAND_BANK_OTHERS)) {
-            return CollectionsUtil.playerNames(player);
-        }
-        return super.getTab(player, arg, args);
-    }
+    public static boolean execute(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getExecutor();
+        if (player == null) return false;
 
-    @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        if (result.length() >= 2 && !sender.hasPermission(ChestPerms.COMMAND_BANK_OTHERS)) {
-            this.errorPermission(sender);
-            return;
-        }
-
-        Player player = (Player) sender;
-        String target = result.getArg(1, player.getName());
-        this.plugin.getUserManager().getUserDataAsync(target).thenAccept(user -> {
+        String userName = arguments.getStringArgument(ARG_USER, context.getSender().getName());
+        plugin.getUserManager().getUserDataAsync(userName).thenAccept(user -> {
             if (user == null) {
-                this.errorPlayer(sender);
+                context.errorBadPlayer();
                 return;
             }
 
             UUID targetId = user.getId();
-            this.plugin.runTask(task -> this.module.getBankMenu().open(player, targetId));
+            plugin.runTask(task -> module.openBank(player, targetId));
         });
+        return true;
     }
 }

@@ -1,53 +1,147 @@
 package su.nightexpress.nexshop.auction.config;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Sound;
-import su.nexmedia.engine.api.lang.LangKey;
-import su.nexmedia.engine.lang.EngineLang;
+import su.nightexpress.nexshop.auction.SortType;
+import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nightcore.language.entry.LangEnum;
+import su.nightexpress.nightcore.language.entry.LangString;
+import su.nightexpress.nightcore.language.entry.LangText;
 
-import static su.nexmedia.engine.utils.Colors.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+import static su.nightexpress.nexshop.auction.Placeholders.*;
+import static su.nightexpress.nightcore.language.tag.MessageTags.*;
 
-public class AuctionLang extends EngineLang {
+public class AuctionLang extends Lang {
 
-    public static final LangKey COMMAND_OPEN_DESC       = LangKey.of("Auction.Command.Open.Desc", "Open auction.");
+    public static final LangEnum<SortType> SORT_TYPE = LangEnum.of("Auction.SortType", SortType.class);
 
-    public static final LangKey COMMAND_SELL_DESC       = LangKey.of("Auction.Command.Sell.Desc", "Add item on auction.");
-    public static final LangKey COMMAND_SELL_USAGE      = LangKey.of("Auction.Command.Sell.Usage", "<price>");
-    public static final LangKey COMMAND_SELL_ERROR_NO_ITEM = LangKey.of("Auction.Command.Sell.Error.NoItem", RED + "You must hold an item to do that!");
+    public static final LangString COMMAND_ARGUMENT_NAME_PRICE = LangString.of("Auction.Command.Argument.Name.Price", "price");
 
-    public static final LangKey COMMAND_EXPIRED_DESC    = LangKey.of("Auction.Command.Expired.Desc", "List of expired listings.");
-    public static final LangKey COMMAND_EXPIRED_USAGE   = LangKey.of("Auction.Command.Expired.Usage", "[player]");
-    public static final LangKey COMMAND_HISTORY_DESC    = LangKey.of("Auction.Command.History.Desc", "Your sales history.");
-    public static final LangKey COMMAND_HISTORY_USAGE   = LangKey.of("Auction.Command.History.Usage", "[player]");
-    public static final LangKey COMMAND_SELLING_DESC    = LangKey.of("Auction.Command.Selling.Desc", "List of your current listings.");
-    public static final LangKey COMMAND_SELLING_USAGE   = LangKey.of("Auction.Command.Selling.Usage", "[player]");
-    public static final LangKey COMMAND_UNCLAIMED_DESC  = LangKey.of("Auction.Command.Unclaimed.Desc", "List of unclaimed rewards for your listings.");
-    public static final LangKey COMMAND_UNCLAIMED_USAGE = LangKey.of("Auction.Command.Unclaimed.Usage", "[player]");
+    public static final LangString COMMAND_OPEN_DESC = LangString.of("Auction.Command.Open.Desc",
+        "Open auction.");
 
-    public static final LangKey LISTING_ADD_SUCCESS_INFO             = LangKey.of("Auction.Listing.Add.Success.Info", "&7You added &ax%listing_item_amount% %listing_item_name%&7 on auction for &a%listing_price%&7. Tax amount: &c%tax%&7.");
-    public static final LangKey LISTING_ADD_SUCCESS_ANNOUNCE         = LangKey.of("Auction.Listing.Add.Success.Announce", "&a%player_display_name% &7just put &ax%listing_item_amount% <? show_item:\"%listing_item_value%\" ?>&a%listing_item_name%</> &7on auction for &e%listing_price%&7!");
-    public static final LangKey LISTING_ADD_ERROR_BAD_ITEM           = LangKey.of("Auction.Listing.Add.Error.BadItem", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&e%item% &ccan not be added on auction!");
-    public static final LangKey LISTING_ADD_ERROR_LIMIT              = LangKey.of("Auction.Listing.Add.Error.Limit", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cYou can not add more than &e%amount% &cactive listings on auction!");
-    public static final LangKey LISTING_ADD_ERROR_PRICE_TAX          = LangKey.of("Auction.Listing.Add.Error.Price.Tax", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cYou can't afford the &e%tax%% &cprice tax: &e%amount%&c!");
-    public static final LangKey LISTING_ADD_ERROR_PRICE_CURRENCY_MIN = LangKey.of("Auction.Listing.Add.Error.Price.Currency.Min", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cListing price for &e%currency_name% currency&c can not be smaller than &e%amount%&c!");
-    public static final LangKey LISTING_ADD_ERROR_PRICE_CURRENCY_MAX = LangKey.of("Auction.Listing.Add.Error.Price.Currency.Max", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cListing price for &e%currency_name% currency&c can not be greater than &e%amount%&c!");
-    public static final LangKey LISTING_ADD_ERROR_PRICE_NEGATIVE     = LangKey.of("Auction.Listing.Add.Error.Price.Negative", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cListing price can not be negative!");
-    public static final LangKey LISTING_ADD_ERROR_PRICE_MATERIAL_MIN = LangKey.of("Auction.Listing.Add.Error.Price.Material.Min", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cListing price for &ex1 %item%&c can not be smaller than &e%amount%&c!");
-    public static final LangKey LISTING_ADD_ERROR_PRICE_MATERIAL_MAX = LangKey.of("Auction.Listing.Add.Error.Price.Material.Max", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cListing price for &ex1 %item%&c can not be greater than &e%amount%&c!");
-    public static final LangKey LISTING_ADD_ERROR_DISABLED_GAMEMODE  = LangKey.of("Auction.Listing.Add.Error.DisabledGamemode", "<! sound:\"" + Sound.ENTITY_VILLAGER_NO.name() + "\" !>" + "&cYou can't add items in this game mode!");
-    public static final LangKey LISTING_BUY_SUCCESS_INFO             = LangKey.of("Auction.Listing.Buy.Success.Info", "<! prefix:\"false\" type:\"titles:20:50:20\" sound:\"" + Sound.ENTITY_PLAYER_LEVELUP.name() + "\" !>&a&lSuccessful Purchase!\n&7You bought &ax%listing_item_amount% %listing_item_name% &7from &a%listing_seller% &7for &a%listing_price%&7!");
-    public static final LangKey LISTING_BUY_ERROR_NOT_ENOUGH_FUNDS   = LangKey.of("Auction.Listing.Buy.Error.NotEnoughFunds", "<! prefix:\"false\" type:\"titles:20:50:20\" sound:\"" + Sound.BLOCK_ANVIL_PLACE.name() + "\" !>&c&lNot Enough Funds!\n&7Balance: &c%balance% &8| &7Needed: &c%listing_price%");
-    public static final LangKey NOTIFY_LISTING_UNCLAIMED             = LangKey.of("Auction.Notify.Listing.Unclaimed", """
-        <! prefix:"false" !>
-        &8&m-------------&8&l[ &e&lAuction Notification &8&l]&8&m-------------
-        &7     You have &e%amount% unclaimed rewards&7 for your listings!
-        &7                 <? show_text:"&7Click to claim rewards!" run_command:"/ah unclaimed" ?>&a&lClick to Claim Now!</>
-        &8&m-----------------------------------------""");
-    public static final LangKey NOTIFY_LISTING_EXPIRED               = LangKey.of("Auction.Notify.Listing.Expired", """
-         <! prefix:"false" !>
-        &8&m-------------&8&l[ &e&lAuction Notification &8&l]&8&m-------------
-        &7     You have &e%amount% expired&7 listings!
-        &7           <? show_text:"&7Click to return items!" run_command:"/ah expired" ?>&a&lClick to Take Now!</>
-        &8&m-----------------------------------------""");
-    public static final LangKey NOTIFY_LISTING_CLAIM                 = LangKey.of("Auction.Notify.Listing.Claim", "&7You claimed &a%listing_price%&7 for &a%listing_item_name%&7!");
-    public static final LangKey ERROR_DISABLED_WORLD                 = LangKey.of("Auction.Error.DisabledWorld", "&cAuction is disabled in this world!");
+    public static final LangString COMMAND_SELL_DESC  = LangString.of("Auction.Command.Sell.Desc",
+        "Add item on auction.");
+
+    public static final LangText COMMAND_SELL_ERROR_NO_ITEM = LangText.of("Auction.Command.Sell.Error.NoItem",
+        LIGHT_RED.enclose("You must hold an item to do that!"));
+
+    public static final LangString COMMAND_EXPIRED_DESC  = LangString.of("Auction.Command.Expired.Desc",
+        "List of expired listings.");
+
+    public static final LangString COMMAND_HISTORY_DESC  = LangString.of("Auction.Command.History.Desc",
+        "Your sales history.");
+
+    public static final LangString COMMAND_SELLING_DESC  = LangString.of("Auction.Command.Selling.Desc",
+        "List of your current listings.");
+
+    public static final LangString COMMAND_UNCLAIMED_DESC  = LangString.of("Auction.Command.Unclaimed.Desc",
+        "List of unclaimed rewards for your listings.");
+
+    public static final LangText LISTING_ADD_SUCCESS_INFO = LangText.of("Auction.Listing.Add.Success.Info",
+        TAG_NO_PREFIX + SOUND.enclose(Sound.BLOCK_NOTE_BLOCK_BELL),
+        " ",
+        LIGHT_GREEN.enclose(BOLD.enclose("✔ Success!")),
+        " ",
+        LIGHT_GRAY.enclose("You added " + LIGHT_GREEN.enclose("x" + LISTING_ITEM_AMOUNT + " " + LISTING_ITEM_NAME) + " on auction for " + LIGHT_GREEN.enclose(LISTING_PRICE) + "!"),
+        LIGHT_GRAY.enclose("Tax amount: " + LIGHT_RED.enclose(GENERIC_TAX)),
+        " "
+    );
+
+    public static final LangText LISTING_ADD_SUCCESS_ANNOUNCE = LangText.of("Auction.Listing.Add.Success.Broadcast",
+        TAG_NO_PREFIX,
+        " ",
+        LIGHT_YELLOW.enclose(BOLD.enclose("Auction:")),
+        LIGHT_GRAY.enclose("Player " + LIGHT_YELLOW.enclose(PLAYER_DISPLAY_NAME) + " added " + LIGHT_YELLOW.enclose("x" + LISTING_ITEM_AMOUNT) + " " +
+            HOVER.enclose(HoverEvent.Action.SHOW_ITEM, LIGHT_YELLOW.enclose(LISTING_ITEM_NAME), LISTING_ITEM_VALUE) +
+            " on the auction for " + LIGHT_YELLOW.enclose(LISTING_PRICE) + "."),
+        " "
+    );
+
+    public static final LangText LISTING_ADD_ERROR_BAD_ITEM = LangText.of("Auction.Listing.Add.Error.BadItem",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘ " + GENERIC_ITEM) + " can not be added on the auction!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_LIMIT = LangText.of("Auction.Listing.Add.Error.Limit",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " You can't have more than " + LIGHT_RED.enclose(GENERIC_AMOUNT) + " active items on the auction!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_PRICE_TAX = LangText.of("Auction.Listing.Add.Error.Price.Tax",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " You can't afford the " + LIGHT_RED.enclose(GENERIC_TAX) + " price tax: " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_PRICE_CURRENCY_MIN = LangText.of("Auction.Listing.Add.Error.Price.Currency.Min",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Minimal " + LIGHT_RED.enclose(CURRENCY_NAME) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_PRICE_CURRENCY_MAX = LangText.of("Auction.Listing.Add.Error.Price.Currency.Max",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Maximal " + LIGHT_RED.enclose(CURRENCY_NAME) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_INVALID_PRICE = LangText.of("Auction.Listing.Add.Error.Price.Negative",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Invalid price!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_PRICE_MATERIAL_MIN = LangText.of("Auction.Listing.Add.Error.Price.Material.Min",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Minimal " + LIGHT_RED.enclose("x1 " + GENERIC_ITEM) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_PRICE_MATERIAL_MAX = LangText.of("Auction.Listing.Add.Error.Price.Material.Max",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Maximal " + LIGHT_RED.enclose("x1 " + GENERIC_ITEM) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+    );
+
+    public static final LangText LISTING_ADD_ERROR_DISABLED_GAMEMODE = LangText.of("Auction.Listing.Add.Error.DisabledGamemode",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " You can't add items in your current gamemode!")
+    );
+
+    public static final LangText LISTING_BUY_SUCCESS_INFO = LangText.of("Auction.Listing.Buy.Success.Info",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.ENTITY_PLAYER_LEVELUP),
+        LIGHT_GREEN.enclose(BOLD.enclose("Successful Purchase!")),
+        LIGHT_GRAY.enclose("You bought " + LIGHT_GREEN.enclose("x" + LISTING_ITEM_AMOUNT + " " + LISTING_ITEM_NAME) + " from " + LIGHT_GREEN.enclose(LISTING_SELLER) + " for " + LIGHT_GREEN.enclose(LISTING_PRICE) + "!")
+    );
+
+    public static final LangText LISTING_BUY_ERROR_NOT_ENOUGH_FUNDS = LangText.of("Auction.Listing.Buy.Error.NotEnoughFunds",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.BLOCK_ANVIL_PLACE),
+        LIGHT_RED.enclose(BOLD.enclose("Not Enough Funds!")),
+        LIGHT_GRAY.enclose("You need " + LIGHT_RED.enclose(LISTING_PRICE) + ". You have " + LIGHT_RED.enclose(GENERIC_BALANCE) + ".")
+    );
+
+    public static final LangText LISTING_CLAIM_SUCCESS = LangText.of("Auction.Notify.Listing.Claim",
+        LIGHT_GRAY.enclose(LIGHT_GREEN.enclose("✔") + " You claimed " + LIGHT_GREEN.enclose(LISTING_PRICE) + " for " + LIGHT_GREEN.enclose(LISTING_ITEM_NAME) + "!")
+    );
+
+    public static final LangText ERROR_DISABLED_WORLD = LangText.of("Auction.Error.DisabledWorld",
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Auction is disabled in this world!")
+    );
+
+    public static final LangText NOTIFY_UNCLAIMED_LISTINGS = LangText.of("Auction.Notify.Listing.Unclaimed",
+        TAG_NO_PREFIX,
+        " ",
+        LIGHT_YELLOW.enclose(BOLD.enclose("Auction:")),
+        LIGHT_GRAY.enclose("You have " + LIGHT_YELLOW.enclose(GENERIC_AMOUNT) + " unclaimed listing's incomes!"),
+        "",
+        LIGHT_GRAY.enclose("Click " + CLICK.enclose(ClickEvent.Action.RUN_COMMAND, HOVER.enclose(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to claim your incomes!")), "/ah unclaimed") + " to claim now!"),
+        " "
+    );
+
+    public static final LangText NOTIFY_EXPIRED_LISTINGS = LangText.of("Auction.Notify.Listing.Expired",
+        TAG_NO_PREFIX,
+        " ",
+        LIGHT_ORANGE.enclose(BOLD.enclose("Auction:")),
+        LIGHT_GRAY.enclose("You have " + LIGHT_ORANGE.enclose(GENERIC_AMOUNT) + " expired listings!"),
+        "",
+        LIGHT_GRAY.enclose("Click " + CLICK.enclose(ClickEvent.Action.RUN_COMMAND, HOVER.enclose(LIGHT_ORANGE.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to return your items.")), "/ah expired") + " to return them."),
+        " "
+    );
 }

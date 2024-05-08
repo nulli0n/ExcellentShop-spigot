@@ -3,54 +3,47 @@ package su.nightexpress.nexshop.auction.listing;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.placeholder.Placeholder;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.auction.Placeholders;
-import su.nightexpress.nexshop.auction.config.AuctionConfig;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.UUID;
 
 public abstract class AbstractListing implements Placeholder {
 
     protected final UUID      id;
-    protected       UUID      owner;
-    protected       String    ownerName;
-    protected       ItemStack itemStack;
-    protected       double    price;
-    protected final Currency currency;
-    protected final long dateCreation;
-    protected PlaceholderMap placeholderMap;
+    protected final UUID      owner;
+    protected final String    ownerName;
+    protected final ItemStack itemStack;
+    protected final Currency  currency;
+    protected final double    price;
+
+    protected final long creationDate;
+    protected final long deletionDate;
+
+    protected final PlaceholderMap placeholderMap;
 
     public AbstractListing(
-            @NotNull UUID id,
-            @NotNull UUID owner,
-            @NotNull String ownerName,
-            @NotNull ItemStack itemStack,
-            Currency currency,
-            double price,
-            long dateCreation
+        @NotNull UUID id,
+        @NotNull UUID owner,
+        @NotNull String ownerName,
+        @NotNull ItemStack itemStack,
+        Currency currency,
+        double price,
+        long creationDate,
+        long deletionDate
     ) {
         this.id = id;
         this.owner = owner;
         this.ownerName = ownerName;
-        this.itemStack = new ItemStack(itemStack);
+        this.itemStack = itemStack;
         this.currency = currency;
         this.price = price;
-        this.dateCreation = dateCreation;
-        this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.LISTING_SELLER, this.getOwnerName())
-            .add(Placeholders.LISTING_PRICE, this.getCurrency().format(this.getPrice()))
-            .add(Placeholders.LISTING_DATE_CREATION, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getDateCreation())))
-            .add(Placeholders.LISTING_ITEM_AMOUNT, String.valueOf(this.getItemStack().getAmount()))
-            .add(Placeholders.LISTING_ITEM_NAME, ItemUtil.getItemName(this.getItemStack()))
-            .add(Placeholders.LISTING_ITEM_LORE, String.join("\n", ItemUtil.getLore(this.getItemStack())))
-            .add(Placeholders.LISTING_ITEM_VALUE, String.valueOf(ItemUtil.compress(this.getItemStack())))
-            .add(Placeholders.LISTING_DELETES_IN, () -> TimeUtil.formatTimeLeft(this.getDeleteDate()))
-            .add(Placeholders.LISTING_DELETE_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getDeleteDate())))
-        ;
+        this.creationDate = creationDate;
+        this.deletionDate = deletionDate;
+
+        this.placeholderMap = Placeholders.forListing(this);
     }
 
     @Override
@@ -80,7 +73,7 @@ public abstract class AbstractListing implements Placeholder {
 
     @NotNull
     public ItemStack getItemStack() {
-        return itemStack;
+        return new ItemStack(this.itemStack);
     }
 
     @NotNull
@@ -96,9 +89,11 @@ public abstract class AbstractListing implements Placeholder {
         return player.getUniqueId().equals(this.getOwner());
     }
 
-    public long getDateCreation() {
-        return dateCreation;
+    public long getCreationDate() {
+        return creationDate;
     }
 
-    public abstract long getDeleteDate();
+    public final long getDeleteDate() {
+        return this.deletionDate;
+    }
 }

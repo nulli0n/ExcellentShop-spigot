@@ -7,13 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
 import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.impl.AbstractProductPacker;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nightcore.config.FileConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class VanillaCommandPacker extends AbstractProductPacker implements CommandPacker {
 
@@ -28,11 +30,11 @@ public class VanillaCommandPacker extends AbstractProductPacker implements Comma
         this.setCommands(commands);
 
         this.placeholderMap
-            .add(Placeholders.PRODUCT_COMMANDS, () -> String.join("\n", this.getCommands()));
+            .add(Placeholders.PRODUCT_COMMANDS, () -> this.getCommands().stream().map(Lang::goodEntry).collect(Collectors.joining("\n")));
     }
 
     @Override
-    public boolean load(@NotNull JYML cfg, @NotNull String path) {
+    public boolean load(@NotNull FileConfig cfg, @NotNull String path) {
         ItemStack preview = cfg.getItemEncoded(path + ".Content.Preview");
         if (preview == null) preview = new ItemStack(Material.COMMAND_BLOCK);
 
@@ -44,7 +46,7 @@ public class VanillaCommandPacker extends AbstractProductPacker implements Comma
     }
 
     @Override
-    protected void writeAdditional(@NotNull JYML cfg, @NotNull String path) {
+    protected void writeAdditional(@NotNull FileConfig cfg, @NotNull String path) {
         cfg.set(path + ".Content.Commands", this.getCommands());
     }
 

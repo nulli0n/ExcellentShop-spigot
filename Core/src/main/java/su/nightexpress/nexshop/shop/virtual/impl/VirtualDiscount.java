@@ -1,14 +1,13 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.Placeholder;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.NumberUtil;
-import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.util.ShopUtils;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.DiscountMainEditor;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.TimeUtil;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -26,8 +25,6 @@ public class VirtualDiscount implements Placeholder {
     private double         discount;
     private int            duration;
 
-    private DiscountMainEditor editor;
-
     private final PlaceholderMap placeholderMap;
 
     public VirtualDiscount() {
@@ -43,7 +40,7 @@ public class VirtualDiscount implements Placeholder {
     }
 
     @NotNull
-    public static VirtualDiscount read(@NotNull JYML cfg, @NotNull String path) {
+    public static VirtualDiscount read(@NotNull FileConfig cfg, @NotNull String path) {
         cfg.addMissing(path + ".Duration", 3600);
         cfg.saveChanges();
 
@@ -55,18 +52,11 @@ public class VirtualDiscount implements Placeholder {
         return config;
     }
 
-    public static void write(@NotNull VirtualDiscount discount, @NotNull JYML cfg, @NotNull String path) {
+    public static void write(@NotNull VirtualDiscount discount, @NotNull FileConfig cfg, @NotNull String path) {
         cfg.set(path + ".Discount", discount.getDiscount());
         cfg.set(path + ".Duration", discount.getDuration());
         cfg.set(path + ".Activation.Days", discount.getDays().stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
         cfg.set(path + ".Activation.Times", discount.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).toList());
-    }
-
-    public void clear() {
-        if (this.editor != null) {
-            this.editor.clear();
-            this.editor = null;
-        }
     }
 
     @Override
@@ -88,14 +78,6 @@ public class VirtualDiscount implements Placeholder {
         return this.getTimes().stream().anyMatch(time -> {
             return time.truncatedTo(ChronoUnit.MINUTES).equals(roundNow);
         });
-    }
-
-    @NotNull
-    public DiscountMainEditor getEditor() {
-        if (this.editor == null) {
-            this.editor = new DiscountMainEditor(this.getShop(), this);
-        }
-        return editor;
     }
 
     @NotNull

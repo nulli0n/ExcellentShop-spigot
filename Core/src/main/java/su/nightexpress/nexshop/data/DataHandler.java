@@ -3,16 +3,16 @@ package su.nightexpress.nexshop.data;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.data.AbstractUserDataHandler;
-import su.nexmedia.engine.api.data.sql.SQLColumn;
-import su.nexmedia.engine.api.data.sql.SQLValue;
-import su.nexmedia.engine.api.data.sql.column.ColumnType;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.data.impl.ChestDataHandler;
 import su.nightexpress.nexshop.data.impl.VirtualDataHandler;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.data.user.UserSettings;
+import su.nightexpress.nightcore.database.AbstractUserDataHandler;
+import su.nightexpress.nightcore.database.sql.SQLColumn;
+import su.nightexpress.nightcore.database.sql.SQLValue;
+import su.nightexpress.nightcore.database.sql.column.ColumnType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,24 +21,22 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser> {
+public class DataHandler extends AbstractUserDataHandler<ShopPlugin, ShopUser> {
 
     private static final SQLColumn COL_USER_SETTINGS = SQLColumn.of("settings", ColumnType.STRING);
 
-    private static DataHandler instance;
-
-    private VirtualDataHandler virtualDataHandler;
-    private ChestDataHandler   chestDataHandler;
+    private final VirtualDataHandler virtualDataHandler;
+    private       ChestDataHandler   chestDataHandler;
 
     private final Function<ResultSet, ShopUser> funcUser;
 
-    protected DataHandler(@NotNull ExcellentShop plugin) {
-        super(plugin, plugin);
+    public DataHandler(@NotNull ShopPlugin plugin) {
+        super(plugin);
         //if (Config.MODULES_VIRTUAL_SHOP_ENABLED.get()) {
             this.virtualDataHandler = new VirtualDataHandler(this.plugin, this);
         //}
         if (Config.MODULES_CHEST_SHOP_ENABLED.get()) {
-            this.chestDataHandler = new ChestDataHandler(this);
+            this.chestDataHandler = new ChestDataHandler(this.plugin, this);
         }
 
         this.funcUser = (resultSet) -> {
@@ -63,14 +61,6 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
         return this.gson;
     }
 
-    @NotNull
-    public static DataHandler getInstance(@NotNull ExcellentShop plugin) {
-        if (instance == null) {
-            instance = new DataHandler(plugin);
-        }
-        return instance;
-    }
-
     public VirtualDataHandler getVirtualDataHandler() {
         return this.virtualDataHandler;
     }
@@ -82,27 +72,21 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
     @Override
     protected void onLoad() {
         super.onLoad();
-        if (this.getVirtualDataHandler() != null) this.getVirtualDataHandler().load();
-        if (this.getChestDataHandler() != null) this.getChestDataHandler().load();
-    }
-
-    @Override
-    protected void onShutdown() {
-        super.onShutdown();
-        instance = null;
+        if (this.virtualDataHandler != null) this.virtualDataHandler.load();
+        if (this.chestDataHandler != null) this.chestDataHandler.load();
     }
 
     @Override
     public void onPurge() {
         super.onPurge();
-        if (this.getVirtualDataHandler() != null) this.getVirtualDataHandler().purge();
-        if (this.getChestDataHandler() != null) this.getChestDataHandler().purge();
+        if (this.virtualDataHandler != null) this.virtualDataHandler.purge();
+        if (this.chestDataHandler != null) this.chestDataHandler.purge();
     }
 
     @Override
     public void onSynchronize() {
-        if (this.getVirtualDataHandler() != null) this.getVirtualDataHandler().synchronize();
-        if (this.getChestDataHandler() != null) this.getChestDataHandler().synchronize();
+        if (this.virtualDataHandler != null) this.virtualDataHandler.synchronize();
+        if (this.chestDataHandler != null) this.chestDataHandler.synchronize();
     }
 
     @Override
@@ -121,7 +105,7 @@ public class DataHandler extends AbstractUserDataHandler<ExcellentShop, ShopUser
 
     @Override
     @NotNull
-    protected Function<ResultSet, ShopUser> getFunctionToUser() {
+    protected Function<ResultSet, ShopUser> getUserFunction() {
         return this.funcUser;
     }
 }

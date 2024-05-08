@@ -1,246 +1,244 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
-import com.google.common.collect.Lists;
 import org.bukkit.GameMode;
-import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.PlayerRankMap;
-import su.nexmedia.engine.utils.StringUtil;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.RankMap;
+import su.nightexpress.nightcore.util.StringUtil;
 
 import java.util.*;
 
-import static su.nexmedia.engine.utils.Colors2.*;
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
 
 public class VirtualConfig {
 
-    public static final JOption<String> DEFAULT_CURRENCY = JOption.create("General.Default_Currency",
+    public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("General.Default_Currency",
         VaultEconomyHandler.ID,
         "Sets default currency for the Virtual Shop module.",
-        "This currency will be used when you create new products or in case, where other currencies are not available.",
-        "Compatible plugins: https://github.com/nulli0n/ExcellentShop-spigot/wiki/Shop-Currency");
+        "This currency will be used when you create new products or if no other currency is available.",
+        "Compatible plugins: " + URL_WIKI_CURRENCY);
 
-    public static final JOption<Boolean> MAIN_MENU_ENABLED = JOption.create("General.Main_Menu.Enabled",
+    public static final ConfigValue<String> DEFAULT_LAYOUT = ConfigValue.create("General.Default_Layout",
+        Placeholders.DEFAULT,
+        "Sets default shop layout configuration in case if shop's one is not existing anymore."
+    );
+
+    public static final ConfigValue<Boolean> MAIN_MENU_ENABLED = ConfigValue.create("General.Main_Menu.Enabled",
         true,
-        "When 'true', enables the Main Menu, where you can list all of your Virtual Shops.");
+        "Enables the Main Menu feature, where you can list all your Virtual Shops.");
 
-    public static final JOption<Boolean> MAIN_MENU_HIDE_NO_PERM_SHOPS = JOption.create("General.Main_Menu.Hide_No_Permission_Shops",
+    public static final ConfigValue<Boolean> MAIN_MENU_HIDE_NO_PERM_SHOPS = ConfigValue.create("General.Main_Menu.Hide_No_Permission_Shops",
         true,
-        "Sets whether or not shops not accessible for a player will be hidden from him in the Main GUI.");
+        "When enabled, hides shops from the main menu a player don't have access to.");
 
-    public static final JOption<String> SHOP_SHORTCUTS = JOption.create("General.Shop_Shortcuts",
-        "shop",
-        "A list of command aliases for quick access to main menu and shops.", "Split them with a comma.");
-
-    // TODO Change to better default examples when switch to nightcore
-    public static final JOption<PlayerRankMap<Double>> SELL_RANK_MULTIPLIERS = new JOption<PlayerRankMap<Double>>("General.Sell_Multipliers",
-        (cfg, path, def) -> PlayerRankMap.read(cfg, path, Double.class),
-        () -> new PlayerRankMap<>(Map.of(
-            "vip", 1.0
-        )),
-        "Here you can define Sell Multipliers for certain ranks.",
-        "If you want to use permission based system instead of rank based, you can use '" + VirtualPerms.PREFIX_SELL_MULTIPLIER + "[name]' permission pattern.",
-        "(make sure to use names different from your permission ranks then)",
-        "Formula: 'sellPrice * sellMultiplier'. So, 1.0 = 100% (no changes), 1.5 = +50%, 0.75 = -25%, etc."
-    ).mapReader(rm -> rm.setCheckAsPermission(VirtualPerms.PREFIX_SELL_MULTIPLIER)).setWriter((cfg, path, rankMap) -> rankMap.write(cfg, path));
-
-    public static final JOption<Boolean> SELL_MENU_ENABLED = JOption.create("General.Sell_Menu.Enabled",
+    public static final ConfigValue<Boolean> SHOP_SHORTCUTS_ENABLED = ConfigValue.create("General.Shop_Shortcut.Enabled",
         true,
-        "When 'true' enables the Sell Menu, where you can quickly sell all your items.");
+        "Enables the Shop Shortcut commands feature. Allows to quickly open shops.");
 
-    public static final JOption<Boolean> SELL_MENU_SIMPLIFIED = JOption.create("General.Sell_Menu.Simplified", false,
+    public static final ConfigValue<String[]> SHOP_SHORTCUTS_COMMANDS = ConfigValue.create("General.Shop_Shortcut.Commands",
+        new String[]{"shop"},
+        "Command aliases for quick main menu and shop access.", "Split by commas.",
+        "[*] Reboot is required when changed!"
+    );
+
+    public static final ConfigValue<Boolean> SELL_MENU_ENABLED = ConfigValue.create("General.Sell_Menu.Enabled",
+        true,
+        "When 'true' enables the Sell Menu feature, where you can quickly sell all your items.");
+
+    public static final ConfigValue<Boolean> SELL_MENU_SIMPLIFIED = ConfigValue.create("General.Sell_Menu.Simplified",
+        false,
         "Sets whether or not Sell Menu should be simplified.",
         "When simplified, no item and click validation is performed, so menu acts like a regular chest,",
         "and items will be sold on close instead of button click.");
 
-    public static final JOption<String> SELL_MENU_COMMANDS = JOption.create("General.Sell_Menu.Commands",
-        "sellgui",
-        "Custom command aliases to open the Sell Menu. Split them with a comma.");
+    public static final ConfigValue<String[]> SELL_MENU_COMMANDS = ConfigValue.create("General.Sell_Menu.Commands",
+        new String[]{"sellgui", "sellmenu"},
+        "Custom command aliases to open the Sell Menu. Split them with a comma.",
+        "[*] Reboot is required when changed!"
+    );
 
-    public static final JOption<String> SELL_ALL_COMMANDS = JOption.create("General.Sell_All.Commands",
-        "sellall",
-        "Custom Sell All command aliases. Split them with a comma.",
-        "Leave this empty ('') to disable.");
+    public static final ConfigValue<Boolean> SELL_ALL_ENABLED = ConfigValue.create("General.Sell_All.Enabeled",
+        true,
+        "Enables the Sell All command feature.");
 
-    public static final JOption<String> SELL_HAND_COMMANDS = JOption.create("General.Sell_Hand.Commands",
-        "sellhand",
-        "Custom Sell Hand command aliases. Split them with a comma.",
-        "Leave this empty ('') to disable.");
+    public static final ConfigValue<String[]> SELL_ALL_COMMANDS = ConfigValue.create("General.Sell_All.Commands",
+        new String[]{"sellall"},
+        "Sell All command aliases. Split by commas.",
+        "[*] Reboot is required when changed!"
+    );
 
-    public static final JOption<Set<String>> DISABLED_GAMEMODES = JOption.create("General.Disabled_In_Gamemodes",
-        Set.of(GameMode.CREATIVE.name()),
-        "A list of Game Modes, where players can not access shops.",
-        "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/GameMode.html");
+    public static final ConfigValue<Boolean> SELL_HAND_ENABLED = ConfigValue.create("General.Sell_Hand.Enabled",
+        true,
+        "Enables the Sell Hand feature.");
 
-    public static final JOption<Set<String>> DISABLED_WORLDS = JOption.create("General.Disabled_In_Worlds",
-        Set.of("world_name", "example_world123"),
-        "A list of worlds, where players can not access shops.");
+    public static final ConfigValue<String[]> SELL_HAND_COMMANDS = ConfigValue.create("General.Sell_Hand.Commands",
+        new String[]{"sellhand"},
+        "Sell Hand command aliases. Split by commas.",
+        "[*] Reboot is required when changed!"
+    );
 
-    public static final JOption<String> SHOP_FORMAT_NAME = JOption.create("GUI.Shop_Format.Name", Placeholders.SHOP_NAME,
+    public static final ConfigValue<RankMap<Double>> SELL_RANK_MULTIPLIERS = ConfigValue.create("General.Sell_Multipliers",
+        (cfg, path, def) -> RankMap.readDouble(cfg, path, 1D),
+        (cfg, path, rankMap) -> rankMap.write(cfg, path),
+        () -> new RankMap<>(RankMap.Mode.RANK, VirtualPerms.PREFIX_SELL_MULTIPLIER, 1D, Map.of(
+            "vip", 1.5D,
+            "gold", 2D
+        )),
+        "Here you can define Sell Multipliers for certain ranks.",
+        "If you want to use permission based system, you can use '" + VirtualPerms.PREFIX_SELL_MULTIPLIER + "[name]' permission pattern.",
+        "(make sure to use names different from your permission ranks then)",
+        "Formula: '<sellPrice> * <sellMultiplier>'. So, 1.0 = 100% (no changes), 1.5 = +50%, 0.75 = -25%, etc."
+    );
+
+    public static final ConfigValue<Set<GameMode>> DISABLED_GAMEMODES = ConfigValue.forSet("General.Disabled_In_Gamemodes",
+        id -> StringUtil.getEnum(id, GameMode.class).orElse(null),
+        (cfg, path, set) -> cfg.set(path, set.stream().map(Enum::name).toList()),
+        () -> Lists.newSet(GameMode.CREATIVE),
+        "Players can not use shops in specified gamemodes.",
+        "Available values: " + StringUtil.inlineEnum(GameMode.class, ", ")
+    );
+
+    public static final ConfigValue<Set<String>> DISABLED_WORLDS = ConfigValue.create("General.Disabled_In_Worlds",
+        Lists.newSet("world_name", "example_world123"),
+        "Players can not use shops in specified worlds. Case sensetive."
+    );
+
+    public static final ConfigValue<String> SHOP_FORMAT_NAME = ConfigValue.create("GUI.Shop_Format.Name",
+        Placeholders.SHOP_NAME,
         "Sets display name for the shop item in the Main Menu.",
-        "You can use 'Shop' placeholders:" + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "You can use 'Vritual Shop' placeholders:" + URL_WIKI_PLACEHOLDERS
+    );
 
-    public static final JOption<List<String>> SHOP_FORMAT_LORE = JOption.create("GUI.Shop_Format.Lore",
-        Lists.newArrayList(
+    public static final ConfigValue<List<String>> SHOP_FORMAT_LORE = ConfigValue.create("GUI.Shop_Format.Lore",
+        Lists.newList(
             Placeholders.SHOP_DESCRIPTION
         ),
         "Sets lore for the shop item in the Main Menu.",
-        "You can use 'Virtual Shop' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "You can use 'Virtual Shop' placeholders: " + URL_WIKI_PLACEHOLDERS
+    );
 
-    public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_ALL = JOption.create("GUI.Product_Format.Lore.General.All",
-        Arrays.asList(
-            "%permission%",
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_GENERAL = ConfigValue.create("GUI.Product_Format.Lore.Main",
+        Lists.newList(
+            GENERIC_PERMISSION,
+            GENERIC_DISCOUNT,
             "",
             GENERIC_LORE,
             "",
-            GENERIC_DISCOUNT,
+            GENERIC_BUY,
             "",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(BUY) + GRAY + " (Left-Click)",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(SELL) + GRAY + " (Right-Click)",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell All: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_ALL_FORMATTED + GRAY + " (F/Swap Key)",
+            GENERIC_SELL,
             "",
-            LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick buy/sell)",
-            "",
-            "%stock_global_buy%",
-            "%stock_global_sell%",
-            "%stock_player_buy%",
-            "%stock_player_sell%"
+            DARK_GRAY.enclose("Hold " + LIGHT_GRAY.enclose("Shift") + " to buy & sell quickly.")
         ),
-        "Sets lore for the product preview item in Virtual Shop GUI.",
-        "This lore will be used when both Buy and Sell prices are available.",
-        "Local Placeholders:",
-        "- %lore% - Original lore of the product preview item.",
-        "- %discount% - Discount info (if present)",
-        "- %permission% - Permission requirement info (if present)",
-        "- %stock_global_buy% - Global stock info for purchase (if present)",
-        "- %stock_global_sell% - Global stock info for sale (if present)",
-        "- %stock_player_buy% - Player limit info for purchase (if present)",
-        "- %stock_player_sell% - Player limit info for sale (if present).",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "Product lore format. Use '" + GENERIC_LORE + "' placeholder to insert original lore of the product item.",
+        "You can use 'Virtual Product' placeholders: " + URL_WIKI_PLACEHOLDERS
+    );
 
-    public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_BUY_ONLY = JOption.create("GUI.Product_Format.Lore.General.Buy_Only",
-        Arrays.asList(
-            "%permission%",
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_BUY = ConfigValue.create("GUI.Product_Format.Lore.Buy",
+        Lists.newList(
+            GREEN.enclose(BOLD.enclose("BUY:")),
+            GREEN.enclose("←" + WHITE.enclose(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
             "",
-            GENERIC_LORE,
+            PRICE_DYNAMIC.apply(BUY),
             "",
-            GENERIC_DISCOUNT,
-            "",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Buy: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(BUY) + GRAY + " (Left-Click)",
-            "",
-            LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick buy)",
-            "",
-            "%stock_global_buy%",
-            "%stock_player_buy%"
+            STOCK_TYPE.apply(BUY),
+            LIMIT_TYPE.apply(BUY)
         ),
-        "Sets lore for the product preview item in Virtual Shop GUI.",
-        "This lore will be used when only Buy price is available.",
-        "Local Placeholders:",
-        "- %lore% - Original lore of the product preview item.",
-        "- %discount% - Discount info (if present)",
-        "- %permission% - Permission requirement info (if present)",
-        "- %stock_global_buy% - Global stock info for purchase (if present)",
-        "- %stock_player_buy% - Player limit info for purchase (if present).",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "Lore that will appear if product is buyable.",
+        "Placeholder: " + GENERIC_BUY
+    );
 
-    public static final JOption<List<String>> PRODUCT_FORMAT_LORE_GENERAL_SELL_ONLY = JOption.create("GUI.Product_Format.Lore.General.Sell_Only",
-        Arrays.asList(
-            "%permission%",
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_SELL = ConfigValue.create("GUI.Product_Format.Lore.Sell",
+        Lists.newList(
+            RED.enclose(BOLD.enclose("SELL:")),
+            RED.enclose("→" + WHITE.enclose(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
+            RED.enclose("→" + WHITE.enclose(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
             "",
-            GENERIC_LORE,
+            PRICE_DYNAMIC.apply(SELL),
             "",
-            GENERIC_DISCOUNT,
-            "",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell: " + LIGHT_YELLOW + PRODUCT_PRICE_FORMATTED.apply(SELL) + GRAY + " (Right-Click)",
-            LIGHT_YELLOW + "▪ " + LIGHT_GRAY + "Sell All: " + LIGHT_YELLOW + PRODUCT_PRICE_SELL_ALL_FORMATTED + GRAY + " (F/Swap Key)",
-            "",
-            LIGHT_GRAY + "(Hold " + LIGHT_YELLOW + "Shift" + LIGHT_GRAY + " for quick sell)",
-            "",
-            "%stock_global_sell%",
-            "%stock_player_sell%"
+            STOCK_TYPE.apply(SELL),
+            LIMIT_TYPE.apply(SELL)
         ),
-        "Sets lore for the product preview item in Virtual Shop GUI.",
-        "This lore will be used when only Sell price is available.",
-        "Local Placeholders:",
-        "- %lore% - Original lore of the product preview item.",
-        "- %permission% - Permission requirement info (if present)",
-        "- %stock_global_sell% - Global stock info for sale (if present)",
-        "- %stock_player_sell% - Player limit info for sale (if present).",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "Text to appear if product is sellable.",
+        "Placeholder: " + GENERIC_SELL
+    );
 
-    public static final JOption<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = JOption.create("GUI.Product_Format.Lore.Discount",
-        Collections.singletonList(
-            LIGHT_GREEN + "[!] " + LIGHT_GRAY + "There is " + LIGHT_GREEN + Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%" + LIGHT_GRAY + " discount on this item!"
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = ConfigValue.create("GUI.Product_Format.Lore.Discount",
+        Lists.newList(
+            GRAY.enclose(GREEN.enclose("✔") + " Discount " + GREEN.enclose(BOLD.enclose(PRODUCT_DISCOUNT_AMOUNT + "%")) + "!")
         ),
-        "Sets the discount display format when there is active discounts in the shop applicable to a product.",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "Text to appear if product has active discount.",
+        "Placeholder to insert: " + GENERIC_DISCOUNT
+    );
 
-    public static final JOption<List<String>> PRODUCT_FORMAT_LORE_NO_PERMISSION = JOption.create("GUI.Product_Format.Lore.NoPermission",
-        Collections.singletonList(
-            RED + "[!] " + LIGHT_GRAY + "You don't have " + RED + "permission" + LIGHT_GRAY + " to this item!"
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_NO_PERMISSION = ConfigValue.create("GUI.Product_Format.Lore.NoPermission",
+        Lists.newList(
+            GRAY.enclose(RED.enclose("✘") + " You don't have access to this item!")
         ),
-        "Text to display in item lore when player has no permission to product.",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).mapReader(Colorizer::apply);
+        "Text to appear if player don't have access to a product.",
+        "Placeholder to insert: " + GENERIC_PERMISSION
+    );
 
-    public static final JOption<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_STOCK = JOption.forMap("GUI.Product_Format.Lore.Stock.GLOBAL",
+    public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_PRICE_DYNAMIC = ConfigValue.forMap("GUI.Product_Format.Lore.PriceDynamics",
         (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
-        (cfg, path, type) -> Colorizer.apply(cfg.getStringList(path + "." + type)),
+        (cfg, path, type) -> cfg.getStringList(path + "." + type),
+        (cfg, path, map) -> map.forEach((tradeType, lore) -> cfg.set(path + "." + tradeType.name(), lore)),
         () -> {
-            Map<TradeType, List<String>> map = new HashMap<>();
-            map.put(TradeType.BUY,
-                Collections.singletonList(
-                    CYAN + "▪ " + LIGHT_GRAY + "Buy Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + LIGHT_GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(BUY) + GRAY + ")"
-                )
-            );
-
-            map.put(TradeType.SELL,
-                Collections.singletonList(
-                    CYAN + "▪ " + LIGHT_GRAY + "Sell Stock: " + CYAN + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + LIGHT_GRAY + "/" + CYAN + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_STOCK_RESTOCK_DATE.apply(SELL) + GRAY + ")"
-                )
-            );
-            return map;
+            return Map.of(
+                TradeType.BUY, Lists.newList(
+                    GREEN.enclose("[?]" + WHITE.enclose(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(BUY) + WHITE.enclose(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(BUY))
+                ),
+                TradeType.SELL, Lists.newList(
+                    RED.enclose("[?]" + WHITE.enclose(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(SELL) + WHITE.enclose(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(SELL))
+                ));
         },
-        "Sets display format for product Stock.",
-        "If product stock settings is undefined, it will be skipped.",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).setWriter((cfg, path, map) -> map.forEach((tradeType, lore) -> {
-        cfg.set(path + "." + tradeType.name(), lore);
-    }));
+        "Text to appear when product has dynamic/float price.",
+        "Placeholders to insert:",
+        PRICE_DYNAMIC.apply(BUY),
+        PRICE_DYNAMIC.apply(SELL)
+    );
 
-    public static final JOption<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_LIMIT = JOption.forMap("GUI.Product_Format.Lore.Stock.PLAYER",
+    public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_STOCK = ConfigValue.forMap("GUI.Product_Format.Lore.Stock.GLOBAL",
         (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
-        (cfg, path, type) -> Colorizer.apply(cfg.getStringList(path + "." + type)),
+        (cfg, path, type) -> cfg.getStringList(path + "." + type),
+        (cfg, path, map) -> map.forEach((tradeType, lore) -> cfg.set(path + "." + tradeType.name(), lore)),
         () -> {
-            Map<TradeType, List<String>> map = new HashMap<>();
-            map.put(TradeType.BUY,
-                Collections.singletonList(
-                    RED + "▪ " + LIGHT_GRAY + "Buy Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + LIGHT_GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(BUY) + GRAY + ")"
+            return Map.of(TradeType.BUY, Lists.newList(
+                GREEN.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCK_RESTOCK_DATE.apply(BUY)) + ")")
+                ),
+                TradeType.SELL, Lists.newList(
+                RED.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCK_RESTOCK_DATE.apply(SELL)) + ")")
                 )
             );
-
-            map.put(TradeType.SELL,
-                Collections.singletonList(
-                    RED + "▪ " + LIGHT_GRAY + "Sell Limit: " + RED + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + LIGHT_GRAY + "/" + RED + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL) + GRAY + " (⟳ &f" + PRODUCT_LIMIT_RESTOCK_DATE.apply(SELL) + GRAY + ")"
-                )
-            );
-            return map;
         },
-        "Sets display format for product Player Limits.",
-        "If product limit settings is undefined, it will be skipped.",
-        "You can use 'Product' placeholders: " + Placeholders.URL_WIKI_PLACEHOLDERS
-    ).setWriter((cfg, path, map) -> map.forEach((tradeType, lore) -> {
-        cfg.set(path + "." + tradeType.name(), lore);
-    }));
+        "Text to appear when product has buy/sell stock configured.",
+        "Placeholders to insert:",
+        STOCK_TYPE.apply(BUY),
+        STOCK_TYPE.apply(SELL)
+    );
+
+    public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_LIMIT = ConfigValue.forMap("GUI.Product_Format.Lore.Stock.PLAYER",
+        (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
+        (cfg, path, type) -> cfg.getStringList(path + "." + type),
+        (cfg, path, map) -> map.forEach((tradeType, lore) -> cfg.set(path + "." + tradeType.name(), lore)),
+        () -> {
+            return Map.of(TradeType.BUY, Lists.newList(
+                GREEN.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMIT_RESTOCK_DATE.apply(BUY)) + ")")
+                ),
+                TradeType.SELL, Lists.newList(
+                RED.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMIT_RESTOCK_DATE.apply(SELL)) + ")")
+                )
+            );
+        },
+        "Text to appear when product has buy/sell limits configured.",
+        "Placeholders to insert:",
+        LIMIT_TYPE.apply(BUY),
+        LIMIT_TYPE.apply(SELL)
+    );
 }

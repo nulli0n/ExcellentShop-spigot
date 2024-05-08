@@ -2,75 +2,53 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.lang.LangManager;
-import su.nexmedia.engine.utils.NumberUtil;
-import su.nexmedia.engine.utils.StringUtil;
-import su.nexmedia.engine.utils.TimeUtil;
-import su.nexmedia.engine.utils.random.Rnd;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.object.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.language.message.LangMessage;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.StringUtil;
+import su.nightexpress.nightcore.util.TimeUtil;
+import su.nightexpress.nightcore.util.random.Rnd;
 
+import java.io.File;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
 
+    private final Map<DayOfWeek, TreeSet<LocalTime>> rotationTimes;
+
     private RotationData rotationData;
     private RotationType rotationType;
     private int          rotationInterval;
-    private final Map<DayOfWeek, TreeSet<LocalTime>> rotationTimes;
-    private boolean locked;
+    private boolean      locked;
 
-    private int productMinAmount;
-    private int productMaxAmount;
+    private int   productMinAmount;
+    private int   productMaxAmount;
     private int[] productSlots;
 
-    public RotatingShop(@NotNull VirtualShopModule module, @NotNull JYML cfg, @NotNull String id) {
-        super(module, cfg, id);
+    public RotatingShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
+        super(plugin, module, file, id);
         this.rotationTimes = new HashMap<>();
         this.locked = true;
         this.rotationData = new RotationData(this.getId());
-
-        this.placeholderMap
-            .add(Placeholders.SHOP_PAGES, () -> {
-                double limit = this.getProductSlots().length;
-                double products = this.getData().getProducts().size();
-
-                return NumberUtil.format(Math.ceil(products / limit));
-            })
-            .add(Placeholders.SHOP_NEXT_ROTATION_DATE, () -> {
-                LocalDateTime time = this.getNextRotationTime();
-                if (time == null) return LangManager.getPlain(Lang.OTHER_NEVER);
-
-                return time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME); // TODO config
-            })
-            .add(Placeholders.SHOP_NEXT_ROTATION_IN, () -> {
-                LocalDateTime next = this.getNextRotationTime();
-                if (next == null) return LangManager.getPlain(Lang.OTHER_NEVER);
-
-                return TimeUtil.formatTimeLeft(TimeUtil.toEpochMillis(next));
-            })
-            .add(Placeholders.SHOP_ROTATION_TYPE, () -> this.getRotationType().name())
-            .add(Placeholders.SHOP_ROTATION_INTERVAL, () -> TimeUtil.formatTime(this.getRotationInterval() * 1000L))
-            .add(Placeholders.SHOP_ROTATION_MIN_PRODUCTS, () -> NumberUtil.format(this.getProductMinAmount()))
-            .add(Placeholders.SHOP_ROTATION_MAX_PRODUCTS, () -> NumberUtil.format(this.getProductMaxAmount()))
-            .add(Placeholders.SHOP_ROTATION_PRODUCT_SLOTS, () -> Arrays.toString(this.getProductSlots()));
+        this.placeholderMap.add(Placeholders.forRotatingShop(this));
     }
 
     public void loadData() {
@@ -84,20 +62,20 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
     }
 
     @Override
-    protected boolean loadAdditional() {
-        this.setRotationType(cfg.getEnum("Rotation.Type", RotationType.class, RotationType.INTERVAL));
-        this.setRotationInterval(cfg.getInt("Rotation.Interval", 86400));
-        for (String sDay : cfg.getSection("Rotation.Fixed")) {
+    protected boolean loadAdditional(@NotNull FileConfig config) {
+        this.setRotationType(config.getEnum("Rotation.Type", RotationType.class, RotationType.INTERVAL));
+        this.setRotationInterval(config.getInt("Rotation.Interval", 86400));
+        for (String sDay : config.getSection("Rotation.Fixed")) {
             DayOfWeek day = StringUtil.getEnum(sDay, DayOfWeek.class).orElse(null);
             if (day == null) continue;
 
-            TreeSet<LocalTime> times = new TreeSet<>(ShopUtils.parseTimes(cfg.getStringList("Rotation.Fixed." + sDay)));
+            TreeSet<LocalTime> times = new TreeSet<>(ShopUtils.parseTimes(config.getStringList("Rotation.Fixed." + sDay)));
             this.getRotationTimes().put(day, times);
         }
 
-        this.setProductMinAmount(cfg.getInt("Rotation.Products.Min_Amount"));
-        this.setProductMaxAmount(cfg.getInt("Rotation.Products.Max_Amount"));
-        this.setProductSlots(cfg.getIntArray("Rotation.Products.Slots"));
+        this.setProductMinAmount(config.getInt("Rotation.Products.Min_Amount"));
+        this.setProductMaxAmount(config.getInt("Rotation.Products.Max_Amount"));
+        this.setProductSlots(config.getIntArray("Rotation.Products.Slots"));
         return true;
     }
 
@@ -112,31 +90,31 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
     @NotNull
     public RotatingProduct createProduct(@NotNull String id, @NotNull Currency currency,
                                          @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        return new RotatingProduct(id, this, currency, handler, packer);
+        return new RotatingProduct(this.plugin, id, this, currency, handler, packer);
     }
 
     @Override
-    protected void clearAdditionalData() {
-
-    }
-
-    @Override
-    protected void saveAdditionalSettings() {
-        cfg.set("Rotation.Type", this.getRotationType().name());
-        cfg.set("Rotation.Interval", this.getRotationInterval());
-        cfg.remove("Rotation.Fixed");
+    protected void saveAdditionalSettings(@NotNull FileConfig config) {
+        config.set("Rotation.Type", this.getRotationType().name());
+        config.set("Rotation.Interval", this.getRotationInterval());
+        config.remove("Rotation.Fixed");
         this.getRotationTimes().forEach((day, times) -> {
-            cfg.set("Rotation.Fixed." + day.name(), times.stream().map(time -> time.format(ShopUtils.TIME_FORMATTER)).toList());
+            config.set("Rotation.Fixed." + day.name(), times.stream().map(time -> time.format(ShopUtils.TIME_FORMATTER)).toList());
         });
 
-        cfg.set("Rotation.Products.Min_Amount", this.getProductMinAmount());
-        cfg.set("Rotation.Products.Max_Amount", this.getProductMaxAmount());
-        cfg.setIntArray("Rotation.Products.Slots", this.getProductSlots());
+        config.set("Rotation.Products.Min_Amount", this.getProductMinAmount());
+        config.set("Rotation.Products.Max_Amount", this.getProductMaxAmount());
+        config.setIntArray("Rotation.Products.Slots", this.getProductSlots());
     }
 
     @Override
     protected void saveAdditionalProducts() {
-        this.getProducts().forEach(product -> product.write(this.getConfigProducts(), "List." + product.getId()));
+        this.getProducts().forEach(this::writeProduct);
+    }
+
+    @Override
+    protected void writeProduct(@NotNull RotatingProduct product) {
+        product.write(this.configProducts, this.getProductSavePath(product));
     }
 
     @Override
@@ -204,6 +182,21 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
             if (now.isBefore(nextRotate)) return false;
         }
         this.rotate();
+
+        LangMessage notify = VirtualLang.SHOP_ROTATION_NOTIFY.getMessage()
+            .replace(this.replacePlaceholders())
+            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(this.productSlots.length));
+
+        // Back to main server thread.
+        this.plugin.runTask(task -> {
+            this.plugin.getServer().getOnlinePlayers().forEach(player -> {
+                if (!this.canAccess(player, false)) return;
+                notify.send(player);
+
+                this.module.updateShopMenu(player, this);
+            });
+        });
+
         return true;
     }
 

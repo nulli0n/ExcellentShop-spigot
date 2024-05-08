@@ -3,45 +3,37 @@ package su.nightexpress.nexshop.shop.impl;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public abstract class AbstractPreparedProduct<P extends Product> implements PreparedProduct {
 
-    protected final ExcellentShop  plugin;
+    protected final ShopPlugin     plugin;
     protected final Player         player;
     protected final P              product;
-    protected final TradeType      buyType;
+    protected final TradeType      tradeType;
     protected final boolean        all;
     protected final PlaceholderMap placeholderMap;
 
     private Inventory inventory;
     private int units;
 
-    public AbstractPreparedProduct(@NotNull ExcellentShop plugin, @NotNull Player player, @NotNull P product, @NotNull TradeType buyType, boolean all) {
+    public AbstractPreparedProduct(@NotNull ShopPlugin plugin, @NotNull Player player, @NotNull P product, @NotNull TradeType tradeType, boolean all) {
         this.plugin = plugin;
         this.player = player;
         this.product = product;
-        this.buyType = buyType;
+        this.tradeType = tradeType;
         this.all = all;
+        this.placeholderMap = Placeholders.forPreparedProduct(this);
 
         this.setInventory(player.getInventory());
         this.setUnits(1);
-
-        this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.GENERIC_ITEM, () -> ItemUtil.getItemName(this.getProduct().getPreview()))
-            .add(Placeholders.GENERIC_AMOUNT, () -> String.valueOf(this.getAmount()))
-            .add(Placeholders.GENERIC_UNITS, () -> String.valueOf(this.getUnits()))
-            .add(Placeholders.GENERIC_TYPE, () -> plugin.getLangManager().getEnum(this.getTradeType()))
-            .add(Placeholders.GENERIC_PRICE, () -> this.getProduct().getCurrency().format(this.getPrice()))
-        ;
     }
 
     @Override
@@ -67,7 +59,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
     @NotNull
     public TradeType getTradeType() {
-        return this.buyType;
+        return this.tradeType;
     }
 
     public boolean isAll() {

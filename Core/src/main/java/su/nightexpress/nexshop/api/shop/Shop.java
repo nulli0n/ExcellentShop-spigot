@@ -3,11 +3,10 @@ package su.nightexpress.nexshop.api.shop;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.menu.impl.Menu;
-import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.stock.Stock;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
 
 import java.util.Collection;
 import java.util.Map;
@@ -16,25 +15,27 @@ public interface Shop extends Placeholder {
 
     void save();
 
+    void saveSettings();
+
     void saveProducts();
 
-    void clear();
+    void saveProduct(@NotNull Product product);
 
     boolean canAccess(@NotNull Player player, boolean notify);
 
+    default void open(@NotNull Player player) {
+        this.open(player, 1);
+    }
+
     void open(@NotNull Player player, int page);
 
-    void openNextTick(@NotNull Player player, int page);
-
-    @NotNull ShopModule getModule();
+    @NotNull TransactionModule getModule();
 
     @NotNull ShopPricer getPricer();
 
     @NotNull String getId();
 
     @NotNull Stock getStock();
-
-    @NotNull Menu<?> getView();
 
     @NotNull String getName();
 

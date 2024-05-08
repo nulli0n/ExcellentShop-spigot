@@ -3,10 +3,9 @@ package su.nightexpress.nexshop.auction.listing;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.TimeUtil;
 import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.Placeholders;
-import su.nightexpress.nexshop.auction.config.AuctionConfig;
 
 import java.util.UUID;
 
@@ -14,22 +13,17 @@ public class ActiveListing extends AbstractListing {
 
     private final long expireDate;
 
-    public ActiveListing(
-        @NotNull Player player,
-        @NotNull ItemStack itemStack,
-        @NotNull Currency currency,
-        double price
-    ) {
-        this(
-            UUID.randomUUID(),
-            player.getUniqueId(),
-            player.getDisplayName(),
-            itemStack,
-            currency,
-            price,
-            System.currentTimeMillis(),
-            System.currentTimeMillis() + AuctionConfig.LISTINGS_EXPIRE_IN
-        );
+    public static ActiveListing create(@NotNull Player player, @NotNull ItemStack itemStack, @NotNull Currency currency, double price) {
+        UUID id = UUID.randomUUID();
+        UUID holder = player.getUniqueId();
+        String ownerName = player.getDisplayName();
+        ItemStack copyStack = new ItemStack(itemStack);
+
+        long creationDate = System.currentTimeMillis();
+        long expirationDate = AuctionUtils.generateExpireDate(creationDate);
+        long deletionDate = AuctionUtils.generatePurgeDate(expirationDate);
+
+        return new ActiveListing(id, holder, ownerName, copyStack, currency, price, creationDate, expirationDate, deletionDate);
     }
 
     public ActiveListing(
@@ -39,30 +33,20 @@ public class ActiveListing extends AbstractListing {
             @NotNull ItemStack itemStack,
             @NotNull Currency currency,
             double price,
-            long dateCreation,
-            long expireDate
+            long creationDate,
+            long expireDate,
+            long deletionDate
     ) {
-        super(id, owner, ownerName, itemStack, currency, price, dateCreation);
+        super(id, owner, ownerName, itemStack, currency, price, creationDate, deletionDate);
         this.expireDate = expireDate;
-        this.placeholderMap
-            .add(Placeholders.LISTING_EXPIRES_IN, () -> TimeUtil.formatTimeLeft(this.getExpireDate()))
-            .add(Placeholders.LISTING_EXPIRE_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getExpireDate())))
-            ;
+        this.placeholderMap.add(Placeholders.forActiveListing(this));
     }
 
     public long getExpireDate() {
         return expireDate;
     }
 
-    public long getDeleteDate() {
-        return this.getExpireDate() + AuctionConfig.LISTINGS_PURGE_IN;
-    }
-
     public boolean isExpired() {
         return System.currentTimeMillis() > this.getExpireDate();
     }
-
-    /*public boolean isValid() {
-        return System.currentTimeMillis() <= this.getDeleteDate();
-    }*/
 }

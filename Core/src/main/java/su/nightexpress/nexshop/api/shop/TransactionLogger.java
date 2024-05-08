@@ -2,12 +2,13 @@ package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.Colorizer;
+import su.nightexpress.nightcore.util.text.NightMessage;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,22 +29,21 @@ public class TransactionLogger {
     private final DateTimeFormatter dateFormat;
     private final String            format;
 
-    public TransactionLogger(@NotNull ShopModule module) {
+    public TransactionLogger(@NotNull ShopModule module, @NotNull FileConfig config) {
         this.module = module;
 
         String path = "Transaction_Logs.";
-        JYML cfg = module.getConfig();
 
-        this.outFile = JOption.create(path + "Output.File", true).read(cfg);
+        this.outFile = ConfigValue.create(path + "Output.File", true).read(config);
 
-        this.outConsole = JOption.create(path + "Output.Console", true).read(cfg);
+        this.outConsole = ConfigValue.create(path + "Output.Console", true).read(config);
 
-        String datePattern = JOption.create(path + "Format.Date", "dd/MM/yyyy HH:mm:ss").read(cfg);
+        String datePattern = ConfigValue.create(path + "Format.Date", "dd/MM/yyyy HH:mm:ss").read(config);
         this.dateFormat = DateTimeFormatter.ofPattern(datePattern);
 
-        this.format = JOption.create(path + "Format.Purchase",
+        this.format = ConfigValue.create(path + "Format.Purchase",
             GENERIC_TYPE + ": " + PLAYER_NAME + " - x" + GENERIC_AMOUNT + " of " + GENERIC_ITEM + " for " + GENERIC_PRICE + " in " + SHOP_NAME + " shop."
-        ).read(cfg);
+        ).read(config);
     }
 
     public void logTransaction(@NotNull ShopTransactionEvent event) {
@@ -62,7 +62,7 @@ public class TransactionLogger {
     }
 
     private void print(@NotNull String text) {
-        text = Colorizer.restrip(text);
+        text = Colorizer.restrip(NightMessage.clean(text));
 
         if (this.outConsole) {
             this.module.info(text);

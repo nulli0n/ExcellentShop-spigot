@@ -6,7 +6,8 @@ import org.bukkit.World;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.StringUtil;
+import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nightcore.util.StringUtil;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -23,15 +24,19 @@ public class ShopUtils {
 
     public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_TIME;
 
+    private static DateTimeFormatter dateFormatter;
+
     @NotNull
-    public static Set<LocalTime> parseTimes(@NotNull List<String> list) {
-        return list.stream().map(timeRaw -> LocalTime.parse(timeRaw, TIME_FORMATTER)).collect(Collectors.toSet());
+    public static DateTimeFormatter getDateFormatter() {
+        if (dateFormatter == null) {
+            dateFormatter = DateTimeFormatter.ofPattern(Config.DATE_FORMAT.get());
+        }
+        return dateFormatter;
     }
 
     @NotNull
-    @Deprecated
-    public static Set<LocalTime> parseTimesOld(@NotNull List<String> list) {
-        return list.stream().map(timeRaw -> LocalTime.parse(timeRaw.split("-")[0], TIME_FORMATTER)).collect(Collectors.toSet());
+    public static Set<LocalTime> parseTimes(@NotNull List<String> list) {
+        return list.stream().map(timeRaw -> LocalTime.parse(timeRaw, TIME_FORMATTER)).collect(Collectors.toSet());
     }
 
     @NotNull

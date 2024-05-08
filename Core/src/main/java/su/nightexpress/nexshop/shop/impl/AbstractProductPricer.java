@@ -1,23 +1,24 @@
 package su.nightexpress.nexshop.shop.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.Placeholder;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.impl.price.DynamicPricer;
 import su.nightexpress.nexshop.shop.impl.price.FlatPricer;
 import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
+import su.nightexpress.nexshop.shop.impl.price.PlayersPricer;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractProductPricer implements Placeholder {
 
-    protected final PriceType type;
+    protected final PriceType              type;
     protected final Map<TradeType, Double> priceCurrent;
-    protected final PlaceholderMap placeholderMap;
+    protected final PlaceholderMap         placeholderMap;
 
     public AbstractProductPricer(@NotNull PriceType type) {
         this.type = type;
@@ -28,13 +29,14 @@ public abstract class AbstractProductPricer implements Placeholder {
     }
 
     @NotNull
-    public static AbstractProductPricer read(@NotNull JYML cfg, @NotNull String path) {
-        PriceType priceType = cfg.getEnum(path + ".Type", PriceType.class, PriceType.FLAT);
+    public static AbstractProductPricer read(@NotNull FileConfig config, @NotNull String path) {
+        PriceType priceType = config.getEnum(path + ".Type", PriceType.class, PriceType.FLAT);
 
         return switch (priceType) {
-            case FLAT -> FlatPricer.read(cfg, path);
-            case FLOAT -> FloatPricer.read(cfg, path);
-            case DYNAMIC -> DynamicPricer.read(cfg, path);
+            case FLAT -> FlatPricer.read(config, path);
+            case FLOAT -> FloatPricer.read(config, path);
+            case DYNAMIC -> DynamicPricer.read(config, path);
+            case PLAYER_AMOUNT -> PlayersPricer.read(config, path);
         };
     }
 
@@ -44,15 +46,16 @@ public abstract class AbstractProductPricer implements Placeholder {
             case FLAT -> new FlatPricer();
             case FLOAT -> new FloatPricer();
             case DYNAMIC -> new DynamicPricer();
+            case PLAYER_AMOUNT -> new PlayersPricer();
         };
     }
 
-    public void write(@NotNull JYML cfg, @NotNull String path) {
-        cfg.set(path + ".Type", this.getType().name());
-        this.writeAdditional(cfg, path);
+    public void write(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".Type", this.getType().name());
+        this.writeAdditional(config, path);
     }
 
-    protected abstract void writeAdditional(@NotNull JYML cfg, @NotNull String path);
+    protected abstract void writeAdditional(@NotNull FileConfig config, @NotNull String path);
 
     @Override
     @NotNull

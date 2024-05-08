@@ -1,25 +1,29 @@
 package su.nightexpress.nexshop.shop.virtual.command.child;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.CommandResult;
-import su.nightexpress.nexshop.module.ModuleCommand;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
+import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
+import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 
-public class EditorCommand extends ModuleCommand<VirtualShopModule> {
+public class EditorCommand {
 
-    public EditorCommand(@NotNull VirtualShopModule module) {
-        super(module, new String[]{"editor"}, VirtualPerms.COMMAND_EDITOR);
-        this.setDescription(plugin.getMessage(VirtualLang.COMMAND_EDITOR_DESC));
-        this.setPlayerOnly(true);
+    public static void build(@NotNull VirtualShopModule module, @NotNull ChainedNodeBuilder nodeBuilder) {
+        nodeBuilder.addDirect("editor", builder -> builder
+            .permission(VirtualPerms.COMMAND_EDITOR)
+            .description(VirtualLang.COMMAND_EDITOR_DESC)
+            .playerOnly()
+            .executes((context, arguments) -> execute(module, context, arguments)));
     }
 
-    @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        Player player = (Player) sender;
-        this.module.getEditor().open(player, 1);
+    public static boolean execute(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getExecutor();
+        if (player == null) return false;
+
+        module.openShopsEditor(player);
+        return true;
     }
 }

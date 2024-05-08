@@ -6,10 +6,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.integration.VaultHook;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
+import su.nightexpress.nightcore.integration.VaultHook;
 
 import java.util.UUID;
 

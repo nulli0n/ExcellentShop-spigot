@@ -3,13 +3,7 @@ package su.nightexpress.nexshop.data.impl;
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.data.sql.SQLColumn;
-import su.nexmedia.engine.api.data.sql.SQLCondition;
-import su.nexmedia.engine.api.data.sql.SQLQueries;
-import su.nexmedia.engine.api.data.sql.column.ColumnType;
-import su.nexmedia.engine.utils.StringUtil;
-import su.nexmedia.engine.utils.TimeUtil;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -20,6 +14,12 @@ import su.nightexpress.nexshop.data.object.RotationData;
 import su.nightexpress.nexshop.data.object.StockData;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
+import su.nightexpress.nightcore.database.sql.SQLColumn;
+import su.nightexpress.nightcore.database.sql.SQLCondition;
+import su.nightexpress.nightcore.database.sql.SQLQueries;
+import su.nightexpress.nightcore.database.sql.column.ColumnType;
+import su.nightexpress.nightcore.util.StringUtil;
+import su.nightexpress.nightcore.util.TimeUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,11 +42,12 @@ public class VirtualDataHandler {
     private static final SQLColumn COLUMN_PRICE_LAST_BUY     = SQLColumn.of("lastBuyPrice", ColumnType.DOUBLE);
     private static final SQLColumn COLUMN_PRICE_LAST_SELL    = SQLColumn.of("lastSellPrice", ColumnType.DOUBLE);
     private static final SQLColumn COLUMN_PRICE_LAST_UPDATED = SQLColumn.of("lastUpdated", ColumnType.LONG);
+    private static final SQLColumn COLUMN_PRICE_EXPIRE_DATE  = SQLColumn.of("expireDate", ColumnType.LONG);
     private static final SQLColumn COLUMN_PRICE_PURCHASES    = SQLColumn.of("purchases", ColumnType.INTEGER);
     private static final SQLColumn COLUMN_PRICE_SALES        = SQLColumn.of("sales", ColumnType.INTEGER);
     private static final SQLColumn COLUMN_ROTATE_PRODUCTS    = SQLColumn.of("products", ColumnType.STRING);
 
-    private final ExcellentShop plugin;
+    private final ShopPlugin  plugin;
     private final DataHandler dataHandler;
     private final String      tableStockDataOld;
     private final String      tableStockData;
@@ -59,7 +60,7 @@ public class VirtualDataHandler {
     private final Function<ResultSet, PriceData>      priceDataFunction;
     private final Function<ResultSet, RotationData>   rotationDataFunction;
 
-    public VirtualDataHandler(@NotNull ExcellentShop plugin, @NotNull DataHandler dataHandler) {
+    public VirtualDataHandler(@NotNull ShopPlugin plugin, @NotNull DataHandler dataHandler) {
         this.plugin = plugin;
         this.dataHandler = dataHandler;
         this.tableStockDataOld = dataHandler.getTablePrefix() + "_stock_data";
@@ -113,13 +114,14 @@ public class VirtualDataHandler {
                 double lastBuyPrice = resultSet.getDouble(COLUMN_PRICE_LAST_BUY.getName());
                 double lastSellPrice = resultSet.getDouble(COLUMN_PRICE_LAST_SELL.getName());
                 long lastUpdated = resultSet.getLong(COLUMN_PRICE_LAST_UPDATED.getName());
+                long expireDate = resultSet.getLong(COLUMN_PRICE_EXPIRE_DATE.getName());
                 int purchases = resultSet.getInt(COLUMN_PRICE_PURCHASES.getName());
                 int sales = resultSet.getInt(COLUMN_PRICE_SALES.getName());
 
-                return new PriceData(shopId, productId, lastBuyPrice, lastSellPrice, lastUpdated, purchases, sales);
+                return new PriceData(shopId, productId, lastBuyPrice, lastSellPrice, lastUpdated, expireDate, purchases, sales);
             }
-            catch (SQLException e) {
-                e.printStackTrace();
+            catch (SQLException exception) {
+                exception.printStackTrace();
                 return null;
             }
         };
@@ -158,7 +160,8 @@ public class VirtualDataHandler {
 
         this.dataHandler.createTable(this.tablePriceData, Arrays.asList(
             COLUMN_GEN_SHOP_ID, COLUMN_GEN_PRODUCT_ID,
-            COLUMN_PRICE_LAST_BUY, COLUMN_PRICE_LAST_SELL, COLUMN_PRICE_LAST_UPDATED,
+            COLUMN_PRICE_LAST_BUY, COLUMN_PRICE_LAST_SELL,
+            COLUMN_PRICE_LAST_UPDATED, COLUMN_PRICE_EXPIRE_DATE,
             COLUMN_PRICE_PURCHASES, COLUMN_PRICE_SALES
         ));
 
@@ -213,10 +216,12 @@ public class VirtualDataHandler {
             this.dataHandler.delete(this.tableStockDataOld, SQLCondition.equal(COLUMN_STOCK_TYPE.toValue("PLAYER")));
         }
         // ---- UPDATE OLD DATA - END ----
+
+        this.dataHandler.addColumn(this.tablePriceData, COLUMN_PRICE_EXPIRE_DATE.toValue(0));
     }
 
     public void purge() {
-        LocalDateTime deadline = LocalDateTime.now().minusDays(dataHandler.getConfig().purgePeriod);
+        LocalDateTime deadline = LocalDateTime.now().minusDays(dataHandler.getConfig().getPurgePeriod());
         long deadlineMs = TimeUtil.toEpochMillis(deadline);
 
         if (SQLQueries.hasTable(dataHandler.getConnector(), this.tableStockData)) {
@@ -292,19 +297,17 @@ public class VirtualDataHandler {
         this.dataHandler.insert(this.tableStockData, Arrays.asList(
             COLUMN_GEN_SHOP_ID.toValue(data.getShopId()),
             COLUMN_GEN_PRODUCT_ID.toValue(data.getProductId()),
-            //COLUMN_STOCK_TYPE.toValue(StockType.GLOBAL.name()),
             COLUMN_STOCK_TRADE_TYPE.toValue(data.getTradeType().name()),
             COLUMN_STOCK_ITEMS_LEFT.toValue(data.getItemsLeft()),
             COLUMN_STOCK_RESTOCK_DATE.toValue(data.getRestockDate())
         ));
     }
 
-    public void insertPlayerLimit(/*@NotNull UUID playerId, */@NotNull OwnedStockData data) {
+    public void insertPlayerLimit(@NotNull OwnedStockData data) {
         this.dataHandler.insert(this.tablePlayerLimits, Arrays.asList(
-            COLUMN_GEN_PLAYER_ID.toValue(data.getOwnerId().toString()/*playerId.toString()*/),
+            COLUMN_GEN_PLAYER_ID.toValue(data.getOwnerId().toString()),
             COLUMN_GEN_SHOP_ID.toValue(data.getShopId()),
             COLUMN_GEN_PRODUCT_ID.toValue(data.getProductId()),
-            //COLUMN_STOCK_TYPE.toValue(StockType.PLAYER.name()),
             COLUMN_STOCK_TRADE_TYPE.toValue(data.getTradeType().name()),
             COLUMN_STOCK_ITEMS_LEFT.toValue(data.getItemsLeft()),
             COLUMN_STOCK_RESTOCK_DATE.toValue(data.getRestockDate())
@@ -318,6 +321,7 @@ public class VirtualDataHandler {
             COLUMN_PRICE_LAST_BUY.toValue(String.valueOf(data.getLastBuyPrice())),
             COLUMN_PRICE_LAST_SELL.toValue(String.valueOf(data.getLastSellPrice())),
             COLUMN_PRICE_LAST_UPDATED.toValue(String.valueOf(data.getLastUpdated())),
+            COLUMN_PRICE_EXPIRE_DATE.toValue(String.valueOf(data.getExpireDate())),
             COLUMN_PRICE_PURCHASES.toValue(String.valueOf(data.getPurchases())),
             COLUMN_PRICE_SALES.toValue(String.valueOf(data.getSales()))
         ));
@@ -343,7 +347,7 @@ public class VirtualDataHandler {
         );
     }
 
-    public void savePlayerLimit(/*@NotNull UUID playerId, */@NotNull OwnedStockData data) {
+    public void savePlayerLimit(@NotNull OwnedStockData data) {
         this.dataHandler.update(this.tablePlayerLimits,
             Arrays.asList(
                 COLUMN_STOCK_ITEMS_LEFT.toValue(data.getItemsLeft()),
@@ -361,6 +365,7 @@ public class VirtualDataHandler {
             COLUMN_PRICE_LAST_BUY.toValue(data.getLastBuyPrice()),
             COLUMN_PRICE_LAST_SELL.toValue(data.getLastSellPrice()),
             COLUMN_PRICE_LAST_UPDATED.toValue(data.getLastUpdated()),
+            COLUMN_PRICE_EXPIRE_DATE.toValue(data.getExpireDate()),
             COLUMN_PRICE_PURCHASES.toValue(data.getPurchases()),
             COLUMN_PRICE_SALES.toValue(data.getSales())
             ),

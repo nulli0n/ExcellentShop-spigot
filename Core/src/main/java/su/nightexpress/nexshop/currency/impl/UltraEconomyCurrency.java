@@ -6,11 +6,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +18,7 @@ import java.util.UUID;
 public class UltraEconomyCurrency implements Currency, CurrencyHandler, CurrencyOfflineHandler {
 
     private final me.TechsCode.UltraEconomy.objects.Currency currency;
-    private final PlaceholderMap placeholderMap;
+    private final PlaceholderMap                             placeholderMap;
 
     public UltraEconomyCurrency(me.TechsCode.UltraEconomy.objects.Currency currency) {
         this.currency = currency;

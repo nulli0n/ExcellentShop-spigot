@@ -23,6 +23,8 @@ public interface VirtualShop extends Shop {
 
     boolean isLoaded();
 
+    //void saveSettings();
+
     void setLoaded(boolean loaded);
 
     boolean hasPermission(@NotNull Player player);
@@ -34,6 +36,10 @@ public interface VirtualShop extends Shop {
     @NotNull ItemStack getIcon();
 
     void setIcon(@NotNull ItemStack icon);
+
+    @NotNull String getLayoutName();
+
+    void setLayoutName(@NotNull String layoutName);
 
     @NotNull List<String> getDescription();
 

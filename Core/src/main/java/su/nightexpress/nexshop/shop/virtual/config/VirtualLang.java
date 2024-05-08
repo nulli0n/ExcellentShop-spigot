@@ -1,62 +1,170 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
+import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Sound;
-import su.nexmedia.engine.api.lang.LangKey;
-import su.nexmedia.engine.lang.EngineLang;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.virtual.type.ShopType;
+import su.nightexpress.nightcore.language.entry.LangEnum;
+import su.nightexpress.nightcore.language.entry.LangString;
+import su.nightexpress.nightcore.language.entry.LangText;
 
-import static su.nexmedia.engine.utils.Colors.*;
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
+import static su.nightexpress.nightcore.language.tag.MessageTags.OUTPUT;
+import static su.nightexpress.nightcore.language.tag.MessageTags.SOUND;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class VirtualLang extends EngineLang {
+public class VirtualLang extends Lang {
 
-    public static final LangKey COMMAND_EDITOR_DESC = LangKey.of("VirtualShop.Command.Editor.Desc", "Open VirtualShop editor.");
+    public static final LangEnum<ShopType> SHOP_TYPES = LangEnum.of("VirtualShop.ShopType", ShopType.class);
 
-    public static final LangKey COMMAND_OPEN_DESC  = LangKey.of("VirtualShop.Command.Open.Desc", "Opens specified shop.");
-    public static final LangKey COMMAND_OPEN_USAGE = LangKey.of("VirtualShop.Command.Open.Usage", "[player]");
+    public static final LangString COMMAND_ARGUMENT_NAME_SHOP = LangString.of("VirtualShop.Command.Argument.Name.Shop", "shop");
 
-    public static final LangKey COMMAND_MENU_DESC  = LangKey.of("VirtualShop.Command.Menu.Desc", "Opens Main Menu.");
-    public static final LangKey COMMAND_MENU_USAGE = LangKey.of("VirtualShop.Command.Menu.Usage", "[player]");
 
-    public static final LangKey COMMAND_SHOP_DESC  = LangKey.of("VirtualShop.Command.Shop.Desc", "Open specified shop or main menu.");
-    public static final LangKey COMMAND_SHOP_USAGE = LangKey.of("VirtualShop.Command.Shop.Usage", "[shopId]");
+    public static final LangString COMMAND_EDITOR_DESC = LangString.of("VirtualShop.Command.Editor.Desc",
+        "Open VirtualShop editor.");
 
-    public static final LangKey COMMAND_SELL_MENU_DESC  = LangKey.of("VirtualShop.Command.SellMenu.Desc", "Open Sell GUI.");
-    public static final LangKey COMMAND_SELL_MENU_USAGE = LangKey.of("VirtualShop.Command.SellMenu.Usage", "");
 
-    public static final LangKey COMMAND_SELL_ALL_DESC  = LangKey.of("VirtualShop.Command.SellAll.Desc", "Quickly sell all items in inventory.");
-    public static final LangKey COMMAND_SELL_ALL_USAGE = LangKey.of("VirtualShop.Command.SellAll.Usage", "");
+    public static final LangString COMMAND_OPEN_DESC = LangString.of("VirtualShop.Command.Open.Desc",
+        "Opens specified shop.");
 
-    public static final LangKey COMMAND_SELL_HAND_DESC  = LangKey.of("VirtualShop.Command.SellHand.Desc", "Quickly sell hand item.");
-    public static final LangKey COMMAND_SELL_HAND_USAGE = LangKey.of("VirtualShop.Command.SellHand.Usage", "");
+    public static final LangText COMMAND_OPEN_DONE_OTHERS = LangText.of("VirtualShop.Command.Open.Done.Others",
+        LIGHT_GRAY.enclose("Opened " + LIGHT_YELLOW.enclose(SHOP_NAME) + " shop for " + LIGHT_YELLOW.enclose(PLAYER_NAME) + ".")
+    );
 
-    public static final LangKey SHOP_ERROR_BAD_WORLD    = LangKey.of("VirtualShop.Shop.Error.BadWorld", RED + "You can't use shop in this world!");
-    public static final LangKey SHOP_ERROR_BAD_GAMEMODE = LangKey.of("VirtualShop.Shop.Error.BadGamemode", RED + "You can't use shop in current gamemode!");
-    public static final LangKey SHOP_ERROR_INVALID      = LangKey.of("VirtualShop.Shop.Error.Invalid", RED + "No such shop!");
 
-    public static final LangKey PRODUCT_PURCHASE_SELL    = LangKey.of("VirtualShop.Product.Purchase.Sell",
-        "<! type:\"titles:15:60:15\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
-            "\n" + GREEN + BOLD + "Successful Sale! " +
-            "\n" + GRAY + "You sold " + GREEN + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + GRAY + " for " + GREEN + Placeholders.GENERIC_PRICE);
+    public static final LangString COMMAND_MENU_DESC = LangString.of("VirtualShop.Command.Menu.Desc",
+        "Opens Main Menu.");
 
-    public static final LangKey PRODUCT_PURCHASE_BUY     = LangKey.of("VirtualShop.Product.Purchase.Buy",
-        "<! type:\"titles:15:60:15\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
-            "\n" + GREEN + BOLD + "Successful Purchase!" +
-            "\n " + GRAY + "You bought " + GREEN + "x" + Placeholders.GENERIC_AMOUNT + " " + Placeholders.GENERIC_ITEM + GRAY + " for " + GREEN + Placeholders.GENERIC_PRICE);
+    public static final LangText COMMAND_MENU_DONE_OTHERS = LangText.of("VirtualShop.Command.Menu.Done.Others",
+        LIGHT_GRAY.enclose("Opened shops menu for " + LIGHT_YELLOW.enclose(PLAYER_NAME) + ".")
+    );
 
-    public static final LangKey SELL_MENU_SALE_RESULT = LangKey.of("VirtualShop.SellMenu.SaleResult",
-        "<! prefix:\"false\" type:\"titles:20:80:20\" sound:\"" + Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name() + "\" !>" +
-            "\n" + GREEN + BOLD + "Items Sold!" +
-            "\n" + GRAY + "+" + Placeholders.GENERIC_TOTAL);
 
-    public static final LangKey EDITOR_SHOP_CREATE_ERROR_EXIST = LangKey.of("VirtualShop.Editor.Create.Error.Exist", RED + "Shop with such ID already exist!");
-    public static final LangKey EDITOR_ENTER_SHOP_ID           = LangKey.of("VirtualShop.Editor.Enter.Id", GRAY + "Enter " + GREEN + "[Shop Identifier]");
-    public static final LangKey EDITOR_ENTER_DESCRIPTION       = LangKey.of("VirtualShop.Editor.Enter.Description", GRAY + "Enter " + GREEN + "[Description]");
-    public static final LangKey EDITOR_ENTER_NPC_ID            = LangKey.of("VirtualShop.Editor.Enter.NpcId", GRAY + "Enter " + GREEN + "[NPC ID]");
-    public static final LangKey EDITOR_ENTER_TITLE             = LangKey.of("VirtualShop.Editor.Enter.Title", GRAY + "Enter " + GREEN + "[Title]");
-    public static final LangKey EDITOR_ENTER_COMMAND           = LangKey.of("VirtualShop.Editor.Enter.Command", GRAY + "Enter " + GREEN + "[Command]");
-    public static final LangKey EDITOR_ENTER_CHANCE            = LangKey.of("VirtualShop.Editor.Enter.Chance", GRAY + "Enter " + GREEN + "[Chance]");
-    public static final LangKey EDITOR_ENTER_SLOTS             = LangKey.of("VirtualShop.Editor.Enter.Slots", GRAY + "Enter " + GREEN + "[Slots] -> [1,2,5,etc]");
-    public static final LangKey EDITOR_ENTER_RANK              = LangKey.of("VirtualShop.Editor.Enter.Rank", GRAY + "Enter " + GREEN + "[Rank Name]");
-    public static final LangKey EDITOR_ENTER_PERMISSION        = LangKey.of("VirtualShop.Editor.Enter.Permission", GRAY + "Enter " + GREEN + "[Permission Node]");
+    public static final LangString COMMAND_SHOP_DESC = LangString.of("VirtualShop.Command.Shop.Desc",
+        "Open specified shop or main menu.");
 
+
+    public static final LangString COMMAND_SELL_MENU_DESC = LangString.of("VirtualShop.Command.SellMenu.Desc",
+        "Open Sell GUI.");
+
+    public static final LangText COMMAND_SELL_MENU_DONE_OTHERS = LangText.of("VirtualShop.Command.SellMenu.Done.Others",
+        LIGHT_GRAY.enclose("Opened sell menu for " + LIGHT_YELLOW.enclose(PLAYER_NAME) + ".")
+    );
+
+
+    public static final LangString COMMAND_SELL_ALL_DESC = LangString.of("VirtualShop.Command.SellAll.Desc",
+        "Quickly sell all items in inventory.");
+
+    public static final LangText COMMAND_SELL_ALL_DONE_OTHERS = LangText.of("VirtualShop.Command.SellAll.Done.Others",
+        LIGHT_GRAY.enclose("Forced player " + LIGHT_YELLOW.enclose(PLAYER_NAME) + " to sell all items.")
+    );
+
+
+    public static final LangString COMMAND_SELL_HAND_DESC = LangString.of("VirtualShop.Command.SellHand.Desc",
+        "Quickly sell hand item.");
+
+    public static final LangText COMMAND_SELL_HAND_DONE_OTHERS = LangText.of("VirtualShop.Command.SellHand.Done.Others",
+        LIGHT_GRAY.enclose("Forced player " + LIGHT_YELLOW.enclose(PLAYER_NAME) + " to sell hand item.")
+    );
+
+
+    public static final LangText SHOP_ROTATION_NOTIFY = LangText.of("VirtualShop.Shop.Rotation.Notify",
+        TAG_NO_PREFIX,
+        " ",
+        LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose(GENERIC_AMOUNT) + " new items just appeared in the " + LIGHT_YELLOW.enclose(SHOP_NAME) + " shop!"),
+        LIGHT_GRAY.enclose("Click " +
+            CLICK.enclose(ClickEvent.Action.RUN_COMMAND,
+                HOVER.enclose(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to open shop!")),
+                "/shop " + SHOP_ID
+            )
+            + " to open the shop!"),
+        " "
+    );
+
+    public static final LangText SHOP_ERROR_BAD_WORLD = LangText.of("VirtualShop.Shop.Error.BadWorld",
+        LIGHT_RED.enclose("You can't use shop in this world!"));
+
+    public static final LangText SHOP_ERROR_BAD_GAMEMODE = LangText.of("VirtualShop.Shop.Error.BadGamemode",
+        LIGHT_RED.enclose("You can't use shop in current gamemode!"));
+
+    public static final LangText SHOP_ERROR_INVALID_LAYOUT = LangText.of("VirtualShop.Shop.Error.InvalidLayout",
+        LIGHT_GRAY.enclose("Could not open shop " + LIGHT_RED.enclose(SHOP_NAME) + ": Invalid shop layout!"));
+
+
+    public static final LangText ERROR_INVALID_SHOP = LangText.of("VirtualShop.Shop.Error.Invalid",
+        LIGHT_RED.enclose("Invalid shop!"));
+
+
+    public static final LangText PRODUCT_PURCHASE_SELL = LangText.of("VirtualShop.Product.Purchase.Sell",
+        OUTPUT.enclose(15, 60) + SOUND.enclose(Sound.ENTITY_EXPERIENCE_ORB_PICKUP),
+        LIGHT_GREEN.enclose(BOLD.enclose("Successful Sale!")),
+        LIGHT_GRAY.enclose("You sold " + LIGHT_GREEN.enclose("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + LIGHT_GREEN.enclose(GENERIC_PRICE))
+    );
+
+    public static final LangText PRODUCT_PURCHASE_BUY = LangText.of("VirtualShop.Product.Purchase.Buy",
+        OUTPUT.enclose(15, 60) + SOUND.enclose(Sound.ENTITY_EXPERIENCE_ORB_PICKUP),
+        LIGHT_GREEN.enclose(BOLD.enclose("Successful Purchase!")),
+        LIGHT_GRAY.enclose("You bought " + LIGHT_GREEN.enclose("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + LIGHT_GREEN.enclose(GENERIC_PRICE))
+    );
+
+
+    public static final LangText SELL_MENU_SALE_RESULT = LangText.of("VirtualShop.SellMenu.SaleResult",
+        OUTPUT.enclose(15, 60) + SOUND.enclose(Sound.ENTITY_EXPERIENCE_ORB_PICKUP),
+        LIGHT_GREEN.enclose(BOLD.enclose("Items Sold!")),
+        LIGHT_GRAY.enclose("+" + GENERIC_TOTAL)
+    );
+
+    public static final LangText SELL_MENU_SALE_DETAILS = LangText.of("VirtualShop.SellMenu.SaleDetails",
+        TAG_NO_PREFIX,
+        " ",
+        LIGHT_GREEN.enclose(BOLD.enclose("Sale Details:")),
+        GENERIC_ENTRY,
+        " ",
+        LIGHT_GRAY.enclose("Total: " + LIGHT_GREEN.enclose(GENERIC_TOTAL)),
+        " "
+    );
+
+    public static final LangString SELL_MENU_SALE_ENTRY = LangString.of("VirtualShop.SellMenu.SaleEntry",
+        LIGHT_GRAY.enclose("x" + GENERIC_AMOUNT + " " + WHITE.enclose(GENERIC_ITEM) + ": " + LIGHT_GREEN.enclose(GENERIC_PRICE)));
+
+
+    public static final LangString PRICE_AVG_DIFF_UP   = LangString.of("VirtualShop.Price.AverageDynamics.Up",
+        GREEN.enclose("↑ " + GENERIC_VALUE + "%"));
+
+    public static final LangString PRICE_AVG_DIFF_DOWN = LangString.of("VirtualShop.Price.AverageDynamics.Down",
+        RED.enclose("↓ " + GENERIC_VALUE + "%"));
+
+
+    public static final LangString EDITOR_PRODUCT_NO_RANK_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoRankRequirements",
+        "No ranks required!");
+
+    public static final LangString EDITOR_PRODUCT_NO_PERM_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoPermissionRequirements",
+        "No permissions required!");
+
+    public static final LangString EDITOR_SHOP_CREATE_ERROR_EXIST = LangString.of("VirtualShop.Editor.Create.Error.Exist",
+        LIGHT_RED.enclose("Shop already exists!"));
+
+    public static final LangString EDITOR_ENTER_SHOP_ID = LangString.of("VirtualShop.Editor.Enter.Id",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Shop Identifier]")));
+
+    public static final LangString EDITOR_ENTER_DESCRIPTION = LangString.of("VirtualShop.Editor.Enter.Description",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Description]")));
+
+    public static final LangString EDITOR_ENTER_NPC_ID = LangString.of("VirtualShop.Editor.Enter.NpcId",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[NPC ID]")));
+
+    public static final LangString EDITOR_ENTER_TITLE = LangString.of("VirtualShop.Editor.Enter.Title",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Title]")));
+
+    public static final LangString EDITOR_ENTER_COMMAND = LangString.of("VirtualShop.Editor.Enter.Command",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Command]")));
+
+    public static final LangString EDITOR_ENTER_SLOTS = LangString.of("VirtualShop.Editor.Enter.Slots",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Slots] -> [1,2,5,etc]")));
+
+    public static final LangString EDITOR_ENTER_RANK = LangString.of("VirtualShop.Editor.Enter.Rank",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Rank Name]")));
+
+    public static final LangString EDITOR_ENTER_PERMISSION = LangString.of("VirtualShop.Editor.Enter.Permission",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Permission Node]")));
 }

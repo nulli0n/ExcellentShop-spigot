@@ -3,14 +3,14 @@ package su.nightexpress.nexshop.api.shop.packer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.Placeholder;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
 
 public interface ProductPacker extends Placeholder {
 
-    boolean load(@NotNull JYML cfg, @NotNull String path);
+    boolean load(@NotNull FileConfig config, @NotNull String path);
 
-    void write(@NotNull JYML cfg, @NotNull String path);
+    void write(@NotNull FileConfig config, @NotNull String path);
 
     @NotNull ItemStack getPreview();
 

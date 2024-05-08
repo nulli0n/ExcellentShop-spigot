@@ -1,34 +1,40 @@
 package su.nightexpress.nexshop.module;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.AbstractManager;
-import su.nexmedia.engine.command.list.HelpSubCommand;
-import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nightcore.command.experimental.RootCommand;
+import su.nightexpress.nightcore.command.experimental.ServerCommand;
+import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.manager.AbstractManager;
+import su.nightexpress.nightcore.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
-public abstract class AbstractShopModule extends AbstractManager<ExcellentShop> {
+public abstract class AbstractShopModule extends AbstractManager<ShopPlugin> implements ShopModule {
 
-    private final String id;
-    private final String name;
-    protected final ModuleCommand<AbstractShopModule> command;
-    protected final JYML cfg;
+    public static final String CONFIG_NAME = "settings.yml";
 
-    public AbstractShopModule(@NotNull ExcellentShop plugin, @NotNull String id, @NotNull String[] aliases) {
+    private final String   id;
+    private final String   name;
+    private final String[] aliases;
+
+    private ServerCommand moduleCommand;
+
+    public AbstractShopModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull String[] aliases) {
         super(plugin);
         this.id = id;
         this.name = StringUtil.capitalizeUnderscored(this.getId());
-        this.command = new ModuleCommand<>(this, aliases, (String) null);
-        this.cfg = JYML.loadOrExtract(plugin, this.getLocalPath(), "settings.yml");
+        this.aliases = aliases;
     }
 
     @Override
-    protected void onLoad() {
+    protected final void onLoad() {
         // ---------- MOVE OUT OF /MODULES/ START ----------
         File dirOld = new File(plugin.getDataFolder().getAbsolutePath() + "/modules/" + this.getId());
         File dirNew = new File(plugin.getDataFolder().getAbsolutePath() + "/" + this.getId());
@@ -42,16 +48,32 @@ public abstract class AbstractShopModule extends AbstractManager<ExcellentShop> 
         }
         // ---------- MOVE OUT OF /MODULES/ END ----------
 
-        this.command.addDefaultCommand(new HelpSubCommand<>(this.plugin));
-        this.command.addChildren(new ModuleReloadCommand<>(this));
+        FileConfig config = this.getConfig();
 
-        this.plugin.getCommandManager().registerCommand(this.command);
+        this.loadModule(config);
+
+        this.moduleCommand = RootCommand.chained(this.plugin, this.aliases, builder -> {
+            builder.localized(this.getName());
+            ReloadCommand.build(this, builder);
+            this.addCommands(builder);
+        });
+        this.plugin.getCommandManager().registerCommand(this.moduleCommand);
+
+        config.saveChanges();
     }
 
     @Override
-    protected void onShutdown() {
-        this.plugin.getCommandManager().unregisterCommand(this.command);
+    protected final void onShutdown() {
+        this.disableModule();
+
+        this.plugin.getCommandManager().unregisterCommand(this.moduleCommand);
     }
+
+    protected abstract void loadModule(@NotNull FileConfig config);
+
+    protected abstract void disableModule();
+
+    protected abstract void addCommands(@NotNull ChainedNodeBuilder builder);
 
     @NotNull
     public String getId() {
@@ -64,13 +86,18 @@ public abstract class AbstractShopModule extends AbstractManager<ExcellentShop> 
     }
 
     @NotNull
-    public JYML getConfig() {
-        return this.cfg;
+    public FileConfig getConfig() {
+        return FileConfig.loadOrExtract(plugin, this.getLocalPath(), CONFIG_NAME);
     }
 
     @NotNull
     public final String getLocalPath() {
         return this.getId();
+    }
+
+    @NotNull
+    public final String getMenusPath() {
+        return this.getLocalPath() + Config.DIR_MENU;
     }
 
     @NotNull

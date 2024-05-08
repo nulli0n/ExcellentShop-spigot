@@ -1,158 +1,160 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
-import com.google.common.collect.Lists;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AutoPaged;
-import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.api.menu.click.ClickHandler;
-import su.nexmedia.engine.api.menu.click.ItemClick;
-import su.nexmedia.engine.api.menu.impl.ConfigMenu;
-import su.nexmedia.engine.api.menu.impl.MenuOptions;
-import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.lang.LangManager;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemReplacer;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.menu.MenuOptions;
+import su.nightexpress.nightcore.menu.MenuSize;
+import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.api.AutoFill;
+import su.nightexpress.nightcore.menu.api.AutoFilled;
+import su.nightexpress.nightcore.menu.impl.ConfigMenu;
+import su.nightexpress.nightcore.menu.item.ItemHandler;
+import su.nightexpress.nightcore.menu.item.MenuItem;
+import su.nightexpress.nightcore.menu.link.Linked;
+import su.nightexpress.nightcore.menu.link.ViewLink;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
 
-import static su.nexmedia.engine.utils.Colors2.*;
+import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopSearchMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestProduct> {
+public class ShopSearchMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<ChestProduct>, Linked<List<ChestProduct>> {
 
-    public static final String FILE = "shops_search.yml";
+    public static final String FILE_NAME = "shops_search.yml";
 
     private static final String PLACEHOLDER_ACTION_TELEPORT = "%action_teleport%";
 
-    private final ChestShopModule                module;
-    private final Map<Player, List<ChestProduct>> searchCache;
+    //private final ChestShopModule              module;
+    private final ViewLink<List<ChestProduct>> link;
 
-    private final int[]        productSlots;
-    private final String       productName;
-    private final List<String> productLore;
-    private final List<String> actionTeleportLore;
+    private int[]        productSlots;
+    private String       productName;
+    private List<String> productLore;
+    private List<String> actionTeleportLore;
 
-    public ShopSearchMenu(@NotNull ChestShopModule module) {
-        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getMenusPath(), FILE));
-        this.module = module;
-        this.searchCache = new WeakHashMap<>();
-
-        this.productSlots = cfg.getIntArray("Product.Slots");
-        this.productName = cfg.getString("Product.Name", Placeholders.PRODUCT_PREVIEW_NAME);
-        this.productLore = cfg.getStringList("Product.Lore");
-        this.actionTeleportLore = JOption.create("Product.Action_Teleport", Lists.newArrayList(
-            LIGHT_YELLOW + "[▶] " + LIGHT_GRAY + "Left-Click to " + LIGHT_YELLOW + "teleport" + LIGHT_GRAY + "."
-        )).read(cfg);
-
-        this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
-            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this));
+    public ShopSearchMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
+        super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE_NAME));
+        //this.module = module;
+        this.link = new ViewLink<>();
 
         this.load();
     }
 
+    @NotNull
+    @Override
+    public ViewLink<List<ChestProduct>> getLink() {
+        return link;
+    }
+
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        super.onPrepare(viewer, options);
-        this.getItemsForPage(viewer).forEach(this::addItem);
+        this.autoFill(viewer);
     }
 
-    public void open(@NotNull Player player, @NotNull String input) {
-        String searchFor = input.toLowerCase();
+    @Override
+    protected void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
 
-        List<ChestProduct> products = new ArrayList<>();
-        this.module.getShops().forEach(shop -> {
-            shop.getProducts().forEach(product -> {
-                if (!(product.getPacker() instanceof ItemPacker packer)) return;
+    }
 
-                ItemStack item = packer.getItem();
-                String material = item.getType().getKey().getKey();
-                String localized = LangManager.getMaterial(item.getType()).toLowerCase();
-                String displayName = ItemUtil.getItemName(item);
-                if (material.contains(searchFor) || localized.contains(searchFor) || displayName.contains(searchFor)) {
-                    products.add(product);
-                    return;
-                }
+    @Override
+    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ChestProduct> autoFill) {
+        Player player = viewer.getPlayer();
 
-                if (packer instanceof PluginItemPacker pluginPacker) {
-                    String itemId = pluginPacker.getItemId();
-                    if (itemId.contains(searchFor)) {
-                        products.add(product);
-                    }
-                }
-            });
+        autoFill.setSlots(this.productSlots);
+        autoFill.setItems(this.getLink(player));
+        autoFill.setItemCreator(product -> {
+            boolean isOwn = product.getShop().isOwner(player);
+            boolean canTeleport = player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT));
+
+
+            ItemStack item = new ItemStack(product.getPreview());
+            ItemReplacer.create(item).hideFlags().trimmed()
+                .setDisplayName(this.productName)
+                .setLore(this.productLore)
+                .replaceLoreExact(PLACEHOLDER_ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
+                .replace(product.getPlaceholders())
+                .replace(product.getShop().getPlaceholders())
+                .writeMeta();
+            return item;
         });
-
-        this.searchCache.put(player, products);
-        this.open(player, 1);
-    }
-
-    @NotNull
-    private Collection<ChestProduct> getSearchResult(@NotNull Player player) {
-        return this.searchCache.getOrDefault(player, Collections.emptyList());
-    }
-
-    @Override
-    public int[] getObjectSlots() {
-        return this.productSlots;
-    }
-
-    @Override
-    @NotNull
-    public List<ChestProduct> getObjects(@NotNull Player player) {
-        return this.getSearchResult(player).stream().
-            sorted(Comparator.comparing(product -> product.getPricer().getBuyPrice())).toList();
-    }
-
-    @Override
-    @NotNull
-    public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestProduct product) {
-        boolean isOwn = product.getShop().isOwner(player);
-        boolean canTeleport = player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT));
-
-
-        ItemStack item = new ItemStack(product.getPreview());
-        ItemReplacer.create(item).hideFlags().trimmed()
-            .setDisplayName(this.productName)
-            .setLore(this.productLore)
-            .replaceLoreExact(PLACEHOLDER_ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
-            .replace(product.getPlaceholders())
-            .replace(product.getShop().getPlaceholders())
-            .replace(Colorizer::apply)
-            .writeMeta();
-        return item;
-    }
-
-    @Override
-    @NotNull
-    public ItemClick getObjectClick(@NotNull ChestProduct product) {
-        return (viewer, event) -> {
-            Player player = viewer.getPlayer();
+        autoFill.setClickAction(product -> (viewer1, event) -> {
             boolean isOwn = product.getShop().isOwner(player);
             boolean canTeleport = player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT));
 
             if (canTeleport) {
-                product.getShop().teleport(viewer.getPlayer());
+                product.getShop().teleport(player);
             }
-        };
+        });
     }
 
     @Override
-    public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
-        super.onClose(viewer, event);
-        this.searchCache.remove(viewer.getPlayer());
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions(BLACK.enclose("Search Result"), MenuSize.CHEST_45);
+    }
+
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
+
+        ItemStack exitItem = ItemUtil.getSkinHead(SKIN_WRONG_MARK);
+        ItemUtil.editMeta(exitItem, meta -> {
+            meta.setDisplayName(LIGHT_RED.enclose(BOLD.enclose("Exit")));
+        });
+        list.add(new MenuItem(exitItem).setSlots(40).setPriority(10).setHandler(ItemHandler.forClose(this)));
+
+        ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
+        ItemUtil.editMeta(prevPage, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
+        });
+        list.add(new MenuItem(prevPage).setSlots(39).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
+
+        ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
+        ItemUtil.editMeta(nextPage, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
+        });
+        list.add(new MenuItem(nextPage).setSlots(41).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+
+        return list;
+    }
+
+    @Override
+    protected void loadAdditional() {
+        this.productSlots = ConfigValue.create("Product.Slots", IntStream.range(0, 36).toArray()).read(cfg);
+
+        this.productName = ConfigValue.create("Product.Name",
+            LIGHT_YELLOW.enclose(BOLD.enclose(PRODUCT_PREVIEW_NAME))
+        ).read(cfg);
+
+        this.productLore = ConfigValue.create("Product.Lore", Lists.newList(
+            PRODUCT_PREVIEW_LORE,
+            "",
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Shop: ") + SHOP_NAME + " " + GRAY.enclose("(by " + SHOP_OWNER + ")")),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy for: ") + PRODUCT_PRICE_FORMATTED.apply(TradeType.BUY) + " " + GRAY.enclose("(" + PRODUCT_STOCK_AMOUNT_LEFT.apply(TradeType.BUY) + " left)")),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell for: ") + PRODUCT_PRICE_FORMATTED.apply(TradeType.SELL) + " " + GRAY.enclose("(" + PRODUCT_STOCK_AMOUNT_LEFT.apply(TradeType.SELL) + " left)")),
+            "",
+            PLACEHOLDER_ACTION_TELEPORT
+        )).read(cfg);
+
+        this.actionTeleportLore = ConfigValue.create("Product.Action_Teleport", Lists.newList(
+            LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Left-Click to " + LIGHT_YELLOW.enclose("teleport") + ".")
+        )).read(cfg);
     }
 }

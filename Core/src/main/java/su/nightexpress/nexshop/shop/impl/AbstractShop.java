@@ -1,26 +1,23 @@
 package su.nightexpress.nexshop.shop.impl;
 
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.AbstractConfigHolder;
-import su.nexmedia.engine.api.placeholder.Placeholder;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.lang.LangManager;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nightcore.manager.AbstractFileData;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractConfigHolder<ExcellentShop> implements Shop, Placeholder {
+public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop, Placeholder {
 
     protected final ShopDataPricer          pricer;
     protected final Map<TradeType, Boolean> transactions;
@@ -29,35 +26,18 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     protected String name;
 
-    public AbstractShop(@NotNull ExcellentShop plugin, @NotNull JYML cfg, @NotNull String id) {
-        super(plugin, cfg, id);
+    public AbstractShop(@NotNull ShopPlugin plugin, @NotNull File file, @NotNull String id) {
+        super(plugin, file, id);
         this.pricer = new ShopDataPricer(plugin, this);
         this.transactions = new HashMap<>();
         this.products = new LinkedHashMap<>();
-        this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.SHOP_ID, this::getId)
-            .add(Placeholders.SHOP_NAME, this::getName)
-            .add(Placeholders.SHOP_BUY_ALLOWED, () -> LangManager.getBoolean(this.isTransactionEnabled(TradeType.BUY)))
-            .add(Placeholders.SHOP_SELL_ALLOWED, () -> LangManager.getBoolean(this.isTransactionEnabled(TradeType.SELL)));
+        this.placeholderMap = Placeholders.forShop(this);
     }
 
     @Override
     @NotNull
     public PlaceholderMap getPlaceholders() {
         return this.placeholderMap;
-    }
-
-    public void open(@NotNull Player player, int page) {
-        this.getView().open(player, page);
-    }
-
-    public void openNextTick(@NotNull Player player, int page) {
-        this.getView().openNextTick(player, page);
-    }
-
-    @Override
-    public void save() {
-        super.save();
     }
 
     @NotNull
@@ -74,7 +54,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     @Override
     public void setName(@NotNull String name) {
-        this.name = Colorizer.apply(name);
+        this.name = name;
     }
 
     @Override
@@ -99,10 +79,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     @Override
     public void removeProduct(@NotNull String id) {
-        P product = this.getProductMap().remove(id);
-        if (product != null) {
-            product.clear();
-        }
+        this.getProductMap().remove(id);
     }
 
     @Override

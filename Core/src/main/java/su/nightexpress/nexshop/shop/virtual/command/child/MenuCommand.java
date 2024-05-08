@@ -1,48 +1,43 @@
 package su.nightexpress.nexshop.shop.virtual.command.child;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.CommandResult;
-import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
-import su.nightexpress.nexshop.module.ModuleCommand;
+import su.nightexpress.nexshop.config.Perms;
+import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.command.CommandFlags;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-import su.nightexpress.nexshop.shop.virtual.menu.MainMenu;
+import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
+import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
+import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nightcore.util.CommandUtil;
 
-import java.util.List;
+public class MenuCommand {
 
-public class MenuCommand extends ModuleCommand<VirtualShopModule> {
+    private static final String ARG_PLAYER = "player";
 
-    public MenuCommand(@NotNull VirtualShopModule module) {
-        super(module, new String[]{"menu"}, VirtualPerms.COMMAND_MENU);
-        this.setDescription(plugin.getMessage(VirtualLang.COMMAND_MENU_DESC));
-        this.setUsage(plugin.getMessage(VirtualLang.COMMAND_MENU_USAGE));
+    public static void build(@NotNull VirtualShopModule module, @NotNull ChainedNodeBuilder nodeBuilder) {
+        nodeBuilder.addDirect("menu", builder -> builder
+            .permission(VirtualPerms.COMMAND_MENU)
+            .description(VirtualLang.COMMAND_MENU_DESC)
+            .withArgument(ArgumentTypes.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_MENU_OTHERS))
+            .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))
+            .executes((context, arguments) -> execute(module, context, arguments))
+        );
     }
 
-    @Override
-    @NotNull
-    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
-        if (arg == 1) {
-            return CollectionsUtil.playerNames(player);
-        }
-        return super.getTab(player, arg, args);
-    }
+    public static boolean execute(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = CommandUtil.getPlayerOrSender(context, arguments, ARG_PLAYER);
+        if (player == null) return false;
 
-    @Override
-    public void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        String pName = result.length() >= 2 ? result.getArg(1) : sender.getName();
-        Player player = PlayerUtil.getPlayer(pName);
-        if (player == null) {
-            this.errorPlayer(sender);
-            return;
+        if (player != context.getSender()) {
+            context.send(VirtualLang.COMMAND_MENU_DONE_OTHERS.getMessage().replace(Placeholders.forPlayer(player)));
         }
 
-        MainMenu mainMenu = this.module.getMainMenu();
-        if (mainMenu == null) return;
+        boolean force = arguments.hasFlag(CommandFlags.FORCE);
 
-        mainMenu.open(player, 1);
+        return module.openMainMenu(player, force);
     }
 }

@@ -1,71 +1,57 @@
 package su.nightexpress.nexshop.currency.command;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.AbstractCommand;
-import su.nexmedia.engine.api.command.CommandResult;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.currency.handler.ItemStackHandler;
 import su.nightexpress.nexshop.currency.impl.ConfigCurrency;
+import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
+import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
+import su.nightexpress.nightcore.command.experimental.builder.DirectNodeBuilder;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.StringUtil;
 
-import java.util.Collections;
-import java.util.List;
+public class CreateCommand {
 
-public class CreateCommand extends AbstractCommand<ExcellentShop> {
+    private static final String ARG_NAME = "name";
 
-    public CreateCommand(@NotNull ExcellentShop plugin) {
-        super(plugin, new String[]{"create"}, Perms.COMMAND_CURRENCY_CREATE);
-        this.setDescription(plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_DESC));
-        this.setUsage(plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_USAGE));
-        this.setPlayerOnly(true);
+    public static void build(@NotNull ShopPlugin plugin, @NotNull DirectNodeBuilder builder) {
+        builder
+            .permission(Perms.COMMAND_CURRENCY_CREATE)
+            .description(Lang.COMMAND_CURRENCY_CREATE_DESC)
+            .playerOnly()
+            .withArgument(ArgumentTypes.string(ARG_NAME).localized(Lang.COMMAND_ARGUMENT_NAME_NAME).required())
+            .executes((context, arguments) -> execute(plugin, context, arguments));
+
     }
 
-    @Override
-    @NotNull
-    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
-        if (arg == 2) {
-            return Collections.singletonList("<name>");
-        }
-        return super.getTab(player, arg, args);
-    }
+    public static boolean execute(@NotNull ShopPlugin plugin, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getExecutor();
+        if (player == null) return false;
 
-    @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        if (result.length() < 3) {
-            this.printUsage(sender);
-            return;
-        }
-
-        Player player = (Player) sender;
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType().isAir()) {
-            plugin.getMessage(Lang.COMMAND_CURRENCY_ERROR_NO_ITEM).send(sender);
-            return;
+            return context.sendFailure(Lang.COMMAND_CURRENCY_ERROR_NO_ITEM.getMessage());
         }
 
-        String id = result.getArg(2).toLowerCase();
+        String id = arguments.getStringArgument(ARG_NAME);
         Currency currency = plugin.getCurrencyManager().getCurrency(id);
         if (currency != null) {
             if (!(currency instanceof ConfigCurrency) || !(currency.getHandler() instanceof ItemStackHandler)) {
-                plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_ERROR_EXIST)
-                    .replace(currency.replacePlaceholders())
-                    .send(sender);
-                return;
+                return context.sendFailure(Lang.COMMAND_CURRENCY_CREATE_ERROR_EXIST.getMessage().replace(currency.replacePlaceholders()));
             }
         }
 
         plugin.getCurrencyManager().createItemCurrency(id, item);
-        plugin.getMessage(Lang.COMMAND_CURRENCY_CREATE_DONE_NEW)
+
+        return context.sendSuccess(Lang.COMMAND_CURRENCY_CREATE_DONE_NEW.getMessage()
             .replace(Placeholders.GENERIC_NAME, StringUtil.capitalizeFully(id))
-            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
-            .send(sender);
+            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item)));
     }
 }

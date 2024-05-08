@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.stock.Stock;
@@ -13,10 +13,10 @@ public abstract class AbstractStock<S extends Shop, P extends Product> implement
 
     public static final int UNLIMITED = -1;
 
-    protected final ExcellentShop plugin;
-    protected final S shop;
+    protected final ShopPlugin plugin;
+    protected final S          shop;
 
-    public AbstractStock(@NotNull ExcellentShop plugin, @NotNull S shop) {
+    public AbstractStock(@NotNull ShopPlugin plugin, @NotNull S shop) {
         this.plugin = plugin;
         this.shop = shop;
     }

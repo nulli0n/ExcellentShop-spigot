@@ -3,14 +3,13 @@ package su.nightexpress.nexshop.currency.impl;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.Colorizer;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.currency.handler.ItemStackHandler;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public class ConfigCurrency implements Currency {
 
@@ -30,8 +29,8 @@ public class ConfigCurrency implements Currency {
         this.handler = handler;
 
         this.enabled = enabled;
-        this.name = Colorizer.apply(name);
-        this.format = Colorizer.apply(format);
+        this.name = name;
+        this.format = format;
         this.icon = icon.getType().isAir() ? new ItemStack(Material.GOLD_NUGGET) : new ItemStack(icon);
 
         this.placeholderMap = new PlaceholderMap()
@@ -45,24 +44,24 @@ public class ConfigCurrency implements Currency {
     }
 
     @NotNull
-    public static ConfigCurrency read(@NotNull JYML cfg, @NotNull String path, @NotNull String id, @NotNull CurrencyHandler handler) {
+    public static ConfigCurrency read(@NotNull FileConfig config, @NotNull String path, @NotNull String id, @NotNull CurrencyHandler handler) {
         if (!path.endsWith(".") && !path.isEmpty()) path += ".";
 
-        boolean enabled = JOption.create(path + "Enabled", true).read(cfg);
-        String name = JOption.create(path + "Name", handler.getDefaultName()).read(cfg);
-        String format = JOption.create(path + "Format", handler.getDefaultFormat()).read(cfg);
-        ItemStack icon = JOption.create(path + "Icon", handler.getDefaultIcon()).read(cfg);
+        boolean enabled = ConfigValue.create(path + "Enabled", true).read(config);
+        String name = ConfigValue.create(path + "Name", handler.getDefaultName()).read(config);
+        String format = ConfigValue.create(path + "Format", handler.getDefaultFormat()).read(config);
+        ItemStack icon = ConfigValue.create(path + "Icon", handler.getDefaultIcon()).read(config);
 
         return new ConfigCurrency(id, handler, enabled, name, format, icon);
     }
 
-    public void write(@NotNull JYML cfg, @NotNull String path) {
-        cfg.set(path + ".Name", this.getName());
-        cfg.set(path + ".Format", this.getFormat());
-        cfg.setItem(path + ".Icon", this.getIcon());
+    public void write(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".Name", this.getName());
+        config.set(path + ".Format", this.getFormat());
+        config.setItem(path + ".Icon", this.getIcon());
 
         if (this.handler instanceof ItemStackHandler itemHandler) {
-            itemHandler.write(cfg, path);
+            itemHandler.write(config, path);
         }
     }
 

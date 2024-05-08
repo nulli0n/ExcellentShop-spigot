@@ -3,20 +3,20 @@ package su.nightexpress.nexshop.api.shop;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.lang.LangKey;
-import su.nexmedia.engine.api.lang.LangMessage;
-import su.nexmedia.engine.api.placeholder.Placeholder;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nightcore.language.entry.LangText;
+import su.nightexpress.nightcore.language.message.LangMessage;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public class Transaction implements Placeholder {
 
-    private final ExcellentShop  plugin;
+    //private final ExcellentShop  plugin;
     private final Product        product;
     private final TradeType      tradeType;
     private final PlaceholderMap placeholderMap;
@@ -25,20 +25,20 @@ public class Transaction implements Placeholder {
     private double price;
     private Result result;
 
-    public Transaction(@NotNull ExcellentShop plugin,
+    public Transaction(@NotNull ShopPlugin plugin,
                        @NotNull Product product,
                        @NotNull TradeType tradeType,
                        int units,
                        double price,
                        @NotNull Result result) {
-        this.plugin = plugin;
+        //this.plugin = plugin;
         this.product = product;
         this.tradeType = tradeType;
         this.units = units;
         this.price = price;
         this.result = result;
         this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.GENERIC_TYPE, plugin.getLangManager().getEnum(this.getTradeType()))
+            .add(Placeholders.GENERIC_TYPE, Lang.TRADE_TYPES.getLocalized(this.getTradeType()))
             .add(Placeholders.GENERIC_AMOUNT, String.valueOf(product.getUnitAmount() * this.getUnits()))
             .add(Placeholders.GENERIC_UNITS, String.valueOf(this.getUnits()))
             .add(Placeholders.GENERIC_PRICE, product.getCurrency().format(this.getPrice()))
@@ -58,7 +58,7 @@ public class Transaction implements Placeholder {
 
     @Nullable
     public LangMessage getErrorMessage() {
-        LangKey key = switch (this.getResult()) {
+        LangText langText = switch (this.getResult()) {
             case TOO_EXPENSIVE -> Lang.SHOP_PRODUCT_ERROR_TOO_EXPENSIVE;
             case NOT_ENOUGH_ITEMS -> Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS;
             case OUT_OF_STOCK -> Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK;
@@ -66,7 +66,7 @@ public class Transaction implements Placeholder {
             case OUT_OF_SPACE -> Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE;
             default -> null;
         };
-        return key == null ? null : this.plugin.getMessage(key).replace(this.replacePlaceholders());
+        return langText == null ? null : langText.getMessage().replace(this.replacePlaceholders());
     }
 
     @NotNull

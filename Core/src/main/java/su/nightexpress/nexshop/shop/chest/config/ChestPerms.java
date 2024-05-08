@@ -1,49 +1,61 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
-import su.nexmedia.engine.api.server.JPermission;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.config.Perms;
+import su.nightexpress.nightcore.util.wrapper.UniPermission;
 
 public class ChestPerms {
 
-    public static final String PREFIX            = Perms.PREFIX + "chestshop.";
-    public static final String PREFIX_COMMAND    = PREFIX + "command.";
-    public static final String PREFIX_BYPASS     = PREFIX + "bypass.";
-    public static final String PREFIX_PRICE_TYPE = PREFIX + "price.";
-    public static final String PREFIX_SHOP_TYPE  = PREFIX + "type.";
+    public static final String PREFIX               = Perms.PREFIX + "chestshop.";
+    public static final String PREFIX_COMMAND       = PREFIX + "command.";
+    public static final String PREFIX_BYPASS        = PREFIX + "bypass.";
+    public static final String PREFIX_PRICE_TYPE    = PREFIX + "price.";
+    public static final String PREFIX_SHOP_TYPE     = PREFIX + "type.";
+    public static final String PREFIX_PRODUCT_LIMIT = PREFIX + "products.amount.";
+    public static final String PREFIX_SHOP_LIMIT    = PREFIX + "shops.amount.";
 
-    public static final JPermission MODULE     = new JPermission(PREFIX + Placeholders.WILDCARD, "Full access to the Chest Shop module.");
-    public static final JPermission COMMAND    = new JPermission(PREFIX_COMMAND + Placeholders.WILDCARD, "Access to all the Chest Shop commands.");
-    public static final JPermission BYPASS     = new JPermission(PREFIX_BYPASS + Placeholders.WILDCARD);
-    public static final JPermission SHOP_TYPE  = new JPermission(PREFIX_SHOP_TYPE + Placeholders.WILDCARD);
-    public static final JPermission PRICE_TYPE = new JPermission(PREFIX_PRICE_TYPE + Placeholders.WILDCARD);
+    public static final UniPermission MODULE     = new UniPermission(PREFIX + Placeholders.WILDCARD);
+    public static final UniPermission COMMAND    = new UniPermission(PREFIX_COMMAND + Placeholders.WILDCARD);
+    public static final UniPermission BYPASS     = new UniPermission(PREFIX_BYPASS + Placeholders.WILDCARD);
+    public static final UniPermission SHOP_TYPE  = new UniPermission(PREFIX_SHOP_TYPE + Placeholders.WILDCARD);
+    public static final UniPermission PRICE_TYPE = new UniPermission(PREFIX_PRICE_TYPE + Placeholders.WILDCARD);
 
-    public static final JPermission TELEPORT        = new JPermission(PREFIX + "teleport");
-    public static final JPermission TELEPORT_OTHERS = new JPermission(PREFIX + "teleport.others");
-    public static final JPermission CREATE          = new JPermission(PREFIX + "create");
-    public static final JPermission REMOVE          = new JPermission(PREFIX + "remove");
-    public static final JPermission REMOVE_OTHERS   = new JPermission(PREFIX + "remove.others");
-    public static final JPermission EDIT_OTHERS     = new JPermission(PREFIX + "edit.others");
+    public static final UniPermission DISPLAY_CUSTOMIZATION = new UniPermission(PREFIX + "display.customization");
+    public static final UniPermission TELEPORT              = new UniPermission(PREFIX + "teleport");
+    public static final UniPermission TELEPORT_OTHERS       = new UniPermission(PREFIX + "teleport.others");
+    public static final UniPermission CREATE                = new UniPermission(PREFIX + "create");
+    public static final UniPermission REMOVE                = new UniPermission(PREFIX + "remove");
+    public static final UniPermission REMOVE_OTHERS         = new UniPermission(PREFIX + "remove.others");
+    public static final UniPermission EDIT_OTHERS           = new UniPermission(PREFIX + "edit.others");
 
-    public static final JPermission COMMAND_LIST        = new JPermission(PREFIX_COMMAND + "list");
-    public static final JPermission COMMAND_BROWSE      = new JPermission(PREFIX_COMMAND + "browse");
-    public static final JPermission COMMAND_OPEN        = new JPermission(PREFIX_COMMAND + "open");
-    public static final JPermission COMMAND_BANK        = new JPermission(PREFIX_COMMAND + "bank");
-    public static final JPermission COMMAND_BANK_OTHERS = new JPermission(PREFIX_COMMAND + "bank.others");
+    public static final UniPermission COMMAND_LIST        = new UniPermission(PREFIX_COMMAND + "list");
+    public static final UniPermission COMMAND_BROWSE      = new UniPermission(PREFIX_COMMAND + "browse");
+    public static final UniPermission COMMAND_OPEN        = new UniPermission(PREFIX_COMMAND + "open");
+    public static final UniPermission COMMAND_BANK        = new UniPermission(PREFIX_COMMAND + "bank");
+    public static final UniPermission COMMAND_BANK_OTHERS = new UniPermission(PREFIX_COMMAND + "bank.others");
 
-    public static final JPermission BYPASS_CREATION_CLAIMS = new JPermission(PREFIX_BYPASS + "creation.claims");
+    public static final UniPermission BYPASS_CREATION_CLAIMS = new UniPermission(PREFIX_BYPASS + "creation.claims");
 
     static {
         Perms.PLUGIN.addChildren(MODULE);
 
         MODULE.addChildren(
-            COMMAND, BYPASS, SHOP_TYPE, PRICE_TYPE,
-            CREATE, REMOVE, REMOVE_OTHERS, TELEPORT, TELEPORT_OTHERS, EDIT_OTHERS
+            COMMAND,
+            BYPASS,
+            SHOP_TYPE,
+            PRICE_TYPE,
+            CREATE,
+            DISPLAY_CUSTOMIZATION,
+            REMOVE, REMOVE_OTHERS,
+            TELEPORT, TELEPORT_OTHERS,
+            EDIT_OTHERS
         );
 
         COMMAND.addChildren(
             COMMAND_OPEN,
-            COMMAND_LIST, COMMAND_BROWSE, COMMAND_BANK, COMMAND_BANK_OTHERS
+            COMMAND_LIST,
+            COMMAND_BROWSE,
+            COMMAND_BANK, COMMAND_BANK_OTHERS
         );
 
         BYPASS.addChildren(BYPASS_CREATION_CLAIMS);

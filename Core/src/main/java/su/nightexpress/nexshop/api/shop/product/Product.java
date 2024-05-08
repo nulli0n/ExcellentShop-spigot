@@ -5,8 +5,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.placeholder.Placeholder;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
@@ -14,6 +12,8 @@ import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public interface Product extends Placeholder {
 
@@ -24,8 +24,6 @@ public interface Product extends Placeholder {
     }
 
     @NotNull PlaceholderMap getPlaceholders(@Nullable Player player);
-
-    void clear();
 
     void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click);
 

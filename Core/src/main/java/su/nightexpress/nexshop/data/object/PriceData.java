@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.data.object;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
 
 public class PriceData {
 
@@ -12,6 +13,7 @@ public class PriceData {
     private double lastBuyPrice;
     private double lastSellPrice;
     private long   lastUpdated;
+    private long   expireDate;
     private int    purchases;
     private int    sales;
 
@@ -22,20 +24,35 @@ public class PriceData {
             product.getPricer().getBuyPrice(),
             product.getPricer().getSellPrice(),
             System.currentTimeMillis(),
-            0, 0
+            generateExpireDate(product),
+            0,
+            0
         );
     }
 
-    public PriceData(@NotNull String shopId, @NotNull String productId,
-                     double lastBuyPrice, double lastSellPrice, long lastUpdated,
-                     int purchases, int sales) {
+    public PriceData(@NotNull String shopId,
+                     @NotNull String productId,
+                     double lastBuyPrice,
+                     double lastSellPrice,
+                     long lastUpdated,
+                     long expireDate,
+                     int purchases,
+                     int sales) {
         this.shopId = shopId.toLowerCase();
         this.productId = productId.toLowerCase();
         this.setLastBuyPrice(lastBuyPrice);
         this.setLastSellPrice(lastSellPrice);
         this.setLastUpdated(lastUpdated);
+        this.setExpireDate(expireDate);
         this.setPurchases(purchases);
         this.setSales(sales);
+    }
+
+    private static long generateExpireDate(@NotNull Product product) {
+        if (product.getPricer() instanceof FloatPricer pricer) {
+            return pricer.getClosestTimestamp();
+        }
+        return -1L;
     }
 
     public void countTransaction(@NotNull TradeType tradeType, int amount) {
@@ -45,6 +62,14 @@ public class PriceData {
         else {
             this.setSales(this.getSales() + amount);
         }
+    }
+
+    public boolean isExpired() {
+        return this.expireDate >= 0 && System.currentTimeMillis() > this.expireDate;
+    }
+
+    public void expire() {
+        this.setExpireDate(0L);
     }
 
     @NotNull
@@ -79,6 +104,14 @@ public class PriceData {
 
     public void setLastUpdated(long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public long getExpireDate() {
+        return expireDate;
+    }
+
+    public void setExpireDate(long expireDate) {
+        this.expireDate = expireDate;
     }
 
     public int getPurchases() {

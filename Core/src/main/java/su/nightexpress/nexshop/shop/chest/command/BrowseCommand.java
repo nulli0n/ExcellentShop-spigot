@@ -1,26 +1,30 @@
 package su.nightexpress.nexshop.shop.chest.command;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.CommandResult;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
-import su.nightexpress.nexshop.module.ModuleCommand;
+import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
+import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 
-public class BrowseCommand extends ModuleCommand<ChestShopModule> {
+public class BrowseCommand {
 
-    public BrowseCommand(@NotNull ChestShopModule module) {
-        super(module, new String[]{"browse"}, ChestPerms.COMMAND_BROWSE);
-        this.setDescription(plugin.getMessage(ChestLang.COMMAND_BROWSE_DESC));
-        this.setUsage(plugin.getMessage(ChestLang.COMMAND_BROWSE_USAGE));
-        this.setPlayerOnly(true);
+    public static void build(@NotNull ChestShopModule module, @NotNull ChainedNodeBuilder nodeBuilder) {
+        nodeBuilder.addDirect("browse", builder -> builder
+            .permission(ChestPerms.COMMAND_BROWSE)
+            .description(ChestLang.COMMAND_BROWSE_DESC)
+            .playerOnly()
+            .executes((context, arguments) -> execute(module, context, arguments))
+        );
     }
 
-    @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        Player player = (Player) sender;
-        this.module.getBrowseMenu().open(player, 1);
+    public static boolean execute(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getExecutor();
+        if (player == null) return false;
+
+        module.browseShops(player);
+        return true;
     }
 }

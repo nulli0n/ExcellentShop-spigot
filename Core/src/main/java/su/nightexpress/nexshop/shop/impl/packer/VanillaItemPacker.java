@@ -3,9 +3,9 @@ package su.nightexpress.nexshop.shop.impl.packer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.lang.LangManager;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nightcore.config.FileConfig;
 
 public class VanillaItemPacker extends AbstractItemPacker {
 
@@ -16,26 +16,11 @@ public class VanillaItemPacker extends AbstractItemPacker {
         super(new ItemStack(Material.BARRIER));
 
         this.placeholderMap
-            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, () -> LangManager.getBoolean(this.isRespectItemMeta()));
+            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, () -> Lang.getYesOrNo(this.isRespectItemMeta()));
     }
-
-    /*@NotNull
-    public static VanillaItemPacker forChestShop(@NotNull ItemStack item) {
-        VanillaItemPacker packer = new VanillaItemPacker();
-        packer.load(item);
-        packer.setUsePreview(false);
-        return packer;
-    }
-
-    @NotNull
-    public static VanillaItemPacker forVirtualShop(@NotNull ItemStack item) {
-        VanillaItemPacker packer = new VanillaItemPacker();
-        packer.load(item);
-        return packer;
-    }*/
 
     @Override
-    public boolean load(@NotNull JYML cfg, @NotNull String path) {
+    public boolean load(@NotNull FileConfig cfg, @NotNull String path) {
         ItemStack item = cfg.getItemEncoded(path + ".Content.Item");
         if (item == null) return false;
 
@@ -51,7 +36,7 @@ public class VanillaItemPacker extends AbstractItemPacker {
     }
 
     @Override
-    protected void writeAdditional(@NotNull JYML cfg, @NotNull String path) {
+    protected void writeAdditional(@NotNull FileConfig cfg, @NotNull String path) {
         cfg.setItemEncoded(path + ".Content.Item", this.getItem());
         cfg.set(path + ".Item_Meta_Enabled", this.isRespectItemMeta());
     }

@@ -6,12 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.manager.AbstractManager;
-import su.nexmedia.engine.integration.VaultHook;
-import su.nexmedia.engine.utils.EngineUtils;
-import su.nexmedia.engine.utils.FileUtil;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.currency.handler.*;
@@ -20,6 +15,11 @@ import su.nightexpress.nexshop.currency.impl.ConfigCurrency;
 import su.nightexpress.nexshop.currency.impl.DummyCurrency;
 import su.nightexpress.nexshop.currency.impl.UltraEconomyCurrency;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.integration.VaultHook;
+import su.nightexpress.nightcore.manager.AbstractManager;
+import su.nightexpress.nightcore.util.FileUtil;
+import su.nightexpress.nightcore.util.Plugins;
 
 import java.io.File;
 import java.util.Collection;
@@ -28,18 +28,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class CurrencyManager extends AbstractManager<ExcellentShop> {
+public class CurrencyManager extends AbstractManager<ShopPlugin> {
 
     public static final String        FILE_NAME      = "currencies.yml";
     public static final DummyCurrency DUMMY_CURRENCY = new DummyCurrency();
 
-    private final JYML                  config;
+    private final FileConfig            config;
     private final Map<String, Currency> currencyMap;
 
-    public CurrencyManager(@NotNull ExcellentShop plugin) {
+    public CurrencyManager(@NotNull ShopPlugin plugin) {
         super(plugin);
         this.currencyMap = new HashMap<>();
-        this.config = JYML.loadOrExtract(plugin, FILE_NAME);
+        this.config = FileConfig.loadOrExtract(plugin, FILE_NAME);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
         File defDir = new File(this.plugin.getDataFolder() + "/currency/default/");
         if (defDir.exists()) {
-            for (JYML cfg : JYML.loadAll(defDir.getAbsolutePath(), true)) {
+            for (FileConfig cfg : FileConfig.loadAll(defDir.getAbsolutePath(), true)) {
                 String id = cfg.getFile().getName().replace(".yml", "");
 
                 ItemStackHandler handler = new ItemStackHandler(new ItemStack(Material.AIR));
@@ -66,7 +66,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
         File itemDir = new File(this.plugin.getDataFolder() + "/currency/custom_item/");
         if (itemDir.exists()) {
-            for (JYML cfg : JYML.loadAll(itemDir.getAbsolutePath(), true)) {
+            for (FileConfig cfg : FileConfig.loadAll(itemDir.getAbsolutePath(), true)) {
                 String id = cfg.getFile().getName().replace(".yml", "");
 
                 ItemStackHandler handler = ItemStackHandler.read(cfg, "");
@@ -85,33 +85,33 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
 
         this.loadCurrency(PlayerXPHandler.ID, PlayerXPHandler::new);
 
-        if (EngineUtils.hasVault() && VaultHook.hasEconomy()) {
+        if (Plugins.hasVault() && VaultHook.hasEconomy()) {
             this.loadCurrency(VaultEconomyHandler.ID, VaultEconomyHandler::new);
         }
 
-        if (EngineUtils.hasPlugin(HookId.PLAYER_POINTS)) {
+        if (Plugins.isInstalled(HookId.PLAYER_POINTS)) {
             this.loadCurrency(PlayerPointsHandler.ID, PlayerPointsHandler::new);
         }
-        if (EngineUtils.hasPlugin(HookId.BEAST_TOKENS)) {
+        if (Plugins.isInstalled(HookId.BEAST_TOKENS)) {
             this.loadCurrency(BeastTokensHandler.ID, BeastTokensHandler::new);
         }
-        if (EngineUtils.hasPlugin(HookId.VOTING_PLUGIN)) {
+        if (Plugins.isInstalled(HookId.VOTING_PLUGIN)) {
             this.loadCurrency(VotingPluginHandler.ID, VotingPluginHandler::new);
         }
-        if (EngineUtils.hasPlugin(HookId.ELITEMOBS)) {
+        if (Plugins.isInstalled(HookId.ELITEMOBS)) {
             this.loadCurrency(EliteMobsHandler.ID, EliteMobsHandler::new);
         }
-        if (EngineUtils.hasPlugin(HookId.COINS_ENGINE)) {
+        if (Plugins.isInstalled(HookId.COINS_ENGINE)) {
             CoinsEngineCurrency.getCurrencies().forEach(this::registerCurrency);
         }
 
-        if (EngineUtils.hasPlugin(HookId.GEMS_ECONOMY)) {
+        if (Plugins.isInstalled(HookId.GEMS_ECONOMY)) {
             for (me.xanium.gemseconomy.currency.Currency currency : GemsEconomy.getInstance().getCurrencyManager().getCurrencies()) {
                 this.loadCurrency("gemseconomy_" + currency.getSingular(), () -> new GemsEconomyHandler(currency));
             }
         }
 
-        if (EngineUtils.hasPlugin(HookId.ULTRA_ECONOMY)) {
+        if (Plugins.isInstalled(HookId.ULTRA_ECONOMY)) {
             UltraEconomy.getAPI().getCurrencies().forEach(currency -> {
                 this.registerCurrency(new UltraEconomyCurrency(currency));
             });
@@ -209,6 +209,7 @@ public class CurrencyManager extends AbstractManager<ExcellentShop> {
     }
 
     @NotNull
+    @Deprecated
     public Currency getAny() {
         return this.getCurrencies().stream().findFirst().orElseThrow();
     }

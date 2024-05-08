@@ -3,11 +3,7 @@ package su.nightexpress.nexshop.shop.virtual;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.values.UniDouble;
-import su.nexmedia.engine.utils.values.UniInt;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -20,28 +16,49 @@ import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
+import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.FileUtil;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.wrapper.UniDouble;
+import su.nightexpress.nightcore.util.wrapper.UniInt;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+
 public class ShopCreator {
 
-    //private final ExcellentShop plugin;
+    private final ShopPlugin plugin;
     private final VirtualShopModule module;
     private final Currency currency;
 
-    public ShopCreator(@NotNull ExcellentShop plugin, @NotNull VirtualShopModule module) {
-        //this.plugin = plugin;
+    public ShopCreator(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
+        this.plugin = plugin;
         this.module = module;
         this.currency = this.module.getDefaultCurrency();
     }
 
-    public void createShops() {
+    public void createDefaults() {
+        this.createLayouts();
         this.createVirtual();
         this.createRotating();
+    }
+
+    private void createLayouts() {
+        File dir = new File(this.module.getAbsolutePath(), VirtualShopModule.DIR_LAYOUTS);
+        if (dir.exists()) return;
+
+        dir.mkdirs();
+
+        File file = new File(dir.getAbsolutePath(), Placeholders.DEFAULT + ".yml");
+        FileUtil.create(file);
+        FileConfig config = new FileConfig(file);
+
+        new ShopLayout(this.plugin, this.module, config);
     }
 
     private void createVirtual() {
@@ -72,61 +89,54 @@ public class ShopCreator {
     }
 
     private void createBlockShop() {
-        String name = "<gradient:#b88f44>&lBlock Market</gradient:#b79d6d>";
-        List<String> desc = List.of("&7Building blocks and resources.");
+        String name = YELLOW.enclose(BOLD.enclose("Block Market"));
+        List<String> desc = List.of(GRAY.enclose("Building blocks and resources."));
 
         StaticShop shop = this.createStaticShop("blocks", name, desc, new ItemStack(Material.JUNGLE_LOG), 3);
 
         this.addShopProduct(shop, Material.STONE, 50, 20, 1, 0);
-        this.addShopProduct(shop, Material.SMOOTH_STONE, 50, 20, 1, 1);
-        this.addShopProduct(shop, Material.STONE_BRICKS, 50, 20, 1, 2);
-        this.addShopProduct(shop, Material.CRACKED_STONE_BRICKS, 50, 20, 1, 3);
-        this.addShopProduct(shop, Material.CHISELED_STONE_BRICKS, 50, 20, 1, 4);
-        this.addShopProduct(shop, Material.COBBLESTONE, 20, 10, 1, 5);
-        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE, 50, 20, 1, 6);
-        this.addShopProduct(shop, Material.MOSSY_STONE_BRICKS, 60, 30, 1, 7);
-        this.addShopProduct(shop, Material.TUFF, 50, 20, 1, 8);
+        this.addShopProduct(shop, Material.STONE_BRICKS, 50, 20, 1, 1);
+        this.addShopProduct(shop, Material.CHISELED_STONE_BRICKS, 50, 20, 1, 2);
+        this.addShopProduct(shop, Material.COBBLESTONE, 20, 10, 1, 3);
+        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE, 50, 20, 1, 4);
+        this.addShopProduct(shop, Material.MOSSY_STONE_BRICKS, 60, 30, 1, 5);
+        this.addShopProduct(shop, Material.GRASS_BLOCK, 50, 20, 1, 6);
+        this.addShopProduct(shop, Material.RED_SAND, 50, 20, 1, 7);
+        this.addShopProduct(shop, Material.SAND, 30, 15, 1, 8);
         this.addShopProduct(shop, Material.GRANITE, 50, 20, 1, 9);
         this.addShopProduct(shop, Material.POLISHED_GRANITE, 60, 30, 1, 10);
         this.addShopProduct(shop, Material.DIORITE, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.POLISHED_DIORITE, 60, 30, 1, 12);
-        this.addShopProduct(shop, Material.ANDESITE, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.POLISHED_ANDESITE, 60, 30, 1, 14);
-        this.addShopProduct(shop, Material.GRAVEL, 30, 15, 1, 15);
-        this.addShopProduct(shop, Material.RED_SAND, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.SAND, 30, 15, 1, 17);
+        this.addShopProduct(shop, Material.ANDESITE, 50, 20, 1, 12);
+        this.addShopProduct(shop, Material.GRAVEL, 30, 15, 1, 13);
+        this.addShopProduct(shop, Material.PODZOL, 50, 20, 1, 14);
+        this.addShopProduct(shop, Material.DIRT, 10, 5, 1, 15);
+        this.addShopProduct(shop, Material.RED_SANDSTONE, 50, 20, 1, 16);
+        this.addShopProduct(shop, Material.SANDSTONE, 50, 20, 1, 17);
         this.addShopProduct(shop, Material.DEEPSLATE, 60, 30, 1, 18);
         this.addShopProduct(shop, Material.COBBLED_DEEPSLATE, 40, 20, 1, 19);
         this.addShopProduct(shop, Material.CHISELED_DEEPSLATE, 60, 30, 1, 20);
         this.addShopProduct(shop, Material.POLISHED_DEEPSLATE, 70, 40, 1, 21);
-        this.addShopProduct(shop, Material.REINFORCED_DEEPSLATE, 300, 150, 1, 22);
-        this.addShopProduct(shop, Material.PODZOL, 50, 20, 1, 23);
-        this.addShopProduct(shop, Material.GRASS_BLOCK, 50, 20, 1, 24);
-        this.addShopProduct(shop, Material.RED_SANDSTONE, 50, 20, 1, 25);
-        this.addShopProduct(shop, Material.SANDSTONE, 50, 20, 1, 26);
+        this.addShopProduct(shop, Material.TUFF, 50, 20, 1, 22);
+        this.addShopProduct(shop, Material.MYCELIUM, 50, 20, 1, 23);
+        this.addShopProduct(shop, Material.PACKED_MUD, 60, 40, 1, 24);
+        this.addShopProduct(shop, Material.CHISELED_RED_SANDSTONE, 50, 20, 1, 25);
+        this.addShopProduct(shop, Material.CHISELED_SANDSTONE, 50, 20, 1, 26);
         this.addShopProduct(shop, Material.DEEPSLATE_BRICKS, 70, 35, 1, 27);
         this.addShopProduct(shop, Material.CRACKED_DEEPSLATE_BRICKS, 80, 45, 1, 28);
         this.addShopProduct(shop, Material.DEEPSLATE_TILES, 80, 45, 1, 29);
         this.addShopProduct(shop, Material.CRACKED_DEEPSLATE_TILES, 90, 50, 1, 30);
-        this.addShopProduct(shop, Material.MYCELIUM, 50, 20, 1, 32);
-        this.addShopProduct(shop, Material.DIRT, 10, 5, 1, 33);
-        this.addShopProduct(shop, Material.CHISELED_RED_SANDSTONE, 50, 20, 1, 34);
-        this.addShopProduct(shop, Material.CHISELED_SANDSTONE, 50, 20, 1, 35);
-        this.addShopProduct(shop, Material.CLAY, 50, 20, 1, 36);
-        this.addShopProduct(shop, Material.BRICKS, 60, 30, 1, 37);
-        this.addShopProduct(shop, Material.DRIPSTONE_BLOCK, 50, 20, 1, 38);
-        this.addShopProduct(shop, Material.POINTED_DRIPSTONE, 50, 20, 1, 39);
-        this.addShopProduct(shop, Material.CALCITE, 500, 250, 1, 40);
-        this.addShopProduct(shop, Material.SEA_LANTERN, 300, 150, 1, 41);
-        this.addShopProduct(shop, Material.PACKED_MUD, 60, 40, 1, 42);
-        this.addShopProduct(shop, Material.SMOOTH_RED_SANDSTONE, 50, 20, 1, 43);
-        this.addShopProduct(shop, Material.SMOOTH_SANDSTONE, 50, 20, 1, 44);
-        this.addShopProduct(shop, Material.PRISMARINE, 50, 20, 1, 45);
-        this.addShopProduct(shop, Material.PRISMARINE_BRICKS, 50, 20, 1, 46);
-        this.addShopProduct(shop, Material.DARK_PRISMARINE, 50, 20, 1, 47);
-        this.addShopProduct(shop, Material.MUD_BRICKS, 60, 45, 1, 51);
-        this.addShopProduct(shop, Material.CUT_RED_SANDSTONE, 50, 20, 1, 52);
-        this.addShopProduct(shop, Material.CUT_SANDSTONE, 50, 20, 1, 53);
+        this.addShopProduct(shop, Material.CLAY, 50, 20, 1, 31);
+        this.addShopProduct(shop, Material.BRICKS, 60, 30, 1, 32);
+        this.addShopProduct(shop, Material.MUD_BRICKS, 60, 45, 1, 33);
+        this.addShopProduct(shop, Material.SMOOTH_RED_SANDSTONE, 50, 20, 1, 34);
+        this.addShopProduct(shop, Material.SMOOTH_SANDSTONE, 50, 20, 1, 35);
+        this.addShopProduct(shop, Material.PRISMARINE, 50, 20, 1, 36);
+        this.addShopProduct(shop, Material.PRISMARINE_BRICKS, 50, 20, 1, 37);
+        this.addShopProduct(shop, Material.DARK_PRISMARINE, 50, 20, 1, 38);
+        this.addShopProduct(shop, Material.SLIME_BLOCK, 50, 20, 1, 40);
+        this.addShopProduct(shop, Material.CALCITE, 500, 250, 1, 42);
+        this.addShopProduct(shop, Material.CUT_RED_SANDSTONE, 50, 20, 1, 43);
+        this.addShopProduct(shop, Material.CUT_SANDSTONE, 50, 20, 1, 44);
         this.addShopProduct(shop, Material.OAK_LOG, 50, 20, 2, 0);
         this.addShopProduct(shop, Material.OAK_PLANKS, 50, 20, 2, 1);
         this.addShopProduct(shop, Material.MANGROVE_LOG, 50, 20, 2, 2);
@@ -134,8 +144,8 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.NETHERRACK, 50, 20, 2, 4);
         this.addShopProduct(shop, Material.NETHER_BRICKS, 50, 20, 2, 5);
         this.addShopProduct(shop, Material.RED_NETHER_BRICKS, 50, 20, 2, 6);
-        this.addShopProduct(shop, Material.CRACKED_NETHER_BRICKS, 50, 20, 2, 7);
-        this.addShopProduct(shop, Material.CHISELED_NETHER_BRICKS, 50, 20, 2, 8);
+        this.addShopProduct(shop, Material.PURPUR_BLOCK, 50, 20, 2, 7);
+        this.addShopProduct(shop, Material.PURPUR_PILLAR, 50, 20, 2, 8);
         this.addShopProduct(shop, Material.SPRUCE_LOG, 50, 20, 2, 9);
         this.addShopProduct(shop, Material.SPRUCE_PLANKS, 50, 20, 2, 10);
         this.addShopProduct(shop, Material.CRIMSON_STEM, 50, 20, 2, 11);
@@ -149,11 +159,11 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.BIRCH_PLANKS, 50, 20, 2, 19);
         this.addShopProduct(shop, Material.WARPED_STEM, 50, 20, 2, 20);
         this.addShopProduct(shop, Material.WARPED_PLANKS, 50, 20, 2, 21);
-        this.addShopProduct(shop, Material.QUARTZ_BLOCK, 50, 20, 2, 22);
-        this.addShopProduct(shop, Material.CHISELED_QUARTZ_BLOCK, 50, 20, 2, 23);
-        this.addShopProduct(shop, Material.QUARTZ_BRICKS, 50, 20, 2, 24);
-        this.addShopProduct(shop, Material.QUARTZ_PILLAR, 50, 20, 2, 25);
-        this.addShopProduct(shop, Material.SMOOTH_QUARTZ, 50, 20, 2, 26);
+        this.addShopProduct(shop, Material.OBSIDIAN, 50, 20, 2, 22);
+        this.addShopProduct(shop, Material.CRYING_OBSIDIAN, 100, 50, 2, 23);
+        this.addShopProduct(shop, Material.MAGMA_BLOCK, 50, 20, 2, 24);
+        this.addShopProduct(shop, Material.QUARTZ_BLOCK, 50, 20, 2, 25);
+        this.addShopProduct(shop, Material.QUARTZ_BRICKS, 50, 20, 2, 26);
         this.addShopProduct(shop, Material.JUNGLE_LOG, 50, 20, 2, 27);
         this.addShopProduct(shop, Material.JUNGLE_PLANKS, 50, 20, 2, 28);
         this.addShopProduct(shop, Material.BLACKSTONE, 50, 20, 2, 29);
@@ -165,19 +175,13 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.SOUL_SAND, 50, 20, 2, 35);
         this.addShopProduct(shop, Material.ACACIA_LOG, 50, 20, 2, 36);
         this.addShopProduct(shop, Material.ACACIA_PLANKS, 50, 20, 2, 37);
-        this.addShopProduct(shop, Material.CRIMSON_NYLIUM, 50, 20, 2, 38);
-        this.addShopProduct(shop, Material.OBSIDIAN, 50, 20, 2, 39);
-        this.addShopProduct(shop, Material.CRYING_OBSIDIAN, 100, 50, 2, 40);
-        this.addShopProduct(shop, Material.MAGMA_BLOCK, 50, 20, 2, 41);
-        this.addShopProduct(shop, Material.BONE_BLOCK, 50, 20, 2, 42);
-        this.addShopProduct(shop, Material.GLASS, 50, 20, 2, 43);
+        this.addShopProduct(shop, Material.DARK_OAK_LOG, 50, 20, 2, 38);
+        this.addShopProduct(shop, Material.DARK_OAK_PLANKS, -1, -1, 2, 39);
+        this.addShopProduct(shop, Material.BONE_BLOCK, 50, 20, 2, 40);
+        this.addShopProduct(shop, Material.GLASS, 50, 20, 2, 41);
+        this.addShopProduct(shop, Material.WARPED_NYLIUM, 50, 20, 2, 42);
+        this.addShopProduct(shop, Material.CRIMSON_NYLIUM, 50, 20, 2, 43);
         this.addShopProduct(shop, Material.SOUL_SOIL, 50, 20, 2, 44);
-        this.addShopProduct(shop, Material.DARK_OAK_LOG, 50, 20, 2, 45);
-        this.addShopProduct(shop, Material.DARK_OAK_PLANKS, -1, -1, 2, 46);
-        this.addShopProduct(shop, Material.WARPED_NYLIUM, 50, 20, 2, 47);
-        this.addShopProduct(shop, Material.SLIME_BLOCK, 50, 20, 2, 51);
-        this.addShopProduct(shop, Material.PURPUR_BLOCK, 50, 20, 2, 52);
-        this.addShopProduct(shop, Material.PURPUR_PILLAR, 50, 20, 2, 53);
         this.addShopProduct(shop, Material.COPPER_BLOCK, 50, 20, 3, 0);
         this.addShopProduct(shop, Material.CUT_COPPER, 50, 20, 3, 1);
         this.addShopProduct(shop, Material.EXPOSED_COPPER, 50, 20, 3, 2);
@@ -209,15 +213,15 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.ICE, 50, 20, 3, 37);
         this.addShopProduct(shop, Material.SNOW_BLOCK, 50, 20, 3, 38);
         this.addShopProduct(shop, Material.WARPED_WART_BLOCK, 50, 20, 3, 40);
-        this.addShopProduct(shop, Material.AMETHYST_BLOCK, 50, 20, 3, 45);
-        this.addShopProduct(shop, Material.BUDDING_AMETHYST, 10_000, 5_000, 3, 46);
+        this.addShopProduct(shop, Material.AMETHYST_BLOCK, 50, 20, 3, 43);
+        this.addShopProduct(shop, Material.BUDDING_AMETHYST, 10_000, 5_000, 3, 44);
 
         shop.save();
     }
 
     private void createIngredientsShop() {
-        String name = "<gradient:#409ed9>&lIngredients</gradient:#97d5fc>";
-        List<String> desc = List.of("&7Potions and Ingredients.");
+        String name = LIGHT_RED.enclose(BOLD.enclose("Ingredients"));
+        List<String> desc = List.of(GRAY.enclose("Potions and Ingredients."));
 
         StaticShop shop = this.createStaticShop("ingredients", name, desc, new ItemStack(Material.REDSTONE), 1);
 
@@ -245,15 +249,15 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.BLAZE_POWDER, 50, 20, 1, 21);
         this.addShopProduct(shop, Material.MAGMA_CREAM, 150, 75, 1, 22);
         this.addShopProduct(shop, Material.GHAST_TEAR, 500, 250, 1, 23);
-        this.addShopProduct(shop, Material.CAULDRON, 50, 20, 1, 52);
-        this.addShopProduct(shop, Material.BREWING_STAND, 50, 20, 1, 53);
+        this.addShopProduct(shop, Material.CAULDRON, 50, 20, 1, 34);
+        this.addShopProduct(shop, Material.BREWING_STAND, 50, 20, 1, 35);
 
         shop.save();
     }
 
     private void createFarmerShop() {
-        String name = "<gradient:#409ed9>&lFarmer's Market</gradient:#97d5fc>";
-        List<String> desc = List.of("&7Everything your garden need.");
+        String name = LIGHT_YELLOW.enclose(BOLD.enclose("Farmer's Market"));
+        List<String> desc = List.of(GRAY.enclose("Everything your garden need."));
 
         StaticShop shop = this.createStaticShop("farmers_market", name, desc, new ItemStack(Material.WHEAT), 2);
 
@@ -266,13 +270,11 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.AZALEA, 50, 20, 1, 6);
         this.addShopProduct(shop, Material.FLOWERING_AZALEA, 50, 20, 1, 7);
         this.addShopProduct(shop, Material.MANGROVE_PROPAGULE, 50, 20, 1, 8);
-        this.addShopProduct(shop, Material.TALL_GRASS, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.DEAD_BUSH, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.RED_MUSHROOM, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.BROWN_MUSHROOM, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.WARPED_FUNGUS, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.CRIMSON_FUNGUS, 50, 20, 1, 15);
-        this.addShopProduct(shop, Material.NETHER_WART, 50, 20, 1, 16);
+        this.addShopProduct(shop, Material.RED_MUSHROOM, 50, 20, 1, 9);
+        this.addShopProduct(shop, Material.BROWN_MUSHROOM, 50, 20, 1, 10);
+        this.addShopProduct(shop, Material.WARPED_FUNGUS, 50, 20, 1, 11);
+        this.addShopProduct(shop, Material.CRIMSON_FUNGUS, 50, 20, 1, 12);
+        this.addShopProduct(shop, Material.NETHER_WART, 50, 20, 1, 13);
         this.addShopProduct(shop, Material.SHROOMLIGHT, 50, 20, 1, 17);
         this.addShopProduct(shop, Material.POPPY, 50, 20, 1, 18);
         this.addShopProduct(shop, Material.BLUE_ORCHID, 50, 20, 1, 19);
@@ -301,12 +303,6 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.TWISTING_VINES, 50, 20, 1, 42);
         this.addShopProduct(shop, Material.NETHER_SPROUTS, 50, 20, 1, 43);
         this.addShopProduct(shop, Material.SPORE_BLOSSOM, 50, 20, 1, 44);
-        this.addShopProduct(shop, Material.FERN, 50, 20, 1, 45);
-        this.addShopProduct(shop, Material.LARGE_FERN, 50, 20, 1, 46);
-        this.addShopProduct(shop, Material.VINE, 50, 20, 1, 47);
-        this.addShopProduct(shop, Material.SMALL_DRIPLEAF, 50, 20, 1, 51);
-        this.addShopProduct(shop, Material.BIG_DRIPLEAF, 50, 20, 1, 52);
-        this.addShopProduct(shop, Material.LILY_PAD, 50, 20, 1, 53);
         this.addShopProduct(shop, Material.WHEAT_SEEDS, 50, 20, 2, 0);
         this.addShopProduct(shop, Material.BEETROOT_SEEDS, 50, 20, 2, 1);
         this.addShopProduct(shop, Material.PUMPKIN_SEEDS, 50, 20, 2, 2);
@@ -339,8 +335,8 @@ public class ShopCreator {
     }
 
     private void createFishShop() {
-        String name = "<gradient:#409ed9>&lFish Market</gradient:#97d5fc>";
-        List<String> desc = List.of("&7Everything you can obtain", "&7when fishing.");
+        String name = LIGHT_ORANGE.enclose(BOLD.enclose("Fish Market"));
+        List<String> desc = List.of(GRAY.enclose("Everything you can obtain"), GRAY.enclose("when fishing."));
 
         StaticShop shop = this.createStaticShop("fish_market", name, desc, new ItemStack(Material.TROPICAL_FISH), 1);
 
@@ -368,8 +364,8 @@ public class ShopCreator {
     }
 
     private void createFoodShop() {
-        String name = "<gradient:#409ed9>&lFood Market</gradient:#97d5fc>";
-        List<String> desc = List.of("&7All regular food.");
+        String name = LIGHT_RED.enclose(BOLD.enclose("Food Market"));
+        List<String> desc = List.of(GRAY.enclose("All regular food."));
 
         StaticShop shop = this.createStaticShop("food", name, desc, new ItemStack(Material.SWEET_BERRIES), 1);
 
@@ -402,8 +398,8 @@ public class ShopCreator {
     }
 
     private void createHostileLootShop() {
-        String name = "<gradient:#409ed9>&lHostile Loot</gradient:#97d5fc>";
-        List<String> desc = List.of("&7Everything related to", "&7hostile mobs and their loot.");
+        String name = LIGHT_GREEN.enclose(BOLD.enclose("Hostile Loot"));
+        List<String> desc = List.of(GRAY.enclose("Everything related to"), GRAY.enclose("hostile mobs and their loot."));
 
         StaticShop shop = this.createStaticShop("hostile_loot", name, desc, new ItemStack(Material.CREEPER_HEAD), 4);
 
@@ -508,9 +504,9 @@ public class ShopCreator {
     }
 
     private void createPeacefulLoot() {
-        String name = "<gradient:#409ed9>&lPeaceful Loot</gradient:#97d5fc>";
-        List<String> desc = List.of("&7Everything related to", "&7peaceful mobs and their loot.");
-        ItemStack icon = ItemUtil.createCustomHead("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWEzNzFhMDZlYTc4NThmODlkMjdjYzEwNTVjMzE3YjIzZjEwNWM5MTI1YmM1MTZkMzg5MWFhNGM4MzVjMjk5In19fQ==");
+        String name = LIGHT_PINK.enclose(BOLD.enclose("Peaceful Loot"));
+        List<String> desc = List.of(GRAY.enclose("Everything related to"), GRAY.enclose("peaceful mobs and their loot."));
+        ItemStack icon = ItemUtil.getSkinHead("9b1760e3778f8087046b86bec6a0a83a567625f30f0d6bce866d4bed95dba6c1");
 
         StaticShop shop = this.createStaticShop("peaceful_loot", name, desc, icon, 3);
 
@@ -538,10 +534,10 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.MUTTON, 50, 20, 1, 21);
         this.addShopProduct(shop, Material.BEEF, 50, 20, 1, 27);
         this.addShopProduct(shop, Material.BEEF, 50, 20, 1, 28);
+        this.addShopProduct(shop, Material.BEE_SPAWN_EGG, 5_000, 2_500, 1, 34);
+        this.addShopProduct(shop, Material.ALLAY_SPAWN_EGG, 100_000, 50_000, 1, 35);
         this.addShopProduct(shop, Material.WOLF_SPAWN_EGG, 300, 150, 1, 43);
         this.addShopProduct(shop, Material.FROG_SPAWN_EGG, 5_000, 2_500, 1, 44);
-        this.addShopProduct(shop, Material.BEE_SPAWN_EGG, 5_000, 2_500, 1, 52);
-        this.addShopProduct(shop, Material.ALLAY_SPAWN_EGG, 100_000, 50_000, 1, 53);
         this.addShopProduct(shop, Material.CHICKEN_SPAWN_EGG, 50, 20, 2, 0);
         this.addShopProduct(shop, Material.RABBIT_SPAWN_EGG, 50, 20, 2, 1);
         this.addShopProduct(shop, Material.TURTLE_SPAWN_EGG, 100, 50, 2, 2);
@@ -592,8 +588,8 @@ public class ShopCreator {
     }
 
     private void createToolShop() {
-        String name = "<gradient:#75fce6>&lTool Store</gradient:#b4fdf1>";
-        List<String> desc = List.of("&7All type tools.");
+        String name = LIGHT_CYAN.enclose(BOLD.enclose("Tool Store"));
+        List<String> desc = List.of(GRAY.enclose("All type tools."));
 
         StaticShop shop = this.createStaticShop("tools", name, desc, new ItemStack(Material.DIAMOND_PICKAXE), 1);
 
@@ -622,8 +618,8 @@ public class ShopCreator {
     }
 
     private void createWeaponShop() {
-        String name = "<gradient:#fae409>&lArmory</gradient:#fbf18f>";
-        List<String> desc = List.of("&7All type armors and weapons.");
+        String name = YELLOW.enclose(BOLD.enclose("Armory"));
+        List<String> desc = List.of(GRAY.enclose("All type armors and weapons."));
 
         StaticShop shop = this.createStaticShop("weapons", name, desc, new ItemStack(Material.GOLDEN_SWORD), 2);
 
@@ -662,8 +658,8 @@ public class ShopCreator {
     }
 
     private void createWoolShop() {
-        String name = "<gradient:#7afd2f>&lWool Market</gradient:#b9f099>";
-        List<String> desc = List.of("&7Wool with colors.");
+        String name = LIGHT_GREEN.enclose(BOLD.enclose("Wool Market"));
+        List<String> desc = List.of(GRAY.enclose("Wool with colors."));
 
         StaticShop shop = this.createStaticShop("wool", name, desc, new ItemStack(Material.LIME_WOOL), 1);
 
@@ -688,8 +684,8 @@ public class ShopCreator {
     }
 
     private void createTravellerShop() {
-        String name = "&2&lTraveller Shop";
-        List<String> desc = List.of("&7Shop with items changing", "&7every 24 hours.");
+        String name = GREEN.enclose(BOLD.enclose("Traveller Shop"));
+        List<String> desc = List.of(GRAY.enclose("Shop with items changing"), GRAY.enclose("every 24 hours."));
 
         RotatingShop shop = this.createRotatingShop("traveller", name, desc, new ItemStack(Material.ENDER_EYE));
 
@@ -727,10 +723,11 @@ public class ShopCreator {
 
     @NotNull
     private RotatingShop createRotatingShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon) {
-        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_ROTATING_SHOPS + id, AbstractVirtualShop.CONFIG_NAME);
+        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_ROTATING_SHOPS + id, AbstractVirtualShop.FILE_NAME);
         FileUtil.create(file);
 
-        RotatingShop shop = new RotatingShop(this.module, new JYML(file), id);
+        RotatingShop shop = new RotatingShop(this.plugin, this.module, file, id);
+        shop.setLayoutName(Placeholders.DEFAULT);
         shop.setRotationType(RotationType.INTERVAL);
         shop.setRotationInterval(86400);
         shop.setProductMinAmount(15);
@@ -743,11 +740,12 @@ public class ShopCreator {
 
     @NotNull
     private StaticShop createStaticShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon, int pages) {
-        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, AbstractVirtualShop.CONFIG_NAME);
+        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, AbstractVirtualShop.FILE_NAME);
         FileUtil.create(file);
 
-        StaticShop shop = new StaticShop(this.module, new JYML(file), id);
+        StaticShop shop = new StaticShop(this.plugin, this.module, file, id);
         shop.setPages(pages);
+        shop.setLayoutName(Placeholders.DEFAULT);
         this.setShopSettings(shop, name, description, icon);
 
         return shop;

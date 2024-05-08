@@ -3,10 +3,10 @@ package su.nightexpress.nexshop.api.shop.product;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.placeholder.Placeholder;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nightcore.util.placeholder.Placeholder;
 
 public interface PreparedProduct extends Placeholder {
 

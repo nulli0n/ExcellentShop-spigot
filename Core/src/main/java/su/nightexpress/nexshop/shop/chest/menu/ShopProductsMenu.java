@@ -2,62 +2,63 @@ package su.nightexpress.nexshop.shop.chest.menu;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.api.menu.click.ClickHandler;
-import su.nexmedia.engine.api.menu.impl.MenuOptions;
-import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.api.menu.item.ItemOptions;
-import su.nexmedia.engine.api.menu.item.MenuItem;
-import su.nexmedia.engine.api.menu.link.Linked;
-import su.nexmedia.engine.api.menu.link.ViewLink;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemReplacer;
-import su.nexmedia.engine.utils.PlayerUtil;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.menu.MenuOptions;
+import su.nightexpress.nightcore.menu.MenuSize;
+import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.click.ClickResult;
+import su.nightexpress.nightcore.menu.item.ItemHandler;
+import su.nightexpress.nightcore.menu.item.ItemOptions;
+import su.nightexpress.nightcore.menu.item.MenuItem;
+import su.nightexpress.nightcore.menu.link.Linked;
+import su.nightexpress.nightcore.menu.link.ViewLink;
+import su.nightexpress.nightcore.util.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.stream.IntStream;
 
-public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestShop> {
+import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-    public static final String FILE = "shop_products.yml";
+public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop>, ShopEditor {
 
-    private final int[] productSlots;
-    private final ItemStack productFree;
-    private final ItemStack productLocked;
-    private final String productName;
-    private final List<String> productLore;
+    public static final String FILE_NAME = "shop_products.yml";
 
+    private final ChestShopModule module;
     private final ViewLink<ChestShop> link;
+    private final ItemHandler returnHandler;
 
-    public ShopProductsMenu(@NotNull ExcellentShop plugin, @NotNull ChestShopModule module) {
-        super(plugin, JYML.loadOrExtract(plugin, module.getMenusPath(), FILE));
+    private int[] productSlots;
+    private ItemStack productFree;
+    private ItemStack productLocked;
+    private String productName;
+    private List<String> productLore;
+
+    public ShopProductsMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
+        super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE_NAME));
+        this.module = module;
         this.link = new ViewLink<>();
 
-        this.productSlots = cfg.getIntArray("Products.Slots");
-        this.productFree = cfg.getItem("Products.Free");
-        this.productLocked = cfg.getItem("Products.Locked");
-        this.productName = Colorizer.apply(cfg.getString("Products.Product.Name", Placeholders.PRODUCT_PREVIEW_NAME));
-        this.productLore = Colorizer.apply(cfg.getStringList("Products.Product.Lore"));
-
-        this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-            .addClick(MenuItemType.RETURN, (viewer, event) -> plugin.runTask(task -> this.getShop(viewer).openMenu(viewer.getPlayer())));
+        this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
+            this.runNextTick(() -> module.openShopSettings(viewer.getPlayer(), this.getLink(viewer)));
+        }));
 
         this.load();
     }
@@ -68,16 +69,10 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
         return link;
     }
 
-    @NotNull
-    private ChestShop getShop(@NotNull MenuViewer viewer) {
-        return this.getLink().get(viewer);
-    }
-
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        ChestShop shop = this.getShop(viewer);
+        ChestShop shop = this.getLink(viewer);
         Player player = viewer.getPlayer();
-        int page = viewer.getPage();
 
         int maxProducts = ChestUtils.getProductLimit(player);
         if (maxProducts < 0) maxProducts = this.productSlots.length;
@@ -95,14 +90,14 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
                     productCount++;
                     item = new MenuItem(this.productFree);
                     item.setOptions(ItemOptions.personalWeak(player));
-                    item.setClick((viewer2, event) -> {
+                    item.setHandler((viewer2, event) -> {
                         ItemStack cursor = event.getCursor();
-                        if (cursor == null || shop.createProduct(viewer2.getPlayer(), cursor) == null) return;
+                        if (cursor == null || cursor.getType().isAir()) return;
+                        if (shop.createProduct(player, cursor) == null) return;
 
                         event.getView().setCursor(null);
-                        PlayerUtil.addItem(viewer2.getPlayer(), cursor);
-                        shop.save();
-                        this.openNextTick(viewer2, page);
+                        Players.addItem(viewer2.getPlayer(), cursor);
+                        this.saveProductsAndFlush(viewer, shop);
                     });
                 }
                 else {
@@ -125,31 +120,18 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
                 MenuItem item = new MenuItem(productIcon);
                 item.setOptions(ItemOptions.personalWeak(player));
                 item.setSlots(productSlot);
-                item.setClick((viewer2, event) -> {
-                    if (event.isShiftClick()) {
-                        if (event.isRightClick()) {
-                            if (shop.getStock().count(product, TradeType.BUY) > 0) {
-                                plugin.getMessage(ChestLang.EDITOR_ERROR_PRODUCT_LEFT).send(viewer2.getPlayer());
-                                return;
-                            }
-                            shop.removeProduct(product.getId());
-                            shop.save();
-                            this.openNextTick(viewer2.getPlayer(), page);
+                item.setHandler((viewer2, event) -> {
+                    if (event.isShiftClick() && event.isRightClick()) {
+                        if (shop.getStock().count(product, TradeType.BUY) > 0) {
+                            ChestLang.EDITOR_ERROR_PRODUCT_LEFT.getMessage().send(viewer2.getPlayer());
+                            return;
                         }
+                        shop.removeProduct(product.getId());
+                        this.saveProductsAndFlush(viewer, shop);
                         return;
                     }
-                    if (event.isRightClick() || (PlayerUtil.isBedrockPlayer(player))) {
-                        product.getPriceEditor().openNextTick(viewer2.getPlayer(), 1);
-                        return;
-                    }
-                    if (event.isLeftClick()) {
-                        List<Currency> currencies = new ArrayList<>(ChestUtils.getAllowedCurrencies());
-                        int index = currencies.indexOf(product.getCurrency()) + 1;
-                        if (index >= currencies.size()) index = 0;
-                        product.setCurrency(currencies.get(index));
-                        shop.save();
-                        this.openNextTick(viewer.getPlayer(), page);
-                    }
+
+                    this.runNextTick(() -> this.module.openPriceMenu(viewer2.getPlayer(), product));
                 });
                 this.addItem(item);
             }
@@ -157,20 +139,26 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
     }
 
     @Override
-    public void onClick(@NotNull MenuViewer viewer, @Nullable ItemStack item, @NotNull SlotType slotType, int slot, @NotNull InventoryClickEvent event) {
-        super.onClick(viewer, item, slotType, slot, event);
+    protected void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
 
-        ChestShop shop = this.getShop(viewer);
+    }
+
+    @Override
+    public void onClick(@NotNull MenuViewer viewer, @NotNull ClickResult result, @NotNull InventoryClickEvent event) {
+        super.onClick(viewer, result, event);
+
+        ChestShop shop = this.getLink(viewer);
         Player player = viewer.getPlayer();
         int maxProducts = ChestUtils.getProductLimit(player);
         int hasProducts = shop.getProducts().size();
         boolean canAdd = maxProducts < 0 || hasProducts < maxProducts;
         if (!canAdd) return;
 
-        if (slotType == SlotType.MENU_EMPTY) return;
-        if (slotType == SlotType.PLAYER || slotType == SlotType.PLAYER_EMPTY) {
+        //if (result.isMenu() && result.isEmptySlot()) return;
+        if (result.isInventory()) {
             if (event.isShiftClick()) return;
-            if (PlayerUtil.isBedrockPlayer(player)) {
+            if (Players.isBedrock(player)) {
+                ItemStack item = result.getItemStack();
                 if (item == null || item.getType().isAir()) return;
 
                 shop.createProduct(player, item);
@@ -178,5 +166,69 @@ public class ShopProductsMenu extends ConfigEditorMenu implements Linked<ChestSh
             }
             event.setCancelled(false);
         }
+    }
+
+    @Override
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions(BLACK.enclose("Shop Products"), MenuSize.CHEST_18);
+    }
+
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
+
+        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
+        ItemUtil.editMeta(backItem, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
+        });
+        list.add(new MenuItem(backItem).setSlots(13).setPriority(10).setHandler(this.returnHandler));
+
+        return list;
+    }
+
+    @Override
+    protected void loadAdditional() {
+        this.productSlots = ConfigValue.create("Products.Slots", IntStream.range(0, 9).toArray()).read(cfg);
+
+        ItemStack freeSlot = ItemUtil.getSkinHead("dd10aa51522d3d6a2d8232ed886c79987e1e53956646dafbabd9eddff6986");
+        ItemUtil.editMeta(freeSlot, meta -> {
+            meta.setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("✔ Available Slot")));
+            meta.setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Drop item here to add it to the shop!")
+            ));
+        });
+
+        ItemStack lockedSlot = ItemUtil.getSkinHead("4051b59085d2c4249577823f63e1e2eb9f7cf64b7c78785a21805fad3ef14");
+        ItemUtil.editMeta(lockedSlot, meta -> {
+            meta.setDisplayName(LIGHT_RED.enclose(BOLD.enclose("✘ Locked Slot")));
+            meta.setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Oh! This slot is not available currently."),
+                "",
+                LIGHT_GRAY.enclose("You can unlock slots with our ranks:"),
+                LIGHT_RED.enclose("www.put_your_store.com")
+            ));
+        });
+
+        this.productFree = ConfigValue.create("Products.Free", freeSlot).read(cfg);
+
+        this.productLocked = ConfigValue.create("Products.Locked", lockedSlot).read(cfg);
+
+        this.productName = ConfigValue.create("Products.Product.Name", 
+            LIGHT_YELLOW.enclose(BOLD.enclose(PRODUCT_PREVIEW_NAME))
+        ).read(cfg);
+
+        this.productLore = ConfigValue.create("Products.Product.Lore", Lists.newList(
+            PRODUCT_PREVIEW_LORE,
+            "",
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Currency: ") + PRODUCT_CURRENCY),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Price Type: ") + PRODUCT_PRICE_TYPE),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy Price: ") + PRODUCT_PRICE_FORMATTED.apply(TradeType.BUY)),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell Price: ") + PRODUCT_PRICE_FORMATTED.apply(TradeType.SELL)),
+            "",
+            LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Left-Click to " + LIGHT_YELLOW.enclose("edit") + "."),
+            LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Shift-Right to " + LIGHT_YELLOW.enclose("delete") + ".")
+        )).read(cfg);
     }
 }

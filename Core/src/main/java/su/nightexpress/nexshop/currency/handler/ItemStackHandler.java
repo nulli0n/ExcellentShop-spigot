@@ -4,10 +4,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.PlayerUtil;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Players;
 
 public class ItemStackHandler implements CurrencyHandler {
 
@@ -18,7 +18,7 @@ public class ItemStackHandler implements CurrencyHandler {
     }
 
     @Nullable
-    public static ItemStackHandler read(@NotNull JYML config, @NotNull String path) {
+    public static ItemStackHandler read(@NotNull FileConfig config, @NotNull String path) {
         if (!path.endsWith(".") && !path.isEmpty()) path += ".";
 
         ItemStack item;
@@ -32,7 +32,7 @@ public class ItemStackHandler implements CurrencyHandler {
         return item == null ? null : new ItemStackHandler(item);
     }
 
-    public void write(@NotNull JYML cfg, @NotNull String path) {
+    public void write(@NotNull FileConfig cfg, @NotNull String path) {
         cfg.remove(path + ".Item");
         if (this.getItem().hasItemMeta()) {
             cfg.setItemEncoded(path + ".Item", this.getItem());
@@ -63,16 +63,16 @@ public class ItemStackHandler implements CurrencyHandler {
 
     @Override
     public double getBalance(@NotNull Player player) {
-        return PlayerUtil.countItem(player, this.getItem());
+        return Players.countItem(player, this.getItem());
     }
 
     @Override
     public void give(@NotNull Player player, double amount) {
-        PlayerUtil.addItem(player, this.getItem(), (int) amount);
+        Players.addItem(player, this.getItem(), (int) amount);
     }
 
     @Override
     public void take(@NotNull Player player, double amount) {
-        PlayerUtil.takeItem(player, this.getItem(), (int) amount);
+        Players.takeItem(player, this.getItem(), (int) amount);
     }
 }

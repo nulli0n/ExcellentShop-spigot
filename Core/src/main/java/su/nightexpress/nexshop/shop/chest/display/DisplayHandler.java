@@ -3,10 +3,7 @@ package su.nightexpress.nexshop.shop.chest.display;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedDataValue;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import com.comphenix.protocol.wrappers.*;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -14,54 +11,54 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.Version;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.EngineUtils;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.Reflex;
-import su.nightexpress.nexshop.ExcellentShop;
+import org.joml.Vector3f;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.util.BlockPos;
+import su.nightexpress.nightcore.manager.SimpleManager;
+import su.nightexpress.nightcore.util.EntityUtil;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Plugins;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
+import su.nightexpress.nightcore.util.text.NightMessage;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class DisplayHandler {
-
-    private static final Class<?>      NMS_ENTITY          = Reflex.getClass("net.minecraft.world.entity", "Entity");
-    private static final String        ENTITY_COUNTER_NAME = Version.isAtLeast(Version.V1_19_R3) ? "d" : "c";
-    public static final  AtomicInteger ENTITY_COUNTER      = (AtomicInteger) Reflex.getFieldValue(NMS_ENTITY, ENTITY_COUNTER_NAME);
+public class DisplayHandler extends SimpleManager<ShopPlugin> {
 
     private final ChestShopModule           module;
     private final Map<String, Set<Integer>> entityIdMap;
-    private final DisplayUpdateTask         updateTask;
+    private final boolean                   useDisplays;
 
-    public DisplayHandler(@NotNull ExcellentShop plugin, @NotNull ChestShopModule module) {
+    public DisplayHandler(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
+        super(plugin);
         this.module = module;
         this.entityIdMap = new HashMap<>();
-        this.updateTask = new DisplayUpdateTask(plugin, this);
+        this.useDisplays = ChestUtils.canUseDisplayEntities();
     }
 
-    public void setup() {
-        this.updateTask.start();
+    @Override
+    protected void onLoad() {
+
     }
 
-    public void shutdown() {
-        this.updateTask.stop();
-        this.entityIdMap.values().forEach(set -> set.forEach(this::destroyEntity));
+    @Override
+    protected void onShutdown() {
+        this.entityIdMap.values().forEach(this::destroyEntity);
         this.entityIdMap.clear();
     }
 
     public void update() {
-        this.module.getShops().forEach(this::update);
+        this.module.getActiveShops().forEach(this::update);
     }
 
     public void update(@NotNull ChestShop shop) {
@@ -70,22 +67,25 @@ public class DisplayHandler {
         if (origin != null) origin.clear();
 
         this.create(shop);
-
-        copy.forEach(this::destroyEntity);
+        this.destroyEntity(copy);
     }
 
     public int nextEntityId() {
-        return ENTITY_COUNTER.incrementAndGet();
+        return EntityUtil.nextEntityId();
     }
 
     public void create(@NotNull ChestShop shop) {
-        Location location = shop.getLocation();
+        World world = shop.getWorld();
+        if (world == null) return; // Can be null because async display task, may get inactive shops of just unloaded world.
 
-        World world = location.getWorld();
-        if (world == null || !world.isChunkLoaded(shop.getChunkX(), shop.getChunkZ()) || world.getPlayers().isEmpty()) return;
+        BlockPos blockPos = shop.getBlockPos();
+        if (!blockPos.isChunkLoaded(world)) return;
+
+        Location location = blockPos.toLocation(world);
+        double distance = ChestConfig.DISPLAY_VISIBLE_DISTANCE.get();
 
         Set<Player> players = world.getPlayers().stream()
-            .filter(player -> player.getLocation().distance(location) <= ChestConfig.DISPLAY_VISIBLE_DISTANCE.get())
+            .filter(player -> player.getLocation().distance(location) <= distance)
             .collect(Collectors.toSet());
         if (players.isEmpty()) return;
 
@@ -93,10 +93,7 @@ public class DisplayHandler {
         Set<Integer> entityIds = this.entityIdMap.computeIfAbsent(shop.getId(), k -> new HashSet<>());
         ChestProduct product = shop.getRandomProduct();
 
-
-        if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) {
-            //List<String> text = new ArrayList<>(shop.getDisplayText());
-            List<String> text = shop.getDisplayText();
+        if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get() && shop.isHologramEnabled()) {
             PlaceholderMap placeholderMap = new PlaceholderMap(shop.getPlaceholders());
             for (TradeType tradeType : TradeType.values()) {
                 placeholderMap.add(Placeholders.GENERIC_PRODUCT_PRICE.apply(tradeType), () -> {
@@ -105,10 +102,12 @@ public class DisplayHandler {
             }
             placeholderMap.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getPreview()));
 
-            text.replaceAll(placeholderMap.replacer());
+            List<String> text = new ArrayList<>();
+            for (String line : shop.getDisplayText()) {
+                text.add(0, placeholderMap.replacer().apply(line));
+            }
 
-            Collections.reverse(text);
-            Location hologramLocation = shop.getDisplayTextLocation().clone();
+            Location hologramLocation = shop.getDisplayTextLocation();
             for (String line : text) {
                 entityIds.add(this.spawnHologram(players, hologramLocation, line));
                 hologramLocation = hologramLocation.add(0, ChestConfig.DISPLAY_HOLOGRAM_LINE_GAP.get(), 0);
@@ -120,9 +119,11 @@ public class DisplayHandler {
             entityIds.add(this.spawnItem(players, shop.getDisplayItemLocation(), displayProduct));
         }
 
-        ItemStack showcase = shop.getShowcaseItem();
-        if (showcase != null) {
-            entityIds.add(this.spawnShowcase(players, shop.getDisplayShowcaseLocation(), showcase));
+        if (shop.isShowcaseEnabled()) {
+            ItemStack showcase = ChestUtils.getCustomShowcaseOrDefault(shop);
+            if (showcase != null) {
+                entityIds.add(this.spawnShowcase(players, shop.getDisplayShowcaseLocation(), showcase));
+            }
         }
     }
 
@@ -139,11 +140,19 @@ public class DisplayHandler {
 
     public int spawnItem(@NotNull Set<Player> players, @NotNull Location location, @NotNull ItemStack item) {
         int entityID = this.nextEntityId();
+        EntityType type = /*this.useDisplays ? EntityType.ITEM_DISPLAY : */EntityType.DROPPED_ITEM;
 
-        PacketContainer spawnPacket = this.createSpawnPacket(EntityType.DROPPED_ITEM, location, entityID);
+        PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
         PacketContainer dataPacket = this.createMetadataPacket(entityID, metadata -> {
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(8, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item);
+            //if (type == EntityType.DROPPED_ITEM) {
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(8, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item);
+            /*}
+            else {
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 1); // billboard
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item); // billboard
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(24, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 7); // billboard
+            }*/
         });
 
         players.forEach(player -> {
@@ -156,54 +165,74 @@ public class DisplayHandler {
 
     public int spawnShowcase(@NotNull Set<Player> players, @NotNull Location location, @NotNull ItemStack item) {
         int entityID = this.nextEntityId();
+        EntityType type = this.useDisplays ? EntityType.ITEM_DISPLAY : EntityType.ARMOR_STAND;
 
-        PacketContainer spawnPacket = this.createSpawnPacket(EntityType.ARMOR_STAND, location, entityID);
+        PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
 
         PacketContainer dataPacket = this.createMetadataPacket(entityID, metadata -> {
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20); //invis
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), false); //custom name visible
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) (/*0x01 | */0x08 | 0x10)); //isSmall, noBasePlate, set Marker
+            if (type == EntityType.ARMOR_STAND) {
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20); //invis
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), false); //custom name visible
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) (/*0x01 | */0x08 | 0x10)); //isSmall, noBasePlate, set Marker
+
+            }
+            else {
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(12, WrappedDataWatcher.Registry.get(Vector3f.class)), new Vector3f(0.7f, 0.7f, 0.7f)); // scale
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item); // slot
+                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(24, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 5); // mode HEAD
+            }
         });
 
         PacketContainer armorPacket = new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT);
 
-        List<com.comphenix.protocol.wrappers.Pair<EnumWrappers.ItemSlot, ItemStack>> list = new ArrayList<>();
-        list.add(new com.comphenix.protocol.wrappers.Pair<>(EnumWrappers.ItemSlot.HEAD, item));
+        if (type == EntityType.ARMOR_STAND) {
+            List<com.comphenix.protocol.wrappers.Pair<EnumWrappers.ItemSlot, ItemStack>> list = new ArrayList<>();
+            list.add(new com.comphenix.protocol.wrappers.Pair<>(EnumWrappers.ItemSlot.HEAD, item));
 
-        armorPacket.getIntegers().write(0, entityID);
-        armorPacket.getSlotStackPairLists().writeSafely(0, list);
+            armorPacket.getIntegers().write(0, entityID);
+            armorPacket.getSlotStackPairLists().writeSafely(0, list);
+        }
 
         players.forEach(player -> {
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, spawnPacket);
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, dataPacket);
-            ProtocolLibrary.getProtocolManager().sendServerPacket(player, armorPacket);
+            if (type == EntityType.ARMOR_STAND) ProtocolLibrary.getProtocolManager().sendServerPacket(player, armorPacket);
         });
 
         return entityID;
     }
 
-    public int spawnHologram(@NotNull Set<Player> players, @NotNull Location location, @NotNull String name) {
+    public int spawnHologram(@NotNull Set<Player> players, @NotNull Location location, @NotNull String text) {
         int entityID = this.nextEntityId();
+        EntityType type = this.useDisplays ? EntityType.TEXT_DISPLAY : EntityType.ARMOR_STAND;
 
-        PacketContainer spawnPacket = this.createSpawnPacket(EntityType.ARMOR_STAND, location, entityID);
+        PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
 
         players.forEach(player -> {
-
-            String text = name;
-            if (EngineUtils.hasPlaceholderAPI()) {
-                text = PlaceholderAPI.setPlaceholders(player, text);
+            String userText = text;
+            if (Plugins.hasPlaceholderAPI()) {
+                userText = PlaceholderAPI.setPlaceholders(player, userText);
             }
-            text = Colorizer.apply(text);
-
-            Optional<?> opt = Optional.of(WrappedChatComponent.fromChatMessage(text)[0].getHandle());
+            String translated = NightMessage.asLegacy(userText);
 
             PacketContainer dataPacket = this.createMetadataPacket(entityID, metadata -> {
-                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20); //invis
-                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true)), opt); //display name
-                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), true); //custom name visible
-                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
-                metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) (0x01 | 0x08 | 0x10)); //isSmall, noBasePlate, set Marker
+                Object component = WrappedChatComponent.fromChatMessage(translated)[0].getHandle();
+
+                // Armor Stands (legacy)
+                if (type == EntityType.ARMOR_STAND) {
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20); //invis
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true)), Optional.of(component)); //display name
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), true); //custom name visible
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) (0x01 | 0x08 | 0x10)); //isSmall, noBasePlate, set Marker
+                }
+                // Displays (modern)
+                else {
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 1); // billboard
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry.getChatComponentSerializer()), component);
+                    metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(27, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x1); // shadow
+                }
             });
 
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, spawnPacket);
@@ -214,8 +243,16 @@ public class DisplayHandler {
     }
 
     public void destroyEntity(int... ids) {
-        PacketContainer destroyPacket = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
+        /*PacketContainer destroyPacket = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
         destroyPacket.getIntLists().write(0, IntStream.of(ids).boxed().toList());
+        ProtocolLibrary.getProtocolManager().broadcastServerPacket(destroyPacket);*/
+
+        this.destroyEntity(IntStream.of(ids).boxed().toList());
+    }
+
+    public void destroyEntity(@NotNull Collection<Integer> ids) {
+        PacketContainer destroyPacket = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
+        destroyPacket.getIntLists().write(0, new ArrayList<>(ids));
         ProtocolLibrary.getProtocolManager().broadcastServerPacket(destroyPacket);
     }
 

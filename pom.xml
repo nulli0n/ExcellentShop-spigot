@@ -7,7 +7,7 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.9.0</version>
+    <version>4.10.0</version>
     <modules>
         <module>Core</module>
     </modules>
@@ -23,6 +23,7 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+
         <repository>
             <id>maven</id>
             <url>https://repo1.maven.org/maven2/</url>
@@ -36,9 +37,9 @@
             <version>1.20.4-R0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>su.nexmedia</groupId>
-            <artifactId>NexEngine</artifactId>
-            <version>2.2.12</version>
+            <groupId>su.nightexpress.nightcore</groupId>
+            <artifactId>nightcore</artifactId>
+            <version>2.6.0</version>
         </dependency>
     </dependencies>
 

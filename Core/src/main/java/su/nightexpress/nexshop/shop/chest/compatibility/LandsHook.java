@@ -5,7 +5,7 @@ import me.angeschossen.lands.api.land.Land;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 
 import java.util.UUID;
 
@@ -13,7 +13,7 @@ public class LandsHook implements ClaimHook {
 
     private final LandsIntegration lands;
 
-    public LandsHook(@NotNull ExcellentShop plugin) {
+    public LandsHook(@NotNull ShopPlugin plugin) {
         this.lands = new LandsIntegration(plugin);
     }
 

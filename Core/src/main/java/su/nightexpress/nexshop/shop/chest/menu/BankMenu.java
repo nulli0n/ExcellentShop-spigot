@@ -2,80 +2,75 @@ package su.nightexpress.nexshop.shop.chest.menu;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AutoPaged;
-import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.api.menu.click.ClickHandler;
-import su.nexmedia.engine.api.menu.click.ItemClick;
-import su.nexmedia.engine.api.menu.impl.MenuOptions;
-import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.api.menu.link.Linked;
-import su.nexmedia.engine.api.menu.link.ViewLink;
-import su.nexmedia.engine.editor.EditorManager;
-import su.nexmedia.engine.utils.*;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
-import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
-import su.nightexpress.nexshop.shop.chest.ChestUtils;
+import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.menu.MenuOptions;
+import su.nightexpress.nightcore.menu.MenuSize;
+import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.api.AutoFill;
+import su.nightexpress.nightcore.menu.api.AutoFilled;
+import su.nightexpress.nightcore.menu.item.ItemHandler;
+import su.nightexpress.nightcore.menu.item.MenuItem;
+import su.nightexpress.nightcore.menu.link.Linked;
+import su.nightexpress.nightcore.menu.link.ViewLink;
+import su.nightexpress.nightcore.util.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.IntStream;
 
-public class BankMenu extends ConfigEditorMenu implements AutoPaged<Currency>, Linked<BankMenu.Info> {
+import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-    private static final String PLACEHOLDER_BANK_BALANCE = "%bank_balance%";
+public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Linked<BankMenu.Info> {
+
+    public static final  String FILE_NAME                  = "shop_bank.yml";
+    private static final String PLACEHOLDER_BANK_BALANCE   = "%bank_balance%";
     private static final String PLACEHOLDER_PLAYER_BALANCE = "%player_balance%";
 
     private final ChestShopModule module;
-    private final int[]        objectSlots;
-    private final String       objectName;
-    private final List<String> objectLore;
+    private final ItemHandler     returnHandler;
+    private final ViewLink<Info>  link;
 
-    private final ViewLink<Info> link;
+    private int[]        objectSlots;
+    private String       objectName;
+    private List<String> objectLore;
 
-    public static class Info {
+    public record Info(@Nullable ChestShop shop, @NotNull UUID playerId) {}
 
-        public Info(@Nullable ChestShop shop, @Nullable UUID playerId) {
-            this.holder = shop;
-            this.playerId = playerId;
-        }
-
-        public ChestShop holder;
-        public UUID playerId;
-
-    }
-
-    public BankMenu(@NotNull ChestShopModule module) {
-        super(module.plugin(), JYML.loadOrExtract(module.plugin(), module.getLocalPath() + "/menu/", "shop_bank.yml"));
+    public BankMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
+        super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE_NAME));
         this.module = module;
         this.link = new ViewLink<>();
-        //this.others = new WeakHashMap<>();
 
-        this.objectSlots = cfg.getIntArray("Currency.Slots");
-        this.objectName = Colorizer.apply(cfg.getString("Currency.Name", ""));
-        this.objectLore = Colorizer.apply(cfg.getStringList("Currency.Lore"));
-
-        this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.RETURN, (viewer, event) -> {
-                Info info = this.getInfo(viewer.getPlayer());
-                if (info.holder != null) {
-                    info.holder.openMenu(viewer.getPlayer());
-                }
-            })
-            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
-            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this));
+        this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
+            Info info = this.getLink(viewer);
+            if (info.shop != null && info.shop.isActive()) {
+                this.runNextTick(() -> module.openShopSettings(viewer.getPlayer(), info.shop));
+            }
+        }));
 
         this.load();
 
         this.getItems().forEach(menuItem -> {
-            if (menuItem.getType() == MenuItemType.RETURN) {
-                menuItem.getOptions().setVisibilityPolicy(viewer -> this.getInfo(viewer.getPlayer()).holder != null);
+            if (menuItem.getHandler() == this.returnHandler) {
+                menuItem.getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).shop != null);
             }
+            // Added for currency PAPI support.
+            menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
+                ItemReplacer.replacePlaceholderAPI(itemStack, viewer.getPlayer());
+            });
         });
     }
 
@@ -87,91 +82,63 @@ public class BankMenu extends ConfigEditorMenu implements AutoPaged<Currency>, L
 
     public void open(@NotNull Player player, @NotNull ChestShop holder) {
         Info info = new Info(holder, holder.getOwnerId());
-        this.open(player, info, 1);
+        this.open(player, info);
     }
 
     public void open(@NotNull Player player, @NotNull UUID holder) {
         Info info = new Info(null, holder);
-        this.open(player, info, 1);
-
-        //this.others.put(player, holder);
-        //this.open(player, 1);
+        this.open(player, info);
     }
-
-    @NotNull
-    public Info getInfo(@NotNull Player player) {
-        return this.getLink().get(player);
-    }
-
-    /*@NotNull
-    public UUID getHolder(@NotNull Player player) {
-        return this.others.getOrDefault(player, player.getUniqueId());
-    }*/
 
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        super.onPrepare(viewer, options);
-        this.getItemsForPage(viewer).forEach(this::addItem);
-    }
-
-    private enum Type {
-        UNSPECIFIED,
-        DEPOSIT,
-        WITHDRAW,
+        this.autoFill(viewer);
     }
 
     @Override
-    public int[] getObjectSlots() {
-        return this.objectSlots;
+    protected void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
+        
     }
 
     @Override
-    @NotNull
-    public List<Currency> getObjects(@NotNull Player player) {
-        return new ArrayList<>(ChestUtils.getAllowedCurrencies());
-    }
+    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<Currency> autoFill) {
+        Player player = viewer.getPlayer();
+        Info info = this.getLink(player);
 
-    @Override
-    @NotNull
-    public ItemStack getObjectStack(@NotNull Player player, @NotNull Currency currency) {
-        Info info = this.getInfo(player);
-        ItemStack icon = currency.getIcon();
-        ItemReplacer.create(icon).hideFlags().trimmed()
-            .setDisplayName(this.objectName)
-            .setLore(this.objectLore)
-            .replace(currency.getPlaceholders())
-            .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getHandler().getBalance(player)))
-            .replace(PLACEHOLDER_BANK_BALANCE, currency.format(module.getPlayerBank(info.playerId).getBalance(currency)))
-            .writeMeta();
-        return icon;
-    }
-
-    @Override
-    @NotNull
-    public ItemClick getObjectClick(@NotNull Currency currency) {
-        return (viewer, event) -> {
-            Player player = viewer.getPlayer();
-            Info info = this.getInfo(player);
-            UUID holder = info.playerId;//this.getHolder(player);
-            ChestPlayerBank bank = this.module.getPlayerBank(holder);
+        autoFill.setSlots(this.objectSlots);
+        autoFill.setItems(this.module.getAllowedCurrencies());
+        autoFill.setItemCreator(currency -> {
+            ItemStack icon = currency.getIcon();
+            ItemReplacer.create(icon).hideFlags().trimmed()
+                .setDisplayName(this.objectName)
+                .setLore(this.objectLore)
+                .replace(currency.getPlaceholders())
+                .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getHandler().getBalance(player)))
+                .replace(PLACEHOLDER_BANK_BALANCE, currency.format(module.getPlayerBank(info.playerId).getBalance(currency)))
+                .writeMeta();
+            return icon;
+        });
+        autoFill.setClickAction(currency -> (viewer1, event) -> {
+            UUID holder = info.playerId;
+            ChestBank bank = this.module.getPlayerBank(holder);
 
             if (event.getClick() == ClickType.DROP) {
                 this.module.depositToBank(player, holder, currency, currency.getHandler().getBalance(player));
                 this.module.savePlayerBank(bank);
-                this.openNextTick(player, viewer.getPage());
+                this.runNextTick(() -> this.flush(viewer));
                 return;
             }
             if (event.getClick() == ClickType.SWAP_OFFHAND) {
                 this.module.withdrawFromBank(player, holder, currency, bank.getBalance(currency));
                 this.module.savePlayerBank(bank);
-                this.openNextTick(player, viewer.getPage());
+                this.runNextTick(() -> this.flush(viewer));
                 return;
             }
 
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, wrapper -> {
-                String msg = wrapper.getTextRaw();
+            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, (dialog, input) -> {
+                String msg = input.getTextRaw();
                 Type type = Type.UNSPECIFIED;
-                if (!PlayerUtil.isBedrockPlayer(player)) {
+                if (!Players.isBedrock(player)) {
                     if (event.isLeftClick()) type = Type.DEPOSIT;
                     else if (event.isRightClick()) type = Type.WITHDRAW;
                 }
@@ -184,9 +151,9 @@ public class BankMenu extends ConfigEditorMenu implements AutoPaged<Currency>, L
                     msg = msg.substring(1);
                 }
 
-                double amount = StringUtil.getDouble(msg, 0, false);
+                double amount = NumberUtil.getDouble(msg, 0D);
                 if (amount == 0D) {
-                    EditorManager.error(player, plugin.getMessage(Lang.EDITOR_ERROR_NUMBER_GENERIC).getLocalized());
+                    dialog.error(Lang.EDITOR_INPUT_ERROR_GENERIC.getMessage());
                     return false;
                 }
 
@@ -201,6 +168,66 @@ public class BankMenu extends ConfigEditorMenu implements AutoPaged<Currency>, L
                 this.module.savePlayerBank(bank);
                 return result;
             });
-        };
+        });
+    }
+
+    private enum Type {
+        UNSPECIFIED,
+        DEPOSIT,
+        WITHDRAW,
+    }
+
+    @Override
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions(BLACK.enclose("Shop Bank"), MenuSize.CHEST_18);
+    }
+
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
+
+        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
+        ItemUtil.editMeta(backItem, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
+        });
+        list.add(new MenuItem(backItem).setSlots(13).setPriority(10).setHandler(this.returnHandler));
+
+        ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
+        ItemUtil.editMeta(prevPage, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
+        });
+        list.add(new MenuItem(prevPage).setSlots(9).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
+
+        ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
+        ItemUtil.editMeta(nextPage, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
+        });
+        list.add(new MenuItem(nextPage).setSlots(17).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+
+        return list;
+    }
+
+    // TODO Add extra menu for all 4 actions (bedrock players)
+    @Override
+    protected void loadAdditional() {
+        this.objectSlots = ConfigValue.create("Currency.Slots", IntStream.range(0, 9).toArray()).read(cfg);
+
+        this.objectName = ConfigValue.create("Currency.Name",
+            LIGHT_YELLOW.enclose(BOLD.enclose(CURRENCY_NAME)) + " " + LIGHT_GRAY.enclose("(ID: " + WHITE.enclose(CURRENCY_ID) + ")")
+        ).read(cfg);
+
+        this.objectLore = ConfigValue.create("Currency.Lore", Lists.newList(
+            " ",
+            LIGHT_YELLOW.enclose(BOLD.enclose("Details:")),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Bank Balance: ") + PLACEHOLDER_BANK_BALANCE),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Your Balance: ") + PLACEHOLDER_PLAYER_BALANCE),
+            "",
+            LIGHT_GRAY.enclose(LIGHT_GREEN.enclose("[▶]") + " Left-Click to " + LIGHT_GREEN.enclose("deposit") + "."),
+            LIGHT_GRAY.enclose(LIGHT_GREEN.enclose("[▶]") + " Right-Click to " + LIGHT_GREEN.enclose("withdraw") + "."),
+            LIGHT_GRAY.enclose(LIGHT_RED.enclose("[▶]") + " [Q/Drop] Key to " + LIGHT_RED.enclose("deposit all") + "."),
+            LIGHT_GRAY.enclose(LIGHT_RED.enclose("[▶]") + " [F/Swap] Key to " + LIGHT_RED.enclose("withdraw all") + ".")
+        )).read(cfg);
     }
 }

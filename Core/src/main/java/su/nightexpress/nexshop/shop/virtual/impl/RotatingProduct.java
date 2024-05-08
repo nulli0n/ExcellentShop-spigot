@@ -1,14 +1,15 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.NumberUtil;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.data.object.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.NumberUtil;
 
 import java.util.UUID;
 
@@ -16,27 +17,29 @@ public class RotatingProduct extends AbstractVirtualProduct<RotatingShop> {
 
     private double rotationChance;
 
-    public RotatingProduct(@NotNull RotatingShop shop, @NotNull Currency currency,
+    public RotatingProduct(@NotNull ShopPlugin plugin,
+                           @NotNull RotatingShop shop, @NotNull Currency currency,
                            @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        this(UUID.randomUUID().toString(), shop, currency, handler, packer);
+        this(plugin, UUID.randomUUID().toString(), shop, currency, handler, packer);
     }
 
-    public RotatingProduct(@NotNull String id, @NotNull RotatingShop shop, @NotNull Currency currency,
+    public RotatingProduct(@NotNull ShopPlugin plugin,
+                           @NotNull String id, @NotNull RotatingShop shop, @NotNull Currency currency,
                            @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        super(id, shop, currency, handler, packer);
+        super(plugin, id, shop, currency, handler, packer);
 
         this.placeholderRelMap
             .add(Placeholders.PRODUCT_ROTATION_CHANCE, player -> NumberUtil.format(this.getRotationChance()));
     }
 
     @Override
-    protected void loadAdditional(@NotNull JYML cfg, @NotNull String path) {
-        this.setRotationChance(cfg.getDouble(path + ".Rotation.Chance"));
+    protected void loadAdditional(@NotNull FileConfig config, @NotNull String path) {
+        this.setRotationChance(config.getDouble(path + ".Rotation.Chance"));
     }
 
     @Override
-    protected void writeAdditional(@NotNull JYML cfg, @NotNull String path) {
-        cfg.set(path + ".Rotation.Chance", this.getRotationChance());
+    protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".Rotation.Chance", this.getRotationChance());
     }
 
     public boolean isInRotation() {

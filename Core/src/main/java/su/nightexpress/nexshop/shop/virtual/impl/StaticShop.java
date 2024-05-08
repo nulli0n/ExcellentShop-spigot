@@ -1,18 +1,18 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
+import su.nightexpress.nightcore.config.FileConfig;
 
+import java.io.File;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,18 +24,17 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
 
     private int pages;
 
-    public StaticShop(@NotNull VirtualShopModule module, @NotNull JYML cfg, @NotNull String id) {
-        super(module, cfg, id);
+    public StaticShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
+        super(plugin, module, file, id);
         this.discountConfigs = new HashSet<>();
-        this.placeholderMap
-            .add(Placeholders.SHOP_PAGES, () -> String.valueOf(this.getPages()));
+        this.placeholderMap.add(Placeholders.forStaticShop(this));
     }
 
     @Override
-    protected boolean loadAdditional() {
-        this.setPages(cfg.getInt("Pages", 1));
-        for (String sId : cfg.getSection("Discounts")) {
-            this.addDiscountConfig(VirtualDiscount.read(cfg, "Discounts." + sId));
+    protected boolean loadAdditional(@NotNull FileConfig config) {
+        this.setPages(config.getInt("Pages", 1));
+        for (String sId : config.getSection("Discounts")) {
+            this.addDiscountConfig(VirtualDiscount.read(config, "Discounts." + sId));
         }
         return true;
     }
@@ -44,27 +43,26 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
     @NotNull
     public StaticProduct createProduct(@NotNull String id, @NotNull Currency currency,
                                        @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        return new StaticProduct(id, this, currency, handler, packer);
+        return new StaticProduct(this.plugin, id, this, currency, handler, packer);
     }
 
     @Override
-    protected void clearAdditionalData() {
-        this.discountConfigs.forEach(VirtualDiscount::clear);
-        this.discountConfigs.clear();
-    }
-
-    @Override
-    protected void saveAdditionalSettings() {
-        cfg.set("Pages", this.getPages());
-        cfg.remove("Discounts");
-        this.discountConfigs.forEach(discountConfig -> VirtualDiscount.write(discountConfig, cfg, "Discounts." + UUID.randomUUID()));
+    protected void saveAdditionalSettings(@NotNull FileConfig config) {
+        config.set("Pages", this.getPages());
+        config.remove("Discounts");
+        this.discountConfigs.forEach(discountConfig -> VirtualDiscount.write(discountConfig, config, "Discounts." + UUID.randomUUID()));
     }
 
     @Override
     protected void saveAdditionalProducts() {
         this.getProducts()
             .stream().sorted(Comparator.comparingInt(StaticProduct::getSlot).thenComparingInt(StaticProduct::getPage))
-            .forEach(product -> product.write(configProducts, "List." + product.getId()));
+            .forEach(this::writeProduct);
+    }
+
+    @Override
+    protected void writeProduct(@NotNull StaticProduct product) {
+        product.write(this.configProducts, this.getProductSavePath(product));
     }
 
     @Override
@@ -100,8 +98,6 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
     }
 
     public void removeDiscountConfig(@NotNull VirtualDiscount config) {
-        if (this.discountConfigs.remove(config)) {
-            config.clear();
-        }
+        this.discountConfigs.remove(config);
     }
 }

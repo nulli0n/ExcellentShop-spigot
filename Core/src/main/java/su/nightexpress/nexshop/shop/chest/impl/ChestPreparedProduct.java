@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.chest.impl;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.Transaction.Result;
@@ -14,7 +14,7 @@ import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
 
 public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> {
 
-    public ChestPreparedProduct(@NotNull ExcellentShop plugin, @NotNull Player player, @NotNull ChestProduct product, @NotNull TradeType tradeType, boolean all) {
+    public ChestPreparedProduct(@NotNull ShopPlugin plugin, @NotNull Player player, @NotNull ChestProduct product, @NotNull TradeType tradeType, boolean all) {
         super(plugin, player, product, tradeType, all);
     }
 
@@ -60,14 +60,14 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             product.getCurrency().getHandler().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
 
-            plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_USER)
+            ChestLang.SHOP_TRADE_BUY_INFO_USER.getMessage()
                 .replace(this.replacePlaceholders())
                 .replace(shop.replacePlaceholders())
                 .send(player);
 
             Player owner = shop.getOwner().getPlayer();
             if (owner != null && !shop.isAdminShop()) {
-                plugin.getMessage(ChestLang.SHOP_TRADE_BUY_INFO_OWNER)
+                ChestLang.SHOP_TRADE_BUY_INFO_OWNER.getMessage()
                     .replace(Placeholders.forPlayer(player))
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
@@ -134,14 +134,14 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             product.take(inventory, transaction.getUnits());
             shop.getModule().getLogger().logTransaction(event);
 
-            plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_USER)
+            ChestLang.SHOP_TRADE_SELL_INFO_USER.getMessage()
                 .replace(this.replacePlaceholders())
                 .replace(shop.replacePlaceholders())
                 .send(player);
 
             Player owner = shop.getOwner().getPlayer();
             if (owner != null && !shop.isAdminShop()) {
-                plugin.getMessage(ChestLang.SHOP_TRADE_SELL_INFO_OWNER)
+                ChestLang.SHOP_TRADE_SELL_INFO_OWNER.getMessage()
                     .replace(Placeholders.forPlayer(player))
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())

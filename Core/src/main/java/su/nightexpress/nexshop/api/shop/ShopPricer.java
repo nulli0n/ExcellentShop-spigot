@@ -9,8 +9,6 @@ public interface ShopPricer extends TransactionListener {
 
     void load();
 
-    void refreshPrices();
-
     void updatePrices();
 
     void updatePrice(@NotNull Product product);

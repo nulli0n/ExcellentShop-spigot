@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
@@ -30,7 +30,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
     private boolean locked;
 
-    public VirtualStock(@NotNull ExcellentShop plugin, @NotNull VirtualShop shop) {
+    public VirtualStock(@NotNull ShopPlugin plugin, @NotNull VirtualShop shop) {
         super(plugin, shop);
         this.globalDataMap = new ConcurrentHashMap<>();
         this.playerDataMap = new ConcurrentHashMap<>();
@@ -195,13 +195,13 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
 
 
-    private void deletePlayerLimit(@NotNull VirtualProduct product) {
+    public void deletePlayerLimit(@NotNull VirtualProduct product) {
         for (TradeType tradeType : TradeType.values()) {
             this.deletePlayerLimit(product, tradeType);
         }
     }
 
-    private void deletePlayerLimit(@NotNull VirtualProduct product, @NotNull TradeType tradeType) {
+    public void deletePlayerLimit(@NotNull VirtualProduct product, @NotNull TradeType tradeType) {
         this.playerDataMap.values().forEach(map -> {
             map.getOrDefault(tradeType, Collections.emptyMap()).remove(product.getId());
         });
@@ -209,13 +209,13 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(product, tradeType));
     }
 
-    private void deletePlayerLimit(@NotNull UUID playerId, @NotNull VirtualProduct product, @NotNull TradeType tradeType) {
+    public void deletePlayerLimit(@NotNull UUID playerId, @NotNull VirtualProduct product, @NotNull TradeType tradeType) {
         this.getPlayerDataMap(playerId, tradeType).remove(product.getId());
 
         this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(playerId, product, tradeType));
     }
 
-    private void deletePlayerLimit(@NotNull UUID playerId) {
+    public void deletePlayerLimit(@NotNull UUID playerId) {
         this.playerDataMap.remove(playerId);
         this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(playerId));
     }

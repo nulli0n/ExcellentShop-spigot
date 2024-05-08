@@ -3,11 +3,8 @@ package su.nightexpress.nexshop.shop.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.lang.LangMessage;
-import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nightexpress.nexshop.ExcellentShop;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
@@ -20,14 +17,20 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.menu.ShopView;
 import su.nightexpress.nexshop.shop.impl.price.FlatPricer;
 import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
+import su.nightexpress.nightcore.language.entry.LangText;
+import su.nightexpress.nightcore.menu.api.Menu;
+import su.nightexpress.nightcore.menu.impl.AbstractMenu;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
 
-    protected final ExcellentShop plugin;
-    protected final String id;
+    protected final ShopPlugin plugin;
+    protected final String     id;
     protected final PlaceholderRelMap<Player> placeholderRelMap;
 
     protected S                     shop;
@@ -36,7 +39,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     protected ProductPacker         packer;
     protected AbstractProductPricer pricer;
 
-    public AbstractProduct(@NotNull ExcellentShop plugin,
+    public AbstractProduct(@NotNull ShopPlugin plugin,
                            @NotNull String id,
                            @NotNull S shop,
                            @NotNull Currency currency,
@@ -72,17 +75,17 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
         if (tradeType == TradeType.BUY) {
             if (!this.isBuyable()) {
-                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_UNBUYABLE).send(player);
+                Lang.SHOP_PRODUCT_ERROR_UNBUYABLE.getMessage().send(player);
                 return;
             }
             if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && !this.hasSpace(player)) {
-                this.plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY).send(player);
+                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.getMessage().send(player);
                 return;
             }
         }
         else if (tradeType == TradeType.SELL) {
             if (!this.isSellable()) {
-                plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_UNSELLABLE).send(player);
+                Lang.SHOP_PRODUCT_ERROR_UNSELLABLE.getMessage().send(player);
                 return;
             }
         }
@@ -91,17 +94,17 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         // For Chest Shop will return inventory space or item amount.
         int canPurchase = this.getAvailableAmount(player, tradeType);
         if (canPurchase == 0) {
-            LangMessage msgStock;
+            LangText msgStock;
             if (tradeType == TradeType.BUY) {
-                msgStock = plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK);
+                msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK;
             }
             else {
                 if (shop instanceof ChestShop) {
-                    msgStock = plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE);
+                    msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE;
                 }
-                else msgStock = plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_FULL_STOCK);
+                else msgStock = Lang.SHOP_PRODUCT_ERROR_FULL_STOCK;
             }
-            msgStock.send(player);
+            msgStock.getMessage().send(player);
             return;
         }
 
@@ -110,17 +113,13 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
             prepared.trade();
 
-            MenuViewer viewer = shop.getView().getViewer(player);
-            if (viewer != null) {
-                shop.open(player, viewer.getPage()); // Update current shop page
+            Menu menu = AbstractMenu.getMenu(player);
+            if (menu instanceof ShopLayout || menu instanceof ShopView) {
+                menu.flush(player);
             }
             return;
         }
-        this.openTrade(player, prepared);
-    }
-
-    public void openTrade(@NotNull Player player, @NotNull PreparedProduct prepared) {
-        this.plugin.getCartMenu().open(player, prepared);
+        this.plugin.getShopManager().openProductCart(player, prepared);
     }
 
     @Override
@@ -157,7 +156,9 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         int amountCan = this.getAvailableAmount(player, TradeType.SELL);
 
         int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);
-        return balance * this.getPriceSell(player);
+        double price = balance * this.getPriceSell(player);
+
+        return Math.max(price, 0);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.chest;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -7,36 +8,36 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nightexpress.nexshop.ShopAPI;
-import su.nightexpress.nexshop.api.currency.Currency;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nightcore.util.BukkitThing;
+import su.nightexpress.nightcore.util.Colorizer;
+import su.nightexpress.nightcore.util.LocationUtil;
+import su.nightexpress.nightcore.util.Version;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ChestUtils {
 
     @NotNull
-    public static Set<Currency> getAllowedCurrencies() {
-        return ChestConfig.ALLOWED_CURRENCIES.get().stream()
-            .map(id -> ShopAPI.getCurrencyManager().getCurrency(id)).filter(Objects::nonNull).collect(Collectors.toSet());
+    public static String generateShopId(@NotNull Player player, @NotNull Location location) {
+        return (player.getName() + "_" + LocationUtil.getWorldName(location) + "_" + location.getBlockX() + "_" + location.getBlockY() + "_" + location.getBlockZ()).toLowerCase();
+    }
+
+    public static boolean canUseDisplayEntities() {
+        return Version.isAtLeast(Version.V1_19_R3) && !ChestConfig.DISPLAY_HOLOGRAM_FORCE_ARMOR_STAND.get();
     }
 
     public static int getShopLimit(@NotNull Player player) {
-        return ChestConfig.SHOP_CREATION_MAX_PER_RANK.get().getBestValue(player, 0);
+        return ChestConfig.SHOP_CREATION_MAX_PER_RANK.get().getGreatestOrNegative(player);
     }
 
     public static int getProductLimit(@NotNull Player player) {
-        return ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get().getBestValue(player, 0);
-    }
-
-    public static boolean isAllowedCurrency(@NotNull Currency currency) {
-        return ChestConfig.ALLOWED_CURRENCIES.get().contains(currency.getId());
+        return ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get().getGreatestOrNegative(player);
     }
 
     public static boolean isAllowedItem(@NotNull ItemStack item) {
@@ -75,5 +76,33 @@ public class ChestUtils {
         if (!(block.getState() instanceof Container)) return false;
 
         return ChestConfig.ALLOWED_CONTAINERS.get().contains(block.getType());
+    }
+
+    @Nullable
+    public static ItemStack getDefaultShowcase(@NotNull Material blockType) {
+        var map = ChestConfig.DISPLAY_DEFAULT_SHOWCASE.get();
+
+        ItemStack showcase = map.getOrDefault(BukkitThing.toString(blockType), map.get(Placeholders.DEFAULT));
+        if (showcase == null || showcase.getType().isAir()) return null;
+
+        return new ItemStack(showcase);
+    }
+
+    @Nullable
+    public static ItemStack getCustomShowcase(@Nullable String type) {
+        if (type == null) return null;
+
+        var map = ChestConfig.DISPLAY_PLAYER_CUSTOMIZATION_SHOWCASE_LIST.get();
+
+        ItemStack showcase = map.get(type.toLowerCase());
+        if (showcase == null || showcase.getType().isAir()) return null;
+
+        return new ItemStack(showcase);
+    }
+
+    @Nullable
+    public static ItemStack getCustomShowcaseOrDefault(@NotNull ChestShop shop) {
+        ItemStack showcase = getCustomShowcase(shop.getShowcaseType());
+        return showcase == null ? getDefaultShowcase(shop.getBlockType()) : showcase;
     }
 }

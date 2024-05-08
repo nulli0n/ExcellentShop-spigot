@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.Transaction.Result;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
@@ -15,7 +15,7 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 
 public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProduct> {
 
-    public VirtualPreparedProduct(@NotNull ExcellentShop plugin, @NotNull Player player, @NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
+    public VirtualPreparedProduct(@NotNull ShopPlugin plugin, @NotNull Player player, @NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
         super(plugin, player, product, tradeType, all);
     }
 
@@ -43,7 +43,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
-            plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_BUY).replace(this.replacePlaceholders()).send(player);
+            VirtualLang.PRODUCT_PURCHASE_BUY.getMessage().replace(this.replacePlaceholders()).send(player);
 
             shop.getPricer().onTransaction(event);
             shop.getStock().onTransaction(event);
@@ -51,7 +51,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
             // Process transaction
             product.delivery(this.getInventory(), transaction.getUnits());
             product.getCurrency().getHandler().take(player, transaction.getPrice());
-            //shop.getBank().deposit(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
         }
         return transaction;
@@ -85,10 +84,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         else if (!this.isAll() && fined < 1) {
             result = Transaction.Result.OUT_OF_STOCK;
         }
-        /*else if (!shop.getBank().hasEnough(product.getCurrency(), price)) {
-            result = TransactionResult.Result.OUT_OF_MONEY;
-            plugin.getMessage(Lang.SHOP_PRODUCT_ERROR_OUT_OF_FUNDS).replace(this.replacePlaceholders()).send(player);
-        }*/
 
         // Call custom event
         Transaction transaction = new Transaction(plugin, product, TradeType.SELL, fined, price, result);
@@ -99,12 +94,11 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
-            plugin.getMessage(VirtualLang.PRODUCT_PURCHASE_SELL).replace(this.replacePlaceholders()).send(player);
+            VirtualLang.PRODUCT_PURCHASE_SELL.getMessage().replace(this.replacePlaceholders()).send(player);
 
             shop.getPricer().onTransaction(event);
             shop.getStock().onTransaction(event);
 
-            //shop.getBank().withdraw(product.getCurrency(), price);
             shop.getModule().getLogger().logTransaction(event);
             product.getCurrency().getHandler().give(player, transaction.getPrice());
             product.take(inventory, transaction.getUnits());

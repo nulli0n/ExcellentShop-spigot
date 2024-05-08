@@ -2,28 +2,28 @@ package su.nightexpress.nexshop.shop.impl;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
-import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.ShopPricer;
+import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
+import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.data.object.PriceData;
 import su.nightexpress.nexshop.shop.impl.price.DynamicPricer;
 import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
-import su.nightexpress.nexshop.api.shop.Transaction;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ShopDataPricer implements ShopPricer {
 
-    private final ExcellentShop plugin;
+    private final ShopPlugin             plugin;
     private final Shop                   shop;
     private final Map<String, PriceData> dataMap;
 
-    public ShopDataPricer(@NotNull ExcellentShop plugin, @NotNull Shop shop) {
+    public ShopDataPricer(@NotNull ShopPlugin plugin, @NotNull Shop shop) {
         this.plugin = plugin;
         this.shop = shop;
         this.dataMap = new ConcurrentHashMap<>();
@@ -31,7 +31,7 @@ public class ShopDataPricer implements ShopPricer {
 
     @Override
     public void load() {
-        this.getDataMap().clear();
+        this.dataMap.clear();
         this.plugin.getData().getVirtualDataHandler().getPriceData(this.shop).forEach(this::addData);
         this.updatePrices();
 
@@ -53,9 +53,16 @@ public class ShopDataPricer implements ShopPricer {
         }
     }
 
-    @Override
+    /*@Override
     public void refreshPrices() {
         this.shop.getProducts().forEach(product -> {
+            if (product.getPricer().getType() == PriceType.FLAT) return;
+
+            PriceData priceData = this.getData(product);
+            if (priceData != null && priceData.isExpired()) {
+
+            }
+
             if (product.getPricer().getType() == PriceType.FLOAT) {
                 if (!(product.getPricer() instanceof FloatPricer pricer)) return;
                 if (!pricer.isUpdateTime()) return;
@@ -63,7 +70,7 @@ public class ShopDataPricer implements ShopPricer {
                 this.flushFloatPrices(product);
             }
         });
-    }
+    }*/
 
     @Override
     public void updatePrices() {
@@ -108,6 +115,7 @@ public class ShopDataPricer implements ShopPricer {
         priceData.setLastBuyPrice(pricer.getPrice(TradeType.BUY));
         priceData.setLastSellPrice(pricer.getPrice(TradeType.SELL));
         priceData.setLastUpdated(System.currentTimeMillis());
+        priceData.setExpireDate(-1);
         this.saveData(priceData);
     }
 
@@ -116,7 +124,7 @@ public class ShopDataPricer implements ShopPricer {
 
         PriceData priceData = this.getData(product);
         boolean hasData = priceData != null;
-        if (hasData) {
+        if (hasData && !priceData.isExpired()) {
             product.setPrice(TradeType.BUY, priceData.getLastBuyPrice());
             product.setPrice(TradeType.SELL, priceData.getLastSellPrice());
         }
@@ -142,8 +150,11 @@ public class ShopDataPricer implements ShopPricer {
         priceData.setLastBuyPrice(buyPrice);
         priceData.setLastSellPrice(sellPrice);
         priceData.setLastUpdated(System.currentTimeMillis());
+        priceData.setExpireDate(pricer.getClosestTimestamp());
+        product.setPrice(TradeType.BUY, priceData.getLastBuyPrice());
+        product.setPrice(TradeType.SELL, priceData.getLastSellPrice());
         this.saveData(priceData);
-        this.updateFloat(product);
+        //this.updateFloat(product);
     }
 
     @NotNull
@@ -152,7 +163,7 @@ public class ShopDataPricer implements ShopPricer {
     }
 
     private void addData(@NotNull PriceData data) {
-        this.getDataMap().put(data.getProductId(), data);
+        this.dataMap.put(data.getProductId(), data);
     }
 
     @NotNull
@@ -175,7 +186,7 @@ public class ShopDataPricer implements ShopPricer {
 
     @Nullable
     private PriceData getData(@NotNull String productId) {
-        return this.getDataMap().get(productId);
+        return this.dataMap.get(productId);
     }
 
     @Override
@@ -192,7 +203,7 @@ public class ShopDataPricer implements ShopPricer {
 
     @Override
     public void deleteData(@NotNull Product product) {
-        this.getDataMap().remove(product.getId());
+        this.dataMap.remove(product.getId());
         //PriceData data = this.getDataMap().remove(product.getId());
         //if (data == null) return;
 
@@ -202,7 +213,7 @@ public class ShopDataPricer implements ShopPricer {
     }
 
     public void deleteData() {
-        this.getDataMap().clear();
+        this.dataMap.clear();
         this.plugin.getData().getVirtualDataHandler().deletePriceData(shop);
     }
 }

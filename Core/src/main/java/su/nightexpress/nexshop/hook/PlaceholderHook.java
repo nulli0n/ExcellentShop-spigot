@@ -3,18 +3,18 @@ package su.nightexpress.nexshop.hook;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.NumberUtil;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nightcore.util.NumberUtil;
 
 public class PlaceholderHook {
 
     private static Expansion expansion;
 
-    public static void setup(@NotNull ExcellentShop plugin) {
+    public static void setup(@NotNull ShopPlugin plugin) {
         if (expansion == null) {
             expansion = new Expansion(plugin);
             expansion.register();
@@ -30,9 +30,9 @@ public class PlaceholderHook {
 
     private static class Expansion extends PlaceholderExpansion {
 
-        private final ExcellentShop plugin;
+        private final ShopPlugin plugin;
 
-        public Expansion(@NotNull ExcellentShop plugin) {
+        public Expansion(@NotNull ShopPlugin plugin) {
             this.plugin = plugin;
         }
 

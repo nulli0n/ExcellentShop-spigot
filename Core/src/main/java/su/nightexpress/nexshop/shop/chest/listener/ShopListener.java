@@ -15,28 +15,30 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.manager.AbstractListener;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.impl.ChestPlayerBank;
+import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nightcore.manager.AbstractListener;
 
-public class ShopListener extends AbstractListener<ExcellentShop> {
+import java.util.stream.Collectors;
 
-    private final ChestShopModule        module;
-    //private final Map<String, Set<JYML>> unloadedShops;
+public class ShopListener extends AbstractListener<ShopPlugin> {
 
-    public ShopListener(@NotNull ChestShopModule module) {
-        super(module.plugin());
+    private final ChestShopModule module;
+
+    public ShopListener(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
+        super(plugin);
         this.module = module;
-        //this.unloadedShops = new HashMap<>();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -44,18 +46,15 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
         if (!ChestConfig.SHOP_AUTO_BANK.get()) return;
 
         Player player = event.getPlayer();
-        ChestPlayerBank bank = this.module.getPlayerBank(player);
+        ChestBank bank = this.module.getPlayerBank(player);
         bank.getBalanceMap().forEach((currency, amount) -> {
             currency.getHandler().give(player, amount);
         });
 
         if (bank.getBalanceMap().values().stream().anyMatch(amount -> amount > 0)) {
-            this.plugin.getMessage(ChestLang.NOTIFICATION_SHOP_EARNINGS)
-                .replace(str -> str.contains(Placeholders.GENERIC_AMOUNT), (line, list) -> {
-                    bank.getBalanceMap().forEach((currency, amount) -> {
-                        list.add(currency.replacePlaceholders().apply(line.replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))));
-                    });
-                })
+            String balances = bank.getBalanceMap().entrySet().stream().map(entry -> entry.getKey().format(entry.getValue())).collect(Collectors.joining(", "));
+            ChestLang.NOTIFICATION_SHOP_EARNINGS.getMessage()
+                .replace(Placeholders.GENERIC_AMOUNT, balances)
                 .send(player);
         }
 
@@ -69,48 +68,6 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
         if (block == null) return;
 
         this.module.interactShop(event, event.getPlayer(), block);
-
-        /*ChestShop shop = this.module.getShop(block);
-        if (shop == null) return;
-
-        Player player = event.getPlayer();
-        Action action = event.getAction();
-        boolean isDenied = event.useInteractedBlock() == Result.DENY;
-        event.setUseInteractedBlock(Result.DENY);
-
-        if (action == Action.RIGHT_CLICK_BLOCK) {
-            if (player.isSneaking()) {
-                if (isDenied) return;
-
-                ItemStack item = event.getItem();
-                if (item != null) {
-                    if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME || item.getType() == Material.HOPPER) {
-                        if (!shop.isOwner(player)) {
-                            plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
-                        }
-                        else event.setUseInteractedBlock(Result.ALLOW);
-                        return;
-                    }
-                }
-
-                if (shop.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) {
-                    shop.openMenu(player);
-                }
-                else {
-                    plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
-                }
-                return;
-            }
-
-            if (shop.isAdminShop() || !shop.isOwner(player)) {
-                if (shop.canAccess(player, true)) {
-                    shop.open(player, 1);
-                }
-            }
-            else if (!isDenied) {
-                event.setUseInteractedBlock(Result.ALLOW);
-            }
-        }*/
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -123,7 +80,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
 
         if (!shop.isOwner(player)) {
             event.setCancelled(true);
-            plugin.getMessage(ChestLang.SHOP_ERROR_NOT_OWNER).send(player);
+            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
             return;
         }
 
@@ -146,8 +103,7 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
             if ((shopLeft == null && shopRight == null)) return;
 
             ChestShop shop = shopRight == null ? shopLeft : shopRight;
-            shop.updateLocation(shop.getLocation());
-            this.module.addShop(shop);
+            shop.updatePosition();
         });
     }
 
@@ -162,17 +118,17 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopPiston1(BlockPistonRetractEvent event) {
+    public void onShopPistonRestrictPull(BlockPistonRetractEvent event) {
         event.setCancelled(event.getBlocks().stream().anyMatch(this.module::isShop));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopPiston2(BlockPistonExtendEvent event) {
+    public void onShopPistonRestrictPush(BlockPistonExtendEvent event) {
         event.setCancelled(event.getBlocks().stream().anyMatch(this.module::isShop));
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    public void onShopHopperTakeAdd(InventoryMoveItemEvent event) {
+    public void onShopHopperRestrict(InventoryMoveItemEvent event) {
         Inventory target = event.getDestination();
         Inventory from = event.getSource();
 
@@ -222,17 +178,13 @@ public class ShopListener extends AbstractListener<ExcellentShop> {
         }
     }
 
-    /*@EventHandler(priority = EventPriority.MONITOR)
-    public void onDataWorldLoad(WorldLoadEvent e) {
-        this.unloadedShops.getOrDefault(e.getWorld().getName(), Collections.emptySet()).forEach(this.module::loadShop);
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onShopWorldLoad(WorldLoadEvent event) {
+        this.module.getShops(event.getWorld()).forEach(ChestShop::updatePosition);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onDataWorldUnLoad(WorldUnloadEvent e) {
-        World world = e.getWorld();
-        this.module.getShops().stream().filter(shop -> shop.getLocation().getWorld() == world).forEach(shop -> {
-            this.module.unloadShop(shop);
-            this.unloadedShops.computeIfAbsent(world.getName(), k -> new HashSet<>()).add(shop.getConfig());
-        });
-    }*/
+    public void onShopWorldUnload(WorldUnloadEvent event) {
+        this.module.getShops(event.getWorld()).forEach(ChestShop::deactivate);
+    }
 }

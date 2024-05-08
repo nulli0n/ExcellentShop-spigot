@@ -3,12 +3,12 @@ package su.nightexpress.nexshop.currency.impl;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.coinsengine.api.CoinsEngineAPI;
 import su.nightexpress.coinsengine.data.impl.CoinsUser;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 import su.nightexpress.nexshop.api.currency.CurrencyOfflineHandler;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -101,7 +101,7 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
         CoinsUser user = CoinsEngineAPI.getUserData(playerId);
         if (user == null) return 0D;
 
-        return user.getCurrencyData(this.currency).getBalance();
+        return user.getBalance(this.currency);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
         CoinsEngineAPI.getUserDataAsync(playerId).thenAccept(user -> {
             if (user == null) return;
 
-            user.getCurrencyData(this.currency).addBalance(amount);
+            user.addBalance(this.currency, amount);
             CoinsEngineAPI.getUserManager().saveAsync(user);
         });
     }
@@ -129,7 +129,7 @@ public class CoinsEngineCurrency implements Currency, CurrencyHandler, CurrencyO
         CoinsEngineAPI.getUserDataAsync(playerId).thenAccept(user -> {
             if (user == null) return;
 
-            user.getCurrencyData(this.currency).removeBalance(amount);
+            user.removeBalance(this.currency, amount);
             CoinsEngineAPI.getUserManager().saveAsync(user);
         });
     }

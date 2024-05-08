@@ -2,8 +2,8 @@ package su.nightexpress.nexshop.shop.util;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
-import su.nexmedia.engine.utils.Pair;
+import su.nightexpress.nightcore.util.Pair;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,38 +26,14 @@ public class PlaceholderRelMap<T> {
         this.keys = new ArrayList<>(keys);
     }
 
-    /*@NotNull
-    public static <T> PlaceholderRelMap<T> fusion(@NotNull PlaceholderRelMap<T>... others) {
-        PlaceholderRelMap<T> map = new PlaceholderRelMap<>();
-        for (PlaceholderRelMap<T> other : others) {
-            map.add(other);
-        }
-        return map;
-    }*/
-
     @NotNull
     public List<Pair<String, Function<T, String>>> getKeys() {
         return keys;
     }
 
     @NotNull
-    public PlaceholderRelMap<T> add(@NotNull PlaceholderMap other) {
-        other.getKeys().forEach(pair -> {
-            this.add(pair.getFirst(), player -> pair.getSecond().get()); // TODO Bad (?)
-        });
-        return this;
-    }
-
-    @NotNull
     public PlaceholderRelMap<T> add(@NotNull PlaceholderRelMap<T> other) {
         this.keys.addAll(other.getKeys());
-        return this;
-    }
-
-    @NotNull
-    @Deprecated
-    public PlaceholderRelMap<T> add(@NotNull String key, @NotNull String replacer) {
-        this.add(key, (object) -> replacer);
         return this;
     }
 
@@ -80,14 +56,4 @@ public class PlaceholderRelMap<T> {
 
         return new PlaceholderMap(list);
     }
-
-    /*@NotNull
-    public UnaryOperator<String> replacer(@Nullable T object) {
-        List<Pair<String, Supplier<String>>> list = new ArrayList<>();
-        this.keys.forEach(pair -> {
-            list.add(Pair.of(pair.getFirst(), () -> pair.getSecond().apply(object)));
-        });
-
-        return str -> StringUtil.replaceEach(str, list);
-    }*/
 }

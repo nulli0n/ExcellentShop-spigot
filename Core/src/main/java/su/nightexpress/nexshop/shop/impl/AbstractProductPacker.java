@@ -2,9 +2,9 @@ package su.nightexpress.nexshop.shop.impl;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.placeholder.PlaceholderMap;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public abstract class AbstractProductPacker implements ProductPacker {
 
@@ -19,13 +19,13 @@ public abstract class AbstractProductPacker implements ProductPacker {
     }
 
     @Override
-    public void write(@NotNull JYML cfg, @NotNull String path) {
+    public void write(@NotNull FileConfig cfg, @NotNull String path) {
         cfg.remove("Content");
         cfg.setItemEncoded(path + ".Content.Preview", this.getPreview());
         this.writeAdditional(cfg, path);
     }
 
-    protected abstract void writeAdditional(@NotNull JYML cfg, @NotNull String path);
+    protected abstract void writeAdditional(@NotNull FileConfig cfg, @NotNull String path);
 
     @Override
     @NotNull

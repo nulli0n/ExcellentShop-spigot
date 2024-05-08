@@ -1,51 +1,36 @@
 package su.nightexpress.nexshop.shop.chest.command;
 
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.command.CommandResult;
-import su.nexmedia.engine.utils.CollectionsUtil;
-import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.module.ModuleCommand;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
+import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
+import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 
-import java.util.List;
+public class ListCommand {
 
-public class ListCommand extends ModuleCommand<ChestShopModule> {
+    private static final String ARG_USER = "user";
 
-    public ListCommand(@NotNull ChestShopModule module) {
-        super(module, new String[]{"list"}, ChestPerms.COMMAND_LIST);
-        this.setDescription(plugin.getMessage(ChestLang.COMMAND_LIST_DESC));
-        this.setPlayerOnly(true);
+    public static void build(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull ChainedNodeBuilder nodeBuilder) {
+        nodeBuilder.addDirect("list", builder -> builder
+            .permission(ChestPerms.COMMAND_LIST)
+            .description(ChestLang.COMMAND_LIST_DESC)
+            .playerOnly()
+            .withArgument(ArgumentTypes.playerName(ARG_USER))
+            .executes((context, arguments) -> execute(plugin, module, context, arguments))
+        );
     }
 
-    @Override
-    @NotNull
-    public List<String> getTab(@NotNull Player player, int arg, @NotNull String[] args) {
-        if (arg == 1) {
-            return CollectionsUtil.playerNames(player);
-        }
-        return super.getTab(player, arg, args);
-    }
+    public static boolean execute(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getExecutor();
+        if (player == null) return false;
 
-    @Override
-    protected void onExecute(@NotNull CommandSender sender, @NotNull CommandResult result) {
-        Player player = (Player) sender;
-        if (result.length() >= 2) {
-            this.plugin.getUserManager().getUserDataAsync(result.getArg(1)).thenAccept(user -> {
-                if (user == null) {
-                    this.errorPlayer(sender);
-                    return;
-                }
-
-                this.plugin.runTask(task -> {
-                    this.module.listShops(player, user.getId());
-                });
-            });
-            return;
-        }
-
-        this.module.listShops(player);
+        String userName = arguments.getStringArgument(ARG_USER, player.getName());
+        module.listShops(player, userName);
+        return true;
     }
 }

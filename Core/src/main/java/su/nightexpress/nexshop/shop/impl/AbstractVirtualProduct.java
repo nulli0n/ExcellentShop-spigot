@@ -2,8 +2,7 @@ package su.nightexpress.nexshop.shop.impl;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.utils.PlayerUtil;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
@@ -12,8 +11,9 @@ import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
-import su.nightexpress.nexshop.shop.virtual.editor.menu.ProductMainEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.Players;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -26,11 +26,10 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
     protected Set<String> requiredPermissions;
     protected boolean     discountAllowed;
 
-    protected ProductMainEditor editor;
-
-    public AbstractVirtualProduct(@NotNull String id, @NotNull S shop, @NotNull Currency currency,
+    public AbstractVirtualProduct(@NotNull ShopPlugin plugin,
+                                  @NotNull String id, @NotNull S shop, @NotNull Currency currency,
                                   @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        super(shop.plugin(), id, shop, currency, handler, packer);
+        super(plugin, id, shop, currency, handler, packer);
         this.allowedRanks = new HashSet<>();
         this.requiredPermissions = new HashSet<>();
         this.stockValues = new StockValues();
@@ -39,38 +38,23 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.placeholderRelMap.add(Placeholders.forVirtualProduct(this));
     }
 
-    public void write(@NotNull JYML cfg, @NotNull String path) {
-        cfg.set(path + ".Handler", this.getHandler().getName());
-        this.getPacker().write(cfg, path);
-        cfg.set(path + ".Allowed_Ranks", this.getAllowedRanks());
-        cfg.set(path + ".Required_Permissions", this.getRequiredPermissions());
+    public void write(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".Handler", this.getHandler().getName());
+        this.getPacker().write(config, path);
+        config.set(path + ".Allowed_Ranks", this.getAllowedRanks());
+        config.set(path + ".Required_Permissions", this.getRequiredPermissions());
         if (this.getCurrency() != CurrencyManager.DUMMY_CURRENCY) {
-            cfg.set(path + ".Currency", this.getCurrency().getId());
+            config.set(path + ".Currency", this.getCurrency().getId());
         }
-        this.getPricer().write(cfg, path + ".Price");
-        this.getStockValues().write(cfg, path + ".Stock.GLOBAL");
-        this.getLimitValues().write(cfg, path + ".Stock.PLAYER");
-        this.writeAdditional(cfg, path);
+        this.getPricer().write(config, path + ".Price");
+        this.getStockValues().write(config, path + ".Stock.GLOBAL");
+        this.getLimitValues().write(config, path + ".Stock.PLAYER");
+        this.writeAdditional(config, path);
     }
 
-    protected abstract void loadAdditional(@NotNull JYML cfg, @NotNull String path);
+    protected abstract void loadAdditional(@NotNull FileConfig config, @NotNull String path);
 
-    protected abstract void writeAdditional(@NotNull JYML cfg, @NotNull String path);
-
-    public void clear() {
-        if (this.editor != null) {
-            this.editor.clear();
-            this.editor = null;
-        }
-    }
-
-    @NotNull
-    public ProductMainEditor getEditor() {
-        if (this.editor == null) {
-            this.editor = new ProductMainEditor(this.getShop().plugin(), this);
-        }
-        return this.editor;
-    }
+    protected abstract void writeAdditional(@NotNull FileConfig config, @NotNull String path);
 
     @Override
     @NotNull
@@ -87,7 +71,7 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         }
 
         if (!this.getAllowedRanks().isEmpty()) {
-            Set<String> ranks = PlayerUtil.getPermissionGroups(player);
+            Set<String> ranks = Players.getPermissionGroups(player);
             return ranks.stream().anyMatch(rank -> this.getAllowedRanks().contains(rank));
         }
 
@@ -124,20 +108,24 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.limitValues = limitValues;
     }
 
+    @Override
     @NotNull
     public Set<String> getAllowedRanks() {
         return allowedRanks;
     }
 
+    @Override
     public void setAllowedRanks(@NotNull Set<String> allowedRanks) {
         this.allowedRanks = allowedRanks;
     }
 
+    @Override
     @NotNull
     public Set<String> getRequiredPermissions() {
         return requiredPermissions;
     }
 
+    @Override
     public void setRequiredPermissions(@NotNull Set<String> requiredPermissions) {
         this.requiredPermissions = requiredPermissions;
     }

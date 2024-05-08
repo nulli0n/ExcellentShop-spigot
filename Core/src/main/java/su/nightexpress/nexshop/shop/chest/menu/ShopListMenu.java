@@ -1,134 +1,110 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
-import com.google.common.collect.Lists;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JOption;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AutoPaged;
-import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.api.menu.click.ClickHandler;
-import su.nexmedia.engine.api.menu.click.ItemClick;
-import su.nexmedia.engine.api.menu.impl.ConfigMenu;
-import su.nexmedia.engine.api.menu.impl.MenuOptions;
-import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.api.menu.link.Linked;
-import su.nexmedia.engine.api.menu.link.ViewLink;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.ItemReplacer;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
+import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.menu.MenuOptions;
+import su.nightexpress.nightcore.menu.MenuSize;
+import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.api.AutoFill;
+import su.nightexpress.nightcore.menu.api.AutoFilled;
+import su.nightexpress.nightcore.menu.impl.ConfigMenu;
+import su.nightexpress.nightcore.menu.item.ItemHandler;
+import su.nightexpress.nightcore.menu.item.MenuItem;
+import su.nightexpress.nightcore.menu.link.Linked;
+import su.nightexpress.nightcore.menu.link.ViewLink;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
 
 import java.util.*;
+import java.util.stream.IntStream;
 
-import static su.nexmedia.engine.utils.Colors2.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
 
-public class ShopListMenu extends ConfigMenu<ExcellentShop> implements AutoPaged<ChestShop>, Linked<UUID> {
+public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<ChestShop>, Linked<String> {
 
-    public static final String FILE = "shops_list.yml";
+    public static final String FILE_NAME = "shops_list.yml";
 
     private static final String PLACEHOLDER_ACTION_TELEPORT = "%action_teleport%";
-    private static final String PLACEHOLDER_ACTION_EDITOR = "%action_editor%";
+    private static final String PLACEHOLDER_ACTION_EDITOR   = "%action_editor%";
 
-    private final ChestShopModule   module;
-    private final ViewLink<UUID> link;
+    private final ChestShopModule  module;
+    private final ViewLink<String> link;
+    private final ItemHandler      returnHandler;
 
-    private final int[]  shopSlots;
-    private final String shopName;
-    private final List<String> shopLoreOwn;
-    private final List<String> shopLoreOthers;
-    private final List<String> actionTeleportLore;
-    private final List<String> actionEditLore;
+    private int[]        shopSlots;
+    private String       shopName;
+    private List<String> shopLoreOwn;
+    private List<String> shopLoreOthers;
+    private List<String> actionTeleportLore;
+    private List<String> actionEditLore;
 
-    public ShopListMenu(@NotNull ExcellentShop plugin, @NotNull ChestShopModule module) {
-        super(plugin, JYML.loadOrExtract(plugin, module.getMenusPath(), FILE));
+    public ShopListMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
+        super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE_NAME));
         this.module = module;
         this.link = new ViewLink<>();
 
-        this.shopSlots = cfg.getIntArray("Shop.Slots");
-        this.shopName = cfg.getString("Shop.Name", Placeholders.SHOP_NAME);
-        this.shopLoreOwn = cfg.getStringList("Shop.Lore.Own");
-        this.shopLoreOthers = cfg.getStringList("Shop.Lore.Others");
-        this.actionTeleportLore = JOption.create("Shop.Lore.Action_Teleport", Lists.newArrayList(
-            LIGHT_YELLOW + "[▶] " + LIGHT_GRAY + "Left-Click to " + LIGHT_YELLOW + "teleport" + LIGHT_GRAY + "."
-        )).read(cfg);
-        this.actionEditLore = JOption.create("Shop.Lore.Action_Editor", Lists.newArrayList(
-            LIGHT_YELLOW + "[▶] " + LIGHT_GRAY + "Right-Click to " + LIGHT_YELLOW + "edit" + LIGHT_GRAY + "."
-        )).read(cfg);
-
-        this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.RETURN, (viewer, event) -> {
-                this.module.getBrowseMenu().openNextTick(viewer, 1);
-            })
-            .addClick(MenuItemType.CLOSE, (viewer, event) -> plugin.runTask(task -> viewer.getPlayer().closeInventory()))
-            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
-            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this));
+        this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
+            this.runNextTick(() -> this.module.browseShops(viewer.getPlayer()));
+        }));
 
         this.load();
     }
 
     @NotNull
     @Override
-    public ViewLink<UUID> getLink() {
+    public ViewLink<String> getLink() {
         return link;
     }
 
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        super.onPrepare(viewer, options);
-        this.getItemsForPage(viewer).forEach(this::addItem);
-    }
-
-    @NotNull
-    public UUID getOwnerId(@NotNull Player player) {
-        return this.getLink().get(player);
+        this.autoFill(viewer);
     }
 
     @Override
-    public int[] getObjectSlots() {
-        return shopSlots;
+    protected void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
+
     }
 
     @Override
-    @NotNull
-    public List<ChestShop> getObjects(@NotNull Player player) {
-        UUID ownerId = this.getOwnerId(player);
-        return this.module.getShops(ownerId).stream().sorted(Comparator.comparing(AbstractShop::getName)).toList();
-    }
+    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ChestShop> autoFill) {
+        Player player = viewer.getPlayer();
+        String ownerName = this.getLink(player);
 
-    @Override
-    @NotNull
-    public ItemStack getObjectStack(@NotNull Player player, @NotNull ChestShop shop) {
-        boolean isOwn = shop.isOwner(player);
-        boolean canEdit = isOwn || player.hasPermission(ChestPerms.EDIT_OTHERS);
-        boolean canTeleport = player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT));
+        autoFill.setSlots(this.shopSlots);
+        autoFill.setItems(this.module.getShops(ownerName).stream().sorted(Comparator.comparing(AbstractShop::getName)).toList());
+        autoFill.setItemCreator(shop -> {
+            boolean isOwn = shop.isOwner(player);
+            boolean canEdit = isOwn || player.hasPermission(ChestPerms.EDIT_OTHERS);
+            boolean canTeleport = player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT));
 
-        ItemStack item = new ItemStack(shop.getBlockType());
-        ItemReplacer.create(item).hideFlags().trimmed()
-            .setDisplayName(this.shopName).setLore(isOwn ? this.shopLoreOwn : this.shopLoreOthers)
-            .replaceLoreExact(PLACEHOLDER_ACTION_EDITOR, canEdit ? this.actionEditLore : Collections.emptyList())
-            .replaceLoreExact(PLACEHOLDER_ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
-            .replace(shop.replacePlaceholders())
-            .replace(Colorizer::apply)
-            .writeMeta();
-        return item;
-    }
-
-    @Override
-    @NotNull
-    public ItemClick getObjectClick(@NotNull ChestShop shop) {
-        return (viewer, event) -> {
-            Player player = viewer.getPlayer();
+            ItemStack item = new ItemStack(shop.getBlockType());
+            ItemReplacer.create(item).hideFlags().trimmed()
+                .setDisplayName(this.shopName).setLore(isOwn ? this.shopLoreOwn : this.shopLoreOthers)
+                .replaceLoreExact(PLACEHOLDER_ACTION_EDITOR, canEdit ? this.actionEditLore : Collections.emptyList())
+                .replaceLoreExact(PLACEHOLDER_ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
+                .replace(shop.replacePlaceholders())
+                .writeMeta();
+            return item;
+        });
+        autoFill.setClickAction(shop -> (viewer1, event) -> {
             boolean isOwn = shop.isOwner(player);
 
             if (event.isRightClick()) {
                 if (isOwn || player.hasPermission(ChestPerms.EDIT_OTHERS)) {
-                    shop.openMenu(player);
+                    this.module.openShopSettings(player, shop);
                 }
                 return;
             }
@@ -136,6 +112,70 @@ public class ShopListMenu extends ConfigMenu<ExcellentShop> implements AutoPaged
             if (player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT))) {
                 shop.teleport(player);
             }
-        };
+        });
+    }
+
+    @Override
+    @NotNull
+    protected MenuOptions createDefaultOptions() {
+        return new MenuOptions(BLACK.enclose("Shops"), MenuSize.CHEST_45);
+    }
+
+    @Override
+    @NotNull
+    protected List<MenuItem> createDefaultItems() {
+        List<MenuItem> list = new ArrayList<>();
+
+        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
+        ItemUtil.editMeta(backItem, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
+        });
+        list.add(new MenuItem(backItem).setSlots(40).setPriority(10).setHandler(this.returnHandler));
+
+        ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
+        ItemUtil.editMeta(prevPage, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
+        });
+        list.add(new MenuItem(prevPage).setSlots(39).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
+
+        ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
+        ItemUtil.editMeta(nextPage, meta -> {
+            meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
+        });
+        list.add(new MenuItem(nextPage).setSlots(41).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+
+        return list;
+    }
+
+    @Override
+    protected void loadAdditional() {
+        this.shopSlots = ConfigValue.create("Shop.Slots", IntStream.range(0, 36).toArray()).read(cfg);
+
+        this.shopName = ConfigValue.create("Shop.Name",
+            LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME))
+        ).read(cfg);
+
+        this.shopLoreOwn = ConfigValue.create("Shop.Lore.Own", Lists.newList(
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Location:") + " " + SHOP_LOCATION_X + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Y + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Z + LIGHT_GRAY.enclose(" in ") + SHOP_LOCATION_WORLD),
+            "",
+            PLACEHOLDER_ACTION_TELEPORT,
+            PLACEHOLDER_ACTION_EDITOR
+        )).read(cfg);
+
+        this.shopLoreOthers = ConfigValue.create("Shop.Lore.Others", Lists.newList(
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Owner:") + " " + SHOP_OWNER),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Location:") + " " + SHOP_LOCATION_X + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Y + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Z + LIGHT_GRAY.enclose(" in ") + SHOP_LOCATION_WORLD),
+            "",
+            PLACEHOLDER_ACTION_TELEPORT,
+            PLACEHOLDER_ACTION_EDITOR
+        )).read(cfg);
+
+        this.actionTeleportLore = ConfigValue.create("Shop.Lore.Action_Teleport", Lists.newList(
+            LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Left-Click to " + LIGHT_YELLOW.enclose("teleport") + ".")
+        )).read(cfg);
+
+        this.actionEditLore = ConfigValue.create("Shop.Lore.Action_Editor", Lists.newList(
+            LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Right-Click to " + LIGHT_YELLOW.enclose("edit") + ".")
+        )).read(cfg);
     }
 }

@@ -5,7 +5,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ExcellentShop;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
 
-    public ChestStock(@NotNull ExcellentShop plugin, @NotNull ChestShop shop) {
+    public ChestStock(@NotNull ShopPlugin plugin, @NotNull ChestShop shop) {
         super(plugin, shop);
     }
 
@@ -32,7 +32,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         int amount = event.getTransaction().getUnits();
         //Player player = event.getPlayer();
 
-        if (!this.getShop().isAdminShop()) {
+        if (!this.shop.isAdminShop()) {
             if (tradeType == TradeType.BUY) {
                 this.consume(product, amount, tradeType);
             }
@@ -43,7 +43,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
     @Override
     @Nullable
     protected ChestProduct findProduct(@NotNull Product product) {
-        return this.getShop().getProductById(product.getId());
+        return this.shop.getProductById(product.getId());
     }
 
     @Override
@@ -63,10 +63,11 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
 
     @Override
     public int countItem(@NotNull ChestProduct product, @NotNull TradeType type, @Nullable Player player) {
-        if (this.getShop().isAdminShop()) return -1;
+        if (this.shop.isInactive()) return 0;
+        if (this.shop.isAdminShop()) return -1;
         if (!(product.getPacker() instanceof ItemPacker packer)) return -1;
 
-        Inventory inventory = this.getShop().getInventory();
+        Inventory inventory = this.shop.getInventory();
 
         // Для покупки со стороны игрока, возвращаем количество реальных предметов в контейнере.
         if (type == TradeType.BUY) {
@@ -88,9 +89,10 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
 
     @Override
     public boolean consumeItem(@NotNull ChestProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
+        if (this.shop.isInactive()) return false;
         if (!(product.getPacker() instanceof ItemPacker packer)) return false;
 
-        Inventory inventory = this.getShop().getInventory();
+        Inventory inventory = this.shop.getInventory();
         amount = Math.abs(amount * product.getUnitAmount());
 
         ShopUtils.takeItem(inventory, packer::isItemMatches, amount);
@@ -99,9 +101,10 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
 
     @Override
     public boolean storeItem(@NotNull ChestProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
+        if (this.shop.isInactive()) return false;
         if (!(product.getPacker() instanceof ItemPacker packer)) return false;
 
-        Inventory inventory = this.getShop().getInventory();
+        Inventory inventory = this.shop.getInventory();
         amount = Math.abs(amount * product.getUnitAmount());
 
         ShopUtils.addItem(inventory, packer.getItem(), amount);

@@ -1,8 +1,8 @@
 package su.nightexpress.nexshop.api.shop.stock;
 
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nightcore.config.FileConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,14 +27,14 @@ public class StockValues {
     }
 
     @NotNull
-    public static StockValues read(@NotNull JYML cfg, @NotNull String path) {
+    public static StockValues read(@NotNull FileConfig config, @NotNull String path) {
         Map<TradeType, Integer> initialAmountMap = new HashMap<>();
         Map<TradeType, Long> restockTimeMap = new HashMap<>();
 
         for (TradeType tradeType : TradeType.values()) {
             String path2 = path + "." + tradeType.name();
-            int initialAmount = cfg.getInt(path2 + ".Initial_Amount", -1);
-            long restockTime = cfg.getLong(path2 + ".Restock_Time", 0);
+            int initialAmount = config.getInt(path2 + ".Initial_Amount", -1);
+            long restockTime = config.getLong(path2 + ".Restock_Time", 0);
 
             initialAmountMap.put(tradeType, initialAmount);
             restockTimeMap.put(tradeType, restockTime);
@@ -42,10 +42,10 @@ public class StockValues {
         return new StockValues(initialAmountMap, restockTimeMap);
     }
 
-    public void write(@NotNull JYML cfg, @NotNull String path) {
+    public void write(@NotNull FileConfig config, @NotNull String path) {
         for (TradeType tradeType : TradeType.values()) {
-            cfg.set(path + "." + tradeType.name() + ".Initial_Amount", this.getInitialAmount(tradeType));
-            cfg.set(path + "." + tradeType.name() + ".Restock_Time", this.getRestockSeconds(tradeType));
+            config.set(path + "." + tradeType.name() + ".Initial_Amount", this.getInitialAmount(tradeType));
+            config.set(path + "." + tradeType.name() + ".Restock_Time", this.getRestockSeconds(tradeType));
         }
     }
 

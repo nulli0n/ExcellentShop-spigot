@@ -3,39 +3,40 @@ package su.nightexpress.nexshop.auction.listing;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.utils.TimeUtil;
-import su.nightexpress.nexshop.Perms;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.Placeholders;
-import su.nightexpress.nexshop.auction.config.AuctionConfig;
 
 import java.util.UUID;
 
 public class CompletedListing extends AbstractListing {
 
     private final String buyerName;
-    private boolean      isRewarded;
     private final long   buyDate;
 
-    public CompletedListing(@NotNull ActiveListing listing, @NotNull Player buyer) {
-        this(
-                UUID.randomUUID(),
-                listing.getOwner(),
-                listing.getOwnerName(),
-                buyer.getDisplayName(),
-                listing.getItemStack(),
-                listing.getCurrency(),
-                listing.getPrice(),
-                listing.getDateCreation(),
-                false,
-                System.currentTimeMillis()
-        );
+    private boolean claimed;
 
-        double tax = buyer.hasPermission(Perms.AUCTION_BYPASS_LISTING_TAX) ? 0D : AuctionConfig.LISTINGS_TAX_ON_LISTING_PURCHASE;
+    @NotNull
+    public static CompletedListing create(@NotNull ActiveListing listing, @NotNull Player buyer) {
+        UUID id = UUID.randomUUID();
+        UUID holder = listing.getOwner();
+        String ownerName = listing.getOwnerName();
+        String buyerName = buyer.getDisplayName();
+        ItemStack itemStack = listing.getItemStack();
+        Currency currency = listing.getCurrency();
+        double price = listing.getPrice();
+        long creationDate = listing.getCreationDate();
+
+        long buyDate = System.currentTimeMillis();
+        long deletionDate = AuctionUtils.generatePurgeDate(buyDate);
+        boolean isPaid = false;
+
+        double tax = AuctionUtils.getClaimTax(buyer);
         if (tax > 0D) {
-            this.price -= Math.max(0D, AuctionUtils.calculateTax(this.getPrice(), tax));
+            price -= Math.max(0D, AuctionUtils.getTax(currency, price, tax));
         }
+
+        return new CompletedListing(id, holder, ownerName, buyerName, itemStack, currency, price, creationDate, buyDate, deletionDate, isPaid);
     }
 
     public CompletedListing(
@@ -45,19 +46,18 @@ public class CompletedListing extends AbstractListing {
         @NotNull String buyerName,
         @NotNull ItemStack itemStack,
         @NotNull Currency currency,
-            double price,
-        long dateCreation,
-        boolean isRewarded,
-        long buyDate
+        double price,
+        long creationDate,
+        long buyDate,
+        long deletionDate,
+        boolean claimed
     ) {
-        super(id, owner, ownerName, itemStack, currency, price, dateCreation);
-        this.setRewarded(isRewarded);
+        super(id, owner, ownerName, itemStack, currency, price, creationDate, deletionDate);
+        this.setClaimed(claimed);
         this.buyerName = buyerName;
         this.buyDate = buyDate;
-        this.placeholderMap
-            .add(Placeholders.LISTING_BUYER, this.getBuyerName())
-            .add(Placeholders.LISTING_BUY_DATE, AuctionConfig.DATE_FORMAT.format(TimeUtil.getLocalDateTimeOf(this.getBuyDate())))
-            ;
+
+        this.placeholderMap.add(Placeholders.forComletedListing(this));
     }
 
     @NotNull
@@ -69,16 +69,11 @@ public class CompletedListing extends AbstractListing {
         return buyDate;
     }
 
-    public boolean isRewarded() {
-        return isRewarded;
+    public boolean isClaimed() {
+        return claimed;
     }
 
-    public void setRewarded(boolean rewarded) {
-        isRewarded = rewarded;
-    }
-
-    @Override
-    public long getDeleteDate() {
-        return this.getBuyDate() + AuctionConfig.LISTINGS_PURGE_IN;
+    public void setClaimed(boolean claimed) {
+        this.claimed = claimed;
     }
 }

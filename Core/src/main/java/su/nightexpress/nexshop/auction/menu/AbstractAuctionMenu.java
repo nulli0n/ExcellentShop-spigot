@@ -1,75 +1,72 @@
 package su.nightexpress.nexshop.auction.menu;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nexmedia.engine.api.config.JYML;
-import su.nexmedia.engine.api.menu.AutoPaged;
-import su.nexmedia.engine.api.menu.MenuItemType;
-import su.nexmedia.engine.api.menu.click.ClickHandler;
-import su.nexmedia.engine.api.menu.impl.ConfigMenu;
-import su.nexmedia.engine.api.menu.impl.MenuOptions;
-import su.nexmedia.engine.api.menu.impl.MenuViewer;
-import su.nexmedia.engine.utils.Colorizer;
-import su.nexmedia.engine.utils.EngineUtils;
-import su.nexmedia.engine.utils.ItemUtil;
-import su.nexmedia.engine.utils.StringUtil;
-import su.nightexpress.nexshop.ExcellentShop;
-import su.nightexpress.nexshop.Perms;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.auction.AuctionManager;
-import su.nightexpress.nexshop.auction.Placeholders;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
-import su.nightexpress.nexshop.auction.menu.type.AuctionItemType;
+import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.menu.MenuOptions;
+import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.menu.api.AutoFill;
+import su.nightexpress.nightcore.menu.api.AutoFilled;
+import su.nightexpress.nightcore.menu.impl.ConfigMenu;
+import su.nightexpress.nightcore.menu.item.ItemHandler;
+import su.nightexpress.nightcore.menu.link.Linked;
+import su.nightexpress.nightcore.menu.link.ViewLink;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.Plugins;
 
 import java.util.*;
 
-public abstract class AbstractAuctionMenu<A extends AbstractListing> extends ConfigMenu<ExcellentShop> implements AutoPaged<A> {
+public abstract class AbstractAuctionMenu<A extends AbstractListing> extends ConfigMenu<ShopPlugin> implements AutoFilled<A>, Linked<UUID> {
 
-    protected AuctionManager auctionManager;
+    protected final AuctionManager auctionManager;
+    protected final ViewLink<UUID> link;
 
-    protected int[]        objectSlots;
+    protected final ItemHandler returnHandler;
+    protected final ItemHandler expiredHandler;
+    protected final ItemHandler historyHandler;
+    protected final ItemHandler unclaimedHandler;
+    protected final ItemHandler listingsHandler;
+
     protected String       itemName;
     protected List<String> itemLore;
+    protected int[]        itemSlots;
 
-    protected Map<FormatType, List<String>> loreFormat;
-    protected Map<Player, UUID> seeOthers;
-
-    private static final String PLACEHOLDER_LORE_FORMAT = "%lore_format%";
-
-    public AbstractAuctionMenu(@NotNull AuctionManager auctionManager, @NotNull JYML cfg) {
-        super(auctionManager.plugin(), cfg);
+    public AbstractAuctionMenu(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull String fileName) {
+        super(plugin, FileConfig.loadOrExtract(plugin, auctionManager.getMenusPath(), fileName));
         this.auctionManager = auctionManager;
-        this.seeOthers = new WeakHashMap<>();
-        this.loreFormat = new HashMap<>();
+        this.link = new ViewLink<>();
 
-        this.itemName = Colorizer.apply(cfg.getString("Items.Name", Placeholders.LISTING_ITEM_NAME));
-        this.itemLore = Colorizer.apply(cfg.getStringList("Items.Lore"));
-        this.objectSlots = cfg.getIntArray("Items.Slots");
-        for (FormatType formatType : FormatType.values()) {
-            this.loreFormat.put(formatType, Colorizer.apply(cfg.getStringList("Lore_Format." + formatType.name())));
-        }
+        this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
+            this.runNextTick(() -> this.auctionManager.openAuction(viewer.getPlayer()));
+        }));
 
-        this.registerHandler(MenuItemType.class)
-            .addClick(MenuItemType.CLOSE, ClickHandler.forClose(this))
-            .addClick(MenuItemType.PAGE_NEXT, ClickHandler.forNextPage(this))
-            .addClick(MenuItemType.PAGE_PREVIOUS, ClickHandler.forPreviousPage(this))
-            .addClick(MenuItemType.RETURN, (viewer, event) -> this.auctionManager.getMainMenu().openNextTick(viewer, 1));
+        this.addHandler(this.expiredHandler = new ItemHandler("expired_listings", (viewer, event) -> {
+            this.runNextTick(() -> this.auctionManager.openExpiedListings(viewer.getPlayer()));
+        }));
 
-        this.registerHandler(AuctionItemType.class)
-            .addClick(AuctionItemType.EXPIRED_LISTINGS, (viewer, event) -> {
-                this.auctionManager.getExpiredMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.SALES_HISTORY, (viewer, event) -> {
-                this.auctionManager.getHistoryMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.UNCLAIMED_ITEMS, (viewer, event) -> {
-                this.auctionManager.getUnclaimedMenu().openNextTick(viewer, 1);
-            })
-            .addClick(AuctionItemType.OWN_LISTINGS, (viewer, event) -> {
-                this.auctionManager.getSellingMenu().openNextTick(viewer, 1);
-            });
+        this.addHandler(this.historyHandler = new ItemHandler("sales_history", (viewer, event) -> {
+            this.runNextTick(() -> this.auctionManager.openSalesHistory(viewer.getPlayer()));
+        }));
+
+        this.addHandler(this.unclaimedHandler = new ItemHandler("unclaimed_items", (viewer, event) -> {
+            this.runNextTick(() -> this.auctionManager.openUnclaimedListings(viewer.getPlayer()));
+        }));
+
+        this.addHandler(this.listingsHandler = new ItemHandler("own_listings", (viewer, event) -> {
+            this.runNextTick(() -> this.auctionManager.openPlayerListings(viewer.getPlayer()));
+        }));
+    }
+
+    @NotNull
+    @Override
+    public ViewLink<UUID> getLink() {
+        return link;
     }
 
     @Override
@@ -77,63 +74,36 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
         super.load();
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            if (Config.GUI_PLACEHOLDER_API.get() && EngineUtils.hasPlaceholderAPI()) {
-                ItemUtil.setPlaceholderAPI(viewer.getPlayer(), item);
+            if (Config.GUI_PLACEHOLDER_API.get() && Plugins.hasPlaceholderAPI()) {
+                ItemReplacer.create(item).readMeta().replacePlaceholderAPI(viewer.getPlayer()).writeMeta();
             }
         }));
     }
 
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        super.onPrepare(viewer, options);
-        this.getItemsForPage(viewer).forEach(this::addItem);
-    }
-
-    enum FormatType {
-        OWNER, PLAYER, ADMIN
-    }
-
-    public void open(@NotNull Player player, int page, @NotNull UUID id) {
-        if (!id.equals(player.getUniqueId())) {
-            this.seeOthers.put(player, id);
-        }
-        this.open(player, page);
+        this.autoFill(viewer);
     }
 
     @Override
-    public int[] getObjectSlots() {
-        return objectSlots;
+    protected void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
+
     }
 
     @Override
-    @NotNull
-    public ItemStack getObjectStack(@NotNull Player player, @NotNull A aucItem) {
-        ItemStack item = new ItemStack(aucItem.getItemStack());
-        ItemUtil.mapMeta(item, meta -> {
-            List<String> lore = StringUtil.replaceInList(this.itemLore, PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, aucItem));
-            meta.setDisplayName(this.itemName);
-            meta.setLore(lore);
-            //lore.replaceAll(aucItem.replacePlaceholders());
-            //meta.setDisplayName(aucItem.replacePlaceholders().apply(this.itemName));
-            //meta.setLore(lore);
-            ItemUtil.replace(meta, aucItem.replacePlaceholders());
+    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<A> autoFill) {
+        Player player = viewer.getPlayer();
+
+        autoFill.setSlots(this.itemSlots);
+        autoFill.setItemCreator(aucItem -> {
+            ItemStack item = new ItemStack(aucItem.getItemStack());
+            ItemReplacer.create(item).trimmed()
+                .setDisplayName(this.itemName)
+                .setLore(this.itemLore)
+                .replace(aucItem.getPlaceholders())
+                .replacePlaceholderAPI(player)
+                .writeMeta();
+            return item;
         });
-        ItemUtil.setPlaceholderAPI(player, item);
-        return item;
-    }
-
-    @NotNull
-    protected List<String> getLoreFormat(@NotNull Player player, @NotNull A aucItem) {
-        FormatType formatType = FormatType.PLAYER;
-        if (player.hasPermission(Perms.AUCTION_LISTING_REMOVE_OTHERS)) formatType = FormatType.ADMIN;
-        else if (aucItem.isOwner(player)) formatType = FormatType.OWNER;
-
-        return this.loreFormat.getOrDefault(formatType, Collections.emptyList());
-    }
-
-    @Override
-    public void onClose(@NotNull MenuViewer viewer, @NotNull InventoryCloseEvent event) {
-        super.onClose(viewer, event);
-        this.seeOthers.remove(viewer.getPlayer());
     }
 }
