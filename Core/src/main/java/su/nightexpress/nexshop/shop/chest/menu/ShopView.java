@@ -6,9 +6,11 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -25,15 +27,16 @@ import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
 import su.nightexpress.nightcore.util.ItemReplacer;
 import su.nightexpress.nightcore.util.ItemUtil;
-import su.nightexpress.nightcore.util.Lists;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.GENERIC_BUY;
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.GENERIC_SELL;
+import static su.nightexpress.nightcore.util.text.tag.Tags.BLACK;
+import static su.nightexpress.nightcore.util.text.tag.Tags.LIGHT_GRAY;
 
 public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<ChestProduct>, Linked<ChestShop> {
 
@@ -42,7 +45,7 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
     private final ViewLink<ChestShop> link;
 
     private int[]        productSlots;
-    private List<String> productLore;
+    //private List<String> productLore;
 
     public ShopView(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
         super(plugin, FileConfig.loadOrExtract(plugin, module.getLocalPath(), FILE_NAME));
@@ -51,7 +54,10 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
         this.load();
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemReplacer.replace(item, this.getLink(viewer).replacePlaceholders());
+            ItemReplacer.create(item).readMeta()
+                .replace(this.getLink(viewer).getPlaceholders())
+                .replacePlaceholderAPI(viewer.getPlayer())
+                .writeMeta();
         }));
     }
 
@@ -80,10 +86,16 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
         autoFill.setSlots(this.productSlots);
         autoFill.setItems(shop.getProducts());
         autoFill.setItemCreator(product -> {
+            List<String> loreFormat = ChestConfig.PRODUCT_FORMAT_LORE_GENERAL.get();
+            List<String> buyLore = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable() ? ChestConfig.PRODUCT_FORMAT_LORE_BUY.get() : Collections.emptyList();
+            List<String> sellLore = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable() ? ChestConfig.PRODUCT_FORMAT_LORE_SELL.get() : Collections.emptyList();
+
             ItemStack preview = product.getPreview();
             ItemReplacer.create(preview).readMeta().trimmed()
-                .setLore(this.productLore)
-                .replaceLoreExact(GENERIC_LORE, ItemUtil.getLore(preview))
+                .setLore(loreFormat)
+                .injectLore(GENERIC_BUY, buyLore)
+                .injectLore(GENERIC_SELL, sellLore)
+                .injectLore(GENERIC_LORE, ItemUtil.getLore(preview))
                 .replace(product.getPlaceholders())
                 .replace(product.getCurrency().getPlaceholders())
                 .replace(shop.getPlaceholders())
@@ -146,7 +158,7 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
     protected void loadAdditional() {
         this.productSlots = ConfigValue.create("Item.Product_Slots", new int[]{11,12,13,14,15}).read(cfg);
 
-        this.productLore = ConfigValue.create("Product_Format.Lore.Text", Lists.newList(
+        /*this.productLore = ConfigValue.create("Product_Format.Lore.Text", Lists.newList(
             GENERIC_LORE,
             "",
             GREEN.enclose(BOLD.enclose("BUY:")),
@@ -159,6 +171,6 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
             RED.enclose("✔" + WHITE.enclose(" Shop Space: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL)),
             "",
             DARK_GRAY.enclose("Hold " + LIGHT_GRAY.enclose("Shift") + " to buy & sell quickly.")
-        )).read(cfg);
+        )).read(cfg);*/
     }
 }

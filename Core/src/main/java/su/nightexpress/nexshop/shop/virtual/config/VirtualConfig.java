@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.GameMode;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -24,8 +25,14 @@ public class VirtualConfig {
         "This currency will be used when you create new products or if no other currency is available.",
         "Compatible plugins: " + URL_WIKI_CURRENCY);
 
+    public static final ConfigValue<String> DEFAULT_CART_UI = ConfigValue.create("General.Default_Cart_UI",
+        DEFAULT,
+        "Sets default product purchase menu config.",
+        "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
+    );
+
     public static final ConfigValue<String> DEFAULT_LAYOUT = ConfigValue.create("General.Default_Layout",
-        Placeholders.DEFAULT,
+        DEFAULT,
         "Sets default shop layout configuration in case if shop's one is not existing anymore."
     );
 

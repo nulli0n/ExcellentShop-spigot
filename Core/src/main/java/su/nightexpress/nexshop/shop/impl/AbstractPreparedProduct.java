@@ -23,6 +23,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
     private Inventory inventory;
     private int units;
+    private boolean silent;
 
     public AbstractPreparedProduct(@NotNull ShopPlugin plugin, @NotNull Player player, @NotNull P product, @NotNull TradeType tradeType, boolean all) {
         this.plugin = plugin;
@@ -34,6 +35,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
         this.setInventory(player.getInventory());
         this.setUnits(1);
+        this.setSilent(false);
     }
 
     @Override
@@ -64,6 +66,16 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
     public boolean isAll() {
         return all;
+    }
+
+    @Override
+    public boolean isSilent() {
+        return silent;
+    }
+
+    @Override
+    public void setSilent(boolean silent) {
+        this.silent = silent;
     }
 
     @NotNull

@@ -115,6 +115,7 @@ public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Li
                 .replace(currency.getPlaceholders())
                 .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getHandler().getBalance(player)))
                 .replace(PLACEHOLDER_BANK_BALANCE, currency.format(module.getPlayerBank(info.playerId).getBalance(currency)))
+                .replacePlaceholderAPI(player)
                 .writeMeta();
             return icon;
         });

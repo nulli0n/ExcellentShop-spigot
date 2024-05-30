@@ -85,7 +85,10 @@ public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop>
             }
 
             menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
-                ItemReplacer.replace(itemStack, Placeholders.forShopDisplay(this.getLink(viewer)));
+                ItemReplacer.create(itemStack).readMeta().trimmed()
+                    .replace(Placeholders.forShopDisplay(this.getLink(viewer)))
+                    .replacePlaceholderAPI(viewer.getPlayer())
+                    .writeMeta();
             });
         });
     }

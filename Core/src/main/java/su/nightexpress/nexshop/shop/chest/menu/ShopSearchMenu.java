@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
@@ -54,6 +55,14 @@ public class ShopSearchMenu extends ConfigMenu<ShopPlugin> implements AutoFilled
         this.link = new ViewLink<>();
 
         this.load();
+
+        if (Config.GUI_PLACEHOLDER_API.get()) {
+            this.getItems().forEach(menuItem -> {
+                menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
+                    ItemReplacer.replacePlaceholderAPI(itemStack, viewer.getPlayer());
+                });
+            });
+        }
     }
 
     @NotNull

@@ -55,6 +55,10 @@ public class Lang extends CoreLang {
     public static final LangText ERROR_INVALID_CURRENCY = LangText.of("Error.Currency.Invalid",
         LIGHT_RED.enclose("Invalid currency!"));
 
+    public static final LangText SHOP_PRODUCT_ERROR_INVALID_CART_UI = LangText.of("Shop.Product.Error.InvalidCartUI",
+        SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_RED.enclose("Could not open purchase menu: Cart UI not found."));
+
     public static final LangText SHOP_PRODUCT_ERROR_UNBUYABLE = LangText.of("Shop.Product.Error.Unbuyable",
         SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
         LIGHT_RED.enclose(BOLD.enclose("Sorry! ")) + LIGHT_GRAY.enclose("This product can't be purchased currently!"));

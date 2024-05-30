@@ -43,7 +43,9 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
-            VirtualLang.PRODUCT_PURCHASE_BUY.getMessage().replace(this.replacePlaceholders()).send(player);
+            if (!this.isSilent()) {
+                VirtualLang.PRODUCT_PURCHASE_BUY.getMessage().replace(this.replacePlaceholders()).send(player);
+            }
 
             shop.getPricer().onTransaction(event);
             shop.getStock().onTransaction(event);
@@ -94,7 +96,9 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
-            VirtualLang.PRODUCT_PURCHASE_SELL.getMessage().replace(this.replacePlaceholders()).send(player);
+            if (!this.isSilent()) {
+                VirtualLang.PRODUCT_PURCHASE_SELL.getMessage().replace(this.replacePlaceholders()).send(player);
+            }
 
             shop.getPricer().onTransaction(event);
             shop.getStock().onTransaction(event);

@@ -99,6 +99,7 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
 
             PriceType priceType = Lists.next(product.getPricer().getType(), predicate);
             product.setPricer(AbstractProductPricer.from(priceType));
+            product.getShop().getPricer().deleteData(product);
 
             if (product.getPricer() instanceof RangedPricer pricer) {
                 pricer.setPriceRange(TradeType.BUY, UniDouble.of(buy, buy));
@@ -203,7 +204,12 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
                         .writeMeta();
                 });
             }
-            menuItem.getOptions().addDisplayModifier((viewer, item) -> ItemReplacer.replace(item, this.getLink(viewer).getPlaceholders().replacer()));
+            menuItem.getOptions().addDisplayModifier((viewer, item) -> {
+                ItemReplacer.create(item).readMeta().trimmed()
+                    .replace(this.getLink(viewer).getPlaceholders())
+                    .replacePlaceholderAPI(viewer.getPlayer())
+                    .writeMeta();
+            });
         });
     }
 

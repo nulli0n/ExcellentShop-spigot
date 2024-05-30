@@ -28,6 +28,7 @@ public class OpenCommand {
             .withArgument(CommandArguments.forShop(ARG_SHOP, module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.getString()).required())
             .withArgument(ArgumentTypes.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_OPEN_OTHERS))
             .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))
+            .withFlag(CommandFlags.silent()).permission(Perms.COMMAND_FLAGS)
             .executes((context, arguments) -> execute(module, context, arguments))
         );
     }
@@ -37,10 +38,10 @@ public class OpenCommand {
         Player player = CommandUtil.getPlayerOrSender(context, arguments, ARG_PLAYER);
         if (player == null) return false;
 
-        if (player != context.getSender()) {
+        if (player != context.getSender() && !arguments.hasFlag(CommandFlags.SILENT)) {
             context.send(VirtualLang.COMMAND_OPEN_DONE_OTHERS.getMessage()
                 .replace(Placeholders.forPlayer(player))
-                .replace(Placeholders.SHOP_NAME, shop.replacePlaceholders())
+                .replace(Placeholders.SHOP_NAME, shop.getName())
             );
         }
 

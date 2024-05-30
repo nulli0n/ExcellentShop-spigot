@@ -341,6 +341,12 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     @Override
     @NotNull
+    public String getDefaultCartUI() {
+        return ChestConfig.DEFAULT_CART_UI.get();
+    }
+
+    @Override
+    @NotNull
     public TransactionLogger getLogger() {
         return logger;
     }

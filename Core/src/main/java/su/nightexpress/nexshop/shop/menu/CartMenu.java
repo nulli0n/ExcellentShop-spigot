@@ -45,7 +45,7 @@ import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedProduct> {
 
-    public static final String FILE_NAME = "product_cart.yml";
+    //public static final String FILE_NAME = "product_cart.yml";
 
     private final ViewLink<PreparedProduct> link;
 
@@ -59,8 +59,8 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
     private int[]    productSlots;
     private UniSound productSound;
 
-    public CartMenu(@NotNull ShopPlugin plugin) {
-        super(plugin, FileConfig.loadOrExtract(plugin, Config.DIR_MENU, FILE_NAME));
+    public CartMenu(@NotNull ShopPlugin plugin, @NotNull FileConfig config) {
+        super(plugin, config);
         this.link = new ViewLink<>();
 
         this.addHandler(this.confirmHandler = new ItemHandler("confirm", (viewer, event) -> {

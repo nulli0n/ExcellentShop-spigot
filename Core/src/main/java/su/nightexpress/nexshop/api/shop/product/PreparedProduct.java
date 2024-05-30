@@ -22,6 +22,10 @@ public interface PreparedProduct extends Placeholder {
 
     boolean isAll();
 
+    boolean isSilent();
+
+    void setSilent(boolean silent);
+
     @NotNull Inventory getInventory();
 
     void setInventory(@NotNull Inventory inventory);

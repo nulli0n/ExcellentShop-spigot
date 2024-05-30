@@ -51,7 +51,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
         // =============================================
         // Rotating Product stuff
         // =============================================
-        this.addItem(Material.ENDER_EYE, VirtualLocales.PRODUCT_ROTATION_CHANCE, 12, (viewer, event, product) -> {
+        this.addItem(Material.ENDER_EYE, VirtualLocales.PRODUCT_ROTATION_CHANCE, 13, (viewer, event, product) -> {
             RotatingProduct rotatingProduct = (RotatingProduct) product;
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_VALUE, (dialog, input) -> {
                 rotatingProduct.setRotationChance(input.asDouble());

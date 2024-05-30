@@ -5,6 +5,7 @@ import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
@@ -13,6 +14,10 @@ import su.nightexpress.nightcore.util.*;
 
 import java.util.*;
 
+import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
+import static su.nightexpress.nexshop.shop.virtual.Placeholders.GENERIC_SELL;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
 
@@ -40,6 +45,12 @@ public class ChestConfig {
     public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("Shops.Default_Currency",
         VaultEconomyHandler.ID,
         "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available."
+    );
+
+    public static final ConfigValue<String> DEFAULT_CART_UI = ConfigValue.create("Shops.Default_Cart_UI",
+        DEFAULT,
+        "Sets default product purchase menu config.",
+        "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
     );
 
     public static final ConfigValue<Set<String>> ALLOWED_CURRENCIES = ConfigValue.create("Shops.Allowed_Currencies",
@@ -166,6 +177,45 @@ public class ChestConfig {
     public static final ConfigValue<Set<String>> SHOP_PRODUCT_DENIED_NAMES = ConfigValue.create("Shops.Products.Name_Blacklist",
         Set.of("shit", "sample text"),
         "Items containing the following words in their name will be disallowed from being used as shop products.");
+
+
+
+
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_GENERAL = ConfigValue.create("Shops.Products.Format.Main",
+        Lists.newList(
+            GENERIC_LORE,
+            "",
+            GENERIC_BUY,
+            "",
+            GENERIC_SELL,
+            "",
+            DARK_GRAY.enclose("Hold " + LIGHT_GRAY.enclose("Shift") + " to buy & sell quickly.")
+        ),
+        "Product lore format. Use '" + GENERIC_LORE + "' placeholder to insert original lore of the product item.",
+        "You can use 'Chest Product' placeholders: " + URL_WIKI_PLACEHOLDERS
+    );
+
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_BUY = ConfigValue.create("Shops.Products.Format.Buy",
+        Lists.newList(
+            GREEN.enclose(BOLD.enclose("BUY:")),
+            GREEN.enclose("←" + WHITE.enclose(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
+            GREEN.enclose("✔" + WHITE.enclose(" Items Left: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY))
+        ),
+        "Lore that will appear if product is buyable.",
+        "Placeholder: " + GENERIC_BUY
+    );
+
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_SELL = ConfigValue.create("Shops.Products.Format.Sell",
+        Lists.newList(
+            RED.enclose(BOLD.enclose("SELL:")),
+            RED.enclose("→" + WHITE.enclose(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
+            RED.enclose("→" + WHITE.enclose(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
+            RED.enclose("✔" + WHITE.enclose(" Shop Space: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL))
+        ),
+        "Text to appear if product is sellable.",
+        "Placeholder: " + GENERIC_SELL
+    );
+
 
 
     public static final ConfigValue<Map<String, ItemStack>> DISPLAY_DEFAULT_SHOWCASE = ConfigValue.forMap("Display.Showcase",

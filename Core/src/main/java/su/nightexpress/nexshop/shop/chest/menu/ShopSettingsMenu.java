@@ -119,7 +119,10 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
 
         this.getItems().forEach(menuItem -> {
             menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-                ItemReplacer.replace(item, this.getLink(viewer).replacePlaceholders());
+                ItemReplacer.create(item).readMeta().trimmed()
+                    .replace(this.getLink(viewer).getPlaceholders())
+                    .replacePlaceholderAPI(viewer.getPlayer())
+                    .writeMeta();
             });
 
             if (menuItem.getHandler() == this.bankHandler) {

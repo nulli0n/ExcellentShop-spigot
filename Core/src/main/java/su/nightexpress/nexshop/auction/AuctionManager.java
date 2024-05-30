@@ -111,7 +111,13 @@ public class AuctionManager extends AbstractShopModule {
 
     @Override
     protected void addCommands(@NotNull ChainedNodeBuilder builder) {
-        builder.fallback(context -> OpenCommand.executes(this.plugin, this, context));
+        builder.fallback(context -> {
+            if (!context.checkPermission(AuctionPerms.COMMAND_OPEN)) {
+                context.errorPermission();
+                return false;
+            }
+            return OpenCommand.executes(this.plugin, this, context);
+        });
 
         ExpiredCommand.build(this.plugin, this, builder);
         HistoryCommand.build(this.plugin, this, builder);

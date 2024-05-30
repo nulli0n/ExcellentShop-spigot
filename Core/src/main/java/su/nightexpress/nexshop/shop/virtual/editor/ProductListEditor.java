@@ -165,7 +165,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
 
             LangItem locale = shop.getType() == ShopType.STATIC ? VirtualLocales.PRODUCT_OBJECT : VirtualLocales.ROTATING_PRODUCT_OBJECT;
             ItemStack productIcon = new ItemStack(product.getPreview());
-            ItemReplacer.create(productIcon).readLocale(locale).hideFlags().trimmed()
+            ItemReplacer.create(productIcon).readMeta().readLocale(locale).hideFlags().trimmed()
                 .replace(product.getPlaceholders())
                 .writeMeta();
 

@@ -60,18 +60,20 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             product.getCurrency().getHandler().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
 
-            ChestLang.SHOP_TRADE_BUY_INFO_USER.getMessage()
-                .replace(this.replacePlaceholders())
-                .replace(shop.replacePlaceholders())
-                .send(player);
-
-            Player owner = shop.getOwner().getPlayer();
-            if (owner != null && !shop.isAdminShop()) {
-                ChestLang.SHOP_TRADE_BUY_INFO_OWNER.getMessage()
-                    .replace(Placeholders.forPlayer(player))
+            if (!this.isSilent()) {
+                ChestLang.SHOP_TRADE_BUY_INFO_USER.getMessage()
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
-                    .send(owner);
+                    .send(player);
+
+                Player owner = shop.getOwner().getPlayer();
+                if (owner != null && !shop.isAdminShop()) {
+                    ChestLang.SHOP_TRADE_BUY_INFO_OWNER.getMessage()
+                        .replace(Placeholders.forPlayer(player))
+                        .replace(this.replacePlaceholders())
+                        .replace(shop.replacePlaceholders())
+                        .send(owner);
+                }
             }
         }
 
@@ -134,18 +136,20 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             product.take(inventory, transaction.getUnits());
             shop.getModule().getLogger().logTransaction(event);
 
-            ChestLang.SHOP_TRADE_SELL_INFO_USER.getMessage()
-                .replace(this.replacePlaceholders())
-                .replace(shop.replacePlaceholders())
-                .send(player);
-
-            Player owner = shop.getOwner().getPlayer();
-            if (owner != null && !shop.isAdminShop()) {
-                ChestLang.SHOP_TRADE_SELL_INFO_OWNER.getMessage()
-                    .replace(Placeholders.forPlayer(player))
+            if (!this.isSilent()) {
+                ChestLang.SHOP_TRADE_SELL_INFO_USER.getMessage()
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
-                    .send(owner);
+                    .send(player);
+
+                Player owner = shop.getOwner().getPlayer();
+                if (owner != null && !shop.isAdminShop()) {
+                    ChestLang.SHOP_TRADE_SELL_INFO_OWNER.getMessage()
+                        .replace(Placeholders.forPlayer(player))
+                        .replace(this.replacePlaceholders())
+                        .replace(shop.replacePlaceholders())
+                        .send(owner);
+                }
             }
         }
         return transaction;

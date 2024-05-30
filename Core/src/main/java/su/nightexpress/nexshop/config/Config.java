@@ -13,6 +13,7 @@ import java.util.Map;
 public class Config {
 
     public static final String DIR_MENU = "/menu/";
+    public static final String DIR_CARTS = "/menu/product_carts/";
 
     public static final ConfigValue<String> DATE_FORMAT = ConfigValue.create("General.DateFormat",
         "MM/dd/yyyy HH:mm");

@@ -4,6 +4,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
@@ -55,6 +56,14 @@ public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop
         }));
 
         this.load();
+
+        if (Config.GUI_PLACEHOLDER_API.get()) {
+            this.getItems().forEach(menuItem -> {
+                menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
+                    ItemReplacer.replacePlaceholderAPI(itemStack, viewer.getPlayer());
+                });
+            });
+        }
     }
 
     @Override
@@ -85,6 +94,7 @@ public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)
                 .replace(GENERIC_NAME, ItemUtil.getItemName(pair.getSecond()))
+                .replacePlaceholderAPI(viewer.getPlayer())
                 .writeMeta();
             return icon;
         });
@@ -117,13 +127,13 @@ public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop
         ItemUtil.editMeta(prevPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(prevPage).setSlots(9).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
+        list.add(new MenuItem(prevPage).setSlots(27).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
 
         ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(nextPage).setSlots(17).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        list.add(new MenuItem(nextPage).setSlots(35).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
 
         return list;
     }

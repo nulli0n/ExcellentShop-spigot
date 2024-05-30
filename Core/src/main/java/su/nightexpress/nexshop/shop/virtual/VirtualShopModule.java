@@ -312,6 +312,12 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
 
     @Override
     @NotNull
+    public String getDefaultCartUI() {
+        return VirtualConfig.DEFAULT_CART_UI.get();
+    }
+
+    @Override
+    @NotNull
     public TransactionLogger getLogger() {
         return logger;
     }
@@ -626,14 +632,26 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     public void sellAll(@NotNull Player player) {
-        this.sellAll(player, player.getInventory());
+        this.sellAll(player, false);
+    }
+
+    public void sellAll(@NotNull Player player, boolean silent) {
+        this.sellAll(player, player.getInventory(), silent);
     }
 
     public void sellAll(@NotNull Player player, @NotNull Inventory inventory) {
-        this.sellAll(player, inventory, null);
+        this.sellAll(player, inventory, false);
+    }
+
+    public void sellAll(@NotNull Player player, @NotNull Inventory inventory, boolean silent) {
+        this.sellAll(player, inventory, null, silent);
     }
 
     public void sellAll(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop) {
+        this.sellAll(player, inventory, shop, false);
+    }
+
+    public void sellAll(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop, boolean silent) {
         Map<Currency, Double> profitMap = new HashMap<>();
         Map<ItemStack, Transaction> resultMap = new HashMap<>();
         Map<VirtualProduct, Integer> productAmountMap = new HashMap<>();
@@ -657,6 +675,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
             VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, false);
             preparedProduct.setUnits(units);
             preparedProduct.setInventory(inventory);
+            preparedProduct.setSilent(silent);
 
             Transaction result = preparedProduct.trade();
             if (result.getResult() == Transaction.Result.SUCCESS) {
@@ -675,21 +694,23 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
             .map(entry -> entry.getKey().format(entry.getValue()))
             .collect(Collectors.joining(", "));
 
-        VirtualLang.SELL_MENU_SALE_RESULT.getMessage()
-            .replace(Placeholders.GENERIC_TOTAL, total)
-            .send(player);
+        if (!silent) {
+            VirtualLang.SELL_MENU_SALE_RESULT.getMessage()
+                .replace(Placeholders.GENERIC_TOTAL, total)
+                .send(player);
 
-        VirtualLang.SELL_MENU_SALE_DETAILS.getMessage()
-            .replace(Placeholders.GENERIC_TOTAL, total)
-            .replace(Placeholders.GENERIC_ENTRY, list -> {
-                resultMap.forEach((item, result) -> {
-                    list.add(VirtualLang.SELL_MENU_SALE_ENTRY.getString()
-                        .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
-                        .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
-                        .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
-                    );
-                });
-            })
-            .send(player);
+            VirtualLang.SELL_MENU_SALE_DETAILS.getMessage()
+                .replace(Placeholders.GENERIC_TOTAL, total)
+                .replace(Placeholders.GENERIC_ENTRY, list -> {
+                    resultMap.forEach((item, result) -> {
+                        list.add(VirtualLang.SELL_MENU_SALE_ENTRY.getString()
+                            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
+                            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
+                            .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
+                        );
+                    });
+                })
+                .send(player);
+        }
     }
 }
