@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.data.user;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualStock;
 import su.nightexpress.nightcore.database.AbstractUser;
 
 import java.util.UUID;
@@ -37,11 +36,7 @@ public class ShopUser extends AbstractUser<ShopPlugin> {
         VirtualShopModule module = this.plugin.getVirtualShop();
         if (module != null) {
             this.plugin.runTaskAsync(task -> {
-                module.getShops().forEach(shop -> {
-                    if (shop.getStock() instanceof VirtualStock virtualStock) {
-                        virtualStock.load(this.getId());
-                    }
-                });
+                module.getShops().forEach(shop -> shop.getStock().load(this.getId()));
             });
         }
     }
@@ -52,11 +47,7 @@ public class ShopUser extends AbstractUser<ShopPlugin> {
 
         VirtualShopModule module = this.plugin.getVirtualShop();
         if (module != null) {
-            module.getShops().forEach(shop -> {
-                if (shop.getStock() instanceof VirtualStock virtualStock) {
-                    virtualStock.unload(this.getId());
-                }
-            });
+            module.getShops().forEach(shop -> shop.getStock().unload(this.getId()));
         }
     }
 

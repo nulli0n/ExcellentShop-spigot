@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.10.1</version>
+        <version>4.11.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -99,6 +99,12 @@
             <groupId>com.sk89q.worldguard</groupId>
             <artifactId>worldguard-bukkit</artifactId>
             <version>7.0.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.angeschossen</groupId>
+            <artifactId>UpgradeableHoppersAPI</artifactId>
+            <version>4.13.10</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

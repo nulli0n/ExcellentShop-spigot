@@ -18,12 +18,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
@@ -60,6 +62,26 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
         bank.getBalanceMap().clear();
         this.module.savePlayerBank(bank);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onShopPlaceCreation(BlockPlaceEvent event) {
+        if (!ChestConfig.SHOP_ITEM_CREATION_ENABLED.get()) return;
+
+        ItemStack itemStack = event.getItemInHand();
+        if (ChestUtils.isShopItem(itemStack)) {
+            event.setCancelled(true);
+
+            Player player = event.getPlayer();
+            EquipmentSlot slot = event.getHand();
+            Block block = event.getBlockPlaced();
+
+            this.plugin.runTask(task -> {
+                if (this.module.createShopFromItem(player, block, itemStack)) {
+                    player.getInventory().setItem(slot, itemStack);
+                }
+            });
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -127,7 +149,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         event.setCancelled(event.getBlocks().stream().anyMatch(this.module::isShop));
     }
 
-    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onShopHopperRestrict(InventoryMoveItemEvent event) {
         Inventory target = event.getDestination();
         Inventory from = event.getSource();
@@ -147,7 +169,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
             if (shop == null) return;
 
             ItemStack item = event.getItem();
-            if (!shop.isProduct(item)) {
+            if (!shop.isProduct(item) || ChestUtils.isInfiniteStorage()) {
                 event.setCancelled(true);
             }
         }

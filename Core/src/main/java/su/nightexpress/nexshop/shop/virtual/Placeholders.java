@@ -24,8 +24,7 @@ import java.util.stream.Collectors;
 
 public class Placeholders extends su.nightexpress.nexshop.Placeholders {
 
-    public static final String GENERIC_BUY             = "%buy%";
-    public static final String GENERIC_SELL            = "%sell%";
+
     public static final String GENERIC_SELL_MULTIPLIER = "%sell_multiplier%";
 
     public static final String SHOP_TYPE                = "%shop_type%";

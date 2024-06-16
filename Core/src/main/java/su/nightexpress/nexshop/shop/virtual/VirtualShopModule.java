@@ -236,14 +236,9 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     public void loadShopData() {
-        Collection<? extends Player> players = this.plugin.getServer().getOnlinePlayers();
-
         this.getShops().forEach(shop -> {
             shop.getPricer().load();
             shop.getStock().load();
-            if (shop.getStock() instanceof VirtualStock virtualStock) {
-                players.forEach(player -> virtualStock.load(player.getUniqueId()));
-            }
             if (shop instanceof RotatingShop rotatingShop) {
                 rotatingShop.loadData();
             }
@@ -428,13 +423,16 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     @Nullable
+    @Deprecated
     public VirtualProduct getBestProduct(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType type, @Nullable VirtualShop shop) {
-        return shop == null ? this.getBestProductFor(player, item, type) : shop.getBestProduct(player, item, type);
+        //return shop == null ? this.getBestProductFor(player, item, type) : shop.getBestProduct(player, item, type);
+        return this.getBestProduct(item, type, shop, player);
     }
 
     @Nullable
+    @Deprecated
     public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
-        Set<VirtualProduct> products = new HashSet<>();
+        /*Set<VirtualProduct> products = new HashSet<>();
         this.getShops().forEach(shop -> {
             VirtualProduct best = shop.getBestProduct(player, item, tradeType);
             if (best != null) {
@@ -443,6 +441,37 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         });
 
         Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(player, tradeType));
+        return (tradeType == TradeType.BUY ? products.stream().min(comparator) : products.stream().max(comparator)).orElse(null);*/
+
+        return this.getBestProductFor(item, tradeType, player);
+    }
+
+    @Nullable
+    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType type, @Nullable VirtualShop shop) {
+        return this.getBestProduct(item, type, shop, null);
+    }
+
+    @Nullable
+    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType type, @Nullable VirtualShop shop, @Nullable Player player) {
+        return shop == null ? this.getBestProductFor(item, type, player) : shop.getBestProduct(item, type, player);
+    }
+
+    @Nullable
+    public VirtualProduct getBestProductFor(@NotNull ItemStack item, @NotNull TradeType tradeType) {
+        return this.getBestProductFor(item, tradeType, null);
+    }
+
+    @Nullable
+    public VirtualProduct getBestProductFor(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player) {
+        Set<VirtualProduct> products = new HashSet<>();
+        this.getShops().forEach(shop -> {
+            VirtualProduct best = shop.getBestProduct(item, tradeType, player);
+            if (best != null) {
+                products.add(best);
+            }
+        });
+
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
         return (tradeType == TradeType.BUY ? products.stream().min(comparator) : products.stream().max(comparator)).orElse(null);
     }
 
@@ -659,7 +688,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         for (ItemStack item : inventory.getContents()) {
             if (item == null || item.getType().isAir()) continue;
 
-            VirtualProduct product = this.getBestProduct(player, item, TradeType.SELL, shop);
+            VirtualProduct product = this.getBestProduct(item, TradeType.SELL, shop, player);
             if (product == null) continue;
 
             int amount = item.getAmount();

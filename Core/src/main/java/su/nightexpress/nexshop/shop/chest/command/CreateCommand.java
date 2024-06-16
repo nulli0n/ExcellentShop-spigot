@@ -45,6 +45,6 @@ public class CreateCommand {
         double buyPrice = arguments.getDoubleArgument(ARG_BUY_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
         double sellPrice = arguments.getDoubleArgument(ARG_SELL_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
 
-        return module.createShop(player, block, ShopType.PLAYER, buyPrice, sellPrice);
+        return module.createShopNaturally(player, block, ShopType.PLAYER, buyPrice, sellPrice);
     }
 }

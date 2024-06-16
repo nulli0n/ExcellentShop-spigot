@@ -11,6 +11,7 @@ import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.impl.AbstractStock;
 import su.nightexpress.nexshop.shop.util.ShopUtils;
 
@@ -67,6 +68,10 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         if (this.shop.isAdminShop()) return -1;
         if (!(product.getPacker() instanceof ItemPacker packer)) return -1;
 
+        if (ChestUtils.isInfiniteStorage()) {
+            return (int) Math.floor(product.getQuantity() / (double) product.getUnitAmount());
+        }
+
         Inventory inventory = this.shop.getInventory();
 
         // Для покупки со стороны игрока, возвращаем количество реальных предметов в контейнере.
@@ -92,9 +97,14 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         if (this.shop.isInactive()) return false;
         if (!(product.getPacker() instanceof ItemPacker packer)) return false;
 
-        Inventory inventory = this.shop.getInventory();
         amount = Math.abs(amount * product.getUnitAmount());
 
+        if (ChestUtils.isInfiniteStorage()) {
+            product.setQuantity(product.getQuantity() - amount);
+            return true;
+        }
+
+        Inventory inventory = this.shop.getInventory();
         ShopUtils.takeItem(inventory, packer::isItemMatches, amount);
         return true;
     }
@@ -104,9 +114,14 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         if (this.shop.isInactive()) return false;
         if (!(product.getPacker() instanceof ItemPacker packer)) return false;
 
-        Inventory inventory = this.shop.getInventory();
         amount = Math.abs(amount * product.getUnitAmount());
 
+        if (ChestUtils.isInfiniteStorage()) {
+            product.setQuantity(product.getQuantity() + amount);
+            return true;
+        }
+
+        Inventory inventory = this.shop.getInventory();
         ShopUtils.addItem(inventory, packer.getItem(), amount);
         return true;
     }

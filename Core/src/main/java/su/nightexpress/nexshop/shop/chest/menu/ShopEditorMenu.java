@@ -9,7 +9,7 @@ import su.nightexpress.nightcore.dialog.DialogHandler;
 import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.menu.impl.ConfigMenu;
-import su.nightexpress.nightcore.util.text.WrappedMessage;
+import su.nightexpress.nightcore.util.text.TextRoot;
 
 public abstract class ShopEditorMenu extends ConfigMenu<ShopPlugin> {
 
@@ -25,7 +25,7 @@ public abstract class ShopEditorMenu extends ConfigMenu<ShopPlugin> {
         return this.handleInput(player, prompt.getMessage(), handler);
     }
 
-    protected Dialog handleInput(@NotNull Player player, @NotNull WrappedMessage prompt, @NotNull DialogHandler handler) {
+    protected Dialog handleInput(@NotNull Player player, @NotNull TextRoot prompt, @NotNull DialogHandler handler) {
         Dialog dialog = Dialog.create(player, handler);
         dialog.prompt(prompt);
         this.runNextTick(player::closeInventory);

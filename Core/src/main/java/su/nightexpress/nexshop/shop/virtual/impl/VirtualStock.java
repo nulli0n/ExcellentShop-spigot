@@ -39,10 +39,22 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
     @Override
     public void load() {
-        List<StockData> dataList = this.plugin.getData().getVirtualDataHandler().getStockDatas(this.getShop().getId());
+        this.plugin.getData().getVirtualDataHandler().getStocksAndLimits(this.getShop().getId()).forEach(data -> {
+            if (data instanceof OwnedStockData ownedData) {
+                this.getPlayerDataMap(ownedData.getOwnerId(), data.getTradeType()).put(data.getProductId(), ownedData);
+            }
+            else this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
+        });
+
+        /*List<StockData> dataList = this.plugin.getData().getVirtualDataHandler().getStockDatas(this.getShop().getId());
         dataList.forEach(data -> {
             this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
         });
+
+        List<OwnedStockData> userDataList = this.plugin.getData().getVirtualDataHandler().getPlayerLimits();
+        userDataList.forEach(data -> {
+            this.getPlayerDataMap(data.getOwnerId(), data.getTradeType()).put(data.getProductId(), data);
+        });*/
 
         this.unlock();
         //this.plugin.info("Loaded " + dataList.size() + " product stock datas for '" + shop.getId() + " shop.");

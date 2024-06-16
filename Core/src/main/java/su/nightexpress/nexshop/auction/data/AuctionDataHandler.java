@@ -159,13 +159,13 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
 
     @Override
     public void onPurge() {
-        LocalDateTime deadline = LocalDateTime.now().minusDays(this.getConfig().getPurgePeriod());
-        long deadlineMs = TimeUtil.toEpochMillis(deadline);
+        //LocalDateTime deadline = LocalDateTime.now().minusDays(this.getConfig().getPurgePeriod());
+        //long deadlineMs = TimeUtil.toEpochMillis(deadline);
 
         if (SQLQueries.hasTable(this.getConnector(), this.tableCompletedListings)) {
             this.delete(this.tableCompletedListings,
-                SQLCondition.smaller(COLUMN_BUY_DATE.toValue(deadlineMs)),
-                SQLCondition.equal(COLUMN_IS_PAID.toValue(0))
+                SQLCondition.smaller(COLUMN_DELETE_DATE.toValue(System.currentTimeMillis()))
+                //SQLCondition.equal(COLUMN_IS_PAID.toValue(0))
             );
 
             //String sql = "DELETE FROM " + this.tableCompletedListings + " WHERE buyDate < " + deadlineMs + " AND isPaid = 0";
@@ -173,7 +173,8 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
         }
         if (SQLQueries.hasTable(this.getConnector(), this.tableListings)) {
             this.delete(this.tableListings,
-                SQLCondition.smaller(COLUMN_EXPIRE_DATE.toValue(deadlineMs))
+                //SQLCondition.smaller(COLUMN_EXPIRE_DATE.toValue(deadlineMs))
+                SQLCondition.smaller(COLUMN_DELETE_DATE.toValue(System.currentTimeMillis()))
             );
 
             //String sql = "DELETE FROM " + this.tableListings + " WHERE expireDate < " + deadlineMs;

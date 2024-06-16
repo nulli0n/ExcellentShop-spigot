@@ -56,6 +56,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private String        ownerName;
     private OfflinePlayer ownerPlayer;
     private ShopType      type;
+    private boolean itemCreated;
 
     private boolean hologramEnabled;
     private boolean showcaseEnabled;
@@ -114,6 +115,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         this.setName(config.getString("Name", this.getOwnerName()));
         this.setType(config.getEnum("Type", ShopType.class, ShopType.PLAYER));
+        this.setItemCreated(config.getBoolean("ItemCreated", false));
 
         for (TradeType tradeType : TradeType.values()) {
             this.setTransactionEnabled(tradeType, config.getBoolean("Transaction_Allowed." + tradeType.name(), true));
@@ -168,30 +170,34 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             itemPacker.setUsePreview(false);
         }
 
+        int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
+
         ChestProduct product = new ChestProduct(this.plugin, id, this, currency, handler, packer);
         product.setPricer(AbstractProductPricer.read(config, path + ".Price"));
+        product.setQuantity(infQuantity);
         return product;
     }
 
     @Override
     protected void onSave(@NotNull FileConfig config) {
-        this.saveSettings(config);
-        this.saveProducts(config);
+        this.writeSettings(config);
+        this.writeProducts(config);
     }
 
     @Override
     public void saveSettings() {
         FileConfig config = this.getConfig();
-        this.saveSettings(config);
+        this.writeSettings(config);
         config.saveChanges();
     }
 
-    private void saveSettings(@NotNull FileConfig config) {
+    private void writeSettings(@NotNull FileConfig config) {
         this.blockPos.write(config, "Placement.BlockPos");
         config.set("Placement.World", this.worldName);
         config.set("Name", this.getName());
         config.set("Owner.Id", this.getOwnerId().toString());
         config.set("Type", this.getType().name());
+        config.set("ItemCreated", this.isItemCreated());
         this.transactions.forEach((type, isAllowed) -> {
             config.set("Transaction_Allowed." + type.name(), isAllowed);
         });
@@ -203,11 +209,11 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     @Override
     public void saveProducts() {
         FileConfig config = this.getConfig();
-        this.saveProducts(config);
+        this.writeProducts(config);
         config.saveChanges();
     }
 
-    private void saveProducts(@NotNull FileConfig config) {
+    private void writeProducts(@NotNull FileConfig config) {
         config.remove("Products");
         this.getProducts().forEach(product -> product.write(config, "Products." + product.getId()));
     }
@@ -454,6 +460,14 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         this.type = type;
     }
 
+    public boolean isItemCreated() {
+        return itemCreated;
+    }
+
+    public void setItemCreated(boolean itemCreated) {
+        this.itemCreated = itemCreated;
+    }
+
     @NotNull
     public Material getBlockType() {
         return blockType;
@@ -507,7 +521,28 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @NotNull
     public List<String> getDisplayText() {
-        return new ArrayList<>(ChestConfig.DISPLAY_HOLOGRAM_TEXT.get().getOrDefault(this.getType(), Collections.emptyList()));
+        return new ArrayList<>(ChestConfig.DISPLAY_HOLOGRAM_TEXT_ALL.get().getOrDefault(this.getType(), Collections.emptyList()));
+    }
+
+    @NotNull
+    public List<String> getHologramText(@Nullable ChestProduct product) {
+        var buyTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_BUY.get();
+        var sellTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_SELL.get();
+
+        boolean isBuyable = this.isTransactionEnabled(TradeType.BUY) && product != null && product.isBuyable();
+        boolean isSellable = this.isTransactionEnabled(TradeType.SELL) & product != null && product.isSellable();
+
+        List<String> text = new ArrayList<>();
+        for (String line : this.getDisplayText()) {
+            text.add(0, line
+                .replace(Placeholders.GENERIC_BUY, !isBuyable ? "" : buyTextMap.getOrDefault(this.getType(), ""))
+                .replace(Placeholders.GENERIC_SELL, !isSellable ? "" : sellTextMap.getOrDefault(this.getType(), ""))
+                .trim()
+            );
+        }
+        text.removeIf(String::isBlank);
+
+        return text;
     }
 
     @NotNull

@@ -60,12 +60,24 @@ public class Listings {
         this.completedByOwnerId.getOrDefault(listing.getOwner(), Collections.emptySet()).remove(listing);
     }
 
+    public void removeInvalidActive() {
+        this.listings.values().removeIf(AbstractListing::isDeletionTime);
+        this.listingsByOwnerId.values().forEach(set -> set.removeIf(AbstractListing::isDeletionTime));
+    }
+
+    public void removeInvalidCompleted() {
+        this.completedListings.values().removeIf(AbstractListing::isDeletionTime);
+        this.completedByOwnerId.values().forEach(set -> set.removeIf(AbstractListing::isDeletionTime));
+    }
+
     public boolean hasListing(@NotNull UUID uuid) {
         return this.getById(uuid) != null;
     }
 
     @Nullable
     public ActiveListing getById(@NotNull UUID uuid) {
+        this.removeInvalidActive();
+
         return this.listings.getOrDefault(uuid, null);
     }
 
@@ -73,6 +85,8 @@ public class Listings {
 
     @NotNull
     public List<ActiveListing> getAll() {
+        this.removeInvalidActive();
+
         return new ArrayList<>(this.listings.values());
     }
 
@@ -83,6 +97,8 @@ public class Listings {
 
     @NotNull
     public List<ActiveListing> getAll(@NotNull UUID id) {
+        this.removeInvalidActive();
+
         return new ArrayList<>(this.listingsByOwnerId.getOrDefault(id, Collections.emptySet()));
     }
 
@@ -90,6 +106,8 @@ public class Listings {
 
     @NotNull
     public List<CompletedListing> getCompleted() {
+        this.removeInvalidCompleted();
+
         return new ArrayList<>(this.completedListings.values());
     }
 
@@ -100,6 +118,8 @@ public class Listings {
 
     @NotNull
     public List<CompletedListing> getCompleted(@NotNull UUID id) {
+        this.removeInvalidCompleted();
+
         return new ArrayList<>(this.completedByOwnerId.getOrDefault(id, Collections.emptySet()));
     }
 
@@ -107,6 +127,8 @@ public class Listings {
 
     @NotNull
     public List<ActiveListing> getActive() {
+        this.removeInvalidActive();
+
         return new ArrayList<>(this.listings.values().stream().filter(Predicate.not(ActiveListing::isExpired)).toList());
     }
 
@@ -122,10 +144,10 @@ public class Listings {
 
 
 
-    @NotNull
+    /*@NotNull
     public List<ActiveListing> getExpired() {
         return new ArrayList<>(this.listings.values());
-    }
+    }*/
 
     @NotNull
     public List<ActiveListing> getExpired(@NotNull Player player) {
@@ -139,10 +161,10 @@ public class Listings {
 
 
 
-    @NotNull
+    /*@NotNull
     public List<CompletedListing> getClaimed() {
         return new ArrayList<>(this.completedListings.values());
-    }
+    }*/
 
     @NotNull
     public List<CompletedListing> getClaimed(@NotNull Player player) {
@@ -156,10 +178,10 @@ public class Listings {
 
 
 
-    @NotNull
+    /*@NotNull
     public List<CompletedListing> getUnclaimed() {
         return new ArrayList<>(this.completedListings.values());
-    }
+    }*/
 
     @NotNull
     public List<CompletedListing> getUnclaimed(@NotNull Player player) {

@@ -27,16 +27,20 @@ public interface Product extends Placeholder {
 
     void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click);
 
-    double getPrice(@NotNull Player player, @NotNull TradeType tradeType);
+    default double getPrice(@NotNull TradeType tradeType) {
+        return this.getPrice(tradeType, null);
+    }
+
+    double getPrice(@NotNull TradeType tradeType, @Nullable Player player);
 
     void setPrice(@NotNull TradeType tradeType, double price);
 
     default double getPriceBuy(@NotNull Player player) {
-        return this.getPrice(player, TradeType.BUY);
+        return this.getPrice(TradeType.BUY, player);
     }
 
     default double getPriceSell(@NotNull Player player) {
-        return this.getPrice(player, TradeType.SELL);
+        return this.getPrice(TradeType.SELL, player);
     }
 
     double getPriceSellAll(@NotNull Player player);
@@ -54,7 +58,7 @@ public interface Product extends Placeholder {
     }
 
     default void take(@NotNull Player player, int count) {
-        this.delivery(player.getInventory(), count);
+        this.take(player.getInventory(), count);
     }
 
     default void take(@NotNull Inventory inventory, int count) {

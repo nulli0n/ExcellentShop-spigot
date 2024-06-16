@@ -9,6 +9,7 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -41,6 +42,7 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
     private final ItemHandler nameHandler;
     private final ItemHandler typeHandler;
     private final ItemHandler bankHandler;
+    private final ItemHandler storageHandler;
     private final ItemHandler displayHandler;
     private final ItemHandler transactHandler;
     private final ItemHandler productsHandler;
@@ -102,6 +104,10 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
             this.runNextTick(() -> module.openBank(viewer.getPlayer(), this.getLink(viewer)));
         }));
 
+        this.addHandler(this.storageHandler = new ItemHandler("shop_storage", (viewer, event) -> {
+            this.runNextTick(() -> module.openStorage(viewer.getPlayer(), this.getLink(viewer)));
+        }));
+
         this.addHandler(this.displayHandler = new ItemHandler("shop_display", (viewer, event) -> {
             ChestShop shop = this.getLink(viewer);
             this.runNextTick(() -> module.openDisplayMenu(viewer.getPlayer(), shop));
@@ -141,6 +147,9 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
             }
             else if (menuItem.getHandler() == this.displayHandler) {
                 menuItem.getOptions().setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.DISPLAY_CUSTOMIZATION));
+            }
+            else if (menuItem.getHandler() == this.storageHandler) {
+                menuItem.getOptions().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage());
             }
         });
     }
@@ -212,6 +221,17 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
             ));
         });
         list.add(new MenuItem(bankItem).setSlots(2).setPriority(10).setHandler(this.bankHandler));
+
+        ItemStack storageItem = ItemUtil.getSkinHead("edc36c9cb50a527aa55607a0df7185ad20aabaa903e8d9abfc78260705540def");
+        ItemUtil.editMeta(storageItem, meta -> {
+            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Storage")));
+            meta.setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Store items here."),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
+            ));
+        });
+        list.add(new MenuItem(storageItem).setSlots(3).setPriority(10).setHandler(this.storageHandler));
 
 
 

@@ -259,10 +259,38 @@ public class VirtualDataHandler {
     }
 
     @NotNull
+    public List<StockData> getStocksAndLimits(@NotNull String shopId) {
+        List<StockData> list = new ArrayList<>();
+
+        list.addAll(this.dataHandler.load(this.tableStockData, this.stockDataFunction,
+            Collections.emptyList(),
+            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))),
+            -1
+        ));
+
+        list.addAll(this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
+            Collections.emptyList(),
+            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))),
+            -1
+        ));
+
+        return list;
+    }
+
+    @NotNull
     public List<OwnedStockData> getPlayerLimits(@NotNull UUID playerId) {
         return this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
             Collections.emptyList(),
             Collections.singletonList(SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString()))),
+            -1
+        );
+    }
+
+    @NotNull
+    public List<OwnedStockData> getPlayerLimits() {
+        return this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
+            Collections.emptyList(),
+            Collections.emptyList(),
             -1
         );
     }

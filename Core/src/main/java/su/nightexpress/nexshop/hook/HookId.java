@@ -26,6 +26,8 @@ public class HookId {
     public static final String ORAXEN      = "Oraxen";
     public static final String ITEMS_ADDER = "ItemsAdder";
 
+    public static final String UPGRADEABLE_HOPPERS = "UpgradeableHoppers";
+
     public static List<String> getItemPluginNames() {
         return Arrays.asList(ORAXEN, ITEMS_ADDER);
     }

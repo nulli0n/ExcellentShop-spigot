@@ -46,6 +46,10 @@ public abstract class AbstractListing implements Placeholder {
         this.placeholderMap = Placeholders.forListing(this);
     }
 
+    public boolean isDeletionTime() {
+        return this.getDeleteDate() >= 0 && System.currentTimeMillis() >= this.getDeleteDate();
+    }
+
     @Override
     @NotNull
     public PlaceholderMap getPlaceholders() {

@@ -28,7 +28,7 @@ public class OpenCommand {
             .withArgument(CommandArguments.forShop(ARG_SHOP, module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.getString()).required())
             .withArgument(ArgumentTypes.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_OPEN_OTHERS))
             .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))
-            .withFlag(CommandFlags.silent()).permission(Perms.COMMAND_FLAGS)
+            .withFlag(CommandFlags.silent().permission(Perms.COMMAND_FLAGS))
             .executes((context, arguments) -> execute(module, context, arguments))
         );
     }

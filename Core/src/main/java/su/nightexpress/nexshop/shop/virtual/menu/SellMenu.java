@@ -99,7 +99,7 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
             int slot = this.itemSlots[index++];
             if (slot >= inventory.getSize()) continue;
 
-            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            VirtualProduct product = this.module.getBestProductFor(item, TradeType.SELL, player);
             if (product == null) continue;
 
             ItemStack icon = new ItemStack(item);
@@ -141,7 +141,7 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
         if (item == null || item.getType().isAir()) return;
 
         if (result.isInventory()) {
-            VirtualProduct product = this.module.getBestProductFor(player, item, TradeType.SELL);
+            VirtualProduct product = this.module.getBestProductFor(item, TradeType.SELL, player);
             if (product == null) return;
 
             List<ItemStack> items = this.getLink().get(player);

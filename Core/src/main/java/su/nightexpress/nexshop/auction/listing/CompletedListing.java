@@ -57,7 +57,7 @@ public class CompletedListing extends AbstractListing {
         this.buyerName = buyerName;
         this.buyDate = buyDate;
 
-        this.placeholderMap.add(Placeholders.forComletedListing(this));
+        this.placeholderMap.add(Placeholders.forCompletedListing(this));
     }
 
     @NotNull

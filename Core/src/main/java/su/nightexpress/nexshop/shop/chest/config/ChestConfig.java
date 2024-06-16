@@ -8,6 +8,7 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.*;
@@ -44,7 +45,8 @@ public class ChestConfig {
 
     public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("Shops.Default_Currency",
         VaultEconomyHandler.ID,
-        "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available."
+        "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available.",
+        "As well as for shop creation/deletion price."
     );
 
     public static final ConfigValue<String> DEFAULT_CART_UI = ConfigValue.create("Shops.Default_Cart_UI",
@@ -91,6 +93,12 @@ public class ChestConfig {
         "[*] This feature may damage performance (depends on the currency plugin and its offline player data handling).",
         "[*] This feature is not available for some currencies.");
 
+    public static final ConfigValue<Boolean> SHOP_INFINITE_STORAGE_ENABLED = ConfigValue.create("Shops.InfiniteStorage.Enabled",
+        false,
+        "Sets whether or not infinite storage system is enabled.",
+        "Infinite storage allows you to store as many items in your shops as you want/can,",
+        "and don't uses block inventories.");
+
     public static final ConfigValue<Double> SHOP_PRODUCT_INITIAL_BUY_PRICE = ConfigValue.create("Shops.Product.InitialPrice.Buy",
         10D,
         "Sets initial buy price for new products added in chest shops.");
@@ -98,6 +106,43 @@ public class ChestConfig {
     public static final ConfigValue<Double> SHOP_PRODUCT_INITIAL_SELL_PRICE = ConfigValue.create("Shops.Product.InitialPrice.Sell",
         2D,
         "Sets initial sell price for new products added in chest shops.");
+
+    public static final ConfigValue<Boolean> SHOP_ITEM_CREATION_ENABLED = ConfigValue.create("Shops.ItemCreation.Enabled",
+        false,
+        "Sets whether or not players can create shops by placing specific item.");
+
+    public static final ConfigValue<Map<Material, ItemStack>> SHOP_ITEM_CREATION_ITEMS = ConfigValue.forMap("Shops.ItemCreation.Items",
+        BukkitThing::getMaterial,
+        (cfg, path, material) -> cfg.getItem(path + "." + material),
+        (cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + BukkitThing.toString(type), item)),
+        () -> {
+            Map<Material, ItemStack> map = new HashMap<>();
+            map.put(Material.CHEST, ChestUtils.getDefaultShopItem(Material.CHEST, "edc36c9cb50a527aa55607a0df7185ad20aabaa903e8d9abfc78260705540def"));
+            map.put(Material.BARREL, ChestUtils.getDefaultShopItem(Material.BARREL, "5193c89d1df679854f33c2215247b676a159d5395392d0c61b8476f813d9edb0"));
+            map.put(Material.WHITE_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.WHITE_SHULKER_BOX, "7e066c569d4b94e49b23770e46c9a0e1d736711becb702809375e2d5a32f2a99"));
+            map.put(Material.LIGHT_GRAY_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.LIGHT_GRAY_SHULKER_BOX, "56a48c4037343731bd5fd1510ca15c573788389f258677a17f014e08aeaa9560"));
+            map.put(Material.GRAY_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.GRAY_SHULKER_BOX, "a95bde13c45754468cfc8c3a00133d997362fa7e302b0b0fbc4bd0fca6890059"));
+            map.put(Material.BLACK_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.BLACK_SHULKER_BOX, "bf6174c01a67e1eada9db16bb551ddee32dfcbf37611382f88cdb1e62895bab2"));
+            map.put(Material.BROWN_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.BROWN_SHULKER_BOX, "b41956931d1f6d1d1b6f82f077b8a265b259f5d29f567869e9955cc6f9a82f12"));
+            map.put(Material.RED_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.RED_SHULKER_BOX, "324aa7bf056ccd3d4e63197b04d89f0e9ba79fa6049c503029521724e234054a"));
+            map.put(Material.ORANGE_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.ORANGE_SHULKER_BOX, "a83cbb7b98e1954dd2c007ea45975fc7fe1f6ebea7c12d75a578d0960f34996"));
+            map.put(Material.YELLOW_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.YELLOW_SHULKER_BOX, "e780feff71541bf6eb4368e726f868871cc549f2599d45cc0e1c729825fee9df"));
+            map.put(Material.LIME_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.LIME_SHULKER_BOX, "f45cf042172c9e4e7c8eea570ac8bbd76dc7d8d561ae0f7b60937b3bd4d92e19"));
+            map.put(Material.GREEN_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.GREEN_SHULKER_BOX, "efd8881d02fe9cee859ac597731b2df46bee6d52c446205f9da9dfa7bd111694"));
+            map.put(Material.CYAN_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.CYAN_SHULKER_BOX, "101facfbdea4980bb0182dcf259341093e22b87375e70b849b88cfad17fc5b27"));
+            map.put(Material.LIGHT_BLUE_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.LIGHT_BLUE_SHULKER_BOX, "dbcf2e5a0ee72bbd63b08336918f11730120a49df3557cfa84ff6450fbc4c65c"));
+            map.put(Material.BLUE_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.BLUE_SHULKER_BOX, "47d0d86e1f1108468ac150dafa28e7d0619a6e3066cb42994bc6c1866bd267e3"));
+            map.put(Material.PURPLE_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.PURPLE_SHULKER_BOX, "30eed20b95873611c2b60e54f8df6f4e6654fb9575fc47e63f63327f9f6c56cf"));
+            map.put(Material.MAGENTA_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.MAGENTA_SHULKER_BOX, "83524237183c2ba221ba61923a7130099e37166227cacb1f65cec93b6c33a6a8"));
+            map.put(Material.PINK_SHULKER_BOX, ChestUtils.getDefaultShopItem(Material.PINK_SHULKER_BOX, "a374cf299874af600608acfb55169237fda244ccca0e23aa08c2e335bd73406b"));
+            return map;
+        },
+        "Assigns custom shop creation items with specific container types.",
+        "These items, when placed, will turn out into assigned container with a shop created on it:",
+        "-- Items:",
+        "---- <container_type>: # See 'Allowed_Containers'",
+        "------ <item settings> # " + WIKI_ITEMS_URL
+    );
 
     public static final ConfigValue<Double> SHOP_CREATION_COST_CREATE = ConfigValue.create("Shops.Creation.Cost.Create",
         0D,
@@ -288,27 +333,52 @@ public class ChestConfig {
         "Sets distance between hologram lines."
     );
 
-    public static final ConfigValue<Map<ShopType, List<String>>> DISPLAY_HOLOGRAM_TEXT = ConfigValue.forMap("Display.Title.Values",
+    public static final ConfigValue<Map<ShopType, List<String>>> DISPLAY_HOLOGRAM_TEXT_ALL = ConfigValue.forMap("Display.Title.Values",
         str -> StringUtil.getEnum(str, ShopType.class).orElse(null),
         (cfg, path, type) -> cfg.getStringList(path + "." + type),
         (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
         Map.of(
-            ShopType.ADMIN, Arrays.asList(
+            ShopType.ADMIN, Lists.newList(
                 LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
                 LIGHT_GRAY.enclose(GENERIC_PRODUCT_NAME),
-                LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)) + " " + RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
+                GENERIC_BUY + " " + GENERIC_SELL
             ),
-            ShopType.PLAYER, Arrays.asList(
+            ShopType.PLAYER, Lists.newList(
                 LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
                 LIGHT_GRAY.enclose(GENERIC_PRODUCT_NAME),
-                LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)) + " " + RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
+                GENERIC_BUY + " " + GENERIC_SELL
             )
         ),
-        "Sets hologram text format for player and admin shops.",
+        "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
         "You can use 'Chest Shop' placeholders: " + URL_WIKI_PLACEHOLDERS,
         "Display item name: " + GENERIC_PRODUCT_NAME,
         "Display item price: " + GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
         Plugins.PLACEHOLDER_API + " is also supported here."
     );
 
+    public static final ConfigValue<Map<ShopType, String>> DISPLAY_HOLOGRAM_TEXT_BUY = ConfigValue.forMap("Display.Title.BuyValue",
+        str -> StringUtil.getEnum(str, ShopType.class).orElse(null),
+        (cfg, path, type) -> cfg.getString(path + "." + type),
+        (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
+        Map.of(
+            ShopType.ADMIN, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY))),
+            ShopType.PLAYER, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)))
+        ),
+        "Sets hologram text to appear for '" + GENERIC_BUY + "' placeholder when buying option is available for displayed product.",
+        "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.BUY),
+        "All placeholders from 'Title -> Values' option are available here too."
+    );
+
+    public static final ConfigValue<Map<ShopType, String>> DISPLAY_HOLOGRAM_TEXT_SELL = ConfigValue.forMap("Display.Title.SellValue",
+        str -> StringUtil.getEnum(str, ShopType.class).orElse(null),
+        (cfg, path, type) -> cfg.getString(path + "." + type),
+        (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
+        Map.of(
+            ShopType.ADMIN, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL))),
+            ShopType.PLAYER, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
+        ),
+        "Sets hologram text to appear for '" + GENERIC_SELL + "' placeholder when selling option is available for displayed product.",
+        "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
+        "All placeholders from 'Title -> Values' option are available here too."
+    );
 }

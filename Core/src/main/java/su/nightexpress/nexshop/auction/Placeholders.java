@@ -50,7 +50,7 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
     }
 
     @NotNull
-    public static PlaceholderMap forComletedListing(@NotNull CompletedListing listing) {
+    public static PlaceholderMap forCompletedListing(@NotNull CompletedListing listing) {
         return new PlaceholderMap()
             .add(LISTING_BUYER, listing.getBuyerName())
             .add(LISTING_BUY_DATE, ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getBuyDate())));

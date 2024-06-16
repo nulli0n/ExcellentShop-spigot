@@ -34,6 +34,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     //public static final String WRONG_MARK = Tags.RED.enclose("✘");
     //public static final String WARN_MARK  = Tags.ORANGE.enclose("[❗]");
 
+    public static final String GENERIC_BUY        = "%buy%";
+    public static final String GENERIC_SELL       = "%sell%";
     public static final String GENERIC_NAME       = "%name%";
     public static final String GENERIC_ITEM       = "%item%";
     public static final String GENERIC_TOTAL      = "%total%";
@@ -157,12 +159,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
 
             map.add(PRODUCT_PRICE.apply(tradeType), player -> {
                 Currency currency = product.getCurrency();
-                return player == null ? currency.format(product.getPricer().getPrice(tradeType)) : currency.format(product.getPrice(player, tradeType));
+                return player == null ? currency.format(product.getPricer().getPrice(tradeType)) : currency.format(product.getPrice(tradeType, player));
             });
 
             map.add(PRODUCT_PRICE_FORMATTED.apply(tradeType), player -> {
                 AbstractProductPricer pricer = product.getPricer();
-                double price = player == null ? pricer.getPrice(tradeType) : product.getPrice(player, tradeType);
+                double price = player == null ? pricer.getPrice(tradeType) : product.getPrice(tradeType, player);
 
                 return price >= 0 ? product.getCurrency().format(price) : "-";
             });

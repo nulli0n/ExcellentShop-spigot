@@ -7,8 +7,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
@@ -33,10 +33,11 @@ import su.nightexpress.nightcore.menu.link.ViewLink;
 import su.nightexpress.nightcore.util.ItemReplacer;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Lists;
-import su.nightexpress.nightcore.util.text.tag.api.Tag;
+import su.nightexpress.nightcore.util.text.tag.impl.ColorTag;
 import su.nightexpress.nightcore.util.wrapper.UniSound;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
@@ -316,7 +317,7 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
                 };
 
             String namePrefix = handler == this.addHandler ? "+" : handler == this.takeHandler ? "-" : "Set ";
-            Tag tag = handler == this.addHandler ? LIGHT_GREEN : handler == this.takeHandler ? LIGHT_RED : LIGHT_BLUE;
+            ColorTag tag = handler == this.addHandler ? LIGHT_GREEN : handler == this.takeHandler ? LIGHT_RED : LIGHT_BLUE;
 
             for (int index = 0; index < 3; index++) {
                 int unitAmount = units[index];

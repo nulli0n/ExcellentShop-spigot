@@ -81,5 +81,9 @@ public interface VirtualShop extends Shop {
 
     @Nullable VirtualProduct getProductById(@NotNull String id);
 
-    @Nullable VirtualProduct getBestProduct(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType);
+    @Nullable default VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType tradeType) {
+        return this.getBestProduct(item, tradeType, null);
+    }
+
+    @Nullable VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player);
 }

@@ -102,10 +102,8 @@ public class DisplayHandler extends SimpleManager<ShopPlugin> {
             }
             placeholderMap.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getPreview()));
 
-            List<String> text = new ArrayList<>();
-            for (String line : shop.getDisplayText()) {
-                text.add(0, placeholderMap.replacer().apply(line));
-            }
+            List<String> text = shop.getHologramText(product);
+            text.replaceAll(placeholderMap.replacer());
 
             Location hologramLocation = shop.getDisplayTextLocation();
             for (String line : text) {

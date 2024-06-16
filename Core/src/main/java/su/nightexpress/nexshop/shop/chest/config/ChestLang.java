@@ -26,6 +26,14 @@ public class ChestLang extends CoreLang {
 
     public static final LangString COMMAND_BROWSE_DESC = LangString.of("ChestShop.Command.Browse.Desc", "Player shops GUI.");
 
+    public static final LangString COMMAND_GIVE_ITEM_DESC = LangString.of("ChestShop.Command.GiveItem.Desc", "Give shop creation item.");
+
+    public static final LangText COMMAND_GIVE_ITEM_BAD_MATERIAL = LangText.of("ChestShop.Command.GiveItem.BadMaterial",
+        LIGHT_RED.enclose("Invalid shop type!"));
+
+    public static final LangText COMMAND_GIVE_ITEM_DONE = LangText.of("ChestShop.Command.GiveItem.Done",
+        LIGHT_GRAY.enclose("Given " + LIGHT_YELLOW.enclose(GENERIC_NAME) + " to " + LIGHT_YELLOW.enclose(PLAYER_DISPLAY_NAME) + "."));
+
     public static final LangString COMMAND_REMOVE_DESC = LangString.of("ChestShop.Command.Remove.Desc", "Removes the shop from the chest that you're looking at.");
 
     public static final LangString COMMAND_OPEN_DESC = LangString.of("ChestShop.Command.Open.Desc", "Open inventory of the target shop.");
@@ -62,6 +70,9 @@ public class ChestLang extends CoreLang {
 
     public static final LangText SHOP_CREATION_ERROR_TYPE_PERMISSION = LangText.of("ChestShop.Shop.Creation.Error.TypePermission",
         LIGHT_RED.enclose("You don't have permission to create this type shops!"));
+
+    public static final LangText SHOP_REMOVAL_ERROR_NOT_EMPTY = LangText.of("ChestShop.Shop.Removal.Error.NotEmpty",
+        LIGHT_RED.enclose("Please withdraw items from shop storage to remove it."));
 
     public static final LangText SHOP_REMOVAL_INFO_DONE = LangText.of("ChestShop.Shop.Removal.Info.Done",
         OUTPUT.enclose(10, 80) + SOUND.enclose(Sound.ENTITY_GENERIC_EXPLODE),
@@ -118,26 +129,50 @@ public class ChestLang extends CoreLang {
     );
 
     public static final LangText BANK_DEPOSIT_SUCCESS = LangText.of("ChestShop.Shop.Bank.Deposit.Success",
-        OUTPUT.enclose(20, 60),
-        LIGHT_GREEN.enclose(BOLD.enclose("Successful Deposit!")),
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_GREEN.enclose(BOLD.enclose("Successful Deposit!")),
         LIGHT_GRAY.enclose("You deposit " + LIGHT_GREEN.enclose(GENERIC_AMOUNT) + " to shop bank!")
     );
 
     public static final LangText BANK_DEPOSIT_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.Bank.Deposit.Error.NotEnough",
-        OUTPUT.enclose(20, 60),
-        LIGHT_RED.enclose(BOLD.enclose("Unable to Deposit!")),
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_RED.enclose(BOLD.enclose("Unable to Deposit!")),
         LIGHT_GRAY.enclose("You don't have enough funds!")
     );
 
     public static final LangText BANK_WITHDRAW_SUCCESS = LangText.of("ChestShop.Shop.Bank.Withdraw.Success",
-        OUTPUT.enclose(20, 60),
-        LIGHT_GREEN.enclose(BOLD.enclose("Successful Withdraw!")),
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_GREEN.enclose(BOLD.enclose("Successful Withdraw!")),
         LIGHT_GRAY.enclose("You withdraw " + LIGHT_GREEN.enclose(GENERIC_AMOUNT) + " from shop bank!")
     );
 
     public static final LangText BANK_WITHDRAW_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.Bank.Withdraw.NotEnough",
-        OUTPUT.enclose(20, 60),
-        LIGHT_RED.enclose(BOLD.enclose("Unable to Withdraw!")),
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_RED.enclose(BOLD.enclose("Unable to Withdraw!")),
         LIGHT_GRAY.enclose("There is not enough funds in bank!")
+    );
+
+    public static final LangText STORAGE_DEPOSIT_SUCCESS = LangText.of("ChestShop.Shop.InfiniteStorage.Deposit.Success",
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_GREEN.enclose(BOLD.enclose("Successful Deposit!")),
+        LIGHT_GRAY.enclose("You deposit " + LIGHT_GREEN.enclose("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " to shop storage!")
+    );
+
+    public static final LangText STORAGE_DEPOSIT_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.InfiniteStorage.Deposit.Error.NotEnough",
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_RED.enclose(BOLD.enclose("Unable to Deposit!")),
+        LIGHT_GRAY.enclose("You don't have enough items!")
+    );
+
+    public static final LangText STORAGE_WITHDRAW_SUCCESS = LangText.of("ChestShop.Shop.InfiniteStorage.Withdraw.Success",
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_GREEN.enclose(BOLD.enclose("Successful Withdraw!")),
+        LIGHT_GRAY.enclose("You withdraw " + LIGHT_GREEN.enclose("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " from shop storage!")
+    );
+
+    public static final LangText STORAGE_WITHDRAW_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.InfiniteStorage.Withdraw.NotEnough",
+        //OUTPUT.enclose(20, 60),
+        //LIGHT_RED.enclose(BOLD.enclose("Unable to Withdraw!")),
+        LIGHT_GRAY.enclose("There is not enough items in storage!")
     );
 }

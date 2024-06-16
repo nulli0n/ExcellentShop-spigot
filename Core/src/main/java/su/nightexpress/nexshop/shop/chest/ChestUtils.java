@@ -12,11 +12,11 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
+import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nightcore.util.BukkitThing;
-import su.nightexpress.nightcore.util.Colorizer;
-import su.nightexpress.nightcore.util.LocationUtil;
-import su.nightexpress.nightcore.util.Version;
+import su.nightexpress.nightcore.language.LangAssets;
+import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.text.tag.Tags;
 
 import java.util.List;
 import java.util.Set;
@@ -72,10 +72,51 @@ public class ChestUtils {
     }
 
     public static boolean isValidContainer(@NotNull Block block) {
-        if (block.getType() == Material.ENDER_CHEST) return false;
-        if (!(block.getState() instanceof Container)) return false;
+        return isValidContainer(block.getType()) && block.getState() instanceof Container;
+    }
 
-        return ChestConfig.ALLOWED_CONTAINERS.get().contains(block.getType());
+    public static boolean isValidContainer(@NotNull Material material) {
+        return material != Material.ENDER_CHEST && ChestConfig.ALLOWED_CONTAINERS.get().contains(material);
+    }
+
+    public static boolean isInfiniteStorage() {
+        return ChestConfig.SHOP_INFINITE_STORAGE_ENABLED.get();
+    }
+
+    @Nullable
+    public static ItemStack createShopItem(@NotNull Material material) {
+        if (!isValidContainer(material)) return null;
+
+        ItemStack itemStack = ChestConfig.SHOP_ITEM_CREATION_ITEMS.get().get(material);
+        if (itemStack == null || itemStack.getType().isAir()) return null;
+
+        ItemStack result = new ItemStack(itemStack);
+
+        PDCUtil.set(result, ChestKeys.shopItemType, BukkitThing.toString(material));
+        return result;
+    }
+
+    public static boolean isShopItem(@NotNull ItemStack itemStack) {
+        return getShopItemType(itemStack) != null;
+    }
+
+    @Nullable
+    public static Material getShopItemType(@NotNull ItemStack itemStack) {
+        String name = PDCUtil.getString(itemStack, ChestKeys.shopItemType).orElse(null);
+        return name == null ? null : BukkitThing.getMaterial(name);
+    }
+
+    @NotNull
+    public static ItemStack getDefaultShopItem(@NotNull Material material, @NotNull String texture) {
+        ItemStack itemStack = ItemUtil.getSkinHead(texture);
+        ItemUtil.editMeta(itemStack, meta -> {
+            meta.setDisplayName(Tags.LIGHT_YELLOW.enclose(Tags.BOLD.enclose("Shop Block")) + " " + Tags.GRAY.enclose("(" + Tags.WHITE.enclose(LangAssets.get(material)) + ")"));
+            meta.setLore(Lists.newList(
+                Tags.GRAY.enclose("Place down to create a shop!")
+            ));
+        });
+
+        return itemStack;
     }
 
     @Nullable

@@ -123,7 +123,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     }
 
     @Override
-    public double getPrice(@NotNull Player player, @NotNull TradeType tradeType) {
+    public double getPrice(@NotNull TradeType tradeType, @Nullable Player player) {
         double price = this.getPricer().getPrice(tradeType);
 
         if (this instanceof VirtualProduct virtualProduct) {
@@ -131,8 +131,10 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
                 price *= virtualProduct.getShop().getDiscountModifier();
             }
             if (tradeType == TradeType.SELL) {
-                double sellModifier = VirtualShopModule.getSellMultiplier(player);
-                price *= sellModifier;
+                if (player != null) {
+                    double sellModifier = VirtualShopModule.getSellMultiplier(player);
+                    price *= sellModifier;
+                }
             }
         }
         if (!this.getCurrency().decimalsAllowed()) {

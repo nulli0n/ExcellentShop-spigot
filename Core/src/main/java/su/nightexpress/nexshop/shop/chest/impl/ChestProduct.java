@@ -13,6 +13,8 @@ import su.nightexpress.nightcore.config.FileConfig;
 
 public class ChestProduct extends AbstractProduct<ChestShop> {
 
+    private long quantity;
+
     public ChestProduct(@NotNull ShopPlugin plugin,
                         @NotNull String id,
                         @NotNull ChestShop shop,
@@ -25,6 +27,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".InfiniteStorage.Quantity", this.getQuantity());
         config.set(path + ".Handler", this.getHandler().getName());
         config.set(path + ".Currency", this.getCurrency().getId());
         this.getPricer().write(config, path + ".Price");
@@ -40,5 +43,21 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     @NotNull
     public ChestPreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all) {
         return new ChestPreparedProduct(this.plugin, player, this, buyType, all);
+    }
+
+    /**
+     *
+     * @return Product quantity for Infinite Storage system.
+     */
+    public long getQuantity() {
+        return quantity;
+    }
+
+    /**
+     * Sets product's quantity for Infinite Storage system.
+     * @param quantity Product quantity.
+     */
+    public void setQuantity(long quantity) {
+        this.quantity = Math.max(0, Math.abs(quantity));
     }
 }

@@ -160,20 +160,27 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
     @Override
     @Nullable
-    public VirtualProduct getBestProduct(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
-        if (!this.module.isAvailable(player, false)) return null;
-        if (!this.canAccess(player, false)) return null;
+    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player) {
+        if (player != null) {
+            if (!this.module.isAvailable(player, false)) return null;
+            if (!this.canAccess(player, false)) return null;
+        }
         if (!this.isTransactionEnabled(tradeType)) return null;
 
         var stream = this.getProducts().stream().filter(product -> {
-            if (!product.isTradeable(tradeType) || !product.hasAccess(player)) return false;
+            if (!product.isTradeable(tradeType)) return false;
             if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
             if (!itemPacker.isItemMatches(item)) return false;
             if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) return false;
-            return product.getAvailableAmount(player, tradeType) != 0;
+
+            if (player != null) {
+                return product.hasAccess(player) && product.getAvailableAmount(player, tradeType) != 0;
+            }
+
+            return true;
         });
 
-        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(player, tradeType));
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
 
         return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
     }

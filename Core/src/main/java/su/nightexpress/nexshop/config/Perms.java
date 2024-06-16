@@ -11,6 +11,7 @@ public class Perms {
     public static final UniPermission PLUGIN  = new UniPermission(PREFIX + Placeholders.WILDCARD);
     public static final UniPermission COMMAND = new UniPermission(PREFIX_COMMAND + Placeholders.WILDCARD);
 
+    @Deprecated
     public static final UniPermission COMMAND_FLAGS = new UniPermission(PREFIX_COMMAND + "flags", "Allows to use flags in commands.");
 
     public static final UniPermission COMMAND_CURRENCY        = new UniPermission(PREFIX_COMMAND + "currency");
