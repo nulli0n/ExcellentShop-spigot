@@ -293,6 +293,9 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public void unloadShop(@NotNull ChestShop shop) {
+        if (ChestUtils.isInfiniteStorage()) {
+            shop.saveProductQuantity();
+        }
         if (this.displayHandler != null) {
             this.displayHandler.remove(shop);
         }
@@ -301,9 +304,9 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public void removeShop(@NotNull ChestShop shop) {
-        if (!shop.getFile().delete()) return;
-
         this.unloadShop(shop);
+
+        shop.getFile().delete();
     }
 
     @NotNull
@@ -643,7 +646,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         this.createShop(player, block, shopType, shop -> {
             ItemStack hand = new ItemStack(player.getInventory().getItemInMainHand());
             if (!ChestUtils.isShopItem(hand)) {
-                ChestProduct product = shop.createProduct(player, hand);
+                ChestProduct product = shop.createProduct(player, hand, false);
                 if (product != null) {
                     if (buyPrice > 0) product.setPrice(TradeType.BUY, buyPrice);
                     if (sellPrice > 0) product.setPrice(TradeType.SELL, sellPrice);

@@ -48,7 +48,7 @@ public class ShopDataPricer implements ShopPricer {
             this.plugin.runTaskAsync(task -> {
                 PriceData priceData = this.getDataOrCreate(product);
                 priceData.countTransaction(result.getTradeType(), result.getUnits());
-                this.updateDynamic(product);
+                this.updateDynamic(product, true);
             });
         }
     }
@@ -85,14 +85,14 @@ public class ShopDataPricer implements ShopPricer {
     public void updatePrice(@NotNull Product product) {
         AbstractProductPricer pricer = product.getPricer();
         if (pricer.getType() == PriceType.DYNAMIC) {
-            this.updateDynamic(product);
+            this.updateDynamic(product, false);
         }
         else if (pricer.getType() == PriceType.FLOAT) {
             this.updateFloat(product);
         }
     }
 
-    private void updateDynamic(@NotNull Product product) {
+    private void updateDynamic(@NotNull Product product, boolean save) {
         if (!(product.getPricer() instanceof DynamicPricer pricer)) return;
 
         PriceData priceData = this.getDataOrCreate(product);
@@ -116,7 +116,7 @@ public class ShopDataPricer implements ShopPricer {
         priceData.setLastSellPrice(pricer.getPrice(TradeType.SELL));
         priceData.setLastUpdated(System.currentTimeMillis());
         priceData.setExpireDate(-1);
-        this.saveData(priceData);
+        if (save) this.saveData(priceData);
     }
 
     private void updateFloat(@NotNull Product product) {

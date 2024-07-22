@@ -27,11 +27,15 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".InfiniteStorage.Quantity", this.getQuantity());
+        this.writeQuantity(config, path);
         config.set(path + ".Handler", this.getHandler().getName());
         config.set(path + ".Currency", this.getCurrency().getId());
         this.getPricer().write(config, path + ".Price");
         this.getPacker().write(config, path);
+    }
+
+    public void writeQuantity(@NotNull FileConfig config, @NotNull String path) {
+        config.set(path + ".InfiniteStorage.Quantity", this.getQuantity());
     }
 
     @Override

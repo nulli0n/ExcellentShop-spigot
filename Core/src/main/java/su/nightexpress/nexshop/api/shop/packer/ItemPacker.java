@@ -9,6 +9,10 @@ public interface ItemPacker extends ProductPacker {
 
     @NotNull ItemStack getItem();
 
+    @NotNull default ItemStack getIcon() {
+        return this.getItem();
+    }
+
     void setItem(@NotNull ItemStack item);
 
     boolean isUsePreview();

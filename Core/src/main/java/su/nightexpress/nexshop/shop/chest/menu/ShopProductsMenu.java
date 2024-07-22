@@ -102,7 +102,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
                     item.setHandler((viewer2, event) -> {
                         ItemStack cursor = event.getCursor();
                         if (cursor == null || cursor.getType().isAir()) return;
-                        if (shop.createProduct(player, cursor) == null) return;
+                        if (shop.createProduct(player, cursor, ChestUtils.bypassHandlerDetection(event)) == null) return;
 
                         event.getView().setCursor(null);
                         Players.addItem(viewer2.getPlayer(), cursor);
@@ -171,7 +171,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
                 ItemStack item = result.getItemStack();
                 if (item == null || item.getType().isAir()) return;
 
-                shop.createProduct(player, item);
+                shop.createProduct(player, item, false);
                 return;
             }
             event.setCancelled(false);

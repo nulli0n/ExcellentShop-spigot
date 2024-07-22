@@ -5,6 +5,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 
 public class VanillaItemPacker extends AbstractItemPacker {
@@ -20,14 +21,14 @@ public class VanillaItemPacker extends AbstractItemPacker {
     }
 
     @Override
-    public boolean load(@NotNull FileConfig cfg, @NotNull String path) {
-        ItemStack item = cfg.getItemEncoded(path + ".Content.Item");
+    public boolean load(@NotNull FileConfig config, @NotNull String path) {
+        ItemStack item = config.getItemEncoded(path + ".Content.Item");
         if (item == null) return false;
 
-        ItemStack preview = cfg.getItemEncoded(path + ".Content.Preview");
+        ItemStack preview = config.getItemEncoded(path + ".Content.Preview");
         if (preview == null) preview = new ItemStack(item);
 
-        boolean meta = cfg.getBoolean(path + ".Item_Meta_Enabled");
+        boolean meta = ConfigValue.create(path + ".Item_Meta_Enabled", item.hasItemMeta()).read(config);
 
         this.setPreview(preview);
         this.setItem(item);

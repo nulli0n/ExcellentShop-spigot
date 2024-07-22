@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -129,5 +130,9 @@ public interface Product extends Placeholder {
 
     @NotNull default ItemStack getPreview() {
         return this.getPacker().getPreview();
+    }
+
+    @NotNull default ItemStack getIcon() {
+        return this.getPacker() instanceof ItemPacker itemPacker ? itemPacker.getIcon() : this.getPreview();
     }
 }

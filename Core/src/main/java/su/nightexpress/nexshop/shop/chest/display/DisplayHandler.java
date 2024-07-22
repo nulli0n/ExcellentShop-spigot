@@ -100,7 +100,7 @@ public class DisplayHandler extends SimpleManager<ShopPlugin> {
                     return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
                 });
             }
-            placeholderMap.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getPreview()));
+            placeholderMap.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getIcon()));
 
             List<String> text = shop.getHologramText(product);
             text.replaceAll(placeholderMap.replacer());
@@ -112,7 +112,7 @@ public class DisplayHandler extends SimpleManager<ShopPlugin> {
             }
         }
 
-        ItemStack displayProduct = product == null ? null : product.getPreview();//shop.getDisplayProduct();
+        ItemStack displayProduct = product == null ? null : product.getIcon();//shop.getDisplayProduct();
         if (displayProduct != null) {
             entityIds.add(this.spawnItem(players, shop.getDisplayItemLocation(), displayProduct));
         }

@@ -21,5 +21,6 @@ softdepend:
   - GriefPrevention
   - Oraxen
   - ItemsAdder
+  - MMOItems
   - PlaceholderAPI
 api-version: 1.18

@@ -100,7 +100,10 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         new ShopCreator(this.plugin, this).createDefaults();
 
         this.loadEditors();
-        this.loadShops();
+        if (Plugins.isInstalled(HookId.ITEMS_ADDER)) {
+            this.plugin.runTaskLater(task -> this.loadShops(), 100L);
+        }
+        else this.loadShops();
         this.loadLayouts();
 
         if (Plugins.isLoaded(HookId.CITIZENS)) {
@@ -313,6 +316,14 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
 
     @Override
     @NotNull
+    public String getDefaultCartUI(@NotNull TradeType type) {
+        if (!VirtualConfig.SPLIT_BUY_SELL_CART_UI.get()) return this.getDefaultCartUI();
+
+        return type == TradeType.BUY ? VirtualConfig.DEFAULT_BUY_CART_UI.get() : VirtualConfig.DEFAULT_SELL_CART_UI.get();
+    }
+
+    @Override
+    @NotNull
     public TransactionLogger getLogger() {
         return logger;
     }
@@ -496,6 +507,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         shop.setLayoutName(Placeholders.DEFAULT);
         shop.save();
         this.loadShop(shop);
+        shop.getStock().load();
         shop.setLoaded(true);
 
         return true;

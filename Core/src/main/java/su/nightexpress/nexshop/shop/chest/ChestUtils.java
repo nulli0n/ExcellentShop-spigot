@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,13 @@ public class ChestUtils {
 
     public static boolean canUseDisplayEntities() {
         return Version.isAtLeast(Version.V1_19_R3) && !ChestConfig.DISPLAY_HOLOGRAM_FORCE_ARMOR_STAND.get();
+    }
+
+    public static boolean bypassHandlerDetection(@NotNull InventoryClickEvent event) {
+        if (!ChestConfig.SHOP_PRODUCT_BYPASS_DETECTION_ENABLED.get()) return false;
+
+        boolean needShift = ChestConfig.SHOP_PRODUCT_BYPASS_DETECTION_HOLD_SHIFT.get();
+        return !needShift || event.isShiftClick();
     }
 
     public static int getShopLimit(@NotNull Player player) {

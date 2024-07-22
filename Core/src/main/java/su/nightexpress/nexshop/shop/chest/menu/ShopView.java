@@ -113,12 +113,12 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
             ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
             if (clickType == null) return;
 
-            this.runNextTick(() -> {
+            //this.runNextTick(() -> {
                 product.prepareTrade(viewer1.getPlayer(), clickType);
                 if (clickType != ShopClickAction.BUY_SELECTION && clickType != ShopClickAction.SELL_SELECTION) {
                     this.flush(viewer);
                 }
-            });
+            //});
         });
     }
 

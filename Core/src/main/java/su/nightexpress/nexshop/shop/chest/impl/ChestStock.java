@@ -69,7 +69,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         if (!(product.getPacker() instanceof ItemPacker packer)) return -1;
 
         if (ChestUtils.isInfiniteStorage()) {
-            return (int) Math.floor(product.getQuantity() / (double) product.getUnitAmount());
+            return type == TradeType.SELL ? -1 : (int) Math.floor(product.getQuantity() / (double) product.getUnitAmount());
         }
 
         Inventory inventory = this.shop.getInventory();

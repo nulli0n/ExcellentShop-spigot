@@ -99,6 +99,16 @@ public class ChestConfig {
         "Infinite storage allows you to store as many items in your shops as you want/can,",
         "and don't uses block inventories.");
 
+    public static final ConfigValue<Boolean> SHOP_PRODUCT_BYPASS_DETECTION_ENABLED = ConfigValue.create("Shop.Product.Bypass_Plugin_Detection.Enabled",
+        false,
+        "When enabled, allows players to bypass plugin detection of the item they want to put as a shop product."
+    );
+
+    public static final ConfigValue<Boolean> SHOP_PRODUCT_BYPASS_DETECTION_HOLD_SHIFT = ConfigValue.create("Shop.Product.Bypass_Plugin_Detection.Hold_Shift",
+        false,
+        "When enabled, bypass plugin detection for a shop products will work only when player holds the Shift key (sneaking)."
+    );
+
     public static final ConfigValue<Double> SHOP_PRODUCT_INITIAL_BUY_PRICE = ConfigValue.create("Shops.Product.InitialPrice.Buy",
         10D,
         "Sets initial buy price for new products added in chest shops.");

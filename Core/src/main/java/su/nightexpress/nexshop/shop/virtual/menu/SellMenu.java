@@ -131,7 +131,9 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
     @Override
     public void onClick(@NotNull MenuViewer viewer, @NotNull ClickResult result, @NotNull InventoryClickEvent event) {
         super.onClick(viewer, result, event);
+
         if (this.simplified) {
+            viewer.setLastClickTime(0L);
             event.setCancelled(false);
             return;
         }

@@ -213,6 +213,12 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         config.saveChanges();
     }
 
+    public void saveProductQuantity() {
+        FileConfig config = this.getConfig();
+        this.getProducts().forEach(product -> product.writeQuantity(config, "Products." + product.getId()));
+        config.saveChanges();
+    }
+
     private void writeProducts(@NotNull FileConfig config) {
         config.remove("Products");
         this.getProducts().forEach(product -> product.write(config, "Products." + product.getId()));
@@ -391,7 +397,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     @Nullable
-    public ChestProduct createProduct(@NotNull Player player, @NotNull ItemStack item) {
+    public ChestProduct createProduct(@NotNull Player player, @NotNull ItemStack item, boolean bypassHandler) {
         if (item.getType().isAir() || this.isProduct(item)) {
             return null;
         }
@@ -406,7 +412,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         String id = UUID.randomUUID().toString();
 
-        ProductHandler handler = ProductHandlerRegistry.getHandler(stack);
+        ProductHandler handler;
+        if (bypassHandler) {
+            handler = ProductHandlerRegistry.forBukkitItem();
+        }
+        else handler = ProductHandlerRegistry.getHandler(stack);
+
+
         ProductPacker packer = handler.createPacker();
         if (packer instanceof ItemPacker itemPacker) {
             itemPacker.load(stack);

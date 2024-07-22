@@ -104,7 +104,7 @@ public class UltraEconomyCurrency implements Currency, CurrencyHandler, Currency
     }
 
     private Optional<Account> getAccount(@NotNull Player player) {
-        return UltraEconomy.getInstance().getAccounts().name(player.getName());
+        return UltraEconomy.getAPI().getAccounts().name(player.getName());
     }
 
     @Override
@@ -123,6 +123,6 @@ public class UltraEconomyCurrency implements Currency, CurrencyHandler, Currency
     }
 
     private Optional<Account> getAccount(@NotNull UUID playerId) {
-        return UltraEconomy.getInstance().getAccounts().uuid(playerId);
+        return UltraEconomy.getAPI().getAccounts().uuid(playerId);
     }
 }

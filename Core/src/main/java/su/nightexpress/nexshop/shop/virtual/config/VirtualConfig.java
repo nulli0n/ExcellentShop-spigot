@@ -31,6 +31,23 @@ public class VirtualConfig {
         "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
     );
 
+    public static final ConfigValue<Boolean> SPLIT_BUY_SELL_CART_UI = ConfigValue.create("General.Split_BuySell_Cart_UI",
+        false,
+        "Sets whether or not Virtual Shop will use different purchase menus for buying and selling."
+    );
+
+    public static final ConfigValue<String> DEFAULT_BUY_CART_UI = ConfigValue.create("General.Default_Buy_Cart_UI",
+        DEFAULT,
+        "Sets default product purchase menu config for buying if Split option is enabled.",
+        "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
+    );
+
+    public static final ConfigValue<String> DEFAULT_SELL_CART_UI = ConfigValue.create("General.Default_Sell_Cart_UI",
+        DEFAULT,
+        "Sets default product purchase menu config for selling if Split option is enabled.",
+        "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
+    );
+
     public static final ConfigValue<String> DEFAULT_LAYOUT = ConfigValue.create("General.Default_Layout",
         DEFAULT,
         "Sets default shop layout configuration in case if shop's one is not existing anymore."

@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -74,7 +75,7 @@ public class TransactionLogger {
             File file = new File(this.module.getAbsolutePath(), FILE_NAME);
             BufferedWriter output;
             try {
-                output = new BufferedWriter(new FileWriter(file, true));
+                output = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8, true));
                 output.append(outFile);
                 output.newLine();
                 output.close();

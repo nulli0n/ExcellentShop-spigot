@@ -171,7 +171,9 @@ public class CurrencyManager extends AbstractManager<ShopPlugin> {
 
     private void loadCurrency(@NotNull String id, @NotNull String path, @NotNull Supplier<CurrencyHandler> supplier) {
         ConfigCurrency currency = ConfigCurrency.read(this.config, path, id, supplier.get());
-        this.registerCurrency(currency);
+        if (currency.isEnabled()) {
+            this.registerCurrency(currency);
+        }
     }
 
     @Override

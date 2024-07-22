@@ -146,19 +146,36 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
         else {
             if (this.getRotationTimes().isEmpty()) return null;
 
-            LocalDate dateNow = LocalDate.now();
-            while (!this.getRotationTimes().containsKey(dateNow.getDayOfWeek())) {
-                dateNow = dateNow.plusDays(1);
+            int count = 0;
+            LocalDate dateLookup = LocalDate.now();
+
+            LocalTime fit = null;
+            while (count < 6) {
+                fit = this.findTime(dateLookup.getDayOfWeek());
+                if (fit != null) break;
+
+                dateLookup = dateLookup.plusDays(1);
+                count++;
             }
-
-            TreeSet<LocalTime> times = this.getRotationTimes(dateNow.getDayOfWeek());
-            if (times.isEmpty()) return null;
-
-            LocalTime fit = times.ceiling(LocalTime.now().truncatedTo(ChronoUnit.MINUTES));
             if (fit == null) return null;
 
-            return LocalDateTime.of(dateNow, fit);
+            return LocalDateTime.of(dateLookup, fit);
         }
+    }
+
+    @Nullable
+    private LocalTime findTime(@NotNull DayOfWeek dayOfWeek) {
+        TreeSet<LocalTime> times = this.getRotationTimes(dayOfWeek);
+        if (times.isEmpty()) return null;
+
+        LocalTime fit;
+        if (dayOfWeek != LocalDate.now().getDayOfWeek()) {
+            fit = times.stream().min(LocalTime::compareTo).orElse(null);
+        }
+        else {
+            fit = times.ceiling(LocalTime.now().truncatedTo(ChronoUnit.MINUTES));
+        }
+        return fit;
     }
 
     public void rotate() {

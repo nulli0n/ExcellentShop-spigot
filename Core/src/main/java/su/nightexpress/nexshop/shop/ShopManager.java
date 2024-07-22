@@ -101,7 +101,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
     }
 
     public boolean openProductCart(@NotNull Player player, @NotNull PreparedProduct product) {
-        CartMenu cartMenu = this.getCartUI(product.getShop().getModule().getDefaultCartUI());
+        CartMenu cartMenu = this.getCartUI(product.getShop().getModule().getDefaultCartUI(product.getTradeType()));
         if (cartMenu == null) {
             Lang.SHOP_PRODUCT_ERROR_INVALID_CART_UI.getMessage().send(player);
             return false;
