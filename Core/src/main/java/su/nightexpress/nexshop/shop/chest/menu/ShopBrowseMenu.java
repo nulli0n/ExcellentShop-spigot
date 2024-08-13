@@ -24,15 +24,18 @@ import su.nightexpress.nightcore.menu.api.AutoFilled;
 import su.nightexpress.nightcore.menu.impl.ConfigMenu;
 import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.item.MenuItem;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.NumberUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ShopBrowseMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<OfflinePlayer> {
 
@@ -90,13 +93,14 @@ public class ShopBrowseMenu extends ConfigMenu<ShopPlugin> implements AutoFilled
             ItemStack item = new ItemStack(Material.PLAYER_HEAD);
 
             ItemUtil.editMeta(item, meta -> {
-                if (meta instanceof SkullMeta skullMeta) {
+                if (meta instanceof SkullMeta skullMeta && owner.getPlayerProfile().getName() != null) {
                     skullMeta.setOwningPlayer(owner);
                 }
             });
 
             ItemReplacer.create(item).hideFlags().trimmed()
-                .setDisplayName(this.objectName).setLore(this.objectLore)
+                .setDisplayName(this.objectName)
+                .setLore(this.objectLore)
                 .replace(PLAYER_NAME, String.valueOf(owner.getName()))
                 .replace(GENERIC_AMOUNT, NumberUtil.format(this.module.getShops(owner.getUniqueId()).size()))
                 .writeMeta();

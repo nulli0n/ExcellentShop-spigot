@@ -330,7 +330,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         Location shopLocation;
         Location invLocation = inventory.getLocation();
         if (invLocation == null || !(inventory instanceof DoubleChestInventory)) {
-            shopLocation = LocationUtil.getCenter(this.getLocation(), false);
+            shopLocation = LocationUtil.setCenter2D(this.getLocation());
         }
         else {
             shopLocation = invLocation.clone().add(0.5, 0, 0.5);
@@ -366,8 +366,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     @Override
-    public void open(@NotNull Player player, int page) {
-        this.module.openShop(player, this, page);
+    public void open(@NotNull Player player, int page, boolean force) {
+        this.module.openShop(player, this, page, force);
     }
 
     @Override
@@ -456,7 +456,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         BlockData data = block.getBlockData();
         if (data instanceof Directional directional) {
             Block opposite = block.getRelative(directional.getFacing()).getLocation().clone().add(0, 0.5, 0).getBlock();
-            location = LocationUtil.getCenter(opposite.getLocation());
+            location = LocationUtil.setCenter3D(opposite.getLocation());
             location.setDirection(directional.getFacing().getOppositeFace().getDirection());
             location.setPitch(35F);
         }

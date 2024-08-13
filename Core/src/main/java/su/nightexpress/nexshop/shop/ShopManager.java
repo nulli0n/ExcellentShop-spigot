@@ -57,7 +57,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
             new CartMenu(this.plugin, FileConfig.loadOrExtract(plugin, Config.DIR_CARTS, Placeholders.DEFAULT + ".yml"));
         }
 
-        for (FileConfig config : FileConfig.loadAll(plugin.getDataFolder() + Config.DIR_CARTS)) {
+        for (FileConfig config : FileConfig.loadAll(plugin.getDataFolder() + Config.DIR_CARTS, true)) {
             CartMenu cartMenu = new CartMenu(this.plugin, config);
             this.cartMenuMap.put(FileConfig.getName(config.getFile()), cartMenu);
         }

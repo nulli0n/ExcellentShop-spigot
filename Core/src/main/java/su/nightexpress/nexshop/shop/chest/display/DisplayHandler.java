@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.chest.display;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.*;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -33,7 +34,10 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+@Deprecated
 public class DisplayHandler extends SimpleManager<ShopPlugin> {
+
+    private static final ProtocolManager PROTOCOL_MANAGER = ProtocolLibrary.getProtocolManager();
 
     private final ChestShopModule           module;
     private final Map<String, Set<Integer>> entityIdMap;
@@ -241,10 +245,6 @@ public class DisplayHandler extends SimpleManager<ShopPlugin> {
     }
 
     public void destroyEntity(int... ids) {
-        /*PacketContainer destroyPacket = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
-        destroyPacket.getIntLists().write(0, IntStream.of(ids).boxed().toList());
-        ProtocolLibrary.getProtocolManager().broadcastServerPacket(destroyPacket);*/
-
         this.destroyEntity(IntStream.of(ids).boxed().toList());
     }
 

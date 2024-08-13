@@ -76,7 +76,7 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
             }
             else {
                 int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
-                this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page));
+                this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page, true));
             }
         }));
 
@@ -85,7 +85,7 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
             Product product = this.getLink(player).getProduct();
             int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
 
-            this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page));
+            this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page, true));
         }));
 
         this.addHandler(this.addHandler = new ItemHandler("add", (viewer, event) -> {

@@ -27,7 +27,11 @@ public interface Shop extends Placeholder {
         this.open(player, 1);
     }
 
-    void open(@NotNull Player player, int page);
+    default void open(@NotNull Player player, int page) {
+        this.open(player, page, false);
+    }
+
+    void open(@NotNull Player player, int page, boolean force);
 
     @NotNull TransactionModule getModule();
 

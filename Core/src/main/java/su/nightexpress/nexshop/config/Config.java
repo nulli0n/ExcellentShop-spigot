@@ -9,6 +9,7 @@ import su.nightexpress.nightcore.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class Config {
 
@@ -27,6 +28,10 @@ public class Config {
         "Do not touch unless you know what and why you're doing.",
         "[Default is 60 seconds]"
     );
+
+    public static final ConfigValue<Set<String>> DISABLED_PRODUCT_HANDLERS = ConfigValue.create("General.Disabled_Product_Handlers",
+        Lists.newSet(),
+        "List of product handlers that won't be registered on plugin load.");
 
     public static final ConfigValue<Boolean> MODULES_VIRTUAL_SHOP_ENABLED = ConfigValue.create("Modules.VirtualShop.Enabled",
         true,

@@ -16,6 +16,7 @@ import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.object.RotationData;
 import su.nightexpress.nexshop.shop.impl.price.RangedPricer;
+import su.nightexpress.nexshop.shop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
@@ -178,11 +179,11 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
 
         ItemReplacer replacer = ItemReplacer.create(preview).trimmed().readMeta()
             .setLore(loreFormat)
-            .injectLore(GENERIC_BUY, buyLore)
-            .injectLore(GENERIC_SELL, sellLore)
-            .injectLore(GENERIC_LORE, ItemUtil.getLore(preview))
-            .injectLore(GENERIC_DISCOUNT, discountLore)
-            .injectLore(GENERIC_PERMISSION, noPermLore)
+            .replace(GENERIC_BUY, buyLore)
+            .replace(GENERIC_SELL, sellLore)
+            .replace(GENERIC_LORE, ItemUtil.getLore(preview))
+            .replace(GENERIC_DISCOUNT, discountLore)
+            .replace(GENERIC_PERMISSION, noPermLore)
             ;
 
         for (TradeType tradeType : TradeType.values()) {
@@ -204,9 +205,9 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
             }
 
             replacer
-                .injectLore(priceDynamicPlaceholder, priceDynamicLore)
-                .injectLore(stockPlaceholder, stockLore)
-                .injectLore(limitPlaceholder, limitLore);
+                .replace(priceDynamicPlaceholder, priceDynamicLore)
+                .replace(stockPlaceholder, stockLore)
+                .replace(limitPlaceholder, limitLore);
         }
 
         if (Config.GUI_PLACEHOLDER_API.get()) {
@@ -231,25 +232,16 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
                     return;
                 }
 
-                ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
-
-                if (Players.isBedrock(player2)) {
-                    boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
-                    boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
-
-                    if (isBuyable && !isSellable) clickType = ShopClickAction.BUY_SELECTION;
-                    else if (isSellable && !isBuyable) clickType = ShopClickAction.SELL_SELECTION;
-                }
+                ShopClickAction clickType = ShopUtils.getClickAction(player2, event.getClick(), shop, product);
                 if (clickType == null) return;
 
-                // In case if some "smart" guy have shop GUI opened during the rotation.
+                // In case if some smartass have shop GUI opened during the rotation.
                 if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) {
                     this.runNextTick(() -> this.flush(viewer));
                     return;
                 }
 
-                ShopClickAction finalClickType = clickType;
-                this.runNextTick(() -> product.prepareTrade(player2, finalClickType));
+                this.runNextTick(() -> product.prepareTrade(player2, clickType));
             });
 
         this.addItem(menuItem);

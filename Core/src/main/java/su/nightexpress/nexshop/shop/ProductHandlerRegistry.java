@@ -7,6 +7,7 @@ import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.impl.handler.VanillaCommandHandler;
 import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
 
@@ -25,7 +26,12 @@ public class ProductHandlerRegistry {
     }
 
     public static void register(@NotNull ProductHandler handler) {
-        getHandlerMap().put(handler.getName().toLowerCase(), handler);
+        String name = handler.getName().toLowerCase();
+        if (Config.DISABLED_PRODUCT_HANDLERS.get().contains(name)) {
+            return;
+        }
+
+        getHandlerMap().put(name, handler);
         ShopAPI.PLUGIN.info("Registered '" + handler.getName() + "' product handler.");
     }
 

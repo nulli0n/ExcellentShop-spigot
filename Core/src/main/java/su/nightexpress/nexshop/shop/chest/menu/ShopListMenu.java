@@ -5,10 +5,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -37,8 +39,9 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
 
     public static final String FILE_NAME = "shops_list.yml";
 
-    private static final String PLACEHOLDER_ACTION_TELEPORT = "%action_teleport%";
-    private static final String PLACEHOLDER_ACTION_EDITOR   = "%action_editor%";
+    private static final String ACTION_TELEPORT = "%action_teleport%";
+    private static final String ACTION_EDITOR   = "%action_editor%";
+    private static final String PRODUCTS        = "%products%";
 
     private final ChestShopModule  module;
     private final ViewLink<String> link;
@@ -50,6 +53,9 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
     private List<String> shopLoreOthers;
     private List<String> actionTeleportLore;
     private List<String> actionEditLore;
+
+    private int          productLimit;
+    private List<String> productLore;
 
     public ShopListMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
         super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE_NAME));
@@ -99,11 +105,22 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
             boolean canEdit = isOwn || player.hasPermission(ChestPerms.EDIT_OTHERS);
             boolean canTeleport = player.hasPermission(ChestPerms.TELEPORT_OTHERS) || (isOwn && player.hasPermission(ChestPerms.TELEPORT));
 
+            List<String> productInfo = new ArrayList<>();
+            int productCount = 0;
+            for (ChestProduct product : shop.getProducts()) {
+                if (productCount >= this.productLimit) break;
+                for (String line : this.productLore) {
+                    productInfo.add(product.replacePlaceholders().apply(line));
+                }
+                productCount++;
+            }
+
             ItemStack item = new ItemStack(shop.getBlockType());
             ItemReplacer.create(item).hideFlags().trimmed()
                 .setDisplayName(this.shopName).setLore(isOwn ? this.shopLoreOwn : this.shopLoreOthers)
-                .replaceLoreExact(PLACEHOLDER_ACTION_EDITOR, canEdit ? this.actionEditLore : Collections.emptyList())
-                .replaceLoreExact(PLACEHOLDER_ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
+                .replace(ACTION_EDITOR, canEdit ? this.actionEditLore : Collections.emptyList())
+                .replace(ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
+                .replace(PRODUCTS, productInfo)
                 .replace(shop.replacePlaceholders())
                 .writeMeta();
             return item;
@@ -167,16 +184,15 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
         this.shopLoreOwn = ConfigValue.create("Shop.Lore.Own", Lists.newList(
             LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Location:") + " " + SHOP_LOCATION_X + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Y + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Z + LIGHT_GRAY.enclose(" in ") + SHOP_LOCATION_WORLD),
             "",
-            PLACEHOLDER_ACTION_TELEPORT,
-            PLACEHOLDER_ACTION_EDITOR
+            PRODUCTS,
+            ACTION_TELEPORT,
+            ACTION_EDITOR
         )).read(cfg);
 
         this.shopLoreOthers = ConfigValue.create("Shop.Lore.Others", Lists.newList(
-            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Owner:") + " " + SHOP_OWNER),
-            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Location:") + " " + SHOP_LOCATION_X + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Y + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Z + LIGHT_GRAY.enclose(" in ") + SHOP_LOCATION_WORLD),
-            "",
-            PLACEHOLDER_ACTION_TELEPORT,
-            PLACEHOLDER_ACTION_EDITOR
+            PRODUCTS,
+            ACTION_TELEPORT,
+            ACTION_EDITOR
         )).read(cfg);
 
         this.actionTeleportLore = ConfigValue.create("Shop.Lore.Action_Teleport", Lists.newList(
@@ -185,6 +201,15 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
 
         this.actionEditLore = ConfigValue.create("Shop.Lore.Action_Editor", Lists.newList(
             LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Right-Click to " + LIGHT_YELLOW.enclose("edit") + ".")
+        )).read(cfg);
+
+        this.productLimit = ConfigValue.create("Shop.ProductInfo.DisplayLimit", 3).read(cfg);
+
+        this.productLore = ConfigValue.create("Shop.ProductInfo.Entry", Lists.newList(
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Item:") + " " + PRODUCT_UNIT_AMOUNT + "x " + PRODUCT_PREVIEW_NAME),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy Price:") + " " + GREEN.enclose(PRODUCT_PRICE_FORMATTED.apply(TradeType.BUY))),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell Price:") + " " + RED.enclose(PRODUCT_PRICE_FORMATTED.apply(TradeType.SELL))),
+            " "
         )).read(cfg);
     }
 }

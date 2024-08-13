@@ -40,7 +40,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
-import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
+import su.nightexpress.nexshop.shop.chest.display.DisplayHandlerV2;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -87,7 +87,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     private ShopView       shopView;
 
     private Set<ClaimHook> claimHooks;
-    private DisplayHandler displayHandler;
+    private DisplayHandlerV2 displayHandler;
 
     private TransactionLogger logger;
 
@@ -209,7 +209,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     private void loadHooks() {
         if (Plugins.isLoaded(HookId.PROTOCOL_LIB)) {
-            this.displayHandler = new DisplayHandler(this.plugin, this);
+            this.displayHandler = new DisplayHandlerV2(this.plugin, this);
             this.displayHandler.setup();
 
             this.addTask(this.plugin.createAsyncTask(() -> this.displayHandler.update()).setSecondsInterval(ChestConfig.DISPLAY_UPDATE_INTERVAL.get()));
@@ -846,7 +846,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     @Nullable
-    public DisplayHandler getDisplayHandler() {
+    public DisplayHandlerV2 getDisplayHandler() {
         return this.displayHandler;
     }
 

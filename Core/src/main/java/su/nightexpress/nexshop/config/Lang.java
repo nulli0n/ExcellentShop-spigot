@@ -47,13 +47,19 @@ public class Lang extends CoreLang {
     public static final LangText COMMAND_CURRENCY_ERROR_NO_ITEM = LangText.of("Command.Currency.Error.NoItem",
         LIGHT_RED.enclose("You must hold an item to do that!"));
 
+
+
     public static final LangText MODULE_COMMAND_RELOAD = LangText.of("Module.Command.Reloaded",
         LIGHT_GRAY.enclose(LIGHT_GREEN.enclose(GENERIC_NAME) + " reloaded!"));
 
     public static final LangString MODULE_COMMAND_RELOAD_DESC = LangString.of("Module.Command.Reload.Desc", "Reload the module.");
 
+
+
     public static final LangText ERROR_INVALID_CURRENCY = LangText.of("Error.Currency.Invalid",
         LIGHT_RED.enclose("Invalid currency!"));
+
+
 
     public static final LangText SHOP_PRODUCT_ERROR_INVALID_CART_UI = LangText.of("Shop.Product.Error.InvalidCartUI",
         SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
@@ -92,6 +98,12 @@ public class Lang extends CoreLang {
         LIGHT_GREEN.enclose(BOLD.enclose("< Custom Amount >")),
         LIGHT_GRAY.enclose("Enter your amount")
     );
+
+
+
+    public static final LangString OTHER_PRICE_DISABLED = LangString.of("Other.PriceDisabled", "N/A");
+
+
 
     public static final LangString EDITOR_PRICE_FLOAT_NO_DAYS = LangString.of("Editor.Price.Float.NoDays",
         "No days set. Price won't refresh properly.");

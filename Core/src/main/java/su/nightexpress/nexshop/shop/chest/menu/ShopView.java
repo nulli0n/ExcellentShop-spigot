@@ -7,12 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -93,9 +93,9 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
             ItemStack preview = product.getPreview();
             ItemReplacer.create(preview).readMeta().trimmed()
                 .setLore(loreFormat)
-                .injectLore(GENERIC_BUY, buyLore)
-                .injectLore(GENERIC_SELL, sellLore)
-                .injectLore(GENERIC_LORE, ItemUtil.getLore(preview))
+                .replace(GENERIC_BUY, buyLore)
+                .replace(GENERIC_SELL, sellLore)
+                .replace(GENERIC_LORE, ItemUtil.getLore(preview))
                 .replace(product.getPlaceholders())
                 .replace(product.getCurrency().getPlaceholders())
                 .replace(shop.getPlaceholders())
@@ -110,14 +110,15 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
                 return;
             }
 
-            ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(event.getClick());
+            ShopClickAction clickType = ShopUtils.getClickAction(player, event.getClick(), shop, product);
             if (clickType == null) return;
 
+            // Can't open next tick for bedrock?
             //this.runNextTick(() -> {
-                product.prepareTrade(viewer1.getPlayer(), clickType);
-                if (clickType != ShopClickAction.BUY_SELECTION && clickType != ShopClickAction.SELL_SELECTION) {
-                    this.flush(viewer);
-                }
+            product.prepareTrade(viewer1.getPlayer(), clickType);
+            if (clickType != ShopClickAction.BUY_SELECTION && clickType != ShopClickAction.SELL_SELECTION) {
+                this.flush(viewer);
+            }
             //});
         });
     }

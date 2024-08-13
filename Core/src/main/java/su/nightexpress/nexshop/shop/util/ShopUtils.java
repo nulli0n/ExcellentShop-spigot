@@ -3,10 +3,18 @@ package su.nightexpress.nexshop.shop.util;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.StringUtil;
 
 import java.time.DayOfWeek;
@@ -32,6 +40,21 @@ public class ShopUtils {
             dateFormatter = DateTimeFormatter.ofPattern(Config.DATE_FORMAT.get());
         }
         return dateFormatter;
+    }
+
+    @Nullable
+    public static ShopClickAction getClickAction(@NotNull Player player, @NotNull ClickType click, @NotNull Shop shop, @NotNull Product product) {
+        ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(click);
+
+        if (Players.isBedrock(player)) {
+            boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
+            boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
+
+            if (isBuyable && !isSellable) clickType = ShopClickAction.BUY_SELECTION;
+            else if (isSellable && !isBuyable) clickType = ShopClickAction.SELL_SELECTION;
+        }
+
+        return clickType;
     }
 
     @NotNull

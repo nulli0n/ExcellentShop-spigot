@@ -90,10 +90,11 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL = "%product_pricer_players_adjust_amount_sell%";
     public static final String PRODUCT_PRICER_PLAYERS_ADJUST_STEP        = "%product_pricer_players_adjust_step%";
 
-    public static final String PRODUCT_ID = "%product_id%";
+    public static final String PRODUCT_ID                = "%product_id%";
     public static final String PRODUCT_ITEM_META_ENABLED = "%product_item_meta_enabled%";
     public static final String PRODUCT_PREVIEW_NAME      = "%product_preview_name%";
     public static final String PRODUCT_PREVIEW_LORE      = "%product_preview_lore%";
+    public static final String PRODUCT_UNIT_AMOUNT      = "%product_unit_amount%";
     public static final String PRODUCT_CURRENCY          = "%product_currency%";
 
     public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_INITIAL = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_initial%";
@@ -143,13 +144,14 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             .add(PRODUCT_ID, player -> product.getId())
             .add(PRODUCT_HANDLER, player -> product.getHandler().getName())
             .add(PRODUCT_CURRENCY, player -> product.getCurrency().getName())
+            .add(PRODUCT_UNIT_AMOUNT, player -> NumberUtil.format(product.getUnitAmount()))
             .add(PRODUCT_PRICE_TYPE, player -> Lang.PRICE_TYPES.getLocalized(product.getPricer().getType()))
             .add(PRODUCT_PRICE_SELL_ALL, player -> NumberUtil.format(player == null ? 0D : product.getPriceSellAll(player)))
             .add(PRODUCT_PRICE_SELL_ALL_FORMATTED, player -> {
-                if (!product.isSellable()) return "-";
+                if (!product.isSellable()) return Lang.OTHER_PRICE_DISABLED.getString();
 
                 double price = player == null ? 0D : product.getPriceSellAll(player);
-                return price >= 0 ? product.getCurrency().format(price) : "-";
+                return price >= 0 ? product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
             })
             .add(PRODUCT_PREVIEW_NAME, player -> ItemUtil.getItemName(product.getPreview()))
             .add(PRODUCT_PREVIEW_LORE, player -> String.join("\n", ItemUtil.getLore(product.getPreview())));
@@ -166,7 +168,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
                 AbstractProductPricer pricer = product.getPricer();
                 double price = player == null ? pricer.getPrice(tradeType) : product.getPrice(tradeType, player);
 
-                return price >= 0 ? product.getCurrency().format(price) : "-";
+                return price >= 0 ? product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
             });
 
             map.add(PRODUCT_PRICE_AVERAGE.apply(tradeType), player -> {

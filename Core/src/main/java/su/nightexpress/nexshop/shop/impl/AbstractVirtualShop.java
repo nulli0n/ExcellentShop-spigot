@@ -167,8 +167,11 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         }
         if (!this.isTransactionEnabled(tradeType)) return null;
 
+        ProductHandler handler = ProductHandlerRegistry.getHandler(item);
+
         var stream = this.getProducts().stream().filter(product -> {
             if (!product.isTradeable(tradeType)) return false;
+            if (product.getHandler() != handler) return false;
             if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
             if (!itemPacker.isItemMatches(item)) return false;
             if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) return false;
@@ -231,8 +234,8 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     }
 
     @Override
-    public void open(@NotNull Player player, int page) {
-        this.module.openShop(player, this, page);
+    public void open(@NotNull Player player, int page, boolean force) {
+        this.module.openShop(player, this, page, force);
     }
 
     @Override

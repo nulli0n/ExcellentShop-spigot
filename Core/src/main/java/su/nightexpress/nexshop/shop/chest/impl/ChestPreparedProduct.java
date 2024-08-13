@@ -9,6 +9,7 @@ import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.Transaction.Result;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
 
@@ -89,12 +90,12 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         ChestProduct product = this.getProduct();
         ChestShop shop = product.getShop();
 
-        boolean isAdmin = shop.isAdminShop();
+        boolean isUnlimited = shop.isAdminShop() || ChestUtils.isInfiniteStorage();
         int shopSpace = shop.getStock().count(product, TradeType.SELL);
         int userCount = product.countUnits(inventory);
         int fined;
         if (this.isAll()) {
-            fined = Math.min((!isAdmin ? shopSpace : userCount), userCount);
+            fined = Math.min((!isUnlimited ? shopSpace : userCount), userCount);
         }
         else {
             fined = this.getUnits();
@@ -128,7 +129,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             shop.getStock().onTransaction(event);
 
             // Process transaction
-            if (!isAdmin) {
+            if (!isUnlimited) {
                 shop.getOwnerBank().withdraw(product.getCurrency(), transaction.getPrice());
                 shop.getModule().savePlayerBank(shop.getOwnerBank());
             }

@@ -123,6 +123,8 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
             this.currencyManager.shutdown();
             this.currencyManager = null;
         }
+
+        ProductHandlerRegistry.getHandlerMap().clear();
     }
 
     private void registerProductHandlers() {
