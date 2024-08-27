@@ -21,6 +21,7 @@ public class HookId {
     public static final String WORLD_GUARD            = "WorldGuard";
     public static final String GRIEF_PREVENTION       = "GriefPrevention";
     public static final String KINGDOMS               = "Kingdoms";
+    public static final String HUSK_CLAIMS            = "HuskClaims";
     public static final String ADVANCED_REGION_MARKET = "AdvancedRegionMarket";
 
     public static final String ORAXEN      = "Oraxen";

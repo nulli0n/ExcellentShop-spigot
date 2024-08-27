@@ -221,6 +221,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             if (Plugins.isInstalled(HookId.GRIEF_PREVENTION)) this.claimHooks.add(new GriefPreventionHook());
             if (Plugins.isInstalled(HookId.WORLD_GUARD)) this.claimHooks.add(new WorldGuardFlags());
             if (Plugins.isInstalled(HookId.KINGDOMS)) this.claimHooks.add(new KingdomsHook());
+            if (Plugins.isInstalled(HookId.HUSK_CLAIMS)) this.claimHooks.add(new HuskClaimsHook());
         }
 
         if (Plugins.isInstalled(HookId.ADVANCED_REGION_MARKET)) {

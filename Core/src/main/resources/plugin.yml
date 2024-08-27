@@ -16,6 +16,7 @@ softdepend:
   - Citizens
   - WorldGuard
   - Lands
+  - HuskClaims
   - Kingdoms
   - AdvancedRegionMarket
   - GriefPrevention
