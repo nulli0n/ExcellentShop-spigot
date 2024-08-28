@@ -14,9 +14,9 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.data.object.RotationData;
-import su.nightexpress.nexshop.shop.impl.price.RangedPricer;
-import su.nightexpress.nexshop.shop.util.ShopUtils;
+import su.nightexpress.nexshop.shop.virtual.data.RotationData;
+import su.nightexpress.nexshop.product.price.impl.RangedPricer;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
@@ -136,7 +136,7 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
         int page = Math.min(viewer.getPage(), viewer.getPages());
         Player player = viewer.getPlayer();
 
-        for (StaticProduct product : shop.getProducts()) {
+        for (StaticProduct product : shop.getValidProducts()) {
             if (product.getPage() != page) continue;
 
             this.addProductItem(shop, player, product, product.getSlot());
@@ -162,6 +162,7 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
         for (String prodId : list) {
             RotatingProduct product = shop.getProductById(prodId);
             if (product == null) continue;
+            if (!product.isValid()) continue;
 
             int slot = slots[count++];
             this.addProductItem(shop, player, product, slot);

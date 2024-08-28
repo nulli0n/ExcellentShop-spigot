@@ -21,6 +21,8 @@ public interface Shop extends Placeholder {
 
     void saveProduct(@NotNull Product product);
 
+    boolean isLoaded();
+
     boolean canAccess(@NotNull Player player, boolean notify);
 
     default void open(@NotNull Player player) {
@@ -58,6 +60,8 @@ public interface Shop extends Placeholder {
     @NotNull Map<String, ? extends Product> getProductMap();
 
     @NotNull Collection<? extends Product> getProducts();
+
+    @NotNull Collection<? extends Product> getValidProducts();
 
     @Nullable Product getProductById(@NotNull String id);
 

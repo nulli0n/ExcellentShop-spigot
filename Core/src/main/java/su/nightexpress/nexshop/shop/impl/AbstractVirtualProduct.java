@@ -10,6 +10,7 @@ import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -35,11 +36,13 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.stockValues = new StockValues();
         this.limitValues = new StockValues();
 
-        this.placeholderRelMap.add(Placeholders.forVirtualProduct(this));
+        this.placeholders.add(Placeholders.forVirtualProduct(this));
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Handler", this.getHandler().getName());
+        if (!(this.getHandler() instanceof DummyHandler)) {
+            config.set(path + ".Handler", this.getHandler().getName());
+        }
         this.getPacker().write(config, path);
         config.set(path + ".Allowed_Ranks", this.getAllowedRanks());
         config.set(path + ".Required_Permissions", this.getRequiredPermissions());

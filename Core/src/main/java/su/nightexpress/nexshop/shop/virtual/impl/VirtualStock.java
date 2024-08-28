@@ -11,76 +11,15 @@ import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.data.object.OwnedStockData;
-import su.nightexpress.nexshop.data.object.StockData;
+import su.nightexpress.nexshop.product.data.ProductData;
+import su.nightexpress.nexshop.product.stock.StockAmount;
+import su.nightexpress.nexshop.product.data.impl.StockData;
 import su.nightexpress.nexshop.shop.impl.AbstractStock;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
-    private final Map<TradeType, Map<String, StockData>>                 globalDataMap;
-    private final Map<UUID, Map<TradeType, Map<String, OwnedStockData>>> playerDataMap;
-
-    private boolean locked;
-
     public VirtualStock(@NotNull ShopPlugin plugin, @NotNull VirtualShop shop) {
         super(plugin, shop);
-        this.globalDataMap = new ConcurrentHashMap<>();
-        this.playerDataMap = new ConcurrentHashMap<>();
-        this.lock();
-    }
-
-    @Override
-    public void load() {
-        this.plugin.getData().getVirtualDataHandler().getStocksAndLimits(this.getShop().getId()).forEach(data -> {
-            if (data instanceof OwnedStockData ownedData) {
-                this.getPlayerDataMap(ownedData.getOwnerId(), data.getTradeType()).put(data.getProductId(), ownedData);
-            }
-            else this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
-        });
-
-        /*List<StockData> dataList = this.plugin.getData().getVirtualDataHandler().getStockDatas(this.getShop().getId());
-        dataList.forEach(data -> {
-            this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
-        });
-
-        List<OwnedStockData> userDataList = this.plugin.getData().getVirtualDataHandler().getPlayerLimits();
-        userDataList.forEach(data -> {
-            this.getPlayerDataMap(data.getOwnerId(), data.getTradeType()).put(data.getProductId(), data);
-        });*/
-
-        this.unlock();
-        //this.plugin.info("Loaded " + dataList.size() + " product stock datas for '" + shop.getId() + " shop.");
-    }
-
-    @Override
-    public void load(@NotNull UUID playerId) {
-        this.playerDataMap.remove(playerId);
-
-        List<OwnedStockData> dataList = this.plugin.getData().getVirtualDataHandler().getPlayerLimits(playerId);
-        dataList.forEach(data -> {
-            this.getPlayerDataMap(playerId, data.getTradeType()).put(data.getProductId(), data);
-        });
-    }
-
-    @Override
-    public void unload(@NotNull UUID playerId) {
-        this.playerDataMap.remove(playerId);
-    }
-
-    public void unlock() {
-        this.setLocked(false);
-    }
-
-    public void lock() {
-        this.setLocked(true);
     }
 
     @Override
@@ -100,9 +39,9 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
             this.store(product, amount, tradeType.getOpposite());
         }
 
-        StockData globalData = this.getGlobalData(product, tradeType);
-        if (globalData != null && globalData.isAwaiting()) {
-            globalData.updateRestockDate(stockValues);
+        StockAmount globalAmount = this.getAmount(product, tradeType, null);
+        if (globalAmount != null && globalAmount.isAwaiting()) {
+            globalAmount.updateRestockDate(stockValues, tradeType);
         }
 
         StockValues limitValues = product.getLimitValues();
@@ -110,9 +49,9 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
             this.consume(product, amount, tradeType, player);
         }
 
-        StockData playerData = this.getPlayerData(player.getUniqueId(), product, tradeType);
-        if (playerData != null && playerData.isAwaiting()) {
-            playerData.updateRestockDate(limitValues);
+        StockAmount playerAmount = this.getAmount(product, tradeType, player);
+        if (playerAmount != null && playerAmount.isAwaiting()) {
+            playerAmount.updateRestockDate(limitValues, tradeType);
         }
     }
 
@@ -123,176 +62,131 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     }
 
     @NotNull
-    private Map<String, StockData> getGlobalDataMap(@NotNull TradeType type) {
-        return this.globalDataMap.computeIfAbsent(type, k -> new ConcurrentHashMap<>());
+    private ProductData getProductData(@NotNull Product product) {
+        return this.getProductData(product.getId());
     }
 
     @NotNull
-    private Map<String, OwnedStockData> getPlayerDataMap(@NotNull UUID playerId, @NotNull TradeType type) {
-        return this.playerDataMap.computeIfAbsent(playerId, k -> new ConcurrentHashMap<>()).computeIfAbsent(type, k -> new ConcurrentHashMap<>());
+    private ProductData getProductData(@NotNull String productId) {
+        return this.plugin.getShopManager().getProductDataManager().getData(this.shop.getId(), productId);
     }
 
     @Nullable
-    public StockData getGlobalData(@NotNull VirtualProduct product, @NotNull TradeType type) {
-        StockValues values = product.getStockValues();
-        StockData data = this.getGlobalDataMap(type).get(product.getId());
-        Supplier<StockData> supplier = () -> new StockData(product, values, type);
-
-        return this.getData(type, values, data, supplier, this::createGlobalData);
+    private StockData getStockData(@NotNull Product product) {
+        return this.getProductData(product).getStockData();
     }
 
     @Nullable
-    public OwnedStockData getPlayerData(@NotNull UUID playerId, @NotNull VirtualProduct product, @NotNull TradeType type) {
-        StockValues values = product.getLimitValues();
-        OwnedStockData data = this.getPlayerDataMap(playerId, type).get(product.getId());
-        Supplier<OwnedStockData> supplier = () -> new OwnedStockData(playerId, product, values, type);
-
-        return this.getData(type, values, data, supplier, this::createPlayerData);
-    }
-
-    @Nullable
-    private <T extends StockData> T getData(@NotNull TradeType type,
-                                            @NotNull StockValues values,
-                                            @Nullable T data,
-                                            @NotNull Supplier<T> supplier,
-                                            @NotNull Consumer<T> creator) {
+    public StockAmount getAmount(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
+        StockValues values = player == null ? product.getStockValues() : product.getLimitValues();
         if (values.isUnlimited(type)) return null;
 
+        ProductData productData = this.getProductData(product);
+        StockData data = productData.getStockData();
+
         if (data == null) {
-            data = supplier.get();
-            data.setItemsLeft(values.getInitialAmount(type));
-            creator.accept(data);
+            data = new StockData(product);
+            productData.loadStock(data);
+            this.insertData(data);
         }
-        else if (data.isRestockTime()) {
-            data.restock(values);
+
+        StockAmount amounts = player == null ? data.getGlobalAmount(type) : data.getPlayerAmount(type, player.getUniqueId());
+        if (amounts.isRestockTime()) {
+            amounts.restock(values, type);
             this.saveData(data);
         }
-        return data;
+
+        return amounts;
     }
 
-    @Nullable
-    public StockData getRelativeData(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
-        return player == null ? this.getGlobalData(product, type) : this.getPlayerData(player.getUniqueId(), product, type);
+    private void insertData(@NotNull StockData data) {
+        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().insertStockData(data));
     }
 
-    private void createGlobalData(@NotNull StockData data) {
-        this.getGlobalDataMap(data.getTradeType()).put(data.getProductId(), data);
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().insertStockData(data));
-    }
+    public void resetGlobalAmount(@NotNull Product product) {
+        StockData data = this.getStockData(product);
+        if (data == null) return;
 
-    private void createPlayerData(@NotNull OwnedStockData data) {
-        this.getPlayerDataMap(data.getOwnerId(), data.getTradeType()).put(data.getProductId(), data);
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().insertPlayerLimit(data));
-    }
-
-    private void saveGlobalData(@NotNull StockData data) {
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().saveStockData(data));
-    }
-
-    private void savePlayerData(@NotNull OwnedStockData data) {
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().savePlayerLimit(data));
-    }
-
-    public void deleteGlobalData(@NotNull Product product) {
         for (TradeType tradeType : TradeType.values()) {
-            this.deleteGlobalData(product, tradeType);
+            data.getGlobalAmounts().remove(tradeType);
         }
+
+        this.saveData(data);
     }
 
-    public void deleteGlobalData(@NotNull Product product, @NotNull TradeType tradeType) {
-        this.getGlobalDataMap(tradeType).remove(product.getId());
-
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getVirtualDataHandler().deleteStockData(product, tradeType));
+    public void resetPlayerAmount(@NotNull VirtualProduct product) {
+        this.resetPlayerAmount(product, null);
     }
 
+    public void resetPlayerAmount(@NotNull VirtualProduct product, @Nullable TradeType tradeType) {
+        StockData data = this.getStockData(product);
+        if (data == null) return;
 
-
-    public void deletePlayerLimit(@NotNull VirtualProduct product) {
-        for (TradeType tradeType : TradeType.values()) {
-            this.deletePlayerLimit(product, tradeType);
+        for (TradeType type : TradeType.values()) {
+            if (tradeType == null || tradeType == type) {
+                data.getPlayerAmounts().remove(tradeType);
+            }
         }
-    }
 
-    public void deletePlayerLimit(@NotNull VirtualProduct product, @NotNull TradeType tradeType) {
-        this.playerDataMap.values().forEach(map -> {
-            map.getOrDefault(tradeType, Collections.emptyMap()).remove(product.getId());
-        });
-
-        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(product, tradeType));
-    }
-
-    public void deletePlayerLimit(@NotNull UUID playerId, @NotNull VirtualProduct product, @NotNull TradeType tradeType) {
-        this.getPlayerDataMap(playerId, tradeType).remove(product.getId());
-
-        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(playerId, product, tradeType));
-    }
-
-    public void deletePlayerLimit(@NotNull UUID playerId) {
-        this.playerDataMap.remove(playerId);
-        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deletePlayerLimit(playerId));
+        this.saveData(data);
     }
 
 
 
     private void saveData(@NotNull StockData data) {
-        if (data instanceof OwnedStockData ownedStockData) {
-            this.savePlayerData(ownedStockData);
-        }
-        else this.saveGlobalData(data);
+        data.cleanUp();
+        this.plugin.getShopManager().getProductDataManager().scheduleSave(data);
+    }
+
+    private void saveData(@NotNull Product product) {
+        StockData data = this.getStockData(product);
+        if (data == null) return;
+
+        this.saveData(data);
     }
 
     public void deleteData() {
-        this.globalDataMap.clear();
-        this.playerDataMap.clear();
-        this.plugin.runTaskAsync(task -> {
-            this.plugin.getData().getVirtualDataHandler().deleteStockData(shop);
-            this.plugin.getData().getVirtualDataHandler().deletePlayerLimits(shop);
+        this.plugin.getShopManager().getProductDataManager().getDatas(this.shop).forEach(productData -> {
+            productData.loadStock(null);
         });
+        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().deleteStockData(this.shop));
     }
 
 
-    private int getItemsLeft(@Nullable StockData data) {
-        return data == null ? UNLIMITED : data.getItemsLeft();
+    private int getItemsLeft(@Nullable StockAmount amounts) {
+        return amounts == null ? UNLIMITED : amounts.getItemsLeft();
     }
 
 
     public int countItem(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
-        if (this.isLocked()) return 0;
-
-        return this.getItemsLeft(this.getRelativeData(product, type, player));
+        return this.getItemsLeft(this.getAmount(product, type, player));
     }
 
     public boolean consumeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
-        if (this.isLocked()) return false;
+        StockAmount amounts = this.getAmount(product, type, player);
+        if (amounts == null) return false;
 
-        StockData data = this.getRelativeData(product, type, player);
-        if (data == null) return false;
-
-        data.setItemsLeft(data.getItemsLeft() - amount);
-        this.saveData(data);
+        amounts.setItemsLeft(amounts.getItemsLeft() - amount);
+        this.saveData(product);
         return true;
     }
 
     public boolean storeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
-        if (this.isLocked()) return false;
+        StockAmount amounts = this.getAmount(product, type, player);
+        if (amounts == null) return false;
 
-        StockData data = this.getRelativeData(product, type, player);
-        if (data == null) return false;
-
-        data.setItemsLeft(data.getItemsLeft() + amount);
-        this.saveData(data);
+        amounts.setItemsLeft(amounts.getItemsLeft() + amount);
+        this.saveData(product);
         return true;
     }
 
     public boolean restockItem(@NotNull VirtualProduct product, @NotNull TradeType type, boolean force, @Nullable Player player) {
-        if (this.isLocked()) return false;
+        StockAmount amounts = this.getAmount(product, type, player);
+        if (amounts == null) return false;
 
-        StockData data = this.getRelativeData(product, type, player);//this.getGlobalDataMap(type).get(product.getId());
-        if (data == null) return false;
-
-        if (force || data.isRestockTime()) {
-            data.restock(player == null ? product.getStockValues() : product.getLimitValues());
-            this.saveData(data);
+        if (force || amounts.isRestockTime()) {
+            amounts.restock(player == null ? product.getStockValues() : product.getLimitValues(), type);
+            this.saveData(product);
             return true;
         }
         return false;
@@ -305,15 +199,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     }
 
     public long getRestockDate(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
-        StockData data = this.getRelativeData(product, type, player);
-        return data == null ? 0L : data.getRestockDate();
-    }
-
-    public boolean isLocked() {
-        return locked;
-    }
-
-    public void setLocked(boolean locked) {
-        this.locked = locked;
+        StockAmount amounts = this.getAmount(product, type, player);
+        return amounts == null ? 0L : amounts.getRestockDate();
     }
 }

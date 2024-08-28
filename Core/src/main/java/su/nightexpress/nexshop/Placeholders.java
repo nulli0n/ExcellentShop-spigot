@@ -8,13 +8,13 @@ import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
-import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
-import su.nightexpress.nexshop.shop.impl.price.DynamicPricer;
-import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
-import su.nightexpress.nexshop.shop.impl.price.PlayersPricer;
-import su.nightexpress.nexshop.shop.impl.price.RangedPricer;
-import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
-import su.nightexpress.nexshop.shop.util.ShopUtils;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
+import su.nightexpress.nexshop.product.price.impl.FloatPricer;
+import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
+import su.nightexpress.nexshop.product.price.impl.RangedPricer;
+import su.nightexpress.nexshop.util.RelativePlaceholders;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -137,8 +137,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     }
 
     @NotNull
-    public static PlaceholderRelMap<Player> forProduct(@NotNull AbstractProduct<?> product) {
-        PlaceholderRelMap<Player> map = new PlaceholderRelMap<>();
+    public static RelativePlaceholders<Player> forProduct(@NotNull AbstractProduct<?> product) {
+        RelativePlaceholders<Player> map = new RelativePlaceholders<>();
 
         map
             .add(PRODUCT_ID, player -> product.getId())

@@ -1,14 +1,17 @@
 package su.nightexpress.nexshop.data;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.data.impl.ChestDataHandler;
 import su.nightexpress.nexshop.data.impl.VirtualDataHandler;
+import su.nightexpress.nexshop.data.serialize.StockAmountSerializer;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.data.user.UserSettings;
+import su.nightexpress.nexshop.product.stock.StockAmount;
 import su.nightexpress.nightcore.database.AbstractUserDataHandler;
 import su.nightexpress.nightcore.database.sql.SQLColumn;
 import su.nightexpress.nightcore.database.sql.SQLValue;
@@ -51,9 +54,18 @@ public class DataHandler extends AbstractUserDataHandler<ShopPlugin, ShopUser> {
                 return new ShopUser(plugin, uuid, name, dateCreated, date, settings);
             }
             catch (SQLException exception) {
+                exception.printStackTrace();
                 return null;
             }
         };
+    }
+
+    @Override
+    @NotNull
+    protected GsonBuilder registerAdapters(@NotNull GsonBuilder builder) {
+        return super.registerAdapters(builder)
+            .registerTypeAdapter(StockAmount.class, new StockAmountSerializer())
+            ;
     }
 
     @NotNull
@@ -85,6 +97,8 @@ public class DataHandler extends AbstractUserDataHandler<ShopPlugin, ShopUser> {
 
     @Override
     public void onSynchronize() {
+        this.plugin.getShopManager().getProductDataManager().loadData();
+
         if (this.virtualDataHandler != null) this.virtualDataHandler.synchronize();
         if (this.chestDataHandler != null) this.chestDataHandler.synchronize();
     }

@@ -13,9 +13,8 @@ import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.impl.AbstractStock;
-import su.nightexpress.nexshop.shop.util.ShopUtils;
+import su.nightexpress.nexshop.util.ShopUtils;
 
-import java.util.UUID;
 import java.util.stream.Stream;
 
 public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
@@ -45,21 +44,6 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
     @Nullable
     protected ChestProduct findProduct(@NotNull Product product) {
         return this.shop.getProductById(product.getId());
-    }
-
-    @Override
-    public void load() {
-
-    }
-
-    @Override
-    public void load(@NotNull UUID playerId) {
-
-    }
-
-    @Override
-    public void unload(@NotNull UUID playerId) {
-
     }
 
     @Override

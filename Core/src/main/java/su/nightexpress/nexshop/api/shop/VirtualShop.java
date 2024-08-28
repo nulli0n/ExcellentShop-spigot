@@ -21,12 +21,6 @@ public interface VirtualShop extends Shop {
 
     boolean load();
 
-    boolean isLoaded();
-
-    //void saveSettings();
-
-    void setLoaded(boolean loaded);
-
     boolean hasPermission(@NotNull Player player);
 
     @NotNull ShopType getType();

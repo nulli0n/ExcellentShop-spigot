@@ -13,13 +13,10 @@ import su.nightexpress.nexshop.data.UserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.hook.PlaceholderHook;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.ShopManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
-import su.nightexpress.nexshop.shop.impl.handler.ItemsAdderHandler;
-import su.nightexpress.nexshop.shop.impl.handler.MMOItemsHandler;
-import su.nightexpress.nexshop.shop.impl.handler.OraxenItemHandler;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nightcore.NightDataPlugin;
 import su.nightexpress.nightcore.command.experimental.ImprovedCommands;
@@ -43,7 +40,7 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
     @Override
     @NotNull
     protected PluginDetails getDefaultDetails() {
-        return PluginDetails.create("Shop", new String[]{"excellentshop", "eshop"})
+        return PluginDetails.create("Shop", new String[]{"eshop", "excellentshop"})
             .setConfigClass(Config.class)
             .setLangClass(Lang.class)
             .setPermissionsClass(Perms.class);
@@ -59,7 +56,7 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
 
     @Override
     public void enable() {
-        this.registerCommands();
+        this.loadCommands();
 
         this.dataHandler = new DataHandler(this);
         this.dataHandler.setup();
@@ -74,7 +71,7 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
             return;
         }
 
-        this.registerProductHandlers();
+        this.loadProductHandlers();
 
         this.shopManager = new ShopManager(this);
         this.shopManager.setup();
@@ -127,22 +124,11 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
         ProductHandlerRegistry.getHandlerMap().clear();
     }
 
-    private void registerProductHandlers() {
-        ProductHandlerRegistry.register(ProductHandlerRegistry.BUKKIT_ITEM);
-        ProductHandlerRegistry.register(ProductHandlerRegistry.BUKKIT_COMMAND);
-
-        if (Plugins.isInstalled(HookId.ORAXEN)) {
-            ProductHandlerRegistry.register(new OraxenItemHandler());
-        }
-        if (Plugins.isInstalled(HookId.ITEMS_ADDER)) {
-            ProductHandlerRegistry.register(new ItemsAdderHandler());
-        }
-        if (Plugins.isInstalled(HookId.MMOITEMS)) {
-            ProductHandlerRegistry.register(new MMOItemsHandler());
-        }
+    private void loadProductHandlers() {
+        ProductHandlerRegistry.load(this);
     }
 
-    private void registerCommands() {
+    private void loadCommands() {
         ChainedNode rootNode = this.getRootNode();
 
         CurrencyCommand.inject(this, rootNode);

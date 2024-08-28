@@ -7,6 +7,7 @@ import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.shop.chest.Placeholders;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -23,12 +24,14 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
                         @NotNull ProductPacker packer) {
         super(plugin, id, shop, currency, handler, packer);
 
-        this.placeholderRelMap.add(Placeholders.forProductStock(this));
+        this.placeholders.add(Placeholders.forProductStock(this));
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
         this.writeQuantity(config, path);
-        config.set(path + ".Handler", this.getHandler().getName());
+        if (!(this.getHandler() instanceof DummyHandler)) {
+            config.set(path + ".Handler", this.getHandler().getName());
+        }
         config.set(path + ".Currency", this.getCurrency().getId());
         this.getPricer().write(config, path + ".Price");
         this.getPacker().write(config, path);

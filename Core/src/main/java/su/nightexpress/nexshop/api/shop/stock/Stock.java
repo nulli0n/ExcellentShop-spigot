@@ -8,17 +8,9 @@ import su.nightexpress.nexshop.api.shop.TransactionListener;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 
-import java.util.UUID;
-
 public interface Stock extends TransactionListener {
 
     @NotNull Shop getShop();
-
-    void load();
-
-    void load(@NotNull UUID playerId);
-
-    void unload(@NotNull UUID playerId);
 
     default int count(@NotNull Product product, @NotNull TradeType type) {
         return this.count(product, type, null);

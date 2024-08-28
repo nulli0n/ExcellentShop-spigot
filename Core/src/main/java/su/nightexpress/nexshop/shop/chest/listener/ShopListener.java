@@ -4,6 +4,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -155,7 +156,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         Inventory from = event.getSource();
 
         // Prevent to steal items from the chest shop.
-        if (target.getType() == InventoryType.HOPPER && from.getType() == InventoryType.CHEST) {
+        if (target.getType() == InventoryType.HOPPER && from.getHolder() instanceof Container) {
             ChestShop shop = this.module.getShop(from);
             if (shop != null) {
                 event.setCancelled(true);
@@ -164,7 +165,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         }
 
         // Prevent to put different from a product items to the chest shop.
-        if (target.getType() == InventoryType.CHEST && from.getType() == InventoryType.HOPPER) {
+        if (target.getHolder() instanceof Container && from.getType() == InventoryType.HOPPER) {
             ChestShop shop = this.module.getShop(target);
             if (shop == null) return;
 

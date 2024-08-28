@@ -6,11 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface PluginItemPacker {
 
-    @NotNull ItemStack createItem();
-
-    boolean isValidId(@NotNull String itemId);
+    @Nullable ItemStack createItem();
 
     @NotNull String getItemId();
-
-    @Nullable String getItemId(@NotNull ItemStack itemStack);
 }

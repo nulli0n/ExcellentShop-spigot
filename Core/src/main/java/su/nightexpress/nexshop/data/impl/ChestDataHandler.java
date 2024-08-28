@@ -68,7 +68,7 @@ public class ChestDataHandler {
         if (module != null) {
             module.getBankMap().clear();
             module.loadBanks();
-            module.loadShopData();
+            //module.loadShopData();
         }
     }
 

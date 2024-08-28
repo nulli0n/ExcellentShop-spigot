@@ -128,7 +128,7 @@ public class DisplayHandlerV2 extends SimpleManager<ShopPlugin> {
                     return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
                 });
             }
-            placeholders.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getIcon()));
+            placeholders.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getPreview()));
 
             originText.addAll(shop.getHologramText(product));
             originText.replaceAll(placeholders.replacer());
@@ -148,7 +148,7 @@ public class DisplayHandlerV2 extends SimpleManager<ShopPlugin> {
                     bundle.containers.addAll(this.createHologramPackets(idList, clone, line));
                 }
 
-                ItemStack displayProduct = product == null ? null : product.getIcon();
+                ItemStack displayProduct = product == null ? null : product.getPreview();
                 if (displayProduct != null) {
                     bundle.containers.addAll(this.createItemPackets(idList, shop.getDisplayItemLocation(), displayProduct));
                 }

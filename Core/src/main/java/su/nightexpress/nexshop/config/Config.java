@@ -61,6 +61,19 @@ public class Config {
         "Command aliases (names) for the Auction module. Split with commas.",
         "[*] You must reboot the server to apply changes.");
 
+    public static final ConfigValue<Boolean> DATA_PRODUCT_CLEAN_UP = ConfigValue.create("Data.Products.CleanUp",
+        false,
+        "Sets whether or not plugin will clean up database from product data (price, stock and player limits) of shops or products that does not exist anymore.",
+        "It's recommended to enable if you're using the same shops configuration on all your servers.",
+        "[*] Do not enable if you have multiple servers with different shop configurations."
+    );
+
+    public static final ConfigValue<Integer> DATA_PRODUCT_SAVE_INTERVAL = ConfigValue.create("Data.Products.SaveInterval",
+        5,
+        "Sets how often (in seconds) modified product data (such as price, stock and player limit values) will be saved to the database.",
+        "[*] Do NOT disable if you're using Float/Dynamic prices and Global/Player stock features."
+    );
+
     public static final ConfigValue<Boolean> GENERAL_BUY_WITH_FULL_INVENTORY = ConfigValue.create("General.Buy_With_Full_Inventory",
         false, "Sets wheter players can purchase items from shop with full inventory.");
 

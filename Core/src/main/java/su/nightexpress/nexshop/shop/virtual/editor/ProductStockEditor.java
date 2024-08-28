@@ -39,14 +39,14 @@ public class ProductStockEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
         this.addItem(ItemUtil.getSkinHead(TEXTURE_GLOBAL), VirtualLocales.PRODUCT_STOCK_GLOBAL_INFO, 10, (viewer, event, product) -> {
             if (event.isRightClick()) {
                 VirtualStock stock = (VirtualStock) product.getShop().getStock();
-                stock.deleteGlobalData(product);
+                stock.resetGlobalAmount(product);
             }
         });
 
         this.addItem(ItemUtil.getSkinHead(TEXTURE_PLAYER), VirtualLocales.PRODUCT_STOCK_PLAYER_INFO, 28, (viewer, event, product) -> {
             if (event.isRightClick()) {
                 VirtualStock stock = (VirtualStock) product.getShop().getStock();
-                stock.deletePlayerLimit(product);
+                stock.resetPlayerAmount(product);
             }
         });
 

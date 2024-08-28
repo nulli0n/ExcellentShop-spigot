@@ -10,32 +10,42 @@ import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.data.object.PriceData;
-import su.nightexpress.nexshop.shop.impl.price.DynamicPricer;
-import su.nightexpress.nexshop.shop.impl.price.FloatPricer;
+import su.nightexpress.nexshop.product.data.ProductData;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.data.impl.PriceData;
+import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
+import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ShopDataPricer implements ShopPricer {
 
-    private final ShopPlugin             plugin;
-    private final Shop                   shop;
-    private final Map<String, PriceData> dataMap;
+    private final ShopPlugin plugin;
+    private final Shop       shop;
 
     public ShopDataPricer(@NotNull ShopPlugin plugin, @NotNull Shop shop) {
         this.plugin = plugin;
         this.shop = shop;
-        this.dataMap = new ConcurrentHashMap<>();
     }
 
-    @Override
-    public void load() {
-        this.dataMap.clear();
-        this.plugin.getData().getVirtualDataHandler().getPriceData(this.shop).forEach(this::addData);
-        this.updatePrices();
+    @NotNull
+    public Map<String, ProductData> getDataMap() {
+        return this.plugin.getShopManager().getProductDataManager().getDataMap(this.shop);
+    }
 
-        //this.plugin.info("Loaded " + this.getDataMap().size() + " price datas for '" + shop.getId() + "' shop!");
+    @NotNull
+    public ProductData getProductData(@NotNull Product product) {
+        return this.getProductData(product.getId());
+    }
+
+    @NotNull
+    public ProductData getProductData(@NotNull String productId) {
+        return this.plugin.getShopManager().getProductDataManager().getData(this.shop.getId(), productId);
+    }
+
+    @Nullable
+    public PriceData getPriceData(@NotNull Product product) {
+        return this.getProductData(product).getPriceData();
     }
 
     @Override
@@ -45,36 +55,17 @@ public class ShopDataPricer implements ShopPricer {
         AbstractProductPricer pricer = product.getPricer();
 
         if (pricer.getType() == PriceType.DYNAMIC) {
-            this.plugin.runTaskAsync(task -> {
+            //this.plugin.runTaskAsync(task -> {  // not needed anymore with scheduled saves
                 PriceData priceData = this.getDataOrCreate(product);
                 priceData.countTransaction(result.getTradeType(), result.getUnits());
                 this.updateDynamic(product, true);
-            });
+            //});
         }
     }
 
-    /*@Override
-    public void refreshPrices() {
-        this.shop.getProducts().forEach(product -> {
-            if (product.getPricer().getType() == PriceType.FLAT) return;
-
-            PriceData priceData = this.getData(product);
-            if (priceData != null && priceData.isExpired()) {
-
-            }
-
-            if (product.getPricer().getType() == PriceType.FLOAT) {
-                if (!(product.getPricer() instanceof FloatPricer pricer)) return;
-                if (!pricer.isUpdateTime()) return;
-
-                this.flushFloatPrices(product);
-            }
-        });
-    }*/
-
     @Override
     public void updatePrices() {
-        this.shop.getProducts().forEach(product -> {
+        this.shop.getValidProducts().forEach(product -> {
             if (product.getPricer().getType() == PriceType.FLAT) return;
 
             this.updatePrice(product);
@@ -122,7 +113,7 @@ public class ShopDataPricer implements ShopPricer {
     private void updateFloat(@NotNull Product product) {
         if (!(product.getPricer() instanceof FloatPricer)) return;
 
-        PriceData priceData = this.getData(product);
+        PriceData priceData = this.getPriceData(product);
         boolean hasData = priceData != null;
         if (hasData && !priceData.isExpired()) {
             product.setPrice(TradeType.BUY, priceData.getLastBuyPrice());
@@ -154,66 +145,48 @@ public class ShopDataPricer implements ShopPricer {
         product.setPrice(TradeType.BUY, priceData.getLastBuyPrice());
         product.setPrice(TradeType.SELL, priceData.getLastSellPrice());
         this.saveData(priceData);
-        //this.updateFloat(product);
-    }
-
-    @NotNull
-    public Map<String, PriceData> getDataMap() {
-        return dataMap;
-    }
-
-    private void addData(@NotNull PriceData data) {
-        this.dataMap.put(data.getProductId(), data);
     }
 
     @NotNull
     private PriceData getDataOrCreate(@NotNull Product product) {
-        PriceData data = this.getData(product);
+        ProductData productData = this.getProductData(product);
+        PriceData data = productData.getPriceData();
         if (data == null) {
             data = new PriceData(product);
-            //this.createData(data);
-            this.addData(data);
-            this.plugin.getData().getVirtualDataHandler().insertPriceData(data);
+            productData.loadPrice(data);
+            this.insertData(data);
         }
         return data;
     }
 
-    @Override
-    @Nullable
-    public PriceData getData(@NotNull Product product) {
-        return this.getData(product.getId());
-    }
-
-    @Nullable
-    private PriceData getData(@NotNull String productId) {
-        return this.dataMap.get(productId);
+    private void insertData(@NotNull PriceData data) {
+        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().insertPriceData(data));
     }
 
     @Override
     public void saveData(@NotNull Product product) {
-        PriceData data = this.getData(product);
+        PriceData data = this.getPriceData(product);
         if (data == null) return;
 
         this.saveData(data);
     }
 
     private void saveData(@NotNull PriceData data) {
-        this.plugin.getData().getVirtualDataHandler().savePriceData(data);
+        this.plugin.getShopManager().getProductDataManager().scheduleSave(data);
     }
 
     @Override
     public void deleteData(@NotNull Product product) {
-        this.dataMap.remove(product.getId());
-        //PriceData data = this.getDataMap().remove(product.getId());
-        //if (data == null) return;
+        this.getDataMap().remove(product.getId());
 
         this.plugin.runTaskAsync(task -> {
             this.plugin.getData().getVirtualDataHandler().deletePriceData(product);
         });
     }
 
+    @Override
     public void deleteData() {
-        this.dataMap.clear();
+        this.getDataMap().clear();
         this.plugin.getData().getVirtualDataHandler().deletePriceData(shop);
     }
 }

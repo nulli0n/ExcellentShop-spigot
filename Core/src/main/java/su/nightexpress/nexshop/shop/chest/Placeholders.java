@@ -7,7 +7,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
+import su.nightexpress.nexshop.util.RelativePlaceholders;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -75,8 +75,8 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
             .add(SHOP_SHOWCASE_ENABLED, () -> ChestLang.getYesOrNo(shop.isShowcaseEnabled()));
     }
 
-    public static PlaceholderRelMap<Player> forProductStock(@NotNull ChestProduct product) {
-        PlaceholderRelMap<Player> map = new PlaceholderRelMap<>();
+    public static RelativePlaceholders<Player> forProductStock(@NotNull ChestProduct product) {
+        RelativePlaceholders<Player> map = new RelativePlaceholders<>();
 
         for (TradeType tradeType : TradeType.values()) {
             map

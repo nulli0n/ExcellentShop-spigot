@@ -33,7 +33,7 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.module.AbstractShopModule;
+import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nexshop.shop.chest.command.*;
 import su.nightexpress.nexshop.shop.chest.compatibility.*;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
@@ -173,7 +173,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     @Override
-    protected void addCommands(@NotNull ChainedNodeBuilder builder) {
+    protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
         if (!ChestConfig.SHOP_AUTO_BANK.get()) {
             BankCommand.build(this.plugin, this, builder);
         }
@@ -250,15 +250,6 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             this.loadShop(config);
         }
         this.info("Shops Loaded: " + this.getShops().size());
-
-        this.plugin.runTaskAsync(task -> this.loadShopData());
-    }
-
-    public void loadShopData() {
-        this.getShops().forEach(shop -> {
-            shop.getPricer().load();
-            shop.getStock().load();
-        });
     }
 
     public boolean loadShop(@NotNull FileConfig config) {
@@ -287,6 +278,9 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         // ----- OLD BANK UPDATE - END -----
 
         shop.updatePosition();
+        if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
+            shop.getPricer().updatePrices(); // Need to load price data from ProductDataManager on /cshop reload.
+        }
 
         this.shopMap.put(shop);
         return true;
@@ -426,6 +420,8 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public boolean openShop(@NotNull Player player, @NotNull ChestShop shop, int page, boolean force) {
+        if (!shop.isLoaded()) return false;
+
         if (!force) {
             if (!shop.canAccess(player, true)) return false;
         }
@@ -453,7 +449,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
         List<ChestProduct> products = new ArrayList<>();
         this.getActiveShops().forEach(shop -> {
-            shop.getProducts().forEach(product -> {
+            shop.getValidProducts().forEach(product -> {
                 if (!(product.getPacker() instanceof ItemPacker packer)) return;
 
                 ItemStack item = packer.getItem();
@@ -500,6 +496,11 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
                 shop = this.getShop(backend);
 
                 if (shop != null) {
+                    ItemStack item = event.getItem();
+                    if (item != null && (item.getType() == Material.GLOW_INK_SAC || ChestUtils.isDye(item.getType()))) {
+                        if (shop.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) return;
+                    }
+
                     event.setUseInteractedBlock(Event.Result.DENY);
                     event.setUseItemInHand(Event.Result.DENY);
                     this.interactShop(event, player, shop);
@@ -518,7 +519,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             ItemStack item = event.getItem();
             if (item != null && !originalDeny) {
                 if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME || item.getType() == Material.HOPPER) {
-                    if (!shop.isOwner(player)) {
+                    if (!shop.isOwner(player) && !player.hasPermission(ChestPerms.EDIT_OTHERS)) {
                         ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
                     }
                     else event.setUseInteractedBlock(Event.Result.ALLOW);
@@ -711,7 +712,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         }
 
         if (ChestUtils.isInfiniteStorage()) {
-            if (shop.getProducts().stream().anyMatch(product -> shop.getStock().count(product, TradeType.BUY) > 0)) {
+            if (shop.getValidProducts().stream().anyMatch(product -> shop.getStock().count(product, TradeType.BUY) > 0)) {
                 ChestLang.SHOP_REMOVAL_ERROR_NOT_EMPTY.getMessage().send(player);
                 return false;
             }
@@ -839,7 +840,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         shop.save();
 
         ChestLang.STORAGE_WITHDRAW_SUCCESS.getMessage()
-            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(units))
+            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(maxUnits))
             .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
             .send(player);
         return true;

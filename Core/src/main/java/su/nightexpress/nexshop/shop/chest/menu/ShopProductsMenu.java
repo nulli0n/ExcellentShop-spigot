@@ -87,7 +87,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
         if (maxProducts < 0) maxProducts = this.productSlots.length;
 
         PriorityQueue<ChestProduct> queue = new PriorityQueue<>(Comparator.comparing(AbstractProduct::getId));
-        queue.addAll(shop.getProducts());
+        queue.addAll(shop.getValidProducts());
 
         int productCount = 0;
 
@@ -160,7 +160,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
         ChestShop shop = this.getLink(viewer);
         Player player = viewer.getPlayer();
         int maxProducts = ChestUtils.getProductLimit(player);
-        int hasProducts = shop.getProducts().size();
+        int hasProducts = shop.getValidProducts().size();
         boolean canAdd = maxProducts < 0 || hasProducts < maxProducts;
         if (!canAdd) return;
 

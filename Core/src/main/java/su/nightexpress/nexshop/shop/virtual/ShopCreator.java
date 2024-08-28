@@ -7,11 +7,11 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
-import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
-import su.nightexpress.nexshop.shop.impl.packer.VanillaItemPacker;
+import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
+import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
@@ -773,9 +773,9 @@ public class ShopCreator {
     private void addShopProduct(@NotNull StaticShop shop, @NotNull Material material, @NotNull UniDouble price, @NotNull UniInt pageSlot) {
         ItemStack itemStack = new ItemStack(material);
 
-        VanillaItemHandler handler = ProductHandlerRegistry.forBukkitItem();
-        VanillaItemPacker packer = handler.createPacker();
-        packer.load(itemStack);
+        BukkitItemHandler handler = ProductHandlerRegistry.forBukkitItem();
+        BukkitItemPacker packer = handler.createPacker(itemStack);
+        //packer.load(itemStack);
 
         StaticProduct product = shop.createProduct(this.currency, handler, packer);
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
@@ -790,9 +790,9 @@ public class ShopCreator {
     private void addShopProduct(@NotNull RotatingShop shop, @NotNull Material material, @NotNull UniDouble price) {
         ItemStack itemStack = new ItemStack(material);
 
-        VanillaItemHandler handler = ProductHandlerRegistry.forBukkitItem();
-        VanillaItemPacker packer = handler.createPacker();
-        packer.load(itemStack);
+        BukkitItemHandler handler = ProductHandlerRegistry.forBukkitItem();
+        BukkitItemPacker packer = handler.createPacker(itemStack);
+        //packer.load(itemStack);
 
         RotatingProduct product = shop.createProduct(this.currency, handler, packer);
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));

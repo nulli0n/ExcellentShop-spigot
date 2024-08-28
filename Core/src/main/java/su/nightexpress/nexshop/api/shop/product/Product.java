@@ -7,12 +7,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nightcore.util.placeholder.Placeholder;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
@@ -22,6 +23,15 @@ public interface Product extends Placeholder {
     @NotNull
     default PlaceholderMap getPlaceholders() {
         return this.getPlaceholders(null);
+    }
+
+    default boolean isValid() {
+        if (this.getPacker() instanceof PluginItemPacker packer && this.getHandler() instanceof PluginItemHandler handler) {
+            return handler.isValidId(packer.getItemId());
+        }
+        return true;
+
+        //return !(this.getHandler() instanceof AbstractPluginItemHandler packer) || packer.isValidId(packer.getItemId());
     }
 
     @NotNull PlaceholderMap getPlaceholders(@Nullable Player player);
@@ -120,7 +130,7 @@ public interface Product extends Placeholder {
 
     @NotNull ProductHandler getHandler();
 
-    void setHandler(@NotNull ProductHandler handler);
+    void setHandler(@NotNull ProductHandler handler, @NotNull ProductPacker packer);
 
     @NotNull ProductPacker getPacker();
 
@@ -130,9 +140,5 @@ public interface Product extends Placeholder {
 
     @NotNull default ItemStack getPreview() {
         return this.getPacker().getPreview();
-    }
-
-    @NotNull default ItemStack getIcon() {
-        return this.getPacker() instanceof ItemPacker itemPacker ? itemPacker.getIcon() : this.getPreview();
     }
 }

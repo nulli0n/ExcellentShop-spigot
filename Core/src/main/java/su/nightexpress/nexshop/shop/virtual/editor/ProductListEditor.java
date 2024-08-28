@@ -14,19 +14,19 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 import su.nightexpress.nightcore.language.entry.LangItem;
@@ -153,6 +153,11 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
 
         int index = 0;
         for (VirtualProduct product : products) {
+            if (!product.isValid()) {
+                this.plugin.error("Invalid item id for '" + product.getId() + "' product in '" + shop.getId() + "' shop!");
+                continue;
+            }
+
             int slot;
             if (product instanceof StaticProduct staticProduct) {
                 if (staticProduct.getPage() != page) continue;
@@ -206,20 +211,19 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
                     StaticProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
                         Currency currency = shop.getModule().getDefaultCurrency();
-                        ProductHandler handler;
+                        su.nightexpress.nexshop.api.shop.handler.ItemHandler handler;
                         if (event.isShiftClick()) {
                             handler = ProductHandlerRegistry.forBukkitItem();
                         }
                         else handler = ProductHandlerRegistry.getHandler(cursor);
 
-                        ProductPacker packer = handler.createPacker();
-                        if (packer instanceof ItemPacker itemPacker) {
-                            itemPacker.load(cursor);
-                        }
+                        ProductPacker packer = handler.createPacker(cursor);
+                        if (packer == null) return;
+
                         cached = staticShop.createProduct(currency, handler, packer);
 
                         shop.getPricer().deleteData(cached);
-                        shop.getStock().deleteGlobalData(cached);
+                        shop.getStock().resetGlobalAmount(cached);
                     }
                     cached.setSlot(event.getRawSlot());
                     cached.setPage(page);
@@ -242,7 +246,6 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
         freeItem.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));
         freeItem.setSlots(freeSlots.stream().mapToInt(Number::intValue).toArray());
         freeItem.setHandler((viewer2, event) -> {
-            //Player player = viewer2.getPlayer();
             ItemStack cursor = event.getCursor();
             boolean hasCursor = cursor != null && !cursor.getType().isAir();
 
@@ -251,21 +254,30 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
                 Currency currency = shop.getModule().getDefaultCurrency();
                 ProductHandler handler;
                 if (event.isShiftClick() && hasCursor) {
-                    handler = ProductHandlerRegistry.BUKKIT_ITEM;
+                    handler = ProductHandlerRegistry.forBukkitItem();
                 }
                 else {
                     handler = hasCursor ? ProductHandlerRegistry.getHandler(cursor) : ProductHandlerRegistry.forBukkitCommand();
                 }
 
-                ProductPacker packer = handler.createPacker();
-                if (packer instanceof ItemPacker itemPacker && cursor != null) {
-                    itemPacker.load(cursor);
+                ProductPacker packer;
+                if (handler instanceof su.nightexpress.nexshop.api.shop.handler.ItemHandler itemHandler && cursor != null) {
+                    packer = itemHandler.createPacker(cursor);
                 }
+                else {
+                    BukkitCommandHandler commandHandler = (BukkitCommandHandler) handler;
+                    packer = commandHandler.createPacker();
+                }
+
+                if (packer == null) {
+                    return;
+                }
+
                 product = shop.createProduct(currency, handler, packer);
 
                 // Delete product price & stock datas for new items in case there was product with similar ID.
                 shop.getPricer().deleteData(product);
-                shop.getStock().deleteGlobalData(product);
+                shop.getStock().resetGlobalAmount(product);
             }
 
             if (product instanceof StaticProduct staticProduct) {
@@ -274,9 +286,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
             }
 
             shop.addProduct(product);
-            //shop.saveProducts();
             event.getView().setCursor(null);
-            //this.flush(player);
             this.saveProductAndFlush(viewer2, product);
         });
 

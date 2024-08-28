@@ -17,15 +17,6 @@ public interface ShopEditor extends Menu {
         this.doFlush(viewer);
     }
 
-    /*default void save(@NotNull MenuViewer viewer, @NotNull Shop shop) {
-        shop.save();
-    }
-
-    default void saveAndFlush(@NotNull MenuViewer viewer, @NotNull Shop shop) {
-        this.save(viewer, shop);
-        this.doFlush(viewer);
-    }*/
-
 
     default void saveProducts(@NotNull MenuViewer viewer, @NotNull Shop shop) {
         shop.saveProducts();

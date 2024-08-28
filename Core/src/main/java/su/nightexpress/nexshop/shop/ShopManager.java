@@ -9,6 +9,7 @@ import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.product.ProductDataManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.menu.CartMenu;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -26,28 +27,37 @@ import java.util.Set;
 
 public class ShopManager extends AbstractManager<ShopPlugin> {
 
-    //private CartMenu cartMenu;
-
     private final Map<String, CartMenu> cartMenuMap;
+    private final ProductDataManager    productDataManager;
 
     public ShopManager(@NotNull ShopPlugin plugin) {
         super(plugin);
         this.cartMenuMap = new HashMap<>();
+        this.productDataManager = new ProductDataManager(plugin);
     }
 
     @Override
     protected void onLoad() {
-        //this.cartMenu = new CartMenu(this.plugin);
         this.loadCartUIs();
+        this.loadProductData();
 
         this.addTask(this.plugin.createAsyncTask(this::updateShops).setSecondsInterval(Config.SHOP_UPDATE_INTERVAL.get()));
     }
 
     @Override
     protected void onShutdown() {
-        //if (this.cartMenu != null) this.cartMenu.clear();
         this.cartMenuMap.values().forEach(Menu::clear);
         this.cartMenuMap.clear();
+
+        this.productDataManager.shutdown();
+    }
+
+    private void loadProductData() {
+        this.plugin.runTaskAsync(task -> {
+            this.productDataManager.setup(); // Load price & stock datas for all products in both, virtual and chest shops.
+            this.productDataManager.cleanUp(); // Remove datas for non-existent shops or products (shops are already loaded).
+            this.getShops().forEach(shop -> shop.getPricer().updatePrices()); // Update product prices with loaded datas.
+        });
     }
 
     private void loadCartUIs() {
@@ -64,35 +74,45 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         this.plugin.info("Loaded " + this.cartMenuMap.size() + " product cart UIs!");
     }
 
-    private void updateShops() {
+    @NotNull
+    public ProductDataManager getProductDataManager() {
+        return productDataManager;
+    }
+
+    @NotNull
+    public Set<Shop> getShops() {
         Set<Shop> shops = new HashSet<>();
 
         VirtualShopModule virtualShopModule = plugin.getVirtualShop();
         if (virtualShopModule != null) {
-            virtualShopModule.getShops().forEach(shop -> {
-                if (!shop.isLoaded()) return;
-
-                shops.add(shop);
-
-                if (shop instanceof StaticShop staticShop) {
-                    staticShop.getDiscountConfigs().forEach(discount -> {
-                        if (discount.isDiscountTime()) {
-                            discount.update();
-                        }
-                    });
-                }
-                else if (shop instanceof RotatingShop rotatingShop) {
-                    rotatingShop.tryRotate();
-                }
-            });
+            shops.addAll(virtualShopModule.getShops());
         }
 
         ChestShopModule chestShopModule = plugin.getChestShop();
         if (chestShopModule != null) {
-            shops.addAll(chestShopModule.getActiveShops());
+            shops.addAll(chestShopModule.getShops());
         }
 
-        shops.forEach(shop -> shop.getPricer().updatePrices());
+        return shops;
+    }
+
+    private void updateShops() {
+        this.getShops().forEach(shop -> {
+            if (!shop.isLoaded()) return;
+
+            if (shop instanceof StaticShop staticShop) {
+                staticShop.getDiscountConfigs().forEach(discount -> {
+                    if (discount.isDiscountTime()) {
+                        discount.update();
+                    }
+                });
+            }
+            else if (shop instanceof RotatingShop rotatingShop) {
+                rotatingShop.tryRotate();
+            }
+
+            shop.getPricer().updatePrices();
+        });
     }
 
     @Nullable

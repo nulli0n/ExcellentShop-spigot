@@ -8,8 +8,6 @@ import su.nightexpress.nightcore.util.placeholder.Placeholder;
 
 public interface ProductPacker extends Placeholder {
 
-    boolean load(@NotNull FileConfig config, @NotNull String path);
-
     void write(@NotNull FileConfig config, @NotNull String path);
 
     @NotNull ItemStack getPreview();

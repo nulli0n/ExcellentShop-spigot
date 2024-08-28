@@ -55,7 +55,7 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
 
     @Override
     protected void saveAdditionalProducts() {
-        this.getProducts()
+        this.getValidProducts()
             .stream().sorted(Comparator.comparingInt(StaticProduct::getSlot).thenComparingInt(StaticProduct::getPage))
             .forEach(this::writeProduct);
     }

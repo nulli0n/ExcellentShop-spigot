@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
+import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.auction.command.child.*;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
@@ -20,8 +20,8 @@ import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.module.AbstractShopModule;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
+import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.database.DatabaseType;
@@ -110,7 +110,7 @@ public class AuctionManager extends AbstractShopModule {
     }
 
     @Override
-    protected void addCommands(@NotNull ChainedNodeBuilder builder) {
+    protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
         builder.fallback(context -> {
             if (!context.checkPermission(AuctionPerms.COMMAND_OPEN)) {
                 context.errorPermission();
@@ -276,7 +276,7 @@ public class AuctionManager extends AbstractShopModule {
             return false;
         }
 
-        for (PluginItemPacker packer : ProductHandlerRegistry.getPluginItemPackers()) {
+        for (PluginItemHandler packer : ProductHandlerRegistry.getPluginItemHandlers()) {
             String id = packer.getItemId(item);
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;

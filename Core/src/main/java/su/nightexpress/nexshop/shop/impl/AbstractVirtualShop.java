@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop.impl;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -20,9 +19,10 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
-import su.nightexpress.nexshop.shop.impl.handler.VanillaCommandHandler;
-import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
+import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
@@ -31,6 +31,8 @@ import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualStock;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.language.LangAssets;
+import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.StringUtil;
 
@@ -49,7 +51,6 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     protected final Set<Discount>     discounts;
     protected final Set<Integer>      npcIds;
 
-    protected boolean      loaded;
     protected String       name;
     protected List<String> description;
     protected boolean      permissionRequired;
@@ -129,23 +130,19 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         if (!cfg.contains(path + ".Handler")) {
             ItemStack item = cfg.getItemEncoded(path + ".Content.Item");
             if (item != null && !item.getType().isAir()) {
-                cfg.set(path + ".Handler", VanillaItemHandler.NAME);
+                cfg.set(path + ".Handler", BukkitItemHandler.NAME);
             }
-            else cfg.set(path + ".Handler", VanillaCommandHandler.NAME);
+            else cfg.set(path + ".Handler", BukkitCommandHandler.NAME);
         }
 
-        String handlerId = cfg.getString(path + ".Handler", VanillaItemHandler.NAME);
+        String handlerId = cfg.getString(path + ".Handler", BukkitItemHandler.NAME);
         ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
         if (handler == null) {
-            handler = ProductHandlerRegistry.forBukkitItem();
-            this.getModule().warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Using default one...");
+            handler = ProductHandlerRegistry.getDummyHandler();
+            this.getModule().warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in editor.");
         }
 
-        ProductPacker packer = handler.createPacker();
-        if (!packer.load(cfg, path)) {
-            this.getModule().error("Invalid data for '" + id + "' product in '" + this.getId() + "' shop.");
-            return null;
-        }
+        ProductPacker packer = handler.createPacker(cfg, path);
 
         P product = this.createProduct(id, currency, handler, packer);
 
@@ -169,7 +166,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
         ProductHandler handler = ProductHandlerRegistry.getHandler(item);
 
-        var stream = this.getProducts().stream().filter(product -> {
+        var stream = this.getValidProducts().stream().filter(product -> {
             if (!product.isTradeable(tradeType)) return false;
             if (product.getHandler() != handler) return false;
             if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
@@ -250,15 +247,6 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         }
 
         return true;
-    }
-
-    @Override
-    public boolean isLoaded() {
-        return loaded;
-    }
-
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
     }
 
     @NotNull
@@ -343,25 +331,25 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     public String generateProductId(@NotNull ProductPacker packer) {
         String id;
         if (packer instanceof ItemPacker itemPacker) {
-            if (itemPacker.getItem().getType() == Material.BARRIER) {
-                id = "new_item";
-            }
-            else {
-                id = ItemUtil.getItemName(itemPacker.getItem());
-            }
+            id = StringUtil.lowerCaseUnderscoreStrict(ItemUtil.getItemName(itemPacker.getItem())); // Remove all non-latins from item display name.
+            if (id.isBlank()) id = StringUtil.lowerCaseUnderscoreStrict(LangAssets.get(itemPacker.getItem().getType())); // Remove all non-latins from localized item material.
+            if (id.isBlank()) id = BukkitThing.toString(itemPacker.getItem().getType()); // Use default english material.
         }
         else if (packer instanceof CommandPacker) {
             id = "command_item";
         }
         else id = UUID.randomUUID().toString();
 
-        id = StringUtil.lowerCaseUnderscore(id);
-
         int count = 0;
-        while (this.getProductById(id) != null) {
-            id = id + "_" + (++count);
+        while (this.getProductById(this.addCount(id, count)) != null) {
+            count++;
         }
 
-        return id;
+        return this.addCount(id, count);
+    }
+
+    @NotNull
+    private String addCount(@NotNull String id, int count) {
+        return count == 0 ? id : id + "_" + count;
     }
 }

@@ -6,8 +6,8 @@ import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
-import su.nightexpress.nexshop.shop.util.ShopUtils;
+import su.nightexpress.nexshop.util.RelativePlaceholders;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
@@ -116,8 +116,8 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
      * @return PlaceholderMap with <b>additional</b> placeholders only.
      */
     @NotNull
-    public static PlaceholderRelMap<Player> forVirtualProduct(@NotNull VirtualProduct product) {
-        return new PlaceholderRelMap<Player>()
+    public static RelativePlaceholders<Player> forVirtualProduct(@NotNull VirtualProduct product) {
+        return new RelativePlaceholders<Player>()
                 .add(forProductStock(product))
                 .add(PRODUCT_DISCOUNT_AMOUNT, player -> NumberUtil.format(product.getShop().getDiscountPlain(product)))
                 .add(PRODUCT_DISCOUNT_ALLOWED, player -> Lang.getYesOrNo(product.isDiscountAllowed()))
@@ -136,11 +136,11 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
     }
 
     @NotNull
-    public static PlaceholderRelMap<Player> forProductStock(@NotNull VirtualProduct product) {
+    public static RelativePlaceholders<Player> forProductStock(@NotNull VirtualProduct product) {
         String never = Lang.OTHER_NEVER.getString();
         String infinity = Lang.OTHER_INFINITY.getString();
 
-        PlaceholderRelMap<Player> map = new PlaceholderRelMap<>();
+        RelativePlaceholders<Player> map = new RelativePlaceholders<>();
         VirtualStock stock = (VirtualStock) product.getShop().getStock();
 
         for (TradeType tradeType : TradeType.values()) {

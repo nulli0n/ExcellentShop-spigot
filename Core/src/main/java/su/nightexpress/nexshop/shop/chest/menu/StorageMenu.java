@@ -89,7 +89,7 @@ public class StorageMenu extends ShopEditorMenu implements AutoFilled<ChestProdu
         ChestStock stock = shop.getStock();
 
         autoFill.setSlots(this.objectSlots);
-        autoFill.setItems(shop.getProducts());
+        autoFill.setItems(shop.getValidProducts());
         autoFill.setItemCreator(product -> {
             ItemStack icon = product.getPreview();
             ItemReplacer.create(icon).hideFlags().trimmed()

@@ -22,5 +22,6 @@ softdepend:
   - Oraxen
   - ItemsAdder
   - MMOItems
+  - ExcellentCrates
   - PlaceholderAPI
 api-version: 1.18

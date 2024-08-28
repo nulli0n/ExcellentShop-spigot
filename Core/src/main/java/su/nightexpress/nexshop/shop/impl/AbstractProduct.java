@@ -16,10 +16,11 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.menu.ShopView;
-import su.nightexpress.nexshop.shop.impl.price.FlatPricer;
-import su.nightexpress.nexshop.shop.util.PlaceholderRelMap;
+import su.nightexpress.nexshop.product.price.impl.FlatPricer;
+import su.nightexpress.nexshop.util.RelativePlaceholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nightcore.language.entry.LangText;
@@ -29,9 +30,9 @@ import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
 
-    protected final ShopPlugin plugin;
-    protected final String     id;
-    protected final PlaceholderRelMap<Player> placeholderRelMap;
+    protected final ShopPlugin                   plugin;
+    protected final String                       id;
+    protected final RelativePlaceholders<Player> placeholders;
 
     protected S                     shop;
     protected Currency              currency;
@@ -50,16 +51,15 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         this.shop = shop;
         this.setCurrency(currency);
         this.setPricer(new FlatPricer());
-        this.setHandler(handler);
-        this.packer = packer;
+        this.setHandler(handler, packer);
 
-        this.placeholderRelMap = Placeholders.forProduct(this);
+        this.placeholders = Placeholders.forProduct(this);
     }
 
     @Override
     @NotNull
     public PlaceholderMap getPlaceholders(@Nullable Player player) {
-        PlaceholderMap map = this.placeholderRelMap.toNormal(player);
+        PlaceholderMap map = this.placeholders.toNormal(player);
         map.add(this.getPacker().getPlaceholders()); // Packer can be changed, we can't cache it.
         map.add(this.getPricer().getPlaceholders()); // Pricer can be changed, we can't cache it.
         return map;
@@ -207,9 +207,9 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     }
 
     @Override
-    public void setHandler(@NotNull ProductHandler handler) {
+    public void setHandler(@NotNull ProductHandler handler, @NotNull ProductPacker packer) {
         this.handler = handler;
-        this.packer = handler.createPacker();
+        this.packer = packer;
     }
 
     @NotNull

@@ -1,61 +1,101 @@
 Command:
+  Argument:
+    Name:
+      Name: nombre
+      Currency: divisa
+      Price: precio
   Currency:
-    Desc: Administrar las divisas del plugin.
-    Usage: '[help]'
+    Desc: Administrar las divisas.
     Give:
       Desc: Dar una divisa específica a un jugador.
-      Usage: <currency> <player> <amount>
-      Done: Le diste &ax%amount% %currency_name%&7 a &a%player_name%&7.
+      Done: <lgray>Le diste <lyellow>%amount% %currency_name%</lyellow> a <lyellow>%player_name%</lyellow>.</lgray>.
     Take:
-      Desc: Quita una divisa especificada a un jugador.
-      Usage: <currency> <player> <amount>
-      Done: Tomaste &ax%amount% %currency_name%&7 de &a%player_name%&7.
+      Desc: Quitar una divisa específica a un jugador.
+      Done: <lgray>Tomaste <lyellow>%amount% %currency_name%</lyellow> de <lyellow>%player_name%</lyellow>.</lgray>
     Create:
-      Desc: Crea/reemplaza una divisa de/con el objeto en mano.
-      Usage: <name>
+      Desc: Crea una divisa con el objeto en mano.
       Done:
-        New: Nueva divisa creada &a%currency_id%&7 como &a%item%&7.
-        Replace: Objeto sustituído en la divisa &a%currency_id%&7 con &a%item%&7.
+        New: <lgray>Nueva divisa <lgreen>%name%</lgreen> creada con <lgreen>%item%</lgreen>.</lgray>
       Error:
-        Exist: La divisa &c%currency_id%&7 ya existe y no es un objeto divisa.
+        Exist: <lgray>La divisa <lred>%currency_id%</lred> ya existe y no es una divisa de objeto.</lgray>
+    Error:
+      NoItem: <lred>¡Es necesario tener un item en la mano!</lred>
 Module:
-  Cmd:
-    Reload: El módulo &a%module% &7ha sido recargado.
+  Command:
+    Reloaded: <lgray><lgreen>%name%</lgreen> recargado!</lgray>
+    Reload:
+      Desc: Recarga el módulo.
 Error:
   Currency:
-    Invalid: '&cDivisa inválida.'
-Editor:
-  Generic:
-    Enter:
-      Name: '&7Introduce un &a[Nombre]'
-      Amount: '&7Introduce una &a[Cantidad]'
-      Day: '&7Introduce &aun día &7en &ainglés.'
-      Time: '&7Introduce &auna hora&7 como: &a18:00:00.'
-      Seconds: '&7Introduce &auna cantidad &7de segundos.'
-    Error:
-      Currency: '&cDivisa inválida.'
-  Product:
-    Enter:
-      Price: '&7Introduce un nuevo &aprecio.'
-      Currency: '&7Introduce &ala id de una divisa.'
+    Invalid: <lred>Divisa inválida.</lred>
 Shop:
   Product:
     Error:
-      Unbuyable: '&cNo puedes comprar este item.'
-      Unsellable: '&cNo puedes vender este item.'
-      OutOfStock: '&cEste producto está agotado.'
-      OutOfSpace: '&cEsta tienda no tiene espacio.'
-      OutOfFunds: '&cEsta tienda no tiene dinero.'
-      FullStock: '&cEste producto está lleno de existencias.'
-      FullInventory: '&cNo puedes comprar con el inventario lleno.'
+      InvalidCartUI:
+        - <sound:"entity_villager_no">
+        - '<lred>No se a podido abrir el menú de compra: Cart UI no encontrado.</lred>'
+      Unbuyable:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡Este producto no se puede comprar!</lgray>
+      Unsellable:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡Este producto no se puede vender!</lgray>
+      OutOfStock:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡Este producto está fuera de stock!</lgray>
+      OutOfSpace:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡La tienda no tiene espacio!</lgray>
+      OutOfFunds:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡La tienda no tiene dinero!</lgray>
+      FullStock:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡El stock de este producto está completo!</lgray>
+      FullInventory:
+        - <sound:"entity_villager_no">
+        - <lred><b>¡Lo sentimos! </b></lred><lgray>¡No puedes comprar con el inventario lleno!</lgray>
       TooExpensive:
-        - <! type:"titles:15:60:15" sound:"BLOCK_ANVIL_PLACE" !>
-        - '&c&lDemasiado caro '
-        - ' &7Necesitas: &c%price%&7!'
+        - <output:"titles:15:60:15"><sound:"block_anvil_place">
+        - <lred><b>¡Demasiado caro!</b></lred>
+        - <lgray>¡Necesitas <lred>%price%</lred>!</lgray>
       NotEnoughItems:
-        - <! type:"titles:15:60:15" sound:"BLOCK_ANVIL_PLACE" !>
-        - '&c&lNo hay objetos suficientes. '
-        - ' &7Necesitas: &cx%amount% %item%&7!'
+        - <output:"titles:15:60:15"><sound:"block_anvil_place">
+        - <lred><b>¡No hay objetos suficientes!</b></lred>
+        - <lgray>¡Necesitas <lred>x%amount% %item%</lred>!</lgray>
+  Cart:
+    EnterAmount:
+      - <output:"titles:20:1200:20">
+      - <lgreen><b>< Cantidad personalizada ></b></lgreen>
+      - <lgray>Introduce tu cantidad</lgray>
+Other:
+  PriceDisabled: N/A
+Editor:
+  Price:
+    Float:
+      NoDays: No se han establecido los días. El precio no se actualizará adecuadamente.
+      NoTimes: No se han establecido las horas. El precio no se actualizará adecuadamente.
+  Generic:
+    Enter:
+      Name: <lgray>Introduce el <lgreen>[Nombre]</lgreen></lgray>
+      Amount: <lgray>Introduce la <lgreen>[Cantidad]</lgreen></lgray>
+      Value: <lgray>Introduce el <lgreen>[Valor]</lgreen></lgray>
+      Day: <lgray>Introduce el <lgreen>[Día en inglés]</lgreen></lgray>
+      Time: <lgray>Introduce las <lgreen>[Horas:Minutos:Segundos]</lgreen></lgray>
+      Seconds: <lgray>Introduce los <lgreen>[Segundos]</lgreen></lgray>
+  Product:
+    Enter:
+      Price: <lgray>Introduce el <lgreen>[Precio]</lgreen></lgray>
+      UniPrice: <lgray>Introduce el <lgreen>[Min] [Max]</lgreen></lgray>
+      Currency: <lgray>Introduce el <lgreen>[Id de divisa]</lgreen></lgray>
+Days:
+  MONDAY: Lunes
+  TUESDAY: Martes
+  WEDNESDAY: Miércoles
+  THURSDAY: Jueves
+  FRIDAY: Viernes
+  SATURDAY: Sábado
+  SUNDAY: Domingo
 TradeType:
   BUY: Compra
   SELL: Venta
@@ -63,735 +103,950 @@ PriceType:
   FLAT: Fijo
   FLOAT: Rango
   DYNAMIC: Dinámico
+  PLAYER_AMOUNT: Cantidad de jugador
 VirtualShop:
   Command:
+    Argument:
+      Name:
+        Shop: shop
+    Editor:
+      Desc: Abre el editor de la tienda virtual.
     Open:
       Desc: Abre una tienda específica.
-      Usage: '[player]'
+      Done:
+        Others: <lgray>Se ha abierto la tienda <lyellow>%shop_name%</lyellow> para <lyellow>%player_name%</lyellow>.</lgray>
     Menu:
       Desc: Abre el menú principal.
-      Usage: '[player]'
+      Done:
+        Others: <lgray>Se ha abierto el menu de tiendas para <lyellow>%player_name%</lyellow>.</lgray>
     Shop:
       Desc: Abre la tienda específica o el menú principal.
-      Usage: '[shopId]'
     SellMenu:
       Desc: Abre la interfaz de venta.
-      Usage: ''
+      Done:
+        Others: <lgray>Se ha abierto el menú de venta para <lyellow>%player_name%</lyellow>.</lgray>
+    SellAll:
+      Desc: Vende rápidamente todos los items del inventario.
+      Done:
+        Others: <lgray>Se ha forzado al jugador <lyellow>%player_name%</lyellow> a vender todos los items.</lgray>
+    SellHand:
+      Desc: Vende rápidamente el item en la mano.
+      Done:
+        Others: <lgray>Se ha forzado al jugador <lyellow>%player_name%</lyellow> a vender el item en la mano.</lgray>
   Shop:
+    Rotation:
+      Notify:
+        - <noprefix>
+        - ' '
+        - <lgray>Acaban de aparecer <lyellow>%amount%</lyellow> nuevos items en la tienda <lyellow>%shop_name%</lyellow>!</lgray>
+        - <lgray>¡Click <click:run_command:"/shop %shop_id%"><hover:show_text:'<lgray>¡Click para abrir la tienda!</lgray>'><lyellow><b>AQUÍ</b></lyellow></hover></click> para abrir la tienda!</lgray>
+        - ' '
     Error:
-      BadWorld: '&cLa tienda está desactivada en este mundo.'
-      BadGamemode: '&cNo puedes usar la tienda en el &cmodo de juego &e%type%!'
-      Invalid: '&cNo existe esa tienda.'
+      BadWorld: <lred>La tienda está desactivada en este mundo.</lred>
+      BadGamemode: <lred>No puedes usar la tienda en este modo de juego.</lred>
+      InvalidLayout: '<lgray>Error al abrir la tienda <lred>%shop_name%</lred>: Diseño de tienda inválido.</lgray>'
+      Invalid: <lred>No existe esa tienda.</lred>
   Product:
     Purchase:
       Sell:
-        - <! type:"titles:15:60:15" sound:"ENTITY_EXPERIENCE_ORB_PICKUP" !>
-        - '&a&lVenta exitosa '
-        - '&7Vendiste &ax%amount% %item% &7por &a%price%&7.'
+        - <output:"titles:15:60:15"><sound:"entity_experience_orb_pickup">
+        - <lgreen><b>Venta exitosa</b></lgreen>
+        - <lgray>Vendiste <lgreen>x%amount% %item%</lgreen> por <lgreen>%price%</lgreen></lgray>
       Buy:
-        - <! type:"titles:15:60:15" sound:"ENTITY_EXPERIENCE_ORB_PICKUP" !>
-        - '&a&lCompra exitosa'
-        - '&7Compraste &ax%amount% %item% &7por &a%price%&7.'
+        - <output:"titles:15:60:15"><sound:"entity_experience_orb_pickup">
+        - <lgreen><b>Compra exitosa</b></lgreen>
+        - <lgray>Compraste <lgreen>x%amount% %item%</lgreen> por <lgreen>%price%</lgreen></lgray>
   SellMenu:
     SaleResult:
-      - <! prefix:"false" sound:"ENTITY_EXPERIENCE_ORB_PICKUP" !>
-      - '&a&lObjetos vendidos:'
-      - '&7x%amount% %item%: &f%price%'
+      - <output:"titles:15:60:15"><sound:"entity_experience_orb_pickup">
+      - <lgreen><b>Objetos vendidos</b></lgreen>
+      - <lgray>+%total%</lgray>
+    SaleDetails:
+      - <noprefix>
+      - ' '
+      - <lgreen><b>Detalles de la venta:</b></lgreen>
+      - '%entry%'
+      - ' '
+      - '<lgray>Total: <lgreen>%total%</lgreen></lgray>'
+      - ' '
+    SaleEntry: '<lgray>x%amount% <white>%item%</white>: <lgreen>%price%</lgreen></lgray>'
+  Price:
+    AverageDynamics:
+      Up: <green>↑ %value%%</green>
+      Down: <red>↓ %value%%</red>
   Editor:
+    Product:
+      NoRankRequirements: ¡No se requieren rangos!
+      NoPermissionRequirements: ¡No se requieren permisos!
+      Object:
+        Static2:
+          Name: <lyellow><b>%product_preview_name%</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Handler: </lgray>%product_handler%</lyellow>'
+            - '<lyellow>● <lgray>Divisa: </lgray>%product_currency%</lyellow>'
+            - '<lyellow>● <lgray>Tipo de precio: </lgray>%product_price_type%</lyellow>'
+            - '<lyellow>● <lgray>Precio de compra: </lgray>%product_price_buy%</lyellow>'
+            - '<lyellow>● <lgray>Precio de venta: </lgray>%product_price_sell%</lyellow>'
+            - ''
+            - <lgray>Puedes mover este producto a cualquier</lgray>
+            - <lgray>otra ranura, página o tienda.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>editar</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>recoger</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>eliminar <lred>(irreversible)</lred></lyellow>.</lgray>
+        Rotating2:
+          Name: <lyellow><b>%product_preview_name%</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Probabilidad de rotación: </lgray>%product_rotation_chance%%</lyellow>'
+            - '<lyellow>● <lgray>Divisa: </lgray>%product_currency%</lyellow>'
+            - '<lyellow>● <lgray>Precio de compra: </lgray>%product_price_buy%</lyellow>'
+            - '<lyellow>● <lgray>Precio de venta:: </lgray>%product_price_sell%</lyellow>'
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>editar</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>recoger</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>eliminar <lred>(irreversible)</lred></lyellow>.</lgray>
+      FreeSlot:
+        Name: <lyellow><b><green><b>Ranura libre</b></green></b></lyellow>
+        Lore:
+          - ''
+          - <lgray><green><b>PRODUCTO DE ITEM:</b></green></lgray>
+          - <lgray>Click con un item para</lgray>
+          - <lgray>crear un producto de <green>item</green>.</lgray>
+          - ''
+          - <lgray>Mantén <white>Shift</white> para ignorar</lgray>
+          - <lgray>los metadatos customizados del item.</lgray>
+          - ''
+          - <lgray><lorange><b>PRODUCTO DE COMANDO:</b></lorange></lgray>
+          - <lgray>Click con el cursor vacío para</lgray>
+          - <lgray>crear un producto de <lorange>comando</lorange>.</lgray>
+      ReservedSlot:
+        Name: <lyellow><b><red><b>Ranura reservada</b></red></b></lyellow>
+        Lore:
+          - <lgray>Esta ranura está ocupada por un producto de la tienda.</lgray>
+      Item:
+        Name: <lyellow><b>Item actual</b></lyellow>
+        Lore:
+          - <lgray>Este es el item que:</lgray>
+          - <lyellow>● <lgray>Los jugadores obtienen cuando <green>compran</green>.</lgray></lyellow>
+          - <lyellow>● <lgray>Los jugadores deben tener para <red>vender</red>.</lgray></lyellow>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Arrastra y suelta para <lyellow>reemplazar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>obtener una copia</lyellow>.</lgray>
+          - ''
+          - <lgray>(Mantén <white>Shift</white> para ignorar los metadatos del item)</lgray>
+      Preview:
+        Name: <lyellow><b>Preview del item</b></lyellow>
+        Lore:
+          - <lgray>Este item solo se usa como</lgray>
+          - <lgray>representación visual del producto.</lgray>
+          - ''
+          - <lgray>Puedes <lyellow>renombrarlo</lyellow>, añadir <lyellow>lore</lyellow> y <lyellow>encantamientos</lyellow>.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Arrastra y suelta para <lyellow>reemplazar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>obtener una copia</lyellow>.</lgray>
+      RespectItemMeta:
+        Name: <lyellow><b>Respetar metadatos del item</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Habilitado: </lgray>%product_item_meta_enabled%</lyellow>'
+          - ''
+          - <lgray>Cuando está <green>habilitado</green>, los jugadores solo pueden</lgray>
+          - <lgray>vender items idénticos al <white>item actual</white>.</lgray>
+          - ''
+          - <lgray>Cuando está <red>deshabilitado</red>, los jugadores pueden</lgray>
+          - <lgray>vender cualquier item que sea del mismo tipo que el <white>item actual</white>.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>alternar</lyellow>.</lgray>
+      PriceManager:
+        Name: <lyellow><b>Gestor de precios</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Tipo: </lgray>%product_price_type%</lyellow>'
+          - '<lyellow>● <lgray>Divisa: </lgray>%product_currency%</lyellow>'
+          - '<lyellow>● <lgray>Comprar: </lgray>%product_price_buy%</lyellow>'
+          - '<lyellow>● <lgray>Vender: </lgray>%product_price_sell%</lyellow>'
+          - ''
+          - <lgray>Gestiona la divisa y el precio.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>editar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>refrescar</lyellow>.</lgray>
+      RanksRequired:
+        Name: <lyellow><b>Rangos requeridos</b></lyellow>
+        Lore:
+          - <lgray>%product_allowed_ranks%</lgray>
+          - ''
+          - <lgray>Solo los jugadores con los rangos listados</lgray>
+          - <lgray>(grupos) tendrán acceso a este producto.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir rango</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todos & deshabilitar</lyellow>.</lgray>
+      PermissionsRequired:
+        Name: <lyellow><b>Permisos requeridos</b></lyellow>
+        Lore:
+          - <lgray>%product_required_permissions%</lgray>
+          - ''
+          - <lgray>Solo los jugadores con los permisos listados</lgray>
+          - <lgray>tendrán acceso a este producto.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Shift-Click-Izdo para <lyellow>añadir permiso</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Shift-Click-Dcho para <lyellow>eliminar todos & deshabilitar</lyellow>.</lgray>
+      Commands:
+        Name: <lyellow><b>Comandos</b></lyellow>
+        Lore:
+          - <lgray>%product_commands%</lgray>
+          - ''
+          - <lgray>Comandos que se ejecutarán</lgray>
+          - <lgray>cuando se compre el producto.</lgray>
+          - ''
+          - <lgray><lyellow><b>Placeholders:</b></lyellow></lgray>
+          - '<lyellow>● <lgray>%player_name%: </lgray>Nombre del jugador (comprador).</lyellow>'
+          - '<lyellow>● <lgray>PlaceholderAPI: </lgray>Cualquiera.</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir comando</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todos</lyellow>.</lgray>
+      Rotation:
+        Chance:
+          Name: <lyellow><b>Probabilidad de rotación</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Actual: </lgray>%product_rotation_chance%%</lyellow>'
+            - ''
+            - <lgray>La probabilidad de que este producto</lgray>
+            - <lgray>aparezca en la siguiente rotación de la tienda.</lgray>
+            - <lgray>Cuanto mayor el número mayor la probabilidad.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>cambiar</lyellow>.</lgray>
+        DayTimes:
+          Name: <lyellow><b>%name%</b></lyellow>
+          Lore:
+            - <lgray>%time%</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todo</lyellow>.</lgray>
+      Stock:
+        Category:
+          Name: <lyellow><b>Existencias (stock)</b></lyellow>
+          Lore:
+            - <lgray>Aquí puedes definir la cantidad disponible para</lgray>
+            - <lgray>comprar y para vender de cada producto, tanto</lgray>
+            - <lgray>de forma global como para cada jugador.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>navegar</lyellow>.</lgray>
+        Info:
+          Global:
+            Name: <lyellow><b>Existencias globales (stock)</b></lyellow>
+            Lore:
+              - <lgray>Limita la cantidad que puede venderse/comprarse</lgray>
+              - <lgray>de cada producto para todos los jugadores.</lgray>
+              - ''
+              - <lgray><lyellow><b>Restock manual:</b></lyellow></lgray>
+              - '<lyellow>● <lgray>Por compra: <green>Stock de venta ↑</green> | <red>Stock de compra ↓</red></lgray></lyellow>'
+              - '<lyellow>● <lgray>Por venta: <red>Stock de venta ↓</red> | <green>Stock de compra ↑</green></lgray></lyellow>'
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>borrar los datos de límite globales</lyellow>.</lgray>
+          Player:
+            Name: <lyellow><b>Límites de jugador (stock)</b></lyellow>
+            Lore:
+              - <lgray>Limita la cantidad que puede venderse/comprarse</lgray>
+              - <lgray>de cada producto para cada jugador.</lgray>
+              - ''
+              - <lgray><lyellow><b>Restock manual:</b></lyellow></lgray>
+              - <lgray>El restock manual para los límites de judador <red>no es posible</red>.</lgray>
+              - <lgray>Los jugadores deben esperar el tiempo de restock.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>borrar los datos de límite por jugador</lyellow>.</lgray>
+        Global:
+          BuyInitial:
+            Name: <lyellow><b>Stock inicial de compra</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_global_buy_amount_initial%</lyellow>'
+              - ''
+              - <lgray>Establece el límite de compra inicial.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar límite</lyellow>.</lgray>
+          SellInitial:
+            Name: <lyellow><b>Stock inicial de venta</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_global_sell_amount_initial%</lyellow>'
+              - ''
+              - <lgray>Establece el límite de venta inicial.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar límite</lyellow>.</lgray>
+          BuyRestock:
+            Name: <lyellow><b>Restablecer límite de compra</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_global_buy_restock_time%</lyellow>'
+              - ''
+              - <lgray>Establece cada cuanto los límites de compra</lgray>
+              - <lgray>se restablecerán al límite por</lgray>
+              - <lgray>defecto (inicial).</lgray>
+              - ''
+              - <lgray>Cuando esté deshabilitado <dgray>(-1)</dgray>, el límite</lgray>
+              - <lgray>nunca se restablecerá automáticamente!</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>deshabilitar</lyellow>.</lgray>
+          SellRestock:
+            Name: <lyellow><b>Restablecer límite de venta</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_global_sell_restock_time%</lyellow>'
+              - ''
+              - <lgray>Establece cada cuanto los límites de venta</lgray>
+              - <lgray>se restablecerán al límite por</lgray>
+              - <lgray>defecto (inicial).</lgray>
+              - ''
+              - <lgray>Cuando esté deshabilitado <dgray>(-1)</dgray>, el límite</lgray>
+              - <lgray>nunca se restablecerá automáticamente!</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>deshabilitar</lyellow>.</lgray>
+        Player:
+          BuyInitial:
+            Name: <lyellow><b>Límite de compra inicial</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_player_buy_amount_initial%</lyellow>'
+              - ''
+              - <lgray>Establece el límite de compra inicial.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar límite</lyellow>.</lgray>
+          SellInitial:
+            Name: <lyellow><b>Límite de venta inicial</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_player_sell_amount_initial%</lyellow>'
+              - ''
+              - <lgray>Establece el límite de venta inicial.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar límite</lyellow>.</lgray>
+          BuyRestock:
+            Name: <lyellow><b>Restablecer límite de compra</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_player_buy_restock_time%</lyellow>'
+              - ''
+              - <lgray>Establece cada cuanto los límites de compra</lgray>
+              - <lgray>se restablecerán al límite por</lgray>
+              - <lgray>defecto (inicial).</lgray>
+              - ''
+              - <lgray>Cuando esté deshabilitado <dgray>(-1)</dgray>, el límite</lgray>
+              - <lgray>nunca se restablecerá automáticamente!</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>deshabilitar</lyellow>.</lgray>
+          SellRestock:
+            Name: <lyellow><b>Restablecer límite de venta</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_stock_player_sell_restock_time%</lyellow>'
+              - ''
+              - <lgray>Establece cada cuanto los límites de venta</lgray>
+              - <lgray>se restablecerán al límite por</lgray>
+              - <lgray>defecto (inicial).</lgray>
+              - ''
+              - <lgray>Cuando esté deshabilitado <dgray>(-1)</dgray>, el límite</lgray>
+              - <lgray>nunca se restablecerá automáticamente!</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>deshabilitar</lyellow>.</lgray>
+      Price:
+        Info:
+          Name: <lyellow><b>Información del precio</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Compra: </lgray>%product_price_buy_formatted%</lyellow>'
+            - '<lyellow>● <lgray>Venta: </lgray>%product_price_sell_formatted%</lyellow>'
+            - ''
+            - <lgray><lyellow><b>Refrescar:</b></lyellow></lgray>
+            - <lgray>Recupera y aplica el precio de la</lgray>
+            - <lgray>base de datos.</lgray>
+            - <lgray>Si no hay información o ha expirado,</lgray>
+            - <lgray>se genera un precio nuevo.</lgray>
+            - ''
+            - <lgray>En la mayoría de los casos no cambiará</lgray>
+            - <lgray>nada hasta que lo elimines.</lgray>
+            - ''
+            - <lgray><lyellow><b>Borrar:</b></lyellow></lgray>
+            - <lgray>Elimina la información del precio del</lgray>
+            - <lgray>producto de la base de datos.</lgray>
+            - ''
+            - <lgray>Utiliza la opción de <lyellow>refrescar</lyellow> para generar uno nuevo.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>refrescar</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>borrar</lyellow>.</lgray>
+        Type:
+          Name: <lyellow><b>Tipo de precio</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Actual: </lgray>%product_price_type%</lyellow>'
+            - ''
+            - <lgray>Cambia el tipo de precio del producto.</lgray>
+            - <lgray>Cada tipo tiene configuraciones distintas.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>cambiar</lyellow>.</lgray>
+        Currency:
+          Name: <lyellow><b>Divisa</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Actual: </lgray>%product_currency%</lyellow>'
+            - ''
+            - <lgray>Establece la divisa del producto.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>cambiar</lyellow>.</lgray>
+        DiscountAllowed:
+          Name: <lyellow><b>Descuento habilitado</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Habilitado: </lgray>%product_discount_allowed%</lyellow>'
+            - ''
+            - <lgray>Establece si este producto se ve afectado</lgray>
+            - <lgray>por los descuentos de la tienda.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>alternar</lyellow>.</lgray>
+        Flat:
+          Buy:
+            Name: <lyellow><b>Precio de compra</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_price_buy%</lyellow>'
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>deshabilitar</lyellow>.</lgray>
+          Sell:
+            Name: <lyellow><b>Precio de venta</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_price_sell%</lyellow>'
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>deshabilitar</lyellow>.</lgray>
+        Float:
+          Buy:
+            Name: <lyellow><b>Precio de compra</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Min: </lgray>%product_pricer_buy_min%</lyellow>'
+              - '<lyellow>● <lgray>Max: </lgray>%product_pricer_buy_max%</lyellow>'
+              - ''
+              - <lgray>Establece un rango de precios para el producto.</lgray>
+              - <lgray>El precio de compra final se encontrará entre estos valores.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>deshabilitar</lyellow>.</lgray>
+          Sell:
+            Name: <lyellow><b>Precio de venta</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Min: </lgray>%product_pricer_sell_min%</lyellow>'
+              - '<lyellow>● <lgray>Max: </lgray>%product_pricer_sell_max%</lyellow>'
+              - ''
+              - <lgray>Establece un rango de precios para el producto.</lgray>
+              - <lgray>El precio de venta final se encontrará entre estos valores.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>deshabilitar</lyellow>.</lgray>
+          Decimals:
+            Name: <lyellow><b>Decimales</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Habilitados: </lgray>%product_pricer_float_round_decimals%</lyellow>'
+              - ''
+              - <lgray>Establece si los precios deberían tener</lgray>
+              - <lgray>decimales o ser números enteros.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>alternar</lyellow>.</lgray>
+          RefreshDays:
+            Name: <lyellow><b>Actualizar en días</b></lyellow>
+            Lore:
+              - <lgray>%product_pricer_float_refresh_days%</lgray>
+              - ''
+              - <lgray>Establece los días en los que se actualizará el precio.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir día</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todos</lyellow>.</lgray>
+          RefreshTimes:
+            Name: <lyellow><b>Actualizar en horas</b></lyellow>
+            Lore:
+              - <lgray>%product_pricer_float_refresh_times%</lgray>
+              - ''
+              - <lgray>Establece las horas en los que se actualizará el precio.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir hora</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todos</lyellow>.</lgray>
+        Dynamic:
+          Initial:
+            Name: <lyellow><b>Precio inicial</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Compra: </lgray>%product_pricer_dynamic_initial_buy%</lyellow>'
+              - '<lyellow>● <lgray>Venta: </lgray>%product_pricer_dynamic_initial_sell%</lyellow>'
+              - ''
+              - <lgray>Establece el precio inicial del producto.</lgray>
+              - <lgray>Estos serán los valores iniciales / por defecto.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar la compra</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>cambiar la venta</lyellow>.</lgray>
+          Step:
+            Name: <lyellow><b>Incrementos de precio</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Compra: </lgray>%product_pricer_dynamic_step_buy%</lyellow>'
+              - '<lyellow>● <lgray>Venta: </lgray>%product_pricer_dynamic_step_sell%</lyellow>'
+              - ''
+              - <lgray>El incremento define cuanto subira o bajará</lgray>
+              - <lgray>el precio con cada compra o venta.</lgray>
+              - ''
+              - <lgray>Compras = Sube el precio, Ventas = Baja el precio</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar la compra</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>cambiar la venta</lyellow>.</lgray>
+        Players:
+          Initial:
+            Name: <lyellow><b>Precio inicial</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Compra: </lgray>%product_pricer_dynamic_initial_buy%</lyellow>'
+              - '<lyellow>● <lgray>Venta: </lgray>%product_pricer_dynamic_initial_sell%</lyellow>'
+              - ''
+              - <lgray>Establece el precio inicial del producto.</lgray>
+              - <lgray>Estos serán los valores iniciales / por defecto.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar la compra</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>cambiar la venta</lyellow>.</lgray>
+          Adjust:
+            Name: <lyellow><b>Ajuste de precio</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Compra: </lgray>%product_pricer_players_adjust_amount_buy%</lyellow>'
+              - '<lyellow>● <lgray>Venta: </lgray>%product_pricer_players_adjust_amount_sell%</lyellow>'
+              - ''
+              - <lgray>Define cuanto cambiará el precio de</lgray>
+              - <lgray>acuerdo a la cantidad de jugadores online.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar la compra</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>cambiar la venta</lyellow>.</lgray>
+          Step:
+            Name: <lyellow><b>Incrementos de precio</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Actual: </lgray>%product_pricer_players_adjust_step%</lyellow>'
+              - ''
+              - <lgray>Establece cada que cantidad de</lgray>
+              - <lgray>jugadores cambiará el precio.</lgray>
+              - ''
+              - <lgray><lyellow><b>Ejemplos:</b></lyellow></lgray>
+              - <lgray><lyellow>1</lyellow> = por <lyellow>cada jugador</lyellow> online.</lgray>
+              - <lgray><lyellow>5</lyellow> = por <lyellow>cada 5 jugadores</lyellow> (5, 10, 15, etc.)</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>cambiar</lyellow>.</lgray>
     Create:
       Error:
-        Exist: '&cYa existe una tienda con esa id.'
+        Exist: <lred>Ya existe una tienda con esa id.</lred>
     Enter:
-      Id: '&7Escribe el &a[ID de la tienda]'
-      Description: '&7Escribe la &a[Descripción]'
-      NpcId: '&7Escribe el &a[ID de NPC]'
-      Title: '&7Escribe el &a[Título]'
-      Command: '&7Escribe el &a[Comando]'
+      Id: <lgray>Escribe el <lgreen>[ID de la tienda]</lgreen></lgray>
+      Description: <lgray>Escribe la <lgreen>[Descripción]</lgreen></lgray>
+      NpcId: <lgray>Escribe el <lgreen>[ID de NPC]</lgreen></lgray>
+      Title: <lgray>Escribe el <lgreen>[Título]</lgreen></lgray>
+      Command: <lgray>Escribe el <lgreen>[Comando]</lgreen></lgray>
+      Slots: <lgray>Escribe los <lgreen>[Slots] -> [1,2,5,etc]</lgreen></lgray>
+      Rank: <lgray>Escribe el <lgreen>[Nombre del rango]</lgreen></lgray>
+      Permission: <lgray>Escribe el <lgreen>[Nodo del permiso]</lgreen></lgray>
     Shop:
-      Icon:
-        Name: '#ffed6a&lIcono de la tienda'
+      Create:
+        Name: <lyellow><b>Nueva tienda</b></lyellow>
         Lore:
-          - '#bdc8c9Establece un ícono para la tienda.'
-          - '#bdc8c9Este ícono se muestra en las GUIs.'
           - ''
-          - '#ffa76a&lNota:'
-          - '#ffa76a▪ #bdc8c9En lugar del nombre y lore del item, se'
-          - '#bdc8c9usará el #ffa76aNombre de la tienda#bdc8c9 y su #ffa76aDescripción#bdc8c9.'
-          - ''
-          - '#bbff6a&lAcciones:'
-          - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aReemplazar'
-          - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aObtener una copia'
-    Product:
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>crear una tienda estática</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>crear una tienda rotatoria</lyellow>.</lgray>
       Object:
-        Name: '#ffed6a&l%product_preview_name%'
+        Name: <lyellow><b>%shop_name%</b></lyellow>
         Lore:
-          - '#bdc8c9Puedes mover este producto a cualquier otra'
-          - '#bdc8c9ranura. También puedes guardarlo en tu inventario'
-          - '#bdc8c9para añadirlo a otra páginas o tiendas.'
-          - '#bdc8c9Toda la configuración del producto se #bbff6amantendrá#bdc8c9.'
+          - '<lyellow>● <lgray>Tipo: </lgray>%shop_type%</lyellow>'
+          - '<lyellow>● <lgray>Páginas: </lgray>%shop_pages%</lyellow>'
           - ''
-          - '#bbff6a&lAcciones:'
-          - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aEditar'
-          - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aEliminar#ff6a6a (irreversible)'
-      FreeSlot:
-        Name: '#ffed6a&l#bbff6a&lRanura libre'
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>editar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar <red>(irreversible)</red></lyellow>.</lgray>
+      DisplayName:
+        Name: <lyellow><b>Nombre</b></lyellow>
         Lore:
-          - '#bbff6a&lAcciones:'
-          - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aAñadir producto de item'
-          - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aAñadir producto de comando'
-      ReservedSlot:
-        Name: '#ffed6a&l#ff6a6a&lRanura reservada'
+          - '<lyellow>● <lgray>Actual: </lgray>%shop_name%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+      Description:
+        Name: <lyellow><b>Descripción</b></lyellow>
         Lore:
-          - '#bdc8c9Esta ranura está ocupada por un producto de la tienda.'
-      PriceManager:
-        Name: '#ffed6a&lGestor de precios'
+          - <lgray>%shop_description%</lgray>
+          - ''
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir línea</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todo</lyellow>.</lgray>
+      Pages:
+        Name: <lyellow><b>Cantidad de páginas</b></lyellow>
         Lore:
-          - '#ffed6a&lActual:'
-          - '#ffed6a▪ #bdc8c9Divisa: #ffed6a%product_currency%'
-          - '#ffed6a▪ #bdc8c9Comprar: #ffed6a%product_price_buy%'
-          - '#ffed6a▪ #bdc8c9Vender: #ffed6a%product_price_sell%'
+          - '<lyellow>● <lgray>Actual: </lgray>%shop_pages%</lyellow>'
           - ''
-          - '#bdc8c9Gestiona la divisa y el precio'
-          - '#bdc8c9del producto.'
+          - <lgray>Cantidad de páginas en la tienda.</lgray>
           - ''
-          - '#bbff6a&lAcciones:'
-          - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar precios'
-          - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar divisas'
-          - '#bbff6a▪ #bdc8c9Tecla [Q/Soltar]: #bbff6aRefrescar precio'
-      RespectItemMeta:
-        Name: '#ffed6a&lRespetar metadatos del item'
+          - <lgray><lred>[!]</lred> Asegúrate de añadir botones</lgray>
+          - <lgray>en el diseño de la página.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>+1 página</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>-1 página</lyellow>.</lgray>
+      Icon:
+        Name: <lyellow><b>Icono de la tienda</b></lyellow>
         Lore:
-          - '#ffed6a&lActual:'
-          - '#ffed6a▪ #bdc8c9Enabled: #ffed6a%product_item_meta_enabled%'
+          - <lyellow>[▶]</lyellow> <lgray>Arrastra y suelta para <lyellow>reemplazar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>obtener una copia</lyellow>.</lgray>
+      PermissionRequirement:
+        Name: <lyellow><b>Permiso requerido</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Habilitado: </lgray>%shop_permission_required%</lyellow>'
+          - '<lyellow>● <lgray>Nodo: </lgray>%shop_permission_node%</lyellow>'
           - ''
-          - '#bdc8c9Establece si el producto debería respetar'
-          - '#bdc8c9los metadatos del #ffed6aItem#bdc8c9.'
-          - '#bdc8c9Esto quiere decir que los jugadores podrán vender'
-          - '#bdc8c9items similares o exactamente iguales.'
+          - <lgray>Establece si hace falta o no tener</lgray>
+          - <lgray>un permiso para usar esta tienda.</lgray>
           - ''
-          - '#ffa76a&lNota:'
-          - '#ffa76a▪ #bdc8c9¡Activa esto para objetos personalizados!'
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>alternar</lyellow>.</lgray>
+      Transactions:
+        Name: <lyellow><b>Transacciones</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Compra habilitada: </lgray>%shop_buy_allowed%</lyellow>'
+          - '<lyellow>● <lgray>Venta habilitada: </lgray>%shop_sell_allowed%</lyellow>'
           - ''
-          - '#bbff6a&lAcciones:'
-          - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
-VirtualEditorType:
-  Editor:
-    SHOP_CREATE:
-      Name: '#ffed6a&lCrear tienda'
-      Lore:
-        - '#bdc8c9Crea una nueva tienda virtual.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCrear'
-    SHOP_OBJECT:
-      Name: '#ffed6a&l%shop_name%'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Páginas: #ffed6a%shop_pages%'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aEditar'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aEliminar#ff6a6a (irreversible)'
-    SHOP_CHANGE_NAME:
-      Name: '#ffed6a&lNombre de la tienda'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Nombre: #ffed6a%shop_name%'
-        - ''
-        - '#bdc8c9Establece el nombre de la tienda.'
-        - '#bdc8c9Se usa en los mensajes, etc.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Este #ffa76ano #bdc8c9es el título del GUI.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
-    SHOP_CHANGE_DESCRIPTION:
-      Name: '#ffed6a&lDescripción de la tienda'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#bdc8c9%shop_description%'
-        - ''
-        - '#bdc8c9Establece la descripción de la tienda.'
-        - '#bdc8c9Se usa en el menú principal.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir línea'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aLimpiar lista'
-    SHOP_CHANGE_PAGES:
-      Name: '#ffed6a&lCantidad de páginas'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Páginas: #ffed6a%shop_pages%'
-        - ''
-        - '#bdc8c9Establece el número de páginas'
-        - '#bdc8c9que tendrá la tienda.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9¡No olvides añadir items desde'
-        - '#bdc8c9el #ffed6aEditor de interfaz#bdc8c9!'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6a+1 Página'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6a-1 Página'
-    SHOP_CHANGE_PERMISSION:
-      Name: '#ffed6a&lRequisito de permisos'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Activado: #ffed6a%shop_permission_required%'
-        - '#ffed6a▪ #bdc8c9Nodo: #ffed6a%shop_permission_node%'
-        - ''
-        - '#bdc8c9Establece si los jugadores deben tener'
-        - '#bdc8c9un permiso específico para poder'
-        - '#bdc8c9usar esta tienda.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
-    SHOP_CHANGE_TRANSACTIONS:
-      Name: '#ffed6a&lTransacciones habilitadas'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Comprar está habilitado: #ffed6a%shop_buy_allowed%'
-        - '#ffed6a▪ #bdc8c9Vender está habilitado: #ffed6a%shop_sell_allowed%'
-        - ''
-        - '#bdc8c9Establece si la #ffed6acompra#bdc8c9 y/o la #ffed6aventa'
-        - '#bdc8c9están permitidas en esta tienda.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar la compra'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aAlternar la venta'
-    SHOP_CHANGE_CITIZENS_ID:
-      Name: '#ffed6a&lNPCs adjuntos'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9NPC IDs: #ffed6a%shop_npc_ids%'
-        - ''
-        - '#bdc8c9Una lista de las IDs de NPCs adjuntos'
-        - '#bdc8c9a esta tienda. Estos NPCs abrirán'
-        - '#bdc8c9la interfaz de la tienda cuando'
-        - '#bdc8c9interactúes con ellos.'
-        - ''
-        - '#ff6a6a&lAdvertencia:'
-        - '#ff6a6a▪ #bdc8c9¡Es necesario tener #ff6a6aCitizens #bdc8c9instalado!'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir ID'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
-    SHOP_CHANGE_VIEW_DESIGN:
-      Name: '#ffed6a&lEditor de interfaz'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Título: #ffed6a%shop_view_title%'
-        - '#ffed6a▪ #bdc8c9Tamaño: #ffed6a%shop_view_size%'
-        - ''
-        - '#bdc8c9Establece el #ffed6atítulo#bdc8c9 y el #ffed6atamaño#bdc8c9 de la'
-        - '#bdc8c9GUI de la tienda. Aquí puedes personalizar'
-        - '#bdc8c9la interfaz (GUI) de esta tienda. Coloca items'
-        - '#bdc8c9en el editor y presiona #ffed6aESC#bdc8c9 para guardar.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAbrir editor'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aCambiar título'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aCambiar tamaño'
-    SHOP_CHANGE_DISCOUNTS:
-      Name: '#ffed6a&lDescuentos'
-      Lore:
-        - '#bdc8c9Crea y administra los descuentos de la tienda aquí.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aNavegar'
-    SHOP_CHANGE_PRODUCTS:
-      Name: '#ffed6a&lProductos'
-      Lore:
-        - '#bdc8c9Crea y administra los pruductos de la tienda aquí.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aNavegar'
-    PRODUCT_CHANGE_ITEM:
-      Name: '#ffed6a&lItem actual'
-      Lore:
-        - '#bdc8c9Establece el item que el jugador'
-        - '#bdc8c9puede comprar o vender.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aReemplazar'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aObtener una copia'
-    PRODUCT_CHANGE_PREVIEW:
-      Name: '#ffed6a&lVista previa del producto'
-      Lore:
-        - '#bdc8c9Establece el item con el que se representará'
-        - '#bdc8c9este producto en la interfaz (GUI).'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Use item with premade name, lore for best results.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Arrastra y suelta: #bbff6aReemplazar'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aObtener una copia'
-    PRODUCT_CHANGE_COMMANDS:
-      Name: '#ffed6a&lComandos del producto'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#bdc8c9%product_commands%'
-        - ''
-        - '#bdc8c9Una lista de comandos que serán'
-        - '#bdc8c9ejecutados cuando un jugador'
-        - '#bdc8c9compre este producto.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Usa #ffa76a%player_name%'
-        - '#bdc8c9 para el nombre del jugador.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir comando'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
-    PRODUCT_CHANGE_DISCOUNT:
-      Name: '#ffed6a&lDescuentos permitidos'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Permitidos: #ffed6a%product_discount_allowed%'
-        - ''
-        - '#bdc8c9Establece si el precio del producto puede'
-        - '#bdc8c9ser afectado por los descuentos de la tienda.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
-    PRODUCT_CHANGE_STOCK_GLOBAL:
-      Name: '#ffed6a&lExistencias globales (stock)'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Compra - Stock inicial: #ffed6a%product_stock_global_buy_amount_initial%'
-        - '#ffed6a▪ #bdc8c9Compra - Tiempo de reposición: #ffed6a%product_stock_global_buy_restock_time%'
-        - '#ffed6a▪ #bdc8c9Venta - Stock inicial: #ffed6a%product_stock_global_sell_amount_initial%'
-        - '#ffed6a▪ #bdc8c9Venta - Tiempo de reposición: #ffed6a%product_stock_global_sell_restock_time%'
-        - ''
-        - '#bdc8c9Establece cuanto del producto puede'
-        - '#bdc8c9almacenar la tienda. Cada vez que se'
-        - '#bdc8c9realiza una transacción, la cantidad de stock'
-        - '#bdc8c9del producto cambia. Cuando queden 0 objetos,'
-        - '#bdc8c9no se podrá hacer compra/venta hasta que se'
-        - '#bdc8c9reabastezca el producto.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como cantidad inicial'
-        - '#bdc8c9para que el producto sea #ffa76ailimitado#bdc8c9.'
-        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como tiempo para'
-        - '#bdc8c9hacer que nunca se reestablezcan las existencias.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCompra - Cambiar stock inicial'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCompra - Cambiar tiempo de reposición'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aVenta - Cambiar stock inicial'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aVenta - Cambiar tiempo de reposición'
-        - '#bbff6a▪ #bdc8c9Tecla [Q/Soltar]: #bbff6aDeshabilitar todo'
-    PRODUCT_CHANGE_STOCK_PLAYER:
-      Name: '#ffed6a&lLímites de jugador (stock)'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Compra - Stock inicial: #ffed6a%product_stock_player_buy_amount_initial%'
-        - '#ffed6a▪ #bdc8c9Compra - Tiempo de reposición: #ffed6a%product_stock_player_buy_restock_time%'
-        - '#ffed6a▪ #bdc8c9Venta - Stock inicial: #ffed6a%product_stock_player_sell_amount_initial%'
-        - '#ffed6a▪ #bdc8c9Venta - Tiempo de reposición: #ffed6a%product_stock_player_sell_restock_time%'
-        - ''
-        - '#bdc8c9Establece cuanto del producto puede'
-        - '#bdc8c9comprar/vender #ffed6acada#bdc8c9 jugador. Cada vez que se'
-        - '#bdc8c9realiza una transacción, la cantidad de stock'
-        - '#bdc8c9del producto cambia. Cuando queden 0 objetos,'
-        - '#bdc8c9no se podrá hacer compra/venta hasta que se'
-        - '#bdc8c9reabastezca el producto.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como cantidad inicial'
-        - '#bdc8c9para que el producto sea #ffa76ailimitado#bdc8c9.'
-        - '#ffa76a▪ #bdc8c9Puedes establecer -1 como tiempo para'
-        - '#bdc8c9hacer que nunca se reestablezcan las existencias.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCompra - Cambiar límite'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCompra - Cambiar tiempo de reposición'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aVenta - Cambiar límite'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aVenta - Cambiar tiempo de reposición'
-        - '#bbff6a▪ #bdc8c9Tecla [Q/Soltar]: #bbff6aDeshabilitar todo'
-    PRODUCT_CHANGE_PRICE_TYPE:
-      Name: '#ffed6a&lTipo de precio'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Actual: #ffed6a%product_price_type%'
-        - ''
-        - '#bdc8c9Cambia el tipo de precio del producto.'
-        - '#bdc8c9Cada tipo tiene configuraciones distintas.'
-        - ''
-        - '#ff6a6a&lAviso:'
-        - '#ff6a6a▪ #bdc8c9¡Al cambiarlo, la configuración anterior se #ff6a6apierde#bdc8c9!'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAlternar'
-    PRODUCT_CHANGE_PRICE_FLAT_BUY:
-      Name: '#ffed6a&lPrecio de compra'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Actual: #ffed6a%product_price_buy%'
-        - ''
-        - '#bdc8c9Establece el precio de compra del producto.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
-        - '#bdc8c9se pueda comprar el producto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aDeshabilitar'
-    PRODUCT_CHANGE_PRICE_FLAT_SELL:
-      Name: '#ffed6a&lPrecio de venta'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Actual: #ffed6a%product_price_sell%'
-        - ''
-        - '#bdc8c9Establece el precio de venta del producto.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
-        - '#bdc8c9se pueda vender el producto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aDeshabilitar'
-    PRODUCT_CHANGE_PRICE_FLOAT_BUY:
-      Name: '#ffed6a&lPrecio de compra'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_buy_min%'
-        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_buy_max%'
-        - ''
-        - '#bdc8c9Establece un rango de precios para el producto.'
-        - '#bdc8c9El precio de compra final se encontrará entre estos valores.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
-        - '#bdc8c9se pueda comprar el producto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
-    PRODUCT_CHANGE_PRICE_FLOAT_SELL:
-      Name: '#ffed6a&lPrecio de venta'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_sell_min%'
-        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_sell_max%'
-        - ''
-        - '#bdc8c9Establece un rango de precios para el producto.'
-        - '#bdc8c9El precio de venta final se encontrará entre estos valores.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
-        - '#bdc8c9se pueda vender el producto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
-    PRODUCT_CHANGE_PRICE_FLOAT_REFRESH:
-      Name: '#ffed6a&lRefrescar configuración'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Días: #ffed6a%product_pricer_float_refresh_days%'
-        - '#ffed6a▪ #bdc8c9Horas: #ffed6a%product_pricer_float_refresh_times%'
-        - ''
-        - '#bdc8c9Establece los momentos de tiempo en los'
-        - '#bdc8c9que se renovará el precio del producto'
-        - '#bdc8c9Hasta que eso ocurra, se utilizará'
-        - '#bdc8c9el último precio generado.'
-        - ''
-        - '#ff6a6a&lAviso:'
-        - '#ff6a6a▪ #bdc8c9¡Es necesario configurar al menos'
-        - '#bdc8c9un #ff6a6adía#bdc8c9 y una #ff6a6ahora#bdc8c9!'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir día'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Izdo: #bbff6aQuitar días'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aAñadir hora'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aQuitar horas'
-    PRODUCT_CHANGE_PRICE_DYNAMIC_BUY:
-      Name: '#ffed6a&lLímites del precio de compra'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_buy_min%'
-        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_buy_max%'
-        - ''
-        - '#bdc8c9Sets the bounds for product buy price.'
-        - '#bdc8c9Final price will be within these values.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
-        - '#bdc8c9se pueda comprar el producto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
-    PRODUCT_CHANGE_PRICE_DYNAMIC_SELL:
-      Name: '#ffed6a&lLímites del precio de venta'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Min: #ffed6a%product_pricer_sell_min%'
-        - '#ffed6a▪ #bdc8c9Max: #ffed6a%product_pricer_sell_max%'
-        - ''
-        - '#bdc8c9Sets the bounds for product sell price.'
-        - '#bdc8c9Final price will be within these values.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Valores negativos hacen que no'
-        - '#bdc8c9se pueda vender el producto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar mínimo'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar máximo'
-    PRODUCT_CHANGE_PRICE_DYNAMIC_INITIAL:
-      Name: '#ffed6a&lPrecio inicial'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Compra: #ffed6a%product_pricer_dynamic_initial_buy%'
-        - '#ffed6a▪ #bdc8c9Venta: #ffed6a%product_pricer_dynamic_initial_sell%'
-        - ''
-        - '#bdc8c9Establece el precio inicial del producto.'
-        - '#bdc8c9Estos serán los valores por defecto.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar compra'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar venta'
-    PRODUCT_CHANGE_PRICE_DYNAMIC_STEP:
-      Name: '#ffed6a&lIncrementos de precio'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Compra: #ffed6a%product_pricer_dynamic_step_buy%'
-        - '#ffed6a▪ #bdc8c9Venta: #ffed6a%product_pricer_dynamic_step_sell%'
-        - ''
-        - '#bdc8c9El incremento define cuanto subira o bajará'
-        - '#bdc8c9el precio con cada compra o venta.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ffa76a▪ #bdc8c9Más compras - mayor precio.'
-        - '#ffa76a▪ #bdc8c9Más ventas - menor precio.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar compra'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aCambiar venta'
-    DISCOUNT_CREATE:
-      Name: '#ffed6a&lCrear descuento'
-      Lore:
-        - '#bdc8c9Crea un nuevo descuento.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCrear'
-    DISCOUNT_OBJECT:
-      Name: '#ffed6a&lDescuento'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Cantidad: #ffed6a%discount_amount%'
-        - '#ffed6a▪ #bdc8c9Días: #ffed6a%discount_days%'
-        - '#ffed6a▪ #bdc8c9Horas: #ffed6a%discount_times%'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aEditar'
-        - '#bbff6a▪ #bdc8c9Shift-Click-Dcho: #bbff6aEliminar #ff6a6a(irreversible)'
-    DISCOUNT_CHANGE_DISCOUNT:
-      Name: '#ffed6a&lCantidad'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Cantidad: #ffed6a%discount_amount%%'
-        - ''
-        - '#bdc8c9Establece la cantidad de descuento (en porcentaje).'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
-    DISCOUNT_CHANGE_DURATION:
-      Name: '#ffed6a&lDuración'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Duración: #ffed6a%discount_duration%'
-        - ''
-        - '#bdc8c9¿Cuánto tiempo durará el descuento?'
-        - '#bdc8c9En segundos.'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aCambiar'
-    DISCOUNT_CHANGE_DAY:
-      Name: '#ffed6a&lDías activo'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Días: #ffed6a%discount_days%'
-        - ''
-        - '#bdc8c9Una lista de los días en los que este'
-        - '#bdc8c9descuento estará activado.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ff6a6a▪ #bdc8c9¡Es necesario configurar al menos'
-        - '#bdc8c9un #ff6a6adía#bdc8c9 y una #ff6a6ahora#bdc8c9!'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir día'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
-    DISCOUNT_CHANGE_TIME:
-      Name: '#ffed6a&lHoras activo'
-      Lore:
-        - '#ffed6a&lActual:'
-        - '#ffed6a▪ #bdc8c9Horas: #ffed6a%discount_times%'
-        - ''
-        - '#bdc8c9Una lista de las horas en los que este'
-        - '#bdc8c9descuento estará activado.'
-        - ''
-        - '#ffa76a&lNotas:'
-        - '#ff6a6a▪ #bdc8c9¡Es necesario configurar al menos'
-        - '#bdc8c9un #ff6a6adía#bdc8c9 y una #ff6a6ahora#bdc8c9!'
-        - ''
-        - '#bbff6a&lAcciones:'
-        - '#bbff6a▪ #bdc8c9Click-Izdo: #bbff6aAñadir hora'
-        - '#bbff6a▪ #bdc8c9Click-Dcho: #bbff6aVaciar lista'
+          - <lgray>Reglas globales para permitir / prohibir</lgray>
+          - <lgray>la venta y la compra en esta tienda.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>alternar compra</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>alternar venta</lyellow>.</lgray>
+      AttachedNPCs:
+        Name: <lyellow><b>NPCs asociados</b></lyellow>
+        Lore:
+          - <lgray>%shop_npc_ids%</lgray>
+          - ''
+          - <lgray>Lista de NPCs (id) asociados que abren</lgray>
+          - <lgray>esta tienda al interactuar con ellos.</lgray>
+          - <lgray><lred>(Necesario el plugin Citizens)</lred></lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir NPC</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todos</lyellow>.</lgray>
+      Layout:
+        Name: <lyellow><b>Editor de vista</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Actual: </lgray>%shop_layout%</lyellow>'
+          - ''
+          - <lgray>Establece el diseño de la interfaz</lgray>
+          - <lgray>para esta tienda.</lgray>
+          - ''
+          - <lgray>Crea más layouts en <lyellow>/layouts/</lyellow></lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>cambiar</lyellow>.</lgray>
+      Discounts:
+        Name: <lyellow><b>Descuentos</b></lyellow>
+        Lore:
+          - <lgray>Crea y administra los descuentos de la tienda aquí.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>navegar</lyellow>.</lgray>
+      Products:
+        Name: <lyellow><b>Productos</b></lyellow>
+        Lore:
+          - <lgray>Crea y administra los productos aquí.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>navegar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>resetear y actualizar todos los precios</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>[F / Cambiar] para <lyellow>resetear todos los límites de stock</lyellow>.</lgray>
+      Rotation:
+        Type:
+          Name: <lyellow><b>Tipo de rotación</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Actual: </lgray>%shop_rotation_type%</lyellow>'
+            - ''
+            - <lgray><lyellow><b>Tipos:</b></lyellow></lgray>
+            - '<lyellow>● <lgray>INTERVAL: </lgray>Cada X minutos.</lyellow>'
+            - '<lyellow>● <lgray>FIXED: </lgray>A horas específicas.</lyellow>'
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>cambiar</lyellow>.</lgray>
+        Interval:
+          Name: <lyellow><b>Intervalo de rotación</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Actual: </lgray>%shop_rotation_interval%</lyellow>'
+            - ''
+            - <lgray>Establece cada cuanto (en segundos)</lgray>
+            - <lgray>rotarán los productos de la tienda.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>forzar la rotación</lyellow>.</lgray>
+        Times:
+          Name: <lyellow><b>Horas de rotación</b></lyellow>
+          Lore:
+            - <lgray>Aquí puedes definir las horas de</lgray>
+            - <lgray>rotación para cada día de la semana.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click para <lyellow>navegar</lyellow>.</lgray>
+        Products:
+          Name: <lyellow><b>Productos en rotación</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Min: </lgray>%shop_rotation_min_products%</lyellow>'
+            - '<lyellow>● <lgray>Max: </lgray>%shop_rotation_max_products%</lyellow>'
+            - '<lyellow>● <lgray>Ranuras: </lgray>%shop_rotation_product_slots%</lyellow>'
+            - ''
+            - <lgray>Establece cuantos productos</lgray>
+            - <lgray>serán usados en la rotación y</lgray>
+            - <lgray>en qué ranuras (slots) aparecerán.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar min</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>cambiar max</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Soltar] para <lyellow>cambiar ranuras</lyellow>.</lgray>
+    Discount:
+      Create:
+        Name: <lyellow><b>Crear descuento</b></lyellow>
+        Lore: []
+      Object:
+        Name: <lyellow><b>Descuento</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Cantidad: </lgray>%discount_amount%</lyellow>'
+          - '<lyellow>● <lgray>Días: </lgray>%discount_days%</lyellow>'
+          - '<lyellow>● <lgray>Horas: </lgray>%discount_times%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>editar</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar <lred>(irreversible)</lred></lyellow>.</lgray>
+      Amount:
+        Name: <lyellow><b>Cantidad</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Cantidad: </lgray>%discount_amount%%</lyellow>'
+          - ''
+          - <lgray>Establece la cantidad de descuento (en porcentaje).</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+      Duration:
+        Name: <lyellow><b>Duración</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Duración: </lgray>%discount_duration%</lyellow>'
+          - ''
+          - <lgray>¿Cuánto tiempo durará el descuento?</lgray>
+          - <lgray>En segundos.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>cambiar</lyellow>.</lgray>
+      Days:
+        Name: <lyellow><b>Días activo</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Días: </lgray>%discount_days%</lyellow>'
+          - ''
+          - <lgray>Una lista de los días en los que este</lgray>
+          - <lgray>descuento estará activado.</lgray>
+          - ''
+          - <lgray>¡Es necesario al menos un día y una hora!</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir día</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todo</lyellow>.</lgray>
+      Times:
+        Name: <lyellow><b>Horas activo</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Días: </lgray>%discount_times%</lyellow>'
+          - ''
+          - <lgray>Una lista de las horas en los que este</lgray>
+          - <lgray>descuento estará activado.</lgray>
+          - ''
+          - <lgray>¡Es necesario al menos un día y una hora!</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Click-Izdo para <lyellow>añadir hora</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Click-Dcho para <lyellow>eliminar todo</lyellow>.</lgray>
+  ShopType:
+    STATIC: Estática
+    ROTATING: Rotatoria
 ChestShop:
   Command:
+    Argument:
+      Name:
+        BuyPrice: buyPrice
+        SellPrice: sellPrice
     List:
       Desc: Lista tus tiendas o las de otro jugador.
-      Usage: '[player]'
+    Bank:
+      Desc: Abre el banco del [jugador].
     Create:
       Desc: Crea una tienda en el cofre que estés mirando.
-      Usage: '[type]'
-    Search:
-      Desc: Buscar tiendas por un objeto específico.
-      Usage: <material>
+    Browse:
+      Desc: Interfaz de tiendas de jugador.
+    GiveItem:
+      Desc: Proporciona el ítem de creación de tienda.
+      BadMaterial: <lred>¡Tipo de tienda inválido!</lred>
+      Done: <lgray>Dado <lyellow>%name%</lyellow> a <lyellow>%player_display_name%</lyellow>.</lgray>
     Remove:
       Desc: Elimina la tienda del cofre que estés mirando.
+    Open:
+      Desc: Abre el inventario de la tienda objetivo.
   Shop:
     Error:
-      NotOwner: '&cNo eres el dueño de esta tienda.'
+      NotOwner: <lred>No eres el dueño de esta tienda.</lred>
     Creation:
       Info:
         Done:
-          - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10; ~sound: BLOCK_NOTE_BLOCK_BELL;}&a&lTienda creada.'
-          - '&7Usa &aShift-Click &7para entrar en el &amodo edición&7.'
+          - <output:"titles:10:80:10"><sound:"block_note_block_bell">
+          - <lgreen><b>¡Tienda creada!</b></lgreen>
+          - <lgray><lgreen>Click-Dcho</lgreen> mientras te agachas para abrir el &amodo edición.</lgray>
       Error:
-        AlreadyShop: Este cofre ya es una tienda.
-        NotEmpty: Por favor, saca primero todas las cosas del cofre.
-        NotAChest: Este bloque no es un cofre.
-        BadLocation: No puedes crear una tienda aquí.
-        LimitReached: Superaste el límite de tiendas. No puedes crear más.
-        BadArea: Solo puedes crear tiendas en tu terreno protegido.
-        NotEnoughFunds: No tienes fondos suficientes.
-        TypePermission: No tienes permiso para crear este tipo de tiendas.
+        AlreadyShop: <lred>Este cofre ya es una tienda.</lred>
+        NotEmpty: <lred>Por favor, saca primero todas las cosas del cofre.</lred>
+        NotAChest: <lred>Este bloque no es un cofre.</lred>
+        BadLocation: <lred>No puedes crear una tienda aquí.</lred>
+        LimitReached: <lred>Superaste el límite de tiendas. No puedes crear más.</lred>
+        BadArea: <lred>olo puedes crear tiendas en tu terreno protegido.</lred>
+        NotEnoughFunds: <lred>No tienes fondos suficientes.</lred>
+        TypePermission: <lred>No tienes permiso para crear este tipo de tiendas.</lred>
     Removal:
-      Info:
-        Done: '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10; ~sound: ENTITY_GENERIC_EXPLODE;}&c&lTienda eliminada.'
       Error:
-        NotAShop: Este bloque no es una tienda.
+        NotEmpty: <lred>Por favor retira los items del inventario de la tienda para eliminarla.</lred>
+        NotAShop: <lred>Este bloque no es una tienda.</lred>
+      Info:
+        Done:
+          - <output:"titles:10:80:10"><sound:"entity_generic_explode">
+          - <lred><b>¡Tienda eliminada!</b></lred>
     Trade:
       Buy:
         Info:
-          User: '{message: ~prefix: false;}&eCompraste &6x%amount% %item% &epor &6%price% &een la tienda &6%shop_name%&e de &6%shop_owner%&e.'
-          Owner: '{message: ~prefix: false;}&6%player% &ecompró &6x%amount% %item% &epor &6%price% &een tu tienda &6%shop_name%&e.'
+          User:
+            - <noprefix>
+            - <lyellow>Has comprado <orange>x%amount% %item%</orange> por <orange>%price%</orange> en la tienda de <orange>%shop_name%</orange>.</lyellow>
+          Owner:
+            - <noprefix>
+            - <lyellow><orange>%player_display_name%</orange> compró <orange>x%amount% %item%</orange> por <orange>%price%</orange> en tu tienda <orange>%shop_name%</orange>.</lyellow>
       Sell:
         Info:
-          User: '{message: ~prefix: false;}&eVendiste &6x%amount% %item% &epor &6%price% &ea &6%shop_name%&e. Dueño: &6%shop_owner%&e.'
-          Owner: '{message: ~prefix: false;}&6%player% &eVendió &6x%amount% %item% &epor &6%price% &ea tu tienda &6%shop_name%&e.'
+          User:
+            - <noprefix>
+            - <lyellow>Vendiste <orange>x%amount% %item%</orange> por <orange>%price%</orange> a la tienda <orange>%shop_name%</orange>.</lyellow>
+          Owner:
+            - <noprefix>
+            - <lyellow><orange>%player_display_name%</orange> vendió <orange>x%amount% %item%</orange> por <orange>%price%</orange> a tu tienda <orange>%shop_name%</orange>.</lyellow>
     Bank:
       Error:
         InvalidCurrency:
-          - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
-          - '&c&lOperación fallida.'
-          - '&7¡Esta divisa es inválida o no está permitida!'
+          - <output:"titles:20:60:20">
+          - <lred><b>Operación fallida.</b></lred>
+          - <lgray>¡Esta divisa es inválida o no está permitida!</lgray>
       Deposit:
-        Success:
-          - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
-          - '&a&lDepósito exitoso.'
-          - '&7Depositaste &a%amount% &7al banco de la tienda.'
+        Success: <lgray>Depositaste <lgreen>%amount%</lgreen> en el banco de la tienda.</lgray>
         Error:
-          NotEnough:
-            - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
-            - '&c&lDepósito fallido.'
-            - '&7No tienes fondos suficientes.'
+          NotEnough: <lgray>No dispones de fondos suficientes.</lgray>
       Withdraw:
-        Success:
-          - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
-          - '&a&lRetiro exitoso.'
-          - '&7Retiraste &a%amount% &7del banco de la tienda.'
-        NotEnough:
-          - '{message: ~type: TITLES; ~fadeIn: 10; ~stay: 80; ~fadeOut: 10;}'
-          - '&c&lRetirada fallida.'
-          - '&7El banco no tiene fondos suficientes.'
+        Success: <lgray>Retiraste <lgreen>%amount%</lgreen> del banco de la tienda.</lgray>
+        NotEnough: <lgray>El banco no tiene fondos suficientes.</lgray>
+    InfiniteStorage:
+      Deposit:
+        Success: <lgray>Depositaste <lgreen>x%amount% %item%</lgreen> en el inventario de la tienda!</lgray>
+        Error:
+          NotEnough: <lgray>No dispones de items suficientes.</lgray>
+      Withdraw:
+        Success: <lgray>Retiraste <lgreen>x%amount% %item%</lgreen> del inventario de la tienda.</lgray>
+        NotEnough: <lgray>El inventario de la tienda no tiene items suficientes.</lgray>
   Product:
     Error:
-      BadItem: Este objeto no se puede intercambiar.
+      BadItem: <lred>Este objeto no se puede intercambiar.</lred>
   Editor:
     Error:
-      ProductLeft: '&cPrimero tienes que sacar todos los objetos de este cofre.'
-ChestShopType:
-  PLAYER: Jugador
-  ADMIN: Admin
+      ProductLeft: <lred>Primero tienes que sacar todos los objetos de este cofre.</lred>
+  Notification:
+    ShopEarnings:
+      - <noprefix>
+      - ' '
+      - <lgreen><b>Beneficios de tus tiendas:</b></lgreen>
+      - '<lgray>Mientras estabas offline tus tiendas generaron: <lgreen>%amount%</lgreen></lgray>'
+      - ' '
+  Search:
+    ItemPrompt:
+      - <output:"titles:20:-1:20"><sound:"block_lava_pop">
+      - <lyellow><b>Búsqueda</b></lyellow>
+      - <lgray>Introduce el <lyellow>nombre</lyellow> del item para buscar.</lgray>
+  ShopType:
+    PLAYER: Jugador
+    ADMIN: Admin
 Auction:
   Command:
+    Argument:
+      Name:
+        Price: price
     Open:
       Desc: Abrir subasta.
     Sell:
       Desc: Añadir un objeto a la subasta.
-      Usage: <price>
+      Error:
+        NoItem: <lred>¡Necesitas un item en la mano para hacer eso!</lred>
     Expired:
       Desc: Lista de anuncios caducados.
-      Usage: '[player]'
     History:
-      Desc: Tu historial de ventas
-      Usage: '[player]'
+      Desc: Tu historial de ventas.
     Selling:
       Desc: Tu lista de anuncios actuales.
-      Usage: '[player]'
     Unclaimed:
       Desc: Lista de recompensas sin reclamar de tu lista.
-      Usage: '[player]'
   Listing:
     Add:
       Success:
-        Info: '&7Añadiste &ax%listing_item_amount% %listing_item_name%&7 en subasta por &a%listing_price%&7. Impuestos: &c%tax%&7.'
-        Announce: '&a%player_display_name% &7pusiste &ax%listing_item_amount% {json: ~showItem: %listing_item_value%;}&a%listing_item_name%{end-json} &7en subasta por &e%listing_price%&7.'
+        Info:
+          - <noprefix><sound:"block_note_block_bell">
+          - ' '
+          - <lgreen><b>✔ ¡Éxito!</b></lgreen>
+          - ' '
+          - <lgray>Pusiste <lgreen>x%listing_item_amount% %listing_item_name%</lgreen> en subasta por <lgreen>%listing_price%</lgreen>.</lgray>
+          - '<lgray>Impuestos: <lred>%tax%</lred></lgray>'
+          - ' '
+        Broadcast:
+          - <noprefix>
+          - ' '
+          - <lyellow><b>Subasta:</b></lyellow>
+          - <lgray>El jugador <lyellow>%player_display_name%</lyellow> ha puesto <lyellow>x%listing_item_amount%</lyellow> <hover:show_item:'%listing_item_value%'><lyellow>%listing_item_name%</lyellow></hover> en subasta por <lyellow>%listing_price%</lyellow>.</lgray>
+          - ' '
       Error:
-        BadItem: '{message: ~sound: ENTITY_VILLAGER_NO;}&e%item% &cno se puede añadir a la subasta.'
-        Limit: '{message: ~sound: ENTITY_VILLAGER_NO;}&cNo puedes añadir mas de &e%amount% &canuncios activos en tu subasta.'
+        BadItem:
+          - <sound:"entity_villager_no">
+          - <lgray>¡<lred>✘ %item%</lred> no se puede añadir a la subasta!</lgray>
+        Limit:
+          - <sound:"entity_villager_no">
+          - <lgray>¡<lred>✘</lred> No puedes tener más de <lred>%amount%</lred> items en subasta!</lgray>
         Price:
-          Tax: '{message: ~sound: ENTITY_VILLAGER_NO;}&cNo puedes pagar el impuesto &e%tax%% &cimpuesto sobre el precio: &e%amount%&c.'
+          Tax:
+            - <sound:"entity_villager_no">
+            - '<lgray>¡<lred>✘</lred> No puedes pagar el impuesto <lred>%tax%</lred> sobre el precio: <lred>%amount%</lred>!</lgray>'
           Currency:
-            Min: '{message: ~sound: ENTITY_VILLAGER_NO;}&cEl precio de venta para la divisa &e%currency_name% &cno puede ser menor que &e%amount%&c.'
-            Max: '{message: ~sound: ENTITY_VILLAGER_NO;}&cEl precio de venta para la divisa &e%currency_name% &cno puede ser mayor que &e%amount%&c.'
-          Negative: '{message: ~sound: ENTITY_VILLAGER_NO;}&cListing price can not be negative!'
+            Min:
+              - <sound:"entity_villager_no">
+              - <lgray>¡<lred>✘</lred> El precio de venta para la divisa <lred>%currency_name%</lred> no puede ser menor que <lred>%amount%</lred>!</lgray>
+            Max:
+              - <sound:"entity_villager_no">
+              - <lgray>¡<lred>✘</lred> El precio de venta para la divisa <lred>%currency_name%</lred> no puede ser mayor que <lred>%amount%</lred>!</lgray>
+          Negative:
+            - <sound:"entity_villager_no">
+            - <lgray>¡<lred>✘</lred> El precio no puede ser negativo!</lgray>
           Material:
-            Min: '{message: ~sound: ENTITY_VILLAGER_NO;}&cEl precio de venta por &ex1 %item%&c no puede ser menor que &e%amount%&c.'
-            Max: '{message: ~sound: ENTITY_VILLAGER_NO;}&cEl precio de venta por &ex1 %item%&c no puede ser mayor que &e%amount%&c.'
-        DisabledGamemode: '{message: ~sound: ENTITY_VILLAGER_NO;}&cNo puedes añadir objetos en este modo de juego.'
+            Min:
+              - <sound:"entity_villager_no">
+              - <lgray>¡<lred>✘</lred> El precio de venta por <lred>x1 %item%</lred> no puede ser menor que <lred>%amount%</lred>!</lgray>
+            Max:
+              - <sound:"entity_villager_no">
+              - <lgray>¡<lred>✘</lred> El precio de venta por <lred>x1 %item%</lred> no puede ser mayor que <lred>%amount%</lred>!</lgray>
+        DisabledGamemode:
+          - <sound:"entity_villager_no">
+          - <lgray>¡<lred>✘</lred> No puedes añadir items en este modo de juego!</lgray>
     Buy:
       Success:
         Info:
-          - '{message: ~prefix: false; ~type: TITLES; ~fadeIn: 20; ~stay: 50; ~fadeOut: 20; ~sound: ENTITY_PLAYER_LEVELUP;}&a&lCompra exitosa.'
-          - '&7Compraste &ax%listing_item_amount% %listing_item_name% &7a &a%listing_seller% &7por &a%listing_price%&7.'
+          - <output:"titles:20:60:20"><sound:"entity_player_levelup">
+          - <lgreen><b>Compra exitosa</b></lgreen>
+          - <lgray>Compraste <lgreen>x%listing_item_amount% %listing_item_name%</lgreen> a <lgreen>%listing_seller%</lgreen> por <lgreen>%listing_price%</lgreen>.</lgray>
       Error:
         NotEnoughFunds:
-          - '{message: ~prefix: false; ~type: TITLES; ~fadeIn: 20; ~stay: 50; ~fadeOut: 20; ~sound: BLOCK_ANVIL_PLACE;}&c&lNo tienes fondos suficientes.'
-          - '&7Ahorros: &c%balance% &8| &7Requerido: &c%listing_price%.'
+          - <output:"titles:20:60:20"><sound:"block_anvil_place">
+          - <lred><b>No tienes fondos suficientes.</b></lred>
+          - <lgray>Necesitas <lred>%listing_price%</lred>. Tienes <lred>%balance%</lred>.</lgray>
   Notify:
     Listing:
+      Claim: <lgray><lgreen>✔</lgreen> Reclamaste <lgreen>%listing_price%</lgreen> por <lgreen>%listing_item_name%</lgreen>!</lgray>
       Unclaimed:
-        - '{message: ~prefix: false;}'
-        - '&8&m-------------&8&l[ &e&lNOTIFICACIÓN DE SUBASTA &8&l]&8&m-------------'
-        - '&7     Tienes &e%amount% recompensas sin reclamar&7 de tus listas.'
-        - '&7                 {json: ~showText: &7Clic para reclamar tus recompensas; ~runCommand: /ah unclaimed;}&a&lClick para reclamar ahora.{end-json}'
-        - '&8&m-----------------------------------------'
+        - <noprefix>
+        - ' '
+        - <lyellow><b>Subasta:</b></lyellow>
+        - <lgray>Tienes <lyellow>%amount%</lyellow> ingresos sin reclamar de tus subastas.</lgray>
+        - ''
+        - <lgray>¡Click <click:run_command:"/ah unclaimed"><hover:show_text:'<lgray>Click para reclamar tus ingresos!</lgray>'><lyellow><b>AQUÍ</b></lyellow></hover></click> para reclamar tus ingresos!</lgray>
+        - ' '
       Expired:
-        - '{message: ~prefix: false;}'
-        - '&8&m-------------&8&l[ &e&lNOTIFICACIÓN DE SUBASTA &8&l]&8&m-------------'
-        - '&7     Tienes &e%amount% &7listas expiradas.'
-        - '&7           {json: ~showText: &7Clic para reclamar tus recompensas; ~runCommand: /ah expired;}&a&lClic para reclamar ahora.!{end-json}'
-        - '&8&m-----------------------------------------'
-      Claim: '&7Reclamaste &a%listing_price%&7 por &a%listing_item_name%&7.'
+        - <noprefix>
+        - ' '
+        - <lorange><b>Subasta:</b></lorange>
+        - <lgray>Tienes <lorange>%amount%</lorange> subastas expiradas</lgray>
+        - ''
+        - <lgray>¡Click <click:run_command:"/ah expired"><hover:show_text:'<lgray>Click para recuperar tus items.</lgray>'><lorange><b>AQUÍ</b></lorange></hover></click> para recuperar tus items.</lgray>
+        - ' '
   Error:
-    DisabledWorld: '&cLas subastas están desactivadas en este mundo.'
-AuctionSortType:
-  NAME: Nombre
-  MATERIAL: Material
-  SELLER: Vendedor
-  NEWEST: Más reciente
-  OLDEST: Menos reciente
-  MOST_EXPENSIVE: Más caro
-  LEAST_EXPENSIVE: Menos caro
+    DisabledWorld: <lgray><lred>✘</lred> Las subastas están desactivadas en este mundo.</lgray>
+  SortType:
+    NAME: Nombre
+    MATERIAL: Material
+    SELLER: Vendedor
+    NEWEST: Más reciente
+    OLDEST: Más antiguo
+    MOST_EXPENSIVE: Más caro
+    LEAST_EXPENSIVE: Más barato

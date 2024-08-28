@@ -17,13 +17,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.Placeholders;
@@ -31,9 +33,9 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.shop.impl.AbstractProductPricer;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
-import su.nightexpress.nexshop.shop.impl.handler.VanillaItemHandler;
+import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.LocationUtil;
 import su.nightexpress.nightcore.util.Pair;
@@ -132,15 +134,15 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private void loadProducts(@NotNull FileConfig config) {
         config.getSection("Products").forEach(id -> {
             ChestProduct product = this.loadProduct(config, id, "Products." + id);
-            if (product == null) {
-                this.plugin.warn("Product not loaded: '" + id + "' in '" + this.getId() + "' shop.");
-                return;
-            }
+//            if (product == null) {
+//                this.plugin.warn("Product not loaded: '" + id + "' in '" + this.getId() + "' shop.");
+//                return;
+//            }
             this.addProduct(product);
         });
     }
 
-    @Nullable
+    @NotNull
     private ChestProduct loadProduct(@NotNull FileConfig config, @NotNull String id, @NotNull String path) {
         String currencyId = config.getString(path + ".Currency", VaultEconomyHandler.ID);
         Currency currency = this.plugin.getCurrencyManager().getCurrency(currencyId);
@@ -154,21 +156,14 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             config.set(path + ".Content.Item", itemOld);
         }
 
-        String handlerId = config.getString(path + ".Handler", VanillaItemHandler.NAME);
+        String handlerId = config.getString(path + ".Handler", BukkitItemHandler.NAME);
         ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
         if (handler == null) {
-            handler = ProductHandlerRegistry.forBukkitItem();
-            this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Using default one...");
+            handler = ProductHandlerRegistry.getDummyHandler();
+            this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in GUI.");
         }
 
-        ProductPacker packer = handler.createPacker();
-        if (!packer.load(config, path)) {
-            this.module.warn("Invalid data for '" + id + "' product in '" + this.getId() + "' shop.");
-            return null;
-        }
-        if (packer instanceof ItemPacker itemPacker) {
-            itemPacker.setUsePreview(false);
-        }
+        ProductPacker packer = handler.createPacker(config, path);
 
         int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
 
@@ -215,13 +210,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     public void saveProductQuantity() {
         FileConfig config = this.getConfig();
-        this.getProducts().forEach(product -> product.writeQuantity(config, "Products." + product.getId()));
+        this.getValidProducts().forEach(product -> product.writeQuantity(config, "Products." + product.getId()));
         config.saveChanges();
     }
 
     private void writeProducts(@NotNull FileConfig config) {
         config.remove("Products");
-        this.getProducts().forEach(product -> product.write(config, "Products." + product.getId()));
+        this.getValidProducts().forEach(product -> product.write(config, "Products." + product.getId()));
     }
 
     @Override
@@ -385,7 +380,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @Nullable
     public ChestProduct getRandomProduct() {
-        Set<ChestProduct> products = new HashSet<>(this.getProducts());
+        Set<ChestProduct> products = new HashSet<>(this.getValidProducts());
         return products.isEmpty() ? null : Rnd.get(products);
     }
 
@@ -412,16 +407,17 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         String id = UUID.randomUUID().toString();
 
-        ProductHandler handler;
+        ItemHandler handler;
         if (bypassHandler) {
             handler = ProductHandlerRegistry.forBukkitItem();
         }
         else handler = ProductHandlerRegistry.getHandler(stack);
 
+        ProductPacker packer = handler.createPacker(stack);
+        if (packer == null) return null;
 
-        ProductPacker packer = handler.createPacker();
-        if (packer instanceof ItemPacker itemPacker) {
-            itemPacker.load(stack);
+        if (packer instanceof BukkitItemPacker itemPacker) {
+            itemPacker.setRespectItemMeta(true); // Always check for similar stack for chest shop.
         }
 
         Currency currency = this.module.getDefaultCurrency();
@@ -435,14 +431,14 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public boolean isProduct(@NotNull ItemStack item) {
-        return this.getProducts().stream().anyMatch(product -> {
+        return this.getValidProducts().stream().anyMatch(product -> {
             return product.getPacker() instanceof ItemPacker handler && handler.isItemMatches(item);
         });
     }
 
     @Nullable
     public ChestProduct getProductAtSlot(int slot) {
-        List<ChestProduct> products = new ArrayList<>(this.getProducts());
+        List<ChestProduct> products = new ArrayList<>(this.getValidProducts());
         if (products.size() <= slot) return null;
 
         return products.get(slot);

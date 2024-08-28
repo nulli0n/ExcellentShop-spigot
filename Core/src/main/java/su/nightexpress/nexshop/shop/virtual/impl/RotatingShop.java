@@ -7,9 +7,9 @@ import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.data.object.RotationData;
+import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.util.ShopUtils;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
@@ -109,7 +109,7 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
 
     @Override
     protected void saveAdditionalProducts() {
-        this.getProducts().forEach(this::writeProduct);
+        this.getValidProducts().forEach(this::writeProduct);
     }
 
     @Override
@@ -223,14 +223,14 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
         if (amount <= 0) return Collections.emptySet();
 
         Map<RotatingProduct, Double> products = new HashMap<>();
-        this.getProducts().stream().filter(RotatingProduct::canRotate)
+        this.getValidProducts().stream().filter(RotatingProduct::canRotate)
             .forEach(product -> products.put(product, product.getRotationChance()));
 
         Set<String> generated = new HashSet<>();
         while (amount > 0 && !products.isEmpty()) {
             RotatingProduct product = Rnd.getByWeight(products);
             this.getPricer().deleteData(product);
-            this.getStock().deleteGlobalData(product);
+            this.getStock().resetGlobalAmount(product);
 
             generated.add(product.getId());
             products.remove(product);

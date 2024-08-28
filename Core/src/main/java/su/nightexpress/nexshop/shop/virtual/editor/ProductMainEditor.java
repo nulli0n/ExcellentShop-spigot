@@ -7,14 +7,16 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
+import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
 import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
-import su.nightexpress.nexshop.shop.impl.handler.VanillaCommandHandler;
-import su.nightexpress.nexshop.shop.impl.packer.VanillaItemPacker;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
+import su.nightexpress.nexshop.product.packer.impl.BukkitCommandPacker;
+import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
@@ -77,7 +79,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
                 this.saveProduct(viewer, product);
                 return true;
             });
-        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getHandler() instanceof VanillaCommandHandler);
+        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getHandler() instanceof BukkitCommandHandler);
 
         // =============================================
         // Item Product stuff
@@ -93,13 +95,16 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             if (cursor == null || cursor.getType().isAir()) return;
 
             boolean isBypass = event.isShiftClick();
-            ProductHandler handler = isBypass ? ProductHandlerRegistry.forBukkitItem() : ProductHandlerRegistry.getHandler(cursor);
+                ItemHandler handler = isBypass ? ProductHandlerRegistry.forBukkitItem() : ProductHandlerRegistry.getHandler(cursor);
 
-            product.setHandler(handler);
+            ProductPacker packer = handler.createPacker(cursor);
+            if (packer == null) return;
 
-            if (product.getPacker() instanceof ItemPacker itemPacker) {
-                itemPacker.load(cursor);
-            }
+            product.setHandler(handler, packer);
+
+//            if (product.getPacker() instanceof ItemPacker itemPacker) {
+//                itemPacker.load(cursor);
+//            }
 
             event.getView().setCursor(null);
             this.saveProductAndFlush(viewer, product);
@@ -128,10 +133,8 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             this.saveProductAndFlush(viewer, product);
         }).getOptions()
             .setVisibilityPolicy(viewer -> {
-                if (this.getLink(viewer).getPacker() instanceof ItemPacker itemPacker) {
-                    return itemPacker.isUsePreview();
-                }
-                return true;
+                ProductPacker packer = this.getLink(viewer).getPacker();
+                return packer instanceof BukkitItemPacker || packer instanceof BukkitCommandPacker;
             })
             .setDisplayModifier((viewer, item) -> {
                 ItemStack original = this.getLink(viewer).getPacker().getPreview();
@@ -142,11 +145,11 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             });
 
         this.addItem(ItemUtil.getSkinHead(TEXTURE_META), VirtualLocales.PRODUCT_RESPECT_ITEM_META, 14, (viewer, event, product) -> {
-            if (!(product.getPacker() instanceof VanillaItemPacker packer)) return;
+            if (!(product.getPacker() instanceof BukkitItemPacker packer)) return;
 
             packer.setRespectItemMeta(!packer.isRespectItemMeta());
             this.saveProductAndFlush(viewer, product);
-        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof VanillaItemPacker);
+        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof BukkitItemPacker);
 
         // =============================================
         // Regular Product stuff

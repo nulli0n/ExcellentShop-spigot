@@ -12,10 +12,7 @@ import su.nightexpress.nightcore.util.placeholder.Placeholder;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop, Placeholder {
 
@@ -38,6 +35,11 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     @NotNull
     public PlaceholderMap getPlaceholders() {
         return this.placeholderMap;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return this.plugin.getShopManager().getProductDataManager().isLoaded();
     }
 
     @NotNull
@@ -92,6 +94,12 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     @NotNull
     public Collection<P> getProducts() {
         return this.getProductMap().values();
+    }
+
+    @Override
+    @NotNull
+    public List<P> getValidProducts() {
+        return this.getProducts().stream().filter(Product::isValid).toList();
     }
 
     @Override

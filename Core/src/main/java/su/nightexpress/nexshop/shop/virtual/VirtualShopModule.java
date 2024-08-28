@@ -13,13 +13,12 @@ import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.TransactionModule;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.module.AbstractShopModule;
+import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.command.child.EditorCommand;
 import su.nightexpress.nexshop.shop.virtual.command.child.MenuCommand;
@@ -33,7 +32,10 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.*;
-import su.nightexpress.nexshop.shop.virtual.impl.*;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
 import su.nightexpress.nexshop.shop.virtual.menu.MainMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.SellMenu;
@@ -107,6 +109,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         this.loadLayouts();
 
         if (Plugins.isLoaded(HookId.CITIZENS)) {
+            this.warn(HookId.CITIZENS + " support is deprecated and will be removed in future versions. Please, use NPC commands to assign your virtual shops to NPCs.");
             this.addListener(new VirtualShopNPCListener(this));
         }
 
@@ -148,7 +151,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     @Override
-    protected void addCommands(@NotNull ChainedNodeBuilder builder) {
+    protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
         OpenCommand.build(this, builder);
         EditorCommand.build(this, builder);
 
@@ -186,9 +189,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
             this.loadShops(shopType);
         }
 
-        long delay = Plugins.isInstalled(HookId.ITEMS_ADDER) ? 100L : 10L; // because ItemsAdder loads too late
-        this.plugin.runTaskAsync(task -> this.loadShopData());
-        this.plugin.runTaskLater(task -> this.validateShopProducts(), delay);
+        this.plugin.runTaskAsync(task -> this.loadRotationData());
     }
 
     private void loadShops(@NotNull ShopType shopType) {
@@ -223,6 +224,10 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         else if (shop instanceof RotatingShop rotatingShop) {
             this.getRotatingShopMap().put(shop.getId(), rotatingShop);
         }
+
+        if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
+            shop.getPricer().updatePrices(); // Need to load price data from ProductDataManager on /vshop reload.
+        }
     }
 
     private void loadLayouts() {
@@ -238,27 +243,11 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         this.mainMenu = new MainMenu(this.plugin, this);
     }
 
-    public void loadShopData() {
+    public void loadRotationData() {
         this.getShops().forEach(shop -> {
-            shop.getPricer().load();
-            shop.getStock().load();
             if (shop instanceof RotatingShop rotatingShop) {
                 rotatingShop.loadData();
             }
-        });
-    }
-
-    public void validateShopProducts() {
-        //this.printShops();
-        this.getShops().forEach(shop -> {
-            shop.getProductMap().values().removeIf(product -> {
-                if (product.getPacker() instanceof PluginItemPacker packer && !packer.isValidId(packer.getItemId())) {
-                    this.error("Invalid item id for '" + product.getId() + "' product in '" + shop.getId() + "' shop!");
-                    return true;
-                }
-                return false;
-            });
-            shop.setLoaded(true);
         });
     }
 
@@ -436,24 +425,12 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     @Nullable
     @Deprecated
     public VirtualProduct getBestProduct(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType type, @Nullable VirtualShop shop) {
-        //return shop == null ? this.getBestProductFor(player, item, type) : shop.getBestProduct(player, item, type);
         return this.getBestProduct(item, type, shop, player);
     }
 
     @Nullable
     @Deprecated
     public VirtualProduct getBestProductFor(@NotNull Player player, @NotNull ItemStack item, @NotNull TradeType tradeType) {
-        /*Set<VirtualProduct> products = new HashSet<>();
-        this.getShops().forEach(shop -> {
-            VirtualProduct best = shop.getBestProduct(player, item, tradeType);
-            if (best != null) {
-                products.add(best);
-            }
-        });
-
-        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(player, tradeType));
-        return (tradeType == TradeType.BUY ? products.stream().min(comparator) : products.stream().max(comparator)).orElse(null);*/
-
         return this.getBestProductFor(item, tradeType, player);
     }
 
@@ -507,8 +484,6 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         shop.setLayoutName(Placeholders.DEFAULT);
         shop.save();
         this.loadShop(shop);
-        shop.getStock().load();
-        shop.setLoaded(true);
 
         return true;
     }

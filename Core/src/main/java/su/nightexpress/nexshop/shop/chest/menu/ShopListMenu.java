@@ -107,7 +107,7 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
 
             List<String> productInfo = new ArrayList<>();
             int productCount = 0;
-            for (ChestProduct product : shop.getProducts()) {
+            for (ChestProduct product : shop.getValidProducts()) {
                 if (productCount >= this.productLimit) break;
                 for (String line : this.productLore) {
                     productInfo.add(product.replacePlaceholders().apply(line));

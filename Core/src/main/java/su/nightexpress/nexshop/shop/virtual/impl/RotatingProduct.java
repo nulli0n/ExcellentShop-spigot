@@ -5,7 +5,7 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
-import su.nightexpress.nexshop.data.object.RotationData;
+import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -28,7 +28,7 @@ public class RotatingProduct extends AbstractVirtualProduct<RotatingShop> {
                            @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
         super(plugin, id, shop, currency, handler, packer);
 
-        this.placeholderRelMap
+        this.placeholders
             .add(Placeholders.PRODUCT_ROTATION_CHANCE, player -> NumberUtil.format(this.getRotationChance()));
     }
 

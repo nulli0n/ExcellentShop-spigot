@@ -10,8 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
-import su.nightexpress.nexshop.shop.ProductHandlerRegistry;
+import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -40,6 +40,10 @@ public class ChestUtils {
         return !needShift || event.isShiftClick();
     }
 
+    public static boolean isDye(@NotNull Material material) {
+        return BukkitThing.toString(material).endsWith("_dye");
+    }
+
     public static int getShopLimit(@NotNull Player player) {
         return ChestConfig.SHOP_CREATION_MAX_PER_RANK.get().getGreatestOrNegative(player);
     }
@@ -54,7 +58,7 @@ public class ChestUtils {
         String material = item.getType().getKey().getKey();
         if (bannedItems.contains(material)) return false;
 
-        for (PluginItemPacker pluginItem : ProductHandlerRegistry.getPluginItemPackers()) {
+        for (PluginItemHandler pluginItem : ProductHandlerRegistry.getPluginItemHandlers()) {
             String id = pluginItem.getItemId(item);
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;

@@ -93,7 +93,7 @@ public class ShopBrowseMenu extends ConfigMenu<ShopPlugin> implements AutoFilled
             ItemStack item = new ItemStack(Material.PLAYER_HEAD);
 
             ItemUtil.editMeta(item, meta -> {
-                if (meta instanceof SkullMeta skullMeta && owner.getPlayerProfile().getName() != null) {
+                if (meta instanceof SkullMeta skullMeta && owner.getName() != null) {
                     skullMeta.setOwningPlayer(owner);
                 }
             });

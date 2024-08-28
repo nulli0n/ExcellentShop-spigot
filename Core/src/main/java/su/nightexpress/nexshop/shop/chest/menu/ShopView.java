@@ -12,7 +12,7 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.util.ShopUtils;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -84,7 +84,7 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
         ChestShop shop = this.getLink(viewer);
 
         autoFill.setSlots(this.productSlots);
-        autoFill.setItems(shop.getProducts());
+        autoFill.setItems(shop.getValidProducts());
         autoFill.setItemCreator(product -> {
             List<String> loreFormat = ChestConfig.PRODUCT_FORMAT_LORE_GENERAL.get();
             List<String> buyLore = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable() ? ChestConfig.PRODUCT_FORMAT_LORE_BUY.get() : Collections.emptyList();
