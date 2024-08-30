@@ -30,6 +30,7 @@ public class BukkitCommandPacker extends AbstractProductPacker<BukkitCommandHand
     public BukkitCommandPacker(@NotNull BukkitCommandHandler handler, @NotNull ItemStack preview, @NotNull List<String> commands) {
         super(handler);
         this.setCommands(commands);
+        this.setPreview(preview);
 
         this.placeholderMap
             .add(Placeholders.PRODUCT_COMMANDS, () -> this.getCommands().stream().map(Lang::goodEntry).collect(Collectors.joining("\n")));

@@ -242,7 +242,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         }
 
         if (!this.hasPermission(player)) {
-            if (notify) Lang.ERROR_NO_PERMISSION.getMessage().send(player);
+            if (notify) Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
             return false;
         }
 

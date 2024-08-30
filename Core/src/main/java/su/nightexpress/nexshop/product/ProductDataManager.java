@@ -28,6 +28,7 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
     @Override
     protected void onLoad() {
         this.loadData();
+        this.loaded = true;
 
         this.addTask(this.plugin.createAsyncTask(this::saveScheduled).setSecondsInterval(Config.DATA_PRODUCT_SAVE_INTERVAL.get()));
     }
@@ -41,10 +42,9 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
     }
 
     public void loadData() {
-        this.loaded = false;
+        this.dataMap.clear();
         this.loadPriceData();
         this.loadStockData();
-        this.loaded = true;
     }
 
     private void loadPriceData() {

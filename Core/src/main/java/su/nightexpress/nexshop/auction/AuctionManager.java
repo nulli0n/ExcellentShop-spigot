@@ -318,7 +318,7 @@ public class AuctionManager extends AbstractShopModule {
     public boolean sell(@NotNull Player player, @NotNull ItemStack item, double price) {
         Set<Currency> currencies = this.getAllowedCurrencies(player);
         if (currencies.isEmpty()) {
-            AuctionLang.ERROR_NO_PERMISSION.getMessage().send(player);
+            AuctionLang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
             return false;
         }
 

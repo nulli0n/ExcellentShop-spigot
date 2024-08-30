@@ -33,6 +33,8 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
+import su.nightexpress.nexshop.shop.chest.display.PacketEventsHandler;
 import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nexshop.shop.chest.command.*;
 import su.nightexpress.nexshop.shop.chest.compatibility.*;
@@ -40,7 +42,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
-import su.nightexpress.nexshop.shop.chest.display.DisplayHandlerV2;
+import su.nightexpress.nexshop.shop.chest.display.ProtocolLibHandler;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -87,7 +89,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     private ShopView       shopView;
 
     private Set<ClaimHook> claimHooks;
-    private DisplayHandlerV2 displayHandler;
+    private DisplayHandler<?> displayHandler;
 
     private TransactionLogger logger;
 
@@ -112,6 +114,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         this.logger = new TransactionLogger(this, config);
 
         this.loadCurrencies();
+        this.loadDisplayHandler();
         this.loadHooks();
 
         this.addListener(new ShopListener(this.plugin, this));
@@ -208,13 +211,6 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     private void loadHooks() {
-        if (Plugins.isLoaded(HookId.PROTOCOL_LIB)) {
-            this.displayHandler = new DisplayHandlerV2(this.plugin, this);
-            this.displayHandler.setup();
-
-            this.addTask(this.plugin.createAsyncTask(() -> this.displayHandler.update()).setSecondsInterval(ChestConfig.DISPLAY_UPDATE_INTERVAL.get()));
-        }
-
         if (ChestConfig.SHOP_CREATION_CLAIM_ONLY.get()) {
             this.claimHooks = new HashSet<>();
             if (Plugins.isInstalled(HookId.LANDS)) this.claimHooks.add(new LandsHook(this.plugin));
@@ -231,6 +227,21 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             if (Plugins.isInstalled(HookId.UPGRADEABLE_HOPPERS)) {
                 this.addListener(new UpgradeHopperListener(this.plugin, this));
             }
+        }
+    }
+
+    private void loadDisplayHandler() {
+        if (Plugins.isInstalled(HookId.PACKET_EVENTS)) {
+            this.displayHandler = new PacketEventsHandler(this.plugin, this);
+        }
+        else if (Plugins.isLoaded(HookId.PROTOCOL_LIB)) {
+            this.displayHandler = new ProtocolLibHandler(this.plugin, this);
+        }
+
+        if (this.displayHandler != null) {
+            this.displayHandler.setup();
+
+            this.addTask(this.plugin.createAsyncTask(() -> this.displayHandler.update()).setSecondsInterval(ChestConfig.DISPLAY_UPDATE_INTERVAL.get()));
         }
     }
 
@@ -697,7 +708,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     public boolean deleteShop(@NotNull Player player, @NotNull ChestShop shop) {
         if (!player.hasPermission(ChestPerms.REMOVE)) {
-            ChestLang.ERROR_NO_PERMISSION.getMessage().send(player);
+            ChestLang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
             return false;
         }
 
@@ -847,7 +858,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     @Nullable
-    public DisplayHandlerV2 getDisplayHandler() {
+    public DisplayHandler<?> getDisplayHandler() {
         return this.displayHandler;
     }
 

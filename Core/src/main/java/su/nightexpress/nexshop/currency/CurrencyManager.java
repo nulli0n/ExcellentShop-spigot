@@ -83,6 +83,7 @@ public class CurrencyManager extends AbstractManager<ShopPlugin> {
     public void loadCurrencies() {
         this.loadItemCurrencies();
 
+        this.loadCurrency(PlayerLevelsHandler.ID, PlayerLevelsHandler::new);
         this.loadCurrency(PlayerXPHandler.ID, PlayerXPHandler::new);
 
         if (Plugins.hasVault() && VaultHook.hasEconomy()) {

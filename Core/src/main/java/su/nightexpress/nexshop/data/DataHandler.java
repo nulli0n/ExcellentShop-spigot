@@ -97,7 +97,9 @@ public class DataHandler extends AbstractUserDataHandler<ShopPlugin, ShopUser> {
 
     @Override
     public void onSynchronize() {
-        this.plugin.getShopManager().getProductDataManager().loadData();
+        if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
+            this.plugin.getShopManager().getProductDataManager().loadData();
+        }
 
         if (this.virtualDataHandler != null) this.virtualDataHandler.synchronize();
         if (this.chestDataHandler != null) this.chestDataHandler.synchronize();

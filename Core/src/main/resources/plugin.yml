@@ -24,4 +24,6 @@ softdepend:
   - MMOItems
   - ExcellentCrates
   - PlaceholderAPI
+  - ProtocolLib
+  - packetevents
 api-version: 1.18

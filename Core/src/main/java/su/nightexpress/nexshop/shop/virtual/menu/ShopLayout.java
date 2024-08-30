@@ -229,7 +229,7 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
             .setHandler((viewer, event) -> {
                 Player player2 = viewer.getPlayer();
                 if (!product.hasAccess(player2)) {
-                    Lang.ERROR_NO_PERMISSION.getMessage().send(player2);
+                    Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player2);
                     return;
                 }
 
