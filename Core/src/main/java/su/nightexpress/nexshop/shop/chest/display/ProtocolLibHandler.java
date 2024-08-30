@@ -124,8 +124,6 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
         list.add(spawnPacket);
         list.add(dataPacket);
 
-        location.add(0, this.lineGap, 0);
-
         return list;
     }
 
