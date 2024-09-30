@@ -36,7 +36,11 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
             if (tradeType == TradeType.BUY) {
                 this.consume(product, amount, tradeType);
             }
-            else this.store(product, amount, tradeType);
+            else {
+                if (!this.store(product, amount, tradeType)) {
+                    result.setResult(Transaction.Result.OUT_OF_SPACE);
+                }
+            }
         }
     }
 
@@ -106,8 +110,8 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         }
 
         Inventory inventory = this.shop.getInventory();
-        ShopUtils.addItem(inventory, packer.getItem(), amount);
-        return true;
+        return ShopUtils.addItem(inventory, packer.getItem(), amount);
+        //return true;
     }
 
     @Override

@@ -6,26 +6,15 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
-import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
-import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.menu.ShopView;
 import su.nightexpress.nexshop.product.price.impl.FlatPricer;
-import su.nightexpress.nexshop.util.RelativePlaceholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
-import su.nightexpress.nightcore.language.entry.LangText;
-import su.nightexpress.nightcore.menu.api.Menu;
-import su.nightexpress.nightcore.menu.impl.AbstractMenu;
+import su.nightexpress.nexshop.util.RelativePlaceholders;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
@@ -65,62 +54,63 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         return map;
     }
 
-    @Override
-    public void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click) {
-        Shop shop = this.getShop();
-        TradeType tradeType = click.getTradeType();
-        if (!shop.isTransactionEnabled(tradeType)) {
-            return;
-        }
-
-        if (tradeType == TradeType.BUY) {
-            if (!this.isBuyable()) {
-                Lang.SHOP_PRODUCT_ERROR_UNBUYABLE.getMessage().send(player);
-                return;
-            }
-            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && !this.hasSpace(player)) {
-                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.getMessage().send(player);
-                return;
-            }
-        }
-        else if (tradeType == TradeType.SELL) {
-            if (!this.isSellable()) {
-                Lang.SHOP_PRODUCT_ERROR_UNSELLABLE.getMessage().send(player);
-                return;
-            }
-        }
-
-        // For Virtual Shop will return either Stock or Player Limit amount.
-        // For Chest Shop will return inventory space or item amount.
-        int canPurchase = this.getAvailableAmount(player, tradeType);
-        if (canPurchase == 0) {
-            LangText msgStock;
-            if (tradeType == TradeType.BUY) {
-                msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK;
-            }
-            else {
-                if (shop instanceof ChestShop) {
-                    msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE;
-                }
-                else msgStock = Lang.SHOP_PRODUCT_ERROR_FULL_STOCK;
-            }
-            msgStock.getMessage().send(player);
-            return;
-        }
-
-        boolean isSellAll = (click == ShopClickAction.SELL_ALL);
-        PreparedProduct prepared = this.getPrepared(player, tradeType, isSellAll);
-        if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
-            prepared.trade();
-
-            Menu menu = AbstractMenu.getMenu(player);
-            if (menu instanceof ShopLayout || menu instanceof ShopView) {
-                menu.flush(player);
-            }
-            return;
-        }
-        this.plugin.getShopManager().openProductCart(player, prepared);
-    }
+//    @Override
+//    @Deprecated
+//    public void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click) {
+//        Shop shop = this.getShop();
+//        TradeType tradeType = click.getTradeType();
+//        if (!shop.isTransactionEnabled(tradeType)) {
+//            return;
+//        }
+//
+//        if (tradeType == TradeType.BUY) {
+//            if (!this.isBuyable()) {
+//                Lang.SHOP_PRODUCT_ERROR_UNBUYABLE.getMessage().send(player);
+//                return;
+//            }
+//            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && !this.hasSpace(player)) {
+//                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.getMessage().send(player);
+//                return;
+//            }
+//        }
+//        else if (tradeType == TradeType.SELL) {
+//            if (!this.isSellable()) {
+//                Lang.SHOP_PRODUCT_ERROR_UNSELLABLE.getMessage().send(player);
+//                return;
+//            }
+//        }
+//
+//        // For Virtual Shop will return either Stock or Player Limit amount.
+//        // For Chest Shop will return inventory space or item amount.
+//        int canPurchase = this.getAvailableAmount(player, tradeType);
+//        if (canPurchase == 0) {
+//            LangText msgStock;
+//            if (tradeType == TradeType.BUY) {
+//                msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK;
+//            }
+//            else {
+//                if (shop instanceof ChestShop) {
+//                    msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE;
+//                }
+//                else msgStock = Lang.SHOP_PRODUCT_ERROR_FULL_STOCK;
+//            }
+//            msgStock.getMessage().send(player);
+//            return;
+//        }
+//
+//        boolean isSellAll = (click == ShopClickAction.SELL_ALL);
+//        PreparedProduct prepared = this.getPrepared(player, tradeType, isSellAll);
+//        if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
+//            prepared.trade();
+//
+//            Menu menu = AbstractMenu.getMenu(player);
+//            if (menu instanceof ShopLayout || menu instanceof ShopView) {
+//                menu.flush(player);
+//            }
+//            return;
+//        }
+//        this.plugin.getShopManager().openProductCart(player, prepared);
+//    }
 
     @Override
     public double getPrice(@NotNull TradeType tradeType, @Nullable Player player) {

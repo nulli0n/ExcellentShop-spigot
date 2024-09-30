@@ -1,8 +1,11 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nightcore.util.wrapper.UniPermission;
+
+import java.util.function.Function;
 
 public class ChestPerms {
 
@@ -13,12 +16,15 @@ public class ChestPerms {
     public static final String PREFIX_SHOP_TYPE     = PREFIX + "type.";
     public static final String PREFIX_PRODUCT_LIMIT = PREFIX + "products.amount.";
     public static final String PREFIX_SHOP_LIMIT    = PREFIX + "shops.amount.";
+    public static final String PREFIX_CURRENCY      = PREFIX + "currency.";
 
     public static final UniPermission MODULE     = new UniPermission(PREFIX + Placeholders.WILDCARD);
     public static final UniPermission COMMAND    = new UniPermission(PREFIX_COMMAND + Placeholders.WILDCARD);
     public static final UniPermission BYPASS     = new UniPermission(PREFIX_BYPASS + Placeholders.WILDCARD);
     public static final UniPermission SHOP_TYPE  = new UniPermission(PREFIX_SHOP_TYPE + Placeholders.WILDCARD);
     public static final UniPermission PRICE_TYPE = new UniPermission(PREFIX_PRICE_TYPE + Placeholders.WILDCARD);
+
+    public static final Function<Currency, UniPermission> CURRENCY = currency -> new UniPermission(PREFIX_CURRENCY + currency.getId());
 
     public static final UniPermission DISPLAY_CUSTOMIZATION = new UniPermission(PREFIX + "display.customization");
     public static final UniPermission TELEPORT              = new UniPermission(PREFIX + "teleport");

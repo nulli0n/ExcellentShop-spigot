@@ -7,19 +7,19 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
-import su.nightexpress.nexshop.shop.chest.ChestShopModule;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
-import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
-import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.entry.LangString;
@@ -31,7 +31,10 @@ import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.item.MenuItem;
 import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.StringUtil;
 import su.nightexpress.nightcore.util.wrapper.UniDouble;
 
 import java.time.DayOfWeek;
@@ -83,9 +86,12 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
 
         this.addHandler(this.currencyHandler = new ItemHandler("product_change_currency", (viewer, event) -> {
             ChestProduct product = this.getLink(viewer);
-            List<Currency> currencies = new ArrayList<>(module.getAllowedCurrencies());
+            List<Currency> currencies = new ArrayList<>(module.getAllowedCurrencies(viewer.getPlayer()));
+            if (currencies.isEmpty()) return;
+
             int index = currencies.indexOf(product.getCurrency()) + 1;
             if (index >= currencies.size()) index = 0;
+
             product.setCurrency(currencies.get(index));
             this.saveProductAndFlush(viewer, product);
         }));

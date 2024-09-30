@@ -121,12 +121,14 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         ShopTransactionEvent event = new ShopTransactionEvent(player, shop, transaction);
         plugin.getPluginManager().callEvent(event);
 
-        result = event.getTransaction().getResult();
+        if (event.getTransactionResult() == Result.SUCCESS) {
+            shop.getStock().onTransaction(event); // May still fail.
+        }
+
         transaction.sendError(player);
 
-        if (result == Transaction.Result.SUCCESS) {
+        if (event.getTransactionResult() == Transaction.Result.SUCCESS) {
             shop.getPricer().onTransaction(event);
-            shop.getStock().onTransaction(event);
 
             // Process transaction
             if (!isUnlimited) {

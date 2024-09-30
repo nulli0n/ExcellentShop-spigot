@@ -8,7 +8,6 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
@@ -42,19 +41,22 @@ public class ShopUtils {
         return dateFormatter;
     }
 
-    @Nullable
+    @NotNull
     public static ShopClickAction getClickAction(@NotNull Player player, @NotNull ClickType click, @NotNull Shop shop, @NotNull Product product) {
-        ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(click);
+        //ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(click);
+
+        boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
+        boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
+        if (!isBuyable && !isSellable) return ShopClickAction.UNDEFINED;
 
         if (Players.isBedrock(player)) {
-            boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
-            boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
+            if (isBuyable && isSellable) return ShopClickAction.PURCHASE_OPTION;
 
-            if (isBuyable && !isSellable) clickType = ShopClickAction.BUY_SELECTION;
-            else if (isSellable && !isBuyable) clickType = ShopClickAction.SELL_SELECTION;
+            return !isSellable ? ShopClickAction.BUY_SELECTION : ShopClickAction.SELL_SELECTION;
         }
 
-        return clickType;
+        ShopClickAction action = Config.GUI_CLICK_ACTIONS.get().get(click);
+        return action == null ? ShopClickAction.UNDEFINED : action;
     }
 
     @NotNull
@@ -144,22 +146,53 @@ public class ShopUtils {
         Arrays.asList(items).forEach(item -> addItem(inventory, item, item.getAmount()));
     }
 
-    public static void addItem(@NotNull Inventory inventory, @NotNull ItemStack item2, int amount) {
-        if (amount <= 0 || item2.getType().isAir()) return;
+//    public static boolean addItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, int amount) {
+//        if (amount <= 0 || itemStack.getType().isAir()) return;
+//
+//        Location location = inventory.getLocation();
+//        World world = location == null ? null : location.getWorld();
+//        ItemStack copyStack = new ItemStack(itemStack);
+//
+//        int realAmount = Math.min(copyStack.getMaxStackSize(), amount);
+//        copyStack.setAmount(realAmount);
+//        inventory.addItem(copyStack).values().forEach(left -> {
+//            if (world != null) {
+//                world.dropItem(location, left);
+//            }
+//        });
+//
+//        amount -= realAmount;
+//        if (amount > 0) addItem(inventory, itemStack, amount);
+//    }
+
+    public static boolean addItem(@NotNull Inventory inventory, @NotNull ItemStack origin, int amount) {
+        if (amount <= 0 || origin.getType().isAir()) return false;
+        if (countItemSpace(inventory, origin) < amount) return false;
 
         Location location = inventory.getLocation();
         World world = location == null ? null : location.getWorld();
-        ItemStack item = new ItemStack(item2);
+//        ItemStack copyStack = new ItemStack(itemStack);
+//        copyStack.setAmount(amount);
+//
+//        inventory.addItem(copyStack).values().forEach(left -> {
+//            if (world != null) {
+//                world.dropItem(location, left);
+//            }
+//        });
 
-        int realAmount = Math.min(item.getMaxStackSize(), amount);
-        item.setAmount(realAmount);
-        inventory.addItem(item).values().forEach(left -> {
+        ItemStack split = new ItemStack(origin);
+
+        int splitAmount = Math.min(split.getMaxStackSize(), amount);
+        split.setAmount(splitAmount);
+        inventory.addItem(split).values().forEach(left -> {
             if (world != null) {
                 world.dropItem(location, left);
             }
         });
 
-        amount -= realAmount;
-        if (amount > 0) addItem(inventory, item2, amount);
+        amount -= splitAmount;
+        if (amount > 0) addItem(inventory, origin, amount);
+
+        return true;
     }
 }

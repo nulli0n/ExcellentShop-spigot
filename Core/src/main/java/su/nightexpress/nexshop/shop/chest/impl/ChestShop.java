@@ -444,8 +444,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return products.get(slot);
     }
 
-    public void teleport(@NotNull Player player) {
-        if (this.isInactive()) return;
+    public boolean teleport(@NotNull Player player) {
+        if (this.isInactive()) return false;
 
         Location location = this.getLocation();
         Block block = location.getBlock();
@@ -456,7 +456,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             location.setDirection(directional.getFacing().getOppositeFace().getDirection());
             location.setPitch(35F);
         }
-        player.teleport(location);
+
+        if (!this.isOwner(player) && !ChestUtils.isSafeLocation(location)) {
+            ChestLang.SHOP_TELEPORT_ERROR_UNSAFE.getMessage().send(player);
+            return false;
+        }
+
+        return player.teleport(location);
     }
 
     @NotNull

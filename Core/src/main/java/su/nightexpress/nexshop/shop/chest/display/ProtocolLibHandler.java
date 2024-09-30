@@ -42,7 +42,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     @Override
     @NotNull
-    protected List<PacketContainer> getItemPackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketContainer> getItemPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
         List<PacketContainer> list = new ArrayList<>();
 
         PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
@@ -51,7 +51,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
             metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(8, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item);
         });
 
-        list.add(spawnPacket);
+        if (create) list.add(spawnPacket);
         list.add(dataPacket);
 
         return list;
@@ -59,7 +59,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     @Override
     @NotNull
-    protected List<PacketContainer> getShowcasePackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketContainer> getShowcasePackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
         List<PacketContainer> list = new ArrayList<>();
 
         PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
@@ -79,7 +79,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
             }
         });
 
-        list.add(spawnPacket);
+        if (create) list.add(spawnPacket);
         list.add(dataPacket);
 
         if (type == EntityType.ARMOR_STAND) {
@@ -98,7 +98,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     @Override
     @NotNull
-    protected List<PacketContainer> getHologramPackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine) {
+    protected List<PacketContainer> getHologramPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine) {
         List<PacketContainer> list = new ArrayList<>();
 
         PacketContainer spawnPacket = createSpawnPacket(type, location, entityID);
@@ -121,7 +121,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
             }
         });
 
-        list.add(spawnPacket);
+        if (create) list.add(spawnPacket);
         list.add(dataPacket);
 
         return list;

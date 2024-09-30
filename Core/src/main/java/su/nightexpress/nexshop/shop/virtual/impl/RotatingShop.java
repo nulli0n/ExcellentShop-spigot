@@ -70,7 +70,7 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
             if (day == null) continue;
 
             TreeSet<LocalTime> times = new TreeSet<>(ShopUtils.parseTimes(config.getStringList("Rotation.Fixed." + sDay)));
-            this.getRotationTimes().put(day, times);
+            this.rotationTimes.put(day, times);
         }
 
         this.setProductMinAmount(config.getInt("Rotation.Products.Min_Amount"));
@@ -144,7 +144,30 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
             return LocalDateTime.now();
         }
         else {
-            if (this.getRotationTimes().isEmpty()) return null;
+            if (this.rotationTimes.isEmpty()) return null;
+
+//            List<LocalDateTime> timestamps = new ArrayList<>();
+//
+//            LocalDateTime todayDate = LocalDateTime.now();
+//            DayOfWeek todayDay = todayDate.getDayOfWeek();
+//
+//            for (int count = 0; count < 7; count++) {
+//                int value = todayDay.getValue() + count;
+//                while (value > 7) value -= 7;
+//
+//                DayOfWeek lookupDay = DayOfWeek.of(value);
+//
+//                var localTimes = this.rotationTimes.get(lookupDay);
+//                if (localTimes != null && !localTimes.isEmpty()) {
+//                    int finalCount = count;
+//                    localTimes.forEach(time -> {
+//                        LocalDateTime date = LocalDateTime.of(LocalDate.now(), time).plusDays(finalCount);
+//                        timestamps.add(date);
+//                    });
+//                }
+//            }
+//
+//            return timestamps.stream().filter(todayDate::isBefore).min(LocalDateTime::compareTo).orElse(null);
 
             int count = 0;
             LocalDate dateLookup = LocalDate.now();
@@ -193,6 +216,7 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
 
         LocalDateTime now = LocalDateTime.now();
         if (this.getRotationType() == RotationType.FIXED) {
+            if (now.getDayOfWeek() != nextRotate.getDayOfWeek()) return false;
             if (!now.toLocalTime().truncatedTo(ChronoUnit.MINUTES).equals(nextRotate.toLocalTime().truncatedTo(ChronoUnit.MINUTES))) return false;
         }
         else if (this.getRotationType() == RotationType.INTERVAL) {

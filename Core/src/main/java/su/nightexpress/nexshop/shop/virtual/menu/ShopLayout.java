@@ -234,7 +234,7 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
                 }
 
                 ShopClickAction clickType = ShopUtils.getClickAction(player2, event.getClick(), shop, product);
-                if (clickType == null) return;
+                if (clickType == ShopClickAction.UNDEFINED) return;
 
                 // In case if some smartass have shop GUI opened during the rotation.
                 if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) {
@@ -242,7 +242,8 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
                     return;
                 }
 
-                this.runNextTick(() -> product.prepareTrade(player2, clickType));
+                //this.runNextTick(() -> product.prepareTrade(player2, clickType));
+                this.runNextTick(() -> plugin.getShopManager().startTrade(player, product, clickType));
             });
 
         this.addItem(menuItem);

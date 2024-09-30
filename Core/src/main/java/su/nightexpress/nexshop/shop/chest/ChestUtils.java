@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.chest;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -10,10 +11,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.*;
@@ -33,6 +36,32 @@ public class ChestUtils {
         return Version.isAtLeast(Version.V1_19_R3) && !ChestConfig.DISPLAY_HOLOGRAM_FORCE_ARMOR_STAND.get();
     }
 
+    @Nullable
+    public static Location getSafeLocation(@NotNull Location origin) {
+        Location location = origin.clone();
+
+        while (!isSafeLocation(location) && location.getBlockY() > 0) {
+            location = location.add(0, -1, 0);
+        }
+
+        return location.getBlockY() == 0 ? null : location;
+    }
+
+    public static boolean isSafeLocation(@NotNull Location origin) {
+        Block block = origin.getBlock();
+        return !isDangerousBlock(block) && isSafeBlock(block.getRelative(BlockFace.DOWN));
+    }
+
+    public static boolean isSafeBlock(@NotNull Block block) {
+        Material material = block.getType();
+        return material.isSolid() && !isDangerousBlock(block);
+    }
+
+    public static boolean isDangerousBlock(@NotNull Block block) {
+        Material material = block.getType();
+        return material == Material.LAVA || material == Material.MAGMA_BLOCK;
+    }
+
     public static boolean bypassHandlerDetection(@NotNull InventoryClickEvent event) {
         if (!ChestConfig.SHOP_PRODUCT_BYPASS_DETECTION_ENABLED.get()) return false;
 
@@ -50,6 +79,10 @@ public class ChestUtils {
 
     public static int getProductLimit(@NotNull Player player) {
         return ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get().getGreatestOrNegative(player);
+    }
+
+    public static boolean hasCurrencyPermission(@NotNull Player player, @NotNull Currency currency) {
+        return player.hasPermission(ChestPerms.CURRENCY.apply(currency));
     }
 
     public static boolean isAllowedItem(@NotNull ItemStack item) {

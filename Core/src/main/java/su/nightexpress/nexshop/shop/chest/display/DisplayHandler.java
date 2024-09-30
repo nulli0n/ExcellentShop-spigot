@@ -8,6 +8,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
@@ -24,12 +25,12 @@ import su.nightexpress.nightcore.util.Plugins;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
 
-    protected final ChestShopModule           module;
-    protected final Map<String, Set<Integer>> entityIdMap;
+    protected final ChestShopModule         module;
+    protected final Map<String, EntityList> entityMap;
 
     protected boolean useDisplays;
     protected double  lineGap;
@@ -37,7 +38,7 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
     public DisplayHandler(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
         super(plugin);
         this.module = module;
-        this.entityIdMap = new HashMap<>();
+        this.entityMap = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -48,170 +49,195 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
 
     @Override
     protected void onShutdown() {
-        this.entityIdMap.values().forEach(this::destroyEntity);
-        this.entityIdMap.clear();
-    }
-
-    protected record PacketBundle<T>(Player player, List<T> containers) {
-
-        public void add(T container) {
-            this.containers.add(container);
-        }
-    }
-
-    protected enum Action {
-        REMOVE, ADD, REFRESH
+        this.entityMap.values().forEach(list -> {
+            this.broadcastPacket(this.createDestroyPacket(list.getIDs()));
+        });
+        this.entityMap.clear();
     }
 
     public void update() {
-        List<PacketBundle<T>> bundles = new ArrayList<>();
-        this.module.getActiveShops().forEach(shop -> bundles.addAll(this.getBundles(shop, Action.REFRESH)));
-        this.sendAction(Action.REFRESH, bundles);
+        this.module.getActiveShops().forEach(this::refresh);
     }
 
-    public void update(@NotNull ChestShop shop) {
-        this.sendAction(Action.REFRESH, this.getBundles(shop, Action.REFRESH));
+    protected static class EntityList {
+
+        private final Set<UUID>            createdFor;
+        private final List<HologramEntity> holograms;
+
+        private ProductEntity product;
+        private ShowcaseEntity showcase;
+
+        public EntityList() {
+            this.createdFor = new HashSet<>();
+            this.holograms = new ArrayList<>();
+        }
+
+        public void addPlayer(@NotNull Player player) {
+            this.createdFor.add(player.getUniqueId());
+        }
+
+        public void removePlayer(@NotNull Player player) {
+            this.createdFor.remove(player.getUniqueId());
+        }
+
+        public boolean canSee(@NotNull Player player) {
+            return this.createdFor.contains(player.getUniqueId());
+        }
+
+        @NotNull
+        public List<HologramEntity> getHolograms() {
+            return holograms;
+        }
+
+        @Nullable
+        public ProductEntity getProduct() {
+            return this.product;
+        }
+
+        @Nullable
+        public ShowcaseEntity getShowcase() {
+            return this.showcase;
+        }
+
+        @NotNull
+        public Set<Integer> getIDs() {
+            Set<Integer> idList = new HashSet<>();
+            this.holograms.forEach(hologramEntity -> idList.add(hologramEntity.entityID));
+            if (this.product != null) idList.add(product.entityID);
+            if (this.showcase != null) idList.add(showcase.entityID);
+            return idList;
+        }
+
+        public void clear() {
+            this.holograms.clear();
+            this.product = null;
+            this.showcase = null;
+        }
     }
 
-    public void create(@NotNull ChestShop shop) {
-        this.sendAction(Action.ADD, this.getBundles(shop, Action.ADD));
-    }
+    protected record HologramEntity(int entityID, Location position) {}
 
-    public void remove(@NotNull ChestShop shop) {
-        this.sendAction(Action.REMOVE, this.getBundles(shop, Action.REMOVE));
-    }
+    protected record ProductEntity(int entityID) {}
 
-    @NotNull
-    private List<PacketBundle<T>> getBundles(@NotNull ChestShop shop, @NotNull Action action) {
-        List<PacketBundle<T>> bundles = new ArrayList<>();
+    protected record ShowcaseEntity(int entityID) {}
+
+    public void refresh(@NotNull ChestShop shop) {
+        this.createIfAbsent(shop);
+
+        EntityList entityList = this.entityMap.get(shop.getId());
+        if (entityList == null) return;
 
         World world = shop.getWorld();
-        if (world == null) return bundles;
+        if (world == null) return;
 
         BlockPos blockPos = shop.getBlockPos();
-        if (!blockPos.isChunkLoaded(world)) return bundles;
+        if (!blockPos.isChunkLoaded(world)) return;
 
         Location location = blockPos.toLocation(world);
         double distance = ChestConfig.DISPLAY_VISIBLE_DISTANCE.get();
 
-        Set<Player> players = world.getPlayers().stream()
-            .filter(player -> player.getLocation().distance(location) <= distance)
-            .collect(Collectors.toSet());
-        if (players.isEmpty()) return bundles;
+        List<Player> players = world.getPlayers();
+        if (players.isEmpty()) return;
 
-        Set<Integer> idList = this.entityIdMap.computeIfAbsent(shop.getId(), k -> new HashSet<>());
         List<String> originText = new ArrayList<>();
-        Set<Integer> previousIds = new HashSet<>();
         ChestProduct product = shop.getRandomProduct();
 
-        if (action == Action.REMOVE || action == Action.REFRESH) {
-            previousIds.addAll(idList);
-            idList.clear();
-        }
-
-        if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get() && shop.isHologramEnabled() && (action == Action.ADD || action == Action.REFRESH)) {
+        if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get() && shop.isHologramEnabled()) {
             PlaceholderMap placeholders = new PlaceholderMap(shop.getPlaceholders());
             for (TradeType tradeType : TradeType.values()) {
                 placeholders.add(Placeholders.GENERIC_PRODUCT_PRICE.apply(tradeType), () -> {
                     return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
                 });
             }
-            placeholders.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "-" : ItemUtil.getItemName(product.getPreview()));
+            placeholders.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
 
             originText.addAll(shop.getHologramText(product));
             originText.replaceAll(placeholders.replacer());
         }
 
         players.forEach(player -> {
-            PacketBundle<T> bundle = new PacketBundle<>(player, new ArrayList<>());
+            if (player.getLocation().distance(location) > distance) {
+                entityList.removePlayer(player);
+                this.sendPacket(player, this.createDestroyPacket(entityList.getIDs()));
+                return;
+            }
 
-            if (action == Action.ADD || action == Action.REFRESH) {
-                List<String> text = new ArrayList<>(originText);
-                if (Plugins.hasPlaceholderAPI()) {
-                    text = PlaceholderAPI.setPlaceholders(player, text);
-                }
+            boolean create = !entityList.canSee(player);
 
-                Location clone = shop.getDisplayTextLocation(); // Cloned to keep the location in list unmodified for next players.
-                for (String line : text) {
-                    bundle.containers.addAll(this.createHologramPackets(idList, clone, line));
-                }
+            List<String> text = new ArrayList<>(originText);
+            if (Plugins.hasPlaceholderAPI()) {
+                text = PlaceholderAPI.setPlaceholders(player, text);
+            }
 
-                ItemStack displayProduct = product == null ? null : product.getPreview();
-                if (displayProduct != null) {
-                    bundle.containers.addAll(this.createItemPackets(idList, shop.getDisplayItemLocation(), displayProduct));
-                }
+            for (int index = 0; index < entityList.getHolograms().size(); index++) {
+                String line = text.size() > index ? text.get(index) : null;
+                if (line == null || line.isBlank()) continue;
 
-                if (shop.isShowcaseEnabled()) {
-                    ItemStack showcase = ChestUtils.getCustomShowcaseOrDefault(shop);
-                    if (showcase != null) {
-                        bundle.containers.addAll(this.createShowcasePackets(idList, shop.getDisplayShowcaseLocation(), showcase));
-                    }
+                HologramEntity entity = entityList.getHolograms().get(index);
+                this.createHologramPackets(player, entity.entityID, create, entity.position, line);
+            }
+
+            ItemStack displayProduct = product == null ? null : product.getPreview();
+            if (displayProduct != null) {
+                this.createItemPackets(player, entityList.product.entityID, create, shop.getDisplayItemLocation(), displayProduct);
+            }
+
+            if (shop.isShowcaseEnabled()) {
+                ItemStack showcase = ChestUtils.getCustomShowcaseOrDefault(shop);
+                if (showcase != null) {
+                    this.createShowcasePackets(player, entityList.showcase.entityID, create, shop.getDisplayShowcaseLocation(), showcase);
                 }
             }
 
-            if (action == Action.REMOVE || action == Action.REFRESH) {
-                bundle.add(this.createDestroyPacket(previousIds));
-            }
-
-            bundles.add(bundle);
+            entityList.addPlayer(player);
         });
-
-        return bundles;
     }
 
-    private void sendAction(@NotNull Action action, @NotNull List<PacketBundle<T>> bundles) {
-        // Synchronize all the packets sending with the main thread to reduce hologram flicker.
-        if (action == Action.REFRESH && !this.plugin.getServer().isPrimaryThread()) {
-            this.plugin.runTask(task -> this.sendBundles(bundles));
+    private void createIfAbsent(@NotNull ChestShop shop) {
+        if (this.entityMap.containsKey(shop.getId())) return;
+
+        EntityList list = this.entityMap.computeIfAbsent(shop.getId(), k -> new EntityList());
+
+        List<String> originText = shop.getDisplayText();
+        double currentGap = 0;
+
+        for (int index = 0; index < originText.size(); index++) {
+            int entityID = EntityUtil.nextEntityId();
+            Location pos = shop.getDisplayTextLocation();
+
+            list.holograms.add(new HologramEntity(entityID, pos.add(0, currentGap, 0)));
+            currentGap += this.lineGap;
         }
-        // Otherwise do it in the current thread.
-        else {
-            this.sendBundles(bundles);
-        }
+
+        list.showcase = new ShowcaseEntity(EntityUtil.nextEntityId());
+        list.product = new ProductEntity(EntityUtil.nextEntityId());
     }
 
-    private void sendBundles(@NotNull List<PacketBundle<T>> bundles) {
-        bundles.forEach(bundle -> bundle.containers().forEach(container -> {
-            this.sendPacket(bundle.player, container);
-        }));
+    public void create(@NotNull ChestShop shop) {
+        this.createIfAbsent(shop);
     }
 
-    @NotNull
-    private List<T> createItemPackets(@NotNull Set<Integer> idList, @NotNull Location location, @NotNull ItemStack item) {
-        int entityID = EntityUtil.nextEntityId();
+    public void remove(@NotNull ChestShop shop) {
+        EntityList list = this.entityMap.remove(shop.getId());
+        if (list == null) return;
+
+        this.broadcastPacket(this.createDestroyPacket(list.getIDs()));
+    }
+
+    private void createItemPackets(@NotNull Player player, int entityID, boolean create, @NotNull Location location, @NotNull ItemStack item) {
         EntityType type = EntityType.DROPPED_ITEM;
-        List<T> list = this.getItemPackets(entityID, type, location, item);
-
-        idList.add(entityID);
-
-        return list;
+        this.getItemPackets(entityID, create, type, location, item).forEach(packet -> this.sendPacket(player, packet));
     }
 
-    @NotNull
-    private List<T> createShowcasePackets(@NotNull Set<Integer> idList, @NotNull Location location, @NotNull ItemStack item) {
-        int entityID = EntityUtil.nextEntityId();
+    private void createShowcasePackets(@NotNull Player player, int entityID, boolean create, @NotNull Location location, @NotNull ItemStack item) {
         EntityType type = this.useDisplays ? EntityType.ITEM_DISPLAY : EntityType.ARMOR_STAND;
-        List<T> list = this.getShowcasePackets(entityID, type, location, item);
-
-        idList.add(entityID);
-        return list;
+        this.getShowcasePackets(entityID, create, type, location, item).forEach(packet -> this.sendPacket(player, packet));
     }
 
-    @NotNull
-    private List<T> createHologramPackets(@NotNull Set<Integer> idList, @NotNull Location location, @NotNull String textLine) {
-        int entityID = EntityUtil.nextEntityId();
+    private void createHologramPackets(@NotNull Player player, int entityID, boolean create, @NotNull Location location, @NotNull String textLine) {
         EntityType type = this.useDisplays ? EntityType.TEXT_DISPLAY : EntityType.ARMOR_STAND;
 
-        List<T> list = new ArrayList<>(this.getHologramPackets(entityID, type, location, textLine));
-
-        location.add(0, this.lineGap, 0);
-        idList.add(entityID);
-
-        return list;
-    }
-
-    private void destroyEntity(@NotNull Set<Integer> idList) {
-        this.broadcastPacket(this.createDestroyPacket(idList));
+        this.getHologramPackets(entityID, create, type, location, textLine).forEach(packet -> this.sendPacket(player, packet));
     }
 
     protected abstract void broadcastPacket(@NotNull T packet);
@@ -225,11 +251,11 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
     protected abstract T createDestroyPacket(@NotNull Set<Integer> list);
 
     @NotNull
-    protected abstract List<T> getHologramPackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine);
+    protected abstract List<T> getHologramPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine);
 
     @NotNull
-    protected abstract List<T> getShowcasePackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item);
+    protected abstract List<T> getShowcasePackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item);
 
     @NotNull
-    protected abstract List<T> getItemPackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item);
+    protected abstract List<T> getItemPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item);
 }

@@ -124,7 +124,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
         for (TradeType type : TradeType.values()) {
             if (tradeType == null || tradeType == type) {
-                data.getPlayerAmounts().remove(tradeType);
+                data.getPlayerAmounts().remove(type);
             }
         }
 

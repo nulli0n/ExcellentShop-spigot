@@ -55,6 +55,11 @@ public class ChestConfig {
         "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
     );
 
+    public static final ConfigValue<Boolean> CHECK_CURRENCY_PERMISSIONS = ConfigValue.create("Shops.Check_Currency_Permission",
+        false,
+        "Sets whether or not players must have '" + ChestPerms.PREFIX_CURRENCY + "[name]' permissions to use specific currencies from 'Allowed_Currencies' list."
+    );
+
     public static final ConfigValue<Set<String>> ALLOWED_CURRENCIES = ConfigValue.create("Shops.Allowed_Currencies",
         Set.of(VaultEconomyHandler.ID),
         "A list of currencies that can be used for Chest Shop products."

@@ -64,6 +64,7 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
         this.addHandler(this.typeHandler = new ItemHandler("shop_change_type", (viewer, event) -> {
             ChestShop shop = this.getLink(viewer);
             shop.setType(Lists.next(shop.getType(), shopType -> shopType.hasPermission(viewer.getPlayer())));
+            module.remakeDisplay(shop);
             this.saveAndFlush(viewer, shop);
         }));
 

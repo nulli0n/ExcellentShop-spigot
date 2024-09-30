@@ -1,6 +1,6 @@
 package su.nightexpress.nexshop.api.shop.type;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public enum ShopClickAction {
 
@@ -9,15 +9,17 @@ public enum ShopClickAction {
     SELL_ALL(TradeType.SELL),
     BUY_SINGLE(TradeType.BUY),
     SELL_SINGLE(TradeType.SELL),
+    PURCHASE_OPTION(null),
+    UNDEFINED(null)
     ;
 
     private final TradeType tradeType;
 
-    ShopClickAction(@NotNull TradeType tradeType) {
+    ShopClickAction(@Nullable TradeType tradeType) {
         this.tradeType = tradeType;
     }
 
-    @NotNull
+    @Nullable
     public TradeType getTradeType() {
         return this.tradeType;
     }

@@ -111,12 +111,13 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
             }
 
             ShopClickAction clickType = ShopUtils.getClickAction(player, event.getClick(), shop, product);
-            if (clickType == null) return;
+            if (clickType == ShopClickAction.UNDEFINED) return;
 
             // Can't open next tick for bedrock?
             //this.runNextTick(() -> {
-            product.prepareTrade(viewer1.getPlayer(), clickType);
-            if (clickType != ShopClickAction.BUY_SELECTION && clickType != ShopClickAction.SELL_SELECTION) {
+            //product.prepareTrade(viewer1.getPlayer(), clickType);
+            plugin.getShopManager().startTrade(player, product, clickType);
+            if (clickType != ShopClickAction.BUY_SELECTION && clickType != ShopClickAction.SELL_SELECTION && clickType != ShopClickAction.PURCHASE_OPTION) {
                 this.flush(viewer);
             }
             //});

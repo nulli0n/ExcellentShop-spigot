@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.currency.CurrencyHandler;
 
 public class VotingPluginHandler implements CurrencyHandler {
@@ -30,7 +31,9 @@ public class VotingPluginHandler implements CurrencyHandler {
 
     @Override
     public void give(@NotNull Player player, double amount) {
-        VotingPluginHooks.getInstance().getUserManager().getVotingPluginUser(player).addPoints((int) amount);
+        ShopAPI.PLUGIN.runTaskAsync(task -> {
+            VotingPluginHooks.getInstance().getUserManager().getVotingPluginUser(player).addPoints((int) amount);
+        });
     }
 
     @Override

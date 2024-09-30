@@ -106,7 +106,7 @@ public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Li
         Info info = this.getLink(player);
 
         autoFill.setSlots(this.objectSlots);
-        autoFill.setItems(this.module.getAllowedCurrencies());
+        autoFill.setItems(this.module.getAllowedCurrencies(player));
         autoFill.setItemCreator(currency -> {
             ItemStack icon = currency.getIcon();
             ItemReplacer.create(icon).hideFlags().trimmed()

@@ -11,7 +11,6 @@ import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
-import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nightcore.util.placeholder.Placeholder;
@@ -36,7 +35,8 @@ public interface Product extends Placeholder {
 
     @NotNull PlaceholderMap getPlaceholders(@Nullable Player player);
 
-    void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click);
+//    @Deprecated
+//    void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click);
 
     default double getPrice(@NotNull TradeType tradeType) {
         return this.getPrice(tradeType, null);

@@ -7,17 +7,26 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
+import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.product.ProductDataManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nexshop.shop.chest.menu.ShopView;
 import su.nightexpress.nexshop.shop.menu.CartMenu;
+import su.nightexpress.nexshop.shop.menu.PurchaseOptionMenu;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.menu.api.Menu;
+import su.nightexpress.nightcore.menu.impl.AbstractMenu;
 
 import java.io.File;
 import java.util.HashMap;
@@ -30,6 +39,8 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
     private final Map<String, CartMenu> cartMenuMap;
     private final ProductDataManager    productDataManager;
 
+    private PurchaseOptionMenu purchaseOptionMenu;
+
     public ShopManager(@NotNull ShopPlugin plugin) {
         super(plugin);
         this.cartMenuMap = new HashMap<>();
@@ -38,6 +49,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
     @Override
     protected void onLoad() {
+        this.loadUI();
         this.loadCartUIs();
         this.loadProductData();
 
@@ -46,6 +58,8 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
     @Override
     protected void onShutdown() {
+        if (this.purchaseOptionMenu != null) this.purchaseOptionMenu.clear();
+
         this.cartMenuMap.values().forEach(Menu::clear);
         this.cartMenuMap.clear();
 
@@ -58,6 +72,10 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
             this.productDataManager.cleanUp(); // Remove datas for non-existent shops or products (shops are already loaded).
             this.getShops().forEach(shop -> shop.getPricer().updatePrices()); // Update product prices with loaded datas.
         });
+    }
+
+    private void loadUI() {
+        this.purchaseOptionMenu = new PurchaseOptionMenu(this.plugin);
     }
 
     private void loadCartUIs() {
@@ -120,6 +138,77 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         return this.cartMenuMap.getOrDefault(id.toLowerCase(), this.cartMenuMap.get(Placeholders.DEFAULT));
     }
 
+    public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull ShopClickAction click) {
+        TradeType tradeType = click.getTradeType();
+
+        if (tradeType != null) {
+            return this.startTrade(player, product, tradeType, click);
+        }
+
+        this.openPurchaseOption(player, product);
+        return true;
+    }
+
+    public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull TradeType tradeType, @Nullable ShopClickAction click) {
+        Shop shop = product.getShop();
+
+        if (!shop.isTransactionEnabled(tradeType)) {
+            return false;
+        }
+
+        if (tradeType == TradeType.BUY) {
+            if (!product.isBuyable()) {
+                Lang.SHOP_PRODUCT_ERROR_UNBUYABLE.getMessage().send(player);
+                return false;
+            }
+            if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && !product.hasSpace(player)) {
+                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.getMessage().send(player);
+                return false;
+            }
+        }
+        else if (tradeType == TradeType.SELL) {
+            if (!product.isSellable()) {
+                Lang.SHOP_PRODUCT_ERROR_UNSELLABLE.getMessage().send(player);
+                return false;
+            }
+        }
+
+        // For Virtual Shop will return either Stock or Player Limit amount.
+        // For Chest Shop will return inventory space or item amount.
+        int canPurchase = product.getAvailableAmount(player, tradeType);
+        if (canPurchase == 0) {
+            LangText msgStock;
+            if (tradeType == TradeType.BUY) {
+                msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK;
+            }
+            else {
+                if (shop instanceof ChestShop) {
+                    msgStock = Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE;
+                }
+                else msgStock = Lang.SHOP_PRODUCT_ERROR_FULL_STOCK;
+            }
+            msgStock.getMessage().send(player);
+            return false;
+        }
+
+        boolean isSellAll = (click == ShopClickAction.SELL_ALL);
+        PreparedProduct prepared = product.getPrepared(player, tradeType, isSellAll);
+
+        if (click != null) {
+            if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
+                prepared.trade();
+
+                Menu menu = AbstractMenu.getMenu(player);
+                if (menu instanceof ShopLayout || menu instanceof ShopView) {
+                    menu.flush(player);
+                }
+                return false;
+            }
+        }
+
+        return this.openProductCart(player, prepared);
+    }
+
     public boolean openProductCart(@NotNull Player player, @NotNull PreparedProduct product) {
         CartMenu cartMenu = this.getCartUI(product.getShop().getModule().getDefaultCartUI(product.getTradeType()));
         if (cartMenu == null) {
@@ -129,5 +218,9 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
         cartMenu.open(player, product);
         return true;
+    }
+
+    public void openPurchaseOption(@NotNull Player player, @NotNull Product product) {
+        this.purchaseOptionMenu.open(player, product);
     }
 }

@@ -45,4 +45,9 @@ public class ShopTransactionEvent extends Event {
     public Transaction getTransaction() {
         return transaction;
     }
+
+    @NotNull
+    public Transaction.Result getTransactionResult() {
+        return this.transaction.getResult();
+    }
 }

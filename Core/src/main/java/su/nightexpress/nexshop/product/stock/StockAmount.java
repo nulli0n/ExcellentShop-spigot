@@ -53,6 +53,6 @@ public class StockAmount {
     }
 
     public boolean isRestockTime() {
-        return this.getRestockDate() > 0 && System.currentTimeMillis() >= this.getRestockDate();
+        return this.restockDate > 0 && System.currentTimeMillis() >= this.restockDate;
     }
 }

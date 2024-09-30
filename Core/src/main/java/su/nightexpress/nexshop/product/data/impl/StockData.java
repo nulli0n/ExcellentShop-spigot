@@ -33,10 +33,10 @@ public class StockData extends AbstractData {
     }
 
     public void cleanUp() {
-        for (TradeType type : TradeType.values()) {
+        //for (TradeType type : TradeType.values()) {
             this.globalAmounts.values().removeIf(StockAmount::isRestockTime);
-            this.playerAmounts.values().removeIf(map -> map.values().removeIf(StockAmount::isRestockTime) && map.isEmpty());
-        }
+            this.playerAmounts.values().removeIf(map -> map.values().removeIf(StockAmount::isRestockTime) || map.isEmpty());
+        //}
     }
 
 //    public void restock(@NotNull StockValues globalStock, @NotNull StockValues playerLimits) {
@@ -65,11 +65,11 @@ public class StockData extends AbstractData {
 
     @NotNull
     public Map<TradeType, StockAmount> getGlobalAmounts() {
-        return globalAmounts;
+        return this.globalAmounts;
     }
 
     @NotNull
     public Map<TradeType, Map<UUID, StockAmount>> getPlayerAmounts() {
-        return playerAmounts;
+        return this.playerAmounts;
     }
 }

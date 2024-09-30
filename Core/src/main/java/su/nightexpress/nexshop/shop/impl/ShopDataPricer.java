@@ -15,6 +15,7 @@ import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.data.impl.PriceData;
 import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
+import su.nightexpress.nightcore.util.NumberUtil;
 
 import java.util.Map;
 
@@ -133,6 +134,10 @@ public class ShopDataPricer implements ShopPricer {
             buyPrice = Math.floor(buyPrice);
             sellPrice = Math.floor(sellPrice);
         }
+        else {
+            buyPrice = NumberUtil.round(buyPrice);
+            sellPrice = NumberUtil.round(sellPrice);
+        }
         if (sellPrice > buyPrice && buyPrice >= 0) {
             sellPrice = buyPrice;
         }
@@ -160,7 +165,8 @@ public class ShopDataPricer implements ShopPricer {
     }
 
     private void insertData(@NotNull PriceData data) {
-        this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().insertPriceData(data));
+        //this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().insertPriceData(data));
+        this.plugin.getData().getVirtualDataHandler().insertPriceData(data);
     }
 
     @Override

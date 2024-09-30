@@ -48,7 +48,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
     @Override
     @NotNull
-    protected List<PacketWrapper<?>> getItemPackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketWrapper<?>> getItemPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
         PacketWrapper<?> spawnPacket = this.createSpawnPacket(type, location, entityID);
@@ -57,7 +57,8 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
             dataList.add(new EntityData(8, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(item))); // item
         });
 
-        list.add(spawnPacket);
+
+        if (create) list.add(spawnPacket);
         list.add(dataPacket);
 
         return list;
@@ -65,7 +66,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
     @Override
     @NotNull
-    protected List<PacketWrapper<?>> getShowcasePackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketWrapper<?>> getShowcasePackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
         PacketWrapper<?> spawnPacket = this.createSpawnPacket(type, location, entityID);
@@ -85,7 +86,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
             }
         });
 
-        list.add(spawnPacket);
+        if (create) list.add(spawnPacket);
         list.add(dataPacket);
 
         if (type == EntityType.ARMOR_STAND) {
@@ -100,7 +101,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
     @SuppressWarnings("deprecation")
     @Override
     @NotNull
-    protected List<PacketWrapper<?>> getHologramPackets(int entityID, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine) {
+    protected List<PacketWrapper<?>> getHologramPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
         PacketWrapper<?> spawnPacket = this.createSpawnPacket(type, location, entityID);
@@ -121,7 +122,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
             }
         });
 
-        list.add(spawnPacket);
+        if (create) list.add(spawnPacket);
         list.add(dataPacket);
 
         return list;
