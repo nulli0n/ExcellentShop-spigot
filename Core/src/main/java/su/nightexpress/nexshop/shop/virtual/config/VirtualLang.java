@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
-import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Sound;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
@@ -9,8 +8,7 @@ import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.language.entry.LangText;
 
 import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
-import static su.nightexpress.nightcore.language.tag.MessageTags.OUTPUT;
-import static su.nightexpress.nightcore.language.tag.MessageTags.SOUND;
+import static su.nightexpress.nightcore.language.tag.MessageTags.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class VirtualLang extends Lang {
@@ -73,8 +71,8 @@ public class VirtualLang extends Lang {
         " ",
         LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose(GENERIC_AMOUNT) + " new items just appeared in the " + LIGHT_YELLOW.enclose(SHOP_NAME) + " shop!"),
         LIGHT_GRAY.enclose("Click " +
-            CLICK.enclose(ClickEvent.Action.RUN_COMMAND,
-                HOVER.enclose(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to open shop!")),
+            CLICK.encloseRun(
+                HOVER.encloseHint(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to open shop!")),
                 "/shop " + SHOP_ID
             )
             + " to open the shop!"),

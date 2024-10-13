@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
@@ -14,7 +13,6 @@ import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.currency.CurrencyManager;
@@ -22,7 +20,6 @@ import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
 import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
@@ -93,98 +90,6 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         this.saveProducts();
     }
 
-    protected abstract boolean loadAdditional(@NotNull FileConfig config);
-
-    private void loadProducts() {
-        this.getProductMap().clear();
-        this.getConfigProducts().reload();
-        this.getConfigProducts().getSection("List").forEach(productId -> {
-            P product = this.loadProduct(this.getConfigProducts(), "List." + productId, productId);
-            if (product == null) {
-                this.getModule().warn("Product not loaded: '" + productId + "' in '" + this.getId() + "' shop.");
-                return;
-            }
-            this.addProduct(product);
-        });
-        this.getConfigProducts().saveChanges();
-    }
-
-    @NotNull
-    public P createProduct(@NotNull Currency currency, @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        return this.createProduct(this.generateProductId(packer), currency, handler, packer);
-    }
-
-    @NotNull
-    public abstract P createProduct(@NotNull String id, @NotNull Currency currency,
-                                    @NotNull ProductHandler handler, @NotNull ProductPacker packer);
-
-    @Nullable
-    protected P loadProduct(@NotNull FileConfig cfg, @NotNull String path, @NotNull String id) {
-        String currencyId = cfg.getString(path + ".Currency", VaultEconomyHandler.ID);
-        Currency currency = ShopAPI.getCurrencyManager().getCurrency(currencyId);
-        if (currency == null) {
-            currency = CurrencyManager.DUMMY_CURRENCY;
-            this.getModule().warn("Invalid currency '" + currencyId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change currency in editor.");
-        }
-
-        if (!cfg.contains(path + ".Handler")) {
-            ItemStack item = cfg.getItemEncoded(path + ".Content.Item");
-            if (item != null && !item.getType().isAir()) {
-                cfg.set(path + ".Handler", BukkitItemHandler.NAME);
-            }
-            else cfg.set(path + ".Handler", BukkitCommandHandler.NAME);
-        }
-
-        String handlerId = cfg.getString(path + ".Handler", BukkitItemHandler.NAME);
-        ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
-        if (handler == null) {
-            handler = ProductHandlerRegistry.getDummyHandler();
-            this.getModule().warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in editor.");
-        }
-
-        ProductPacker packer = handler.createPacker(cfg, path);
-
-        P product = this.createProduct(id, currency, handler, packer);
-
-        product.loadAdditional(cfg, path);
-        product.setAllowedRanks(cfg.getStringSet(path + ".Allowed_Ranks"));
-        product.setRequiredPermissions(cfg.getStringSet(path + ".Required_Permissions"));
-        product.setPricer(AbstractProductPricer.read(cfg, path + ".Price"));
-        product.setStockValues(StockValues.read(cfg, path + ".Stock.GLOBAL"));
-        product.setLimitValues(StockValues.read(cfg, path + ".Stock.PLAYER"));
-        return product;
-    }
-
-    @Override
-    @Nullable
-    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player) {
-        if (player != null) {
-            if (!this.module.isAvailable(player, false)) return null;
-            if (!this.canAccess(player, false)) return null;
-        }
-        if (!this.isTransactionEnabled(tradeType)) return null;
-
-        ProductHandler handler = ProductHandlerRegistry.getHandler(item);
-
-        var stream = this.getValidProducts().stream().filter(product -> {
-            if (!product.isTradeable(tradeType)) return false;
-            if (product.getHandler() != handler) return false;
-            if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
-            if (!itemPacker.isItemMatches(item)) return false;
-            if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) return false;
-
-            if (player != null) {
-                return product.hasAccess(player) && product.getAvailableAmount(player, tradeType) != 0;
-            }
-
-            return true;
-        });
-
-        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
-
-        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
-    }
-
     @Override
     public final void saveSettings() {
         FileConfig config = this.getConfig();
@@ -228,6 +133,96 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     @NotNull
     public final String getProductSavePath(@NotNull Product product) {
         return "List." + product.getId();
+    }
+
+    protected abstract boolean loadAdditional(@NotNull FileConfig config);
+
+    private void loadProducts() {
+        this.products.clear();
+        this.configProducts.reload();
+        this.configProducts.getSection("List").forEach(productId -> {
+            P product = this.loadProduct(this.configProducts, "List." + productId, productId);
+            if (product == null) {
+                this.module.warn("Product not loaded: '" + productId + "' in '" + this.getId() + "' shop.");
+                return;
+            }
+            this.addProduct(product);
+        });
+        this.configProducts.saveChanges();
+    }
+
+    @NotNull
+    public P createProduct(@NotNull Currency currency, @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
+        return this.createProduct(this.generateProductId(packer), currency, handler, packer);
+    }
+
+    @NotNull
+    public abstract P createProduct(@NotNull String id, @NotNull Currency currency,
+                                    @NotNull ProductHandler handler, @NotNull ProductPacker packer);
+
+    @Nullable
+    protected P loadProduct(@NotNull FileConfig config, @NotNull String path, @NotNull String id) {
+        String currencyId = config.getString(path + ".Currency", VaultEconomyHandler.ID);
+        Currency currency = this.plugin.getCurrencyManager().getCurrency(currencyId);
+        if (currency == null) {
+            currency = CurrencyManager.DUMMY_CURRENCY;
+            this.module.warn("Invalid currency '" + currencyId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change currency in editor.");
+        }
+
+        // Legacy stuff
+        if (!config.contains(path + ".Handler")) {
+            ItemStack item = config.getItemEncoded(path + ".Content.Item");
+            if (item != null && !item.getType().isAir()) {
+                config.set(path + ".Handler", BukkitItemHandler.NAME);
+            }
+            else config.set(path + ".Handler", BukkitCommandHandler.NAME);
+        }
+        // Legacy end
+
+        String handlerId = config.getString(path + ".Handler", BukkitItemHandler.NAME);
+        ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
+        if (handler == null) {
+            handler = ProductHandlerRegistry.getDummyHandler();
+            this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in editor.");
+        }
+
+        ProductPacker packer = handler.createPacker(config, path);
+
+        P product = this.createProduct(id, currency, handler, packer);
+        product.load(config, path);
+        product.loadAdditional(config, path);
+
+        return product;
+    }
+
+    @Override
+    @Nullable
+    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player) {
+        if (player != null) {
+            if (!this.module.isAvailable(player, false)) return null;
+            if (!this.canAccess(player, false)) return null;
+        }
+        if (!this.isTransactionEnabled(tradeType)) return null;
+
+        ProductHandler handler = ProductHandlerRegistry.getHandler(item);
+
+        var stream = this.getValidProducts().stream().filter(product -> {
+            if (!product.isTradeable(tradeType)) return false;
+            if (product.getHandler() != handler) return false;
+            if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
+            if (!itemPacker.isItemMatches(item)) return false;
+            if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) return false;
+
+            if (player != null) {
+                return product.hasAccess(player) && product.getAvailableAmount(player, tradeType) != 0;
+            }
+
+            return true;
+        });
+
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
+
+        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
     }
 
     @Override

@@ -12,6 +12,7 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.product.ProductDataManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -27,6 +28,7 @@ import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.menu.api.Menu;
 import su.nightexpress.nightcore.menu.impl.AbstractMenu;
+import su.nightexpress.nightcore.util.Plugins;
 
 import java.io.File;
 import java.util.HashMap;
@@ -67,11 +69,12 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
     }
 
     private void loadProductData() {
-        this.plugin.runTaskAsync(task -> {
+        long delay = Plugins.isInstalled(HookId.ITEMS_ADDER) ? 110L : 1L; // костыль FIXME
+        this.plugin.runTaskLaterAsync(task -> {
             this.productDataManager.setup(); // Load price & stock datas for all products in both, virtual and chest shops.
             this.productDataManager.cleanUp(); // Remove datas for non-existent shops or products (shops are already loaded).
             this.getShops().forEach(shop -> shop.getPricer().updatePrices()); // Update product prices with loaded datas.
-        });
+        }, delay);
     }
 
     private void loadUI() {

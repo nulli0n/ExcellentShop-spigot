@@ -11,6 +11,7 @@ import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -28,8 +29,11 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
     protected boolean     discountAllowed;
 
     public AbstractVirtualProduct(@NotNull ShopPlugin plugin,
-                                  @NotNull String id, @NotNull S shop, @NotNull Currency currency,
-                                  @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
+                                  @NotNull String id,
+                                  @NotNull S shop,
+                                  @NotNull Currency currency,
+                                  @NotNull ProductHandler handler,
+                                  @NotNull ProductPacker packer) {
         super(plugin, id, shop, currency, handler, packer);
         this.allowedRanks = new HashSet<>();
         this.requiredPermissions = new HashSet<>();
@@ -37,6 +41,14 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.limitValues = new StockValues();
 
         this.placeholders.add(Placeholders.forVirtualProduct(this));
+    }
+
+    public void load(@NotNull FileConfig config, @NotNull String path) {
+        this.setAllowedRanks(config.getStringSet(path + ".Allowed_Ranks"));
+        this.setRequiredPermissions(config.getStringSet(path + ".Required_Permissions"));
+        this.setPricer(AbstractProductPricer.read(config, path + ".Price"));
+        this.setStockValues(StockValues.read(config, path + ".Stock.GLOBAL"));
+        this.setLimitValues(StockValues.read(config, path + ".Stock.PLAYER"));
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {

@@ -5,31 +5,30 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
-import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.NumberUtil;
-
-import java.util.UUID;
 
 public class RotatingProduct extends AbstractVirtualProduct<RotatingShop> {
 
     private double rotationChance;
 
-    public RotatingProduct(@NotNull ShopPlugin plugin,
-                           @NotNull RotatingShop shop, @NotNull Currency currency,
-                           @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        this(plugin, UUID.randomUUID().toString(), shop, currency, handler, packer);
-    }
+//    public RotatingProduct(@NotNull ShopPlugin plugin,
+//                           @NotNull RotatingShop shop, @NotNull Currency currency,
+//                           @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
+//        this(plugin, UUID.randomUUID().toString(), shop, currency, handler, packer);
+//    }
 
     public RotatingProduct(@NotNull ShopPlugin plugin,
-                           @NotNull String id, @NotNull RotatingShop shop, @NotNull Currency currency,
-                           @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
+                           @NotNull String id,
+                           @NotNull RotatingShop shop,
+                           @NotNull Currency currency,
+                           @NotNull ProductHandler handler,
+                           @NotNull ProductPacker packer) {
         super(plugin, id, shop, currency, handler, packer);
 
-        this.placeholders
-            .add(Placeholders.PRODUCT_ROTATION_CHANCE, player -> NumberUtil.format(this.getRotationChance()));
+        this.placeholders.add(Placeholders.forRotatingProduct(this));
     }
 
     @Override
@@ -39,16 +38,16 @@ public class RotatingProduct extends AbstractVirtualProduct<RotatingShop> {
 
     @Override
     protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Rotation.Chance", this.getRotationChance());
+        config.set(path + ".Rotation.Chance", this.rotationChance);
     }
 
     public boolean isInRotation() {
-        RotationData data = this.getShop().getData();
+        RotationData data = this.shop.getData();
         return data.getProducts().contains(this.getId());
     }
 
     public boolean canRotate() {
-        return this.getRotationChance() > 0D;
+        return this.rotationChance > 0D;
     }
 
     public double getRotationChance() {

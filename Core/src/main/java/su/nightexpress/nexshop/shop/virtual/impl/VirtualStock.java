@@ -158,10 +158,12 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     }
 
 
+    @Override
     public int countItem(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
         return this.getItemsLeft(this.getAmount(product, type, player));
     }
 
+    @Override
     public boolean consumeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
         StockAmount amounts = this.getAmount(product, type, player);
         if (amounts == null) return false;
@@ -171,6 +173,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         return true;
     }
 
+    @Override
     public boolean storeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
         StockAmount amounts = this.getAmount(product, type, player);
         if (amounts == null) return false;
@@ -180,6 +183,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         return true;
     }
 
+    @Override
     public boolean restockItem(@NotNull VirtualProduct product, @NotNull TradeType type, boolean force, @Nullable Player player) {
         StockAmount amounts = this.getAmount(product, type, player);
         if (amounts == null) return false;

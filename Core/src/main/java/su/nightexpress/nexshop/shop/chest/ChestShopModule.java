@@ -218,7 +218,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             this.loadClaimHook(HookId.LANDS, () -> new LandsHook(this.plugin));
             this.loadClaimHook(HookId.GRIEF_PREVENTION, GriefPreventionHook::new);
             this.loadClaimHook(HookId.GRIEF_DEFENDER, GriefDefenderHook::new);
-            this.loadClaimHook(HookId.WORLD_GUARD, WorldGuardFlags::new);
+            this.loadClaimHook(HookId.WORLD_GUARD, WorldGuardHook::new);
             this.loadClaimHook(HookId.KINGDOMS, KingdomsHook::new);
         }
 

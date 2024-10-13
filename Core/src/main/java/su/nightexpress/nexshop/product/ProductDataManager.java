@@ -42,13 +42,15 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
     }
 
     public void loadData() {
-        this.dataMap.clear();
+        //this.dataMap.clear();
         this.loadPriceData();
         this.loadStockData();
     }
 
     private void loadPriceData() {
         this.plugin.getData().getVirtualDataHandler().getPriceDatas().forEach(priceData -> {
+            if (this.isScheduledToSave(priceData)) return;
+
             this.getData(priceData.getShopId(), priceData.getProductId()).loadPrice(priceData);
         });
         //this.plugin.info("Loaded product price datas.");
@@ -56,9 +58,15 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
 
     private void loadStockData() {
         this.plugin.getData().getVirtualDataHandler().getStockDatas().forEach(stockData -> {
+            if (this.isScheduledToSave(stockData)) return;
+
             this.getData(stockData.getShopId(), stockData.getProductId()).loadStock(stockData);
         });
         //this.plugin.info("Loaded product stock datas.");
+    }
+
+    private boolean isScheduledToSave(@NotNull AbstractData data) {
+        return this.scheduledSave.stream().anyMatch(other -> other.getProductId().equalsIgnoreCase(data.getProductId()) && other.getShopId().equalsIgnoreCase(data.getShopId()));
     }
 
     public void saveScheduled() {

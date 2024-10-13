@@ -6,6 +6,7 @@ import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.util.RelativePlaceholders;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
@@ -51,11 +52,9 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
     public static final String PRODUCT_REQUIRED_PERMISSIONS = "%product_required_permissions%";
     public static final String PRODUCT_ROTATION_CHANCE      = "%product_rotation_chance%";
 
-    public static final Function<TradeType, String> STOCK_TYPE = tradeType -> "%stock_global_" + tradeType.name().toLowerCase() + "%";
-    public static final Function<TradeType, String> LIMIT_TYPE = tradeType -> "%stock_player_" + tradeType.name().toLowerCase() + "%";
-
+    public static final Function<TradeType, String> STOCK_TYPE    = tradeType -> "%stock_global_" + tradeType.name().toLowerCase() + "%";
+    public static final Function<TradeType, String> LIMIT_TYPE    = tradeType -> "%stock_player_" + tradeType.name().toLowerCase() + "%";
     public static final Function<TradeType, String> PRICE_DYNAMIC = tradeType -> "%price_dynamic_" + tradeType.name().toLowerCase() + "%";
-
 
     /**
      * @return PlaceholderMap with <b>additional</b> placeholders only.
@@ -133,6 +132,15 @@ public class Placeholders extends su.nightexpress.nexshop.Placeholders {
                     }
                     return product.getRequiredPermissions().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
                 });
+    }
+
+    /**
+     * @return PlaceholderMap with <b>additional</b> placeholders only.
+     */
+    @NotNull
+    public static RelativePlaceholders<Player> forRotatingProduct(@NotNull RotatingProduct product) {
+        return new RelativePlaceholders<Player>()
+            .add(PRODUCT_ROTATION_CHANCE, player -> NumberUtil.format(product.getRotationChance()));
     }
 
     @NotNull
