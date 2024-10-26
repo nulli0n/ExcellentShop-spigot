@@ -134,7 +134,7 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
 
             if (menuItem.getHandler() == this.bankHandler) {
                 menuItem.getOptions().setVisibilityPolicy(viewer -> {
-                    if (ChestConfig.SHOP_AUTO_BANK.get()) return false;
+                    if (ChestConfig.isAutoBankEnabled()) return false;
                     if (viewer.getPlayer().hasPermission(ChestPerms.COMMAND_BANK_OTHERS)) return true;
 
                     return this.getLink(viewer).isOwner(viewer.getPlayer());

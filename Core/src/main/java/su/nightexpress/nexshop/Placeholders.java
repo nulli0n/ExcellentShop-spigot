@@ -63,6 +63,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String SHOP_NAME         = "%shop_name%";
     public static final String SHOP_BUY_ALLOWED  = "%shop_buy_allowed%";
     public static final String SHOP_SELL_ALLOWED = "%shop_sell_allowed%";
+    public static final String SHOP_PRODUCTS = "%shop_products%";
 
     public static final String PRODUCT_HANDLER                  = "%product_handler%";
     public static final String PRODUCT_PRICE_TYPE               = "%product_price_type%";
@@ -133,7 +134,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             .add(SHOP_ID, shop::getId)
             .add(SHOP_NAME, shop::getName)
             .add(SHOP_BUY_ALLOWED, () -> Lang.getYesOrNo(shop.isTransactionEnabled(TradeType.BUY)))
-            .add(SHOP_SELL_ALLOWED, () -> Lang.getYesOrNo(shop.isTransactionEnabled(TradeType.SELL)));
+            .add(SHOP_SELL_ALLOWED, () -> Lang.getYesOrNo(shop.isTransactionEnabled(TradeType.SELL)))
+            .add(SHOP_PRODUCTS, () -> NumberUtil.format(shop.countProducts()));
     }
 
     @NotNull

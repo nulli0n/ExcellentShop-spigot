@@ -46,7 +46,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!ChestConfig.SHOP_AUTO_BANK.get()) return;
+        if (!ChestConfig.isAutoBankEnabled()) return;
 
         Player player = event.getPlayer();
         ChestBank bank = this.module.getPlayerBank(player);

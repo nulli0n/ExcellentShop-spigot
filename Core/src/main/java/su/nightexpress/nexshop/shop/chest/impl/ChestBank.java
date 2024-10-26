@@ -46,7 +46,7 @@ public class ChestBank {
         if (amount <= 0) return false;
 
         Player player = this.getOnlinePlayer();
-        if (player != null && ChestConfig.SHOP_AUTO_BANK.get()) {
+        if (player != null && ChestConfig.isAutoBankEnabled()) {
             currency.getHandler().give(player, amount);
             return true;
         }
@@ -68,7 +68,7 @@ public class ChestBank {
         if (!this.hasEnough(currency, amount)) return false;
 
         Player player = this.getOnlinePlayer();
-        if (player != null && ChestConfig.SHOP_AUTO_BANK.get()) {
+        if (player != null && ChestConfig.isAutoBankEnabled()) {
             currency.getHandler().take(player, amount);
             return true;
         }
@@ -88,7 +88,7 @@ public class ChestBank {
 
     public double getBalance(@NotNull Currency currency) {
         Player player = this.getOnlinePlayer();
-        if (player != null && ChestConfig.SHOP_AUTO_BANK.get()) {
+        if (player != null && ChestConfig.isAutoBankEnabled()) {
             return currency.getHandler().getBalance(player);
         }
 
@@ -104,7 +104,7 @@ public class ChestBank {
 
     public boolean hasEnough(@NotNull Currency currency, double amount) {
         Player player = this.getOnlinePlayer();
-        if (player != null && ChestConfig.SHOP_AUTO_BANK.get()) {
+        if (player != null && ChestConfig.isAutoBankEnabled()) {
             return currency.getHandler().getBalance(player) >= amount;
         }
 

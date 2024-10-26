@@ -103,11 +103,11 @@ public class MMOItemsHandler extends AbstractPluginItemHandler {
     @Override
     @Nullable
     public String getItemId(@NotNull ItemStack itemStack) {
-        Type type = MMOItems.getType(itemStack);
+        String type = MMOItems.getTypeName(itemStack);
         String id = MMOItems.getID(itemStack);
         if (type == null || id == null) return null;
 
-        return type.getName() + ":" + id;
+        return type + ":" + id;
     }
 
     @SuppressWarnings("unchecked")

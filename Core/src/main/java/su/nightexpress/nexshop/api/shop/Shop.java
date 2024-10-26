@@ -65,6 +65,10 @@ public interface Shop extends Placeholder {
 
     @Nullable Product getProductById(@NotNull String id);
 
+    default int countProducts() {
+        return this.getProducts().size();
+    }
+
     default boolean isProduct(@NotNull Product product) {
         return this.getProductMap().containsKey(product.getId());
     }

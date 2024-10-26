@@ -396,4 +396,8 @@ public class ChestConfig {
         "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
         "All placeholders from 'Title -> Values' option are available here too."
     );
+
+    public static boolean isAutoBankEnabled() {
+        return SHOP_AUTO_BANK.get();
+    }
 }

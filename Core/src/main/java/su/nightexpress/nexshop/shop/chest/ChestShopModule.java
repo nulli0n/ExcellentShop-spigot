@@ -179,7 +179,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     @Override
     protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
-        if (!ChestConfig.SHOP_AUTO_BANK.get()) {
+        if (!ChestConfig.isAutoBankEnabled()) {
             BankCommand.build(this.plugin, this, builder);
         }
         if (ChestConfig.SHOP_ITEM_CREATION_ENABLED.get()) {
@@ -779,7 +779,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
         this.removeShop(shop);
 
-        if (this.getShopsAmount(player) <= 0) {
+        if (this.getShopsAmount(player) <= 0 && !ChestConfig.isAutoBankEnabled()) {
             for (Currency currency : this.getAllowedCurrencies(player)) {
                 this.withdrawFromBank(player, currency, -1);
             }
