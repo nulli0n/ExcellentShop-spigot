@@ -5,16 +5,13 @@ import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.product.packer.impl.DummyPacker;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 public abstract class AbstractProductPacker<T extends ProductHandler> implements ProductPacker {
 
     protected final T handler;
-    protected final PlaceholderMap placeholderMap;
 
     public AbstractProductPacker(@NotNull T handler) {
         this.handler = handler;
-        this.placeholderMap = new PlaceholderMap();
     }
 
     @Override
@@ -26,12 +23,6 @@ public abstract class AbstractProductPacker<T extends ProductHandler> implements
     }
 
     protected abstract void writeAdditional(@NotNull FileConfig config, @NotNull String path);
-
-    @Override
-    @NotNull
-    public PlaceholderMap getPlaceholders() {
-        return this.placeholderMap;
-    }
 
     @NotNull
     public T getHandler() {

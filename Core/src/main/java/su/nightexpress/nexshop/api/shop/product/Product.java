@@ -5,7 +5,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
@@ -13,16 +13,16 @@ import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
-public interface Product extends Placeholder {
+import java.util.function.UnaryOperator;
 
-    @Override
-    @NotNull
-    default PlaceholderMap getPlaceholders() {
-        return this.getPlaceholders(null);
+public interface Product {
+
+    @NotNull default UnaryOperator<String> replacePlaceholders() {
+        return this.replacePlaceholders(null);
     }
+
+    @NotNull UnaryOperator<String> replacePlaceholders(@Nullable Player player);
 
     default boolean isValid() {
         if (this.getPacker() instanceof PluginItemPacker packer && this.getHandler() instanceof PluginItemHandler handler) {
@@ -33,10 +33,12 @@ public interface Product extends Placeholder {
         //return !(this.getHandler() instanceof AbstractPluginItemHandler packer) || packer.isValidId(packer.getItemId());
     }
 
-    @NotNull PlaceholderMap getPlaceholders(@Nullable Player player);
-
-//    @Deprecated
-//    void prepareTrade(@NotNull Player player, @NotNull ShopClickAction click);
+    /**
+     * Performs a check to determine if product is available for buying/selling (e.g. present in the shop, is in rotation).
+     * @param player Player who about to buy/sell product.
+     * @return Whether product is available for buying/selling.
+     */
+    boolean isAvailable(@NotNull Player player);
 
     default double getPrice(@NotNull TradeType tradeType) {
         return this.getPrice(tradeType, null);

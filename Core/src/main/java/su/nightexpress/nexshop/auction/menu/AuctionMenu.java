@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.ListingCategory;
 import su.nightexpress.nexshop.auction.SortType;

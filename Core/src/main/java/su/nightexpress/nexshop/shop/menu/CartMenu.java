@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
@@ -125,9 +125,9 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
             Currency currency = prepared.getProduct().getCurrency();
 
             ItemReplacer replacer = ItemReplacer.create(item).readMeta()
-                .replace(currency.getPlaceholders())
-                .replace(prepared.getPlaceholders())
-                .replace(Placeholders.GENERIC_BALANCE, () -> currency.format(currency.getHandler().getBalance(player)));
+                .replace(currency.replacePlaceholders())
+                .replace(prepared.replacePlaceholders())
+                .replace(Placeholders.GENERIC_BALANCE, () -> currency.format(currency.getBalance(player)));
 
             if (Config.GUI_PLACEHOLDER_API.get()) {
                 replacer.replacePlaceholderAPI(player);
@@ -196,7 +196,7 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
         int capacityCart = this.getCartInventorySpace(prepared);
         int capacityProduct = product.getAvailableAmount(player, prepared.getTradeType());
         double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getOwnerBank().getBalance(product.getCurrency()) : -1D;
-        double userBalance = product.getCurrency().getHandler().getBalance(player);
+        double userBalance = product.getCurrency().getBalance(player);
 
         if (product.getPacker() instanceof ItemPacker itemPacker) {
             if (tradeType == TradeType.BUY) {

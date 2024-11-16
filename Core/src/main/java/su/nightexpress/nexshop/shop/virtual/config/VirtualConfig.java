@@ -1,29 +1,31 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.GameMode;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.RankMap;
 import su.nightexpress.nightcore.util.StringUtil;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
-import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class VirtualConfig {
 
     public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("General.Default_Currency",
-        VaultEconomyHandler.ID,
+        CurrencyId.VAULT,
         "Sets default currency for the Virtual Shop module.",
         "This currency will be used when you create new products or if no other currency is available.",
-        "Compatible plugins: " + URL_WIKI_CURRENCY);
+        "Compatible plugins: " + URL_WIKI_CURRENCY
+    ).onRead(CurrencyId::reroute);
 
     public static final ConfigValue<String> DEFAULT_CART_UI = ConfigValue.create("General.Default_Cart_UI",
         DEFAULT,
@@ -55,56 +57,69 @@ public class VirtualConfig {
 
     public static final ConfigValue<Boolean> MAIN_MENU_ENABLED = ConfigValue.create("General.Main_Menu.Enabled",
         true,
-        "Enables the Main Menu feature, where you can list all your Virtual Shops.");
+        "Enables the Main Menu feature, where you can list all your Virtual Shops."
+    );
 
     public static final ConfigValue<Boolean> MAIN_MENU_HIDE_NO_PERM_SHOPS = ConfigValue.create("General.Main_Menu.Hide_No_Permission_Shops",
         true,
-        "When enabled, hides shops from the main menu a player don't have access to.");
+        "When enabled, hides shops from the main menu a player don't have access to."
+    );
 
     public static final ConfigValue<Boolean> SHOP_SHORTCUTS_ENABLED = ConfigValue.create("General.Shop_Shortcut.Enabled",
         true,
-        "Enables the Shop Shortcut commands feature. Allows to quickly open shops.");
+        "Enables the Shop Shortcut commands feature. Allows to quickly open shops."
+    );
 
     public static final ConfigValue<String[]> SHOP_SHORTCUTS_COMMANDS = ConfigValue.create("General.Shop_Shortcut.Commands",
         new String[]{"shop"},
-        "Command aliases for quick main menu and shop access.", "Split by commas.",
-        "[*] Reboot is required when changed!"
+        "Command aliases for quick main menu and shop access.", "Split with commas."
     );
 
     public static final ConfigValue<Boolean> SELL_MENU_ENABLED = ConfigValue.create("General.Sell_Menu.Enabled",
         true,
-        "When 'true' enables the Sell Menu feature, where you can quickly sell all your items.");
+        "When 'true' enables the Sell Menu feature, where you can quickly sell all your items."
+    );
 
     public static final ConfigValue<Boolean> SELL_MENU_SIMPLIFIED = ConfigValue.create("General.Sell_Menu.Simplified",
         false,
         "Sets whether or not Sell Menu should be simplified.",
         "When simplified, no item and click validation is performed, so menu acts like a regular chest,",
-        "and items will be sold on close instead of button click.");
+        "and items will be sold on close instead of button click."
+    );
 
     public static final ConfigValue<String[]> SELL_MENU_COMMANDS = ConfigValue.create("General.Sell_Menu.Commands",
         new String[]{"sellgui", "sellmenu"},
-        "Custom command aliases to open the Sell Menu. Split them with a comma.",
-        "[*] Reboot is required when changed!"
+        "Custom command aliases to open the Sell Menu. Split with commas."
     );
 
     public static final ConfigValue<Boolean> SELL_ALL_ENABLED = ConfigValue.create("General.Sell_All.Enabeled",
         true,
-        "Enables the Sell All command feature.");
+        "Enables the Sell All command feature."
+    );
 
     public static final ConfigValue<String[]> SELL_ALL_COMMANDS = ConfigValue.create("General.Sell_All.Commands",
         new String[]{"sellall"},
-        "Sell All command aliases. Split by commas.",
-        "[*] Reboot is required when changed!"
+        "Sell All command aliases. Split with commas."
     );
 
     public static final ConfigValue<Boolean> SELL_HAND_ENABLED = ConfigValue.create("General.Sell_Hand.Enabled",
         true,
-        "Enables the Sell Hand feature.");
+        "Enables the Sell Hand feature."
+    );
 
     public static final ConfigValue<String[]> SELL_HAND_COMMANDS = ConfigValue.create("General.Sell_Hand.Commands",
         new String[]{"sellhand"},
-        "Sell Hand command aliases. Split by commas.",
-        "[*] Reboot is required when changed!"
+        "Sell Hand command aliases. Split with commas."
+    );
+
+    public static final ConfigValue<Boolean> SELL_HAND_ALL_ENABLED = ConfigValue.create("General.Sell_Hand_All.Enabled",
+        true,
+        "Enables the Sell Hand feature."
+    );
+
+    public static final ConfigValue<String[]> SELL_HAND_ALL_COMMANDS = ConfigValue.create("General.Sell_Hand_All.Commands",
+        new String[]{"sellhandall"},
+        "Sell Hand All command aliases. Split with commas."
     );
 
     public static final ConfigValue<RankMap<Double>> SELL_RANK_MULTIPLIERS = ConfigValue.create("General.Sell_Multipliers",
@@ -134,14 +149,14 @@ public class VirtualConfig {
     );
 
     public static final ConfigValue<String> SHOP_FORMAT_NAME = ConfigValue.create("GUI.Shop_Format.Name",
-        Placeholders.SHOP_NAME,
+        SHOP_NAME,
         "Sets display name for the shop item in the Main Menu.",
         "You can use 'Vritual Shop' placeholders:" + URL_WIKI_PLACEHOLDERS
     );
 
     public static final ConfigValue<List<String>> SHOP_FORMAT_LORE = ConfigValue.create("GUI.Shop_Format.Lore",
         Lists.newList(
-            Placeholders.SHOP_DESCRIPTION
+            VIRTUAL_SHOP_DESCRIPTION
         ),
         "Sets lore for the shop item in the Main Menu.",
         "You can use 'Virtual Shop' placeholders: " + URL_WIKI_PLACEHOLDERS
@@ -195,7 +210,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = ConfigValue.create("GUI.Product_Format.Lore.Discount",
         Lists.newList(
-            GRAY.enclose(GREEN.enclose("✔") + " Discount " + GREEN.enclose(BOLD.enclose(PRODUCT_DISCOUNT_AMOUNT + "%")) + "!")
+            GRAY.enclose(GREEN.enclose("✔") + " Discount " + GREEN.enclose(BOLD.enclose(su.nightexpress.nexshop.Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%")) + "!")
         ),
         "Text to appear if product has active discount.",
         "Placeholder to insert: " + GENERIC_DISCOUNT
@@ -224,8 +239,8 @@ public class VirtualConfig {
         },
         "Text to appear when product has dynamic/float price.",
         "Placeholders to insert:",
-        PRICE_DYNAMIC.apply(BUY),
-        PRICE_DYNAMIC.apply(SELL)
+        su.nightexpress.nexshop.Placeholders.PRICE_DYNAMIC.apply(BUY),
+        su.nightexpress.nexshop.Placeholders.PRICE_DYNAMIC.apply(SELL)
     );
 
     public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_STOCK = ConfigValue.forMap("GUI.Product_Format.Lore.Stock.GLOBAL",
@@ -243,8 +258,8 @@ public class VirtualConfig {
         },
         "Text to appear when product has buy/sell stock configured.",
         "Placeholders to insert:",
-        STOCK_TYPE.apply(BUY),
-        STOCK_TYPE.apply(SELL)
+        su.nightexpress.nexshop.Placeholders.STOCK_TYPE.apply(BUY),
+        su.nightexpress.nexshop.Placeholders.STOCK_TYPE.apply(SELL)
     );
 
     public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_LIMIT = ConfigValue.forMap("GUI.Product_Format.Lore.Stock.PLAYER",
@@ -262,7 +277,11 @@ public class VirtualConfig {
         },
         "Text to appear when product has buy/sell limits configured.",
         "Placeholders to insert:",
-        LIMIT_TYPE.apply(BUY),
-        LIMIT_TYPE.apply(SELL)
+        su.nightexpress.nexshop.Placeholders.LIMIT_TYPE.apply(BUY),
+        su.nightexpress.nexshop.Placeholders.LIMIT_TYPE.apply(SELL)
     );
+
+    public static boolean isCentralMenuEnabled() {
+        return MAIN_MENU_ENABLED.get();
+    }
 }

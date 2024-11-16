@@ -26,7 +26,7 @@ import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Pair;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 import java.util.ArrayList;

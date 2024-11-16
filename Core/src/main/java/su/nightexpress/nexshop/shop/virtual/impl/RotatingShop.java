@@ -3,14 +3,14 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
@@ -29,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
 
@@ -48,7 +49,12 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
         this.rotationTimes = new HashMap<>();
         this.locked = true;
         this.rotationData = new RotationData(this.getId());
-        this.placeholderMap.add(Placeholders.forRotatingShop(this));
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return su.nightexpress.nexshop.Placeholders.forRotatingShop(this);
     }
 
     public void loadData() {
@@ -121,6 +127,14 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
     @NotNull
     public ShopType getType() {
         return ShopType.ROTATING;
+    }
+
+    @Override
+    public int getPages() {
+        double limit = this.productSlots.length;
+        double products = this.rotationData.getProducts().size();
+
+        return (int) Math.ceil(products / limit);
     }
 
     @NotNull
@@ -254,7 +268,7 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
         while (amount > 0 && !products.isEmpty()) {
             RotatingProduct product = Rnd.getByWeight(products);
             this.getPricer().deleteData(product);
-            this.getStock().resetGlobalAmount(product);
+            this.getStock().resetGlobalValues(product);
 
             generated.add(product.getId());
             products.remove(product);

@@ -3,16 +3,15 @@ package su.nightexpress.nexshop.shop.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.currency.CurrencyManager;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.Players;
@@ -39,8 +38,6 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.requiredPermissions = new HashSet<>();
         this.stockValues = new StockValues();
         this.limitValues = new StockValues();
-
-        this.placeholders.add(Placeholders.forVirtualProduct(this));
     }
 
     public void load(@NotNull FileConfig config, @NotNull String path) {
@@ -58,8 +55,8 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         this.getPacker().write(config, path);
         config.set(path + ".Allowed_Ranks", this.getAllowedRanks());
         config.set(path + ".Required_Permissions", this.getRequiredPermissions());
-        if (this.getCurrency() != CurrencyManager.DUMMY_CURRENCY) {
-            config.set(path + ".Currency", this.getCurrency().getId());
+        if (!this.getCurrency().isDummy()) {
+            config.set(path + ".Currency", this.getCurrency().getInternalId());
         }
         this.getPricer().write(config, path + ".Price");
         this.getStockValues().write(config, path + ".Stock.GLOBAL");
@@ -88,6 +85,16 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
         if (!this.getAllowedRanks().isEmpty()) {
             Set<String> ranks = Players.getPermissionGroups(player);
             return ranks.stream().anyMatch(rank -> this.getAllowedRanks().contains(rank));
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isAvailable(@NotNull Player player) {
+        if (!this.hasAccess(player)) {
+            Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
+            return false;
         }
 
         return true;

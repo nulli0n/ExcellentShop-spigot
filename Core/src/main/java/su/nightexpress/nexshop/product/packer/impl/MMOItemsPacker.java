@@ -6,10 +6,18 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.product.packer.AbstractPluginItemPacker;
 import su.nightexpress.nexshop.product.handler.impl.MMOItemsHandler;
 
+import java.util.function.UnaryOperator;
+
 public class MMOItemsPacker extends AbstractPluginItemPacker<MMOItemsHandler> {
 
     public MMOItemsPacker(MMOItemsHandler handler, @NotNull String itemId, int amount) {
         super(handler, itemId, amount);
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return s -> s;
     }
 
     @Override

@@ -64,7 +64,7 @@ public class PurchaseConfirmMenu extends ConfigMenu<ShopPlugin> implements Linke
 
                 ItemReplacer.create(item).readMeta()
                     .replace(listing.getPlaceholders())
-                    .replace(GENERIC_BALANCE, () -> listing.getCurrency().format(listing.getCurrency().getHandler().getBalance(viewer.getPlayer())))
+                    .replace(GENERIC_BALANCE, () -> listing.getCurrency().format(listing.getCurrency().getBalance(viewer.getPlayer())))
                     .replacePlaceholderAPI(viewer.getPlayer())
                     .writeMeta();
             });

@@ -17,7 +17,6 @@ import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
 import su.nightexpress.nexshop.product.packer.impl.BukkitCommandPacker;
 import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
@@ -42,7 +41,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
     private final VirtualShopModule module;
 
     public ProductMainEditor(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, Tags.BLACK.enclose("Product Editor [" + Placeholders.PRODUCT_ID + "]"), MenuSize.CHEST_54);
+        super(plugin, Tags.BLACK.enclose("Product Editor"), MenuSize.CHEST_54);
         this.module = module;
 
         this.addReturn(49, (viewer, event, product) -> {
@@ -101,10 +100,6 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             if (packer == null) return;
 
             product.setHandler(handler, packer);
-
-//            if (product.getPacker() instanceof ItemPacker itemPacker) {
-//                itemPacker.load(cursor);
-//            }
 
             event.getView().setCursor(null);
             this.saveProductAndFlush(viewer, product);
@@ -197,7 +192,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
         });
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemReplacer.replace(item, this.getLink(viewer).getPlaceholders());
+            ItemReplacer.replace(item, this.getLink(viewer).replacePlaceholders());
         }));
     }
 

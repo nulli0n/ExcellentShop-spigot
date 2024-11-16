@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
@@ -32,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ShopSearchMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<ChestProduct>, Linked<List<ChestProduct>> {
@@ -97,8 +98,8 @@ public class ShopSearchMenu extends ConfigMenu<ShopPlugin> implements AutoFilled
                 .setDisplayName(this.productName)
                 .setLore(this.productLore)
                 .replaceLoreExact(PLACEHOLDER_ACTION_TELEPORT, canTeleport ? this.actionTeleportLore : Collections.emptyList())
-                .replace(product.getPlaceholders())
-                .replace(product.getShop().getPlaceholders())
+                .replace(product.replacePlaceholders(viewer.getPlayer()))
+                .replace(product.getShop().replacePlaceholders())
                 .writeMeta();
             return item;
         });
@@ -155,7 +156,7 @@ public class ShopSearchMenu extends ConfigMenu<ShopPlugin> implements AutoFilled
         this.productLore = ConfigValue.create("Product.Lore", Lists.newList(
             PRODUCT_PREVIEW_LORE,
             "",
-            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Shop: ") + SHOP_NAME + " " + GRAY.enclose("(by " + SHOP_OWNER + ")")),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Shop: ") + SHOP_NAME + " " + GRAY.enclose("(by " + Placeholders.CHEST_SHOP_OWNER + ")")),
             LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy for: ") + PRODUCT_PRICE_FORMATTED.apply(TradeType.BUY) + " " + GRAY.enclose("(" + PRODUCT_STOCK_AMOUNT_LEFT.apply(TradeType.BUY) + " left)")),
             LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell for: ") + PRODUCT_PRICE_FORMATTED.apply(TradeType.SELL) + " " + GRAY.enclose("(" + PRODUCT_STOCK_AMOUNT_LEFT.apply(TradeType.SELL) + " left)")),
             "",

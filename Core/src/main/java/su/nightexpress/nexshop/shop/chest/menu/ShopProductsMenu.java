@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop>, ShopEditor {
@@ -123,7 +123,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
                 ItemStack productIcon = new ItemStack(product.getPreview());
                 ItemReplacer.create(productIcon).trimmed().hideFlags()
                     .setDisplayName(this.productName).setLore(this.productLore)
-                    .replace(product.getPlaceholders())
+                    .replace(product.replacePlaceholders(viewer.getPlayer()))
                     .replacePlaceholderAPI(viewer.getPlayer())
                     .writeMeta();
 

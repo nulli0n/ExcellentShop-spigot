@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.shop.virtual.editor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
@@ -17,7 +18,6 @@ import su.nightexpress.nightcore.menu.api.AutoFilled;
 import su.nightexpress.nightcore.menu.impl.EditorMenu;
 import su.nightexpress.nightcore.util.ItemReplacer;
 import su.nightexpress.nightcore.util.StringUtil;
-import su.nightexpress.nightcore.util.text.tag.Tags;
 
 import java.util.Comparator;
 import java.util.stream.IntStream;
@@ -27,7 +27,7 @@ public class ShopListEditor extends EditorMenu<ShopPlugin, VirtualShopModule> im
     private final VirtualShopModule module;
 
     public ShopListEditor(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, Tags.BLACK.enclose("Shop Editor"), MenuSize.CHEST_45);
+        super(plugin, VirtualLang.EDITOR_TITLE_SHOP_LIST.getString(), MenuSize.CHEST_45);
         this.module = module;
 
         this.addExit(39);
@@ -62,8 +62,9 @@ public class ShopListEditor extends EditorMenu<ShopPlugin, VirtualShopModule> im
         autoFill.setItems(this.module.getShops().stream().sorted(Comparator.comparing(VirtualShop::getId)).toList());
         autoFill.setItemCreator(shop -> {
             ItemStack item = new ItemStack(shop.getIcon());
-            ItemReplacer.create(item).readLocale(VirtualLocales.SHOP_OBJECT).hideFlags().trimmed()
-                .replace(shop.replacePlaceholders())
+            ItemReplacer.create(item)
+                .readLocale(VirtualLocales.SHOP_OBJECT).hideFlags()
+                .replacement(replacer -> replacer.replace(Placeholders.forVirtualShopEditor(shop)))
                 .writeMeta();
             return item;
         });

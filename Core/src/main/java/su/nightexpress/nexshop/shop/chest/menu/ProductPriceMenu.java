@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProduct>, ShopEditor {
@@ -212,7 +212,7 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
             }
             menuItem.getOptions().addDisplayModifier((viewer, item) -> {
                 ItemReplacer.create(item).readMeta().trimmed()
-                    .replace(this.getLink(viewer).getPlaceholders())
+                    .replace(this.getLink(viewer).replacePlaceholders(viewer.getPlayer()))
                     .replacePlaceholderAPI(viewer.getPlayer())
                     .writeMeta();
             });

@@ -6,8 +6,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Linked<BankMenu.Info> {
@@ -112,8 +113,8 @@ public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Li
             ItemReplacer.create(icon).hideFlags().trimmed()
                 .setDisplayName(this.objectName)
                 .setLore(this.objectLore)
-                .replace(currency.getPlaceholders())
-                .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getHandler().getBalance(player)))
+                .replace(currency.replacePlaceholders())
+                .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getBalance(player)))
                 .replace(PLACEHOLDER_BANK_BALANCE, currency.format(module.getPlayerBank(info.playerId).getBalance(currency)))
                 .replacePlaceholderAPI(player)
                 .writeMeta();
@@ -124,7 +125,7 @@ public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Li
             ChestBank bank = this.module.getPlayerBank(holder);
 
             if (event.getClick() == ClickType.DROP) {
-                this.module.depositToBank(player, holder, currency, currency.getHandler().getBalance(player));
+                this.module.depositToBank(player, holder, currency, currency.getBalance(player));
                 this.module.savePlayerBank(bank);
                 this.runNextTick(() -> this.flush(viewer));
                 return;
@@ -213,7 +214,7 @@ public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Li
         this.objectSlots = ConfigValue.create("Currency.Slots", IntStream.range(0, 9).toArray()).read(cfg);
 
         this.objectName = ConfigValue.create("Currency.Name",
-            LIGHT_YELLOW.enclose(BOLD.enclose(CURRENCY_NAME)) + " " + LIGHT_GRAY.enclose("(ID: " + WHITE.enclose(CURRENCY_ID) + ")")
+            LIGHT_YELLOW.enclose(BOLD.enclose(Placeholders.CURRENCY_NAME)) + " " + LIGHT_GRAY.enclose("(ID: " + WHITE.enclose(Placeholders.CURRENCY_ID) + ")")
         ).read(cfg);
 
         this.objectLore = ConfigValue.create("Currency.Lore", Lists.newList(

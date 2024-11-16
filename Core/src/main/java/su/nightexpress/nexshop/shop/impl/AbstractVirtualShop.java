@@ -1,11 +1,14 @@
 package su.nightexpress.nexshop.shop.impl;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
@@ -15,12 +18,9 @@ import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.currency.CurrencyManager;
-import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
 import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.Discount;
@@ -52,7 +52,8 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     protected List<String> description;
     protected boolean      permissionRequired;
     protected ItemStack    icon;
-    protected String layoutName;
+    protected int          mainMenuSlot;
+    protected String       layoutName;
 
     public AbstractVirtualShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
@@ -62,8 +63,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         this.stock = new VirtualStock(this.plugin, this);
         this.discounts = new HashSet<>();
         this.npcIds = new HashSet<>();
-
-        this.placeholderMap.add(Placeholders.forVirtualShop(this));
+        this.mainMenuSlot = -1;
     }
 
     @Override
@@ -72,6 +72,8 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         this.setDescription(config.getStringList("Description"));
         this.setPermissionRequired(config.getBoolean("Permission_Required", false));
         this.setIcon(config.getItem("Icon"));
+        this.setMainMenuSlot(config.getInt("MainMenu.Slot", -1));
+
         this.setLayoutName(ConfigValue.create("Layout.Name", this.getId()).read(config));
         this.getNPCIds().addAll(IntStream.of(config.getIntArray("Citizens.Attached_NPC")).boxed().toList());
 
@@ -102,6 +104,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         config.set("Description", this.getDescription());
         config.set("Permission_Required", this.isPermissionRequired());
         config.setItem("Icon", this.getIcon());
+        config.set("MainMenu.Slot", this.mainMenuSlot);
         config.set("Layout.Name", this.getLayoutName());
         config.setIntArray("Citizens.Attached_NPC", this.getNPCIds().stream().mapToInt(Number::intValue).toArray());
         this.transactions.forEach((type, isAllowed) -> config.set("Transaction_Allowed." + type.name(), isAllowed));
@@ -162,10 +165,10 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
     @Nullable
     protected P loadProduct(@NotNull FileConfig config, @NotNull String path, @NotNull String id) {
-        String currencyId = config.getString(path + ".Currency", VaultEconomyHandler.ID);
-        Currency currency = this.plugin.getCurrencyManager().getCurrency(currencyId);
-        if (currency == null) {
-            currency = CurrencyManager.DUMMY_CURRENCY;
+        String currencyId = CurrencyId.reroute(config.getString(path + ".Currency", CurrencyId.VAULT));
+        Currency currency = EconomyBridge.getCurrencyOrDummy(currencyId);
+        if (currency.isDummy()) {
+            //currency = CurrencyManager.DUMMY_CURRENCY;
             this.module.warn("Invalid currency '" + currencyId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change currency in editor.");
         }
 
@@ -296,6 +299,20 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     public void setIcon(@NotNull ItemStack icon) {
         this.icon = new ItemStack(icon);
         this.icon.setAmount(1);
+
+        if (this.icon.getType().isAir()) {
+            this.icon.setType(Material.BARRIER);
+        }
+    }
+
+    @Override
+    public int getMainMenuSlot() {
+        return this.mainMenuSlot;
+    }
+
+    @Override
+    public void setMainMenuSlot(int mainMenuSlot) {
+        this.mainMenuSlot = mainMenuSlot;
     }
 
     @Override

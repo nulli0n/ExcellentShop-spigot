@@ -27,7 +27,7 @@ import su.nightexpress.nightcore.util.Lists;
 import java.util.ArrayList;
 import java.util.List;
 
-import static su.nightexpress.nexshop.Placeholders.PRODUCT_PRICE_FORMATTED;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class PurchaseOptionMenu extends ConfigMenu<ShopPlugin> implements Linked<Product> {
@@ -65,7 +65,7 @@ public class PurchaseOptionMenu extends ConfigMenu<ShopPlugin> implements Linked
 
         this.getItems().forEach(menuItem -> {
             if (menuItem.getHandler() == this.buyHandler || menuItem.getHandler() == this.sellHandler) {
-                menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> ItemReplacer.replace(itemStack, this.getLink(viewer).getPlaceholders(viewer.getPlayer())));
+                menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> ItemReplacer.replace(itemStack, this.getLink(viewer).replacePlaceholders(viewer.getPlayer())));
             }
         });
     }
@@ -75,7 +75,7 @@ public class PurchaseOptionMenu extends ConfigMenu<ShopPlugin> implements Linked
         Product product = this.getLink(player);
         if (!product.getShop().isTransactionEnabled(type) || !product.isTradeable(type)) return;
 
-        this.runNextTick(() -> plugin.getShopManager().startTrade(player, product, type, null));
+        this.runNextTick(() -> plugin.getShopManager().startTrade(player, product, type, null, null));
     }
 
     @Override

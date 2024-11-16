@@ -27,7 +27,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         VirtualShop shop = product.getShop();
 
         double price = this.getPrice();
-        double balance = product.getCurrency().getHandler().getBalance(player);
+        double balance = product.getCurrency().getBalance(player);
 
         Result result = Transaction.Result.SUCCESS;
         if (balance < price) {
@@ -52,7 +52,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
 
             // Process transaction
             product.delivery(this.getInventory(), transaction.getUnits());
-            product.getCurrency().getHandler().take(player, transaction.getPrice());
+            product.getCurrency().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
         }
         return transaction;
@@ -104,7 +104,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
             shop.getStock().onTransaction(event);
 
             shop.getModule().getLogger().logTransaction(event);
-            product.getCurrency().getHandler().give(player, transaction.getPrice());
+            product.getCurrency().give(player, transaction.getPrice());
             product.take(inventory, transaction.getUnits());
         }
         return transaction;

@@ -6,6 +6,8 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nightcore.config.FileConfig;
 
+import java.util.function.UnaryOperator;
+
 public class FlatPricer extends AbstractProductPricer {
 
     public FlatPricer() {
@@ -24,5 +26,11 @@ public class FlatPricer extends AbstractProductPricer {
     @Override
     protected void writeAdditional(@NotNull FileConfig cfg, @NotNull String path) {
         this.priceCurrent.forEach(((tradeType, amount) -> cfg.set(path + "." + tradeType.name(), amount)));
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return str -> str;
     }
 }

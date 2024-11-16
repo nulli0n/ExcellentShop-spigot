@@ -2,12 +2,11 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -17,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
 
@@ -27,7 +27,12 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
     public StaticShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, module, file, id);
         this.discountConfigs = new HashSet<>();
-        this.placeholderMap.add(Placeholders.forStaticShop(this));
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return su.nightexpress.nexshop.Placeholders.forStaticShop(this);
     }
 
     @Override
@@ -78,6 +83,7 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
         return ShopType.STATIC;
     }
 
+    @Override
     public int getPages() {
         return this.pages;
     }

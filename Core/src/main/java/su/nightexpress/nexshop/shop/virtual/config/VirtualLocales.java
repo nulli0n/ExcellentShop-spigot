@@ -2,13 +2,13 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.language.entry.LangItem;
 import su.nightexpress.nightcore.util.Plugins;
 
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
-import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 
 public class VirtualLocales {
 
@@ -23,8 +23,8 @@ public class VirtualLocales {
 
     public static final LangItem SHOP_OBJECT = LangItem.builder(PREFIX + "Shop.Object")
         .name(SHOP_NAME)
-        .current("Type", SHOP_TYPE)
-        .current("Pages", Placeholders.SHOP_PAGES)
+        .current("Type", VIRTUAL_SHOP_TYPE)
+        .current("Pages", VIRTUAL_SHOP_PAGES)
         .emptyLine()
         .leftClick("edit")
         .shiftRight("delete " + RED.enclose("(no undo)"))
@@ -34,28 +34,15 @@ public class VirtualLocales {
         .name("Display Name")
         .current("Current", SHOP_NAME)
         .emptyLine()
-        .leftClick("change")
+        .click("change")
         .build();
 
     public static final LangItem SHOP_DESCRIPTION = LangItem.builder(PREFIX + "Shop.Description")
         .name("Description")
-        .text(Placeholders.SHOP_DESCRIPTION).emptyLine()
+        .text(su.nightexpress.nexshop.Placeholders.VIRTUAL_SHOP_DESCRIPTION).emptyLine()
         .emptyLine()
         .leftClick("add line")
         .rightClick("remove all")
-        .build();
-
-    public static final LangItem SHOP_PAGES = LangItem.builder(PREFIX + "Shop.Pages")
-        .name("Pages Amount")
-        .current("Current", Placeholders.SHOP_PAGES)
-        .emptyLine()
-        .text("Amount of pages in the shop.")
-        .emptyLine()
-        .text("Make sure that shop layout config")
-        .text("contains page buttons.")
-        .emptyLine()
-        .leftClick("+1 page")
-        .rightClick("-1 page")
         .build();
 
     public static final LangItem SHOP_ICON = LangItem.builder(PREFIX + "Shop.Icon")
@@ -64,42 +51,58 @@ public class VirtualLocales {
         .rightClick("get a copy")
         .build();
 
+    public static final LangItem SHOP_MENU_SLOT = LangItem.builder(PREFIX + "Shop.MenuSlot")
+        .name("Menu Slot")
+        .current("Current", VIRTUAL_SHOP_MENU_SLOT)
+        .emptyLine()
+        .text("Sets shop position in the Central Shop GUI.")
+        .emptyLine()
+        .leftClick("change")
+        .rightClick("disable")
+        .build();
+
     public static final LangItem SHOP_PERMISSION = LangItem.builder(PREFIX + "Shop.PermissionRequirement")
         .name("Permission Requirement")
-        .current("Enabled", SHOP_PERMISSION_REQUIRED)
-        .current("Node", SHOP_PERMISSION_NODE)
+        .current("Enabled", VIRTUAL_SHOP_PERMISSION_REQUIRED)
+        .current("Node", VIRTUAL_SHOP_PERMISSION_NODE)
         .emptyLine()
-        .text("Sets whether or not permission", "is required to use this shop.")
+        .text("Sets whether permission is required", "to use this shop.")
         .emptyLine()
-        .leftClick("toggle")
+        .click("toggle")
         .build();
 
-    public static final LangItem SHOP_TRADES = LangItem.builder(PREFIX + "Shop.Transactions")
-        .name("Transactions")
-        .current("Buying Enabled", SHOP_BUY_ALLOWED)
-        .current("Selling Enabled", SHOP_SELL_ALLOWED)
+    public static final LangItem SHOP_BUYING = LangItem.builder(PREFIX + "Shop.Buying")
+        .name("Buying")
+        .current("State", SHOP_BUY_ALLOWED)
         .emptyLine()
-        .text("Global rules allowing / disallowing")
-        .text("selling and buying in this shop.")
+        .text("Controls whether players can", "buy items in this shop.")
         .emptyLine()
-        .leftClick("toggle buying")
-        .rightClick("toggle selling")
+        .click("toggle")
         .build();
 
-    public static final LangItem SHOP_ATTACHED_NPCS = LangItem.builder(PREFIX + "Shop.AttachedNPCs")
-        .name("Attached NPCs")
-        .text(SHOP_NPC_IDS)
+    public static final LangItem SHOP_SELLING = LangItem.builder(PREFIX + "Shop.Selling")
+        .name("Selling")
+        .current("State", SHOP_SELL_ALLOWED)
         .emptyLine()
-        .text("List of NPCs (id) attached to this shop", "to open it on interaction.")
-        .text(LIGHT_RED.enclose("(Citizens required)"))
+        .text("Controls whether players can", "sell items to this shop.")
         .emptyLine()
-        .leftClick("add NPC")
-        .rightClick("remove all")
+        .click("toggle")
         .build();
+
+//    public static final LangItem SHOP_ATTACHED_NPCS = LangItem.builder(PREFIX + "Shop.AttachedNPCs")
+//        .name("Attached NPCs")
+//        .text(su.nightexpress.nexshop.Placeholders.SHOP_NPC_IDS)
+//        .emptyLine()
+//        .text("List of NPCs (id) attached to this shop", "to open it on interaction.")
+//        .text(LIGHT_RED.enclose("(Citizens required)"))
+//        .emptyLine()
+//        .leftClick("add NPC")
+//        .rightClick("remove all")
+//        .build();
 
     public static final LangItem SHOP_LAYOUT = LangItem.builder(PREFIX + "Shop.Layout")
         .name("Layout")
-        .current("Current", Placeholders.SHOP_LAYOUT)
+        .current("Current", VIRTUAL_SHOP_LAYOUT)
         .emptyLine()
         .text("Sets GUI layout used in this shop.")
         .emptyLine()
@@ -119,14 +122,50 @@ public class VirtualLocales {
         .name("Products")
         .text("Create and manage products here.")
         .emptyLine()
-        .leftClick("navigate")
-        .dropKey("reset & update all prices")
-        .swapKey("reset all stocks & limits")
+        .click("navigate")
+        .build();
+
+    public static final LangItem SHOP_RESET_PRICE_DATA = LangItem.builder(PREFIX + "Shop.ResetPriceData")
+        .name("Reset Price & Update")
+        .text("Resets all price data stored", "in the database for all products", "of this shop.")
+        .emptyLine()
+        .text("After reset, all product prices will", "be regenerated according to", "their settings.")
+        .emptyLine()
+        .click(RED.enclose("reset"))
+        .build();
+
+    public static final LangItem SHOP_RESET_STOCK_DATA = LangItem.builder(PREFIX + "Shop.ResetStockData")
+        .name("Reset Stock & Update")
+        .text("Resets all stock and limit data stored", "in the database for all products", "of this shop.")
+        .emptyLine()
+        .text("After reset, all product stock and limit", "values will be regenerated according", "to their settings.")
+        .emptyLine()
+        .click(RED.enclose("reset"))
+        .build();
+
+    public static final LangItem SHOP_SPECIFIC = LangItem.builder(PREFIX + "Shop.Specific")
+        .name("Specific Settings")
+        .text("Additional settings based on shop type.")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem SHOP_STATIC_PAGES = LangItem.builder(PREFIX + "Shop.Pages")
+        .name("Pages Amount")
+        .current("Current", VIRTUAL_SHOP_PAGES)
+        .emptyLine()
+        .text("Amount of pages in the shop.")
+        .emptyLine()
+        .text("Make sure that shop layout config")
+        .text("contains page buttons.")
+        .emptyLine()
+        .leftClick("+1 page")
+        .rightClick("-1 page")
         .build();
 
     public static final LangItem SHOP_ROTATION_TYPE = LangItem.builder(PREFIX + "Shop.Rotation.Type")
         .name("Rotation Type")
-        .current("Current", Placeholders.SHOP_ROTATION_TYPE)
+        .current("Current", VIRTUAL_SHOP_ROTATION_TYPE)
         .emptyLine()
         .text(LIGHT_YELLOW.enclose(BOLD.enclose("Types:")))
         .current(RotationType.INTERVAL.name(), "Every X minutes.")
@@ -137,7 +176,7 @@ public class VirtualLocales {
 
     public static final LangItem SHOP_ROTATION_INTERVAL = LangItem.builder(PREFIX + "Shop.Rotation.Interval")
         .name("Rotation Interval")
-        .current("Current", Placeholders.SHOP_ROTATION_INTERVAL)
+        .current("Current", VIRTUAL_SHOP_ROTATION_INTERVAL)
         .emptyLine()
         .text("Sets how often shop products", "will be rotated (changed).")
         .emptyLine()
@@ -153,9 +192,9 @@ public class VirtualLocales {
 
     public static final LangItem SHOP_ROTATION_PRODUCTS = LangItem.builder(PREFIX + "Shop.Rotation.Products")
         .name("Rotation Products")
-        .current("Min", SHOP_ROTATION_MIN_PRODUCTS)
-        .current("Max", SHOP_ROTATION_MAX_PRODUCTS)
-        .current("Slots", SHOP_ROTATION_PRODUCT_SLOTS)
+        .current("Min", VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS)
+        .current("Max", VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS)
+        .current("Slots", VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS)
         .emptyLine()
         .text("Sets how many products", "will be used in rotations and", "slots where they will appear.")
         .emptyLine()
@@ -181,7 +220,7 @@ public class VirtualLocales {
 
     public static final LangItem ROTATING_PRODUCT_OBJECT = LangItem.builder(PREFIX + "Product.Object.Rotating2")
         .name(PRODUCT_PREVIEW_NAME)
-        .current("Rotation Chance", Placeholders.PRODUCT_ROTATION_CHANCE + "%")
+        .current("Rotation Chance", su.nightexpress.nexshop.Placeholders.PRODUCT_ROTATION_CHANCE + "%")
         .current("Currency", PRODUCT_CURRENCY)
         .current("Buy Price", PRODUCT_PRICE.apply(BUY))
         .current("Sell Price", PRODUCT_PRICE.apply(SELL))
@@ -260,7 +299,7 @@ public class VirtualLocales {
 
     public static final LangItem PRODUCT_RANKS_REQUIRED = LangItem.builder(PREFIX + "Product.RanksRequired")
         .name("Required Ranks")
-        .text(PRODUCT_ALLOWED_RANKS)
+        .text(su.nightexpress.nexshop.Placeholders.PRODUCT_ALLOWED_RANKS)
         .emptyLine()
         .text("Only players with listed ranks (groups)", "will have access to this product.")
         .emptyLine()
@@ -270,7 +309,7 @@ public class VirtualLocales {
 
     public static final LangItem PRODUCT_PERMISIONS_REQUIRED = LangItem.builder(PREFIX + "Product.PermissionsRequired")
         .name("Required Permissions")
-        .text(PRODUCT_REQUIRED_PERMISSIONS)
+        .text(su.nightexpress.nexshop.Placeholders.PRODUCT_REQUIRED_PERMISSIONS)
         .emptyLine()
         .text("Only players with listed permissions", "will have access to this product.")
         .emptyLine()
@@ -280,7 +319,7 @@ public class VirtualLocales {
 
     public static final LangItem PRODUCT_COMMANDS = LangItem.builder(PREFIX + "Product.Commands")
         .name("Commands")
-        .text(Placeholders.PRODUCT_COMMANDS)
+        .text(su.nightexpress.nexshop.Placeholders.PRODUCT_COMMANDS)
         .emptyLine()
         .text("Commands to run when product is purchased.")
         .emptyLine()
@@ -294,7 +333,7 @@ public class VirtualLocales {
 
     public static final LangItem PRODUCT_ROTATION_CHANCE = LangItem.builder(PREFIX + "Product.Rotation.Chance")
         .name("Weight")
-        .current("Current", Placeholders.PRODUCT_ROTATION_CHANCE + "%")
+        .current("Current", su.nightexpress.nexshop.Placeholders.PRODUCT_ROTATION_CHANCE + "%")
         .emptyLine()
         .text("Greater the weight, greater the chance", "that this product will appear", "in shop rotations.")
         .emptyLine()
@@ -480,7 +519,7 @@ public class VirtualLocales {
 
     public static final LangItem PRODUCT_DISCOUNT = LangItem.builder(PREFIX + "Product.Price.DiscountAllowed")
         .name("Discount Allowed")
-        .current("Enabled", PRODUCT_DISCOUNT_ALLOWED)
+        .current("Enabled", su.nightexpress.nexshop.Placeholders.PRODUCT_DISCOUNT_ALLOWED)
         .emptyLine()
         .text("Sets whether or not this product", "can be affected by shop's discounts.")
         .emptyLine()

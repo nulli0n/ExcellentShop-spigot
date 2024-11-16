@@ -6,17 +6,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
@@ -41,7 +40,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.shop.virtual.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<VirtualShop> {
@@ -55,13 +54,14 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
     public ShopLayout(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull FileConfig config) {
         super(plugin, config);
         this.module = module;
+        this.applyPAPI = Config.usePlaceholdersForGUI();
         this.link = new ViewLink<>();
 
         config.options().setHeader(Lists.newList(
             "=".repeat(50),
             "Available Placeholders:",
             "- " + GENERIC_BALANCE + " -> Player's balance for default Virtual Shop currency.",
-            "- " + GENERIC_SELL_MULTIPLIER + " -> Player's sell multiplier (set in VirtualShop settings.yml).",
+            "- " + Placeholders.GENERIC_SELL_MULTIPLIER + " -> Player's sell multiplier (set in VirtualShop settings.yml).",
             "- " + URL_WIKI_PLACEHOLDERS + " -> Placeholders of: Shop, Virtual Shop, Static/Rotating Shop.",
             "- " + Plugins.PLACEHOLDER_API + " -> Any of them. Enable PlaceholderAPI for GUIs in the plugin config.",
             "=".repeat(50)
@@ -85,9 +85,9 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
             ItemReplacer.create(itemStack).readMeta().trimmed()
-                .replace(this.getLink(viewer).getPlaceholders())
-                .replace(GENERIC_BALANCE, () -> currency.format(currency.getHandler().getBalance(viewer.getPlayer())))
-                .replace(GENERIC_SELL_MULTIPLIER, () -> NumberUtil.format(VirtualShopModule.getSellMultiplier(viewer.getPlayer())))
+                .replace(this.getLink(viewer).replacePlaceholders())
+                .replace(GENERIC_BALANCE, () -> currency.format(currency.getBalance(viewer.getPlayer())))
+                .replace(Placeholders.GENERIC_SELL_MULTIPLIER, () -> NumberUtil.format(VirtualShopModule.getSellMultiplier(viewer.getPlayer())))
                 .replacePlaceholderAPI(viewer.getPlayer())
                 .writeMeta();
         }));
@@ -188,9 +188,9 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
             ;
 
         for (TradeType tradeType : TradeType.values()) {
-            String stockPlaceholder = STOCK_TYPE.apply(tradeType);
-            String limitPlaceholder = LIMIT_TYPE.apply(tradeType);
-            String priceDynamicPlaceholder = PRICE_DYNAMIC.apply(tradeType);
+            String stockPlaceholder = Placeholders.STOCK_TYPE.apply(tradeType);
+            String limitPlaceholder = Placeholders.LIMIT_TYPE.apply(tradeType);
+            String priceDynamicPlaceholder = Placeholders.PRICE_DYNAMIC.apply(tradeType);
 
             List<String> stockLore = new ArrayList<>();
             List<String> limitLore = new ArrayList<>();
@@ -216,9 +216,9 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
         }
 
         replacer
-            .replace(product.getPlaceholders(player))
-            .replace(product.getCurrency().getPlaceholders())
-            .replace(shop.getPlaceholders());
+            .replace(product.replacePlaceholders(player))
+            .replace(product.getCurrency().replacePlaceholders())
+            .replace(shop.replacePlaceholders());
 
         replacer.writeMeta();
 
@@ -227,23 +227,7 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
             .setPriority(Integer.MAX_VALUE)
             .setOptions(ItemOptions.personalWeak(player))
             .setHandler((viewer, event) -> {
-                Player player2 = viewer.getPlayer();
-                if (!product.hasAccess(player2)) {
-                    Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player2);
-                    return;
-                }
-
-                ShopClickAction clickType = ShopUtils.getClickAction(player2, event.getClick(), shop, product);
-                if (clickType == ShopClickAction.UNDEFINED) return;
-
-                // In case if some smartass have shop GUI opened during the rotation.
-                if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) {
-                    this.runNextTick(() -> this.flush(viewer));
-                    return;
-                }
-
-                //this.runNextTick(() -> product.prepareTrade(player2, clickType));
-                this.runNextTick(() -> plugin.getShopManager().startTrade(player, product, clickType));
+                plugin.getShopManager().onProductClick(player, product, event.getClick(), this);
             });
 
         this.addItem(menuItem);
@@ -299,7 +283,7 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
                 LIGHT_GRAY.enclose("Sell everything from your"),
                 LIGHT_GRAY.enclose("inventory to this shop."),
                 "",
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell Multiplier: ") + "x" + GENERIC_SELL_MULTIPLIER),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell Multiplier: ") + "x" + Placeholders.GENERIC_SELL_MULTIPLIER),
                 "",
                 LIGHT_YELLOW.enclose("[▶]") + LIGHT_GRAY.enclose(" Click to " + LIGHT_YELLOW.enclose("sell all") + ".")
             ));

@@ -9,10 +9,8 @@ import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.VirtualStock;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -30,7 +28,7 @@ public class ProductStockEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
     private static final String TEXTURE_SELL   = "6eb911ea94b5a1cf77f3ca637a3b1662b35121bd72e118651184f2fb1060d1";
 
     public ProductStockEditor(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, Tags.BLACK.enclose("Product Stock [" + Placeholders.PRODUCT_ID + "]"), MenuSize.CHEST_54);
+        super(plugin, Tags.BLACK.enclose("Product Stock"), MenuSize.CHEST_54);
 
         this.addReturn(49, (viewer, event, product) -> {
             this.runNextTick(() -> module.openProductEditor(viewer.getPlayer(), product));
@@ -38,15 +36,13 @@ public class ProductStockEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
 
         this.addItem(ItemUtil.getSkinHead(TEXTURE_GLOBAL), VirtualLocales.PRODUCT_STOCK_GLOBAL_INFO, 10, (viewer, event, product) -> {
             if (event.isRightClick()) {
-                VirtualStock stock = (VirtualStock) product.getShop().getStock();
-                stock.resetGlobalAmount(product);
+                product.getShop().getStock().resetGlobalValues(product);
             }
         });
 
         this.addItem(ItemUtil.getSkinHead(TEXTURE_PLAYER), VirtualLocales.PRODUCT_STOCK_PLAYER_INFO, 28, (viewer, event, product) -> {
             if (event.isRightClick()) {
-                VirtualStock stock = (VirtualStock) product.getShop().getStock();
-                stock.resetPlayerAmount(product);
+                product.getShop().getStock().resetPlayerLimits(product);
             }
         });
 
@@ -89,7 +85,7 @@ public class ProductStockEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
         // End
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemReplacer.replace(item, this.getLink(viewer).getPlaceholders());
+            ItemReplacer.replace(item, this.getLink(viewer).replacePlaceholders());
         }));
     }
 

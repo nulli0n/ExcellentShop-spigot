@@ -11,7 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
@@ -19,7 +19,6 @@ import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
@@ -55,7 +54,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
     private final NamespacedKey              keyProductCache;
 
     public ProductListEditor(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, Tags.BLACK.enclose("Products Editor [" + Placeholders.SHOP_ID + "]"), MenuSize.CHEST_54);
+        super(plugin, Tags.BLACK.enclose("Products Editor"), MenuSize.CHEST_54);
         this.module = module;
         this.productCache = new HashMap<>();
         this.keyProductCache = new NamespacedKey(plugin, "product_cache");
@@ -171,7 +170,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
             LangItem locale = shop.getType() == ShopType.STATIC ? VirtualLocales.PRODUCT_OBJECT : VirtualLocales.ROTATING_PRODUCT_OBJECT;
             ItemStack productIcon = new ItemStack(product.getPreview());
             ItemReplacer.create(productIcon).readMeta().readLocale(locale).hideFlags().trimmed()
-                .replace(product.getPlaceholders())
+                .replace(product.replacePlaceholders())
                 .writeMeta();
 
             MenuItem productItem = new MenuItem(productIcon);
@@ -223,7 +222,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
                         cached = staticShop.createProduct(currency, handler, packer);
 
                         shop.getPricer().deleteData(cached);
-                        shop.getStock().resetGlobalAmount(cached);
+                        shop.getStock().resetGlobalValues(cached);
                     }
                     cached.setSlot(event.getRawSlot());
                     cached.setPage(page);
@@ -277,7 +276,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
 
                 // Delete product price & stock datas for new items in case there was product with similar ID.
                 shop.getPricer().deleteData(product);
-                shop.getStock().resetGlobalAmount(product);
+                shop.getStock().resetGlobalValues(product);
             }
 
             if (product instanceof StaticProduct staticProduct) {

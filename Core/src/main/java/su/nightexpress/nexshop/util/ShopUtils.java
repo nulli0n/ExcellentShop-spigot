@@ -13,7 +13,9 @@ import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nightcore.util.Players;
+import su.nightexpress.nightcore.util.Plugins;
 import su.nightexpress.nightcore.util.StringUtil;
 
 import java.time.DayOfWeek;
@@ -39,6 +41,10 @@ public class ShopUtils {
             dateFormatter = DateTimeFormatter.ofPattern(Config.DATE_FORMAT.get());
         }
         return dateFormatter;
+    }
+
+    public static boolean hasEconomyBridge() {
+        return Plugins.isInstalled(HookId.ECONOMY_BRIDGE);
     }
 
     @NotNull

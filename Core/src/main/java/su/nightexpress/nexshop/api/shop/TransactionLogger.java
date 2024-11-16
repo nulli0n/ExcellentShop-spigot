@@ -7,7 +7,6 @@ import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.Colorizer;
 import su.nightexpress.nightcore.util.text.NightMessage;
 
 import java.io.BufferedWriter;
@@ -44,7 +43,7 @@ public class TransactionLogger {
 
         this.format = ConfigValue.create(path + "Format.Purchase",
             GENERIC_TYPE + ": " + PLAYER_NAME + " - x" + GENERIC_AMOUNT + " of " + GENERIC_ITEM + " for " + GENERIC_PRICE + " in " + SHOP_NAME + " shop."
-        ).read(config);
+        ).read(config).replace("%player%", Placeholders.PLAYER_NAME);
     }
 
     public void logTransaction(@NotNull ShopTransactionEvent event) {
@@ -55,7 +54,7 @@ public class TransactionLogger {
         Product product = result.getProduct();
         Shop shop = product.getShop();
 
-        String format = Placeholders.forPlayer(player).apply(this.format.replace("%player%", player.getName()));
+        String format = Placeholders.forPlayerWithPAPI(player).apply(this.format);
         format = result.replacePlaceholders().apply(format);
         format = shop.replacePlaceholders().apply(format);
 
@@ -63,7 +62,7 @@ public class TransactionLogger {
     }
 
     private void print(@NotNull String text) {
-        text = Colorizer.restrip(NightMessage.clean(text));
+        text = NightMessage.stripAll(text);
 
         if (this.outConsole) {
             this.module.info(text);

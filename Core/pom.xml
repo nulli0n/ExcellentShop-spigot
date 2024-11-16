@@ -5,15 +5,15 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.11.8</version>
+        <version>4.12.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>Core</artifactId>
 
     <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -29,23 +29,8 @@
         </repository>
 
         <repository>
-            <id>rosewood-repo</id>
-            <url>https://repo.rosewooddev.io/repository/public/</url>
-        </repository>
-
-        <repository>
-            <id>BenCodez Repo</id>
-            <url>https://nexus.bencodez.com/repository/maven-public/</url>
-        </repository>
-
-        <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-        </repository>
-
-        <repository>
-            <id>techscode</id>
-            <url>https://repo.techscode.com/repository/techscode-apis/</url>
         </repository>
 
         <repository>
@@ -65,6 +50,12 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>su.nightexpress.economybridge</groupId>
+            <artifactId>economy-bridge</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.TechFortress</groupId>
             <artifactId>GriefPrevention</artifactId>
@@ -112,13 +103,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.black_ixx</groupId>
-            <artifactId>playerpoints</artifactId>
-            <version>3.2.6</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>com.sk89q.worldguard</groupId>
             <artifactId>worldguard-bukkit</artifactId>
             <version>7.0.6</version>
@@ -161,25 +145,6 @@
         </dependency>
 
         <dependency>
-            <groupId>me.mraxetv.beasttokens</groupId>
-            <artifactId>BeastTokens</artifactId>
-            <version>3.11.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.bencodez</groupId>
-            <artifactId>votingplugin</artifactId>
-            <version>6.15.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.Ghost-chu</groupId>
-            <artifactId>GemsEconomy</artifactId>
-            <version>74073694a3</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.github.LoneDev6</groupId>
             <artifactId>api-itemsadder</artifactId>
             <version>3.6.2-beta-r3-b</version>
@@ -199,25 +164,6 @@
             <version>6.9.5-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.magmaguy.elitemobs</groupId>
-            <artifactId>EliteMobs</artifactId>
-            <version>8.5.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>su.nightexpress.coinsengine</groupId>
-            <artifactId>CoinsEngine</artifactId>
-            <version>2.3.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>me.TechsCode</groupId>
-            <artifactId>UltraEconomyAPI</artifactId>
-            <version>1.1.2</version>
-        </dependency>
-
     </dependencies>
 
     <build>

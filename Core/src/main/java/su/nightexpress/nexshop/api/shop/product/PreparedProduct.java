@@ -4,11 +4,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.api.shop.Transaction;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 
-public interface PreparedProduct extends Placeholder {
+import java.util.function.UnaryOperator;
+
+public interface PreparedProduct {
+
+    @NotNull UnaryOperator<String> replacePlaceholders();
 
     @NotNull Transaction trade();
 

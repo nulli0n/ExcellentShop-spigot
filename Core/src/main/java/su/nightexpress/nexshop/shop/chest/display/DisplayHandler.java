@@ -9,11 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
-import su.nightexpress.nexshop.shop.chest.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -22,7 +22,7 @@ import su.nightexpress.nightcore.manager.SimpleManager;
 import su.nightexpress.nightcore.util.EntityUtil;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Plugins;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
+import su.nightexpress.nightcore.util.placeholder.Replacer;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,6 +57,10 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
 
     public void update() {
         this.module.getActiveShops().forEach(this::refresh);
+    }
+
+    public void handleQuit(@NotNull Player player) {
+        this.entityMap.values().forEach(entityList -> entityList.removePlayer(player));
     }
 
     protected static class EntityList {
@@ -143,16 +147,18 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
         ChestProduct product = shop.getRandomProduct();
 
         if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get() && shop.isHologramEnabled()) {
-            PlaceholderMap placeholders = new PlaceholderMap(shop.getPlaceholders());
+            Replacer replacer = new Replacer();
+
             for (TradeType tradeType : TradeType.values()) {
-                placeholders.add(Placeholders.GENERIC_PRODUCT_PRICE.apply(tradeType), () -> {
+                replacer.replace(Placeholders.GENERIC_PRODUCT_PRICE.apply(tradeType), () -> {
                     return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
                 });
             }
-            placeholders.add(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
+            replacer.replace(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
 
             originText.addAll(shop.getHologramText(product));
-            originText.replaceAll(placeholders.replacer());
+            originText.replaceAll(shop.replacePlaceholders());
+            originText.replaceAll(replacer::getReplacedRaw);
         }
 
         players.forEach(player -> {

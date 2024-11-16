@@ -9,7 +9,7 @@ import su.nightexpress.nightcore.language.entry.LangText;
 
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nightcore.language.tag.MessageTags.*;
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 
 public class ChestLang extends CoreLang {
 

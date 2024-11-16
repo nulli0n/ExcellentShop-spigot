@@ -43,6 +43,16 @@ public interface VirtualShop extends Shop {
 
     void setPermissionRequired(boolean permissionRequired);
 
+    int getMainMenuSlot();
+
+    void setMainMenuSlot(int mainMenuSlot);
+
+    default boolean isMainMenuSlotDisabled() {
+        return this.getMainMenuSlot() < 0;
+    }
+
+    int getPages();
+
     @NotNull Set<Integer> getNPCIds();
 
     default boolean hasDiscount() {

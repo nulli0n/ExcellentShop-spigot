@@ -2,8 +2,8 @@ package su.nightexpress.nexshop.auction.config;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.auction.Placeholders;
-import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.BukkitThing;
@@ -20,15 +20,15 @@ import java.util.stream.IntStream;
 public class AuctionConfig {
 
     public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("Settings.Default_Currency",
-        VaultEconomyHandler.ID,
+        CurrencyId.VAULT,
         "Sets default Auction currency."
-    );
+    ).onRead(CurrencyId::reroute);
 
     public static final ConfigValue<Set<String>> ALLOWED_CURRENCIES = ConfigValue.create("Settings.Allowed_Currencies",
         Set.of(Placeholders.WILDCARD),
         "List of currencies available to use by players.",
         "You can use asterisk '" + Placeholders.WILDCARD + "' to allow all currencies."
-    );
+    ).onRead(set -> Lists.modify(set, CurrencyId::reroute));
 
     public static final ConfigValue<Set<String>> DISABLED_WORLDS = ConfigValue.create("Settings.Disabled_Worlds",
         Lists.newSet("custom_world", "another_world"),
@@ -95,7 +95,7 @@ public class AuctionConfig {
         (cfg, path, map) -> map.forEach((id, range) -> range.write(cfg, path + "." + id)),
         () -> Map.of(
             Placeholders.DEFAULT, UniDouble.of(-1, -1),
-            VaultEconomyHandler.ID, UniDouble.of(1, 10_000_000)
+            CurrencyId.VAULT, UniDouble.of(1, 10_000_000)
         ),
         "Sets min. and max. possible listing price for specified currencies.",
         "Use '-1' for unlimited amount.",

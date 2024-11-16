@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.product.packer.AbstractPluginItemPacker;
 import su.nightexpress.nexshop.product.handler.impl.ExcellentCratesHandler;
 
+import java.util.function.UnaryOperator;
+
 public class ExcellentCratesPacker extends AbstractPluginItemPacker<ExcellentCratesHandler> {
 
     public ExcellentCratesPacker(@NotNull ExcellentCratesHandler handler, @NotNull String itemId, int amount) {
@@ -16,5 +18,11 @@ public class ExcellentCratesPacker extends AbstractPluginItemPacker<ExcellentCra
     @Nullable
     public ItemStack createItem() {
         return this.handler.createItem(this.itemId);
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return s -> s;
     }
 }

@@ -7,6 +7,8 @@ import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.product.packer.AbstractItemPacker;
 import su.nightexpress.nightcore.config.FileConfig;
 
+import java.util.function.UnaryOperator;
+
 public class DummyPacker extends AbstractItemPacker<DummyHandler> {
 
     public DummyPacker(@NotNull DummyHandler handler) {
@@ -16,6 +18,12 @@ public class DummyPacker extends AbstractItemPacker<DummyHandler> {
     @Override
     protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
 
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return s -> s;
     }
 
     @Override

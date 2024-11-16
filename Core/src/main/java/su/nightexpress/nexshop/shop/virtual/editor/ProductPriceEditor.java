@@ -6,8 +6,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
@@ -20,7 +21,6 @@ import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
 import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
@@ -49,7 +49,7 @@ public class ProductPriceEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
     private final VirtualShopModule module;
 
     public ProductPriceEditor(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, Tags.BLACK.enclose("Price Settings [" + Placeholders.PRODUCT_ID + "]"), MenuSize.CHEST_54);
+        super(plugin, Tags.BLACK.enclose("Price Settings"), MenuSize.CHEST_54);
         this.module = module;
 
         this.addReturn(49, (viewer, event, product) -> {
@@ -89,13 +89,13 @@ public class ProductPriceEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
 
         this.addItem(Material.EMERALD, VirtualLocales.PRODUCT_PRICE_CURRENCY, 13, (viewer, event, product) -> {
             this.handleInput(viewer, Lang.EDITOR_PRODUCT_ENTER_CURRENCY, (dialog, input) -> {
-                Currency currency = this.plugin.getCurrencyManager().getCurrency(input.getTextRaw());
+                Currency currency = EconomyBridge.getCurrency(input.getTextRaw());
                 if (currency != null) {
                     product.setCurrency(currency);
                     this.saveProduct(viewer, product);
                 }
                 return true;
-            }).setSuggestions(plugin.getCurrencyManager().getCurrencyIds(), true);
+            }).setSuggestions(EconomyBridge.getCurrencyIds(), true);
         }).getOptions().setDisplayModifier((viewer, itemStack) -> {
             ItemStack icon = this.getLink(viewer).getCurrency().getIcon();
             itemStack.setType(icon.getType());
@@ -117,7 +117,7 @@ public class ProductPriceEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
             Product product = this.getLink(viewer);
             if (product.getPricer() instanceof RangedPricer) {
                 ItemReplacer.create(item).readLocale(VirtualLocales.PRODUCT_PRICE_FLOAT_BUY).hideFlags().trimmed()
-                    .replace(product.getPlaceholders())
+                    .replace(product.replacePlaceholders())
                     .writeMeta();
             }
         });
@@ -131,7 +131,7 @@ public class ProductPriceEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
                 Product product = this.getLink(viewer);
                 if (product.getPricer() instanceof RangedPricer) {
                     ItemReplacer.create(item).readLocale(VirtualLocales.PRODUCT_PRICE_FLOAT_SELL).hideFlags().trimmed()
-                        .replace(product.getPlaceholders())
+                        .replace(product.replacePlaceholders())
                         .writeMeta();
                 }
             });
@@ -255,7 +255,7 @@ public class ProductPriceEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
 
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemReplacer.replace(item, this.getLink(viewer).getPlaceholders());
+            ItemReplacer.replace(item, this.getLink(viewer).replacePlaceholders());
         }));
     }
 

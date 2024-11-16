@@ -12,6 +12,10 @@ public interface Stock extends TransactionListener {
 
     @NotNull Shop getShop();
 
+    void resetGlobalValues(@NotNull Product product);
+
+    void resetPlayerLimits(@NotNull Product product);
+
     default int count(@NotNull Product product, @NotNull TradeType type) {
         return this.count(product, type, null);
     }
@@ -35,4 +39,6 @@ public interface Stock extends TransactionListener {
     boolean store(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player);
 
     boolean restock(@NotNull Product product, @NotNull TradeType type, boolean force, @Nullable Player player);
+
+    long getRestockTime(@NotNull Product product, @NotNull TradeType type, @Nullable Player player);
 }

@@ -6,8 +6,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.auction.command.child.*;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
@@ -19,7 +20,6 @@ import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
@@ -63,7 +63,7 @@ public class AuctionManager extends AbstractShopModule {
 
         this.loadCurrencies();
 
-        if (this.getDefaultCurrency() == CurrencyManager.DUMMY_CURRENCY) {
+        if (this.getDefaultCurrency().isDummy()) {
             this.error("Invalid default currency. Adding items to the auction will be disabled until fixed.");
         }
 
@@ -131,11 +131,11 @@ public class AuctionManager extends AbstractShopModule {
     private void loadCurrencies() {
         Set<String> allowedList = AuctionConfig.ALLOWED_CURRENCIES.get();
         if (allowedList.contains(Placeholders.WILDCARD)) {
-            this.allowedCurrencies.addAll(this.plugin.getCurrencyManager().getCurrencies());
+            this.allowedCurrencies.addAll(EconomyBridge.getCurrencies());
         }
         else {
             for (String id : AuctionConfig.ALLOWED_CURRENCIES.get()) {
-                Currency currency = this.plugin.getCurrencyManager().getCurrency(id);
+                Currency currency = EconomyBridge.getCurrency(id);
                 if (currency == null) {
                     this.error("Unknown currency: '" + id + "'. Skipping.");
                     continue;
@@ -145,11 +145,11 @@ public class AuctionManager extends AbstractShopModule {
         }
 
         Currency defaultCurrency = this.getDefaultCurrency();
-        if (defaultCurrency != CurrencyManager.DUMMY_CURRENCY) {
+        if (!defaultCurrency.isDummy()) {
             this.allowedCurrencies.add(defaultCurrency);
         }
 
-        this.info("Allowed currencies: [" + this.allowedCurrencies.stream().map(Currency::getId).collect(Collectors.joining(", ")) + "]");
+        this.info("Allowed currencies: [" + this.allowedCurrencies.stream().map(Currency::getInternalId).collect(Collectors.joining(", ")) + "]");
     }
 
     private void loadCategories() {
@@ -185,8 +185,10 @@ public class AuctionManager extends AbstractShopModule {
 
     @NotNull
     public Currency getDefaultCurrency() {
-        Currency currency = this.plugin.getCurrencyManager().getCurrency(AuctionConfig.DEFAULT_CURRENCY.get());
-        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
+        return EconomyBridge.getCurrencyOrDummy(AuctionConfig.DEFAULT_CURRENCY.get());
+
+//        Currency currency = this.plugin.getCurrencyManager().getCurrency(AuctionConfig.DEFAULT_CURRENCY.get());
+//        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
     }
 
     @NotNull
@@ -414,7 +416,7 @@ public class AuctionManager extends AbstractShopModule {
         double taxAmount = AuctionUtils.getSellTax(player);
         double taxPay = AuctionUtils.getTax(currency, price, taxAmount);
         if (taxPay > 0) {
-            double balance = currency.getHandler().getBalance(player);
+            double balance = currency.getBalance(player);
             if (balance < taxPay) {
                 AuctionLang.LISTING_ADD_ERROR_PRICE_TAX.getMessage()
                     .replace(Placeholders.GENERIC_TAX, taxAmount)
@@ -422,7 +424,7 @@ public class AuctionManager extends AbstractShopModule {
                     .send(player);
                 return null;
             }
-            currency.getHandler().take(player, taxPay);
+            currency.take(player, taxPay);
         }
 
         ActiveListing listing = ActiveListing.create(player, item, currency, price);
@@ -450,7 +452,7 @@ public class AuctionManager extends AbstractShopModule {
         if (this.needEnsureListingExists() && !this.getDataHandler().isListingExist(listing.getId())) return false;
         if (!this.listings.hasListing(listing.getId())) return false;
 
-        double balance = listing.getCurrency().getHandler().getBalance(buyer);
+        double balance = listing.getCurrency().getBalance(buyer);
         double price = listing.getPrice();
         if (balance < price) {
             AuctionLang.LISTING_BUY_ERROR_NOT_ENOUGH_FUNDS.getMessage()
@@ -460,7 +462,7 @@ public class AuctionManager extends AbstractShopModule {
             return false;
         }
 
-        listing.getCurrency().getHandler().take(buyer, price);
+        listing.getCurrency().take(buyer, price);
         Players.addItem(buyer, listing.getItemStack());
 
         CompletedListing completedListing = CompletedListing.create(listing, buyer);
@@ -515,7 +517,7 @@ public class AuctionManager extends AbstractShopModule {
             }
             if (listing.isClaimed()) continue;
 
-            listing.getCurrency().getHandler().give(player, listing.getPrice());
+            listing.getCurrency().give(player, listing.getPrice());
             listing.setClaimed(true);
 
             AuctionLang.LISTING_CLAIM_SUCCESS.getMessage()

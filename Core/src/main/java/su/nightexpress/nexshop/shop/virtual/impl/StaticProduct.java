@@ -1,23 +1,22 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
 import su.nightexpress.nightcore.config.FileConfig;
 
+import java.util.function.UnaryOperator;
+
 public class StaticProduct extends AbstractVirtualProduct<StaticShop> {
 
     private int shopSlot;
     private int shopPage;
-
-//    public StaticProduct(@NotNull ShopPlugin plugin,
-//                         @NotNull StaticShop shop, @NotNull Currency currency,
-//                         @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-//        this(plugin, UUID.randomUUID().toString(), shop, currency, handler, packer);
-//    }
 
     public StaticProduct(@NotNull ShopPlugin plugin,
                          @NotNull String id,
@@ -40,6 +39,12 @@ public class StaticProduct extends AbstractVirtualProduct<StaticShop> {
         config.set(path + ".Discount.Allowed", this.discountAllowed);
         config.set(path + ".Shop_View.Slot", this.shopSlot);
         config.set(path + ".Shop_View.Page", this.shopPage);
+    }
+
+    @Override
+    @NotNull
+    protected UnaryOperator<String> replaceExplicitPlaceholders(@Nullable Player player) {
+        return Placeholders.forStaticProduct(this, player);
     }
 
     public int getSlot() {

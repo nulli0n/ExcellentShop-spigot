@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class StorageMenu extends ShopEditorMenu implements AutoFilled<ChestProduct>, Linked<ChestShop> {
@@ -95,7 +95,7 @@ public class StorageMenu extends ShopEditorMenu implements AutoFilled<ChestProdu
             ItemReplacer.create(icon).hideFlags().trimmed()
                 .setDisplayName(this.objectName)
                 .setLore(this.objectLore)
-                .replace(product.getPlaceholders())
+                .replace(product.replacePlaceholders(viewer.getPlayer()))
                 .replace(GENERIC_AMOUNT, NumberUtil.format(product.getQuantity()))
                 .replacePlaceholderAPI(player)
                 .writeMeta();
@@ -110,7 +110,7 @@ public class StorageMenu extends ShopEditorMenu implements AutoFilled<ChestProdu
             }
 
             if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                int units = stock.countItem(product, TradeType.BUY, player);
+                int units = stock.count(product, TradeType.BUY, player);
                 this.module.withdrawFromStorage(player, product, units);
                 this.runNextTick(() -> this.flush(viewer));
                 return;

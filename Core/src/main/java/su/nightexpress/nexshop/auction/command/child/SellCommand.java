@@ -22,7 +22,7 @@ public class SellCommand {
             .permission(AuctionPerms.COMMAND_SELL)
             .description(AuctionLang.COMMAND_SELL_DESC)
             .playerOnly()
-            .withArgument(ArgumentTypes.decimalAbs(ARG_PRICE)
+            .withArgument(ArgumentTypes.decimalCompactAbs(ARG_PRICE)
                 .required()
                 .localized(AuctionLang.COMMAND_ARGUMENT_NAME_PRICE)
                 .withSamples(tabContext -> Lists.newList("10", "500", "10000"))

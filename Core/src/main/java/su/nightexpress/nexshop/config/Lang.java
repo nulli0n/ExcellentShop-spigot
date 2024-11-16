@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.config;
 
 import org.bukkit.Sound;
+import su.nightexpress.economybridge.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nightcore.core.CoreLang;
@@ -29,12 +30,12 @@ public class Lang extends CoreLang {
     public static final LangString COMMAND_CURRENCY_GIVE_DESC = LangString.of("Command.Currency.Give.Desc", "Give currency to a player.");
 
     public static final LangText COMMAND_CURRENCY_GIVE_DONE = LangText.of("Command.Currency.Give.Done",
-        LIGHT_GRAY.enclose("Given " + LIGHT_YELLOW.enclose(GENERIC_AMOUNT + " " + CURRENCY_NAME) + " to " + LIGHT_YELLOW.enclose(PLAYER_NAME) + "."));
+        LIGHT_GRAY.enclose("Given " + LIGHT_YELLOW.enclose(GENERIC_AMOUNT + " " + Placeholders.CURRENCY_NAME) + " to " + LIGHT_YELLOW.enclose(PLAYER_NAME) + "."));
 
     public static final LangString COMMAND_CURRENCY_TAKE_DESC = LangString.of("Command.Currency.Take.Desc", "Take currency from a player.");
 
     public static final LangText COMMAND_CURRENCY_TAKE_DONE = LangText.of("Command.Currency.Take.Done",
-        LIGHT_GRAY.enclose("Took " + LIGHT_YELLOW.enclose(GENERIC_AMOUNT + " " + CURRENCY_NAME) + " from " + LIGHT_YELLOW.enclose(PLAYER_NAME) + "."));
+        LIGHT_GRAY.enclose("Took " + LIGHT_YELLOW.enclose(GENERIC_AMOUNT + " " + Placeholders.CURRENCY_NAME) + " from " + LIGHT_YELLOW.enclose(PLAYER_NAME) + "."));
 
     public static final LangString COMMAND_CURRENCY_CREATE_DESC = LangString.of("Command.Currency.Create.Desc", "Create an item currency.");
 
@@ -42,7 +43,7 @@ public class Lang extends CoreLang {
         LIGHT_GRAY.enclose("Created a new currency " + LIGHT_GREEN.enclose(GENERIC_NAME) + " as " + LIGHT_GREEN.enclose(GENERIC_ITEM) + "."));
 
     public static final LangText COMMAND_CURRENCY_CREATE_ERROR_EXIST = LangText.of("Command.Currency.Create.Error.Exist",
-        LIGHT_GRAY.enclose("Currency " + LIGHT_RED.enclose(CURRENCY_ID) + " already exists and is not an item currency."));
+        LIGHT_GRAY.enclose("Currency " + LIGHT_RED.enclose(Placeholders.CURRENCY_ID) + " already exists and is not an item currency."));
 
     public static final LangText COMMAND_CURRENCY_ERROR_NO_ITEM = LangText.of("Command.Currency.Error.NoItem",
         LIGHT_RED.enclose("You must hold an item to do that!"));
@@ -102,8 +103,6 @@ public class Lang extends CoreLang {
 
 
     public static final LangString OTHER_PRICE_DISABLED = LangString.of("Other.PriceDisabled", "N/A");
-
-
 
     public static final LangString EDITOR_PRICE_FLOAT_NO_DAYS = LangString.of("Editor.Price.Float.NoDays",
         "No days set. Price won't refresh properly.");

@@ -45,7 +45,7 @@ public class PlaceholderHook {
         @Override
         @NotNull
         public String getAuthor() {
-            return plugin.getDescription().getAuthors().get(0);
+            return plugin.getDescription().getAuthors().getFirst();
         }
 
         @Override
@@ -61,6 +61,8 @@ public class PlaceholderHook {
 
         @Override
         public String onPlaceholderRequest(Player player, @NotNull String params) {
+            if (player == null) return null;
+
             if (params.startsWith("auction_")) {
                 AuctionManager module = this.plugin.getAuction();
                 if (module == null) return null;
@@ -93,7 +95,7 @@ public class PlaceholderHook {
                 }
             }
 
-            return super.onPlaceholderRequest(player, params);
+            return null;
         }
     }
 }

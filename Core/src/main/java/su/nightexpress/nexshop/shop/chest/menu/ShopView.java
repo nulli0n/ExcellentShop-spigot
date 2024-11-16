@@ -4,15 +4,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -32,11 +31,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
-import static su.nightexpress.nexshop.shop.virtual.Placeholders.GENERIC_BUY;
-import static su.nightexpress.nexshop.shop.virtual.Placeholders.GENERIC_SELL;
-import static su.nightexpress.nightcore.util.text.tag.Tags.BLACK;
-import static su.nightexpress.nightcore.util.text.tag.Tags.LIGHT_GRAY;
+import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<ChestProduct>, Linked<ChestShop> {
 
@@ -55,7 +51,8 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
             ItemReplacer.create(item).readMeta()
-                .replace(this.getLink(viewer).getPlaceholders())
+                //.replacement(replacer -> replacer.replace(su.nightexpress.nexshop.Placeholders.forChestShop(this.getLink(viewer))))
+                .replace(this.getLink(viewer).replacePlaceholders())
                 .replacePlaceholderAPI(viewer.getPlayer())
                 .writeMeta();
         }));
@@ -70,7 +67,7 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
         ChestShop shop = this.getLink(viewer);
-        options.setTitle(shop.replacePlaceholders().apply(options.getTitle()));
+        options.editTitle(Placeholders.forChestShop(shop));
         this.autoFill(viewer);
     }
 
@@ -96,31 +93,16 @@ public class ShopView extends ConfigMenu<ShopPlugin> implements AutoFilled<Chest
                 .replace(GENERIC_BUY, buyLore)
                 .replace(GENERIC_SELL, sellLore)
                 .replace(GENERIC_LORE, ItemUtil.getLore(preview))
-                .replace(product.getPlaceholders())
-                .replace(product.getCurrency().getPlaceholders())
-                .replace(shop.getPlaceholders())
+                .replace(product.replacePlaceholders(viewer.getPlayer()))
+                .replace(product.getCurrency().replacePlaceholders())
+                .replace(shop.replacePlaceholders())
+                //.replacement(replacer -> replacer.replace(su.nightexpress.nexshop.Placeholders.forChestShop(shop)))
                 .writeMeta();
             return preview;
         });
         autoFill.setClickAction(product -> (viewer1, event) -> {
             Player player = viewer1.getPlayer();
-
-            if (product.getShop().isInactive()) {
-                this.runNextTick(player::closeInventory);
-                return;
-            }
-
-            ShopClickAction clickType = ShopUtils.getClickAction(player, event.getClick(), shop, product);
-            if (clickType == ShopClickAction.UNDEFINED) return;
-
-            // Can't open next tick for bedrock?
-            //this.runNextTick(() -> {
-            //product.prepareTrade(viewer1.getPlayer(), clickType);
-            plugin.getShopManager().startTrade(player, product, clickType);
-            if (clickType != ShopClickAction.BUY_SELECTION && clickType != ShopClickAction.SELL_SELECTION && clickType != ShopClickAction.PURCHASE_OPTION) {
-                this.flush(viewer);
-            }
-            //});
+            plugin.getShopManager().onProductClick(player, product, event.getClick(), this);
         });
     }
 

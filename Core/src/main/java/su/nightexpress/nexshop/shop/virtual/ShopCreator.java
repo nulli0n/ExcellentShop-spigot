@@ -4,7 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
@@ -92,7 +93,7 @@ public class ShopCreator {
         String name = YELLOW.enclose(BOLD.enclose("Block Market"));
         List<String> desc = List.of(GRAY.enclose("Building blocks and resources."));
 
-        StaticShop shop = this.createStaticShop("blocks", name, desc, new ItemStack(Material.JUNGLE_LOG), 3);
+        StaticShop shop = this.createStaticShop("blocks", name, desc, new ItemStack(Material.JUNGLE_LOG), 3, 14);
 
         this.addShopProduct(shop, Material.STONE, 50, 20, 1, 0);
         this.addShopProduct(shop, Material.STONE_BRICKS, 50, 20, 1, 1);
@@ -223,7 +224,7 @@ public class ShopCreator {
         String name = LIGHT_RED.enclose(BOLD.enclose("Ingredients"));
         List<String> desc = List.of(GRAY.enclose("Potions and Ingredients."));
 
-        StaticShop shop = this.createStaticShop("ingredients", name, desc, new ItemStack(Material.REDSTONE), 1);
+        StaticShop shop = this.createStaticShop("ingredients", name, desc, new ItemStack(Material.REDSTONE), 1, 12);
 
         this.addShopProduct(shop, Material.COAL, 10, 10, 1, 0);
         this.addShopProduct(shop, Material.IRON_INGOT, 100, 100, 1, 1);
@@ -259,7 +260,7 @@ public class ShopCreator {
         String name = LIGHT_YELLOW.enclose(BOLD.enclose("Farmer's Market"));
         List<String> desc = List.of(GRAY.enclose("Everything your garden need."));
 
-        StaticShop shop = this.createStaticShop("farmers_market", name, desc, new ItemStack(Material.WHEAT), 2);
+        StaticShop shop = this.createStaticShop("farmers_market", name, desc, new ItemStack(Material.WHEAT), 2, 23);
 
         this.addShopProduct(shop, Material.OAK_SAPLING, 50, 20, 1, 0);
         this.addShopProduct(shop, Material.SPRUCE_SAPLING, 50, 20, 1, 1);
@@ -338,7 +339,7 @@ public class ShopCreator {
         String name = LIGHT_ORANGE.enclose(BOLD.enclose("Fish Market"));
         List<String> desc = List.of(GRAY.enclose("Everything you can obtain"), GRAY.enclose("when fishing."));
 
-        StaticShop shop = this.createStaticShop("fish_market", name, desc, new ItemStack(Material.TROPICAL_FISH), 1);
+        StaticShop shop = this.createStaticShop("fish_market", name, desc, new ItemStack(Material.TROPICAL_FISH), 1, 21);
 
         this.addShopProduct(shop, Material.COD_SPAWN_EGG, 200, 100, 1, 0);
         this.addShopProduct(shop, Material.SALMON_SPAWN_EGG, 200, 100, 1, 1);
@@ -367,7 +368,7 @@ public class ShopCreator {
         String name = LIGHT_RED.enclose(BOLD.enclose("Food Market"));
         List<String> desc = List.of(GRAY.enclose("All regular food."));
 
-        StaticShop shop = this.createStaticShop("food", name, desc, new ItemStack(Material.SWEET_BERRIES), 1);
+        StaticShop shop = this.createStaticShop("food", name, desc, new ItemStack(Material.SWEET_BERRIES), 1, 22);
 
         this.addShopProduct(shop, Material.APPLE, 50, 20, 1, 0);
         this.addShopProduct(shop, Material.GOLDEN_APPLE, 1_000, 500, 1, 1);
@@ -401,7 +402,7 @@ public class ShopCreator {
         String name = LIGHT_GREEN.enclose(BOLD.enclose("Hostile Loot"));
         List<String> desc = List.of(GRAY.enclose("Everything related to"), GRAY.enclose("hostile mobs and their loot."));
 
-        StaticShop shop = this.createStaticShop("hostile_loot", name, desc, new ItemStack(Material.CREEPER_HEAD), 4);
+        StaticShop shop = this.createStaticShop("hostile_loot", name, desc, new ItemStack(Material.CREEPER_HEAD), 4, 16);
 
         this.addShopProduct(shop, Material.SPIDER_SPAWN_EGG, 100, 50, 1, 0);
         this.addShopProduct(shop, Material.SKELETON_SPAWN_EGG, 100, 50, 1, 1);
@@ -508,7 +509,7 @@ public class ShopCreator {
         List<String> desc = List.of(GRAY.enclose("Everything related to"), GRAY.enclose("peaceful mobs and their loot."));
         ItemStack icon = ItemUtil.getSkinHead("9b1760e3778f8087046b86bec6a0a83a567625f30f0d6bce866d4bed95dba6c1");
 
-        StaticShop shop = this.createStaticShop("peaceful_loot", name, desc, icon, 3);
+        StaticShop shop = this.createStaticShop("peaceful_loot", name, desc, icon, 3, 15);
 
         this.addShopProduct(shop, Material.COW_SPAWN_EGG, 100, 50, 1, 0);
         this.addShopProduct(shop, Material.MOOSHROOM_SPAWN_EGG, 1_000, 500, 1, 1);
@@ -591,7 +592,7 @@ public class ShopCreator {
         String name = LIGHT_CYAN.enclose(BOLD.enclose("Tool Store"));
         List<String> desc = List.of(GRAY.enclose("All type tools."));
 
-        StaticShop shop = this.createStaticShop("tools", name, desc, new ItemStack(Material.DIAMOND_PICKAXE), 1);
+        StaticShop shop = this.createStaticShop("tools", name, desc, new ItemStack(Material.DIAMOND_PICKAXE), 1, 10);
 
         this.addShopProduct(shop, Material.COMPASS, 50, 20, 1, 1);
         this.addShopProduct(shop, Material.SHEARS, 50, 20, 1, 3);
@@ -621,7 +622,7 @@ public class ShopCreator {
         String name = YELLOW.enclose(BOLD.enclose("Armory"));
         List<String> desc = List.of(GRAY.enclose("All type armors and weapons."));
 
-        StaticShop shop = this.createStaticShop("weapons", name, desc, new ItemStack(Material.GOLDEN_SWORD), 2);
+        StaticShop shop = this.createStaticShop("weapons", name, desc, new ItemStack(Material.GOLDEN_SWORD), 2, 11);
 
         this.addShopProduct(shop, Material.SHIELD, 50, 20, 1, 4);
         this.addShopProduct(shop, Material.BOW, 50, 20, 1, 12);
@@ -661,7 +662,7 @@ public class ShopCreator {
         String name = LIGHT_GREEN.enclose(BOLD.enclose("Wool Market"));
         List<String> desc = List.of(GRAY.enclose("Wool with colors."));
 
-        StaticShop shop = this.createStaticShop("wool", name, desc, new ItemStack(Material.LIME_WOOL), 1);
+        StaticShop shop = this.createStaticShop("wool", name, desc, new ItemStack(Material.LIME_WOOL), 1, 13);
 
         this.addShopProduct(shop, Material.WHITE_WOOL, 50, 20, 1, 10);
         this.addShopProduct(shop, Material.ORANGE_WOOL, 50, 20, 1, 11);
@@ -739,12 +740,13 @@ public class ShopCreator {
     }
 
     @NotNull
-    private StaticShop createStaticShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon, int pages) {
+    private StaticShop createStaticShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon, int pages, int menuSlot) {
         File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, AbstractVirtualShop.FILE_NAME);
         FileUtil.create(file);
 
         StaticShop shop = new StaticShop(this.plugin, this.module, file, id);
         shop.setPages(pages);
+        shop.setMainMenuSlot(menuSlot);
         shop.setLayoutName(Placeholders.DEFAULT);
         this.setShopSettings(shop, name, description, icon);
 
@@ -775,7 +777,7 @@ public class ShopCreator {
 
         BukkitItemHandler handler = ProductHandlerRegistry.forBukkitItem();
         BukkitItemPacker packer = handler.createPacker(itemStack);
-        //packer.load(itemStack);
+        if (packer == null) return;
 
         StaticProduct product = shop.createProduct(this.currency, handler, packer);
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
@@ -792,7 +794,7 @@ public class ShopCreator {
 
         BukkitItemHandler handler = ProductHandlerRegistry.forBukkitItem();
         BukkitItemPacker packer = handler.createPacker(itemStack);
-        //packer.load(itemStack);
+        if (packer == null) return;
 
         RotatingProduct product = shop.createProduct(this.currency, handler, packer);
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));

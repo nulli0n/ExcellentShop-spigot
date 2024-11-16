@@ -1,6 +1,7 @@
 package su.nightexpress.nexshop.shop;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.Placeholders;
@@ -23,6 +24,7 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.manager.AbstractManager;
@@ -141,18 +143,32 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         return this.cartMenuMap.getOrDefault(id.toLowerCase(), this.cartMenuMap.get(Placeholders.DEFAULT));
     }
 
-    public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull ShopClickAction click) {
-        TradeType tradeType = click.getTradeType();
+    public void onProductClick(@NotNull Player player, @NotNull Product product, @NotNull ClickType clickType, @NotNull Menu source) {
+        if (!product.isAvailable(player)) {
+            source.runNextTick(() -> source.flush(player));
+            return;
+        }
+
+        Shop shop = product.getShop();
+
+        ShopClickAction action = ShopUtils.getClickAction(player, clickType, shop, product);
+        if (action == ShopClickAction.UNDEFINED) return;
+
+        this.startTrade(player, product, action, source);
+    }
+
+    public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull ShopClickAction action, @Nullable Menu source) {
+        TradeType tradeType = action.getTradeType();
 
         if (tradeType != null) {
-            return this.startTrade(player, product, tradeType, click);
+            return this.startTrade(player, product, tradeType, action, source);
         }
 
         this.openPurchaseOption(player, product);
         return true;
     }
 
-    public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull TradeType tradeType, @Nullable ShopClickAction click) {
+    public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull TradeType tradeType, @Nullable ShopClickAction action, @Nullable Menu source) {
         Shop shop = product.getShop();
 
         if (!shop.isTransactionEnabled(tradeType)) {
@@ -194,16 +210,15 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
             return false;
         }
 
-        boolean isSellAll = (click == ShopClickAction.SELL_ALL);
+        boolean isSellAll = (action == ShopClickAction.SELL_ALL);
         PreparedProduct prepared = product.getPrepared(player, tradeType, isSellAll);
 
-        if (click != null) {
-            if (click == ShopClickAction.BUY_SINGLE || click == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
+        if (action != null) {
+            if (action == ShopClickAction.BUY_SINGLE || action == ShopClickAction.SELL_SINGLE || prepared.isAll()) {
                 prepared.trade();
 
-                Menu menu = AbstractMenu.getMenu(player);
-                if (menu instanceof ShopLayout || menu instanceof ShopView) {
-                    menu.flush(player);
+                if (source != null) {
+                    source.flush(player);
                 }
                 return false;
             }

@@ -7,8 +7,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.TransactionModule;
@@ -16,17 +18,10 @@ import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.virtual.command.child.EditorCommand;
-import su.nightexpress.nexshop.shop.virtual.command.child.MenuCommand;
-import su.nightexpress.nexshop.shop.virtual.command.child.OpenCommand;
-import su.nightexpress.nexshop.shop.virtual.command.standalone.SellAllCommand;
-import su.nightexpress.nexshop.shop.virtual.command.standalone.SellHandCommand;
-import su.nightexpress.nexshop.shop.virtual.command.standalone.SellMenuCommand;
-import su.nightexpress.nexshop.shop.virtual.command.standalone.ShopCommand;
+import su.nightexpress.nexshop.shop.virtual.command.impl.VirtualCommands;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
@@ -37,7 +32,7 @@ import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopNPCListener;
-import su.nightexpress.nexshop.shop.virtual.menu.MainMenu;
+import su.nightexpress.nexshop.shop.virtual.menu.CentralMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.SellMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
@@ -66,8 +61,8 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     private final Map<String, StaticShop>   staticShopMap;
     private final Map<String, RotatingShop> rotatingShopMap;
 
-    private MainMenu mainMenu;
-    private SellMenu sellMenu;
+    private CentralMenu centralMenu;
+    private SellMenu    sellMenu;
 
     private DiscountListEditor  discountListEditor;
     private DiscountMainEditor  discountEditor;
@@ -78,6 +73,8 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     private RotationTimesEditor rotationTimesEditor;
     private ShopListEditor      shopListEditor;
     private ShopMainEditor      shopEditor;
+    private StaticSettingsEditor staticSettingsEditor;
+    private RotationSettingsEditor rotationSettingsEditor;
 
     private TransactionLogger logger;
 
@@ -113,7 +110,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
             this.addListener(new VirtualShopNPCListener(this));
         }
 
-        if (VirtualConfig.MAIN_MENU_ENABLED.get()) {
+        if (VirtualConfig.isCentralMenuEnabled()) {
             this.loadMainMenu();
         }
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
@@ -132,10 +129,12 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         if (this.rotationTimesEditor != null) this.rotationTimesEditor.clear();
         if (this.shopListEditor != null) this.shopListEditor.clear();
         if (this.shopEditor != null) this.shopEditor.clear();
+        if (this.staticSettingsEditor != null) this.staticSettingsEditor.clear();
+        if (this.rotationSettingsEditor != null) this.rotationSettingsEditor.clear();
 
-        if (this.mainMenu != null) {
-            this.mainMenu.clear();
-            this.mainMenu = null; // Main menu is toggleable.
+        if (this.centralMenu != null) {
+            this.centralMenu.clear();
+            this.centralMenu = null; // Main menu is toggleable.
         }
         if (this.sellMenu != null) {
             this.sellMenu.clear();
@@ -148,28 +147,13 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         for (ShopType shopType : ShopType.values()) {
             this.getShopMap(shopType).clear();
         }
+
+        VirtualCommands.unload(this.plugin, this);
     }
 
     @Override
     protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
-        OpenCommand.build(this, builder);
-        EditorCommand.build(this, builder);
-
-        if (VirtualConfig.MAIN_MENU_ENABLED.get()) {
-            MenuCommand.build(this, builder);
-        }
-        if (VirtualConfig.SHOP_SHORTCUTS_ENABLED.get()) {
-            this.plugin.getCommandManager().registerCommand(ShopCommand.create(this.plugin, this, VirtualConfig.SHOP_SHORTCUTS_COMMANDS.get()));
-        }
-        if (VirtualConfig.SELL_MENU_ENABLED.get()) {
-            this.plugin.getCommandManager().registerCommand(SellMenuCommand.create(this.plugin, this, VirtualConfig.SELL_MENU_COMMANDS.get()));
-        }
-        if (VirtualConfig.SELL_ALL_ENABLED.get()) {
-            this.plugin.getCommandManager().registerCommand(SellAllCommand.create(this.plugin, this, VirtualConfig.SELL_ALL_COMMANDS.get()));
-        }
-        if (VirtualConfig.SELL_HAND_ENABLED.get()) {
-            this.plugin.getCommandManager().registerCommand(SellHandCommand.create(this.plugin, this, VirtualConfig.SELL_HAND_COMMANDS.get()));
-        }
+        VirtualCommands.load(this.plugin, this, builder);
     }
 
     private void loadEditors() {
@@ -182,6 +166,8 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         this.rotationTimesEditor = new RotationTimesEditor(this.plugin, this);
         this.shopListEditor = new ShopListEditor(this.plugin, this);
         this.shopEditor = new ShopMainEditor(this.plugin, this);
+        this.staticSettingsEditor = new StaticSettingsEditor(this.plugin, this);
+        this.rotationSettingsEditor = new RotationSettingsEditor(this.plugin, this);
     }
 
     private void loadShops() {
@@ -240,7 +226,19 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     private void loadMainMenu() {
-        this.mainMenu = new MainMenu(this.plugin, this);
+        this.centralMenu = new CentralMenu(this.plugin, this);
+
+        // ----------- TRANSFER LEGACY CENTRAL MENU SLOT - START -----------
+        this.getShops().forEach(shop -> {
+            if (shop.isMainMenuSlotDisabled()) {
+                int slot = this.centralMenu.getLegacySlot(shop);
+                if (slot >= 0) {
+                    shop.setMainMenuSlot(slot);
+                    shop.saveSettings();
+                }
+            }
+        });
+        // ----------- TRANSFER LEGACY CENTRAL MENU SLOT - END -----------
     }
 
     public void loadRotationData() {
@@ -293,8 +291,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     @Override
     @NotNull
     public Currency getDefaultCurrency() {
-        Currency currency = this.plugin.getCurrencyManager().getCurrency(VirtualConfig.DEFAULT_CURRENCY.get());
-        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
+        return EconomyBridge.getCurrencyOrDummy(VirtualConfig.DEFAULT_CURRENCY.get());
     }
 
     @Override
@@ -323,8 +320,8 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     @Nullable
-    public MainMenu getMainMenu() {
-        return mainMenu;
+    public CentralMenu getMainMenu() {
+        return centralMenu;
     }
 
     @NotNull
@@ -570,6 +567,15 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         this.shopEditor.open(player, shop);
     }
 
+    public void openSpecificEditor(@NotNull Player player, @NotNull VirtualShop shop) {
+        if (shop instanceof StaticShop staticShop) {
+            this.staticSettingsEditor.open(player, staticShop);
+        }
+        else if (shop instanceof RotatingShop rotatingShop) {
+            this.rotationSettingsEditor.open(player, rotatingShop);
+        }
+    }
+
     public boolean openShop(@NotNull Player player, @NotNull VirtualShop shop) {
         return this.openShop(player, shop, false);
     }
@@ -607,13 +613,13 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     public boolean openMainMenu(@NotNull Player player, boolean force) {
-        if (this.mainMenu == null) return false;
+        if (this.centralMenu == null) return false;
 
         if (!force) {
             if (!this.isAvailable(player, true)) return false;
         }
 
-        return this.mainMenu.open(player);
+        return this.centralMenu.open(player);
     }
 
     public void openSellMenu(@NotNull Player player) {

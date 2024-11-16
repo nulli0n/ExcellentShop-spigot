@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class FloatPricer extends RangedPricer {
@@ -29,7 +30,6 @@ public class FloatPricer extends RangedPricer {
         super(PriceType.FLOAT);
         this.days = new HashSet<>(Arrays.asList(DayOfWeek.values()));
         this.times = new HashSet<>();
-        this.placeholderMap.add(Placeholders.forFloatPricer(this));
     }
 
     @NotNull
@@ -54,6 +54,12 @@ public class FloatPricer extends RangedPricer {
         config.set(path + ".Refresh.Days", this.getDays().stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
         config.set(path + ".Refresh.Times", this.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).toList());
         config.set(path + ".Round_Decimals", this.isRoundDecimals());
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.FLOAT_PRICER.replacer(this);
     }
 
     /*@Deprecated

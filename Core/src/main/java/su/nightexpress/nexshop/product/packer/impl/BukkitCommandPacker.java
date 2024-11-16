@@ -7,16 +7,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.product.packer.AbstractProductPacker;
 import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nightcore.config.FileConfig;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.UnaryOperator;
 
 public class BukkitCommandPacker extends AbstractProductPacker<BukkitCommandHandler> implements CommandPacker {
 
@@ -31,15 +30,18 @@ public class BukkitCommandPacker extends AbstractProductPacker<BukkitCommandHand
         super(handler);
         this.setCommands(commands);
         this.setPreview(preview);
-
-        this.placeholderMap
-            .add(Placeholders.PRODUCT_COMMANDS, () -> this.getCommands().stream().map(Lang::goodEntry).collect(Collectors.joining("\n")));
     }
 
     @Override
     protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
         config.setItemEncoded(path + ".Content.Preview", this.getPreview());
         config.set(path + ".Content.Commands", this.getCommands());
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.BUKKIT_COMMAND_PACKER.replacer(this);
     }
 
     @Override

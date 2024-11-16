@@ -20,9 +20,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.currency.CurrencyManager;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.TransactionModule;
 import su.nightexpress.nexshop.api.shop.event.ChestShopCreateEvent;
@@ -31,7 +33,6 @@ import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
 import su.nightexpress.nexshop.shop.chest.display.PacketEventsHandler;
@@ -194,7 +195,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     public void loadCurrencies() {
         for (String curId : ChestConfig.ALLOWED_CURRENCIES.get()) {
-            Currency currency = this.plugin.getCurrencyManager().getCurrency(curId);
+            Currency currency = EconomyBridge.getCurrency(curId);
             if (currency == null) {
                 this.error("Unknown currency '" + curId + "'. Skipping.");
                 continue;
@@ -203,7 +204,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         }
 
         Currency def = this.getDefaultCurrency();
-        if (def == CurrencyManager.DUMMY_CURRENCY) {
+        if (def.isDummy()) {
             this.error("You have invalid currency set in the 'Default_Currency' setting.");
             this.error("You must fix this issue to make your shops working properly.");
         }
@@ -291,7 +292,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         if (config.contains("Bank")) {
             ChestBank bank = this.getPlayerBank(shop.getOwnerId());
             for (Currency currency : this.getAllowedCurrencies()) {
-                bank.deposit(currency, config.getDouble("Bank." + currency.getId()));
+                bank.deposit(currency, config.getDouble("Bank." + currency.getInternalId()));
             }
             this.plugin.getData().getChestDataHandler().saveChestBank(bank);
             config.remove("Bank");
@@ -390,8 +391,10 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     @NotNull
     public Currency getDefaultCurrency() {
-        Currency currency = this.plugin.getCurrencyManager().getCurrency(ChestConfig.DEFAULT_CURRENCY.get());
-        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
+        return EconomyBridge.getCurrencyOrDummy(ChestConfig.DEFAULT_CURRENCY.get());
+
+//        Currency currency = this.plugin.getCurrencyManager().getCurrency(ChestConfig.DEFAULT_CURRENCY.get());
+//        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
     }
 
     @Override
@@ -799,7 +802,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             return false;
         }
 
-        double balance = currency.getHandler().getBalance(player);
+        double balance = currency.getBalance(player);
 
         if (amount < 0D) amount = balance;
 
@@ -808,10 +811,10 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             return false;
         }
 
-        currency.getHandler().take(player, amount);
+        currency.take(player, amount);
 
         // If funds not transfered
-        if (currency.getHandler().getBalance(player) == balance) {
+        if (currency.getBalance(player) == balance) {
             return false;
         }
 
@@ -843,7 +846,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             return false;
         }
 
-        currency.getHandler().give(player, amount);
+        currency.give(player, amount);
         bank.withdraw(currency, amount);
         this.savePlayerBank(bank);
 
@@ -863,7 +866,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             return false;
         }
 
-        stock.storeItem(product, units, TradeType.BUY, player);
+        stock.store(product, units, TradeType.BUY, player);
         product.take(player, units);
         shop.save();
 
@@ -878,7 +881,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         ChestShop shop = product.getShop();
         ChestStock stock = shop.getStock();
 
-        int shopUnits = stock.countItem(product, TradeType.BUY, player);
+        int shopUnits = stock.count(product, TradeType.BUY, player);
         if (shopUnits < units) {
             ChestLang.STORAGE_WITHDRAW_ERROR_NOT_ENOUGH.getMessage().send(player);
             return false;
@@ -888,7 +891,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         int maxUnits = Math.min(spaceUnits, units);
 
         product.delivery(player, maxUnits);
-        stock.consumeItem(product, maxUnits, TradeType.BUY, player);
+        stock.consume(product, maxUnits, TradeType.BUY, player);
         shop.save();
 
         ChestLang.STORAGE_WITHDRAW_SUCCESS.getMessage()
@@ -1009,7 +1012,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     private boolean canPayForShop(@NotNull Player player, double price) {
         if (price <= 0) return true;
 
-        return this.getDefaultCurrency().getHandler().getBalance(player) >= price;
+        return this.getDefaultCurrency().getBalance(player) >= price;
     }
 
     private boolean payForShop(@NotNull Player player, double price) {
@@ -1017,10 +1020,10 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
         Currency currency = this.getDefaultCurrency();
 
-        double balance = currency.getHandler().getBalance(player);
+        double balance = currency.getBalance(player);
         if (balance < price) return false;
 
-        currency.getHandler().take(player, price);
+        currency.take(player, price);
         return true;
     }
 }

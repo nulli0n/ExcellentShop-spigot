@@ -5,8 +5,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.config.Lang;
@@ -72,7 +73,7 @@ public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFi
         Player player = viewer.getPlayer();
 
         autoFill.setSlots(this.itemSlots);
-        autoFill.setItems(this.auctionManager.getAllowedCurrencies(player).stream().sorted(Comparator.comparing(Currency::getId)).toList());
+        autoFill.setItems(this.auctionManager.getAllowedCurrencies(player).stream().sorted(Comparator.comparing(Currency::getInternalId)).toList());
         autoFill.setItemCreator(currency -> {
             ItemStack item = currency.getIcon();
             Pair<ItemStack, Double> prepared = this.getLink(player);
@@ -85,7 +86,7 @@ public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFi
             ItemReplacer.create(item).trimmed().hideFlags()
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)
-                .replace(currency.getPlaceholders())
+                .replace(currency.replacePlaceholders())
                 .replace(GENERIC_PRICE, currency.format(price))
                 .replace(GENERIC_TAX, currency.format(taxPay))
                 .replacePlaceholderAPI(player)
@@ -146,7 +147,7 @@ public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFi
     @Override
     protected void loadAdditional() {
         this.itemName = ConfigValue.create("Items.Name",
-            LIGHT_YELLOW.enclose(BOLD.enclose(CURRENCY_NAME))
+            LIGHT_YELLOW.enclose(BOLD.enclose(Placeholders.CURRENCY_NAME))
         ).read(cfg);
 
         this.itemLore = ConfigValue.create("Items.Lore", Lists.newList(

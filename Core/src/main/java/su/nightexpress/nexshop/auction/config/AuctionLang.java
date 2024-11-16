@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.auction.config;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Sound;
+import su.nightexpress.economybridge.Placeholders;
 import su.nightexpress.nexshop.auction.SortType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nightcore.language.entry.LangEnum;
@@ -77,12 +78,12 @@ public class AuctionLang extends Lang {
 
     public static final LangText LISTING_ADD_ERROR_PRICE_CURRENCY_MIN = LangText.of("Auction.Listing.Add.Error.Price.Currency.Min",
         SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Minimal " + LIGHT_RED.enclose(CURRENCY_NAME) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Minimal " + LIGHT_RED.enclose(Placeholders.CURRENCY_NAME) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
     );
 
     public static final LangText LISTING_ADD_ERROR_PRICE_CURRENCY_MAX = LangText.of("Auction.Listing.Add.Error.Price.Currency.Max",
         SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Maximal " + LIGHT_RED.enclose(CURRENCY_NAME) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
+        LIGHT_GRAY.enclose(LIGHT_RED.enclose("✘") + " Maximal " + LIGHT_RED.enclose(Placeholders.CURRENCY_NAME) + " price is " + LIGHT_RED.enclose(GENERIC_AMOUNT) + "!")
     );
 
     public static final LangText LISTING_ADD_ERROR_INVALID_PRICE = LangText.of("Auction.Listing.Add.Error.Price.Negative",

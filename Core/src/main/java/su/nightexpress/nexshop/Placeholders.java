@@ -2,25 +2,42 @@ package su.nightexpress.nexshop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.currency.Currency;
+import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
+import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.product.packer.impl.BukkitCommandPacker;
+import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
+import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
-import su.nightexpress.nexshop.util.RelativePlaceholders;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
+import su.nightexpress.nexshop.shop.virtual.impl.*;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
+import su.nightexpress.nightcore.util.TimeUtil;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderList;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
@@ -29,10 +46,6 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String URL_WIKI_PLACEHOLDERS  = URL_WIKI + "/utility/placeholders#internal-placeholders";
     public static final String URL_WIKI_PRODUCT_STOCK = URL_WIKI + "/features/product-stock";
     public static final String URL_WIKI_CURRENCY      = URL_WIKI + "/features/multi-currency";
-
-    //public static final String CHECK_MARK = Tags.GREEN.enclose("✔");
-    //public static final String WRONG_MARK = Tags.RED.enclose("✘");
-    //public static final String WARN_MARK  = Tags.ORANGE.enclose("[❗]");
 
     public static final String GENERIC_BUY        = "%buy%";
     public static final String GENERIC_SELL       = "%sell%";
@@ -53,17 +66,55 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String GENERIC_PAGE       = "%page%";
     public static final String GENERIC_PAGES      = "%pages%";
 
+    public static final String                      GENERIC_PRODUCT_NAME    = "%product_name%";
+    public static final Function<TradeType, String> GENERIC_PRODUCT_PRICE   = tradeType -> "%product_price_" + tradeType.getLowerCase() + "%";
+    public static final String                      GENERIC_SELL_MULTIPLIER = "%sell_multiplier%";
+
+    public static final Function<TradeType, String> STOCK_TYPE    = tradeType -> "%stock_global_" + tradeType.name().toLowerCase() + "%";
+    public static final Function<TradeType, String> LIMIT_TYPE    = tradeType -> "%stock_player_" + tradeType.name().toLowerCase() + "%";
+    public static final Function<TradeType, String> PRICE_DYNAMIC = tradeType -> "%price_dynamic_" + tradeType.name().toLowerCase() + "%";
+
     public static final String ITEM_NAME = "%item_name%";
     public static final String ITEM_LORE = "%item_lore%";
-
-    public static final String CURRENCY_NAME = "%currency_name%";
-    public static final String CURRENCY_ID   = "%currency_id%";
 
     public static final String SHOP_ID           = "%shop_id%";
     public static final String SHOP_NAME         = "%shop_name%";
     public static final String SHOP_BUY_ALLOWED  = "%shop_buy_allowed%";
     public static final String SHOP_SELL_ALLOWED = "%shop_sell_allowed%";
-    public static final String SHOP_PRODUCTS = "%shop_products%";
+    public static final String SHOP_PRODUCTS     = "%shop_products%";
+
+    // Chest shop
+    public static final String CHEST_SHOP_OWNER            = "%shop_owner%";
+    public static final String CHEST_SHOP_X                = "%shop_location_x%";
+    public static final String CHEST_SHOP_Y                = "%shop_location_y%";
+    public static final String CHEST_SHOP_Z                = "%shop_location_z%";
+    public static final String CHEST_SHOP_WORLD            = "%shop_location_world%";
+    public static final String CHEST_SHOP_IS_ADMIN         = "%shop_is_admin%";
+    public static final String CHEST_SHOP_TYPE             = "%shop_type%";
+    public static final String CHEST_SHOP_BANK_BALANCE     = "%shop_bank_balance%";
+    public static final String CHEST_SHOP_HOLOGRAM_ENABLED = "%shop_hologram_enabled%";
+    public static final String CHEST_SHOP_SHOWCASE_ENABLED = "%shop_showcase_enabled%";
+
+    // Virtual shop
+    public static final String VIRTUAL_SHOP_TYPE                   = "%shop_type%";
+    public static final String VIRTUAL_SHOP_DESCRIPTION            = "%shop_description%";
+    public static final String VIRTUAL_SHOP_PERMISSION_REQUIRED    = "%shop_permission_required%";
+    public static final String VIRTUAL_SHOP_PERMISSION_NODE        = "%shop_permission_node%";
+    public static final String VIRTUAL_SHOP_PAGES                  = "%shop_pages%";
+    public static final String VIRTUAL_SHOP_MENU_SLOT = "%shop_menu_slot%";
+    public static final String VIRTUAL_SHOP_LAYOUT                 = "%shop_layout%";
+    public static final String SHOP_NPC_IDS                        = "%shop_npc_ids%";
+    public static final String VIRTUAL_SHOP_DISCOUNT_AMOUNT        = "%shop_discount_amount%";
+    public static final String VIRTUAL_SHOP_NEXT_ROTATION_DATE     = "%shop_next_rotation_date%";
+    public static final String VIRTUAL_SHOP_NEXT_ROTATION_IN       = "%shop_next_rotation_in%";
+    public static final String VIRTUAL_SHOP_ROTATION_TYPE          = "%shop_rotation_type%";
+    public static final String VIRTUAL_SHOP_ROTATION_INTERVAL      = "%shop_rotation_interval%";
+    public static final String VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS  = "%shop_rotation_min_products%";
+    public static final String VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS  = "%shop_rotation_max_products%";
+    public static final String VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS = "%shop_rotation_product_slots%";
+
+    public static final Function<Integer, String>              CHEST_SHOP_PRODUCT_NAME  = (slot) -> "%shop_product_name_" + slot + "%";
+    public static final BiFunction<TradeType, Integer, String> CHEST_SHOP_PRODUCT_PRICE = (tradeType, slot) -> "%shop_product_price_" + tradeType.getLowerCase() + "_" + slot + "%";
 
     public static final String PRODUCT_HANDLER                  = "%product_handler%";
     public static final String PRODUCT_PRICE_TYPE               = "%product_price_type%";
@@ -108,80 +159,189 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final Function<TradeType, String> PRODUCT_LIMIT_RESTOCK_TIME   = type -> "%product_stock_player_" + type.getLowerCase() + "_restock_time%";
     public static final Function<TradeType, String> PRODUCT_LIMIT_RESTOCK_DATE   = type -> "%product_stock_player_" + type.getLowerCase() + "_restock_date%";
 
+    // Virtual
+    public static final String PRODUCT_COMMANDS             = "%product_commands%";
+    public static final String PRODUCT_DISCOUNT_ALLOWED     = "%product_discount_allowed%";
+    public static final String PRODUCT_DISCOUNT_AMOUNT      = "%product_discount_amount%";
+    public static final String PRODUCT_ALLOWED_RANKS        = "%product_allowed_ranks%";
+    public static final String PRODUCT_REQUIRED_PERMISSIONS = "%product_required_permissions%";
+    public static final String PRODUCT_ROTATION_CHANCE      = "%product_rotation_chance%";
+
     public static final String DISCOUNT_CONFIG_AMOUNT   = "%discount_amount%";
     public static final String DISCOUNT_CONFIG_DURATION = "%discount_duration%";
     public static final String DISCOUNT_CONFIG_DAYS     = "%discount_days%";
     public static final String DISCOUNT_CONFIG_TIMES    = "%discount_times%";
 
-    /*@NotNull
-    public static String good(@NotNull String text) {
-        return CHECK_MARK + Tags.GRAY.enclose(text);
-    }
+    public record ProductPOV<T extends Product>(@NotNull T product, @Nullable Player player){}
 
     @NotNull
-    public static String bad(@NotNull String text) {
-        return WRONG_MARK + Tags.GRAY.enclose(text);
-    }
+    public static final PlaceholderList<Transaction> TRANSACTION = PlaceholderList.create(list -> list
+        .add(GENERIC_TYPE, transaction -> Lang.TRADE_TYPES.getLocalized(transaction.getTradeType()))
+        .add(GENERIC_AMOUNT, transaction -> String.valueOf(transaction.getAmount()))
+        .add(GENERIC_UNITS, transaction -> String.valueOf(transaction.getUnits()))
+        .add(GENERIC_PRICE, transaction -> transaction.getProduct().getCurrency().format(transaction.getPrice()))
+        .add(GENERIC_ITEM, transaction -> ItemUtil.getItemName(transaction.getProduct().getPreview()))
+    );
+
+    // ------------------------------
+    // Shops
+    // ------------------------------
 
     @NotNull
-    public static String warn(@NotNull String text) {
-        return WARN_MARK + Tags.GRAY.enclose(text);
-    }*/
+    public static final PlaceholderList<Shop> SHOP = PlaceholderList.create(list -> list
+        .add(SHOP_ID, Shop::getId)
+        .add(SHOP_NAME, Shop::getName)
+        .add(SHOP_BUY_ALLOWED, shop -> Lang.getEnabledOrDisabled(shop.isTransactionEnabled(TradeType.BUY)))
+        .add(SHOP_SELL_ALLOWED, shop -> Lang.getEnabledOrDisabled(shop.isTransactionEnabled(TradeType.SELL)))
+        .add(SHOP_PRODUCTS, shop -> NumberUtil.format(shop.countProducts()))
+    );
 
     @NotNull
-    public static PlaceholderMap forShop(@NotNull Shop shop) {
-        return new PlaceholderMap()
-            .add(SHOP_ID, shop::getId)
-            .add(SHOP_NAME, shop::getName)
-            .add(SHOP_BUY_ALLOWED, () -> Lang.getYesOrNo(shop.isTransactionEnabled(TradeType.BUY)))
-            .add(SHOP_SELL_ALLOWED, () -> Lang.getYesOrNo(shop.isTransactionEnabled(TradeType.SELL)))
-            .add(SHOP_PRODUCTS, () -> NumberUtil.format(shop.countProducts()));
-    }
+    public static final PlaceholderList<ChestShop> CHEST_SHOP = PlaceholderList.create(list -> {
+        list
+            .add(SHOP)
+            .add(CHEST_SHOP_BANK_BALANCE, shop -> shop.getOwnerBank().getBalanceMap().keySet().stream()
+                .map(currency -> currency.format(shop.getOwnerBank().getBalance(currency))).collect(Collectors.joining(", ")))
+            .add(CHEST_SHOP_OWNER, shop -> shop.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME.get() : shop.getOwnerName())
+            .add(CHEST_SHOP_X, shop -> NumberUtil.format(shop.getBlockPos().getX()))
+            .add(CHEST_SHOP_Y, shop -> NumberUtil.format(shop.getBlockPos().getY()))
+            .add(CHEST_SHOP_Z, shop -> NumberUtil.format(shop.getBlockPos().getZ()))
+            .add(CHEST_SHOP_WORLD, shop -> shop.isActive() ? LangAssets.get(shop.getWorld()) : shop.getWorldName())
+            .add(CHEST_SHOP_IS_ADMIN, shop -> ChestLang.getYesOrNo(shop.isAdminShop()))
+            .add(CHEST_SHOP_TYPE, shop -> ChestLang.SHOP_TYPES.getLocalized(shop.getType()))
+            .add(CHEST_SHOP_HOLOGRAM_ENABLED, shop -> ChestLang.getYesOrNo(shop.isHologramEnabled()))
+            .add(CHEST_SHOP_SHOWCASE_ENABLED, shop -> ChestLang.getYesOrNo(shop.isShowcaseEnabled()));
+
+        for (int slot = 0; slot < 27; slot++) {
+            int index = slot;
+            for (TradeType tradeType : TradeType.values()) {
+                list.add(CHEST_SHOP_PRODUCT_PRICE.apply(tradeType, slot), shop -> {
+                    ChestProduct product = shop.getProductAtSlot(index);
+                    return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
+                });
+            }
+            list.add(CHEST_SHOP_PRODUCT_NAME.apply(slot), shop -> {
+                ChestProduct product = shop.getProductAtSlot(index);
+                return product == null ? "-" : ItemUtil.getItemName(product.getPreview());
+            });
+        }
+    });
 
     @NotNull
-    public static RelativePlaceholders<Player> forProduct(@NotNull AbstractProduct<?> product) {
-        RelativePlaceholders<Player> map = new RelativePlaceholders<>();
+    public static final PlaceholderList<VirtualShop> VIRTUAL_SHOP = PlaceholderList.create(list -> list
+        .add(SHOP)
+        //.add(VIRTUAL_SHOP_TYPE, shop -> VirtualLang.SHOP_TYPES.getLocalized(shop.getType()))
+        .add(VIRTUAL_SHOP_DESCRIPTION, shop -> String.join("\n", shop.getDescription()))
+        .add(VIRTUAL_SHOP_PAGES, shop -> String.valueOf(shop.getPages()))
+        //.add(VIRTUAL_SHOP_PERMISSION_NODE, shop -> VirtualPerms.PREFIX_SHOP + shop.getId())
+        //.add(VIRTUAL_SHOP_PERMISSION_REQUIRED, shop -> Lang.getYesOrNo(shop.isPermissionRequired()))
+        //.add(VIRTUAL_SHOP_MENU_SLOT, shop -> shop.isMainMenuSlotDisabled() ? Lang.OTHER_DISABLED.getString() : String.valueOf(shop.getMainMenuSlot()))
+        //.add(VIRTUAL_SHOP_LAYOUT, VirtualShop::getLayoutName)
+        .add(VIRTUAL_SHOP_DISCOUNT_AMOUNT, shop -> NumberUtil.format(shop.getDiscountPlain()))
+        //.add(SHOP_NPC_IDS, shop -> String.join(", ", shop.getNPCIds().stream().map(String::valueOf).toList()))
+    );
 
-        map
-            .add(PRODUCT_ID, player -> product.getId())
-            .add(PRODUCT_HANDLER, player -> product.getHandler().getName())
-            .add(PRODUCT_CURRENCY, player -> product.getCurrency().getName())
-            .add(PRODUCT_UNIT_AMOUNT, player -> NumberUtil.format(product.getUnitAmount()))
-            .add(PRODUCT_PRICE_TYPE, player -> Lang.PRICE_TYPES.getLocalized(product.getPricer().getType()))
-            .add(PRODUCT_PRICE_SELL_ALL, player -> NumberUtil.format(player == null ? 0D : product.getPriceSellAll(player)))
-            .add(PRODUCT_PRICE_SELL_ALL_FORMATTED, player -> {
-                if (!product.isSellable()) return Lang.OTHER_PRICE_DISABLED.getString();
+//    @NotNull
+//    public static final PlaceholderList<StaticShop> VIRTUAL_STATIC_SHOP = PlaceholderList.create(list -> list
+//        .add(VIRTUAL_SHOP)
+//    );
 
-                double price = player == null ? 0D : product.getPriceSellAll(player);
-                return price >= 0 ? product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
+    @NotNull
+    public static final PlaceholderList<RotatingShop> VIRTUAL_ROTATING_SHOP = PlaceholderList.create(list -> list
+        .add(VIRTUAL_SHOP)
+        .add(VIRTUAL_SHOP_NEXT_ROTATION_DATE, shop -> {
+            LocalDateTime time = shop.getNextRotationTime();
+            if (time == null) return Lang.OTHER_NEVER.getString();
+
+            return time.format(ShopUtils.getDateFormatter());
+        })
+        .add(VIRTUAL_SHOP_NEXT_ROTATION_IN, shop -> {
+            LocalDateTime next = shop.getNextRotationTime();
+            if (next == null) return Lang.OTHER_NEVER.getString();
+
+            return TimeUtil.formatDuration(TimeUtil.toEpochMillis(next));
+        })
+        //.add(VIRTUAL_SHOP_ROTATION_TYPE, shop -> shop.getRotationType().name())
+        //.add(VIRTUAL_SHOP_ROTATION_INTERVAL, shop -> TimeUtil.formatTime(shop.getRotationInterval() * 1000L))
+        //.add(VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS, shop -> NumberUtil.format(shop.getProductMinAmount()))
+        //.add(VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS, shop -> NumberUtil.format(shop.getProductMaxAmount()))
+        //.add(VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS, shop -> Arrays.toString(shop.getProductSlots()))
+    );
+
+    @NotNull
+    public static final PlaceholderList<VirtualShop> VIRTUAL_SHOP_INTERNAL = PlaceholderList.create(list -> list
+        .add(VIRTUAL_SHOP)
+        .add(VIRTUAL_SHOP_TYPE, shop -> VirtualLang.SHOP_TYPES.getLocalized(shop.getType()))
+        .add(VIRTUAL_SHOP_PERMISSION_NODE, shop -> VirtualPerms.PREFIX_SHOP + shop.getId())
+        .add(VIRTUAL_SHOP_PERMISSION_REQUIRED, shop -> Lang.getYesOrNo(shop.isPermissionRequired()))
+        .add(VIRTUAL_SHOP_MENU_SLOT, shop -> shop.isMainMenuSlotDisabled() ? Lang.OTHER_DISABLED.getString() : String.valueOf(shop.getMainMenuSlot()))
+        .add(VIRTUAL_SHOP_LAYOUT, VirtualShop::getLayoutName)
+        .add(SHOP_NPC_IDS, shop -> String.join(", ", shop.getNPCIds().stream().map(String::valueOf).toList()))
+    );
+
+    @NotNull
+    public static final PlaceholderList<RotatingShop> ROTATING_SHOP_INTERNAL = PlaceholderList.create(list -> list
+        .add(VIRTUAL_SHOP_INTERNAL)
+        .add(VIRTUAL_SHOP_ROTATION_TYPE, shop -> shop.getRotationType().name())
+        .add(VIRTUAL_SHOP_ROTATION_INTERVAL, shop -> TimeUtil.formatTime(shop.getRotationInterval() * 1000L))
+        .add(VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS, shop -> NumberUtil.format(shop.getProductMinAmount()))
+        .add(VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS, shop -> NumberUtil.format(shop.getProductMaxAmount()))
+        .add(VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS, shop -> Arrays.toString(shop.getProductSlots()))
+    );
+
+    // ------------------------------
+    // Products
+    // ------------------------------
+
+    public static final PlaceholderList<PreparedProduct> PREPARED_PRODUCT = PlaceholderList.create(list -> list
+        .add(GENERIC_ITEM, product -> ItemUtil.getItemName(product.getProduct().getPreview()))
+        .add(GENERIC_AMOUNT, product -> String.valueOf(product.getAmount()))
+        .add(GENERIC_UNITS, product -> String.valueOf(product.getUnits()))
+        .add(GENERIC_TYPE, product -> Lang.TRADE_TYPES.getLocalized(product.getTradeType()))
+        .add(GENERIC_PRICE, product -> product.getProduct().getCurrency().format(product.getPrice()))
+    );
+
+    public static final PlaceholderList<ProductPOV<? extends Product>> PRODUCT = PlaceholderList.create(list -> {
+        list
+            .add(PRODUCT_ID, pov -> pov.product.getId())
+            .add(PRODUCT_HANDLER, pov -> pov.product.getHandler().getName())
+            .add(PRODUCT_CURRENCY, pov -> pov.product.getCurrency().getName())
+            .add(PRODUCT_UNIT_AMOUNT, pov -> NumberUtil.format(pov.product.getUnitAmount()))
+            .add(PRODUCT_PRICE_TYPE, pov -> Lang.PRICE_TYPES.getLocalized(pov.product.getPricer().getType()))
+            .add(PRODUCT_PRICE_SELL_ALL, pov -> NumberUtil.format(pov.player == null ? 0D : pov.product.getPriceSellAll(pov.player)))
+            .add(PRODUCT_PRICE_SELL_ALL_FORMATTED, pov -> {
+                if (!pov.product.isSellable()) return Lang.OTHER_PRICE_DISABLED.getString();
+
+                double price = pov.player == null ? 0D : pov.product.getPriceSellAll(pov.player);
+                return price >= 0 ? pov.product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
             })
-            .add(PRODUCT_PREVIEW_NAME, player -> ItemUtil.getItemName(product.getPreview()))
-            .add(PRODUCT_PREVIEW_LORE, player -> String.join("\n", ItemUtil.getLore(product.getPreview())));
+            .add(PRODUCT_PREVIEW_NAME, pov -> ItemUtil.getItemName(pov.product.getPreview()))
+            .add(PRODUCT_PREVIEW_LORE, pov -> String.join("\n", ItemUtil.getLore(pov.product.getPreview())));
 
 
         for (TradeType tradeType : TradeType.values()) {
 
-            map.add(PRODUCT_PRICE.apply(tradeType), player -> {
-                Currency currency = product.getCurrency();
-                return player == null ? currency.format(product.getPricer().getPrice(tradeType)) : currency.format(product.getPrice(tradeType, player));
+            list.add(PRODUCT_PRICE.apply(tradeType), pov -> {
+                Currency currency = pov.product.getCurrency();
+                return pov.player == null ? currency.format(pov.product.getPricer().getPrice(tradeType)) : currency.format(pov.product.getPrice(tradeType, pov.player));
             });
 
-            map.add(PRODUCT_PRICE_FORMATTED.apply(tradeType), player -> {
-                AbstractProductPricer pricer = product.getPricer();
-                double price = player == null ? pricer.getPrice(tradeType) : product.getPrice(tradeType, player);
+            list.add(PRODUCT_PRICE_FORMATTED.apply(tradeType), pov -> {
+                AbstractProductPricer pricer = pov.product.getPricer();
+                double price = pov.player == null ? pricer.getPrice(tradeType) : pov.product.getPrice(tradeType, pov.player);
 
-                return price >= 0 ? product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
+                return price >= 0 ? pov.product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
             });
 
-            map.add(PRODUCT_PRICE_AVERAGE.apply(tradeType), player -> {
-                AbstractProductPricer pricer = product.getPricer();
+            list.add(PRODUCT_PRICE_AVERAGE.apply(tradeType), pov -> {
+                AbstractProductPricer pricer = pov.product.getPricer();
                 if (!(pricer instanceof RangedPricer rangedPricer)) return NumberUtil.format(pricer.getPrice(tradeType));
 
-                return product.getCurrency().format(rangedPricer.getPriceAverage(tradeType));
+                return pov.product.getCurrency().format(rangedPricer.getPriceAverage(tradeType));
             });
 
-            map.add(PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(tradeType), player -> {
-                AbstractProductPricer pricer = product.getPricer();
+            list.add(PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(tradeType), pov -> {
+                AbstractProductPricer pricer = pov.product.getPricer();
                 if (!(pricer instanceof RangedPricer rangedPricer)) return NumberUtil.format(0D);
 
                 double percent = rangedPricer.getAverageDifferencePercent(tradeType);
@@ -190,68 +350,186 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
                     .replace(GENERIC_VALUE, NumberUtil.format(Math.abs(percent)));
             });
         }
+    });
 
-        return map;
-    }
-
-    @NotNull
-    public static PlaceholderMap forPreparedProduct(@NotNull PreparedProduct product) {
-        return new PlaceholderMap()
-            .add(GENERIC_ITEM, () -> ItemUtil.getItemName(product.getProduct().getPreview()))
-            .add(GENERIC_AMOUNT, () -> String.valueOf(product.getAmount()))
-            .add(GENERIC_UNITS, () -> String.valueOf(product.getUnits()))
-            .add(GENERIC_TYPE, () -> Lang.TRADE_TYPES.getLocalized(product.getTradeType()))
-            .add(GENERIC_PRICE, () -> product.getProduct().getCurrency().format(product.getPrice()))
-        ;
-    }
-
-    @NotNull
-    public static PlaceholderMap forRangedPricer(@NotNull RangedPricer pricer) {
-        PlaceholderMap placeholderMap = new PlaceholderMap();
+    public static final PlaceholderList<ProductPOV<ChestProduct>> CHEST_PRODUCT = PlaceholderList.create(list -> {
+        list.add(PRODUCT);
 
         for (TradeType tradeType : TradeType.values()) {
-            placeholderMap
-                .add(PRODUCT_PRICER_RANGE_MIN.apply(tradeType), () -> String.valueOf(pricer.getPriceMin(tradeType)))
-                .add(PRODUCT_PRICER_RANGE_MAX.apply(tradeType), () -> String.valueOf(pricer.getPriceMax(tradeType)));
+            list
+                .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), pov -> {
+                    int leftAmount = pov.product.getShop().getStock().count(pov.product, tradeType, pov.player);
+                    return leftAmount < 0 ? ChestLang.OTHER_INFINITY.getString() : NumberUtil.format(leftAmount);
+                });
         }
+    });
 
-        return placeholderMap;
-    }
-
-    @NotNull
-    public static PlaceholderMap forFloatPricer(@NotNull FloatPricer pricer) {
-        return new PlaceholderMap()
-            .add(PRODUCT_PRICER_FLOAT_REFRESH_DAYS, () -> {
-                if (pricer.getDays().isEmpty()) {
-                    return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_DAYS.getString());
+    public static final PlaceholderList<ProductPOV<? extends VirtualProduct>> VIRTUAL_PRODUCT = PlaceholderList.create(list -> {
+        list
+            .add(PRODUCT)
+            .add(PRODUCT_DISCOUNT_AMOUNT, pov -> NumberUtil.format(pov.product.getShop().getDiscountPlain(pov.product)))
+            .add(PRODUCT_DISCOUNT_ALLOWED, pov -> Lang.getYesOrNo(pov.product.isDiscountAllowed()))
+            .add(PRODUCT_ALLOWED_RANKS, pov -> {
+                if (pov.product.getAllowedRanks().isEmpty()) {
+                    return Lang.goodEntry(VirtualLang.EDITOR_PRODUCT_NO_RANK_REQUIREMENTS.getString());
                 }
-                return pricer.getDays().stream().map(day -> Lang.goodEntry(Lang.DAYS.getLocalized(day))).collect(Collectors.joining("\n"));
+                return pov.product.getAllowedRanks().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
             })
-            .add(PRODUCT_PRICER_FLOAT_REFRESH_TIMES, () -> {
-                if (pricer.getTimes().isEmpty()) {
-                    return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_TIMES.getString());
+            .add(PRODUCT_REQUIRED_PERMISSIONS, pov -> {
+                if (pov.product.getRequiredPermissions().isEmpty()) {
+                    return Lang.goodEntry(VirtualLang.EDITOR_PRODUCT_NO_PERM_REQUIREMENTS.getString());
                 }
-                return pricer.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).map(Lang::goodEntry).collect(Collectors.joining("\n"));
-            })
-            .add(PRODUCT_PRICER_FLOAT_ROUND_DECIMALS, () -> Lang.getYesOrNo(pricer.isRoundDecimals()));
+                return pov.product.getRequiredPermissions().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
+            });
+
+        String never = Lang.OTHER_NEVER.getString();
+        String infinity = Lang.OTHER_INFINITY.getString();
+
+        for (TradeType tradeType : TradeType.values()) {
+            list
+                .add(PRODUCT_STOCK_AMOUNT_INITIAL.apply(tradeType), pov -> {
+                    int initialAmount = pov.product.getStockValues().getInitialAmount(tradeType);
+                    return initialAmount < 0 ? infinity : String.valueOf(initialAmount);
+                })
+                .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), pov -> {
+                    int leftAmount = pov.product.getShop().getStock().count(pov.product, tradeType, null);
+                    return leftAmount < 0 ? infinity : String.valueOf(leftAmount);
+                })
+                .add(PRODUCT_STOCK_RESTOCK_TIME.apply(tradeType), pov -> {
+                    long cooldown = pov.product.getStockValues().getRestockTime(tradeType);
+                    return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+                })
+                .add(PRODUCT_STOCK_RESTOCK_DATE.apply(tradeType), pov -> {
+                    long restockDate = pov.product.getShop().getStock().getRestockTime(pov.product, tradeType, null);
+                    if (restockDate == 0L)
+                        return TimeUtil.formatTime(pov.product.getStockValues().getRestockTime(tradeType));
+
+                    return restockDate < 0 ? never : TimeUtil.formatDuration(restockDate);
+                })
+                .add(PRODUCT_LIMIT_AMOUNT_INITIAL.apply(tradeType), pov -> {
+                    int initialAmount = pov.product.getLimitValues().getInitialAmount(tradeType);
+                    return initialAmount < 0 ? infinity : String.valueOf(initialAmount);
+                })
+                .add(PRODUCT_LIMIT_RESTOCK_TIME.apply(tradeType), pov -> {
+                    long cooldown = pov.product.getLimitValues().getRestockTime(tradeType);
+                    return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+                })
+                .add(PRODUCT_LIMIT_AMOUNT_LEFT.apply(tradeType), pov -> {
+                    int leftAmount = pov.product.getShop().getStock().count(pov.product, tradeType, pov.player);
+                    return leftAmount < 0 ? infinity : String.valueOf(leftAmount);
+                })
+                .add(PRODUCT_LIMIT_RESTOCK_DATE.apply(tradeType), pov -> {
+                    long restockDate = pov.product.getShop().getStock().getRestockTime(pov.product, tradeType, pov.player);
+                    if (restockDate == 0L)
+                        return TimeUtil.formatTime(pov.product.getLimitValues().getRestockTime(tradeType));
+
+                    return restockDate < 0 ? never : TimeUtil.formatDuration(restockDate);
+                });
+        }
+    });
+
+    public static final PlaceholderList<ProductPOV<RotatingProduct>> VIRTUAL_ROTATING_PRODUCT = PlaceholderList.create(list -> list
+        .add(VIRTUAL_PRODUCT)
+        .add(PRODUCT_ROTATION_CHANCE, pov -> NumberUtil.format(pov.product.getRotationChance()))
+    );
+
+    // ------------------------------
+    // Product Packers
+    // ------------------------------
+
+    public static final PlaceholderList<BukkitItemPacker> BUKKIT_ITEM_PACKER = PlaceholderList.create(list -> list
+        .add(PRODUCT_ITEM_META_ENABLED, packet -> Lang.getYesOrNo(packet.isRespectItemMeta()))
+    );
+
+    public static final PlaceholderList<BukkitCommandPacker> BUKKIT_COMMAND_PACKER = PlaceholderList.create(list -> list
+        .add(PRODUCT_COMMANDS, packer -> packer.getCommands().stream().map(Lang::goodEntry).collect(Collectors.joining("\n")))
+    );
+
+    // ------------------------------
+    // Product Pricers
+    // ------------------------------
+
+    public static final PlaceholderList<? super RangedPricer> RANGED_PRICER = PlaceholderList.create(list -> {
+        for (TradeType tradeType : TradeType.values()) {
+            list
+                .add(PRODUCT_PRICER_RANGE_MIN.apply(tradeType), pricer -> String.valueOf(pricer.getPriceMin(tradeType)))
+                .add(PRODUCT_PRICER_RANGE_MAX.apply(tradeType), pricer -> String.valueOf(pricer.getPriceMax(tradeType)));
+        }
+    });
+
+    public static final PlaceholderList<FloatPricer> FLOAT_PRICER = PlaceholderList.create(list -> list
+        .add(RANGED_PRICER)
+        .add(PRODUCT_PRICER_FLOAT_REFRESH_DAYS, pricer -> {
+            if (pricer.getDays().isEmpty()) {
+                return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_DAYS.getString());
+            }
+            return pricer.getDays().stream().map(day -> Lang.goodEntry(Lang.DAYS.getLocalized(day))).collect(Collectors.joining("\n"));
+        })
+        .add(PRODUCT_PRICER_FLOAT_REFRESH_TIMES, pricer -> {
+            if (pricer.getTimes().isEmpty()) {
+                return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_TIMES.getString());
+            }
+            return pricer.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).map(Lang::goodEntry).collect(Collectors.joining("\n"));
+        })
+        .add(PRODUCT_PRICER_FLOAT_ROUND_DECIMALS, pricer -> Lang.getYesOrNo(pricer.isRoundDecimals()))
+    );
+
+    public static final PlaceholderList<DynamicPricer> DYNAMIC_PRICER = PlaceholderList.create(list -> list
+        .add(RANGED_PRICER)
+        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, pricer -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
+        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, pricer -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
+        .add(PRODUCT_PRICER_DYNAMIC_STEP_BUY, pricer -> NumberUtil.format(pricer.getStep(TradeType.BUY)))
+        .add(PRODUCT_PRICER_DYNAMIC_STEP_SELL, pricer -> NumberUtil.format(pricer.getStep(TradeType.SELL)))
+    );
+
+    public static final PlaceholderList<PlayersPricer> PLAYERS_PRICER = PlaceholderList.create(list -> list
+        .add(RANGED_PRICER)
+        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, pricer -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
+        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, pricer -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
+        .add(PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_BUY, pricer -> NumberUtil.format(pricer.getAdjustAmount(TradeType.BUY)))
+        .add(PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL, pricer -> NumberUtil.format(pricer.getAdjustAmount(TradeType.SELL)))
+        .add(PRODUCT_PRICER_PLAYERS_ADJUST_STEP, pricer -> NumberUtil.format(pricer.getAdjustStep()))
+    );
+
+    @NotNull
+    public static UnaryOperator<String> forProduct(@NotNull Product product, @Nullable Player player) {
+        return PRODUCT.replacer(new ProductPOV<>(product, player));
     }
 
     @NotNull
-    public static PlaceholderMap forDynamicPricer(@NotNull DynamicPricer pricer) {
-        return new PlaceholderMap()
-            .add(PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, () -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
-            .add(PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, () -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
-            .add(PRODUCT_PRICER_DYNAMIC_STEP_BUY, () -> NumberUtil.format(pricer.getStep(TradeType.BUY)))
-            .add(PRODUCT_PRICER_DYNAMIC_STEP_SELL, () -> NumberUtil.format(pricer.getStep(TradeType.SELL)));
+    public static UnaryOperator<String> forChestProduct(@NotNull ChestProduct product, @Nullable Player player) {
+        return CHEST_PRODUCT.replacer(new ProductPOV<>(product, player));
     }
 
     @NotNull
-    public static PlaceholderMap forPlayersPricer(@NotNull PlayersPricer pricer) {
-        return new PlaceholderMap()
-            .add(PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, () -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
-            .add(PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, () -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
-            .add(PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_BUY, () -> NumberUtil.format(pricer.getAdjustAmount(TradeType.BUY)))
-            .add(PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL, () -> NumberUtil.format(pricer.getAdjustAmount(TradeType.SELL)))
-            .add(PRODUCT_PRICER_PLAYERS_ADJUST_STEP, () -> NumberUtil.format(pricer.getAdjustStep()));
+    public static UnaryOperator<String> forStaticProduct(@NotNull StaticProduct product, @Nullable Player player) {
+        return VIRTUAL_PRODUCT.replacer(new ProductPOV<>(product, player));
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forRotatingProduct(@NotNull RotatingProduct product, @Nullable Player player) {
+        return VIRTUAL_ROTATING_PRODUCT.replacer(new ProductPOV<>(product, player));
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forChestShop(@NotNull ChestShop shop) {
+        return CHEST_SHOP.replacer(shop);
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forStaticShop(@NotNull StaticShop shop) {
+        return VIRTUAL_SHOP.replacer(shop);
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forRotatingShop(@NotNull RotatingShop shop) {
+        return VIRTUAL_ROTATING_SHOP.replacer(shop);
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forVirtualShopEditor(@NotNull VirtualShop shop) {
+        if (shop instanceof RotatingShop rotatingShop) return ROTATING_SHOP_INTERNAL.replacer(rotatingShop);
+
+        return VIRTUAL_SHOP_INTERNAL.replacer(shop);
     }
 }

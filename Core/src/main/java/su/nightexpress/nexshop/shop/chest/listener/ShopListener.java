@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -45,13 +46,21 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        var displayHandler = this.module.getDisplayHandler();
+        if (displayHandler != null) {
+            displayHandler.handleQuit(event.getPlayer());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (!ChestConfig.isAutoBankEnabled()) return;
 
         Player player = event.getPlayer();
         ChestBank bank = this.module.getPlayerBank(player);
         bank.getBalanceMap().forEach((currency, amount) -> {
-            currency.getHandler().give(player, amount);
+            currency.give(player, amount);
         });
 
         if (bank.getBalanceMap().values().stream().anyMatch(amount -> amount > 0)) {

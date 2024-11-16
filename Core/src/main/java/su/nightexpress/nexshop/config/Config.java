@@ -31,20 +31,24 @@ public class Config {
 
     public static final ConfigValue<Set<String>> DISABLED_PRODUCT_HANDLERS = ConfigValue.create("General.Disabled_Product_Handlers",
         Lists.newSet(),
-        "List of product handlers that won't be registered on plugin load.");
+        "List of product handlers that won't be registered on plugin load."
+    );
 
     public static final ConfigValue<Boolean> MODULES_VIRTUAL_SHOP_ENABLED = ConfigValue.create("Modules.VirtualShop.Enabled",
         true,
-        "Sets whether or not Virtual Shop module is enabled.");
+        "Sets whether or not Virtual Shop module is enabled."
+    );
 
     public static final ConfigValue<String[]> MODULES_VIRTUAL_SHOP_ALIASES = ConfigValue.create("Modules.VirtualShop.Command_Aliases",
         new String[]{"vshop"},
         "Command aliases (names) for the Virtual Shop module. Split with commas.",
-        "[*] You must reboot the server to apply changes.");
+        "[*] You must reboot the server to apply changes."
+    );
 
     public static final ConfigValue<Boolean> MODULES_CHEST_SHOP_ENABLED = ConfigValue.create("Modules.ChestShop.Enabled",
         true,
-        "Sets whether or not Chest Shop module is enabled.");
+        "Sets whether or not Chest Shop module is enabled."
+    );
 
     public static final ConfigValue<String[]> MODULES_CHEST_SHOP_ALIASES = ConfigValue.create("Modules.ChestShop.Command_Aliases",
         new String[]{"chestshop", "cshop", "cs"},
@@ -54,12 +58,14 @@ public class Config {
 
     public static final ConfigValue<Boolean> MODULES_AUCTION_ENABLED = ConfigValue.create("Modules.Auction.Enabled",
         true,
-        "Sets whether or not Auction module is enabled.");
+        "Sets whether or not Auction module is enabled."
+    );
 
     public static final ConfigValue<String[]> MODULES_AUCTION_ALIASES = ConfigValue.create("Modules.Auction.Command_Aliases",
         new String[]{"auction", "auc", "ah"},
         "Command aliases (names) for the Auction module. Split with commas.",
-        "[*] You must reboot the server to apply changes.");
+        "[*] You must reboot the server to apply changes."
+    );
 
     public static final ConfigValue<Boolean> DATA_PRODUCT_CLEAN_UP = ConfigValue.create("Data.Products.CleanUp",
         false,
@@ -68,21 +74,27 @@ public class Config {
         "[*] Do not enable if you have multiple servers with different shop configurations."
     );
 
-    public static final ConfigValue<Integer> DATA_PRODUCT_SAVE_INTERVAL = ConfigValue.create("Data.Products.SaveInterval",
-        5,
-        "Sets how often (in seconds) modified product data (such as price, stock and player limit values) will be saved to the database.",
-        "[*] Do NOT disable if you're using Float/Dynamic prices and Global/Player stock features."
-    );
+//    public static final ConfigValue<Integer> DATA_PRODUCT_SAVE_INTERVAL = ConfigValue.create("Data.Products.SaveInterval",
+//        5,
+//        "Sets how often (in seconds) modified product data (such as price, stock and player limit values) will be saved to the database.",
+//        "[*] Do NOT disable if you're using Float/Dynamic prices and Global/Player stock features."
+//    );
 
     public static final ConfigValue<Boolean> GENERAL_BUY_WITH_FULL_INVENTORY = ConfigValue.create("General.Buy_With_Full_Inventory",
-        false, "Sets wheter players can purchase items from shop with full inventory.");
+        false,
+        "Sets wheter players can purchase items from shop with full inventory."
+    );
 
     public static final ConfigValue<Boolean> GENERAL_CLOSE_GUI_AFTER_TRADE = ConfigValue.create("General.Close_GUI_After_Trade",
-        false, "Sets whether or not Shop GUI should be closed when you sold/bought items.");
+        false,
+        "Sets whether or not Shop GUI should be closed when you sold/bought items."
+    );
 
+    @Deprecated
     public static final ConfigValue<Boolean> GUI_PLACEHOLDER_API = ConfigValue.create("GUI.Use_PlaceholderAPI",
         false,
-        "Sets whether PlaceholderAPI placeholders will be applied to non-product items in Shop GUIs.");
+        "[Outdated. There is dedicated PlaceholderAPI setting in GUI files]"
+    );
 
     public static final ConfigValue<Map<ClickType, ShopClickAction>> GUI_CLICK_ACTIONS = ConfigValue.create(
         "GUI.Click_Types",
@@ -120,5 +132,9 @@ public class Config {
 
     private static String[] getAliases(@NotNull String[] aliases, @NotNull String fallback) {
         return aliases.length == 0 ? new String[]{fallback} : aliases;
+    }
+
+    public static boolean usePlaceholdersForGUI() {
+        return GUI_PLACEHOLDER_API.get();
     }
 }

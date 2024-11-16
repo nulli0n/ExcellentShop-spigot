@@ -8,24 +8,21 @@ import su.nightexpress.nexshop.product.price.impl.FlatPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
-public abstract class AbstractProductPricer implements Placeholder {
+public abstract class AbstractProductPricer {
 
     protected final PriceType              type;
     protected final Map<TradeType, Double> priceCurrent;
-    protected final PlaceholderMap         placeholderMap;
 
     public AbstractProductPricer(@NotNull PriceType type) {
         this.type = type;
         this.priceCurrent = new HashMap<>();
         this.setPrice(TradeType.BUY, -1D);
         this.setPrice(TradeType.SELL, -1D);
-        this.placeholderMap = new PlaceholderMap();
     }
 
     @NotNull
@@ -57,11 +54,8 @@ public abstract class AbstractProductPricer implements Placeholder {
 
     protected abstract void writeAdditional(@NotNull FileConfig config, @NotNull String path);
 
-    @Override
     @NotNull
-    public PlaceholderMap getPlaceholders() {
-        return this.placeholderMap;
-    }
+    public abstract UnaryOperator<String> replacePlaceholders();
 
     @NotNull
     public PriceType getType() {

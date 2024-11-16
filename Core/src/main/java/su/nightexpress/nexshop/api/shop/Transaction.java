@@ -2,24 +2,19 @@ package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nightcore.language.entry.LangText;
-import su.nightexpress.nightcore.language.message.LangMessage;
-import su.nightexpress.nightcore.util.ItemUtil;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
-public class Transaction implements Placeholder {
+import java.util.function.UnaryOperator;
 
-    //private final ExcellentShop  plugin;
-    private final Product        product;
-    private final TradeType      tradeType;
-    private final PlaceholderMap placeholderMap;
+public class Transaction {
+
+    private final Product   product;
+    private final TradeType tradeType;
 
     private int    units;
     private double price;
@@ -37,28 +32,15 @@ public class Transaction implements Placeholder {
         this.units = units;
         this.price = price;
         this.result = result;
-        this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.GENERIC_TYPE, Lang.TRADE_TYPES.getLocalized(this.getTradeType()))
-            .add(Placeholders.GENERIC_AMOUNT, String.valueOf(product.getUnitAmount() * this.getUnits()))
-            .add(Placeholders.GENERIC_UNITS, String.valueOf(this.getUnits()))
-            .add(Placeholders.GENERIC_PRICE, product.getCurrency().format(this.getPrice()))
-            .add(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()));
     }
 
-    @Override
     @NotNull
-    public PlaceholderMap getPlaceholders() {
-        return this.placeholderMap;
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.TRANSACTION.replacer(this);
     }
 
     public void sendError(@NotNull Player player) {
-        LangMessage message = this.getErrorMessage();
-        if (message != null) message.send(player);
-    }
-
-    @Nullable
-    public LangMessage getErrorMessage() {
-        LangText langText = switch (this.getResult()) {
+        LangText text = switch (this.result) {
             case TOO_EXPENSIVE -> Lang.SHOP_PRODUCT_ERROR_TOO_EXPENSIVE;
             case NOT_ENOUGH_ITEMS -> Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS;
             case OUT_OF_STOCK -> Lang.SHOP_PRODUCT_ERROR_OUT_OF_STOCK;
@@ -66,25 +48,27 @@ public class Transaction implements Placeholder {
             case OUT_OF_SPACE -> Lang.SHOP_PRODUCT_ERROR_OUT_OF_SPACE;
             default -> null;
         };
-        return langText == null ? null : langText.getMessage().replace(this.replacePlaceholders());
+        if (text == null) return;
+
+        text.getMessage().send(player, replacer -> replacer.replace(this.replacePlaceholders()));
     }
 
     @NotNull
     public Product getProduct() {
-        return product;
+        return this.product;
     }
 
     @NotNull
     public TradeType getTradeType() {
-        return tradeType;
+        return this.tradeType;
     }
 
     public int getAmount() {
-        return this.getProduct().getUnitAmount() * this.getUnits();
+        return this.product.getUnitAmount() * this.getUnits();
     }
 
     public int getUnits() {
-        return units;
+        return this.units;
     }
 
     public void setUnits(int units) {
@@ -92,7 +76,7 @@ public class Transaction implements Placeholder {
     }
 
     public double getPrice() {
-        return price;
+        return this.price;
     }
 
     public void setPrice(double price) {
@@ -101,7 +85,7 @@ public class Transaction implements Placeholder {
 
     @NotNull
     public Result getResult() {
-        return result;
+        return this.result;
     }
 
     public void setResult(@NotNull Result result) {

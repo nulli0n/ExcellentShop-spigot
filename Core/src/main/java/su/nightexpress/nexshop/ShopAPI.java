@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.currency.CurrencyManager;
 import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.data.UserManager;
 import su.nightexpress.nexshop.auction.AuctionManager;
@@ -17,10 +16,10 @@ public class ShopAPI {
         return PLUGIN.getData();
     }
 
-    @NotNull
-    public static CurrencyManager getCurrencyManager() {
-        return PLUGIN.getCurrencyManager();
-    }
+//    @NotNull
+//    public static CurrencyManager getCurrencyManager() {
+//        return PLUGIN.getCurrencyManager();
+//    }
 
     public static AuctionManager getAuctionManager() {
         return PLUGIN.getAuction();

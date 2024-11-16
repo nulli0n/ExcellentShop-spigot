@@ -11,6 +11,7 @@ import su.nightexpress.nightcore.util.wrapper.UniDouble;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 public class PlayersPricer extends RangedPricer {
 
@@ -23,7 +24,6 @@ public class PlayersPricer extends RangedPricer {
         this.priceInitial = new HashMap<>();
         this.adjustAmount = new HashMap<>();
         this.adjustStep = 1;
-        this.placeholderMap.add(Placeholders.forPlayersPricer(this));
     }
 
     @NotNull
@@ -54,6 +54,12 @@ public class PlayersPricer extends RangedPricer {
             config.set(path + "." + tradeType.name() + ".Adjust_Amount", this.getAdjustAmount(tradeType));
         }
         config.set(path + ".Adjust_Step", this.getAdjustStep());
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.PLAYERS_PRICER.replacer(this);
     }
 
     @Override

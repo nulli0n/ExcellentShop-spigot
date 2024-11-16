@@ -9,6 +9,7 @@ import su.nightexpress.nightcore.util.wrapper.UniDouble;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
 public class DynamicPricer extends RangedPricer {
 
@@ -19,7 +20,6 @@ public class DynamicPricer extends RangedPricer {
         super(PriceType.DYNAMIC);
         this.priceInitial = new HashMap<>();
         this.priceStep = new HashMap<>();
-        this.placeholderMap.add(Placeholders.forDynamicPricer(this));
     }
 
     @NotNull
@@ -43,6 +43,12 @@ public class DynamicPricer extends RangedPricer {
             cfg.set(path + "." + tradeType.name() + ".Initial", this.getInitial(tradeType));
             cfg.set(path + "." + tradeType.name() + ".Step", this.getStep(tradeType));
         }
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.DYNAMIC_PRICER.replacer(this);
     }
 
     @Override

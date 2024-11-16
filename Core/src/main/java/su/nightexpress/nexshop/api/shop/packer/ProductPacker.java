@@ -4,9 +4,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
 
-public interface ProductPacker extends Placeholder {
+import java.util.function.UnaryOperator;
+
+public interface ProductPacker {
+
+    @NotNull UnaryOperator<String> replacePlaceholders();
 
     void write(@NotNull FileConfig config, @NotNull String path);
 

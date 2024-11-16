@@ -44,51 +44,68 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         }
     }
 
-    @Override
     @Nullable
-    protected ChestProduct findProduct(@NotNull Product product) {
+    private ChestProduct findProduct(@NotNull Product product) {
         return this.shop.getProductById(product.getId());
     }
 
     @Override
-    public int countItem(@NotNull ChestProduct product, @NotNull TradeType type, @Nullable Player player) {
-        if (this.shop.isInactive()) return 0;
-        if (this.shop.isAdminShop()) return -1;
-        if (!(product.getPacker() instanceof ItemPacker packer)) return -1;
+    public void resetGlobalValues(@NotNull Product product) {
 
-        if (ChestUtils.isInfiniteStorage()) {
-            return type == TradeType.SELL ? -1 : (int) Math.floor(product.getQuantity() / (double) product.getUnitAmount());
-        }
-
-        Inventory inventory = this.shop.getInventory();
-
-        // Для покупки со стороны игрока, возвращаем количество реальных предметов в контейнере.
-        if (type == TradeType.BUY) {
-            double totalItems = Stream.of(inventory.getContents()).filter(has -> has != null && packer.isItemMatches(has))
-                .mapToInt(ItemStack::getAmount).sum();
-            return (int) Math.floor(totalItems / (double) product.getUnitAmount());
-        }
-        // Для продажи со стороны игрока, возвращаем количество в свободных и идентичных стопках для предмета.
-        else {
-            ItemStack item = packer.getItem();
-            double totalSlots = (int) Stream.of(inventory.getContents())
-                .filter(itemHas -> itemHas == null || itemHas.getType().isAir() || packer.isItemMatches(itemHas)).count();
-            double totalSpace = totalSlots * (double) item.getMaxStackSize();
-            int unitsSpace = (int) Math.ceil(totalSpace / (double) product.getUnitAmount());
-
-            return unitsSpace - this.count(product, TradeType.BUY);
-        }
     }
 
     @Override
-    public boolean consumeItem(@NotNull ChestProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
-        if (this.shop.isInactive()) return false;
-        if (!(product.getPacker() instanceof ItemPacker packer)) return false;
+    public void resetPlayerLimits(@NotNull Product product) {
 
-        amount = Math.abs(amount * product.getUnitAmount());
+    }
+
+    @Override
+    public int count(@NotNull Product raw, @NotNull TradeType type, @Nullable Player player) {
+        ChestProduct product = this.findProduct(raw);
+        if (product == null) return 0;
+        if (this.shop.isInactive()) return 0;
+        if (this.shop.isAdminShop()) return UNLIMITED;
+        if (!(product.getPacker() instanceof ItemPacker packer)) return UNLIMITED;
+
+        double unitAmount = product.getUnitAmount();
 
         if (ChestUtils.isInfiniteStorage()) {
-            product.setQuantity(product.getQuantity() - amount);
+            return type == TradeType.SELL ? UNLIMITED : (int) Math.floor(product.getQuantity() / unitAmount);
+        }
+
+        Inventory inventory = this.shop.getInventory();
+        ItemStack[] contents = inventory.getContents();
+        double totalAmount;
+
+        // For buying (from player's perspective) return product unit amount based on similar inventory slots only.
+        if (type == TradeType.BUY) {
+            totalAmount = Stream.of(contents).mapToInt(content -> content != null && packer.isItemMatches(content) ? content.getAmount() : 0).sum();
+        }
+        // For selling (from player's perspective) return product unit amount based on free or similar inventory slots.
+        else {
+            ItemStack item = packer.getItem();
+            totalAmount = Stream.of(contents).mapToInt(content -> {
+                if (content == null || content.getType().isAir()) return item.getMaxStackSize();
+                if (packer.isItemMatches(content)) return Math.max(0, content.getMaxStackSize() - content.getAmount());
+
+                return 0;
+            }).sum();
+        }
+
+        return (int) Math.floor(totalAmount / unitAmount);
+    }
+
+    @Override
+    public boolean consume(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player) {
+        ChestProduct origin = this.findProduct(product);
+        if (origin == null) return false;
+        if (this.shop.isInactive()) return false;
+        if (!(origin.getPacker() instanceof ItemPacker packer)) return false;
+
+        amount = Math.abs(amount * origin.getUnitAmount());
+
+        if (ChestUtils.isInfiniteStorage()) {
+            origin.setQuantity(origin.getQuantity() - amount);
             return true;
         }
 
@@ -98,14 +115,16 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
     }
 
     @Override
-    public boolean storeItem(@NotNull ChestProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
+    public boolean store(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player) {
+        ChestProduct origin = this.findProduct(product);
+        if (origin == null) return false;
         if (this.shop.isInactive()) return false;
-        if (!(product.getPacker() instanceof ItemPacker packer)) return false;
+        if (!(origin.getPacker() instanceof ItemPacker packer)) return false;
 
-        amount = Math.abs(amount * product.getUnitAmount());
+        amount = Math.abs(amount * origin.getUnitAmount());
 
         if (ChestUtils.isInfiniteStorage()) {
-            product.setQuantity(product.getQuantity() + amount);
+            origin.setQuantity(origin.getQuantity() + amount);
             return true;
         }
 
@@ -115,7 +134,12 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
     }
 
     @Override
-    public boolean restockItem(@NotNull ChestProduct product, @NotNull TradeType type, boolean force, @Nullable Player player) {
+    public boolean restock(@NotNull Product product, @NotNull TradeType type, boolean force, @Nullable Player player) {
         return false;
+    }
+
+    @Override
+    public long getRestockTime(@NotNull Product product, @NotNull TradeType type, @Nullable Player player) {
+        return 0L;
     }
 }

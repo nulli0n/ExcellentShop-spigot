@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.api.shop;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nightcore.config.FileConfig;
 
 public interface ShopModule {

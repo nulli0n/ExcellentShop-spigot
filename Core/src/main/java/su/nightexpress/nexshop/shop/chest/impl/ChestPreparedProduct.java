@@ -29,7 +29,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         int amountToBuy = this.getUnits();
         int amountShopHas = shop.getStock().count(product, TradeType.BUY);
         double price = this.getPrice();
-        double balanceUser = product.getCurrency().getHandler().getBalance(player);
+        double balanceUser = product.getCurrency().getBalance(player);
 
         Result result = Transaction.Result.SUCCESS;
         if (balanceUser < price) {
@@ -58,7 +58,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
 
             // Process transaction
             product.delivery(this.getInventory(), transaction.getUnits());
-            product.getCurrency().getHandler().take(player, transaction.getPrice());
+            product.getCurrency().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
 
             if (!this.isSilent()) {
@@ -131,11 +131,11 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             shop.getPricer().onTransaction(event);
 
             // Process transaction
-            if (!isUnlimited) {
+            if (!shop.isAdminShop()) {
                 shop.getOwnerBank().withdraw(product.getCurrency(), transaction.getPrice());
                 shop.getModule().savePlayerBank(shop.getOwnerBank());
             }
-            product.getCurrency().getHandler().give(player, transaction.getPrice());
+            product.getCurrency().give(player, transaction.getPrice());
             product.take(inventory, transaction.getUnits());
             shop.getModule().getLogger().logTransaction(event);
 

@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nightcore.util.wrapper.UniPermission;
 
@@ -24,7 +24,7 @@ public class ChestPerms {
     public static final UniPermission SHOP_TYPE  = new UniPermission(PREFIX_SHOP_TYPE + Placeholders.WILDCARD);
     public static final UniPermission PRICE_TYPE = new UniPermission(PREFIX_PRICE_TYPE + Placeholders.WILDCARD);
 
-    public static final Function<Currency, UniPermission> CURRENCY = currency -> new UniPermission(PREFIX_CURRENCY + currency.getId());
+    public static final Function<Currency, UniPermission> CURRENCY = currency -> new UniPermission(PREFIX_CURRENCY + currency.getInternalId());
 
     public static final UniPermission DISPLAY_CUSTOMIZATION = new UniPermission(PREFIX + "display.customization");
     public static final UniPermission TELEPORT              = new UniPermission(PREFIX + "teleport");

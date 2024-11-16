@@ -15,20 +15,21 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.currency.handler.VaultEconomyHandler;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
-import su.nightexpress.nexshop.shop.chest.Placeholders;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
@@ -43,6 +44,7 @@ import su.nightexpress.nightcore.util.random.Rnd;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public class ChestShop extends AbstractShop<ChestProduct> {
 
@@ -74,8 +76,12 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         super(plugin, file, id);
         this.module = module;
         this.stock = new ChestStock(this.plugin, this);
+    }
 
-        this.placeholderMap.add(Placeholders.forShop(this));
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return su.nightexpress.nexshop.Placeholders.forChestShop(this);
     }
 
     @Override
@@ -144,8 +150,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @NotNull
     private ChestProduct loadProduct(@NotNull FileConfig config, @NotNull String id, @NotNull String path) {
-        String currencyId = config.getString(path + ".Currency", VaultEconomyHandler.ID);
-        Currency currency = this.plugin.getCurrencyManager().getCurrency(currencyId);
+        String currencyId = CurrencyId.reroute(config.getString(path + ".Currency", CurrencyId.VAULT));
+        Currency currency = EconomyBridge.getCurrency(currencyId);
         if (currency == null || !this.module.isAllowedCurrency(currency)) {
             currency = this.module.getDefaultCurrency();
         }

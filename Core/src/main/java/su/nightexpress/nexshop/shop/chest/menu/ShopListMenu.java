@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
@@ -33,7 +34,7 @@ import java.util.*;
 import java.util.stream.IntStream;
 
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 
 public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<ChestShop>, Linked<String> {
 
@@ -182,7 +183,7 @@ public class ShopListMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<C
         ).read(cfg);
 
         this.shopLoreOwn = ConfigValue.create("Shop.Lore.Own", Lists.newList(
-            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Location:") + " " + SHOP_LOCATION_X + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Y + LIGHT_GRAY.enclose(", ") + SHOP_LOCATION_Z + LIGHT_GRAY.enclose(" in ") + SHOP_LOCATION_WORLD),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Location:") + " " + Placeholders.CHEST_SHOP_X + LIGHT_GRAY.enclose(", ") + Placeholders.CHEST_SHOP_Y + LIGHT_GRAY.enclose(", ") + Placeholders.CHEST_SHOP_Z + LIGHT_GRAY.enclose(" in ") + Placeholders.CHEST_SHOP_WORLD),
             "",
             PRODUCTS,
             ACTION_TELEPORT,

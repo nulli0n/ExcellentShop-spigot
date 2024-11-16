@@ -2,8 +2,10 @@ package su.nightexpress.nexshop.data.impl;
 
 import com.google.gson.reflect.TypeToken;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
@@ -40,7 +42,7 @@ public class ChestDataHandler {
                 Map<String, Double> balanceRaw = this.dataHandler.gson().fromJson(resultSet.getString(COLUMN_BALANCE.getName()), new TypeToken<Map<String, Double>>(){}.getType());
                 Map<Currency, Double> balanceMap = new HashMap<>();
                 balanceRaw.forEach((id, amount) -> {
-                    Currency currency = this.plugin.getCurrencyManager().getCurrency(id);
+                    Currency currency = EconomyBridge.getCurrency(CurrencyId.reroute(id));
                     if (currency == null) return;
 
                     balanceMap.put(currency, amount);
@@ -79,7 +81,7 @@ public class ChestDataHandler {
 
     public void createChestBank(@NotNull ChestBank bank) {
         Map<String, Double> map = new HashMap<>();
-        bank.getBalanceMap().forEach((cur, amount) -> map.put(cur.getId(), amount));
+        bank.getBalanceMap().forEach((cur, amount) -> map.put(cur.getInternalId(), amount));
 
         this.dataHandler.insert(this.tableChestBank, Arrays.asList(
             COLUMN_HOLDER.toValue(bank.getHolder().toString()),
@@ -89,7 +91,7 @@ public class ChestDataHandler {
 
     public void saveChestBank(@NotNull ChestBank bank) {
         Map<String, Double> map = new HashMap<>();
-        bank.getBalanceMap().forEach((cur, amount) -> map.put(cur.getId(), amount));
+        bank.getBalanceMap().forEach((cur, amount) -> map.put(cur.getInternalId(), amount));
 
         this.dataHandler.update(this.tableChestBank, Lists.newList(
             COLUMN_BALANCE.toValue(this.dataHandler.gson().toJson(map))

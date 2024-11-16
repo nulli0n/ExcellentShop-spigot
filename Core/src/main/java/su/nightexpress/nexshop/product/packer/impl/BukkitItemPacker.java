@@ -4,11 +4,12 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
-import su.nightexpress.nexshop.product.packer.AbstractItemPacker;
 import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
+import su.nightexpress.nexshop.product.packer.AbstractItemPacker;
 import su.nightexpress.nightcore.config.FileConfig;
+
+import java.util.function.UnaryOperator;
 
 public class BukkitItemPacker extends AbstractItemPacker<BukkitItemHandler> {
 
@@ -21,9 +22,6 @@ public class BukkitItemPacker extends AbstractItemPacker<BukkitItemHandler> {
         this.setItem(item);
         this.setPreview(preview);
         this.setRespectItemMeta(respectItemMeta);
-
-        this.placeholderMap
-            .add(Placeholders.PRODUCT_ITEM_META_ENABLED, () -> Lang.getYesOrNo(this.isRespectItemMeta()));
     }
 
     @Override
@@ -31,6 +29,12 @@ public class BukkitItemPacker extends AbstractItemPacker<BukkitItemHandler> {
         config.setItemEncoded(path + ".Content.Preview", this.getPreview());
         config.setItemEncoded(path + ".Content.Item", this.getItem());
         config.set(path + ".Item_Meta_Enabled", this.isRespectItemMeta());
+    }
+
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.BUKKIT_ITEM_PACKER.replacer(this);
     }
 
     @Override

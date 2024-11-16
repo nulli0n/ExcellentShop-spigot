@@ -34,7 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.shop.chest.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ShopBrowseMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<OfflinePlayer> {

@@ -2,24 +2,20 @@ package su.nightexpress.nexshop.shop.impl;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nightcore.manager.AbstractFileData;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
 
 import java.io.File;
 import java.util.*;
 
-public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop, Placeholder {
+public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop {
 
     protected final ShopDataPricer          pricer;
     protected final Map<TradeType, Boolean> transactions;
     protected final Map<String, P>          products;
-    protected final PlaceholderMap          placeholderMap;
 
     protected String name;
 
@@ -28,13 +24,6 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
         this.pricer = new ShopDataPricer(plugin, this);
         this.transactions = new HashMap<>();
         this.products = new LinkedHashMap<>();
-        this.placeholderMap = Placeholders.forShop(this);
-    }
-
-    @Override
-    @NotNull
-    public PlaceholderMap getPlaceholders() {
-        return this.placeholderMap;
     }
 
     @Override

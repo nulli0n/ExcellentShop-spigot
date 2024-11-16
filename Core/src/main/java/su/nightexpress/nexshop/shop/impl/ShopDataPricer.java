@@ -56,11 +56,9 @@ public class ShopDataPricer implements ShopPricer {
         AbstractProductPricer pricer = product.getPricer();
 
         if (pricer.getType() == PriceType.DYNAMIC) {
-            //this.plugin.runTaskAsync(task -> {  // not needed anymore with scheduled saves
-                PriceData priceData = this.getDataOrCreate(product);
-                priceData.countTransaction(result.getTradeType(), result.getUnits());
-                this.updateDynamic(product, true);
-            //});
+            PriceData priceData = this.getDataOrCreate(product);
+            priceData.countTransaction(result.getTradeType(), result.getUnits());
+            this.updateDynamic(product, true);
         }
     }
 
@@ -165,7 +163,6 @@ public class ShopDataPricer implements ShopPricer {
     }
 
     private void insertData(@NotNull PriceData data) {
-        //this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().insertPriceData(data));
         this.plugin.getData().getVirtualDataHandler().insertPriceData(data);
     }
 
@@ -178,7 +175,7 @@ public class ShopDataPricer implements ShopPricer {
     }
 
     private void saveData(@NotNull PriceData data) {
-        this.plugin.getShopManager().getProductDataManager().scheduleSave(data);
+        data.setSaveRequired(true);
     }
 
     @Override

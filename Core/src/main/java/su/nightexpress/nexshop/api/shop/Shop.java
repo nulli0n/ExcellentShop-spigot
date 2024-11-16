@@ -6,12 +6,14 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.stock.Stock;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 
-public interface Shop extends Placeholder {
+public interface Shop {
+
+    @NotNull UnaryOperator<String> replacePlaceholders();
 
     void save();
 

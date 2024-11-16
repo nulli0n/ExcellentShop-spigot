@@ -55,10 +55,9 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         }
     }
 
-    @Override
     @Nullable
-    protected VirtualProduct findProduct(@NotNull Product product) {
-        return this.getShop().getProductById(product.getId());
+    private VirtualProduct findProduct(@NotNull Product product) {
+        return this.shop.getProductById(product.getId());
     }
 
     @NotNull
@@ -77,7 +76,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
     }
 
     @Nullable
-    public StockAmount getAmount(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
+    private StockAmount getAmount(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
         StockValues values = player == null ? product.getStockValues() : product.getLimitValues();
         if (values.isUnlimited(type)) return null;
 
@@ -103,7 +102,8 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         this.plugin.runTaskAsync(task -> plugin.getData().getVirtualDataHandler().insertStockData(data));
     }
 
-    public void resetGlobalAmount(@NotNull Product product) {
+    @Override
+    public void resetGlobalValues(@NotNull Product product) {
         StockData data = this.getStockData(product);
         if (data == null) return;
 
@@ -114,18 +114,19 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         this.saveData(data);
     }
 
-    public void resetPlayerAmount(@NotNull VirtualProduct product) {
-        this.resetPlayerAmount(product, null);
-    }
+//    public void resetPlayerAmount(@NotNull VirtualProduct product) {
+//        this.resetPlayerAmount(product, null);
+//    }
 
-    public void resetPlayerAmount(@NotNull VirtualProduct product, @Nullable TradeType tradeType) {
+    @Override
+    public void resetPlayerLimits(@NotNull Product product/*, @Nullable TradeType tradeType*/) {
         StockData data = this.getStockData(product);
         if (data == null) return;
 
         for (TradeType type : TradeType.values()) {
-            if (tradeType == null || tradeType == type) {
+            //if (tradeType == null || tradeType == type) {
                 data.getPlayerAmounts().remove(type);
-            }
+            //}
         }
 
         this.saveData(data);
@@ -135,7 +136,7 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
 
     private void saveData(@NotNull StockData data) {
         data.cleanUp();
-        this.plugin.getShopManager().getProductDataManager().scheduleSave(data);
+        data.setSaveRequired(true);
     }
 
     private void saveData(@NotNull Product product) {
@@ -157,53 +158,60 @@ public class VirtualStock extends AbstractStock<VirtualShop, VirtualProduct> {
         return amounts == null ? UNLIMITED : amounts.getItemsLeft();
     }
 
-
     @Override
-    public int countItem(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
-        return this.getItemsLeft(this.getAmount(product, type, player));
+    public int count(@NotNull Product product, @NotNull TradeType type, @Nullable Player player) {
+        VirtualProduct origin = this.findProduct(product);
+        return origin == null ? 0 : this.getItemsLeft(this.getAmount(origin, type, player));
     }
 
     @Override
-    public boolean consumeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
-        StockAmount amounts = this.getAmount(product, type, player);
+    public boolean consume(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player) {
+        VirtualProduct origin = this.findProduct(product);
+        if (origin == null) return false;
+
+        StockAmount amounts = this.getAmount(origin, type, player);
         if (amounts == null) return false;
 
         amounts.setItemsLeft(amounts.getItemsLeft() - amount);
-        this.saveData(product);
+        this.saveData(origin);
         return true;
     }
 
     @Override
-    public boolean storeItem(@NotNull VirtualProduct product, int amount, @NotNull TradeType type, @Nullable Player player) {
-        StockAmount amounts = this.getAmount(product, type, player);
+    public boolean store(@NotNull Product product, int amount, @NotNull TradeType type, @Nullable Player player) {
+        VirtualProduct origin = this.findProduct(product);
+        if (origin == null) return false;
+
+        StockAmount amounts = this.getAmount(origin, type, player);
         if (amounts == null) return false;
 
         amounts.setItemsLeft(amounts.getItemsLeft() + amount);
-        this.saveData(product);
+        this.saveData(origin);
         return true;
     }
 
     @Override
-    public boolean restockItem(@NotNull VirtualProduct product, @NotNull TradeType type, boolean force, @Nullable Player player) {
-        StockAmount amounts = this.getAmount(product, type, player);
+    public boolean restock(@NotNull Product product, @NotNull TradeType type, boolean force, @Nullable Player player) {
+        VirtualProduct origin = this.findProduct(product);
+        if (origin == null) return false;
+
+        StockAmount amounts = this.getAmount(origin, type, player);
         if (amounts == null) return false;
 
         if (force || amounts.isRestockTime()) {
-            amounts.restock(player == null ? product.getStockValues() : product.getLimitValues(), type);
-            this.saveData(product);
+            amounts.restock(player == null ? origin.getStockValues() : origin.getLimitValues(), type);
+            this.saveData(origin);
             return true;
         }
         return false;
     }
 
+    @Override
+    public long getRestockTime(@NotNull Product product, @NotNull TradeType type, @Nullable Player player) {
+        VirtualProduct origin = this.findProduct(product);
+        if (origin == null) return 0L;
 
-
-    public long getRestockDate(@NotNull VirtualProduct product, @NotNull TradeType type) {
-        return this.getRestockDate(product, type, null);
-    }
-
-    public long getRestockDate(@NotNull VirtualProduct product, @NotNull TradeType type, @Nullable Player player) {
-        StockAmount amounts = this.getAmount(product, type, player);
+        StockAmount amounts = this.getAmount(origin, type, player);
         return amounts == null ? 0L : amounts.getRestockDate();
     }
 }

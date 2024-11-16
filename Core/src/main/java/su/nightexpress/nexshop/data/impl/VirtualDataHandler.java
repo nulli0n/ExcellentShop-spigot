@@ -291,14 +291,6 @@ public class VirtualDataHandler {
         LocalDateTime deadline = LocalDateTime.now().minusDays(dataHandler.getConfig().getPurgePeriod());
         long deadlineMs = TimeUtil.toEpochMillis(deadline);
 
-//        if (SQLQueries.hasTable(dataHandler.getConnector(), this.tableStockData)) {
-//            String sql = "DELETE FROM " + this.tableStockData + " WHERE " + COLUMN_STOCK_RESTOCK_DATE.getName() + " < " + deadlineMs;
-//            SQLQueries.executeStatement(dataHandler.getConnector(), sql);
-//        }
-//        if (SQLQueries.hasTable(dataHandler.getConnector(), this.tablePlayerLimits)) {
-//            String sql = "DELETE FROM " + this.tablePlayerLimits + " WHERE " + COLUMN_STOCK_RESTOCK_DATE.getName() + " < " + deadlineMs;
-//            SQLQueries.executeStatement(dataHandler.getConnector(), sql);
-//        }
         if (SQLQueries.hasTable(dataHandler.getConnector(), this.tablePriceData)) {
             String sql = "DELETE FROM " + this.tablePriceData + " WHERE " + COLUMN_PRICE_LAST_UPDATED.getName() + " < " + deadlineMs;
             SQLQueries.executeStatement(dataHandler.getConnector(), sql);
@@ -315,34 +307,6 @@ public class VirtualDataHandler {
             module.loadRotationData();
         }
     }
-
-//    @NotNull
-//    public List<StockData> getStockDatas(@NotNull String shopId) {
-//        return this.dataHandler.load(this.tableStockData, this.stockDataFunction,
-//            Collections.emptyList(),
-//            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))),
-//            -1
-//        );
-//    }
-
-//    @NotNull
-//    public List<StockData> getStocksAndLimits(@NotNull String shopId) {
-//        List<StockData> list = new ArrayList<>();
-//
-//        list.addAll(this.dataHandler.load(this.tableStockData, this.stockDataFunction,
-//            Collections.emptyList(),
-//            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))),
-//            -1
-//        ));
-//
-//        list.addAll(this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
-//            Collections.emptyList(),
-//            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))),
-//            -1
-//        ));
-//
-//        return list;
-//    }
 
     @NotNull
     private List<LegacyStockData> getStocksAndLimits() {
@@ -372,24 +336,6 @@ public class VirtualDataHandler {
         );
     }
 
-//    @NotNull
-//    public List<OwnedStockData> getPlayerLimits(@NotNull UUID playerId) {
-//        return this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
-//            Collections.emptyList(),
-//            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString()))),
-//            -1
-//        );
-//    }
-//
-//    @NotNull
-//    public List<OwnedStockData> getPlayerLimits() {
-//        return this.dataHandler.load(this.tablePlayerLimits, this.ownedStockDataFunction,
-//            Collections.emptyList(),
-//            Collections.emptyList(),
-//            -1
-//        );
-//    }
-
     @NotNull
     public List<PriceData> getPriceDatas() {
         return this.dataHandler.load(this.tablePriceData, this.priceDataFunction,
@@ -398,19 +344,6 @@ public class VirtualDataHandler {
             -1
         );
     }
-
-//    @NotNull
-//    public List<PriceData> getPriceData(@NotNull Shop shop) {
-//        return this.getPriceData(shop.getId());
-//    }
-//
-//    @NotNull
-//    public List<PriceData> getPriceData(@NotNull String shopId) {
-//        return this.dataHandler.load(this.tablePriceData, this.priceDataFunction,
-//            Collections.emptyList(),
-//            Collections.singletonList(SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))), -1
-//        );
-//    }
 
     @Nullable
     public RotationData getRotationData(@NotNull RotatingShop shop) {
@@ -537,43 +470,6 @@ public class VirtualDataHandler {
         this.dataHandler.executeUpdate(UpdateQuery.create(this.tablePriceData, this.createUpdateEntity(data)));
     }
 
-//    public void saveStockData(@NotNull LegacyStockData data) {
-//        UpdateQuery query = UpdateQuery.create(
-//            this.tableStockData,
-//            Lists.newList(
-//                COLUMN_STOCK_ITEMS_LEFT.toValue(data.getItemsLeft()),
-//                COLUMN_STOCK_RESTOCK_DATE.toValue(data.getRestockDate())
-//            ),
-//            Lists.newList(
-//                SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(data.getShopId())),
-//                SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(data.getProductId())),
-//                SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(data.getTradeType().name()))
-//            )
-//        );
-//
-//        this.dataHandler.executeUpdate(query);
-//    }
-//
-//    public void savePlayerLimit(@NotNull LegacyOwnedStockData data) {
-//        UpdateQuery query = UpdateQuery.create(
-//            this.tablePlayerLimits,
-//            Lists.newList(
-//                COLUMN_STOCK_ITEMS_LEFT.toValue(data.getItemsLeft()),
-//                COLUMN_STOCK_RESTOCK_DATE.toValue(data.getRestockDate())
-//            ),
-//            Lists.newList(
-//                SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(data.getOwnerId().toString()/*playerId.toString()*/)),
-//                SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(data.getShopId())),
-//                SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(data.getProductId())),
-//                SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(data.getTradeType().name()))
-//            )
-//        );
-//
-//        this.dataHandler.executeUpdate(query);
-//    }
-
-
-
     public void saveRotationData(@NotNull RotationData rotationData) {
         UpdateQuery query = UpdateQuery.create(
             this.tableRotationData,
@@ -590,80 +486,6 @@ public class VirtualDataHandler {
     }
 
 
-
-
-//    public void deletePlayerLimit(@NotNull UUID playerId) {
-//        this.dataHandler.delete(this.tablePlayerLimits,
-//            SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString()))
-//        );
-//    }
-//
-//    public void deletePlayerLimit(@NotNull UUID playerId, @NotNull Product product) {
-//        this.dataHandler.delete(this.tablePlayerLimits,
-//            SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString())),
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
-//            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId()))
-//        );
-//    }
-//
-//    public void deletePlayerLimit(@NotNull UUID playerId, @NotNull Product product, @NotNull TradeType tradeType) {
-//        this.deletePlayerLimit(playerId, product.getShop().getId(), product.getId(), tradeType);
-//    }
-//
-//    public void deletePlayerLimit(@NotNull UUID playerId, @NotNull String shopId, @NotNull String productId, @NotNull TradeType tradeType) {
-//        this.dataHandler.delete(this.tablePlayerLimits,
-//            SQLCondition.equal(COLUMN_GEN_PLAYER_ID.toValue(playerId.toString())),
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId)),
-//            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(productId)),
-//            SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(tradeType.name()))
-//        );
-//    }
-
-//    public void deletePlayerLimit(@NotNull Product product, @NotNull TradeType tradeType) {
-//        this.dataHandler.delete(this.tablePlayerLimits,
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
-//            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId())),
-//            SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(tradeType.name()))
-//        );
-//    }
-//
-//    public void deletePlayerLimit(@NotNull Product product) {
-//        this.dataHandler.delete(this.tablePlayerLimits,
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
-//            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId()))
-//        );
-//    }
-//
-//    public void deletePlayerLimits(@NotNull Shop shop) {
-//        this.deletePlayerLimits(shop.getId());
-//    }
-//
-//    public void deletePlayerLimits(@NotNull String shopId) {
-//        this.dataHandler.delete(this.tablePlayerLimits,
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId))
-//        );
-//    }
-
-
-
-//    public void deleteStockData(@NotNull Product product) {
-//        this.dataHandler.delete(this.tableStockData,
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(product.getShop().getId())),
-//            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(product.getId()))
-//        );
-//    }
-//
-//    public void deleteStockData(@NotNull Product product, @NotNull TradeType tradeType) {
-//        this.deleteStockData(product.getShop().getId(), product.getId(), tradeType);
-//    }
-//
-//    public void deleteStockData(@NotNull String shopId, @NotNull String productId, @NotNull TradeType tradeType) {
-//        this.dataHandler.delete(this.tableStockData,
-//            SQLCondition.equal(COLUMN_GEN_SHOP_ID.toValue(shopId)),
-//            SQLCondition.equal(COLUMN_GEN_PRODUCT_ID.toValue(productId)),
-//            SQLCondition.equal(COLUMN_STOCK_TRADE_TYPE.toValue(tradeType.name()))
-//        );
-//    }
 
     public void deleteStockData(@NotNull Shop shop) {
         this.deleteStockData(shop.getId());

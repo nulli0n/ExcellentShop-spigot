@@ -3,8 +3,10 @@ package su.nightexpress.nexshop.auction.data;
 import com.google.common.collect.Lists;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
@@ -70,7 +72,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
                 }
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
-                Currency currency = currencyId == null ? this.auctionManager.getDefaultCurrency() : this.plugin().getCurrencyManager().getCurrency(currencyId);
+                Currency currency = currencyId == null ? this.auctionManager.getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
                 if (currency == null || !this.auctionManager.getAllowedCurrencies().contains(currency)) {
                     this.auctionManager.error("Invalid listing currency '" + currencyId + "'!");
                     return null;
@@ -106,7 +108,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
                 }
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
-                Currency currency = currencyId == null ? this.auctionManager.getDefaultCurrency() : this.plugin().getCurrencyManager().getCurrency(currencyId);
+                Currency currency = currencyId == null ? this.auctionManager.getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
                 if (currency == null || !this.auctionManager.getAllowedCurrencies().contains(currency)) {
                     this.auctionManager.error("Invalid listing currency '" + currencyId + "'!");
                     return null;
@@ -149,11 +151,11 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
         ));
 
         this.addColumn(this.tableListings,
-            COLUMN_CURRENCY.toValue(this.auctionManager.getDefaultCurrency().getId()),
+            COLUMN_CURRENCY.toValue(this.auctionManager.getDefaultCurrency().getInternalId()),
             COLUMN_DATE_CREATION.toValue(System.currentTimeMillis()));
 
         this.addColumn(this.tableCompletedListings,
-            COLUMN_CURRENCY.toValue(this.auctionManager.getDefaultCurrency().getId()),
+            COLUMN_CURRENCY.toValue(this.auctionManager.getDefaultCurrency().getInternalId()),
             COLUMN_DATE_CREATION.toValue(System.currentTimeMillis()));
     }
 
@@ -214,7 +216,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
             COLUMN_OWNER.toValue(listing.getOwner().toString()),
             COLUMN_OWNER_NAME.toValue(listing.getOwnerName()),
             COLUMN_ITEM.toValue(String.valueOf(ItemUtil.compress(listing.getItemStack()))),
-            COLUMN_CURRENCY.toValue(listing.getCurrency().getId()),
+            COLUMN_CURRENCY.toValue(listing.getCurrency().getInternalId()),
             COLUMN_PRICE.toValue(listing.getPrice()),
             COLUMN_EXPIRE_DATE.toValue(listing.getExpireDate()),
             COLUMN_DELETE_DATE.toValue(listing.getDeleteDate()),
@@ -236,7 +238,7 @@ public class AuctionDataHandler extends AbstractDataHandler<ShopPlugin> {
             COLUMN_OWNER_NAME.toValue(listing.getOwnerName()),
             COLUMN_BUYER_NAME.toValue(listing.getBuyerName()),
             COLUMN_ITEM.toValue(String.valueOf(ItemUtil.compress(listing.getItemStack()))),
-            COLUMN_CURRENCY.toValue(listing.getCurrency().getId()),
+            COLUMN_CURRENCY.toValue(listing.getCurrency().getInternalId()),
             COLUMN_PRICE.toValue(listing.getPrice()),
             COLUMN_IS_PAID.toValue(listing.isClaimed() ? 1 : 0),
             COLUMN_BUY_DATE.toValue(listing.getBuyDate()),

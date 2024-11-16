@@ -1,54 +1,47 @@
 package su.nightexpress.nexshop.shop.virtual.editor;
 
 import org.bukkit.Material;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.shop.virtual.Placeholders;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualStock;
-import su.nightexpress.nexshop.shop.virtual.type.RotationType;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
 import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.menu.click.ClickResult;
 import su.nightexpress.nightcore.menu.impl.EditorMenu;
-import su.nightexpress.nightcore.util.*;
-import su.nightexpress.nightcore.util.text.tag.Tags;
-
-import java.util.function.Predicate;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Players;
 
 public class ShopMainEditor extends EditorMenu<ShopPlugin, VirtualShop> implements ShopEditor {
 
-    private static final String TEXTURE_NPC   = "f76cf8b7378e889395d538e6354a17a3de6b294bb6bf8db9c701951c68d3c0e6";
-    private static final String TEXTURE_BOX   = "b663a178638400f16c7073c63fef13572fab9b6f42df9ea039c3b3f6773faf94";
-    private static final String TEXTURE_PAINT = "5e44280d42db07b012eb76dee73249c86fc712e8eb14fa2b44847714bbb95f83";
+    private static final String TEXTURE_SETTINGS   = "e3c81adc6c06d95c65b6c1089755a04d7ebc414f51ba66d14d0c4c1d71520df6";
+    private static final String TEXTURE_BOX        = "b663a178638400f16c7073c63fef13572fab9b6f42df9ea039c3b3f6773faf94";
+    private static final String TEXTURE_PAINT      = "5e44280d42db07b012eb76dee73249c86fc712e8eb14fa2b44847714bbb95f83";
+    private static final String TEXTURE_TNT_RED    = "dc75cd6f9c713e9bf43fea963990d142fc0d252974ebe04b2d882166cbb6d294";
+    private static final String TEXTURE_TNT_ORANGE = "802246ff8b6c617168edaec39660612e72a54ab2eacc27c5e815e4ac70239e3a";
 
     private final VirtualShopModule module;
 
     public ShopMainEditor(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, Tags.BLACK.enclose("Shop Editor [" + Placeholders.SHOP_ID + "]"), MenuSize.CHEST_54);
+        super(plugin, VirtualLang.EDITOR_TITLE_SHOP_SETTINGS.getString(), MenuSize.CHEST_54);
         this.module = module;
 
         this.addReturn(49, (viewer, event, shop) -> {
             this.runNextTick(() -> this.module.openShopsEditor(viewer.getPlayer()));
         });
-
-        // =============================================
-        // Generic stuff
-        // =============================================
 
         this.addItem(Material.NAME_TAG, VirtualLocales.SHOP_DISPLAY_NAME, 10, (viewer, event, shop) -> {
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, (dialog, input) -> {
@@ -64,6 +57,7 @@ public class ShopMainEditor extends EditorMenu<ShopPlugin, VirtualShop> implemen
                 this.saveAndFlush(viewer, shop);
                 return;
             }
+
             this.handleInput(viewer, VirtualLang.EDITOR_ENTER_DESCRIPTION, (dialog, input) -> {
                 shop.getDescription().add(input.getText());
                 this.save(viewer, shop);
@@ -87,12 +81,26 @@ public class ShopMainEditor extends EditorMenu<ShopPlugin, VirtualShop> implemen
             VirtualShop shop = this.getLink(viewer);
             item.setType(shop.getIcon().getType());
             item.setItemMeta(shop.getIcon().getItemMeta());
-            ItemReplacer.create(item).readLocale(VirtualLocales.SHOP_ICON).hideFlags().trimmed()
-                .replace(shop.replacePlaceholders())
+            ItemReplacer.create(item).readLocale(VirtualLocales.SHOP_ICON).hideFlags()
+                .replacement(replacer -> replacer.replace(shop.replacePlaceholders()))
                 .writeMeta();
         });
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_PAINT), VirtualLocales.SHOP_LAYOUT, 14, (viewer, event, shop) -> {
+        this.addItem(Material.COMPASS, VirtualLocales.SHOP_MENU_SLOT, 4, (viewer, event, shop) -> {
+            if (event.isRightClick()) {
+                shop.setMainMenuSlot(-1);
+                this.saveAndFlush(viewer, shop);
+                return;
+            }
+
+            this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_VALUE, (dialog, input) -> {
+                shop.setMainMenuSlot(input.asInt());
+                this.save(viewer, shop);
+                return true;
+            });
+        }).getOptions().setVisibilityPolicy(viewer -> VirtualConfig.isCentralMenuEnabled());
+
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_PAINT), VirtualLocales.SHOP_LAYOUT, 13, (viewer, event, shop) -> {
             this.handleInput(viewer, VirtualLang.EDITOR_ENTER_TITLE, (dialog, input) -> {
                 shop.setLayoutName(input.getTextRaw());
                 this.save(viewer, shop);
@@ -100,22 +108,18 @@ public class ShopMainEditor extends EditorMenu<ShopPlugin, VirtualShop> implemen
             }).setSuggestions(this.module.getLayoutNames(), true);
         });
 
-        this.addItem(Material.LIME_DYE, VirtualLocales.SHOP_TRADES, 15, (viewer, event, shop) -> {
-            TradeType type = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
-            shop.setTransactionEnabled(type, !shop.isTransactionEnabled(type));
+        this.addItem(Material.LIME_DYE, VirtualLocales.SHOP_BUYING, 14, (viewer, event, shop) -> {
+            shop.setTransactionEnabled(TradeType.BUY, !shop.isTransactionEnabled(TradeType.BUY));
             this.saveAndFlush(viewer, shop);
         }).getOptions().addDisplayModifier((viewer, itemStack) -> {
-            VirtualShop shop = this.getLink(viewer);
-            if (shop.isTransactionEnabled(TradeType.BUY) && shop.isTransactionEnabled(TradeType.SELL)) {
-                itemStack.setType(Material.LIGHT_BLUE_DYE);
-            }
-            else if (shop.isTransactionEnabled(TradeType.BUY)) {
-                itemStack.setType(Material.LIME_DYE);
-            }
-            else if (shop.isTransactionEnabled(TradeType.SELL)) {
-                itemStack.setType(Material.RED_DYE);
-            }
-            else itemStack.setType(Material.GRAY_DYE);
+            itemStack.setType(this.getLink(viewer).isTransactionEnabled(TradeType.BUY) ? Material.LIME_DYE : Material.GRAY_DYE);
+        });
+
+        this.addItem(Material.LIME_DYE, VirtualLocales.SHOP_SELLING, 15, (viewer, event, shop) -> {
+            shop.setTransactionEnabled(TradeType.SELL, !shop.isTransactionEnabled(TradeType.SELL));
+            this.saveAndFlush(viewer, shop);
+        }).getOptions().addDisplayModifier((viewer, itemStack) -> {
+            itemStack.setType(this.getLink(viewer).isTransactionEnabled(TradeType.SELL) ? Material.LIME_DYE : Material.GRAY_DYE);
         });
 
         this.addItem(Material.REDSTONE, VirtualLocales.SHOP_PERMISSION, 16, (viewer, event, shop) -> {
@@ -125,124 +129,51 @@ public class ShopMainEditor extends EditorMenu<ShopPlugin, VirtualShop> implemen
             itemStack.setType(this.getLink(viewer).isPermissionRequired() ? Material.REDSTONE : Material.GUNPOWDER);
         });
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 31, (viewer, event, shop) -> {
-            if (event.getClick() == ClickType.DROP) {
-                this.plugin.runTaskAsync(task -> {
-                    shop.getPricer().deleteData();
-                    shop.getPricer().updatePrices();
-                });
-                return;
-            }
-            if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                VirtualStock stock = (VirtualStock) shop.getStock();
-                stock.deleteData();
-                return;
-            }
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_SETTINGS), VirtualLocales.SHOP_SPECIFIC, 28, (viewer, event, shop) -> {
+            this.runNextTick(() -> this.module.openSpecificEditor(viewer.getPlayer(), shop));
+        });
 
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_BOX), VirtualLocales.SHOP_PRODUCTS, 30, (viewer, event, shop) -> {
             this.runNextTick(() -> this.module.openProductsEditor(viewer.getPlayer(), shop));
         });
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 4, (viewer, event, shop) -> {
-            if (event.isRightClick()) {
-                shop.getNPCIds().clear();
-                this.saveAndFlush(viewer, shop);
-                return;
-            }
-
-            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, (dialog, input) -> {
-                int id = input.asInt(-1);
-                if (id < 0) return true;
-
-                shop.getNPCIds().add(id);
-                this.save(viewer, shop);
-                return true;
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_TNT_RED), VirtualLocales.SHOP_RESET_PRICE_DATA, 32, (viewer, event, shop) -> {
+            this.plugin.runTaskAsync(task -> {
+                shop.getPricer().deleteData();
+                shop.getPricer().updatePrices();
             });
-        }).getOptions().setVisibilityPolicy(viewer -> Plugins.isLoaded(HookId.CITIZENS));
+        });
 
-        Predicate<MenuViewer> isStaticShop = viewer -> this.getLink(viewer) instanceof StaticShop;
-        Predicate<MenuViewer> isRotatingShop = viewer -> this.getLink(viewer) instanceof RotatingShop;
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_TNT_ORANGE), VirtualLocales.SHOP_RESET_STOCK_DATA, 34, (viewer, event, shop) -> {
+            VirtualStock stock = (VirtualStock) shop.getStock();
+            stock.deleteData();
+        });
 
-        // =============================================
-        // Static Shop stuff
-        // =============================================
-
-        this.addItem(Material.ENDER_PEARL, VirtualLocales.SHOP_PAGES, 28, (viewer, event, shop) -> {
-            StaticShop staticShop = (StaticShop) shop;
-            int add = event.isLeftClick() ? 1 : -1;
-            staticShop.setPages(staticShop.getPages() + add);
-            this.saveAndFlush(viewer, staticShop);
-        }).getOptions().setVisibilityPolicy(isStaticShop);
-
-        this.addItem(Material.GOLD_NUGGET, VirtualLocales.SHOP_DISCOUNTS, 34, (viewer, event, shop) -> {
-            StaticShop staticShop = (StaticShop) shop;
-            this.runNextTick(() -> this.module.openDiscountsEditor(viewer.getPlayer(), staticShop));
-        }).getOptions().setVisibilityPolicy(isStaticShop);
-
-        // =============================================
-        // Rotating Shop stuff
-        // =============================================
-
-        this.addItem(Material.OAK_SIGN, VirtualLocales.SHOP_ROTATION_TYPE, 13, (viewer, event, shop) -> {
-            RotatingShop rotatingShop = (RotatingShop) shop;
-            rotatingShop.setRotationType(Lists.next(rotatingShop.getRotationType()));
-            this.saveAndFlush(viewer, rotatingShop);
-        }).getOptions().setVisibilityPolicy(isRotatingShop);
-
-        this.addItem(Material.CLOCK, VirtualLocales.SHOP_ROTATION_INTERVAL, 28, (viewer, event, shop) -> {
-            RotatingShop rotatingShop = (RotatingShop) shop;
-            if (event.getClick() == ClickType.DROP) {
-                rotatingShop.rotate();
-                this.flush(viewer);
-                return;
-            }
-
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS, (dialog, input) -> {
-                rotatingShop.setRotationInterval(input.asInt());
-                this.save(viewer, rotatingShop);
-                return true;
-            });
-        }).getOptions().setVisibilityPolicy(viewer -> isRotatingShop.test(viewer) && ((RotatingShop) this.getLink(viewer)).getRotationType() == RotationType.INTERVAL);
-
-        this.addItem(Material.CLOCK, VirtualLocales.SHOP_ROTATION_TIMES, 27, (viewer, event, shop) -> {
-            RotatingShop rotatingShop = (RotatingShop) shop;
-            this.runNextTick(() -> this.module.openRotationTimesEditor(viewer.getPlayer(), rotatingShop));
-        }).getOptions().setVisibilityPolicy(viewer -> isRotatingShop.test(viewer) && ((RotatingShop) this.getLink(viewer)).getRotationType() == RotationType.FIXED);
-
-        this.addItem(Material.CHEST_MINECART, VirtualLocales.SHOP_ROTATION_PRODUCTS, 34, (viewer, event, shop) -> {
-            RotatingShop rotatingShop = (RotatingShop) shop;
-            if (event.getClick() == ClickType.DROP) {
-                this.handleInput(viewer, VirtualLang.EDITOR_ENTER_SLOTS, (dialog, input) -> {
-                    rotatingShop.setProductSlots(NumberUtil.getIntArray(input.getTextRaw()));
-                    this.save(viewer, rotatingShop);
-                    return true;
-                });
-                return;
-            }
-
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, (dialog, input) -> {
-                if (event.isLeftClick()) {
-                    rotatingShop.setProductMinAmount(input.asInt());
-                }
-                else {
-                    rotatingShop.setProductMaxAmount(input.asInt());
-                }
-                this.saveAndFlush(viewer, rotatingShop);
-                return true;
-            });
-        }).getOptions().setVisibilityPolicy(isRotatingShop);
-
-        // =============================================
-        // End stuff
-        // =============================================
+//        this.addItem(ItemUtil.getSkinHead(TEXTURE_NPC), VirtualLocales.SHOP_ATTACHED_NPCS, 4, (viewer, event, shop) -> {
+//            if (event.isRightClick()) {
+//                shop.getNPCIds().clear();
+//                this.saveAndFlush(viewer, shop);
+//                return;
+//            }
+//
+//            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_NPC_ID, (dialog, input) -> {
+//                int id = input.asInt(-1);
+//                if (id < 0) return true;
+//
+//                shop.getNPCIds().add(id);
+//                this.save(viewer, shop);
+//                return true;
+//            });
+//        }).getOptions().setVisibilityPolicy(viewer -> Plugins.isLoaded(HookId.CITIZENS));
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            ItemReplacer.replace(item, this.getLink(viewer).getPlaceholders());
+            ItemReplacer.replace(item, Placeholders.forVirtualShopEditor(this.getLink(viewer)));
         }));
     }
 
     @Override
     protected void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        options.setTitle(this.getLink(viewer).replacePlaceholders().apply(options.getTitle()));
+        options.editTitle(this.getLink(viewer).replacePlaceholders());
     }
 
     @Override

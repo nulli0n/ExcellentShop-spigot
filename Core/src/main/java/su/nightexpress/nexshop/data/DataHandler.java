@@ -98,6 +98,7 @@ public class DataHandler extends AbstractUserDataHandler<ShopPlugin, ShopUser> {
     @Override
     public void onSynchronize() {
         if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
+            this.plugin.getShopManager().getProductDataManager().saveScheduled();
             this.plugin.getShopManager().getProductDataManager().loadData();
         }
 

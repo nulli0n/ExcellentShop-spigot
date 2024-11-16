@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop.product.price.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
@@ -17,7 +16,6 @@ public abstract class RangedPricer extends AbstractProductPricer {
     public RangedPricer(@NotNull PriceType type) {
         super(type);
         this.priceRange = new HashMap<>();
-        this.placeholderMap.add(Placeholders.forRangedPricer(this));
     }
 
     @NotNull

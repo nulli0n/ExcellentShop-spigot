@@ -3,16 +3,16 @@ main: su.nightexpress.nexshop.ShopPlugin
 version: '${project.version}'
 description: Advanced 4 in 1 shop plugin with a lot of cool features!
 author: NightExpress
-depend: [ nightcore ]
+depend: [ nightcore, EconomyBridge ]
 softdepend:
-  - Vault
-  - CoinsEngine
-  - PlayerPoints
-  - GemsEconomy
-  - UltraEconomy
-  - BeastTokens
-  - VotingPlugin
-  - EliteMobs
+#  - Vault
+#  - CoinsEngine
+#  - PlayerPoints
+#  - GemsEconomy
+#  - UltraEconomy
+#  - BeastTokens
+#  - VotingPlugin
+#  - EliteMobs
   - Citizens
   - WorldGuard
   - Lands

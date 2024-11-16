@@ -7,7 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.currency.Currency;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
@@ -118,7 +118,7 @@ public class AuctionUtils {
     public static double getTax(@NotNull Currency currency, double price, double taxPercent) {
         double tax = price * (taxPercent / 100D);
 
-        if (!currency.decimalsAllowed() || AuctionConfig.LISTINGS_FLOOR_PRICE.get()) {
+        if (!currency.canHandleDecimals() || AuctionConfig.LISTINGS_FLOOR_PRICE.get()) {
             tax = Math.ceil(tax);
         }
 
@@ -164,6 +164,6 @@ public class AuctionUtils {
     private static UniDouble getCurrencyPriceRange(@NotNull Currency currency) {
         var map = AuctionConfig.LISTINGS_PRICE_PER_CURRENCY.get();
 
-        return map.getOrDefault(currency.getId(), map.getOrDefault(Placeholders.DEFAULT, UniDouble.of(-1, -1)));
+        return map.getOrDefault(currency.getInternalId(), map.getOrDefault(Placeholders.DEFAULT, UniDouble.of(-1, -1)));
     }
 }

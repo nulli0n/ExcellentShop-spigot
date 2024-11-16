@@ -7,6 +7,8 @@ import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.product.data.AbstractData;
 import su.nightexpress.nexshop.product.data.ProductData;
+import su.nightexpress.nexshop.product.data.impl.PriceData;
+import su.nightexpress.nexshop.product.data.impl.StockData;
 import su.nightexpress.nightcore.manager.AbstractManager;
 
 import java.util.*;
@@ -14,14 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductDataManager extends AbstractManager<ShopPlugin> {
 
-    private final Set<AbstractData>                     scheduledSave;
     private final Map<String, Map<String, ProductData>> dataMap; // shopId -> productId -> ProductData
 
     private boolean loaded;
 
     public ProductDataManager(@NotNull ShopPlugin plugin) {
         super(plugin);
-        this.scheduledSave = ConcurrentHashMap.newKeySet();
         this.dataMap = new ConcurrentHashMap<>();
     }
 
@@ -29,14 +29,11 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
     protected void onLoad() {
         this.loadData();
         this.loaded = true;
-
-        this.addTask(this.plugin.createAsyncTask(this::saveScheduled).setSecondsInterval(Config.DATA_PRODUCT_SAVE_INTERVAL.get()));
     }
 
     @Override
     protected void onShutdown() {
         this.saveScheduled();
-        this.scheduledSave.clear();
         this.dataMap.clear();
         this.loaded = false;
     }
@@ -49,8 +46,6 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
 
     private void loadPriceData() {
         this.plugin.getData().getVirtualDataHandler().getPriceDatas().forEach(priceData -> {
-            if (this.isScheduledToSave(priceData)) return;
-
             this.getData(priceData.getShopId(), priceData.getProductId()).loadPrice(priceData);
         });
         //this.plugin.info("Loaded product price datas.");
@@ -58,22 +53,32 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
 
     private void loadStockData() {
         this.plugin.getData().getVirtualDataHandler().getStockDatas().forEach(stockData -> {
-            if (this.isScheduledToSave(stockData)) return;
-
             this.getData(stockData.getShopId(), stockData.getProductId()).loadStock(stockData);
         });
         //this.plugin.info("Loaded product stock datas.");
     }
 
-    private boolean isScheduledToSave(@NotNull AbstractData data) {
-        return this.scheduledSave.stream().anyMatch(other -> other.getProductId().equalsIgnoreCase(data.getProductId()) && other.getShopId().equalsIgnoreCase(data.getShopId()));
-    }
-
     public void saveScheduled() {
-        if (this.scheduledSave.isEmpty()) return;
+        Set<AbstractData> datas = new HashSet<>();
 
-        this.plugin.getData().getVirtualDataHandler().saveProductDatas(this.scheduledSave);
-        this.scheduledSave.clear();
+        this.dataMap.values().forEach(map -> map.values().forEach(data -> {
+            StockData stockData = data.getStockData();
+            if (stockData != null && stockData.isSaveRequired()) {
+                datas.add(stockData);
+                stockData.setSaveRequired(false);
+            }
+
+            PriceData priceData = data.getPriceData();
+            if (priceData != null && priceData.isSaveRequired()) {
+                datas.add(priceData);
+                priceData.setSaveRequired(false);
+            }
+        }));
+
+        if (datas.isEmpty()) return;
+
+        this.plugin.getData().getVirtualDataHandler().saveProductDatas(datas);
+        this.plugin.debug("Saved " + datas.size() + " product datas");
     }
 
     public void cleanUp() {
@@ -112,10 +117,6 @@ public class ProductDataManager extends AbstractManager<ShopPlugin> {
 
             return false;
         });
-    }
-
-    public void scheduleSave(@NotNull AbstractData data) {
-        this.scheduledSave.add(data);
     }
 
     public boolean isLoaded() {

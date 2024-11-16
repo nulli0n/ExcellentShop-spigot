@@ -25,6 +25,7 @@ import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
 import su.nightexpress.nightcore.util.ItemReplacer;
 import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Players;
 
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
             items.clear();
 
             this.module.sellWithReturn(player, inventory);
-            this.plugin.runTask(task -> player.closeInventory());
+            this.runNextTick(player::closeInventory);
         }));
 
         this.load();
@@ -106,14 +107,15 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
             double price = product.getPriceSell(player) * (item.getAmount() / (double) product.getUnitAmount());
 
             ItemReplacer.create(icon)
-                .trimmed()
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)
-                .replaceLoreExact(ITEM_LORE, ItemUtil.getLore(item))
-                .replace(ITEM_NAME, ItemUtil.getItemName(item))
-                .replace(product.getShop().getPlaceholders())
-                .replace(product.getPlaceholders(player))
-                .replace(GENERIC_PRICE, () -> product.getCurrency().format(price))
+                .replacement(replacer -> replacer
+                    .replace(ITEM_LORE, ItemUtil.getLore(item))
+                    .replace(ITEM_NAME, ItemUtil.getItemName(item))
+                    .replace(product.getShop().replacePlaceholders())
+                    .replace(product.replacePlaceholders(player))
+                    .replace(GENERIC_PRICE, () -> product.getCurrency().format(price))
+                )
                 .writeMeta();
 
             inventory.setItem(slot, icon);
@@ -182,7 +184,7 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
     protected void loadAdditional() {
         this.itemName = ConfigValue.create("Item.Name", WHITE.enclose(ITEM_NAME)).read(cfg);
 
-        this.itemLore = ConfigValue.create("Item.Lore", List.of(
+        this.itemLore = ConfigValue.create("Item.Lore", Lists.newList(
             ITEM_LORE,
             "",
             LIGHT_GREEN.enclose(BOLD.enclose("Details:")),
