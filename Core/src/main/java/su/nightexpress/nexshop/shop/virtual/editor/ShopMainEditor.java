@@ -100,12 +100,8 @@ public class ShopMainEditor extends EditorMenu<ShopPlugin, VirtualShop> implemen
             });
         }).getOptions().setVisibilityPolicy(viewer -> VirtualConfig.isCentralMenuEnabled());
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_PAINT), VirtualLocales.SHOP_LAYOUT, 13, (viewer, event, shop) -> {
-            this.handleInput(viewer, VirtualLang.EDITOR_ENTER_TITLE, (dialog, input) -> {
-                shop.setLayoutName(input.getTextRaw());
-                this.save(viewer, shop);
-                return true;
-            }).setSuggestions(this.module.getLayoutNames(), true);
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_PAINT), VirtualLocales.SHOP_LAYOUTS, 13, (viewer, event, shop) -> {
+            this.runNextTick(() -> module.openShopLayoutEditor(viewer.getPlayer(), shop));
         });
 
         this.addItem(Material.LIME_DYE, VirtualLocales.SHOP_BUYING, 14, (viewer, event, shop) -> {

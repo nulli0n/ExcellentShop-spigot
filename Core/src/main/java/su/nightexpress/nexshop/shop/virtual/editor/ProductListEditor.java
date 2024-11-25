@@ -110,7 +110,7 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
         // ====================================
         // Build Shop Layout
         // ====================================
-        ShopLayout layout = this.module.getLayout(shop);
+        ShopLayout layout = this.module.getLayout(shop, page);
         if (layout != null) {
             options.setType(layout.getOptions().getType());
             options.setSize(layout.getOptions().getSize());

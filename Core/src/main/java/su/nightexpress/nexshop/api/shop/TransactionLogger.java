@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.text.NightMessage;
@@ -41,9 +42,13 @@ public class TransactionLogger {
         String datePattern = ConfigValue.create(path + "Format.Date", "dd/MM/yyyy HH:mm:ss").read(config);
         this.dateFormat = DateTimeFormatter.ofPattern(datePattern);
 
-        this.format = ConfigValue.create(path + "Format.Purchase",
-            GENERIC_TYPE + ": " + PLAYER_NAME + " - x" + GENERIC_AMOUNT + " of " + GENERIC_ITEM + " for " + GENERIC_PRICE + " in " + SHOP_NAME + " shop."
-        ).read(config).replace("%player%", Placeholders.PLAYER_NAME);
+        // TODO Module method or in constructor?
+        String defaultFormat = GENERIC_TYPE + ": " + PLAYER_NAME + " - x" + GENERIC_AMOUNT + " of " + GENERIC_ITEM + " for " + GENERIC_PRICE + " in " + SHOP_NAME + " shop.";
+        if (module instanceof ChestShopModule) {
+            defaultFormat += " [" + CHEST_SHOP_X + ", " + CHEST_SHOP_Y + ", " + CHEST_SHOP_Z + " in " + CHEST_SHOP_WORLD + ", owned by " + CHEST_SHOP_OWNER + "]";
+        }
+
+        this.format = ConfigValue.create(path + "Format.Purchase", defaultFormat).read(config).replace("%player%", Placeholders.PLAYER_NAME);
     }
 
     public void logTransaction(@NotNull ShopTransactionEvent event) {

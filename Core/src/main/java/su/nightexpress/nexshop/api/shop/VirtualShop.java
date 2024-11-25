@@ -31,9 +31,13 @@ public interface VirtualShop extends Shop {
 
     void setIcon(@NotNull ItemStack icon);
 
-    @NotNull String getLayoutName();
+    @NotNull String getDefaultLayout();
 
-    void setLayoutName(@NotNull String layoutName);
+    void setDefaultLayout(@NotNull String layoutName);
+
+    @NotNull String getLayout(int page);
+
+    void setLayout(int page, @Nullable String layoutName);
 
     @NotNull List<String> getDescription();
 

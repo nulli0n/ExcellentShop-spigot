@@ -128,6 +128,10 @@ public class VirtualLang extends Lang {
         BLACK.enclose("Shop Settings: " + SHOP_NAME)
     );
 
+    public static final LangString EDITOR_TITLE_SHOP_LAYOUTS = LangString.of("Editor.Title.Shop.Layouts",
+        BLACK.enclose("Shop Layouts: " + SHOP_NAME)
+    );
+
 
     public static final LangString EDITOR_PRODUCT_NO_RANK_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoRankRequirements",
         "No ranks required!");

@@ -67,8 +67,18 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
             "=".repeat(50)
         ));
 
-        this.addHandler(ItemHandler.forNextPage(this));
-        this.addHandler(ItemHandler.forPreviousPage(this));
+//        this.addHandler(ItemHandler.forNextPage(this));
+//        this.addHandler(ItemHandler.forPreviousPage(this));
+
+        this.addHandler(new ItemHandler(ItemHandler.NEXT_PAGE, (viewer, event) -> {
+            viewer.setPage(viewer.getPage() + 1);
+            this.runNextTick(() -> module.openShop(viewer.getPlayer(), this.getLink(viewer), viewer.getPage()));
+        }, viewer -> viewer.getPage() < viewer.getPages()));
+
+        this.addHandler(new ItemHandler(ItemHandler.PREVIOUS_PAGE, (viewer, event) -> {
+            viewer.setPage(viewer.getPage() - 1);
+            this.runNextTick(() -> module.openShop(viewer.getPlayer(), this.getLink(viewer), viewer.getPage()));
+        }, viewer -> viewer.getPage() > 1));
 
         this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
             this.runNextTick(() -> this.module.openMainMenu(viewer.getPlayer()));

@@ -7,7 +7,7 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.12.0</version>
+    <version>4.13.0</version>
     <modules>
         <module>Core</module>
     </modules>

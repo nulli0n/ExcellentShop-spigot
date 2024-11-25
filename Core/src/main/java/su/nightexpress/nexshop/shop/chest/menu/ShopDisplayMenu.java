@@ -50,12 +50,16 @@ public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop>
         this.addHandler(this.hologramToggleHandler = new ItemHandler("hologram_toggle", (viewer, event) -> {
             ChestShop shop = this.getLink(viewer);
             shop.setHologramEnabled(!shop.isHologramEnabled());
+            module.manageDisplay(displayHandler -> displayHandler.remake(shop));
+
             this.saveAndFlush(viewer, shop);
         }));
 
         this.addHandler(this.showcaseToggleHandler = new ItemHandler("showcase_toggle", (viewer, event) -> {
             ChestShop shop = this.getLink(viewer);
             shop.setShowcaseEnabled(!shop.isShowcaseEnabled());
+            module.manageDisplay(displayHandler -> displayHandler.remake(shop));
+
             this.saveAndFlush(viewer, shop);
         }));
 

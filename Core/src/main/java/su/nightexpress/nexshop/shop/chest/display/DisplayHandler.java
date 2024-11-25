@@ -158,7 +158,7 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
 
             originText.addAll(shop.getHologramText(product));
             originText.replaceAll(shop.replacePlaceholders());
-            originText.replaceAll(replacer::getReplacedRaw);
+            originText.replaceAll(replacer::apply);
         }
 
         players.forEach(player -> {
@@ -217,6 +217,11 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
 
         list.showcase = new ShowcaseEntity(EntityUtil.nextEntityId());
         list.product = new ProductEntity(EntityUtil.nextEntityId());
+    }
+
+    public void remake(@NotNull ChestShop shop) {
+        this.remove(shop);
+        this.refresh(shop);
     }
 
     public void create(@NotNull ChestShop shop) {

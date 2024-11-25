@@ -17,19 +17,17 @@ import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.product.ProductDataManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.menu.ShopView;
 import su.nightexpress.nexshop.shop.menu.CartMenu;
 import su.nightexpress.nexshop.shop.menu.PurchaseOptionMenu;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.menu.api.Menu;
-import su.nightexpress.nightcore.menu.impl.AbstractMenu;
+import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Plugins;
 
 import java.io.File;
@@ -190,6 +188,13 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
                 Lang.SHOP_PRODUCT_ERROR_UNSELLABLE.getMessage().send(player);
                 return false;
             }
+            if (product.countUnits(player) < 1) {
+                Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS.getMessage().send(player, replacer -> replacer
+                    .replace(Placeholders.GENERIC_AMOUNT, 1)
+                    .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
+                );
+                return false;
+            }
         }
 
         // For Virtual Shop will return either Stock or Player Limit amount.
@@ -220,7 +225,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
                 if (source != null) {
                     source.flush(player);
                 }
-                return false;
+                return true;
             }
         }
 

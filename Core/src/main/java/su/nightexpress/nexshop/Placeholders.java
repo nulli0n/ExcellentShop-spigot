@@ -101,8 +101,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String VIRTUAL_SHOP_PERMISSION_REQUIRED    = "%shop_permission_required%";
     public static final String VIRTUAL_SHOP_PERMISSION_NODE        = "%shop_permission_node%";
     public static final String VIRTUAL_SHOP_PAGES                  = "%shop_pages%";
-    public static final String VIRTUAL_SHOP_MENU_SLOT = "%shop_menu_slot%";
-    public static final String VIRTUAL_SHOP_LAYOUT                 = "%shop_layout%";
+    public static final String VIRTUAL_SHOP_MENU_SLOT              = "%shop_menu_slot%";
+    public static final String VIRTUAL_SHOP_DEFAULT_LAYOUT         = "%shop_layout%";
     public static final String SHOP_NPC_IDS                        = "%shop_npc_ids%";
     public static final String VIRTUAL_SHOP_DISCOUNT_AMOUNT        = "%shop_discount_amount%";
     public static final String VIRTUAL_SHOP_NEXT_ROTATION_DATE     = "%shop_next_rotation_date%";
@@ -230,15 +230,9 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     @NotNull
     public static final PlaceholderList<VirtualShop> VIRTUAL_SHOP = PlaceholderList.create(list -> list
         .add(SHOP)
-        //.add(VIRTUAL_SHOP_TYPE, shop -> VirtualLang.SHOP_TYPES.getLocalized(shop.getType()))
         .add(VIRTUAL_SHOP_DESCRIPTION, shop -> String.join("\n", shop.getDescription()))
         .add(VIRTUAL_SHOP_PAGES, shop -> String.valueOf(shop.getPages()))
-        //.add(VIRTUAL_SHOP_PERMISSION_NODE, shop -> VirtualPerms.PREFIX_SHOP + shop.getId())
-        //.add(VIRTUAL_SHOP_PERMISSION_REQUIRED, shop -> Lang.getYesOrNo(shop.isPermissionRequired()))
-        //.add(VIRTUAL_SHOP_MENU_SLOT, shop -> shop.isMainMenuSlotDisabled() ? Lang.OTHER_DISABLED.getString() : String.valueOf(shop.getMainMenuSlot()))
-        //.add(VIRTUAL_SHOP_LAYOUT, VirtualShop::getLayoutName)
         .add(VIRTUAL_SHOP_DISCOUNT_AMOUNT, shop -> NumberUtil.format(shop.getDiscountPlain()))
-        //.add(SHOP_NPC_IDS, shop -> String.join(", ", shop.getNPCIds().stream().map(String::valueOf).toList()))
     );
 
 //    @NotNull
@@ -261,11 +255,6 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
 
             return TimeUtil.formatDuration(TimeUtil.toEpochMillis(next));
         })
-        //.add(VIRTUAL_SHOP_ROTATION_TYPE, shop -> shop.getRotationType().name())
-        //.add(VIRTUAL_SHOP_ROTATION_INTERVAL, shop -> TimeUtil.formatTime(shop.getRotationInterval() * 1000L))
-        //.add(VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS, shop -> NumberUtil.format(shop.getProductMinAmount()))
-        //.add(VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS, shop -> NumberUtil.format(shop.getProductMaxAmount()))
-        //.add(VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS, shop -> Arrays.toString(shop.getProductSlots()))
     );
 
     @NotNull
@@ -275,7 +264,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(VIRTUAL_SHOP_PERMISSION_NODE, shop -> VirtualPerms.PREFIX_SHOP + shop.getId())
         .add(VIRTUAL_SHOP_PERMISSION_REQUIRED, shop -> Lang.getYesOrNo(shop.isPermissionRequired()))
         .add(VIRTUAL_SHOP_MENU_SLOT, shop -> shop.isMainMenuSlotDisabled() ? Lang.OTHER_DISABLED.getString() : String.valueOf(shop.getMainMenuSlot()))
-        .add(VIRTUAL_SHOP_LAYOUT, VirtualShop::getLayoutName)
+        .add(VIRTUAL_SHOP_DEFAULT_LAYOUT, VirtualShop::getDefaultLayout)
         .add(SHOP_NPC_IDS, shop -> String.join(", ", shop.getNPCIds().stream().map(String::valueOf).toList()))
     );
 
@@ -323,7 +312,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
 
             list.add(PRODUCT_PRICE.apply(tradeType), pov -> {
                 Currency currency = pov.product.getCurrency();
-                return pov.player == null ? currency.format(pov.product.getPricer().getPrice(tradeType)) : currency.format(pov.product.getPrice(tradeType, pov.player));
+                return pov.player == null ? currency.formatValue(pov.product.getPricer().getPrice(tradeType)) : currency.formatValue(pov.product.getPrice(tradeType, pov.player));
             });
 
             list.add(PRODUCT_PRICE_FORMATTED.apply(tradeType), pov -> {

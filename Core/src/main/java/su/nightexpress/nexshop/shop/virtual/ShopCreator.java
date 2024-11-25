@@ -728,7 +728,7 @@ public class ShopCreator {
         FileUtil.create(file);
 
         RotatingShop shop = new RotatingShop(this.plugin, this.module, file, id);
-        shop.setLayoutName(Placeholders.DEFAULT);
+        shop.setDefaultLayout(Placeholders.DEFAULT);
         shop.setRotationType(RotationType.INTERVAL);
         shop.setRotationInterval(86400);
         shop.setProductMinAmount(15);
@@ -747,7 +747,7 @@ public class ShopCreator {
         StaticShop shop = new StaticShop(this.plugin, this.module, file, id);
         shop.setPages(pages);
         shop.setMainMenuSlot(menuSlot);
-        shop.setLayoutName(Placeholders.DEFAULT);
+        shop.setDefaultLayout(Placeholders.DEFAULT);
         this.setShopSettings(shop, name, description, icon);
 
         return shop;

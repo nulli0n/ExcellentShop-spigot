@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
-import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.language.entry.LangItem;
@@ -100,15 +99,28 @@ public class VirtualLocales {
 //        .rightClick("remove all")
 //        .build();
 
-    public static final LangItem SHOP_LAYOUT = LangItem.builder(PREFIX + "Shop.Layout")
-        .name("Layout")
-        .current("Current", VIRTUAL_SHOP_LAYOUT)
+    public static final LangItem SHOP_LAYOUTS = LangItem.builder(PREFIX + "Shop.Layouts.Info")
+        .name("Layouts")
+        .text("Set GUI layout for this shop.")
         .emptyLine()
-        .text("Sets GUI layout used in this shop.")
+        .click("navigate")
+        .build();
+
+    public static final LangItem SHOP_LAYOUT_BY_DEFAULT = LangItem.builder(PREFIX + "Shop.Layouts.ByDefault")
+        .name("Default Layout")
+        .current("Current", VIRTUAL_SHOP_DEFAULT_LAYOUT)
         .emptyLine()
-        .text("Create more layouts in " + LIGHT_YELLOW.enclose(VirtualShopModule.DIR_LAYOUTS))
+        .text("Sets default (all pages) GUI", "layout for this shop.")
         .emptyLine()
         .click("change")
+        .build();
+
+    public static final LangItem SHOP_LAYOUT_BY_PAGE = LangItem.builder(PREFIX + "Shop.Layouts.ByPage")
+        .name("Page #" + GENERIC_PAGE + " Layout")
+        .current("Current", GENERIC_NAME)
+        .emptyLine()
+        .leftClick("change")
+        .rightClick("reset")
         .build();
 
     public static final LangItem SHOP_DISCOUNTS = LangItem.builder(PREFIX + "Shop.Discounts")

@@ -73,6 +73,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     private RotationTimesEditor rotationTimesEditor;
     private ShopListEditor      shopListEditor;
     private ShopMainEditor      shopEditor;
+    private ShopLayoutEditor shopLayoutEditor;
     private StaticSettingsEditor staticSettingsEditor;
     private RotationSettingsEditor rotationSettingsEditor;
 
@@ -129,6 +130,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         if (this.rotationTimesEditor != null) this.rotationTimesEditor.clear();
         if (this.shopListEditor != null) this.shopListEditor.clear();
         if (this.shopEditor != null) this.shopEditor.clear();
+        if (this.shopLayoutEditor != null) this.shopLayoutEditor.clear();
         if (this.staticSettingsEditor != null) this.staticSettingsEditor.clear();
         if (this.rotationSettingsEditor != null) this.rotationSettingsEditor.clear();
 
@@ -166,6 +168,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         this.rotationTimesEditor = new RotationTimesEditor(this.plugin, this);
         this.shopListEditor = new ShopListEditor(this.plugin, this);
         this.shopEditor = new ShopMainEditor(this.plugin, this);
+        this.shopLayoutEditor = new ShopLayoutEditor(this.plugin, this);
         this.staticSettingsEditor = new StaticSettingsEditor(this.plugin, this);
         this.rotationSettingsEditor = new RotationSettingsEditor(this.plugin, this);
     }
@@ -335,8 +338,8 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
     }
 
     @Nullable
-    public ShopLayout getLayout(@NotNull VirtualShop shop) {
-        return this.getLayout(shop.getLayoutName());
+    public ShopLayout getLayout(@NotNull VirtualShop shop, int page) {
+        return this.getLayout(shop.getLayout(page));
     }
 
     @Nullable
@@ -478,7 +481,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         shop.setName(LIGHT_YELLOW.enclose(BOLD.enclose(StringUtil.capitalizeUnderscored(id))));
         shop.setDescription(Lists.newList(LIGHT_GRAY.enclose("Configure in " + LIGHT_GREEN.enclose("/vshop editor")), ""));
         shop.setIcon(new ItemStack(Material.CHEST_MINECART));
-        shop.setLayoutName(Placeholders.DEFAULT);
+        shop.setDefaultLayout(Placeholders.DEFAULT);
         shop.save();
         this.loadShop(shop);
 
@@ -567,6 +570,10 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         this.shopEditor.open(player, shop);
     }
 
+    public void openShopLayoutEditor(@NotNull Player player, @NotNull VirtualShop shop) {
+        this.shopLayoutEditor.open(player, shop);
+    }
+
     public void openSpecificEditor(@NotNull Player player, @NotNull VirtualShop shop) {
         if (shop instanceof StaticShop staticShop) {
             this.staticSettingsEditor.open(player, staticShop);
@@ -595,7 +602,7 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
             if (!shop.canAccess(player, true)) return false;
         }
 
-        ShopLayout layout = this.getLayout(shop);
+        ShopLayout layout = this.getLayout(shop, page);
         if (layout == null) layout = this.getLayout(VirtualConfig.DEFAULT_LAYOUT.get());
         if (layout == null) {
             VirtualLang.SHOP_ERROR_INVALID_LAYOUT.getMessage().replace(shop.replacePlaceholders()).send(player);

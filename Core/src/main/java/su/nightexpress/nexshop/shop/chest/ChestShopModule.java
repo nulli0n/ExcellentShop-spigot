@@ -523,7 +523,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public void renameShop(@NotNull Player player, @NotNull ChestShop shop, @NotNull String name) {
-        int maxLength = ChestConfig.SHOP_MAX_NAME_LENGTH.get();
+        int maxLength = ChestConfig.SHOP_MAX_NAME_LENGTH.get(); // TODO Ignore colors
         if (name.length() > maxLength) {
             name = name.substring(0, maxLength);
         }
@@ -904,6 +904,12 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     @Nullable
     public DisplayHandler<?> getDisplayHandler() {
         return this.displayHandler;
+    }
+
+    public void manageDisplay(@NotNull Consumer<DisplayHandler<?>> consumer) {
+        if (this.displayHandler != null) {
+            consumer.accept(this.displayHandler);
+        }
     }
 
     @NotNull

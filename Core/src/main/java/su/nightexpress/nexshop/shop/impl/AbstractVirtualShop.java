@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.currency.CurrencyId;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
@@ -31,6 +32,7 @@ import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.StringUtil;
 
 import java.io.File;
@@ -47,6 +49,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     protected final FileConfig        configProducts;
     protected final Set<Discount>     discounts;
     protected final Set<Integer>      npcIds;
+    protected final Map<Integer, String> pageLayouts;
 
     protected String       name;
     protected List<String> description;
@@ -63,6 +66,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         this.stock = new VirtualStock(this.plugin, this);
         this.discounts = new HashSet<>();
         this.npcIds = new HashSet<>();
+        this.pageLayouts = new HashMap<>();
         this.mainMenuSlot = -1;
     }
 
@@ -74,8 +78,15 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         this.setIcon(config.getItem("Icon"));
         this.setMainMenuSlot(config.getInt("MainMenu.Slot", -1));
 
-        this.setLayoutName(ConfigValue.create("Layout.Name", this.getId()).read(config));
         this.getNPCIds().addAll(IntStream.of(config.getIntArray("Citizens.Attached_NPC")).boxed().toList());
+
+        this.setDefaultLayout(ConfigValue.create("Layout.Name", Placeholders.DEFAULT).read(config));
+        config.getSection("Layout.ByPage").forEach(sId -> {
+            int page = NumberUtil.getIntegerAbs(sId, -1);
+            if (page < 0) return;
+
+            this.pageLayouts.put(page, config.getString("Layout.ByPage." + sId, Placeholders.DEFAULT));
+        });
 
         for (TradeType buyType : TradeType.values()) {
             this.setTransactionEnabled(buyType, config.getBoolean("Transaction_Allowed." + buyType.name(), true));
@@ -105,7 +116,9 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         config.set("Permission_Required", this.isPermissionRequired());
         config.setItem("Icon", this.getIcon());
         config.set("MainMenu.Slot", this.mainMenuSlot);
-        config.set("Layout.Name", this.getLayoutName());
+        config.set("Layout.Name", this.getDefaultLayout());
+        config.remove("Layout.ByPage");
+        this.pageLayouts.forEach((page, lName) -> config.set("Layout.ByPage." + page, lName));
         config.setIntArray("Citizens.Attached_NPC", this.getNPCIds().stream().mapToInt(Number::intValue).toArray());
         this.transactions.forEach((type, isAllowed) -> config.set("Transaction_Allowed." + type.name(), isAllowed));
         this.saveAdditionalSettings(config);
@@ -317,13 +330,27 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
     @Override
     @NotNull
-    public String getLayoutName() {
+    public String getDefaultLayout() {
         return layoutName;
     }
 
     @Override
-    public void setLayoutName(@NotNull String layoutName) {
+    public void setDefaultLayout(@NotNull String layoutName) {
         this.layoutName = layoutName.toLowerCase();
+    }
+
+    @Override
+    @NotNull
+    public String getLayout(int page) {
+        return this.pageLayouts.getOrDefault(page, this.getDefaultLayout());
+    }
+
+    @Override
+    public void setLayout(int page, @Nullable String layoutName) {
+        if (layoutName == null) {
+            this.pageLayouts.remove(page);
+        }
+        else this.pageLayouts.put(page, layoutName.toLowerCase());
     }
 
     @Override
