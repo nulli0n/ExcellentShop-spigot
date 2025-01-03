@@ -7,9 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
@@ -18,20 +16,11 @@ import java.util.function.UnaryOperator;
 
 public interface Product {
 
-    @NotNull default UnaryOperator<String> replacePlaceholders() {
-        return this.replacePlaceholders(null);
-    }
+    @NotNull UnaryOperator<String> replacePlaceholders();
 
     @NotNull UnaryOperator<String> replacePlaceholders(@Nullable Player player);
 
-    default boolean isValid() {
-        if (this.getPacker() instanceof PluginItemPacker packer && this.getHandler() instanceof PluginItemHandler handler) {
-            return handler.isValidId(packer.getItemId());
-        }
-        return true;
-
-        //return !(this.getHandler() instanceof AbstractPluginItemHandler packer) || packer.isValidId(packer.getItemId());
-    }
+    boolean isValid();
 
     /**
      * Performs a check to determine if product is available for buying/selling (e.g. present in the shop, is in rotation).
@@ -40,83 +29,51 @@ public interface Product {
      */
     boolean isAvailable(@NotNull Player player);
 
-    default double getPrice(@NotNull TradeType tradeType) {
-        return this.getPrice(tradeType, null);
-    }
+    int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType);
+
+    double getPriceBuy(@NotNull Player player);
+
+    double getPriceSell(@NotNull Player player);
+
+    double getPriceSellAll(@NotNull Player player);
+
+    double getPrice(@NotNull TradeType tradeType);
 
     double getPrice(@NotNull TradeType tradeType, @Nullable Player player);
 
     void setPrice(@NotNull TradeType tradeType, double price);
 
-    default double getPriceBuy(@NotNull Player player) {
-        return this.getPrice(TradeType.BUY, player);
-    }
+    int getUnitAmount();
 
-    default double getPriceSell(@NotNull Player player) {
-        return this.getPrice(TradeType.SELL, player);
-    }
+    void delivery(@NotNull Player player, int count);
 
-    double getPriceSellAll(@NotNull Player player);
+    void delivery(@NotNull Inventory inventory, int count);
 
-    default int getUnitAmount() {
-        return this.getPacker().getUnitAmount();
-    }
+    void take(@NotNull Player player, int count);
 
-    default void delivery(@NotNull Player player, int count) {
-        this.delivery(player.getInventory(), count);
-    }
+    void take(@NotNull Inventory inventory, int count);
 
-    default void delivery(@NotNull Inventory inventory, int count) {
-        this.getPacker().delivery(inventory, count);
-    }
+    int count(@NotNull Player player);
 
-    default void take(@NotNull Player player, int count) {
-        this.take(player.getInventory(), count);
-    }
+    int countUnits(@NotNull Player player);
 
-    default void take(@NotNull Inventory inventory, int count) {
-        this.getPacker().take(inventory, count);
-    }
+    int countUnits(@NotNull Inventory inventory);
 
-    default int count(@NotNull Player player) {
-        return this.count(player.getInventory());
-    }
+    int count(@NotNull Inventory inventory);
 
-    default int countUnits(@NotNull Player player) {
-        return this.countUnits(player.getInventory());
-    }
+    int countSpace(@NotNull Player player);
 
-    default int countUnits(@NotNull Inventory inventory) {
-        return this.count(inventory) / this.getUnitAmount();
-    }
+    int countSpace(@NotNull Inventory inventory);
 
-    default int count(@NotNull Inventory inventory) {
-        return this.getPacker().count(inventory);
-    }
+    boolean hasSpace(@NotNull Player player);
 
-    default int countSpace(@NotNull Player player) {
-        return this.countSpace(player.getInventory());
-    }
-
-    default int countSpace(@NotNull Inventory inventory) {
-        return this.getPacker().countSpace(inventory);
-    }
-
-    default boolean hasSpace(@NotNull Player player) {
-        return this.hasSpace(player.getInventory());
-    }
-
-    default boolean hasSpace(@NotNull Inventory inventory) {
-        return this.getPacker().hasSpace(inventory);
-    }
+    boolean hasSpace(@NotNull Inventory inventory);
 
     @NotNull PreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
-    int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType);
 
-    default boolean isTradeable(@NotNull TradeType tradeType) {
-        return tradeType == TradeType.BUY ? this.isBuyable() : this.isSellable();
-    }
+
+    boolean isTradeable(@NotNull TradeType tradeType);
 
     boolean isBuyable();
 
@@ -125,6 +82,8 @@ public interface Product {
     @NotNull String getId();
 
     @NotNull Shop getShop();
+
+    @NotNull ItemStack getPreview();
 
     @NotNull Currency getCurrency();
 
@@ -139,8 +98,4 @@ public interface Product {
     @NotNull AbstractProductPricer getPricer();
 
     void setPricer(@NotNull AbstractProductPricer pricer);
-
-    @NotNull default ItemStack getPreview() {
-        return this.getPacker().getPreview();
-    }
 }

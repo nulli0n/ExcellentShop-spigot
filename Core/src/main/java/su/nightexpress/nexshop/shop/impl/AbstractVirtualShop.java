@@ -202,7 +202,7 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
             this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in editor.");
         }
 
-        ProductPacker packer = handler.createPacker(config, path);
+        ProductPacker packer = handler.readPacker(config, path);
 
         P product = this.createProduct(id, currency, handler, packer);
         product.load(config, path);

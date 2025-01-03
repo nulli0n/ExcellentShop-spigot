@@ -26,11 +26,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nightcore.manager.AbstractListener;
 
@@ -110,13 +112,33 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         ChestShop shop = this.module.getShop(block);
         if (shop == null) return;
 
-        if (!shop.isOwner(player)) {
+        if (player.getGameMode() == GameMode.CREATIVE) {
             event.setCancelled(true);
-            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
             return;
         }
 
-        if (player.getGameMode() == GameMode.CREATIVE || !this.module.deleteShop(player, block)) {
+        if (ChestUtils.isInfiniteStorage() && !shop.getBlock().getLocation().equals(block.getLocation())) {
+            var sides = shop.getSides();
+            if (sides.getFirst() != sides.getSecond()) {
+                if (!this.module.canBreak(player, shop)) {
+                    event.setCancelled(true);
+                    return;
+                }
+
+                this.plugin.runTask(task -> {
+                    this.module.getShopMap().updatePositionCache(shop);
+                });
+                return;
+            }
+        }
+
+//        if (!shop.isOwner(player)) {
+//            event.setCancelled(true);
+//            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
+//            return;
+//        }
+
+        if (!this.module.deleteShop(player, block)) {
             event.setCancelled(true);
         }
     }
@@ -179,8 +201,16 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
             if (shop == null) return;
 
             ItemStack item = event.getItem();
-            if (!shop.isProduct(item) || ChestUtils.isInfiniteStorage()) {
+            ChestProduct product = shop.getProduct(item);
+            if (product == null) {
                 event.setCancelled(true);
+                return;
+            }
+
+            if (ChestUtils.isInfiniteStorage()) {
+                // Do not cancel, instead reduce item quantity.
+                item.setAmount(item.getAmount() - 1);
+                shop.getStock().store(product, 1, TradeType.BUY);
             }
         }
     }

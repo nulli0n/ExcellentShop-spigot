@@ -7,17 +7,11 @@ import su.nightexpress.nightcore.config.FileConfig;
 
 public abstract class AbstractProductHandler implements ProductHandler {
 
+    public static final String DELIMITER = " | ";
+
     protected final ShopPlugin plugin;
 
     public AbstractProductHandler(@NotNull ShopPlugin plugin) {
         this.plugin = plugin;
-    }
-
-    public void logBadItem(@NotNull String itemId) {
-        this.plugin.error("Invalid item '" + itemId + "' in the '" + this.getName() + "' handler.");
-    }
-
-    public void logBadItem(@NotNull String itemId, @NotNull FileConfig config, @NotNull String path) {
-        this.plugin.error("Invalid item '" + itemId + "' in the '" + this.getName() + "' handler. Caused by: '" + config.getFile().getName() + "' -> '" + path + "'.");
     }
 }

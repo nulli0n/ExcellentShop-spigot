@@ -2,50 +2,40 @@ package su.nightexpress.nexshop.product.packer.impl;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
 import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
 import su.nightexpress.nexshop.product.packer.AbstractItemPacker;
-import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.ItemNbt;
 
 import java.util.function.UnaryOperator;
 
 public class BukkitItemPacker extends AbstractItemPacker<BukkitItemHandler> {
 
     private ItemStack item;
-    private ItemStack preview;
     private boolean   respectItemMeta;
 
-    public BukkitItemPacker(@NotNull BukkitItemHandler handler, @NotNull ItemStack item, @NotNull ItemStack preview, boolean respectItemMeta) {
+    public BukkitItemPacker(@NotNull BukkitItemHandler handler, @NotNull ItemStack item, boolean respectItemMeta) {
         super(handler);
         this.setItem(item);
-        this.setPreview(preview);
         this.setRespectItemMeta(respectItemMeta);
     }
 
     @Override
-    protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
-        config.setItemEncoded(path + ".Content.Preview", this.getPreview());
-        config.setItemEncoded(path + ".Content.Item", this.getItem());
-        config.set(path + ".Item_Meta_Enabled", this.isRespectItemMeta());
+    @Nullable
+    public String serialize() {
+        String tagString = ItemNbt.getTagString(this.item);
+        if (tagString == null) return null;
+
+        return tagString + BukkitItemHandler.DELIMITER + this.respectItemMeta;
     }
 
     @Override
     @NotNull
     public UnaryOperator<String> replacePlaceholders() {
         return Placeholders.BUKKIT_ITEM_PACKER.replacer(this);
-    }
-
-    @Override
-    @NotNull
-    public ItemStack getPreview() {
-        return new ItemStack(this.preview);
-    }
-
-    @Override
-    public void setPreview(@NotNull ItemStack preview) {
-        this.preview = new ItemStack(preview);
     }
 
     @NotNull
@@ -63,7 +53,7 @@ public class BukkitItemPacker extends AbstractItemPacker<BukkitItemHandler> {
         ProductHandler itemHandler = ProductHandlerRegistry.getHandler(item);
         if (itemHandler != this.handler) return false;
 
-        return this.isRespectItemMeta() ? this.getItem().isSimilar(item) : this.getItem().getType() == item.getType();
+        return this.isRespectItemMeta() ? this.item.isSimilar(item) : this.item.getType() == item.getType();
     }
 
     public boolean isRespectItemMeta() {

@@ -5,13 +5,17 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -30,6 +34,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AuctionUtils {
+
+    public static void hideListingAttributes(@NotNull ItemStack itemStack) {
+        if (AuctionConfig.LISTINGS_HIDE_ATTRIBUTES.get()) {
+            ItemUtil.hideAttributes(itemStack);
+            ItemUtil.editMeta(itemStack, meta -> meta.removeItemFlags(ItemFlag.values())); // quick fix for enchants hidden
+        }
+    }
 
     public static void fillDummy(@NotNull AuctionManager auctionManager) {
         String[] randoms = {"AquaticFlamesIV", "_silent_bunny_", "DefectIV", "Dinara777", "metalblaster99", "poolpony142",
@@ -58,6 +69,9 @@ public class AuctionUtils {
                 }
             }
 
+            ItemHandler handler = ProductHandlerRegistry.forBukkitItem();
+            ItemPacker packer = handler.createPacker(item);
+
             Currency currency = Rnd.get(auctionManager.getAllowedCurrencies());
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
 
@@ -67,18 +81,18 @@ public class AuctionUtils {
 
             if (i < 15) {
                 long deletionDate = generatePurgeDate(dateExpired);
-                ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, item, currency, price, dateCreation, dateExpired, deletionDate);
+                ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, handler, packer, currency, price, dateCreation, dateExpired, deletionDate);
                 auctionManager.getListings().add(listing);
-                auctionManager.getDataHandler().addListing(listing);
+                auctionManager.getDatabase().addListing(listing);
             }
             else {
                 LocalDateTime buyed = created.plusDays(Rnd.get(4)).plusHours(Rnd.get(4)).plusMinutes(Rnd.get(15));
                 long buyDate = TimeUtil.toEpochMillis(buyed);
                 long deletionDate = generatePurgeDate(buyDate);
 
-                CompletedListing listing = new CompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), item, currency, price, dateCreation, buyDate, deletionDate, Rnd.nextBoolean());
+                CompletedListing listing = new CompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), handler, packer, currency, price, dateCreation, buyDate, deletionDate, Rnd.nextBoolean());
                 auctionManager.getListings().addCompleted(listing);
-                auctionManager.getDataHandler().addCompletedListing(listing);
+                auctionManager.getDatabase().addCompletedListing(listing);
             }
         }
     }

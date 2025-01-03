@@ -1,11 +1,15 @@
 package su.nightexpress.nexshop.shop.impl;
 
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
 import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
+import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
@@ -46,6 +50,12 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return this.replacePlaceholders(null);
+    }
+
+    @Override
+    @NotNull
     public UnaryOperator<String> replacePlaceholders(@Nullable Player player) {
         var explicit = this.replaceExplicitPlaceholders(player);
         var packer = this.packer.replacePlaceholders();
@@ -57,6 +67,42 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
             str = pricer.apply(str);
             return str;
         };
+    }
+
+    @Override
+    public boolean isValid() {
+        if (this.packer.isDummy()) return false;
+
+        if (this.packer instanceof PluginItemPacker itemPacker && this.handler instanceof PluginItemHandler itemHandler) {
+            return itemHandler.isValidId(itemPacker.getItemId());
+        }
+        return true;
+    }
+
+    @Override
+    public double getPriceBuy(@NotNull Player player) {
+        return this.getPrice(TradeType.BUY, player);
+    }
+
+    @Override
+    public double getPriceSell(@NotNull Player player) {
+        return this.getPrice(TradeType.SELL, player);
+    }
+
+    @Override
+    public double getPriceSellAll(@NotNull Player player) {
+        int amountHas = this.countUnits(player);
+        int amountCan = this.getAvailableAmount(player, TradeType.SELL);
+
+        int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);
+        double price = balance * this.getPriceSell(player);
+
+        return Math.max(price, 0);
+    }
+
+    @Override
+    public double getPrice(@NotNull TradeType tradeType) {
+        return this.getPrice(tradeType, null);
     }
 
     @Override
@@ -74,30 +120,19 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
                 }
             }
         }
-//        if (!this.getCurrency().canHandleDecimals()) {
-//            price = Math.floor(price);
-//        }
 
         return this.currency.fineValue(price);
     }
 
     @Override
     public void setPrice(@NotNull TradeType tradeType, double price) {
-//        if (!this.getCurrency().canHandleDecimals()) {
-//            price = Math.floor(price);
-//        }
         this.pricer.setPrice(tradeType, this.currency.fineValue(price));
     }
 
+
     @Override
-    public double getPriceSellAll(@NotNull Player player) {
-        int amountHas = this.countUnits(player);
-        int amountCan = this.getAvailableAmount(player, TradeType.SELL);
-
-        int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);
-        double price = balance * this.getPriceSell(player);
-
-        return Math.max(price, 0);
+    public boolean isTradeable(@NotNull TradeType tradeType) {
+        return tradeType == TradeType.BUY ? this.isBuyable() : this.isSellable();
     }
 
     @Override
@@ -120,6 +155,74 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         return true;
     }
 
+
+    @Override
+    public int getUnitAmount() {
+        return this.packer.getUnitAmount();
+    }
+
+    @Override
+    public void delivery(@NotNull Player player, int count) {
+        this.delivery(player.getInventory(), count);
+    }
+
+    @Override
+    public void delivery(@NotNull Inventory inventory, int count) {
+        this.packer.delivery(inventory, count);
+    }
+
+    @Override
+    public void take(@NotNull Player player, int count) {
+        this.take(player.getInventory(), count);
+    }
+
+    @Override
+    public void take(@NotNull Inventory inventory, int count) {
+        this.packer.take(inventory, count);
+    }
+
+    @Override
+    public int count(@NotNull Player player) {
+        return this.count(player.getInventory());
+    }
+
+    @Override
+    public int countUnits(@NotNull Player player) {
+        return this.countUnits(player.getInventory());
+    }
+
+    @Override
+    public int countUnits(@NotNull Inventory inventory) {
+        return this.count(inventory) / this.getUnitAmount();
+    }
+
+    @Override
+    public int count(@NotNull Inventory inventory) {
+        return this.packer.count(inventory);
+    }
+
+    @Override
+    public int countSpace(@NotNull Player player) {
+        return this.countSpace(player.getInventory());
+    }
+
+    @Override
+    public int countSpace(@NotNull Inventory inventory) {
+        return this.packer.countSpace(inventory);
+    }
+
+    @Override
+    public boolean hasSpace(@NotNull Player player) {
+        return this.hasSpace(player.getInventory());
+    }
+
+    @Override
+    public boolean hasSpace(@NotNull Inventory inventory) {
+        return this.packer.hasSpace(inventory);
+    }
+
+
+
     @Override
     @NotNull
     public S getShop() {
@@ -132,10 +235,16 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         return this.id;
     }
 
+    @Override
+    @NotNull
+    public ItemStack getPreview() {
+        return this.packer.getPreview();
+    }
+
     @NotNull
     @Override
     public ProductHandler getHandler() {
-        return handler;
+        return this.handler;
     }
 
     @Override
@@ -147,7 +256,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     @NotNull
     @Override
     public ProductPacker getPacker() {
-        return packer;
+        return this.packer;
     }
 
     @Override

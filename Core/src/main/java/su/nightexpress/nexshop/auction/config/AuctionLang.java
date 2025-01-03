@@ -1,6 +1,5 @@
 package su.nightexpress.nexshop.auction.config;
 
-import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 import org.bukkit.Sound;
 import su.nightexpress.economybridge.Placeholders;
@@ -20,26 +19,16 @@ public class AuctionLang extends Lang {
 
     public static final LangString COMMAND_ARGUMENT_NAME_PRICE = LangString.of("Auction.Command.Argument.Name.Price", "price");
 
-    public static final LangString COMMAND_OPEN_DESC = LangString.of("Auction.Command.Open.Desc",
-        "Open auction.");
-
-    public static final LangString COMMAND_SELL_DESC  = LangString.of("Auction.Command.Sell.Desc",
-        "Add item on auction.");
+    public static final LangString COMMAND_OPEN_DESC      = LangString.of("Auction.Command.Open.Desc", "Open auction.");
+    public static final LangString COMMAND_SELL_DESC      = LangString.of("Auction.Command.Sell.Desc", "Add item on auction.");
+    public static final LangString COMMAND_EXPIRED_DESC   = LangString.of("Auction.Command.Expired.Desc", "List of expired listings.");
+    public static final LangString COMMAND_HISTORY_DESC   = LangString.of("Auction.Command.History.Desc", "Your sales history.");
+    public static final LangString COMMAND_SELLING_DESC   = LangString.of("Auction.Command.Selling.Desc", "List of your current listings.");
+    public static final LangString COMMAND_UNCLAIMED_DESC = LangString.of("Auction.Command.Unclaimed.Desc", "List of unclaimed rewards for your listings.");
 
     public static final LangText COMMAND_SELL_ERROR_NO_ITEM = LangText.of("Auction.Command.Sell.Error.NoItem",
         LIGHT_RED.enclose("You must hold an item to do that!"));
 
-    public static final LangString COMMAND_EXPIRED_DESC  = LangString.of("Auction.Command.Expired.Desc",
-        "List of expired listings.");
-
-    public static final LangString COMMAND_HISTORY_DESC  = LangString.of("Auction.Command.History.Desc",
-        "Your sales history.");
-
-    public static final LangString COMMAND_SELLING_DESC  = LangString.of("Auction.Command.Selling.Desc",
-        "List of your current listings.");
-
-    public static final LangString COMMAND_UNCLAIMED_DESC  = LangString.of("Auction.Command.Unclaimed.Desc",
-        "List of unclaimed rewards for your listings.");
 
     public static final LangText LISTING_ADD_SUCCESS_INFO = LangText.of("Auction.Listing.Add.Success.Info",
         TAG_NO_PREFIX + SOUND.enclose(Sound.BLOCK_NOTE_BLOCK_BELL),
@@ -56,7 +45,7 @@ public class AuctionLang extends Lang {
         " ",
         LIGHT_YELLOW.enclose(BOLD.enclose("Auction:")),
         LIGHT_GRAY.enclose("Player " + LIGHT_YELLOW.enclose(PLAYER_DISPLAY_NAME) + " added " + LIGHT_YELLOW.enclose("x" + LISTING_ITEM_AMOUNT) + " " +
-            HOVER.enclose(HoverEvent.Action.SHOW_ITEM, LIGHT_YELLOW.enclose(LISTING_ITEM_NAME), LISTING_ITEM_VALUE) +
+            HOVER.enclose(LIGHT_YELLOW.enclose(LISTING_ITEM_NAME), HoverEvent.Action.SHOW_ITEM, LISTING_ITEM_VALUE) +
             " on the auction for " + LIGHT_YELLOW.enclose(LISTING_PRICE) + "."),
         " "
     );
@@ -132,7 +121,9 @@ public class AuctionLang extends Lang {
         LIGHT_YELLOW.enclose(BOLD.enclose("Auction:")),
         LIGHT_GRAY.enclose("You have " + LIGHT_YELLOW.enclose(GENERIC_AMOUNT) + " unclaimed listing's incomes!"),
         "",
-        LIGHT_GRAY.enclose("Click " + CLICK.enclose(ClickEvent.Action.RUN_COMMAND, HOVER.enclose(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to claim your incomes!")), "/ah unclaimed") + " to claim now!"),
+        LIGHT_GRAY.enclose("Click " + CLICK.encloseRun(
+            HOVER.encloseHint(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to claim your incomes!")), "/ah unclaimed"
+        ) + " to claim now!"),
         " "
     );
 
@@ -142,7 +133,9 @@ public class AuctionLang extends Lang {
         LIGHT_ORANGE.enclose(BOLD.enclose("Auction:")),
         LIGHT_GRAY.enclose("You have " + LIGHT_ORANGE.enclose(GENERIC_AMOUNT) + " expired listings!"),
         "",
-        LIGHT_GRAY.enclose("Click " + CLICK.enclose(ClickEvent.Action.RUN_COMMAND, HOVER.enclose(LIGHT_ORANGE.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to return your items.")), "/ah expired") + " to return them."),
+        LIGHT_GRAY.enclose("Click " + CLICK.encloseRun(
+            HOVER.encloseHint(LIGHT_ORANGE.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to return your items.")), "/ah expired"
+        ) + " to return them."),
         " "
     );
 }

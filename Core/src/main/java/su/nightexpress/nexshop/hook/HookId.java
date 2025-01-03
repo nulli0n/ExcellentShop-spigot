@@ -5,8 +5,8 @@ import java.util.List;
 
 public class HookId {
 
-    public static final String PROTOCOL_LIB = "ProtocolLib";
-    public static final String PACKET_EVENTS = "packetevents";
+    public static final String PROTOCOL_LIB   = "ProtocolLib";
+    public static final String PACKET_EVENTS  = "packetevents";
     public static final String ECONOMY_BRIDGE = "EconomyBridge";
 
     public static final String PLAYER_POINTS = "PlayerPoints";
@@ -26,10 +26,12 @@ public class HookId {
     public static final String KINGDOMS               = "Kingdoms";
     public static final String ADVANCED_REGION_MARKET = "AdvancedRegionMarket";
 
+    public static final String NEXO             = "Nexo";
     public static final String ORAXEN           = "Oraxen";
     public static final String ITEMS_ADDER      = "ItemsAdder";
     public static final String MMOITEMS         = "MMOItems";
     public static final String EXCELLENT_CRATES = "ExcellentCrates";
+    public static final String EXECUTABLE_ITEMS = "ExecutableItems";
 
     public static final String UPGRADEABLE_HOPPERS = "UpgradeableHoppers";
 

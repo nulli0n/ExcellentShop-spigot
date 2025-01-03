@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.product.packer.impl;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.product.packer.AbstractItemPacker;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -16,8 +17,19 @@ public class DummyPacker extends AbstractItemPacker<DummyHandler> {
     }
 
     @Override
-    protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
+    public void write(@NotNull FileConfig config, @NotNull String path) {
+        // Do not save/override anything in the config.
+    }
 
+    @Override
+    public boolean isDummy() {
+        return true;
+    }
+
+    @Override
+    @Nullable
+    public String serialize() {
+        return "{0}";
     }
 
     @Override
@@ -35,17 +47,6 @@ public class DummyPacker extends AbstractItemPacker<DummyHandler> {
     @Override
     public boolean isItemMatches(@NotNull ItemStack item) {
         return false;
-    }
-
-    @Override
-    @NotNull
-    public ItemStack getPreview() {
-        return this.getItem();
-    }
-
-    @Override
-    public void setPreview(@NotNull ItemStack preview) {
-
     }
 
     @Override

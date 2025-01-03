@@ -169,7 +169,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in GUI.");
         }
 
-        ProductPacker packer = handler.createPacker(config, path);
+        ProductPacker packer = handler.readPacker(config, path);
 
         int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
 
@@ -436,10 +436,18 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return product;
     }
 
+    @Nullable
+    public ChestProduct getProduct(@NotNull ItemStack item) {
+        return this.getValidProducts().stream()
+            .filter(product -> product.getPacker() instanceof ItemPacker packer && packer.isItemMatches(item))
+            .findFirst().orElse(null);
+    }
+
     public boolean isProduct(@NotNull ItemStack item) {
-        return this.getValidProducts().stream().anyMatch(product -> {
-            return product.getPacker() instanceof ItemPacker handler && handler.isItemMatches(item);
-        });
+        return this.getProduct(item) != null;
+//        return this.getValidProducts().stream().anyMatch(product -> {
+//            return product.getPacker() instanceof ItemPacker handler && handler.isItemMatches(item);
+//        });
     }
 
     @Nullable

@@ -5,8 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.product.handler.AbstractProductHandler;
 import su.nightexpress.nexshop.product.packer.impl.DummyPacker;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -25,14 +23,25 @@ public class DummyHandler extends AbstractProductHandler implements ItemHandler 
 
     @Override
     @NotNull
-    public ProductPacker createPacker(@NotNull FileConfig config, @NotNull String path) {
+    public DummyPacker readPacker(@NotNull FileConfig config, @NotNull String path) {
+        return this.createPacker();
+    }
+
+    @NotNull
+    public DummyPacker createPacker() {
         return new DummyPacker(this);
     }
 
     @Override
-    @Nullable
-    public ItemPacker createPacker(@NotNull ItemStack itemStack) {
-        return new DummyPacker(this);
+    @NotNull
+    public DummyPacker createPacker(@NotNull ItemStack itemStack) {
+        return this.createPacker();
+    }
+
+    @Override
+    @NotNull
+    public DummyPacker deserialize(@NotNull String str) {
+        return this.createPacker();
     }
 
     @Override

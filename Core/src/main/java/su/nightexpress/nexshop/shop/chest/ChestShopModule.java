@@ -21,10 +21,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.currency.CurrencyManager;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.TransactionModule;
 import su.nightexpress.nexshop.api.shop.event.ChestShopCreateEvent;
@@ -34,15 +33,14 @@ import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
-import su.nightexpress.nexshop.shop.chest.display.PacketEventsHandler;
-import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nexshop.shop.chest.command.*;
 import su.nightexpress.nexshop.shop.chest.compatibility.*;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.display.DisplayHandler;
+import su.nightexpress.nexshop.shop.chest.display.PacketEventsHandler;
 import su.nightexpress.nexshop.shop.chest.display.ProtocolLibHandler;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
@@ -55,6 +53,7 @@ import su.nightexpress.nexshop.shop.chest.menu.*;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nexshop.shop.chest.util.ShopMap;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
+import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.LangAssets;
@@ -561,7 +560,12 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         boolean originalDeny = event.useInteractedBlock() == Event.Result.DENY;
         event.setUseInteractedBlock(Event.Result.DENY);
 
-        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+            if (!originalDeny) {
+                event.setUseInteractedBlock(Event.Result.ALLOW);
+            }
+            return;
+        }
 
         if (player.isSneaking()) {
             ItemStack item = event.getItem();
@@ -733,6 +737,20 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         return shop;
     }
 
+    public boolean canBreak(@NotNull Player player, @NotNull ChestShop shop) {
+        if (!player.hasPermission(ChestPerms.REMOVE)) {
+            ChestLang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
+            return false;
+        }
+
+        if (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS)) {
+            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean deleteShop(@NotNull Player player, @NotNull Block block) {
         ChestShop shop = this.getShop(block);
         if (shop == null) {
@@ -744,16 +762,17 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public boolean deleteShop(@NotNull Player player, @NotNull ChestShop shop) {
-        if (!player.hasPermission(ChestPerms.REMOVE)) {
-            ChestLang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
-            return false;
-        }
-
-        if (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS)) {
-            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
-            return false;
-        }
-
+        if (!this.canBreak(player, shop)) return false;
+//        if (!player.hasPermission(ChestPerms.REMOVE)) {
+//            ChestLang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
+//            return false;
+//        }
+//
+//        if (!shop.isOwner(player) && !player.hasPermission(ChestPerms.REMOVE_OTHERS)) {
+//            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
+//            return false;
+//        }
+//
         if (!this.payForRemoval(player)) {
             ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS.getMessage().send(player);
             return false;

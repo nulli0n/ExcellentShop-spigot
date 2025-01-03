@@ -6,6 +6,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
+import su.nightexpress.nexshop.auction.AuctionUtils;
+import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -82,6 +84,9 @@ public class PurchaseConfirmMenu extends ConfigMenu<ShopPlugin> implements Linke
         ActiveListing listing = this.getLink(viewer);
 
         ItemStack item = new ItemStack(listing.getItemStack()); // Copy to prevent modifying
+
+        AuctionUtils.hideListingAttributes(item);
+
         MenuItem menuItem = new MenuItem(item);
         menuItem.setSlots(this.itemSlot);
         menuItem.setOptions(ItemOptions.personalWeak(viewer.getPlayer()));

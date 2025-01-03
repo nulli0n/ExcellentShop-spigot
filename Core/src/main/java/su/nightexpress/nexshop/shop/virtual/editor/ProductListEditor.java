@@ -152,11 +152,6 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
 
         int index = 0;
         for (VirtualProduct product : products) {
-            if (!product.isValid()) {
-                this.plugin.error("Invalid item id for '" + product.getId() + "' product in '" + shop.getId() + "' shop!");
-                continue;
-            }
-
             int slot;
             if (product instanceof StaticProduct staticProduct) {
                 if (staticProduct.getPage() != page) continue;

@@ -1,15 +1,16 @@
 package su.nightexpress.nexshop.product.handler.impl;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.handler.AbstractProductHandler;
 import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
-import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.ItemNbt;
 
 public class BukkitItemHandler extends AbstractProductHandler implements ItemHandler {
 
@@ -27,25 +28,44 @@ public class BukkitItemHandler extends AbstractProductHandler implements ItemHan
 
     @Override
     @NotNull
-    public BukkitItemPacker createPacker(@NotNull FileConfig config, @NotNull String path) {
-        ItemStack item = config.getItemEncoded(path + ".Content.Item");
-        if (item == null) {
-            item = new ItemStack(Material.AIR);
-            this.logBadItem("", config, path);
+    public ItemPacker readPacker(@NotNull FileConfig config, @NotNull String path) {
+        String serialized;
+
+        if (config.contains(path + ".Content")) {
+            String tagString = config.getString(path + ".Content.Item", "null");
+            boolean respectMeta = config.getBoolean(path + ".Item_Meta_Enabled");
+
+            serialized = tagString + DELIMITER + respectMeta;
+        }
+        else {
+            serialized = config.getString(path + ".Data", "null");
         }
 
-        ItemStack preview = config.getItemEncoded(path + ".Content.Preview");
-        if (preview == null) preview = new ItemStack(item);
+        ItemPacker packer = this.deserialize(serialized);
+        if (packer.isDummy()) {
+            this.plugin.error("[" + NAME + "] Invalid item data string '" + serialized + "'. Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
+        }
 
-        boolean meta = ConfigValue.create(path + ".Item_Meta_Enabled", item.hasItemMeta()).read(config);
-
-        return new BukkitItemPacker(this, item, preview, meta);
+        return packer;
     }
 
     @Override
-    @Nullable
+    @NotNull
+    public ItemPacker deserialize(@NotNull String str) {
+        String[] split = str.split(DELIMITER);
+        String tagString = split[0];
+        boolean respectMeta = split.length >= 2 && Boolean.parseBoolean(split[1]);
+
+        ItemStack itemStack = tagString.contains("{") ? ItemNbt.fromTagString(tagString) : ItemNbt.decompress(tagString);
+        if (itemStack == null || itemStack.getType().isAir()) return ProductHandlerRegistry.getDummyHandler().createPacker();
+
+        return new BukkitItemPacker(this, itemStack, respectMeta);
+    }
+
+    @Override
+    @NotNull
     public BukkitItemPacker createPacker(@NotNull ItemStack itemStack) {
-        return new BukkitItemPacker(this, itemStack, itemStack, itemStack.hasItemMeta());
+        return new BukkitItemPacker(this, itemStack, itemStack.hasItemMeta());
     }
 
     @Override

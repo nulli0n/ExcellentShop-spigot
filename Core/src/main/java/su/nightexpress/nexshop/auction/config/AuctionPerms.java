@@ -30,15 +30,20 @@ public class AuctionPerms {
     public static final UniPermission COMMAND_OPEN_OTHERS      = new UniPermission(PREFIX_COMMAND + "open.others");
     public static final UniPermission COMMAND_SELL             = new UniPermission(PREFIX_COMMAND + "sell");
 
-    public static final UniPermission BYPASS_LISTING_TAX        = new UniPermission(PREFIX_BYPASS + "listing.tax", "Bypass listing taxes.");
-    public static final UniPermission BYPASS_LISTING_PRICE      = new UniPermission(PREFIX_BYPASS + "listing.price", "Bypass listing price limits.");
-    public static final UniPermission BYPASS_DISABLED_WORLDS    = new UniPermission(PREFIX_BYPASS + "disabled_worlds", "Bypass world restrictions to use Auction.");
-    public static final UniPermission BYPASS_DISABLED_GAMEMODES = new UniPermission(PREFIX_BYPASS + "disabled_gamemodes", "Bypass GameMode restrictions to add items on Auction.");
+    public static final UniPermission BYPASS_LISTING_TAX        = new UniPermission(PREFIX_BYPASS + "listing.tax");
+    public static final UniPermission BYPASS_LISTING_PRICE      = new UniPermission(PREFIX_BYPASS + "listing.price");
+    public static final UniPermission BYPASS_DISABLED_WORLDS    = new UniPermission(PREFIX_BYPASS + "disabled_worlds");
+    public static final UniPermission BYPASS_DISABLED_GAMEMODES = new UniPermission(PREFIX_BYPASS + "disabled_gamemodes");
 
     static {
         Perms.PLUGIN.addChildren(AUCTION);
 
-        AUCTION.addChildren(COMMAND, BYPASS, CURRENCY, LISTING_REMOVE_OTHERS);
+        AUCTION.addChildren(
+            COMMAND,
+            BYPASS,
+            CURRENCY,
+            LISTING_REMOVE_OTHERS
+        );
 
         BYPASS.addChildren(
             BYPASS_LISTING_PRICE,

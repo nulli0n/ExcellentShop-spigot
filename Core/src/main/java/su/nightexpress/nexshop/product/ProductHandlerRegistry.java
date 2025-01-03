@@ -34,9 +34,11 @@ public class ProductHandlerRegistry {
         register(plugin, bukkitCommandHandler = new BukkitCommandHandler(plugin));
 
         register(plugin, HookId.ORAXEN, () -> new OraxenItemHandler(plugin));
+        register(plugin, HookId.NEXO, () -> new NexoItemHandler(plugin));
         register(plugin, HookId.ITEMS_ADDER, () -> new ItemsAdderHandler(plugin));
         register(plugin, HookId.MMOITEMS, () -> new MMOItemsHandler(plugin));
         register(plugin, HookId.EXCELLENT_CRATES, () -> new ExcellentCratesHandler(plugin));
+        register(plugin, HookId.EXECUTABLE_ITEMS, () -> new ExecutableItemsHandler(plugin));
     }
 
     public static boolean register(@NotNull ShopPlugin plugin, @NotNull String pluginName, @NotNull Supplier<ProductHandler> supplier) {

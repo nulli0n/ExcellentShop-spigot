@@ -27,6 +27,17 @@ public abstract class AbstractItemPacker<T extends ItemHandler> extends Abstract
     }
 
     @Override
+    @NotNull
+    public ItemStack getPreview() {
+        return this.getItem();
+    }
+
+    @Override
+    public void setPreview(@NotNull ItemStack preview) {
+
+    }
+
+    @Override
     public void delivery(@NotNull Inventory inventory, int count) {
         int amount = this.getUnitAmount() * count;
         ShopUtils.addItem(inventory, this.getItem(), amount);

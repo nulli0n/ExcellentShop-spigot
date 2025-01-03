@@ -7,7 +7,7 @@ import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 
 public interface ItemHandler extends ProductHandler {
 
-    @Nullable ItemPacker createPacker(@NotNull ItemStack itemStack);
+    @NotNull ItemPacker createPacker(@NotNull ItemStack itemStack);
 
     boolean canHandle(@NotNull ItemStack item);
 }

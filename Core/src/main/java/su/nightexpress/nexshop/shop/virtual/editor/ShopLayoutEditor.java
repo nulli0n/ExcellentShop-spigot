@@ -64,10 +64,10 @@ public class ShopLayoutEditor extends EditorMenu<ShopPlugin, VirtualShop> implem
             item.setDisplayName(VirtualLocales.SHOP_LAYOUT_BY_PAGE.getLocalizedName());
             item.setLore(VirtualLocales.SHOP_LAYOUT_BY_PAGE.getLocalizedLore());
 
-            return item.getTranslated(Replacer.create()
+            return item.replacement(replacer -> replacer
                 .replace(Placeholders.GENERIC_PAGE, String.valueOf(page))
                 .replace(Placeholders.GENERIC_NAME, shop.getLayout(page))
-            );
+            ).getItemStack();
         });
         autoFill.setClickAction(page -> (viewer1, event) -> {
             if (event.isRightClick()) {

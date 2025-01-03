@@ -60,7 +60,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     protected void addProduct(@NotNull P product) {
         this.removeProduct(product.getId());
-        this.getProductMap().put(product.getId(), product);
+        this.products.put(product.getId(), product);
     }
 
     @Override
@@ -70,7 +70,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     @Override
     public void removeProduct(@NotNull String id) {
-        this.getProductMap().remove(id);
+        this.products.remove(id);
     }
 
     @Override
@@ -82,7 +82,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     @Override
     @NotNull
     public Collection<P> getProducts() {
-        return this.getProductMap().values();
+        return this.products.values();
     }
 
     @Override
@@ -94,6 +94,6 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     @Override
     @Nullable
     public P getProductById(@NotNull String id) {
-        return this.getProductMap().get(id.toLowerCase());
+        return this.products.get(id.toLowerCase());
     }
 }

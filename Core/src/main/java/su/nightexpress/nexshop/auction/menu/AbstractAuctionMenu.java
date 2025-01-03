@@ -5,6 +5,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.auction.AuctionUtils;
+import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
@@ -18,6 +20,7 @@ import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
 import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Plugins;
 
 import java.util.*;
@@ -97,6 +100,9 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
         autoFill.setSlots(this.itemSlots);
         autoFill.setItemCreator(aucItem -> {
             ItemStack item = new ItemStack(aucItem.getItemStack());
+
+            AuctionUtils.hideListingAttributes(item);
+
             ItemReplacer.create(item).trimmed()
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)

@@ -20,9 +20,9 @@ import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
 import su.nightexpress.nightcore.menu.MenuViewer;
@@ -114,7 +114,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
                 ItemReplacer.create(item).readLocale(VirtualLocales.PRODUCT_ITEM).hideFlags().writeMeta();
             });
 
-        this.addItem(Material.ITEM_FRAME, VirtualLocales.PRODUCT_PREVIEW, 12, (viewer, event, product) -> {
+        this.addItem(Material.ITEM_FRAME, VirtualLocales.PRODUCT_PREVIEW, 13, (viewer, event, product) -> {
             if (event.isRightClick()) {
                 Players.addItem(viewer.getPlayer(), product.getPreview());
                 return;
@@ -127,10 +127,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             event.getView().setCursor(null);
             this.saveProductAndFlush(viewer, product);
         }).getOptions()
-            .setVisibilityPolicy(viewer -> {
-                ProductPacker packer = this.getLink(viewer).getPacker();
-                return packer instanceof BukkitItemPacker || packer instanceof BukkitCommandPacker;
-            })
+            .setVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof BukkitCommandPacker)
             .setDisplayModifier((viewer, item) -> {
                 ItemStack original = this.getLink(viewer).getPacker().getPreview();
                 item.setType(original.getType());
@@ -139,7 +136,7 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
                 ItemReplacer.create(item).readLocale(VirtualLocales.PRODUCT_PREVIEW).hideFlags().writeMeta();
             });
 
-        this.addItem(ItemUtil.getSkinHead(TEXTURE_META), VirtualLocales.PRODUCT_RESPECT_ITEM_META, 14, (viewer, event, product) -> {
+        this.addItem(ItemUtil.getSkinHead(TEXTURE_META), VirtualLocales.PRODUCT_RESPECT_ITEM_META, 13, (viewer, event, product) -> {
             if (!(product.getPacker() instanceof BukkitItemPacker packer)) return;
 
             packer.setRespectItemMeta(!packer.isRespectItemMeta());

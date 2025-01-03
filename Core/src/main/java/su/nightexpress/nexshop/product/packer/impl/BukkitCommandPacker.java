@@ -7,11 +7,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
-import su.nightexpress.nexshop.product.packer.AbstractProductPacker;
 import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
-import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nexshop.product.packer.AbstractProductPacker;
+import su.nightexpress.nightcore.util.ItemNbt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +33,21 @@ public class BukkitCommandPacker extends AbstractProductPacker<BukkitCommandHand
         this.setPreview(preview);
     }
 
+//    @Override
+//    protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
+//        config.setItemEncoded(path + ".Content.Preview", this.getPreview());
+//        config.set(path + ".Content.Commands", this.getCommands());
+//    }
+
     @Override
-    protected void writeAdditional(@NotNull FileConfig config, @NotNull String path) {
-        config.setItemEncoded(path + ".Content.Preview", this.getPreview());
-        config.set(path + ".Content.Commands", this.getCommands());
+    @Nullable
+    public String serialize() {
+        String previewTag = ItemNbt.getTagString(this.preview);
+        if (previewTag == null) return null;
+
+        String commands = String.join(BukkitCommandHandler.CMD_DELIMITER, this.commands);
+
+        return previewTag + BukkitCommandHandler.DELIMITER + commands;
     }
 
     @Override
@@ -69,6 +81,8 @@ public class BukkitCommandPacker extends AbstractProductPacker<BukkitCommandHand
     @Override
     public void delivery(@NotNull Inventory inventory, int count) {
         if (!(inventory.getHolder() instanceof Player player)) return;
+
+        // TODO Amount placeholder + Players.dispatchCommands(player, this.commands);
 
         ConsoleCommandSender sender = Bukkit.getConsoleSender();
         for (int i = 0; i < count; i++) {

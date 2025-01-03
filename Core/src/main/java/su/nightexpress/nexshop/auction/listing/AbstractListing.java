@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
+import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.auction.Placeholders;
 import su.nightexpress.nightcore.util.placeholder.Placeholder;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
@@ -15,7 +17,9 @@ public abstract class AbstractListing implements Placeholder {
     protected final UUID      id;
     protected final UUID      owner;
     protected final String    ownerName;
-    protected final ItemStack itemStack;
+    //protected final ItemStack itemStack;
+    protected final ItemHandler itemHandler;
+    protected final ItemPacker itemPacker;
     protected final Currency  currency;
     protected final double    price;
 
@@ -28,7 +32,9 @@ public abstract class AbstractListing implements Placeholder {
         @NotNull UUID id,
         @NotNull UUID owner,
         @NotNull String ownerName,
-        @NotNull ItemStack itemStack,
+        //@NotNull ItemStack itemStack,
+        @NotNull ItemHandler itemHandler,
+        @NotNull ItemPacker itemPacker,
         Currency currency,
         double price,
         long creationDate,
@@ -37,7 +43,9 @@ public abstract class AbstractListing implements Placeholder {
         this.id = id;
         this.owner = owner;
         this.ownerName = ownerName;
-        this.itemStack = itemStack;
+        //this.itemStack = itemStack;
+        this.itemHandler = itemHandler;
+        this.itemPacker = itemPacker;
         this.currency = currency;
         this.price = price;
         this.creationDate = creationDate;
@@ -77,7 +85,18 @@ public abstract class AbstractListing implements Placeholder {
 
     @NotNull
     public ItemStack getItemStack() {
-        return new ItemStack(this.itemStack);
+        return this.itemPacker.getItem();
+        //return new ItemStack(this.itemStack);
+    }
+
+    @NotNull
+    public ItemHandler getItemHandler() {
+        return this.itemHandler;
+    }
+
+    @NotNull
+    public ItemPacker getItemPacker() {
+        return this.itemPacker;
     }
 
     @NotNull

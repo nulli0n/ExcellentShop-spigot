@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.auction.AuctionManager;
+import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.ListingCategory;
 import su.nightexpress.nexshop.auction.SortType;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
@@ -210,6 +211,8 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
             if (AuctionConfig.MENU_CONTAINER_PREVIEW_ENABLED.get() && this.isContainer(listing)) {
                 previewLore.addAll(this.lorePreview);
             }
+
+            AuctionUtils.hideListingAttributes(item);
 
             ItemReplacer.create(item).trimmed()
                 .setDisplayName(this.itemName)

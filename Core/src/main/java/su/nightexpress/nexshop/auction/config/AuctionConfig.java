@@ -44,6 +44,10 @@ public class AuctionConfig {
         "https://hub.spigotmc.org/javadocs/spigot/org/bukkit/GameMode.html"
     );
 
+    public static final ConfigValue<Boolean> LISTINGS_HIDE_ATTRIBUTES = ConfigValue.create("Settings.Listings.Hide_Attributes",
+        false,
+        "When enabled, will hide item attributes (damage, durability, etc.) of auction listings.");
+
     public static final ConfigValue<Long> LISTINGS_EXPIRE_TIME = ConfigValue.create("Settings.Listings.Expire_In",
         604800L,
         "Sets how long items remain in the Auction before being removed if they are not bought within that time.",

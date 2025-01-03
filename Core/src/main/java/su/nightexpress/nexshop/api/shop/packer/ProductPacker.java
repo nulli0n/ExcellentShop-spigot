@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.api.shop.packer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nightcore.config.FileConfig;
 
 import java.util.function.UnaryOperator;
@@ -13,14 +14,13 @@ public interface ProductPacker {
 
     void write(@NotNull FileConfig config, @NotNull String path);
 
+    @Nullable String serialize();
+
     @NotNull ItemStack getPreview();
 
     void setPreview(@NotNull ItemStack preview);
 
-    default boolean hasSpace(@NotNull Inventory inventory) {
-        int space = this.countSpace(inventory);
-        return space != 0;
-    }
+    boolean hasSpace(@NotNull Inventory inventory);
 
     int countSpace(@NotNull Inventory inventory);
 
@@ -31,4 +31,6 @@ public interface ProductPacker {
     int count(@NotNull Inventory inventory);
 
     int getUnitAmount();
+
+    boolean isDummy();
 }
