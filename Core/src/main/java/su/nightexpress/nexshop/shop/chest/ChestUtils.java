@@ -11,10 +11,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.economybridge.api.item.ItemHandler;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
@@ -92,8 +92,8 @@ public class ChestUtils {
         String material = item.getType().getKey().getKey();
         if (bannedItems.contains(material)) return false;
 
-        for (PluginItemHandler pluginItem : ProductHandlerRegistry.getPluginItemHandlers()) {
-            String id = pluginItem.getItemId(item);
+        for (ItemHandler handler : ItemBridge.getHandlers()) {
+            String id = handler.getItemId(item);
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }

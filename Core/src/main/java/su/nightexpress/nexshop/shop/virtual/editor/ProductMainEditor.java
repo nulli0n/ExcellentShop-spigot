@@ -7,16 +7,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
-import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
-import su.nightexpress.nexshop.product.packer.impl.BukkitCommandPacker;
-import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
@@ -65,27 +62,27 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
         // Command Product stuff
         // =============================================
         this.addItem(ItemUtil.getSkinHead(TEXTURE_COMMAND), VirtualLocales.PRODUCT_COMMANDS, 10, (viewer, event, product) -> {
-            CommandPacker packer = (CommandPacker) product.getPacker();
+            CommandTyping type = (CommandTyping) product.getType();
 
             if (event.isRightClick()) {
-                packer.getCommands().clear();
+                type.getCommands().clear();
                 this.saveProductAndFlush(viewer, product);
                 return;
             }
 
             this.handleInput(viewer, VirtualLang.EDITOR_ENTER_COMMAND, (dialog, input) -> {
-                packer.getCommands().add(input.getText());
+                type.getCommands().add(input.getText());
                 this.saveProduct(viewer, product);
                 return true;
             });
-        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getHandler() instanceof BukkitCommandHandler);
+        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getType() instanceof CommandTyping);
 
         // =============================================
         // Item Product stuff
         // =============================================
         this.addItem(Material.ITEM_FRAME, VirtualLocales.PRODUCT_ITEM, 10, (viewer, event, product) -> {
             if (event.isRightClick()) {
-                ItemPacker packer = (ItemPacker) product.getPacker();
+                PhysicalTyping packer = (PhysicalTyping) product.getType();
                 Players.addItem(viewer.getPlayer(), packer.getItem());
                 return;
             }
@@ -94,19 +91,15 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             if (cursor == null || cursor.getType().isAir()) return;
 
             boolean isBypass = event.isShiftClick();
-                ItemHandler handler = isBypass ? ProductHandlerRegistry.forBukkitItem() : ProductHandlerRegistry.getHandler(cursor);
+            ProductTyping typing = ProductTypes.fromItem(cursor, isBypass);
 
-            ProductPacker packer = handler.createPacker(cursor);
-            if (packer == null) return;
-
-            product.setHandler(handler, packer);
-
+            product.setType(typing);
             event.getView().setCursor(null);
             this.saveProductAndFlush(viewer, product);
         }).getOptions()
-            .setVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof ItemPacker)
+            .setVisibilityPolicy(viewer -> this.getLink(viewer).getType() instanceof PhysicalTyping)
             .setDisplayModifier((viewer, item) -> {
-                ItemPacker itemPacker = (ItemPacker) this.getLink(viewer).getPacker();
+                PhysicalTyping itemPacker = (PhysicalTyping) this.getLink(viewer).getType();
                 ItemStack original = itemPacker.getItem();
                 item.setType(original.getType());
                 item.setAmount(original.getAmount());
@@ -123,13 +116,14 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             ItemStack cursor = event.getCursor();
             if (cursor == null || cursor.getType().isAir()) return;
 
-            product.getPacker().setPreview(cursor);
+            CommandTyping type = (CommandTyping) product.getType();
+            type.setPreview(cursor);
             event.getView().setCursor(null);
             this.saveProductAndFlush(viewer, product);
         }).getOptions()
-            .setVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof BukkitCommandPacker)
+            .setVisibilityPolicy(viewer -> this.getLink(viewer).getType() instanceof CommandTyping)
             .setDisplayModifier((viewer, item) -> {
-                ItemStack original = this.getLink(viewer).getPacker().getPreview();
+                ItemStack original = this.getLink(viewer).getType().getPreview();
                 item.setType(original.getType());
                 item.setAmount(original.getAmount());
                 item.setItemMeta(original.getItemMeta());
@@ -137,11 +131,11 @@ public class ProductMainEditor extends EditorMenu<ShopPlugin, VirtualProduct> im
             });
 
         this.addItem(ItemUtil.getSkinHead(TEXTURE_META), VirtualLocales.PRODUCT_RESPECT_ITEM_META, 13, (viewer, event, product) -> {
-            if (!(product.getPacker() instanceof BukkitItemPacker packer)) return;
+            if (!(product.getType() instanceof VanillaTyping typing)) return;
 
-            packer.setRespectItemMeta(!packer.isRespectItemMeta());
+            typing.setRespectMeta(!typing.isRespectMeta());
             this.saveProductAndFlush(viewer, product);
-        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof BukkitItemPacker);
+        }).getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).getType() instanceof VanillaTyping);
 
         // =============================================
         // Regular Product stuff

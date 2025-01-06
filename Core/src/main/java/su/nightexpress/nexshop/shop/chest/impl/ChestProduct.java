@@ -3,13 +3,11 @@ package su.nightexpress.nexshop.shop.chest.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
 import su.nightexpress.nightcore.config.FileConfig;
 
@@ -23,19 +21,18 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
                         @NotNull String id,
                         @NotNull ChestShop shop,
                         @NotNull Currency currency,
-                        @NotNull ProductHandler handler,
-                        @NotNull ProductPacker packer) {
-        super(plugin, id, shop, currency, handler, packer);
+                        @NotNull ProductTyping typing) {
+        super(plugin, id, shop, currency, typing);
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
         this.writeQuantity(config, path);
-        if (!(this.getHandler() instanceof DummyHandler)) {
-            config.set(path + ".Handler", this.getHandler().getName());
-        }
+
+        config.set(path + ".Type", this.type.type().name());
+        this.type.write(config, path);
+
         config.set(path + ".Currency", this.getCurrency().getInternalId());
         this.getPricer().write(config, path + ".Price");
-        this.getPacker().write(config, path);
     }
 
     public void writeQuantity(@NotNull FileConfig config, @NotNull String path) {

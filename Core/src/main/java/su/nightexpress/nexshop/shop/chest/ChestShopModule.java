@@ -28,8 +28,8 @@ import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.TransactionModule;
 import su.nightexpress.nexshop.api.shop.event.ChestShopCreateEvent;
 import su.nightexpress.nexshop.api.shop.event.ChestShopRemoveEvent;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.hook.HookId;
@@ -497,9 +497,9 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         List<ChestProduct> products = new ArrayList<>();
         this.getActiveShops().forEach(shop -> {
             shop.getValidProducts().forEach(product -> {
-                if (!(product.getPacker() instanceof ItemPacker packer)) return;
+                if (!(product.getType() instanceof PhysicalTyping typing)) return;
 
-                ItemStack item = packer.getItem();
+                ItemStack item = typing.getItem();
                 String material = BukkitThing.toString(item.getType()).toLowerCase();
                 String localized = LangAssets.get(item.getType()).toLowerCase();
                 String displayName = NightMessage.stripAll(ItemUtil.getItemName(item)).toLowerCase();
@@ -508,7 +508,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
                     return;
                 }
 
-                if (packer instanceof PluginItemPacker pluginPacker) {
+                if (typing instanceof PluginTyping pluginPacker && pluginPacker.isValid()) {
                     String itemId = pluginPacker.getItemId();
                     if (itemId.contains(searchFor)) {
                         products.add(product);

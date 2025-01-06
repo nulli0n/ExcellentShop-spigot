@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.data.DataHandler;
@@ -11,7 +12,6 @@ import su.nightexpress.nexshop.data.UserManager;
 import su.nightexpress.nexshop.data.user.ShopUser;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.hook.PlaceholderHook;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.shop.ShopManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
@@ -29,8 +29,7 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
     private DataHandler dataHandler;
     private UserManager userManager;
 
-    //private CurrencyManager currencyManager;
-    private ShopManager     shopManager;
+    private ShopManager shopManager;
 
     private VirtualShopModule virtualShop;
     private ChestShopModule   chestShop;
@@ -61,6 +60,8 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
             this.error("https://github.com/nulli0n/economy-bridge/releases");
         }
 
+        Keys.load(this);
+
         this.loadCommands();
 
         this.dataHandler = new DataHandler(this);
@@ -68,15 +69,6 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
 
         this.userManager = new UserManager(this);
         this.userManager.setup();
-
-//        this.currencyManager = new CurrencyManager(this);
-//        this.currencyManager.setup();
-//        if (!this.currencyManager.hasCurrency()) {
-//            this.error("No currencies are available! Plugin will be disabled.");
-//            return;
-//        }
-
-        this.loadProductHandlers();
 
         this.shopManager = new ShopManager(this);
         this.shopManager.setup();
@@ -121,22 +113,13 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
             this.auction.shutdown();
             this.auction = null;
         }
-//        if (this.currencyManager != null) {
-//            this.currencyManager.shutdown();
-//            this.currencyManager = null;
-//        }
 
-        ProductHandlerRegistry.getHandlerMap().clear();
-    }
-
-    private void loadProductHandlers() {
-        ProductHandlerRegistry.load(this);
+        Keys.clear();
     }
 
     private void loadCommands() {
         ChainedNode rootNode = this.getRootNode();
 
-        //CurrencyCommand.inject(this, rootNode);
         ReloadCommand.inject(this, rootNode, Perms.COMMAND_RELOAD);
     }
 
@@ -151,11 +134,6 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
     public UserManager getUserManager() {
         return userManager;
     }
-
-//    @NotNull
-//    public CurrencyManager getCurrencyManager() {
-//        return currencyManager;
-//    }
 
     @NotNull
     public ShopManager getShopManager() {

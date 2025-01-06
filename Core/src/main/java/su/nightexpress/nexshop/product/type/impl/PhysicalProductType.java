@@ -1,40 +1,29 @@
-package su.nightexpress.nexshop.product.packer;
+package su.nightexpress.nexshop.product.type.impl;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.config.Keys;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nightcore.util.ItemUtil;
-import su.nightexpress.nightcore.util.text.NightMessage;
-import su.nightexpress.nightcore.util.text.tag.Tags;
+import su.nightexpress.nightcore.util.PDCUtil;
 
-public abstract class AbstractItemPacker<T extends ItemHandler> extends AbstractProductPacker<T> implements ItemPacker {
+public abstract class PhysicalProductType implements PhysicalTyping {
 
-    public static final ItemStack INVALID_ITEM;
-
-    static {
-        INVALID_ITEM = new ItemStack(Material.BARRIER);
-        ItemUtil.editMeta(INVALID_ITEM, meta -> {
-            meta.setDisplayName(NightMessage.asLegacy(Tags.LIGHT_RED.enclose("<Invalid Item>")));
-        });
-    }
-
-    public AbstractItemPacker(@NotNull T handler) {
-        super(handler);
+    @NotNull
+    protected static ItemStack getBrokenItem() {
+        ItemStack itemStack = new ItemStack(Material.BARRIER);
+        Lang.EDITOR_GENERIC_BROKEN_ITEM.apply(itemStack);
+        PDCUtil.set(itemStack, Keys.brokenItem, true);
+        return itemStack;
     }
 
     @Override
     @NotNull
     public ItemStack getPreview() {
         return this.getItem();
-    }
-
-    @Override
-    public void setPreview(@NotNull ItemStack preview) {
-
     }
 
     @Override
@@ -54,10 +43,11 @@ public abstract class AbstractItemPacker<T extends ItemHandler> extends Abstract
         return ShopUtils.countItem(inventory, this::isItemMatches);
     }
 
-    /*@Override
+    @Override
     public boolean hasSpace(@NotNull Inventory inventory) {
-        return ShopUtils.countItemSpace(inventory, this::isItemMatches, this.getItem().getMaxStackSize()) > 0;
-    }*/
+        return this.countSpace(inventory) > 0;
+        //return ShopUtils.countItemSpace(inventory, this.wrapper::isItemMatches, this.wrapper.createItem().getMaxStackSize()) > 0;
+    }
 
     @Override
     public int countSpace(@NotNull Inventory inventory) {

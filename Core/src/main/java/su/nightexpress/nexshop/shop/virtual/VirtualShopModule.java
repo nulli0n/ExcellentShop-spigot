@@ -100,10 +100,10 @@ public class VirtualShopModule extends AbstractShopModule implements Transaction
         new ShopCreator(this.plugin, this).createDefaults();
 
         this.loadEditors();
-        if (Plugins.isInstalled(HookId.ITEMS_ADDER)) {
-            this.plugin.runTaskLater(task -> this.loadShops(), 100L); // костыль FIXME
+        /*if (Plugins.isInstalled(HookId.ITEMS_ADDER)) {
+            this.plugin.runTaskLater(task -> this.loadShops(), 100L); // костыль
         }
-        else this.loadShops();
+        else */this.loadShops();
         this.loadLayouts();
 
         if (Plugins.isLoaded(HookId.CITIZENS)) {

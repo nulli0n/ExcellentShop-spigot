@@ -1,6 +1,6 @@
 package su.nightexpress.nexshop.auction.config;
 
-import su.nightexpress.nexshop.auction.Placeholders;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nightcore.util.wrapper.UniPermission;
 

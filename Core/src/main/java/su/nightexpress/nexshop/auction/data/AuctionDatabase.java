@@ -6,18 +6,15 @@ import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
-import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
+import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.product.type.impl.PluginProductType;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.AbstractDataManager;
 import su.nightexpress.nightcore.db.config.DatabaseConfig;
@@ -27,6 +24,8 @@ import su.nightexpress.nightcore.db.sql.query.SQLQueries;
 import su.nightexpress.nightcore.db.sql.query.impl.DeleteQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.SelectQuery;
 import su.nightexpress.nightcore.db.sql.util.WhereOperator;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.StringUtil;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -72,20 +71,38 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                 UUID owner = UUID.fromString(resultSet.getString(COLUMN_OWNER.getName()));
                 String ownerName = resultSet.getString(COLUMN_OWNER_NAME.getName());
 
+                ProductTyping typing;
+
+                String serialized = resultSet.getString(COLUMN_ITEM.getName());
                 String handlerName = resultSet.getString(COLUMN_HANDLER.getName());
 
-                ProductHandler handler = ProductHandlerRegistry.getHandler(handlerName);
-                if (!(handler instanceof ItemHandler itemHandler)) return null;
+                ProductType type = StringUtil.getEnum(handlerName, ProductType.class).orElse(null);
+                if (type != null) {
+                    typing = ProductTypes.deserialize(type, serialized);
+                }
+                // ------ REVERT 4.13.3 CHANGES - START ------
+                else {
+                    if (handlerName.equalsIgnoreCase("bukkit_item")) {
+                        String delimiter = " \\| ";
+                        String[] split = serialized.split(delimiter);
+                        String tagString = split[0];
 
-                String itemData = resultSet.getString(COLUMN_ITEM.getName());
-                ProductPacker packer = itemHandler.deserialize(itemData);
-                if (!(packer instanceof ItemPacker itemPacker)) return null;
-
-                if (itemHandler instanceof PluginItemHandler pluginHandler && itemPacker instanceof PluginItemPacker pluginPacker) {
-                    if (!pluginHandler.isValidId(pluginPacker.getItemId())) {
-                        this.manager.error("[" + handler.getName() + "] Invalid item ID/Data '" + itemData + "'.");
-                        return null;
+                        typing = ProductTypes.deserialize(ProductType.VANILLA, tagString);
                     }
+                    else {
+                        String delimiter = " \\| ";
+                        String[] split = serialized.split(delimiter);
+                        String itemId = split[0];
+                        int amount = split.length >= 2 ? NumberUtil.getIntegerAbs(split[1]) : 1;
+
+                        typing = new PluginProductType(handlerName, itemId, amount);
+                    }
+                }
+                // ------ REVERT 4.13.3 CHANGES - END ------
+
+                if (!(typing instanceof PhysicalTyping physicalTyping) || !physicalTyping.isValid()) {
+                    this.manager.error("Invalid listing data: '" + serialized + "'. Handler: '" + handlerName + "'.");
+                    return null;
                 }
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
@@ -103,7 +120,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                     deletionDate = AuctionUtils.generatePurgeDate(dateCreation);
                 }
 
-                return new ActiveListing(id, owner, ownerName, itemHandler, itemPacker, currency, price, dateCreation, expireDate, deletionDate);
+                return new ActiveListing(id, owner, ownerName, physicalTyping, currency, price, dateCreation, expireDate, deletionDate);
             }
             catch (SQLException exception) {
                 exception.printStackTrace();
@@ -118,20 +135,38 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                 String ownerName = resultSet.getString(COLUMN_OWNER_NAME.getName());
                 String buyerName = resultSet.getString(COLUMN_BUYER_NAME.getName());
 
+                ProductTyping typing;
+
+                String serialized = resultSet.getString(COLUMN_ITEM.getName());
                 String handlerName = resultSet.getString(COLUMN_HANDLER.getName());
 
-                ProductHandler handler = ProductHandlerRegistry.getHandler(handlerName);
-                if (!(handler instanceof ItemHandler itemHandler)) return null;
+                ProductType type = StringUtil.getEnum(handlerName, ProductType.class).orElse(null);
+                if (type != null) {
+                    typing = ProductTypes.deserialize(type, serialized);
+                }
+                // ------ REVERT 4.13.3 CHANGES - START ------
+                else {
+                    if (handlerName.equalsIgnoreCase("bukkit_item")) {
+                        String delimiter = " \\| ";
+                        String[] split = serialized.split(delimiter);
+                        String tagString = split[0];
 
-                String itemData = resultSet.getString(COLUMN_ITEM.getName());
-                ProductPacker packer = itemHandler.deserialize(itemData);
-                if (!(packer instanceof ItemPacker itemPacker)) return null;
-
-                if (itemHandler instanceof PluginItemHandler pluginHandler && itemPacker instanceof PluginItemPacker pluginPacker) {
-                    if (!pluginHandler.isValidId(pluginPacker.getItemId())) {
-                        this.manager.error("[" + handler.getName() + "] Invalid item ID/Data '" + itemData + "'.");
-                        return null;
+                        typing = ProductTypes.deserialize(ProductType.VANILLA, tagString);
                     }
+                    else {
+                        String delimiter = " \\| ";
+                        String[] split = serialized.split(delimiter);
+                        String itemId = split[0];
+                        int amount = split.length >= 2 ? NumberUtil.getIntegerAbs(split[1]) : 1;
+
+                        typing = new PluginProductType(handlerName, itemId, amount);
+                    }
+                }
+                // ------ REVERT 4.13.3 CHANGES - END ------
+
+                if (!(typing instanceof PhysicalTyping physicalTyping) || !physicalTyping.isValid()) {
+                    this.manager.error("Invalid listing data: '" + serialized + "'. Handler: '" + handlerName + "'.");
+                    return null;
                 }
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
@@ -150,7 +185,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                     deletionDate = AuctionUtils.generatePurgeDate(dateCreation);
                 }
 
-                return new CompletedListing(id, owner, ownerName, buyerName, itemHandler, itemPacker, currency, price, dateCreation, buyDate, deletionDate, isNotified);
+                return new CompletedListing(id, owner, ownerName, buyerName, physicalTyping, currency, price, dateCreation, buyDate, deletionDate, isNotified);
             }
             catch (SQLException exception) {
                 exception.printStackTrace();
@@ -181,11 +216,11 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
             COLUMN_BUY_DATE, COLUMN_DATE_CREATION, COLUMN_DELETE_DATE
         ));
 
-        this.addColumn(this.tableListings, COLUMN_HANDLER, BukkitItemHandler.NAME);
+        this.addColumn(this.tableListings, COLUMN_HANDLER, ProductType.VANILLA.name());
         this.addColumn(this.tableListings, COLUMN_CURRENCY, this.manager.getDefaultCurrency().getInternalId());
         this.addColumn(this.tableListings, COLUMN_DATE_CREATION, String.valueOf(System.currentTimeMillis()));
 
-        this.addColumn(this.tableCompletedListings, COLUMN_HANDLER, BukkitItemHandler.NAME);
+        this.addColumn(this.tableCompletedListings, COLUMN_HANDLER, ProductType.VANILLA.name());
         this.addColumn(this.tableCompletedListings, COLUMN_CURRENCY, this.manager.getDefaultCurrency().getInternalId());
         this.addColumn(this.tableCompletedListings, COLUMN_DATE_CREATION, String.valueOf(System.currentTimeMillis()));
 

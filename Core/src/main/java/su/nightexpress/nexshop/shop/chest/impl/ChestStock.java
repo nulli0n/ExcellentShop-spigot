@@ -8,8 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.impl.AbstractStock;
@@ -65,7 +65,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         if (product == null) return 0;
         if (this.shop.isInactive()) return 0;
         if (this.shop.isAdminShop()) return UNLIMITED;
-        if (!(product.getPacker() instanceof ItemPacker packer)) return UNLIMITED;
+        if (!(product.getType() instanceof PhysicalTyping typing)) return UNLIMITED;
 
         double unitAmount = product.getUnitAmount();
 
@@ -79,14 +79,14 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
 
         // For buying (from player's perspective) return product unit amount based on similar inventory slots only.
         if (type == TradeType.BUY) {
-            totalAmount = Stream.of(contents).mapToInt(content -> content != null && packer.isItemMatches(content) ? content.getAmount() : 0).sum();
+            totalAmount = Stream.of(contents).mapToInt(content -> content != null && typing.isItemMatches(content) ? content.getAmount() : 0).sum();
         }
         // For selling (from player's perspective) return product unit amount based on free or similar inventory slots.
         else {
-            ItemStack item = packer.getItem();
+            ItemStack item = typing.getItem();
             totalAmount = Stream.of(contents).mapToInt(content -> {
                 if (content == null || content.getType().isAir()) return item.getMaxStackSize();
-                if (packer.isItemMatches(content)) return Math.max(0, content.getMaxStackSize() - content.getAmount());
+                if (typing.isItemMatches(content)) return Math.max(0, content.getMaxStackSize() - content.getAmount());
 
                 return 0;
             }).sum();
@@ -100,7 +100,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         ChestProduct origin = this.findProduct(product);
         if (origin == null) return false;
         if (this.shop.isInactive()) return false;
-        if (!(origin.getPacker() instanceof ItemPacker packer)) return false;
+        if (!(origin.getType() instanceof PhysicalTyping typing)) return false;
 
         amount = Math.abs(amount * origin.getUnitAmount());
 
@@ -110,7 +110,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         }
 
         Inventory inventory = this.shop.getInventory();
-        ShopUtils.takeItem(inventory, packer::isItemMatches, amount);
+        ShopUtils.takeItem(inventory, typing::isItemMatches, amount);
         return true;
     }
 
@@ -119,7 +119,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         ChestProduct origin = this.findProduct(product);
         if (origin == null) return false;
         if (this.shop.isInactive()) return false;
-        if (!(origin.getPacker() instanceof ItemPacker packer)) return false;
+        if (!(origin.getType() instanceof PhysicalTyping typing)) return false;
 
         amount = Math.abs(amount * origin.getUnitAmount());
 
@@ -129,7 +129,7 @@ public class ChestStock extends AbstractStock<ChestShop, ChestProduct> {
         }
 
         Inventory inventory = this.shop.getInventory();
-        return ShopUtils.addItem(inventory, packer.getItem(), amount);
+        return ShopUtils.addItem(inventory, typing.getItem(), amount);
         //return true;
     }
 

@@ -27,7 +27,7 @@ import su.nightexpress.nightcore.util.Lists;
 import java.util.ArrayList;
 import java.util.List;
 
-import static su.nightexpress.nexshop.auction.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class PurchaseConfirmMenu extends ConfigMenu<ShopPlugin> implements Linked<ActiveListing> {
@@ -65,7 +65,7 @@ public class PurchaseConfirmMenu extends ConfigMenu<ShopPlugin> implements Linke
                 ActiveListing listing = this.getLink(viewer);
 
                 ItemReplacer.create(item).readMeta()
-                    .replace(listing.getPlaceholders())
+                    .replace(listing.replacePlaceholders())
                     .replace(GENERIC_BALANCE, () -> listing.getCurrency().format(listing.getCurrency().getBalance(viewer.getPlayer())))
                     .replacePlaceholderAPI(viewer.getPlayer())
                     .writeMeta();

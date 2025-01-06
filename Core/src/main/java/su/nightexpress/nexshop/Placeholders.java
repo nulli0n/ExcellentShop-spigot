@@ -10,24 +10,31 @@ import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.auction.listing.AbstractListing;
+import su.nightexpress.nexshop.auction.listing.ActiveListing;
+import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.product.packer.impl.BukkitCommandPacker;
-import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
-import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
-import su.nightexpress.nexshop.shop.chest.config.ChestLang;
-import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
-import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-import su.nightexpress.nexshop.shop.virtual.impl.*;
-import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
+import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.language.LangAssets;
+import su.nightexpress.nightcore.util.ItemNbt;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.TimeUtil;
@@ -172,6 +179,24 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String DISCOUNT_CONFIG_DAYS     = "%discount_days%";
     public static final String DISCOUNT_CONFIG_TIMES    = "%discount_times%";
 
+    // Auction
+    public static final String LISTING_ITEM_NAME     = "%listing_item_name%";
+    public static final String LISTING_ITEM_LORE     = "%listing_item_lore%";
+    public static final String LISTING_ITEM_AMOUNT   = "%listing_item_amount%";
+    public static final String LISTING_ITEM_VALUE    = "%listing_item_value%";
+    public static final String LISTING_SELLER        = "%listing_seller%";
+    public static final String LISTING_PRICE         = "%listing_price%";
+    public static final String LISTING_DATE_CREATION = "%listing_date_creation%";
+    public static final String LISTING_DELETES_IN    = "%listing_deletes_in%";
+    public static final String LISTING_DELETE_DATE   = "%listing_delete_date%";
+    public static final String LISTING_EXPIRES_IN    = "%listing_expires_in%";
+    public static final String LISTING_EXPIRE_DATE   = "%listing_expire_date%";
+    public static final String LISTING_BUYER         = "%listing_buyer%";
+    public static final String LISTING_BUY_DATE      = "%listing_buy_date%";
+
+    public static final String CATEGORY_ID   = "%category_id%";
+    public static final String CATEGORY_NAME = "%category_name%";
+
     public record ProductPOV<T extends Product>(@NotNull T product, @Nullable Player player){}
 
     @NotNull
@@ -293,7 +318,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<ProductPOV<? extends Product>> PRODUCT = PlaceholderList.create(list -> {
         list
             .add(PRODUCT_ID, pov -> pov.product.getId())
-            .add(PRODUCT_HANDLER, pov -> pov.product.getHandler().getName())
+            .add(PRODUCT_HANDLER, pov -> pov.product.getType().getName())
             .add(PRODUCT_CURRENCY, pov -> pov.product.getCurrency().getName())
             .add(PRODUCT_UNIT_AMOUNT, pov -> NumberUtil.format(pov.product.getUnitAmount()))
             .add(PRODUCT_PRICE_TYPE, pov -> Lang.PRICE_TYPES.getLocalized(pov.product.getPricer().getType()))
@@ -426,12 +451,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     // Product Packers
     // ------------------------------
 
-    public static final PlaceholderList<BukkitItemPacker> BUKKIT_ITEM_PACKER = PlaceholderList.create(list -> list
-        .add(PRODUCT_ITEM_META_ENABLED, packet -> Lang.getYesOrNo(packet.isRespectItemMeta()))
+    public static final PlaceholderList<VanillaTyping> VANILLA_TYPING = PlaceholderList.create(list -> list
+        .add(PRODUCT_ITEM_META_ENABLED, typing -> Lang.getYesOrNo(typing.isRespectMeta()))
     );
 
-    public static final PlaceholderList<BukkitCommandPacker> BUKKIT_COMMAND_PACKER = PlaceholderList.create(list -> list
-        .add(PRODUCT_COMMANDS, packer -> packer.getCommands().stream().map(Lang::goodEntry).collect(Collectors.joining("\n")))
+    public static final PlaceholderList<CommandTyping> COMMAND_TYPING = PlaceholderList.create(list -> list
+        .add(PRODUCT_COMMANDS, typing -> typing.getCommands().stream().map(Lang::goodEntry).collect(Collectors.joining("\n")))
     );
 
     // ------------------------------
@@ -480,6 +505,34 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(PRODUCT_PRICER_PLAYERS_ADJUST_STEP, pricer -> NumberUtil.format(pricer.getAdjustStep()))
     );
 
+    // ------------------------------
+    // Auction
+    // ------------------------------
+
+    public static final PlaceholderList<AbstractListing> LISTING = PlaceholderList.create(list -> list
+        .add(LISTING_SELLER, AbstractListing::getOwnerName)
+        .add(LISTING_PRICE, listing -> listing.getCurrency().format(listing.getPrice()))
+        .add(LISTING_DATE_CREATION, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getCreationDate())))
+        .add(LISTING_ITEM_AMOUNT, listing -> String.valueOf(listing.getItemStack().getAmount()))
+        .add(LISTING_ITEM_NAME, listing -> ItemUtil.getItemName(listing.getItemStack()))
+        .add(LISTING_ITEM_LORE, listing -> String.join("\n", ItemUtil.getLore(listing.getItemStack())))
+        .add(LISTING_ITEM_VALUE, listing -> String.valueOf(ItemNbt.compress(listing.getItemStack())))
+        .add(LISTING_DELETES_IN, listing -> TimeUtil.formatDuration(listing.getDeleteDate()))
+        .add(LISTING_DELETE_DATE, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getDeleteDate())))
+    );
+
+    public static final PlaceholderList<ActiveListing> ACTIVE_LISTING = PlaceholderList.create(list -> list
+        .add(LISTING)
+        .add(LISTING_EXPIRES_IN, listing -> TimeUtil.formatDuration(listing.getExpireDate()))
+        .add(LISTING_EXPIRE_DATE, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getExpireDate())))
+    );
+
+    public static final PlaceholderList<CompletedListing> COMPLETED_LISTING = PlaceholderList.create(list -> list
+        .add(LISTING)
+        .add(LISTING_BUYER, CompletedListing::getBuyerName)
+        .add(LISTING_BUY_DATE, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getBuyDate())))
+    );
+
     @NotNull
     public static UnaryOperator<String> forProduct(@NotNull Product product, @Nullable Player player) {
         return PRODUCT.replacer(new ProductPOV<>(product, player));
@@ -520,5 +573,15 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         if (shop instanceof RotatingShop rotatingShop) return ROTATING_SHOP_INTERNAL.replacer(rotatingShop);
 
         return VIRTUAL_SHOP_INTERNAL.replacer(shop);
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forActiveListing(@NotNull ActiveListing listing) {
+        return ACTIVE_LISTING.replacer(listing);
+    }
+
+    @NotNull
+    public static UnaryOperator<String> forCompletedListing(@NotNull CompletedListing listing) {
+        return COMPLETED_LISTING.replacer(listing);
     }
 }

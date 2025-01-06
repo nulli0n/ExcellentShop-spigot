@@ -3,8 +3,8 @@ package su.nightexpress.nexshop.auction.config;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import su.nightexpress.economybridge.currency.CurrencyId;
-import su.nightexpress.nexshop.auction.Placeholders;
-import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.economybridge.item.ItemPlugins;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.Lists;
@@ -141,7 +141,7 @@ public class AuctionConfig {
         ),
         "List of items that can not be added as shop products.",
         "Vanilla Names: https://minecraft.wiki/w/Java_Edition_data_values -> Blocks / Items -> Resource location column.",
-        "Supported Plugins: " + String.join(", ", HookId.getItemPluginNames())
+        "Supported Plugins: " + String.join(", ", ItemPlugins.values())
     );
 
     public static final ConfigValue<Set<String>> LISTINGS_DISABLED_NAMES = ConfigValue.create("Settings.Listings.Disabled_Names",

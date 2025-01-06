@@ -30,7 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.auction.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<Currency>, Linked<Pair<ItemStack, Double>> {

@@ -1,24 +1,24 @@
-package su.nightexpress.nexshop.api.shop.packer;
+package su.nightexpress.nexshop.api.shop.product.typing;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
+import su.nightexpress.nightcore.config.Writeable;
 
 import java.util.function.UnaryOperator;
 
-public interface ProductPacker {
+public interface ProductTyping extends Writeable {
+
+    @NotNull ProductType type();
+
+    @NotNull String getName();
 
     @NotNull UnaryOperator<String> replacePlaceholders();
 
-    void write(@NotNull FileConfig config, @NotNull String path);
-
-    @Nullable String serialize();
+    boolean isValid();
 
     @NotNull ItemStack getPreview();
-
-    void setPreview(@NotNull ItemStack preview);
 
     boolean hasSpace(@NotNull Inventory inventory);
 
@@ -31,6 +31,4 @@ public interface ProductPacker {
     int count(@NotNull Inventory inventory);
 
     int getUnitAmount();
-
-    boolean isDummy();
 }

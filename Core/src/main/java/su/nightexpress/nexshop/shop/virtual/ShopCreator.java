@@ -3,16 +3,15 @@ package su.nightexpress.nexshop.shop.virtual;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.type.impl.VanillaProductType;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
-import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
 import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
@@ -775,11 +774,12 @@ public class ShopCreator {
     private void addShopProduct(@NotNull StaticShop shop, @NotNull Material material, @NotNull UniDouble price, @NotNull UniInt pageSlot) {
         ItemStack itemStack = new ItemStack(material);
 
-        BukkitItemHandler handler = ProductHandlerRegistry.forBukkitItem();
-        BukkitItemPacker packer = handler.createPacker(itemStack);
-        if (packer == null) return;
+//        ItemHandler handler = ItemBridge.getItemManager().forBukkitItem();
+//        ItemWrapper packer = handler.wrap(itemStack);
 
-        StaticProduct product = shop.createProduct(this.currency, handler, packer);
+        ProductTyping type = new VanillaProductType(itemStack, itemStack.hasItemMeta());
+
+        StaticProduct product = shop.createProduct(this.currency, type);
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
         product.getPricer().setPrice(TradeType.BUY, price.getMinValue());
         product.getPricer().setPrice(TradeType.SELL, price.getMaxValue());
@@ -792,11 +792,12 @@ public class ShopCreator {
     private void addShopProduct(@NotNull RotatingShop shop, @NotNull Material material, @NotNull UniDouble price) {
         ItemStack itemStack = new ItemStack(material);
 
-        BukkitItemHandler handler = ProductHandlerRegistry.forBukkitItem();
-        BukkitItemPacker packer = handler.createPacker(itemStack);
-        if (packer == null) return;
+        //ItemHandler handler = ItemBridge.getItemManager().forBukkitItem();
+        //ItemWrapper packer = handler.wrap(itemStack);
 
-        RotatingProduct product = shop.createProduct(this.currency, handler, packer);
+        ProductTyping type = new VanillaProductType(itemStack, itemStack.hasItemMeta());
+
+        RotatingProduct product = shop.createProduct(this.currency, type);
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
         product.getPricer().setPrice(TradeType.BUY, price.getMinValue());
         product.getPricer().setPrice(TradeType.SELL, price.getMaxValue());

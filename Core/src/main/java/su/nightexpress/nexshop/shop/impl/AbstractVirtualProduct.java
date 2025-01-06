@@ -2,15 +2,13 @@ package su.nightexpress.nexshop.shop.impl;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.product.handler.impl.DummyHandler;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualPreparedProduct;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -31,9 +29,8 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
                                   @NotNull String id,
                                   @NotNull S shop,
                                   @NotNull Currency currency,
-                                  @NotNull ProductHandler handler,
-                                  @NotNull ProductPacker packer) {
-        super(plugin, id, shop, currency, handler, packer);
+                                  @NotNull ProductTyping type) {
+        super(plugin, id, shop, currency, type);
         this.allowedRanks = new HashSet<>();
         this.requiredPermissions = new HashSet<>();
         this.stockValues = new StockValues();
@@ -49,10 +46,9 @@ public abstract class AbstractVirtualProduct<S extends AbstractVirtualShop<?>> e
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        if (!(this.getHandler() instanceof DummyHandler)) {
-            config.set(path + ".Handler", this.getHandler().getName());
-        }
-        this.getPacker().write(config, path);
+        config.set(path + ".Type", this.type.type().name());
+        this.type.write(config, path);
+
         config.set(path + ".Allowed_Ranks", this.getAllowedRanks());
         config.set(path + ".Required_Permissions", this.getRequiredPermissions());
         if (!this.getCurrency().isDummy()) {

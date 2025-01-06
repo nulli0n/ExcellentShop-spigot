@@ -7,11 +7,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -20,10 +20,10 @@ import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 import su.nightexpress.nexshop.product.price.impl.PlayersPricer;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -126,7 +126,7 @@ public class ProductPriceEditor extends EditorMenu<ShopPlugin, VirtualProduct> i
                 this.onPriceClick(viewer, event, product, TradeType.SELL);
 
         }).getOptions()
-            .addVisibilityPolicy(viewer -> this.getLink(viewer).getPacker() instanceof ItemPacker)
+            .addVisibilityPolicy(viewer -> this.getLink(viewer).getType() instanceof PhysicalTyping)
             .setDisplayModifier((viewer, item) -> {
                 Product product = this.getLink(viewer);
                 if (product.getPricer() instanceof RangedPricer) {

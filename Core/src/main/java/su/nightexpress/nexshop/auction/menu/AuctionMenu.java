@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static su.nightexpress.nexshop.auction.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
@@ -219,7 +219,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
                 .setLore(this.itemLore)
                 .injectLore(PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, listing))
                 .replaceLoreExact(PLACEHOLDER_ACTION_PREVIEW, previewLore)
-                .replace(listing.getPlaceholders())
+                .replace(listing.replacePlaceholders())
                 .replacePlaceholderAPI(player)
                 .writeMeta();
             return item;

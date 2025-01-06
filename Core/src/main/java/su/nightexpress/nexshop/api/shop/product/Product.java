@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 
@@ -83,17 +82,22 @@ public interface Product {
 
     @NotNull Shop getShop();
 
+    @NotNull
+    ProductTyping getType();
+
+    void setType(@NotNull ProductTyping type);
+
     @NotNull ItemStack getPreview();
 
     @NotNull Currency getCurrency();
 
     void setCurrency(@NotNull Currency currency);
 
-    @NotNull ProductHandler getHandler();
-
-    void setHandler(@NotNull ProductHandler handler, @NotNull ProductPacker packer);
-
-    @NotNull ProductPacker getPacker();
+//    @NotNull ProductHandler getHandler();
+//
+//    void setHandler(@NotNull ProductHandler handler, @NotNull ProductPacker packer);
+//
+//    @NotNull ProductPacker getPacker();
 
     @NotNull AbstractProductPricer getPricer();
 

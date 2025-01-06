@@ -2,10 +2,12 @@ package su.nightexpress.nexshop.config;
 
 import org.bukkit.Sound;
 import su.nightexpress.economybridge.Placeholders;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nightcore.core.CoreLang;
 import su.nightexpress.nightcore.language.entry.LangEnum;
+import su.nightexpress.nightcore.language.entry.LangItem;
 import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.language.entry.LangText;
 
@@ -17,9 +19,10 @@ import static su.nightexpress.nightcore.language.tag.MessageTags.*;
 
 public class Lang extends CoreLang {
 
-    public static final LangEnum<DayOfWeek> DAYS        = LangEnum.of("Days", DayOfWeek.class);
-    public static final LangEnum<TradeType> TRADE_TYPES = LangEnum.of("TradeType", TradeType.class);
-    public static final LangEnum<PriceType> PRICE_TYPES = LangEnum.of("PriceType", PriceType.class);
+    public static final LangEnum<DayOfWeek>   DAYS          = LangEnum.of("Days", DayOfWeek.class);
+    public static final LangEnum<TradeType>   TRADE_TYPES   = LangEnum.of("TradeType", TradeType.class);
+    public static final LangEnum<PriceType>   PRICE_TYPES   = LangEnum.of("PriceType", PriceType.class);
+    public static final LangEnum<ProductType> PRODUCT_TYPES = LangEnum.of("ProductType", ProductType.class);
 
     public static final LangString COMMAND_ARGUMENT_NAME_NAME     = LangString.of("Command.Argument.Name.Name", "name");
     public static final LangString COMMAND_ARGUMENT_NAME_CURRENCY = LangString.of("Command.Argument.Name.Currency", "currency");
@@ -109,6 +112,12 @@ public class Lang extends CoreLang {
 
     public static final LangString EDITOR_PRICE_FLOAT_NO_TIMES = LangString.of("Editor.Price.Float.NoTimes",
         "No times set. Price won't refresh properly.");
+
+    public static final LangItem EDITOR_GENERIC_BROKEN_ITEM = LangItem.of("Editor.Generic.BrokenItem",
+        LIGHT_RED.enclose(BOLD.enclose("< Invalid Item> ")),
+        LIGHT_GRAY.enclose("Item tag/ID is broken"),
+        LIGHT_GRAY.enclose("or invalid.")
+    );
 
     public static final LangString EDITOR_GENERIC_ENTER_NAME = LangString.of("Editor.Generic.Enter.Name",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Name]")));

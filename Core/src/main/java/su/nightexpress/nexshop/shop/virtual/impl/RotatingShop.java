@@ -2,19 +2,18 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
-import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.shop.virtual.data.RotationData;
-import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.message.LangMessage;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -54,7 +53,7 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
     @Override
     @NotNull
     public UnaryOperator<String> replacePlaceholders() {
-        return su.nightexpress.nexshop.Placeholders.forRotatingShop(this);
+        return Placeholders.forRotatingShop(this);
     }
 
     public void loadData() {
@@ -94,9 +93,8 @@ public class RotatingShop extends AbstractVirtualShop<RotatingProduct> {
 
     @Override
     @NotNull
-    public RotatingProduct createProduct(@NotNull String id, @NotNull Currency currency,
-                                         @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        return new RotatingProduct(this.plugin, id, this, currency, handler, packer);
+    public RotatingProduct createProduct(@NotNull String id, @NotNull Currency currency, @NotNull ProductTyping type) {
+        return new RotatingProduct(this.plugin, id, this, currency, type);
     }
 
     @Override

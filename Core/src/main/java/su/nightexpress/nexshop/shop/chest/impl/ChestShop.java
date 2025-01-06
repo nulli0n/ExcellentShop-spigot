@@ -16,27 +16,24 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.currency.CurrencyId;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.economybridge.currency.CurrencyId;
+import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
-import su.nightexpress.nexshop.product.packer.impl.BukkitItemPacker;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
-import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.LocationUtil;
 import su.nightexpress.nightcore.util.Pair;
@@ -81,7 +78,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     @Override
     @NotNull
     public UnaryOperator<String> replacePlaceholders() {
-        return su.nightexpress.nexshop.Placeholders.forChestShop(this);
+        return Placeholders.forChestShop(this);
     }
 
     @Override
@@ -162,18 +159,25 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             config.set(path + ".Content.Item", itemOld);
         }
 
-        String handlerId = config.getString(path + ".Handler", BukkitItemHandler.NAME);
-        ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
-        if (handler == null) {
-            handler = ProductHandlerRegistry.getDummyHandler();
-            this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in GUI.");
+        if (!config.contains(path + ".Type")) {
+            String handlerId = config.getString(path + ".Handler", "bukkit_item");
+            if (handlerId.equalsIgnoreCase("bukkit_command")) {
+                config.set(path + ".Type", ProductType.COMMAND.name());
+            }
+            else if (handlerId.equalsIgnoreCase("bukkit_item")) {
+                config.set(path + ".Type", ProductType.VANILLA.name());
+            }
+            else {
+                config.set(path + ".Type", ProductType.PLUGIN.name());
+            }
         }
 
-        ProductPacker packer = handler.readPacker(config, path);
+        ProductType typed = config.getEnum(path + ".Type", ProductType.class, ProductType.VANILLA);
+        ProductTyping typing = ProductTypes.read(this.module, typed, config, path);
 
         int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
 
-        ChestProduct product = new ChestProduct(this.plugin, id, this, currency, handler, packer);
+        ChestProduct product = new ChestProduct(this.plugin, id, this, currency, typing);
         product.setPricer(AbstractProductPricer.read(config, path + ".Price"));
         product.setQuantity(infQuantity);
         return product;
@@ -412,22 +416,9 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
 
         String id = UUID.randomUUID().toString();
-
-        ItemHandler handler;
-        if (bypassHandler) {
-            handler = ProductHandlerRegistry.forBukkitItem();
-        }
-        else handler = ProductHandlerRegistry.getHandler(stack);
-
-        ProductPacker packer = handler.createPacker(stack);
-        if (packer == null) return null;
-
-        if (packer instanceof BukkitItemPacker itemPacker) {
-            itemPacker.setRespectItemMeta(true); // Always check for similar stack for chest shop.
-        }
-
+        ProductTyping typing = ProductTypes.fromItem(item, bypassHandler);
         Currency currency = this.module.getDefaultCurrency();
-        ChestProduct product = new ChestProduct(this.plugin, id, this, currency, handler, packer);
+        ChestProduct product = new ChestProduct(this.plugin, id, this, currency, typing);
 
         product.setPrice(TradeType.BUY, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
         product.setPrice(TradeType.SELL, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
@@ -439,7 +430,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     @Nullable
     public ChestProduct getProduct(@NotNull ItemStack item) {
         return this.getValidProducts().stream()
-            .filter(product -> product.getPacker() instanceof ItemPacker packer && packer.isItemMatches(item))
+            .filter(product -> product.getType() instanceof PhysicalTyping typing && typing.isItemMatches(item))
             .findFirst().orElse(null);
     }
 
@@ -562,7 +553,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         List<String> text = new ArrayList<>();
         for (String line : this.getDisplayText()) {
-            text.add(0, line
+            text.addFirst(line
                 .replace(Placeholders.GENERIC_BUY, !isBuyable ? "" : buyTextMap.getOrDefault(this.getType(), ""))
                 .replace(Placeholders.GENERIC_SELL, !isSellable ? "" : sellTextMap.getOrDefault(this.getType(), ""))
                 .trim()

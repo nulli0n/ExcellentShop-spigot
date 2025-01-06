@@ -9,13 +9,13 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -69,8 +69,9 @@ public class AuctionUtils {
                 }
             }
 
-            ItemHandler handler = ProductHandlerRegistry.forBukkitItem();
-            ItemPacker packer = handler.createPacker(item);
+            //ItemHandler handler = ProductHandlerRegistry.forBukkitItem();
+            //ItemPacker packer = handler.createPacker(item);
+            PhysicalTyping typing = ProductTypes.fromItem(item, false);
 
             Currency currency = Rnd.get(auctionManager.getAllowedCurrencies());
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
@@ -81,7 +82,7 @@ public class AuctionUtils {
 
             if (i < 15) {
                 long deletionDate = generatePurgeDate(dateExpired);
-                ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, handler, packer, currency, price, dateCreation, dateExpired, deletionDate);
+                ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, typing, currency, price, dateCreation, dateExpired, deletionDate);
                 auctionManager.getListings().add(listing);
                 auctionManager.getDatabase().addListing(listing);
             }
@@ -90,7 +91,7 @@ public class AuctionUtils {
                 long buyDate = TimeUtil.toEpochMillis(buyed);
                 long deletionDate = generatePurgeDate(buyDate);
 
-                CompletedListing listing = new CompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), handler, packer, currency, price, dateCreation, buyDate, deletionDate, Rnd.nextBoolean());
+                CompletedListing listing = new CompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), typing, currency, price, dateCreation, buyDate, deletionDate, Rnd.nextBoolean());
                 auctionManager.getListings().addCompleted(listing);
                 auctionManager.getDatabase().addCompletedListing(listing);
             }

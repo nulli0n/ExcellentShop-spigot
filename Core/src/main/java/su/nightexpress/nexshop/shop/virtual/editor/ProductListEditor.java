@@ -10,14 +10,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
-import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.product.type.impl.CommandProductType;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
@@ -205,16 +204,10 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
                     StaticProduct cached = this.getCachedProduct(cursor);
                     if (cached == null) {
                         Currency currency = shop.getModule().getDefaultCurrency();
-                        su.nightexpress.nexshop.api.shop.handler.ItemHandler handler;
-                        if (event.isShiftClick()) {
-                            handler = ProductHandlerRegistry.forBukkitItem();
-                        }
-                        else handler = ProductHandlerRegistry.getHandler(cursor);
+                        boolean bypassHandler = event.isShiftClick();
+                        ProductTyping typing = ProductTypes.fromItem(cursor, bypassHandler);
 
-                        ProductPacker packer = handler.createPacker(cursor);
-                        if (packer == null) return;
-
-                        cached = staticShop.createProduct(currency, handler, packer);
+                        cached = staticShop.createProduct(currency, typing);
 
                         shop.getPricer().deleteData(cached);
                         shop.getStock().resetGlobalValues(cached);
@@ -246,28 +239,16 @@ public class ProductListEditor extends EditorMenu<ShopPlugin, VirtualShop> imple
             VirtualProduct product = hasCursor ? this.getCachedProduct(cursor) : null;
             if (product == null) {
                 Currency currency = shop.getModule().getDefaultCurrency();
-                ProductHandler handler;
-                if (event.isShiftClick() && hasCursor) {
-                    handler = ProductHandlerRegistry.forBukkitItem();
+                ProductTyping typing;
+
+                if (hasCursor) {
+                    boolean isBypass = event.isShiftClick();
+                    typing = ProductTypes.fromItem(cursor, isBypass);
                 }
                 else {
-                    handler = hasCursor ? ProductHandlerRegistry.getHandler(cursor) : ProductHandlerRegistry.forBukkitCommand();
+                    typing = new CommandProductType(new ItemStack(Material.COMMAND_BLOCK), new ArrayList<>());
                 }
-
-                ProductPacker packer;
-                if (handler instanceof su.nightexpress.nexshop.api.shop.handler.ItemHandler itemHandler && cursor != null) {
-                    packer = itemHandler.createPacker(cursor);
-                }
-                else {
-                    BukkitCommandHandler commandHandler = (BukkitCommandHandler) handler;
-                    packer = commandHandler.createPacker();
-                }
-
-                if (packer == null) {
-                    return;
-                }
-
-                product = shop.createProduct(currency, handler, packer);
+                product = shop.createProduct(currency, typing);
 
                 // Delete product price & stock datas for new items in case there was product with similar ID.
                 shop.getPricer().deleteData(product);

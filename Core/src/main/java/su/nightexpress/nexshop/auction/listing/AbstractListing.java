@@ -4,65 +4,47 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.auction.Placeholders;
-import su.nightexpress.nightcore.util.placeholder.Placeholder;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
-public abstract class AbstractListing implements Placeholder {
+public abstract class AbstractListing {
 
-    protected final UUID      id;
-    protected final UUID      owner;
-    protected final String    ownerName;
-    //protected final ItemStack itemStack;
-    protected final ItemHandler itemHandler;
-    protected final ItemPacker itemPacker;
-    protected final Currency  currency;
-    protected final double    price;
+    protected final UUID           id;
+    protected final UUID           owner;
+    protected final String         ownerName;
+    protected final PhysicalTyping typing;
+    protected final Currency       currency;
+    protected final double         price;
 
     protected final long creationDate;
     protected final long deletionDate;
 
-    protected final PlaceholderMap placeholderMap;
-
-    public AbstractListing(
-        @NotNull UUID id,
-        @NotNull UUID owner,
-        @NotNull String ownerName,
-        //@NotNull ItemStack itemStack,
-        @NotNull ItemHandler itemHandler,
-        @NotNull ItemPacker itemPacker,
-        Currency currency,
-        double price,
-        long creationDate,
-        long deletionDate
-    ) {
+    public AbstractListing(@NotNull UUID id,
+                           @NotNull UUID owner,
+                           @NotNull String ownerName,
+                           @NotNull PhysicalTyping typing,
+                           Currency currency,
+                           double price,
+                           long creationDate,
+                           long deletionDate) {
         this.id = id;
         this.owner = owner;
         this.ownerName = ownerName;
-        //this.itemStack = itemStack;
-        this.itemHandler = itemHandler;
-        this.itemPacker = itemPacker;
+        this.typing = typing;
         this.currency = currency;
         this.price = price;
         this.creationDate = creationDate;
         this.deletionDate = deletionDate;
-
-        this.placeholderMap = Placeholders.forListing(this);
     }
 
     public boolean isDeletionTime() {
         return this.getDeleteDate() >= 0 && System.currentTimeMillis() >= this.getDeleteDate();
     }
 
-    @Override
     @NotNull
-    public PlaceholderMap getPlaceholders() {
-        return this.placeholderMap;
-    }
+    public abstract UnaryOperator<String> replacePlaceholders();
 
     @NotNull
     public final UUID getId() {
@@ -85,18 +67,12 @@ public abstract class AbstractListing implements Placeholder {
 
     @NotNull
     public ItemStack getItemStack() {
-        return this.itemPacker.getItem();
-        //return new ItemStack(this.itemStack);
+        return this.typing.getItem();
     }
 
     @NotNull
-    public ItemHandler getItemHandler() {
-        return this.itemHandler;
-    }
-
-    @NotNull
-    public ItemPacker getItemPacker() {
-        return this.itemPacker;
+    public PhysicalTyping getTyping() {
+        return this.typing;
     }
 
     @NotNull

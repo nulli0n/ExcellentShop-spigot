@@ -11,9 +11,10 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
@@ -198,7 +199,7 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
         double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getOwnerBank().getBalance(product.getCurrency()) : -1D;
         double userBalance = product.getCurrency().getBalance(player);
 
-        if (product.getPacker() instanceof ItemPacker itemPacker) {
+        if (product.getType() instanceof PhysicalTyping itemPacker) {
             if (tradeType == TradeType.BUY) {
                 // Allow to buy no more than player can carry.
                 capacityInventory = itemPacker.countSpace(player.getInventory()) / product.getUnitAmount();

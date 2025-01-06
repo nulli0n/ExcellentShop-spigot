@@ -3,12 +3,12 @@ package su.nightexpress.nexshop.auction.listing;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.AuctionUtils;
-import su.nightexpress.nexshop.auction.Placeholders;
 
 import java.util.UUID;
+import java.util.function.UnaryOperator;
 
 public class CompletedListing extends AbstractListing {
 
@@ -23,9 +23,7 @@ public class CompletedListing extends AbstractListing {
         UUID holder = listing.getOwner();
         String ownerName = listing.getOwnerName();
         String buyerName = buyer.getDisplayName();
-        //ItemStack itemStack = listing.getItemStack();
-        ItemHandler handler = listing.getItemHandler();
-        ItemPacker packer = listing.getItemPacker();
+        PhysicalTyping typing = listing.getTyping();
         Currency currency = listing.getCurrency();
         double price = listing.getPrice();
         long creationDate = listing.getCreationDate();
@@ -39,7 +37,7 @@ public class CompletedListing extends AbstractListing {
             price -= Math.max(0D, AuctionUtils.getTax(currency, price, tax));
         }
 
-        return new CompletedListing(id, holder, ownerName, buyerName, handler, packer, currency, price, creationDate, buyDate, deletionDate, isPaid);
+        return new CompletedListing(id, holder, ownerName, buyerName, typing, currency, price, creationDate, buyDate, deletionDate, isPaid);
     }
 
     public CompletedListing(
@@ -47,9 +45,7 @@ public class CompletedListing extends AbstractListing {
         @NotNull UUID owner,
         @NotNull String ownerName,
         @NotNull String buyerName,
-        //@NotNull ItemStack itemStack,
-        @NotNull ItemHandler handler,
-        @NotNull ItemPacker packer,
+        @NotNull PhysicalTyping typing,
         @NotNull Currency currency,
         double price,
         long creationDate,
@@ -57,12 +53,16 @@ public class CompletedListing extends AbstractListing {
         long deletionDate,
         boolean claimed
     ) {
-        super(id, owner, ownerName, handler, packer, currency, price, creationDate, deletionDate);
+        super(id, owner, ownerName, typing, currency, price, creationDate, deletionDate);
         this.setClaimed(claimed);
         this.buyerName = buyerName;
         this.buyDate = buyDate;
+    }
 
-        this.placeholderMap.add(Placeholders.forCompletedListing(this));
+    @Override
+    @NotNull
+    public UnaryOperator<String> replacePlaceholders() {
+        return Placeholders.forCompletedListing(this);
     }
 
     @NotNull

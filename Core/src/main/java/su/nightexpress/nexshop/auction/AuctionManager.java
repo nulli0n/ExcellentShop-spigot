@@ -7,11 +7,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ItemHandler;
-import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
+import su.nightexpress.economybridge.api.item.ItemHandler;
+import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.command.child.*;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
@@ -22,8 +23,8 @@ import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.config.DatabaseType;
@@ -280,8 +281,8 @@ public class AuctionManager extends AbstractShopModule {
             return false;
         }
 
-        for (PluginItemHandler packer : ProductHandlerRegistry.getPluginItemHandlers()) {
-            String id = packer.getItemId(item);
+        for (ItemHandler handler : ItemBridge.getHandlers()) {
+            String id = handler.getItemId(item);
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }
@@ -429,10 +430,11 @@ public class AuctionManager extends AbstractShopModule {
             currency.take(player, taxPay);
         }
 
-        ItemHandler handler = ProductHandlerRegistry.getHandler(item);
-        ItemPacker packer = handler.createPacker(item);
+        //ItemHandler handler = ProductHandlerRegistry.getHandler(item);
+        //ItemPacker packer = handler.createPacker(item);
+        PhysicalTyping typing = ProductTypes.fromItem(item, false);
 
-        ActiveListing listing = ActiveListing.create(player, handler, packer, currency, price);
+        ActiveListing listing = ActiveListing.create(player, typing, currency, price);
         this.listings.add(listing);
         this.plugin.runTaskAsync(task -> this.database.addListing(listing));
 

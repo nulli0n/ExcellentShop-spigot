@@ -3,11 +3,10 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.data.RotationData;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -22,9 +21,8 @@ public class RotatingProduct extends AbstractVirtualProduct<RotatingShop> {
                            @NotNull String id,
                            @NotNull RotatingShop shop,
                            @NotNull Currency currency,
-                           @NotNull ProductHandler handler,
-                           @NotNull ProductPacker packer) {
-        super(plugin, id, shop, currency, handler, packer);
+                           @NotNull ProductTyping type) {
+        super(plugin, id, shop, currency, type);
     }
 
     @Override

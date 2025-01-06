@@ -4,6 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nightexpress.economybridge.currency.CurrencyId;
+import su.nightexpress.economybridge.item.ItemPlugins;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
@@ -225,7 +226,7 @@ public class ChestConfig {
         ),
         "List of items that can not be added as shop products.",
         "Vanilla Names: https://minecraft.wiki/w/Java_Edition_data_values -> Blocks / Items -> Resource location column.",
-        "Supported Plugins: " + String.join(", ", HookId.getItemPluginNames())
+        "Supported Plugins: " + String.join(", ", ItemPlugins.values())
     );
 
     public static final ConfigValue<Set<String>> SHOP_PRODUCT_DENIED_LORES = ConfigValue.create("Shops.Products.Lore_Blacklist",

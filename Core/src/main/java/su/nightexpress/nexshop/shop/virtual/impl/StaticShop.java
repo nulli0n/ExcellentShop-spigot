@@ -1,11 +1,10 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.type.ShopType;
@@ -46,9 +45,8 @@ public final class StaticShop extends AbstractVirtualShop<StaticProduct> {
 
     @Override
     @NotNull
-    public StaticProduct createProduct(@NotNull String id, @NotNull Currency currency,
-                                       @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        return new StaticProduct(this.plugin, id, this, currency, handler, packer);
+    public StaticProduct createProduct(@NotNull String id, @NotNull Currency currency, @NotNull ProductTyping type) {
+        return new StaticProduct(this.plugin, id, this, currency, type);
     }
 
     @Override

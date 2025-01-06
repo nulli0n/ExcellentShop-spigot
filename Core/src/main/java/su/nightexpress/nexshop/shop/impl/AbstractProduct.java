@@ -7,12 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.handler.PluginItemHandler;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.PluginItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.FlatPricer;
@@ -26,23 +23,21 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     protected final String     id;
 
     protected S                     shop;
+    protected ProductTyping         type;
     protected Currency              currency;
-    protected ProductHandler        handler;
-    protected ProductPacker         packer;
     protected AbstractProductPricer pricer;
 
     public AbstractProduct(@NotNull ShopPlugin plugin,
                            @NotNull String id,
                            @NotNull S shop,
                            @NotNull Currency currency,
-                           @NotNull ProductHandler handler,
-                           @NotNull ProductPacker packer) {
+                           @NotNull ProductTyping type) {
         this.plugin = plugin;
         this.id = id.toLowerCase();
         this.shop = shop;
         this.setCurrency(currency);
         this.setPricer(new FlatPricer());
-        this.setHandler(handler, packer);
+        this.setType(type);
     }
 
     @NotNull
@@ -58,7 +53,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     @NotNull
     public UnaryOperator<String> replacePlaceholders(@Nullable Player player) {
         var explicit = this.replaceExplicitPlaceholders(player);
-        var packer = this.packer.replacePlaceholders();
+        var packer = this.type.replacePlaceholders();
         var pricer = this.pricer.replacePlaceholders();
 
         return str -> {
@@ -71,12 +66,13 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean isValid() {
-        if (this.packer.isDummy()) return false;
-
-        if (this.packer instanceof PluginItemPacker itemPacker && this.handler instanceof PluginItemHandler itemHandler) {
-            return itemHandler.isValidId(itemPacker.getItemId());
-        }
-        return true;
+        return this.type.isValid();
+//        if (this.packer.isDummy()) return false;
+//
+//        if (this.packer instanceof PluginItemPacker itemPacker && this.handler instanceof PluginItemHandler itemHandler) {
+//            return itemHandler.isValidId(itemPacker.getItemId());
+//        }
+//        return true;
     }
 
     @Override
@@ -158,7 +154,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int getUnitAmount() {
-        return this.packer.getUnitAmount();
+        return this.type.getUnitAmount();
     }
 
     @Override
@@ -168,7 +164,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public void delivery(@NotNull Inventory inventory, int count) {
-        this.packer.delivery(inventory, count);
+        this.type.delivery(inventory, count);
     }
 
     @Override
@@ -178,7 +174,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public void take(@NotNull Inventory inventory, int count) {
-        this.packer.take(inventory, count);
+        this.type.take(inventory, count);
     }
 
     @Override
@@ -198,7 +194,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int count(@NotNull Inventory inventory) {
-        return this.packer.count(inventory);
+        return this.type.count(inventory);
     }
 
     @Override
@@ -208,7 +204,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int countSpace(@NotNull Inventory inventory) {
-        return this.packer.countSpace(inventory);
+        return this.type.countSpace(inventory);
     }
 
     @Override
@@ -218,7 +214,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean hasSpace(@NotNull Inventory inventory) {
-        return this.packer.hasSpace(inventory);
+        return this.type.hasSpace(inventory);
     }
 
 
@@ -235,28 +231,21 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         return this.id;
     }
 
+    @NotNull
+    @Override
+    public ProductTyping getType() {
+        return this.type;
+    }
+
+    @Override
+    public void setType(@NotNull ProductTyping type) {
+        this.type = type;
+    }
+
     @Override
     @NotNull
     public ItemStack getPreview() {
-        return this.packer.getPreview();
-    }
-
-    @NotNull
-    @Override
-    public ProductHandler getHandler() {
-        return this.handler;
-    }
-
-    @Override
-    public void setHandler(@NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        this.handler = handler;
-        this.packer = packer;
-    }
-
-    @NotNull
-    @Override
-    public ProductPacker getPacker() {
-        return this.packer;
+        return this.type.getPreview();
     }
 
     @Override

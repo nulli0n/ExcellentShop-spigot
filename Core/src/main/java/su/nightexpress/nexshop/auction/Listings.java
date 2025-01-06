@@ -13,24 +13,24 @@ import java.util.function.Predicate;
 
 public class Listings {
 
-    private final Map<UUID, ActiveListing>         listings;
-    private final Map<UUID, CompletedListing>      completedListings;
-    private final Map<UUID, Set<ActiveListing>>    listingsByOwnerId;
+    private final Map<UUID, ActiveListing>         activeById;
+    private final Map<UUID, CompletedListing>      completedById;
+    private final Map<UUID, Set<ActiveListing>>    activeByOwnerId;
     private final Map<UUID, Set<CompletedListing>> completedByOwnerId;
 
     private static final Comparator<AbstractListing> SORT_BY_CREATION = Comparator.comparingLong(AbstractListing::getCreationDate).reversed();
 
     public Listings() {
-        this.listings = new ConcurrentHashMap<>();
-        this.completedListings = new ConcurrentHashMap<>();
-        this.listingsByOwnerId = new ConcurrentHashMap<>();
+        this.activeById = new ConcurrentHashMap<>();
+        this.completedById = new ConcurrentHashMap<>();
+        this.activeByOwnerId = new ConcurrentHashMap<>();
         this.completedByOwnerId = new ConcurrentHashMap<>();
     }
 
     public void clear() {
-        this.listings.clear();
-        this.completedListings.clear();
-        this.listingsByOwnerId.clear();
+        this.activeById.clear();
+        this.completedById.clear();
+        this.activeByOwnerId.clear();
         this.completedByOwnerId.clear();
     }
 
@@ -41,32 +41,32 @@ public class Listings {
     }
 
     public void add(@NotNull ActiveListing listing) {
-        this.listings.put(listing.getId(), listing);
-        this.listingsByOwnerId.computeIfAbsent(listing.getOwner(), k -> new HashSet<>()).add(listing);
+        this.activeById.put(listing.getId(), listing);
+        this.activeByOwnerId.computeIfAbsent(listing.getOwner(), k -> new HashSet<>()).add(listing);
     }
 
     public void remove(@NotNull ActiveListing listing) {
-        this.listings.remove(listing.getId());
-        this.listingsByOwnerId.getOrDefault(listing.getOwner(), Collections.emptySet()).remove(listing);
+        this.activeById.remove(listing.getId());
+        this.activeByOwnerId.getOrDefault(listing.getOwner(), Collections.emptySet()).remove(listing);
     }
 
     public void addCompleted(@NotNull CompletedListing listing) {
-        this.completedListings.put(listing.getId(), listing);
+        this.completedById.put(listing.getId(), listing);
         this.completedByOwnerId.computeIfAbsent(listing.getOwner(), k -> new HashSet<>()).add(listing);
     }
 
     public void removeCompleted(@NotNull CompletedListing listing) {
-        this.completedListings.remove(listing.getId());
+        this.completedById.remove(listing.getId());
         this.completedByOwnerId.getOrDefault(listing.getOwner(), Collections.emptySet()).remove(listing);
     }
 
     public void removeInvalidActive() {
-        this.listings.values().removeIf(AbstractListing::isDeletionTime);
-        this.listingsByOwnerId.values().forEach(set -> set.removeIf(AbstractListing::isDeletionTime));
+        this.activeById.values().removeIf(AbstractListing::isDeletionTime);
+        this.activeByOwnerId.values().forEach(set -> set.removeIf(AbstractListing::isDeletionTime));
     }
 
     public void removeInvalidCompleted() {
-        this.completedListings.values().removeIf(AbstractListing::isDeletionTime);
+        this.completedById.values().removeIf(AbstractListing::isDeletionTime);
         this.completedByOwnerId.values().forEach(set -> set.removeIf(AbstractListing::isDeletionTime));
     }
 
@@ -78,7 +78,7 @@ public class Listings {
     public ActiveListing getById(@NotNull UUID uuid) {
         this.removeInvalidActive();
 
-        return this.listings.getOrDefault(uuid, null);
+        return this.activeById.getOrDefault(uuid, null);
     }
 
 
@@ -87,7 +87,7 @@ public class Listings {
     public List<ActiveListing> getAll() {
         this.removeInvalidActive();
 
-        return new ArrayList<>(this.listings.values());
+        return new ArrayList<>(this.activeById.values());
     }
 
     @NotNull
@@ -99,7 +99,7 @@ public class Listings {
     public List<ActiveListing> getAll(@NotNull UUID id) {
         this.removeInvalidActive();
 
-        return new ArrayList<>(this.listingsByOwnerId.getOrDefault(id, Collections.emptySet()));
+        return new ArrayList<>(this.activeByOwnerId.getOrDefault(id, Collections.emptySet()));
     }
 
 
@@ -108,7 +108,7 @@ public class Listings {
     public List<CompletedListing> getCompleted() {
         this.removeInvalidCompleted();
 
-        return new ArrayList<>(this.completedListings.values());
+        return new ArrayList<>(this.completedById.values());
     }
 
     @NotNull
@@ -129,7 +129,7 @@ public class Listings {
     public List<ActiveListing> getActive() {
         this.removeInvalidActive();
 
-        return new ArrayList<>(this.listings.values().stream().filter(Predicate.not(ActiveListing::isExpired)).toList());
+        return new ArrayList<>(this.activeById.values().stream().filter(Predicate.not(ActiveListing::isExpired)).toList());
     }
 
     @NotNull

@@ -6,22 +6,18 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.VirtualShop;
-import su.nightexpress.nexshop.api.shop.handler.ProductHandler;
-import su.nightexpress.nexshop.api.shop.packer.CommandPacker;
-import su.nightexpress.nexshop.api.shop.packer.ItemPacker;
-import su.nightexpress.nexshop.api.shop.packer.ProductPacker;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.*;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.product.ProductHandlerRegistry;
-import su.nightexpress.nexshop.product.handler.impl.BukkitCommandHandler;
-import su.nightexpress.nexshop.product.handler.impl.BukkitItemHandler;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.Discount;
@@ -168,13 +164,12 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     }
 
     @NotNull
-    public P createProduct(@NotNull Currency currency, @NotNull ProductHandler handler, @NotNull ProductPacker packer) {
-        return this.createProduct(this.generateProductId(packer), currency, handler, packer);
+    public P createProduct(@NotNull Currency currency, @NotNull ProductTyping type) {
+        return this.createProduct(this.generateProductId(type), currency, type);
     }
 
     @NotNull
-    public abstract P createProduct(@NotNull String id, @NotNull Currency currency,
-                                    @NotNull ProductHandler handler, @NotNull ProductPacker packer);
+    public abstract P createProduct(@NotNull String id, @NotNull Currency currency, @NotNull ProductTyping type);
 
     @Nullable
     protected P loadProduct(@NotNull FileConfig config, @NotNull String path, @NotNull String id) {
@@ -187,24 +182,27 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
 
         // Legacy stuff
         if (!config.contains(path + ".Handler")) {
-            ItemStack item = config.getItemEncoded(path + ".Content.Item");
-            if (item != null && !item.getType().isAir()) {
-                config.set(path + ".Handler", BukkitItemHandler.NAME);
-            }
-            else config.set(path + ".Handler", BukkitCommandHandler.NAME);
+            config.set(path + ".Handler", "bukkit_item");
         }
         // Legacy end
 
-        String handlerId = config.getString(path + ".Handler", BukkitItemHandler.NAME);
-        ProductHandler handler = ProductHandlerRegistry.getHandler(handlerId);
-        if (handler == null) {
-            handler = ProductHandlerRegistry.getDummyHandler();
-            this.module.warn("Invalid handler '" + handlerId + "' for '" + id + "' product in '" + this.getId() + "' shop. Install missing plugin or change product in editor.");
+        if (!config.contains(path + ".Type")) {
+            String handlerId = config.getString(path + ".Handler", "bukkit_item");
+            if (handlerId.equalsIgnoreCase("bukkit_command")) {
+                config.set(path + ".Type", ProductType.COMMAND.name());
+            }
+            else if (handlerId.equalsIgnoreCase("bukkit_item")) {
+                config.set(path + ".Type", ProductType.VANILLA.name());
+            }
+            else {
+                config.set(path + ".Type", ProductType.PLUGIN.name());
+            }
         }
 
-        ProductPacker packer = handler.readPacker(config, path);
+        ProductType type = config.getEnum(path + ".Type", ProductType.class, ProductType.VANILLA);
+        ProductTyping typing = ProductTypes.read(this.module, type, config, path);
 
-        P product = this.createProduct(id, currency, handler, packer);
+        P product = this.createProduct(id, currency, typing);
         product.load(config, path);
         product.loadAdditional(config, path);
 
@@ -220,13 +218,14 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
         }
         if (!this.isTransactionEnabled(tradeType)) return null;
 
-        ProductHandler handler = ProductHandlerRegistry.getHandler(item);
-
         var stream = this.getValidProducts().stream().filter(product -> {
             if (!product.isTradeable(tradeType)) return false;
-            if (product.getHandler() != handler) return false;
-            if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
-            if (!itemPacker.isItemMatches(item)) return false;
+            if (!(product.getType() instanceof PhysicalTyping typing)) return false;
+            if (!typing.isItemMatches(item)) return false;
+
+            //if (product.getHandler() != handler) return false;
+            //if (!(product.getPacker() instanceof ItemPacker itemPacker)) return false;
+            //if (!itemPacker.isItemMatches(item)) return false;
             if (product instanceof RotatingProduct rotatingProduct && !rotatingProduct.isInRotation()) return false;
 
             if (player != null) {
@@ -367,14 +366,19 @@ public abstract class AbstractVirtualShop<P extends AbstractVirtualProduct<?>> e
     }
 
     @NotNull
-    public String generateProductId(@NotNull ProductPacker packer) {
+    public String generateProductId(@NotNull ProductTyping typing) {
         String id;
-        if (packer instanceof ItemPacker itemPacker) {
-            id = StringUtil.lowerCaseUnderscoreStrict(ItemUtil.getItemName(itemPacker.getItem())); // Remove all non-latins from item display name.
-            if (id.isBlank()) id = StringUtil.lowerCaseUnderscoreStrict(LangAssets.get(itemPacker.getItem().getType())); // Remove all non-latins from localized item material.
-            if (id.isBlank()) id = BukkitThing.toString(itemPacker.getItem().getType()); // Use default english material.
+        if (typing instanceof VanillaTyping vanilla) {
+            ItemStack item = vanilla.getItem();
+
+            id = StringUtil.lowerCaseUnderscoreStrict(ItemUtil.getItemName(item)); // Remove all non-latins from item display name.
+            if (id.isBlank()) id = StringUtil.lowerCaseUnderscoreStrict(LangAssets.get(item.getType())); // Remove all non-latins from localized item material.
+            if (id.isBlank()) id = BukkitThing.toString(item.getType()); // Use default english material.
         }
-        else if (packer instanceof CommandPacker) {
+        else if (typing instanceof PluginTyping pluginTyping) {
+            id = (pluginTyping.getHandler().getName() + "_" + pluginTyping.getItemId()).toLowerCase();
+        }
+        else if (typing instanceof CommandTyping) {
             id = "command_item";
         }
         else id = UUID.randomUUID().toString();
