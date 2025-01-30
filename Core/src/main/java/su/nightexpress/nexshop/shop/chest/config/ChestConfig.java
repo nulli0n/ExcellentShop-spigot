@@ -54,6 +54,11 @@ public class ChestConfig {
         "You can create and edit Cart UIs in " + Config.DIR_CARTS + " directory."
     );
 
+    public static final ConfigValue<Boolean> CHECK_SAFE_LOCATION = ConfigValue.create("Shops.Check_Safe_Location",
+        true,
+        "Controls whether plugin should check shop's location safety before player teleports to it."
+    );
+
     public static final ConfigValue<Boolean> CHECK_CURRENCY_PERMISSIONS = ConfigValue.create("Shops.Check_Currency_Permission",
         false,
         "Sets whether or not players must have '" + ChestPerms.PREFIX_CURRENCY + "[name]' permissions to use specific currencies from 'Allowed_Currencies' list."

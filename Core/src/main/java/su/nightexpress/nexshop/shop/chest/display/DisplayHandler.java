@@ -236,7 +236,7 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
     }
 
     private void createItemPackets(@NotNull Player player, int entityID, boolean create, @NotNull Location location, @NotNull ItemStack item) {
-        EntityType type = EntityType.DROPPED_ITEM;
+        EntityType type = EntityType.ITEM;
         this.getItemPackets(entityID, create, type, location, item).forEach(packet -> this.sendPacket(player, packet));
     }
 

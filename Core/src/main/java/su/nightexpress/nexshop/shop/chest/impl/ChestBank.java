@@ -14,9 +14,9 @@ import java.util.UUID;
 public class ChestBank {
 
     private final UUID holder;
-    private final Map<Currency, Double> balanceMap;
+    private final Map<String, Double> balanceMap;
 
-    public ChestBank(@NotNull UUID holder, @NotNull Map<Currency, Double> balanceMap) {
+    public ChestBank(@NotNull UUID holder, @NotNull Map<String, Double> balanceMap) {
         this.holder = holder;
         this.balanceMap = balanceMap;
     }
@@ -33,12 +33,12 @@ public class ChestBank {
 
     @NotNull
     public UUID getHolder() {
-        return holder;
+        return this.holder;
     }
 
     @NotNull
-    public Map<Currency, Double> getBalanceMap() {
-        return balanceMap;
+    public Map<String, Double> getBalanceMap() {
+        return this.balanceMap;
     }
 
     public boolean deposit(@NotNull Currency currency, double amount) {
@@ -62,7 +62,7 @@ public class ChestBank {
         }
 
         double balance = this.getBalance(currency) + amount;
-        this.getBalanceMap().put(currency, balance);
+        this.balanceMap.put(currency.getInternalId(), balance);
         return true;
     }
 
@@ -87,7 +87,7 @@ public class ChestBank {
         }
 
         double balance = this.getBalance(currency) - amount;
-        this.getBalanceMap().put(currency, balance);
+        this.balanceMap.put(currency.getInternalId(), balance);
         return true;
     }
 
@@ -106,7 +106,7 @@ public class ChestBank {
 //            }
         }
 
-        return this.getBalanceMap().getOrDefault(currency, 0D);
+        return this.balanceMap.getOrDefault(currency.getInternalId(), 0D);
     }
 
     public boolean hasEnough(@NotNull Currency currency, double amount) {

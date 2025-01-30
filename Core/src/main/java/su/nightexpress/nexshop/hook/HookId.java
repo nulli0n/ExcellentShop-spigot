@@ -6,8 +6,6 @@ public class HookId {
     public static final String PACKET_EVENTS  = "packetevents";
     public static final String ECONOMY_BRIDGE = "EconomyBridge";
 
-    public static final String CITIZENS  = "Citizens";
-
     public static final String LANDS                  = "Lands";
     public static final String WORLD_GUARD            = "WorldGuard";
     public static final String GRIEF_PREVENTION       = "GriefPrevention";

@@ -24,13 +24,13 @@ public class TransactionLogger {
 
     public static final String FILE_NAME = "transactions.log";
 
-    private final ShopModule        module;
-    private final boolean           outFile;
+    private final Module  module;
+    private final boolean outFile;
     private final boolean           outConsole;
     private final DateTimeFormatter dateFormat;
     private final String            format;
 
-    public TransactionLogger(@NotNull ShopModule module, @NotNull FileConfig config) {
+    public TransactionLogger(@NotNull Module module, @NotNull FileConfig config) {
         this.module = module;
 
         String path = "Transaction_Logs.";

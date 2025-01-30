@@ -1,9 +1,9 @@
 package su.nightexpress.nexshop.shop.virtual.command;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nightcore.command.experimental.argument.CommandArgument;
 import su.nightexpress.nightcore.command.experimental.builder.ArgumentBuilder;
 

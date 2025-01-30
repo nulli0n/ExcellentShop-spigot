@@ -82,7 +82,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                 }
                 // ------ REVERT 4.13.3 CHANGES - START ------
                 else {
-                    if (handlerName.equalsIgnoreCase("bukkit_item")) {
+                    if (handlerName.equalsIgnoreCase("bukkit_item") || handlerName.isBlank()) {
                         String delimiter = " \\| ";
                         String[] split = serialized.split(delimiter);
                         String tagString = split[0];
@@ -146,7 +146,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                 }
                 // ------ REVERT 4.13.3 CHANGES - START ------
                 else {
-                    if (handlerName.equalsIgnoreCase("bukkit_item")) {
+                    if (handlerName.equalsIgnoreCase("bukkit_item") || handlerName.isBlank()) {
                         String delimiter = " \\| ";
                         String[] split = serialized.split(delimiter);
                         String tagString = split[0];

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class VirtualDiscount implements Placeholder {
 
-    private StaticShop     shop;
+    private VirtualShop    shop;
     private Set<DayOfWeek> days;
     private Set<LocalTime> times;
     private double         discount;
@@ -81,14 +81,14 @@ public class VirtualDiscount implements Placeholder {
     }
 
     @NotNull
-    public StaticShop getShop() {
+    public VirtualShop getShop() {
         if (this.shop == null) {
             throw new IllegalStateException("Shop is undefined!");
         }
         return shop;
     }
 
-    public void setShop(@NotNull StaticShop shop) {
+    public void setShop(@NotNull VirtualShop shop) {
         this.shop = shop;
     }
 

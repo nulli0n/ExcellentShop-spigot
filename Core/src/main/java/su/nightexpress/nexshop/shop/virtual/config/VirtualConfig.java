@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.GameMode;
 import su.nightexpress.economybridge.currency.CurrencyId;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -149,7 +150,7 @@ public class VirtualConfig {
     );
 
     public static final ConfigValue<String> SHOP_FORMAT_NAME = ConfigValue.create("GUI.Shop_Format.Name",
-        SHOP_NAME,
+        VIRTUAL_SHOP_ICON_NAME,
         "Sets display name for the shop item in the Main Menu.",
         "You can use 'Vritual Shop' placeholders:" + URL_WIKI_PLACEHOLDERS
     );
@@ -166,13 +167,13 @@ public class VirtualConfig {
         Lists.newList(
             GENERIC_PERMISSION,
             GENERIC_DISCOUNT,
-            "",
+            EMPTY_IF_ABOVE,
             GENERIC_LORE,
-            "",
+            EMPTY_IF_ABOVE,
             GENERIC_BUY,
-            "",
+            EMPTY_IF_ABOVE,
             GENERIC_SELL,
-            "",
+            EMPTY_IF_ABOVE,
             DARK_GRAY.enclose("Hold " + LIGHT_GRAY.enclose("Shift") + " to buy & sell quickly.")
         ),
         "Product lore format. Use '" + GENERIC_LORE + "' placeholder to insert original lore of the product item.",
@@ -183,9 +184,9 @@ public class VirtualConfig {
         Lists.newList(
             GREEN.enclose(BOLD.enclose("BUY:")),
             GREEN.enclose("←" + WHITE.enclose(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
-            "",
+            EMPTY_IF_BELOW,
             PRICE_DYNAMIC.apply(BUY),
-            "",
+            EMPTY_IF_ABOVE,
             STOCK_TYPE.apply(BUY),
             LIMIT_TYPE.apply(BUY)
         ),
@@ -198,9 +199,9 @@ public class VirtualConfig {
             RED.enclose(BOLD.enclose("SELL:")),
             RED.enclose("→" + WHITE.enclose(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
             RED.enclose("→" + WHITE.enclose(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
-            "",
+            EMPTY_IF_BELOW,
             PRICE_DYNAMIC.apply(SELL),
-            "",
+            EMPTY_IF_ABOVE,
             STOCK_TYPE.apply(SELL),
             LIMIT_TYPE.apply(SELL)
         ),
@@ -239,46 +240,44 @@ public class VirtualConfig {
         },
         "Text to appear when product has dynamic/float price.",
         "Placeholders to insert:",
-        su.nightexpress.nexshop.Placeholders.PRICE_DYNAMIC.apply(BUY),
-        su.nightexpress.nexshop.Placeholders.PRICE_DYNAMIC.apply(SELL)
+        Placeholders.PRICE_DYNAMIC.apply(BUY),
+        Placeholders.PRICE_DYNAMIC.apply(SELL)
     );
 
-    public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_STOCK = ConfigValue.forMap("GUI.Product_Format.Lore.Stock.GLOBAL",
-        (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
-        (cfg, path, type) -> cfg.getStringList(path + "." + type),
-        (cfg, path, map) -> map.forEach((tradeType, lore) -> cfg.set(path + "." + tradeType.name(), lore)),
-        () -> {
-            return Map.of(TradeType.BUY, Lists.newList(
-                GREEN.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCK_RESTOCK_DATE.apply(BUY)) + ")")
-                ),
-                TradeType.SELL, Lists.newList(
-                RED.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCK_RESTOCK_DATE.apply(SELL)) + ")")
-                )
-            );
-        },
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_STOCK_BUY = ConfigValue.create("GUI.Product_Format.Lore.Stock.GLOBAL.BUY",
+        Lists.newList(
+            GREEN.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCKS_RESET_IN) + ")")
+        ),
         "Text to appear when product has buy/sell stock configured.",
         "Placeholders to insert:",
-        su.nightexpress.nexshop.Placeholders.STOCK_TYPE.apply(BUY),
-        su.nightexpress.nexshop.Placeholders.STOCK_TYPE.apply(SELL)
+        Placeholders.STOCK_TYPE.apply(BUY)
     );
 
-    public static final ConfigValue<Map<TradeType, List<String>>> PRODUCT_FORMAT_LORE_LIMIT = ConfigValue.forMap("GUI.Product_Format.Lore.Stock.PLAYER",
-        (type) -> StringUtil.getEnum(type, TradeType.class).orElse(null),
-        (cfg, path, type) -> cfg.getStringList(path + "." + type),
-        (cfg, path, map) -> map.forEach((tradeType, lore) -> cfg.set(path + "." + tradeType.name(), lore)),
-        () -> {
-            return Map.of(TradeType.BUY, Lists.newList(
-                GREEN.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMIT_RESTOCK_DATE.apply(BUY)) + ")")
-                ),
-                TradeType.SELL, Lists.newList(
-                RED.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMIT_RESTOCK_DATE.apply(SELL)) + ")")
-                )
-            );
-        },
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_STOCK_SELL = ConfigValue.create("GUI.Product_Format.Lore.Stock.GLOBAL.SELL",
+        Lists.newList(
+            RED.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCKS_RESET_IN) + ")")
+        ),
+        "Text to appear when product has buy/sell stock configured.",
+        "Placeholders to insert:",
+        Placeholders.STOCK_TYPE.apply(SELL)
+    );
+
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_LIMIT_BUY = ConfigValue.create("GUI.Product_Format.Lore.Stock.PLAYER.BUY",
+        Lists.newList(
+            GREEN.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMITS_RESET_IN) + ")")
+        ),
         "Text to appear when product has buy/sell limits configured.",
         "Placeholders to insert:",
-        su.nightexpress.nexshop.Placeholders.LIMIT_TYPE.apply(BUY),
-        su.nightexpress.nexshop.Placeholders.LIMIT_TYPE.apply(SELL)
+        LIMIT_TYPE.apply(BUY)
+    );
+
+    public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_LIMIT_SELL = ConfigValue.create("GUI.Product_Format.Lore.Stock.PLAYER.SELL",
+        Lists.newList(
+            RED.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMITS_RESET_IN) + ")")
+        ),
+        "Text to appear when product has buy/sell limits configured.",
+        "Placeholders to insert:",
+        Placeholders.LIMIT_TYPE.apply(SELL)
     );
 
     public static boolean isCentralMenuEnabled() {

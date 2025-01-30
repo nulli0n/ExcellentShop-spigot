@@ -13,19 +13,17 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.product.ProductDataManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.menu.CartMenu;
-import su.nightexpress.nexshop.shop.menu.PurchaseOptionMenu;
+import su.nightexpress.nexshop.shop.menu.*;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.manager.AbstractManager;
-import su.nightexpress.nightcore.menu.api.Menu;
+import su.nightexpress.nightcore.ui.menu.Menu;
+import su.nightexpress.nightcore.ui.menu.MenuRegistry;
+import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.util.ItemUtil;
 
 import java.io.File;
@@ -37,23 +35,21 @@ import java.util.Set;
 public class ShopManager extends AbstractManager<ShopPlugin> {
 
     private final Map<String, CartMenu> cartMenuMap;
-    private final ProductDataManager    productDataManager;
 
+    private ConfirmMenu confirmMenu;
     private PurchaseOptionMenu purchaseOptionMenu;
 
     public ShopManager(@NotNull ShopPlugin plugin) {
         super(plugin);
         this.cartMenuMap = new HashMap<>();
-        this.productDataManager = new ProductDataManager(plugin);
     }
 
     @Override
     protected void onLoad() {
         this.loadUI();
         this.loadCartUIs();
-        this.loadProductData();
 
-        this.addTask(this.plugin.createAsyncTask(this::updateShops).setSecondsInterval(Config.SHOP_UPDATE_INTERVAL.get()));
+        this.addTask(this::updateShops, Config.SHOP_UPDATE_INTERVAL.get());
     }
 
     @Override
@@ -62,20 +58,10 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
         this.cartMenuMap.values().forEach(Menu::clear);
         this.cartMenuMap.clear();
-
-        this.productDataManager.shutdown();
-    }
-
-    private void loadProductData() {
-        //long delay = Plugins.isInstalled(HookId.ITEMS_ADDER) ? 110L : 1L; // костыль
-        this.plugin.runTaskAsync(task -> {
-            this.productDataManager.setup(); // Load price & stock datas for all products in both, virtual and chest shops.
-            this.productDataManager.cleanUp(); // Remove datas for non-existent shops or products (shops are already loaded).
-            this.getShops().forEach(shop -> shop.getPricer().updatePrices()); // Update product prices with loaded datas.
-        });
     }
 
     private void loadUI() {
+        this.confirmMenu = this.addMenu(new ConfirmMenu(this.plugin));
         this.purchaseOptionMenu = new PurchaseOptionMenu(this.plugin);
     }
 
@@ -87,15 +73,28 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         }
 
         for (FileConfig config : FileConfig.loadAll(plugin.getDataFolder() + Config.DIR_CARTS, true)) {
+            // ============= UPDATE TO 4.14 - START =============
+            config.getSection("Content").forEach(itemId -> {
+                int units = config.getInt("Content." + itemId + ".Units", 0);
+                if (units == 0) return;
+
+                String type = config.getString("Content." + itemId + ".Type");
+                if (type == null) return;
+
+                String result;
+                if (units > 1000 && type.equalsIgnoreCase("set")) result = "set_max";
+                else if (type.equalsIgnoreCase("set_custom")) result = type;
+                else result = type + "_" + units;
+
+                config.set("Content." + itemId + ".Type", result);
+                config.remove("Content." + itemId + ".Units");
+            });
+            // ============= UPDATE TO 4.14 - END =============
+
             CartMenu cartMenu = new CartMenu(this.plugin, config);
             this.cartMenuMap.put(FileConfig.getName(config.getFile()), cartMenu);
         }
         this.plugin.info("Loaded " + this.cartMenuMap.size() + " product cart UIs!");
-    }
-
-    @NotNull
-    public ProductDataManager getProductDataManager() {
-        return productDataManager;
     }
 
     @NotNull
@@ -115,23 +114,10 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         return shops;
     }
 
-    private void updateShops() {
-        this.getShops().forEach(shop -> {
-            if (!shop.isLoaded()) return;
+    public void updateShops() {
+        if (!this.plugin.getDataManager().isLoaded()) return;
 
-            if (shop instanceof StaticShop staticShop) {
-                staticShop.getDiscountConfigs().forEach(discount -> {
-                    if (discount.isDiscountTime()) {
-                        discount.update();
-                    }
-                });
-            }
-            else if (shop instanceof RotatingShop rotatingShop) {
-                rotatingShop.tryRotate();
-            }
-
-            shop.getPricer().updatePrices();
-        });
+        this.getShops().forEach(Shop::update);
     }
 
     @Nullable
@@ -150,7 +136,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         ShopClickAction action = ShopUtils.getClickAction(player, clickType, shop, product);
         if (action == ShopClickAction.UNDEFINED) return;
 
-        this.startTrade(player, product, action, source);
+        source.runNextTick(() -> this.startTrade(player, product, action, source));
     }
 
     public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull ShopClickAction action, @Nullable Menu source) {
@@ -166,10 +152,6 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
     public boolean startTrade(@NotNull Player player, @NotNull Product product, @NotNull TradeType tradeType, @Nullable ShopClickAction action, @Nullable Menu source) {
         Shop shop = product.getShop();
-
-        if (!shop.isTransactionEnabled(tradeType)) {
-            return false;
-        }
 
         if (tradeType == TradeType.BUY) {
             if (!product.isBuyable()) {
@@ -188,7 +170,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
             }
             if (product.countUnits(player) < 1) {
                 Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS.getMessage().send(player, replacer -> replacer
-                    .replace(Placeholders.GENERIC_AMOUNT, 1)
+                    .replace(Placeholders.GENERIC_AMOUNT, product.getUnitAmount())
                     .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
                 );
                 return false;
@@ -231,17 +213,27 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
     }
 
     public boolean openProductCart(@NotNull Player player, @NotNull PreparedProduct product) {
+        MenuViewer viewer = MenuRegistry.getViewer(player);
+        int page = viewer == null ? 1 : viewer.getPage();
+
         CartMenu cartMenu = this.getCartUI(product.getShop().getModule().getDefaultCartUI(product.getTradeType()));
         if (cartMenu == null) {
             Lang.SHOP_PRODUCT_ERROR_INVALID_CART_UI.getMessage().send(player);
             return false;
         }
 
-        cartMenu.open(player, product);
+        cartMenu.open(player, new Breadcumb<>(product, page));
         return true;
     }
 
     public void openPurchaseOption(@NotNull Player player, @NotNull Product product) {
-        this.purchaseOptionMenu.open(player, product);
+        MenuViewer viewer = MenuRegistry.getViewer(player);
+        int page = viewer == null ? 1 : viewer.getPage();
+
+        this.purchaseOptionMenu.open(player, new Breadcumb<>(product, page));
+    }
+
+    public void openConfirmation(@NotNull Player player, @NotNull Confirmation confirmation) {
+        this.confirmMenu.open(player, confirmation);
     }
 }

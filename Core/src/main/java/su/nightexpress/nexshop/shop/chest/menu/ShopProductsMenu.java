@@ -15,7 +15,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -38,7 +38,7 @@ import java.util.stream.IntStream;
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop>, ShopEditor {
+public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop>, LegacyShopEditor {
 
     public static final String FILE_NAME = "shop_products.yml";
 
@@ -132,7 +132,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
                 item.setSlots(productSlot);
                 item.setHandler((viewer2, event) -> {
                     if (event.isShiftClick() && event.isRightClick()) {
-                        if (shop.getStock().count(product, TradeType.BUY) > 0) {
+                        if (product.countStock(TradeType.BUY, null) > 0) {
                             ChestLang.EDITOR_ERROR_PRODUCT_LEFT.getMessage().send(viewer2.getPlayer());
                             return;
                         }

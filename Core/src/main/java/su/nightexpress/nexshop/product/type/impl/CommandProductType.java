@@ -6,12 +6,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.shop.Module;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.ItemNbt;
 import su.nightexpress.nightcore.util.Players;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class CommandProductType implements CommandTyping {
     }
 
     @NotNull
-    public static CommandProductType read(@NotNull ShopModule module, @NotNull FileConfig config, @NotNull String path) {
+    public static CommandProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
         // ------- REVERT 4.13.3 CHANGES - START ------- //
         String serialized = config.getString(path + ".Data");
         if (serialized != null) {
@@ -56,7 +56,7 @@ public class CommandProductType implements CommandTyping {
         String previewTag = config.getString(path + ".Content.Preview", "null");
         List<String> commands = config.getStringList(path + ".Content.Commands");
 
-        ItemStack preview = previewTag.contains("{") ? ItemNbt.fromTagString(previewTag) : ItemNbt.decompress(previewTag);
+        ItemStack preview = ShopUtils.readItemTag(previewTag);
         if (preview == null) preview = new ItemStack(Material.COMMAND_BLOCK);
 
         return new CommandProductType(preview, commands);
@@ -64,7 +64,7 @@ public class CommandProductType implements CommandTyping {
 
     @Override
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Content.Preview", ItemNbt.getTagString(this.preview));
+        config.set(path + ".Content.Preview", ShopUtils.getItemTag(this.preview));
         config.set(path + ".Content.Commands", this.commands);
         config.remove(path + ".Data"); // ------- REVERT 4.13.3 CHANGES ------ //
     }

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.item.ItemHandler;
-import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.shop.Module;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -28,7 +28,7 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
     }
 
     @NotNull
-    public static PluginProductType read(@NotNull ShopModule module, @NotNull FileConfig config, @NotNull String path) {
+    public static PluginProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
         String handlerId = config.getString(path + ".Handler", "dummy");
         ItemHandler handler = ItemBridge.getHandler(handlerId);
         if (handler == null) {

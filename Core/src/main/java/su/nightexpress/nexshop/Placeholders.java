@@ -3,13 +3,12 @@ package su.nightexpress.nexshop;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.Transaction;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -17,6 +16,7 @@ import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.data.shop.RotationData;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
@@ -28,20 +28,20 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.ItemNbt;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.TimeUtil;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderList;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -72,6 +72,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String GENERIC_EXPIRE     = "%expire%";
     public static final String GENERIC_PAGE       = "%page%";
     public static final String GENERIC_PAGES      = "%pages%";
+    public static final String GENERIC_WEIGHT     = "%weight%";
 
     public static final String                      GENERIC_PRODUCT_NAME    = "%product_name%";
     public static final Function<TradeType, String> GENERIC_PRODUCT_PRICE   = tradeType -> "%product_price_" + tradeType.getLowerCase() + "%";
@@ -85,10 +86,10 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String ITEM_LORE = "%item_lore%";
 
     public static final String SHOP_ID           = "%shop_id%";
-    public static final String SHOP_NAME         = "%shop_name%";
-    public static final String SHOP_BUY_ALLOWED  = "%shop_buy_allowed%";
-    public static final String SHOP_SELL_ALLOWED = "%shop_sell_allowed%";
-    public static final String SHOP_PRODUCTS     = "%shop_products%";
+    public static final String SHOP_NAME           = "%shop_name%";
+    public static final String SHOP_BUYING_ALLOWED  = "%shop_buy_allowed%";
+    public static final String SHOP_SELLING_ALLOWED = "%shop_sell_allowed%";
+    public static final String SHOP_PRODUCTS        = "%shop_products%";
 
     // Chest shop
     public static final String CHEST_SHOP_OWNER            = "%shop_owner%";
@@ -103,22 +104,14 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String CHEST_SHOP_SHOWCASE_ENABLED = "%shop_showcase_enabled%";
 
     // Virtual shop
-    public static final String VIRTUAL_SHOP_TYPE                   = "%shop_type%";
+    public static final String VIRTUAL_SHOP_ICON_NAME            = "%shop_icon_name%";
     public static final String VIRTUAL_SHOP_DESCRIPTION            = "%shop_description%";
     public static final String VIRTUAL_SHOP_PERMISSION_REQUIRED    = "%shop_permission_required%";
     public static final String VIRTUAL_SHOP_PERMISSION_NODE        = "%shop_permission_node%";
     public static final String VIRTUAL_SHOP_PAGES                  = "%shop_pages%";
     public static final String VIRTUAL_SHOP_MENU_SLOT              = "%shop_menu_slot%";
     public static final String VIRTUAL_SHOP_DEFAULT_LAYOUT         = "%shop_layout%";
-    public static final String SHOP_NPC_IDS                        = "%shop_npc_ids%";
     public static final String VIRTUAL_SHOP_DISCOUNT_AMOUNT        = "%shop_discount_amount%";
-    public static final String VIRTUAL_SHOP_NEXT_ROTATION_DATE     = "%shop_next_rotation_date%";
-    public static final String VIRTUAL_SHOP_NEXT_ROTATION_IN       = "%shop_next_rotation_in%";
-    public static final String VIRTUAL_SHOP_ROTATION_TYPE          = "%shop_rotation_type%";
-    public static final String VIRTUAL_SHOP_ROTATION_INTERVAL      = "%shop_rotation_interval%";
-    public static final String VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS  = "%shop_rotation_min_products%";
-    public static final String VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS  = "%shop_rotation_max_products%";
-    public static final String VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS = "%shop_rotation_product_slots%";
 
     public static final Function<Integer, String>              CHEST_SHOP_PRODUCT_NAME  = (slot) -> "%shop_product_name_" + slot + "%";
     public static final BiFunction<TradeType, Integer, String> CHEST_SHOP_PRODUCT_PRICE = (tradeType, slot) -> "%shop_product_price_" + tradeType.getLowerCase() + "_" + slot + "%";
@@ -133,38 +126,46 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final Function<TradeType, String> PRODUCT_PRICE_AVERAGE            = type -> "%product_price_avg_" + type.getLowerCase() + "%";
     public static final Function<TradeType, String> PRODUCT_PRICE_AVERAGE_DIFFERENCE = type -> "%product_price_avg_diff_" + type.getLowerCase() + "%";
 
-    public static final Function<TradeType, String> PRODUCT_PRICER_RANGE_MIN = type -> "%product_pricer_" + type.getLowerCase() + "_min%";
-    public static final Function<TradeType, String> PRODUCT_PRICER_RANGE_MAX = type -> "%product_pricer_" + type.getLowerCase() + "_max%";
+    public static final Function<TradeType, String> PRICER_RANGED_BOUNDS_MIN = type -> "%product_pricer_" + type.getLowerCase() + "_min%";
+    public static final Function<TradeType, String> PRICER_RANGED_BOUNDS_MAX = type -> "%product_pricer_" + type.getLowerCase() + "_max%";
 
-    public static final String PRODUCT_PRICER_FLOAT_REFRESH_DAYS   = "%product_pricer_float_refresh_days%";
-    public static final String PRODUCT_PRICER_FLOAT_REFRESH_TIMES  = "%product_pricer_float_refresh_times%";
-    public static final String PRODUCT_PRICER_FLOAT_ROUND_DECIMALS = "%product_pricer_float_round_decimals%";
+    public static final String PRICER_FLOAT_REFRESH_TYPE     = "%product_pricer_float_refresh_type%";
+    public static final String PRICER_FLOAT_REFRESH_INTERVAL = "%product_pricer_float_refresh_interval%";
+    public static final String PRICER_FLOAT_REFRESH_DAYS     = "%product_pricer_float_refresh_days%";
+    public static final String PRICER_FLOAT_REFRESH_TIMES    = "%product_pricer_float_refresh_times%";
+    public static final String PRICER_FLOAT_ROUND_DECIMALS   = "%product_pricer_float_round_decimals%";
 
-    public static final String PRODUCT_PRICER_DYNAMIC_INITIAL_BUY  = "%product_pricer_dynamic_initial_buy%";
-    public static final String PRODUCT_PRICER_DYNAMIC_INITIAL_SELL = "%product_pricer_dynamic_initial_sell%";
-    public static final String PRODUCT_PRICER_DYNAMIC_STEP_BUY     = "%product_pricer_dynamic_step_buy%";
-    public static final String PRODUCT_PRICER_DYNAMIC_STEP_SELL    = "%product_pricer_dynamic_step_sell%";
+    public static final String PRICER_DYNAMIC_INITIAL_BUY  = "%product_pricer_dynamic_initial_buy%";
+    public static final String PRICER_DYNAMIC_INITIAL_SELL = "%product_pricer_dynamic_initial_sell%";
+    public static final String PRICER_DYNAMIC_STEP_BUY     = "%product_pricer_dynamic_step_buy%";
+    public static final String PRICER_DYNAMIC_STEP_SELL    = "%product_pricer_dynamic_step_sell%";
 
-    public static final String PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_BUY  = "%product_pricer_players_adjust_amount_buy%";
-    public static final String PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL = "%product_pricer_players_adjust_amount_sell%";
-    public static final String PRODUCT_PRICER_PLAYERS_ADJUST_STEP        = "%product_pricer_players_adjust_step%";
+    public static final String PRICER_PLAYERS_ADJUST_AMOUNT_BUY  = "%product_pricer_players_adjust_amount_buy%";
+    public static final String PRICER_PLAYERS_ADJUST_AMOUNT_SELL = "%product_pricer_players_adjust_amount_sell%";
+    public static final String PRICER_PLAYERS_ADJUST_STEP        = "%product_pricer_players_adjust_step%";
 
-    public static final String PRODUCT_ID                = "%product_id%";
-    public static final String PRODUCT_ITEM_META_ENABLED = "%product_item_meta_enabled%";
-    public static final String PRODUCT_PREVIEW_NAME      = "%product_preview_name%";
-    public static final String PRODUCT_PREVIEW_LORE      = "%product_preview_lore%";
-    public static final String PRODUCT_UNIT_AMOUNT      = "%product_unit_amount%";
-    public static final String PRODUCT_CURRENCY          = "%product_currency%";
+    public static final String PRODUCT_ID           = "%product_id%";
+    public static final String PRODUCT_RESPECT_META = "%product_item_meta_enabled%";
+    public static final String PRODUCT_PREVIEW_NAME = "%product_preview_name%";
+    public static final String PRODUCT_PREVIEW_LORE = "%product_preview_lore%";
+    public static final String PRODUCT_UNIT_AMOUNT  = "%product_unit_amount%";
+    public static final String PRODUCT_CURRENCY     = "%product_currency%";
 
     public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_INITIAL = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_initial%";
     public static final Function<TradeType, String> PRODUCT_STOCK_AMOUNT_LEFT    = type -> "%product_stock_global_" + type.getLowerCase() + "_amount_left%";
-    public static final Function<TradeType, String> PRODUCT_STOCK_RESTOCK_TIME   = type -> "%product_stock_global_" + type.getLowerCase() + "_restock_time%";
-    public static final Function<TradeType, String> PRODUCT_STOCK_RESTOCK_DATE   = type -> "%product_stock_global_" + type.getLowerCase() + "_restock_date%";
 
     public static final Function<TradeType, String> PRODUCT_LIMIT_AMOUNT_INITIAL = type -> "%product_stock_player_" + type.getLowerCase() + "_amount_initial%";
     public static final Function<TradeType, String> PRODUCT_LIMIT_AMOUNT_LEFT    = type -> "%product_stock_player_" + type.getLowerCase() + "_amount_left%";
-    public static final Function<TradeType, String> PRODUCT_LIMIT_RESTOCK_TIME   = type -> "%product_stock_player_" + type.getLowerCase() + "_restock_time%";
+
+    @Deprecated
     public static final Function<TradeType, String> PRODUCT_LIMIT_RESTOCK_DATE   = type -> "%product_stock_player_" + type.getLowerCase() + "_restock_date%";
+    @Deprecated
+    public static final Function<TradeType, String> PRODUCT_STOCK_RESTOCK_DATE   = type -> "%product_stock_global_" + type.getLowerCase() + "_restock_date%";
+
+    public static final String PRODUCT_STOCKS_RESET_IN   = "%product_stocks_restock_date%";
+    public static final String PRODUCT_STOCKS_RESET_TIME = "%product_stocks_restock_time%";
+    public static final String PRODUCT_LIMITS_RESET_IN   = "%product_limits_restock_date%";
+    public static final String PRODUCT_LIMITS_RESET_TIME = "%product_limits_restock_time%";
 
     // Virtual
     public static final String PRODUCT_COMMANDS             = "%product_commands%";
@@ -172,12 +173,20 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String PRODUCT_DISCOUNT_AMOUNT      = "%product_discount_amount%";
     public static final String PRODUCT_ALLOWED_RANKS        = "%product_allowed_ranks%";
     public static final String PRODUCT_REQUIRED_PERMISSIONS = "%product_required_permissions%";
-    public static final String PRODUCT_ROTATION_CHANCE      = "%product_rotation_chance%";
 
     public static final String DISCOUNT_CONFIG_AMOUNT   = "%discount_amount%";
     public static final String DISCOUNT_CONFIG_DURATION = "%discount_duration%";
     public static final String DISCOUNT_CONFIG_DAYS     = "%discount_days%";
     public static final String DISCOUNT_CONFIG_TIMES    = "%discount_times%";
+
+    public static final String ROTATION_ID         = "%rotation_id%";
+    public static final String ROTATION_TYPE         = "%rotation_type%";
+    public static final String ROTATION_INTERVAL     = "%rotation_interval%";
+    public static final String ROTATION_SLOTS_AMOUNT = "%rotation_slots_amount%";
+    public static final String ROTATION_ITEMS_AMOUNT = "%rotation_items_amount%";
+
+    public static final Function<Rotation, String> SHOP_ROTATION_NEXT_DATE = rotation -> "%shop_rotation_" + rotation.getId() + "_next_date%";
+    public static final Function<Rotation, String> SHOP_ROTATION_NEXT_IN = rotation -> "%shop_rotation_" + rotation.getId() + "_next_in%";
 
     // Auction
     public static final String LISTING_ITEM_NAME     = "%listing_item_name%";
@@ -197,7 +206,13 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String CATEGORY_ID   = "%category_id%";
     public static final String CATEGORY_NAME = "%category_name%";
 
-    public record ProductPOV<T extends Product>(@NotNull T product, @Nullable Player player){}
+    public record ProductPOV<T extends Product>(@NotNull T product, @Nullable Player player){
+
+        @Nullable
+        public UUID playerId() {
+            return this.player == null ? null : this.player.getUniqueId();
+        }
+    }
 
     @NotNull
     public static final PlaceholderList<Transaction> TRANSACTION = PlaceholderList.create(list -> list
@@ -216,8 +231,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<Shop> SHOP = PlaceholderList.create(list -> list
         .add(SHOP_ID, Shop::getId)
         .add(SHOP_NAME, Shop::getName)
-        .add(SHOP_BUY_ALLOWED, shop -> Lang.getEnabledOrDisabled(shop.isTransactionEnabled(TradeType.BUY)))
-        .add(SHOP_SELL_ALLOWED, shop -> Lang.getEnabledOrDisabled(shop.isTransactionEnabled(TradeType.SELL)))
+        .add(SHOP_BUYING_ALLOWED, shop -> Lang.getEnabledOrDisabled(shop.isBuyingAllowed()))
+        .add(SHOP_SELLING_ALLOWED, shop -> Lang.getEnabledOrDisabled(shop.isSellingAllowed()))
         .add(SHOP_PRODUCTS, shop -> NumberUtil.format(shop.countProducts()))
     );
 
@@ -225,8 +240,9 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<ChestShop> CHEST_SHOP = PlaceholderList.create(list -> {
         list
             .add(SHOP)
-            .add(CHEST_SHOP_BANK_BALANCE, shop -> shop.getOwnerBank().getBalanceMap().keySet().stream()
-                .map(currency -> currency.format(shop.getOwnerBank().getBalance(currency))).collect(Collectors.joining(", ")))
+            .add(CHEST_SHOP_BANK_BALANCE, shop -> shop.getOwnerBank().getBalanceMap().keySet().stream().map(EconomyBridge::getCurrency)
+                .filter(Objects::nonNull)
+                .map(currencyId -> currencyId.format(shop.getOwnerBank().getBalance(currencyId))).collect(Collectors.joining(", ")))
             .add(CHEST_SHOP_OWNER, shop -> shop.isAdminShop() ? ChestConfig.ADMIN_SHOP_NAME.get() : shop.getOwnerName())
             .add(CHEST_SHOP_X, shop -> NumberUtil.format(shop.getBlockPos().getX()))
             .add(CHEST_SHOP_Y, shop -> NumberUtil.format(shop.getBlockPos().getY()))
@@ -255,52 +271,33 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     @NotNull
     public static final PlaceholderList<VirtualShop> VIRTUAL_SHOP = PlaceholderList.create(list -> list
         .add(SHOP)
+        .add(VIRTUAL_SHOP_ICON_NAME, shop -> {
+            NightItem icon = shop.getIcon();
+            if (icon.getItemName() != null) return icon.getItemName();
+            if (icon.getDisplayName() != null) return icon.getDisplayName();
+            return shop.getName();
+        })
         .add(VIRTUAL_SHOP_DESCRIPTION, shop -> String.join("\n", shop.getDescription()))
         .add(VIRTUAL_SHOP_PAGES, shop -> String.valueOf(shop.getPages()))
         .add(VIRTUAL_SHOP_DISCOUNT_AMOUNT, shop -> NumberUtil.format(shop.getDiscountPlain()))
     );
 
-//    @NotNull
-//    public static final PlaceholderList<StaticShop> VIRTUAL_STATIC_SHOP = PlaceholderList.create(list -> list
-//        .add(VIRTUAL_SHOP)
-//    );
-
-    @NotNull
-    public static final PlaceholderList<RotatingShop> VIRTUAL_ROTATING_SHOP = PlaceholderList.create(list -> list
-        .add(VIRTUAL_SHOP)
-        .add(VIRTUAL_SHOP_NEXT_ROTATION_DATE, shop -> {
-            LocalDateTime time = shop.getNextRotationTime();
-            if (time == null) return Lang.OTHER_NEVER.getString();
-
-            return time.format(ShopUtils.getDateFormatter());
-        })
-        .add(VIRTUAL_SHOP_NEXT_ROTATION_IN, shop -> {
-            LocalDateTime next = shop.getNextRotationTime();
-            if (next == null) return Lang.OTHER_NEVER.getString();
-
-            return TimeUtil.formatDuration(TimeUtil.toEpochMillis(next));
-        })
-    );
-
     @NotNull
     public static final PlaceholderList<VirtualShop> VIRTUAL_SHOP_INTERNAL = PlaceholderList.create(list -> list
         .add(VIRTUAL_SHOP)
-        .add(VIRTUAL_SHOP_TYPE, shop -> VirtualLang.SHOP_TYPES.getLocalized(shop.getType()))
         .add(VIRTUAL_SHOP_PERMISSION_NODE, shop -> VirtualPerms.PREFIX_SHOP + shop.getId())
         .add(VIRTUAL_SHOP_PERMISSION_REQUIRED, shop -> Lang.getYesOrNo(shop.isPermissionRequired()))
         .add(VIRTUAL_SHOP_MENU_SLOT, shop -> shop.isMainMenuSlotDisabled() ? Lang.OTHER_DISABLED.getString() : String.valueOf(shop.getMainMenuSlot()))
         .add(VIRTUAL_SHOP_DEFAULT_LAYOUT, VirtualShop::getDefaultLayout)
-        .add(SHOP_NPC_IDS, shop -> String.join(", ", shop.getNPCIds().stream().map(String::valueOf).toList()))
     );
 
     @NotNull
-    public static final PlaceholderList<RotatingShop> ROTATING_SHOP_INTERNAL = PlaceholderList.create(list -> list
-        .add(VIRTUAL_SHOP_INTERNAL)
-        .add(VIRTUAL_SHOP_ROTATION_TYPE, shop -> shop.getRotationType().name())
-        .add(VIRTUAL_SHOP_ROTATION_INTERVAL, shop -> TimeUtil.formatTime(shop.getRotationInterval() * 1000L))
-        .add(VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS, shop -> NumberUtil.format(shop.getProductMinAmount()))
-        .add(VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS, shop -> NumberUtil.format(shop.getProductMaxAmount()))
-        .add(VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS, shop -> Arrays.toString(shop.getProductSlots()))
+    public static final PlaceholderList<Rotation> ROTATION = PlaceholderList.create(list -> list
+        .add(ROTATION_ID, Rotation::getId)
+        .add(ROTATION_TYPE, rotation -> rotation.getRotationType().name())
+        .add(ROTATION_INTERVAL, rotation -> TimeUtil.formatTime(rotation.getRotationInterval() * 1000L))
+        .add(ROTATION_SLOTS_AMOUNT, rotation -> String.valueOf(rotation.countAllSlots()))
+        .add(ROTATION_ITEMS_AMOUNT, rotation -> String.valueOf(rotation.countItems()))
     );
 
     // ------------------------------
@@ -372,7 +369,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         for (TradeType tradeType : TradeType.values()) {
             list
                 .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), pov -> {
-                    int leftAmount = pov.product.getShop().getStock().count(pov.product, tradeType, pov.player);
+                    int leftAmount = pov.product.countStock(tradeType, null);
                     return leftAmount < 0 ? ChestLang.OTHER_INFINITY.getString() : NumberUtil.format(leftAmount);
                 });
         }
@@ -381,8 +378,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<ProductPOV<? extends VirtualProduct>> VIRTUAL_PRODUCT = PlaceholderList.create(list -> {
         list
             .add(PRODUCT)
-            .add(PRODUCT_DISCOUNT_AMOUNT, pov -> NumberUtil.format(pov.product.getShop().getDiscountPlain(pov.product)))
             .add(PRODUCT_DISCOUNT_ALLOWED, pov -> Lang.getYesOrNo(pov.product.isDiscountAllowed()))
+            .add(PRODUCT_DISCOUNT_AMOUNT, pov -> NumberUtil.format(pov.product.getShop().getDiscountPlain(pov.product)))
             .add(PRODUCT_ALLOWED_RANKS, pov -> {
                 if (pov.product.getAllowedRanks().isEmpty()) {
                     return Lang.goodEntry(VirtualLang.EDITOR_PRODUCT_NO_RANK_REQUIREMENTS.getString());
@@ -394,65 +391,55 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
                     return Lang.goodEntry(VirtualLang.EDITOR_PRODUCT_NO_PERM_REQUIREMENTS.getString());
                 }
                 return pov.product.getRequiredPermissions().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
-            });
+            })
+            .add(PRODUCT_STOCKS_RESET_IN, pov -> {
+                long restockDate = pov.product.getRestockDate(null);
+                if (restockDate == 0L) return TimeUtil.formatTime(pov.product.getStockValues().getRestockTimeMillis());
 
-        String never = Lang.OTHER_NEVER.getString();
-        String infinity = Lang.OTHER_INFINITY.getString();
+                return restockDate < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatDuration(restockDate);
+            })
+            .add(PRODUCT_LIMITS_RESET_IN, pov -> {
+                long restockDate = pov.product.getRestockDate(pov.playerId());
+                if (restockDate == 0L) return TimeUtil.formatTime(pov.product.getLimitValues().getRestockTimeMillis());
+
+                return restockDate < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatDuration(restockDate);
+            })
+            .add(PRODUCT_STOCKS_RESET_TIME, pov -> {
+                long restockTime = pov.product.getStockValues().getRestockTimeMillis();
+                return restockTime < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatTime(restockTime);
+            })
+            .add(PRODUCT_LIMITS_RESET_TIME, pov -> {
+                long cooldown = pov.product.getLimitValues().getRestockTimeMillis();
+                return cooldown < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatTime(cooldown);
+            });
 
         for (TradeType tradeType : TradeType.values()) {
             list
                 .add(PRODUCT_STOCK_AMOUNT_INITIAL.apply(tradeType), pov -> {
                     int initialAmount = pov.product.getStockValues().getInitialAmount(tradeType);
-                    return initialAmount < 0 ? infinity : String.valueOf(initialAmount);
+                    return initialAmount < 0 ? Lang.OTHER_INFINITY.getString() : String.valueOf(initialAmount);
                 })
                 .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), pov -> {
-                    int leftAmount = pov.product.getShop().getStock().count(pov.product, tradeType, null);
-                    return leftAmount < 0 ? infinity : String.valueOf(leftAmount);
-                })
-                .add(PRODUCT_STOCK_RESTOCK_TIME.apply(tradeType), pov -> {
-                    long cooldown = pov.product.getStockValues().getRestockTime(tradeType);
-                    return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
-                })
-                .add(PRODUCT_STOCK_RESTOCK_DATE.apply(tradeType), pov -> {
-                    long restockDate = pov.product.getShop().getStock().getRestockTime(pov.product, tradeType, null);
-                    if (restockDate == 0L)
-                        return TimeUtil.formatTime(pov.product.getStockValues().getRestockTime(tradeType));
-
-                    return restockDate < 0 ? never : TimeUtil.formatDuration(restockDate);
+                    int leftAmount = pov.product.countStock(tradeType, null);
+                    return leftAmount < 0 ? Lang.OTHER_INFINITY.getString() : String.valueOf(leftAmount);
                 })
                 .add(PRODUCT_LIMIT_AMOUNT_INITIAL.apply(tradeType), pov -> {
                     int initialAmount = pov.product.getLimitValues().getInitialAmount(tradeType);
-                    return initialAmount < 0 ? infinity : String.valueOf(initialAmount);
-                })
-                .add(PRODUCT_LIMIT_RESTOCK_TIME.apply(tradeType), pov -> {
-                    long cooldown = pov.product.getLimitValues().getRestockTime(tradeType);
-                    return cooldown < 0 ? never : TimeUtil.formatTime(cooldown);
+                    return initialAmount < 0 ? Lang.OTHER_INFINITY.getString() : String.valueOf(initialAmount);
                 })
                 .add(PRODUCT_LIMIT_AMOUNT_LEFT.apply(tradeType), pov -> {
-                    int leftAmount = pov.product.getShop().getStock().count(pov.product, tradeType, pov.player);
-                    return leftAmount < 0 ? infinity : String.valueOf(leftAmount);
-                })
-                .add(PRODUCT_LIMIT_RESTOCK_DATE.apply(tradeType), pov -> {
-                    long restockDate = pov.product.getShop().getStock().getRestockTime(pov.product, tradeType, pov.player);
-                    if (restockDate == 0L)
-                        return TimeUtil.formatTime(pov.product.getLimitValues().getRestockTime(tradeType));
-
-                    return restockDate < 0 ? never : TimeUtil.formatDuration(restockDate);
+                    int leftAmount = pov.product.countStock(tradeType, pov.playerId());
+                    return leftAmount < 0 ? Lang.OTHER_INFINITY.getString() : String.valueOf(leftAmount);
                 });
         }
     });
-
-    public static final PlaceholderList<ProductPOV<RotatingProduct>> VIRTUAL_ROTATING_PRODUCT = PlaceholderList.create(list -> list
-        .add(VIRTUAL_PRODUCT)
-        .add(PRODUCT_ROTATION_CHANCE, pov -> NumberUtil.format(pov.product.getRotationChance()))
-    );
 
     // ------------------------------
     // Product Packers
     // ------------------------------
 
     public static final PlaceholderList<VanillaTyping> VANILLA_TYPING = PlaceholderList.create(list -> list
-        .add(PRODUCT_ITEM_META_ENABLED, typing -> Lang.getYesOrNo(typing.isRespectMeta()))
+        .add(PRODUCT_RESPECT_META, typing -> Lang.getYesOrNo(typing.isRespectMeta()))
     );
 
     public static final PlaceholderList<CommandTyping> COMMAND_TYPING = PlaceholderList.create(list -> list
@@ -466,43 +453,45 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<? super RangedPricer> RANGED_PRICER = PlaceholderList.create(list -> {
         for (TradeType tradeType : TradeType.values()) {
             list
-                .add(PRODUCT_PRICER_RANGE_MIN.apply(tradeType), pricer -> String.valueOf(pricer.getPriceMin(tradeType)))
-                .add(PRODUCT_PRICER_RANGE_MAX.apply(tradeType), pricer -> String.valueOf(pricer.getPriceMax(tradeType)));
+                .add(PRICER_RANGED_BOUNDS_MIN.apply(tradeType), pricer -> String.valueOf(pricer.getPriceMin(tradeType)))
+                .add(PRICER_RANGED_BOUNDS_MAX.apply(tradeType), pricer -> String.valueOf(pricer.getPriceMax(tradeType)));
         }
     });
 
     public static final PlaceholderList<FloatPricer> FLOAT_PRICER = PlaceholderList.create(list -> list
         .add(RANGED_PRICER)
-        .add(PRODUCT_PRICER_FLOAT_REFRESH_DAYS, pricer -> {
+        .add(PRICER_FLOAT_REFRESH_TYPE, pricer -> pricer.getRefreshType().name())
+        .add(PRICER_FLOAT_REFRESH_INTERVAL, pricer -> TimeUtil.formatTime(pricer.getRefreshIntervalMillis()))
+        .add(PRICER_FLOAT_REFRESH_DAYS, pricer -> {
             if (pricer.getDays().isEmpty()) {
                 return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_DAYS.getString());
             }
             return pricer.getDays().stream().map(day -> Lang.goodEntry(Lang.DAYS.getLocalized(day))).collect(Collectors.joining("\n"));
         })
-        .add(PRODUCT_PRICER_FLOAT_REFRESH_TIMES, pricer -> {
+        .add(PRICER_FLOAT_REFRESH_TIMES, pricer -> {
             if (pricer.getTimes().isEmpty()) {
                 return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_TIMES.getString());
             }
             return pricer.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).map(Lang::goodEntry).collect(Collectors.joining("\n"));
         })
-        .add(PRODUCT_PRICER_FLOAT_ROUND_DECIMALS, pricer -> Lang.getYesOrNo(pricer.isRoundDecimals()))
+        .add(PRICER_FLOAT_ROUND_DECIMALS, pricer -> Lang.getYesOrNo(pricer.isRoundDecimals()))
     );
 
     public static final PlaceholderList<DynamicPricer> DYNAMIC_PRICER = PlaceholderList.create(list -> list
         .add(RANGED_PRICER)
-        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, pricer -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
-        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, pricer -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
-        .add(PRODUCT_PRICER_DYNAMIC_STEP_BUY, pricer -> NumberUtil.format(pricer.getStep(TradeType.BUY)))
-        .add(PRODUCT_PRICER_DYNAMIC_STEP_SELL, pricer -> NumberUtil.format(pricer.getStep(TradeType.SELL)))
+        .add(PRICER_DYNAMIC_INITIAL_BUY, pricer -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
+        .add(PRICER_DYNAMIC_INITIAL_SELL, pricer -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
+        .add(PRICER_DYNAMIC_STEP_BUY, pricer -> NumberUtil.format(pricer.getStep(TradeType.BUY)))
+        .add(PRICER_DYNAMIC_STEP_SELL, pricer -> NumberUtil.format(pricer.getStep(TradeType.SELL)))
     );
 
     public static final PlaceholderList<PlayersPricer> PLAYERS_PRICER = PlaceholderList.create(list -> list
         .add(RANGED_PRICER)
-        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_BUY, pricer -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
-        .add(PRODUCT_PRICER_DYNAMIC_INITIAL_SELL, pricer -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
-        .add(PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_BUY, pricer -> NumberUtil.format(pricer.getAdjustAmount(TradeType.BUY)))
-        .add(PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL, pricer -> NumberUtil.format(pricer.getAdjustAmount(TradeType.SELL)))
-        .add(PRODUCT_PRICER_PLAYERS_ADJUST_STEP, pricer -> NumberUtil.format(pricer.getAdjustStep()))
+        .add(PRICER_DYNAMIC_INITIAL_BUY, pricer -> NumberUtil.format(pricer.getInitial(TradeType.BUY)))
+        .add(PRICER_DYNAMIC_INITIAL_SELL, pricer -> NumberUtil.format(pricer.getInitial(TradeType.SELL)))
+        .add(PRICER_PLAYERS_ADJUST_AMOUNT_BUY, pricer -> NumberUtil.format(pricer.getAdjustAmount(TradeType.BUY)))
+        .add(PRICER_PLAYERS_ADJUST_AMOUNT_SELL, pricer -> NumberUtil.format(pricer.getAdjustAmount(TradeType.SELL)))
+        .add(PRICER_PLAYERS_ADJUST_STEP, pricer -> NumberUtil.format(pricer.getAdjustStep()))
     );
 
     // ------------------------------
@@ -544,13 +533,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     }
 
     @NotNull
-    public static UnaryOperator<String> forStaticProduct(@NotNull StaticProduct product, @Nullable Player player) {
+    public static UnaryOperator<String> forVirtualProduct(@NotNull VirtualProduct product, @Nullable Player player) {
         return VIRTUAL_PRODUCT.replacer(new ProductPOV<>(product, player));
-    }
-
-    @NotNull
-    public static UnaryOperator<String> forRotatingProduct(@NotNull RotatingProduct product, @Nullable Player player) {
-        return VIRTUAL_ROTATING_PRODUCT.replacer(new ProductPOV<>(product, player));
     }
 
     @NotNull
@@ -559,19 +543,30 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     }
 
     @NotNull
-    public static UnaryOperator<String> forStaticShop(@NotNull StaticShop shop) {
-        return VIRTUAL_SHOP.replacer(shop);
-    }
+    public static UnaryOperator<String> forVirtualShop(@NotNull VirtualShop shop) {
+        PlaceholderList<VirtualShop> list = new PlaceholderList<>(VIRTUAL_SHOP);
 
-    @NotNull
-    public static UnaryOperator<String> forRotatingShop(@NotNull RotatingShop shop) {
-        return VIRTUAL_ROTATING_SHOP.replacer(shop);
+        shop.getRotations().forEach(rotation -> {
+            list.add(SHOP_ROTATION_NEXT_DATE.apply(rotation), shop1 -> {
+                RotationData data = ShopAPI.getDataManager().getRotationData(rotation);
+                if (data == null) return Lang.OTHER_NEVER.getString();
+
+                return TimeUtil.getLocalDateTimeOf(data.getNextRotationDate()).format(ShopUtils.getDateFormatter());
+            });
+
+            list.add(SHOP_ROTATION_NEXT_IN.apply(rotation), shop1 -> {
+                RotationData data = ShopAPI.getDataManager().getRotationData(rotation);
+                if (data == null) return Lang.OTHER_NEVER.getString();
+
+                return TimeUtil.formatDuration(data.getNextRotationDate());
+            });
+        });
+
+        return list.replacer(shop);
     }
 
     @NotNull
     public static UnaryOperator<String> forVirtualShopEditor(@NotNull VirtualShop shop) {
-        if (shop instanceof RotatingShop rotatingShop) return ROTATING_SHOP_INTERNAL.replacer(rotatingShop);
-
         return VIRTUAL_SHOP_INTERNAL.replacer(shop);
     }
 

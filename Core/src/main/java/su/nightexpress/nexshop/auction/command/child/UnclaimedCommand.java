@@ -35,7 +35,7 @@ public class UnclaimedCommand {
         if (player == null) return false;
 
         String userName = arguments.getStringArgument(ARG_TARGET, player.getName());
-        plugin.getUserManager().getUserDataAndPerform(userName, user -> {
+        plugin.getUserManager().manageUser(userName, user -> {
             if (user == null) {
                 context.errorBadPlayer();
                 return;

@@ -1,10 +1,10 @@
 package su.nightexpress.nexshop.shop.virtual.config;
 
-import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.language.entry.LangItem;
 import su.nightexpress.nightcore.util.Plugins;
 
+import static su.nightexpress.nightcore.language.entry.LangItem.builder;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
 import static su.nightexpress.nexshop.Placeholders.*;
@@ -16,153 +16,66 @@ public class VirtualLocales {
     public static final LangItem SHOP_CREATE = LangItem.builder(PREFIX + "Shop.Create")
         .name("New Shop")
         .emptyLine()
-        .leftClick("create Static Shop")
-        .rightClick("create Rotating Shop")
+        .click("create")
+        .build();
+
+    public static final LangItem SHOP_DELETE = LangItem.builder(PREFIX + "Shop.Delete")
+        .name("Delete Shop")
+        .text("Permanently deletes the shop", "with all settings and items.")
+        .emptyLine()
+        .click("delete")
         .build();
 
     public static final LangItem SHOP_OBJECT = LangItem.builder(PREFIX + "Shop.Object")
         .name(SHOP_NAME)
-        .current("Type", VIRTUAL_SHOP_TYPE)
+        .current("Items", SHOP_PRODUCTS)
         .current("Pages", VIRTUAL_SHOP_PAGES)
         .emptyLine()
-        .leftClick("edit")
-        .shiftRight("delete " + RED.enclose("(no undo)"))
+        .click("navigate")
         .build();
 
-    public static final LangItem SHOP_DISPLAY_NAME = LangItem.builder(PREFIX + "Shop.DisplayName")
+    public static final LangItem SHOP_EDIT_NAME = LangItem.builder(PREFIX + "Shop.DisplayName")
         .name("Display Name")
         .current("Current", SHOP_NAME)
         .emptyLine()
         .click("change")
         .build();
 
-    public static final LangItem SHOP_DESCRIPTION = LangItem.builder(PREFIX + "Shop.Description")
+    public static final LangItem SHOP_EDIT_DESCRIPTION = LangItem.builder(PREFIX + "Shop.Description")
         .name("Description")
-        .text(su.nightexpress.nexshop.Placeholders.VIRTUAL_SHOP_DESCRIPTION).emptyLine()
+        .textRaw(VIRTUAL_SHOP_DESCRIPTION)
         .emptyLine()
         .leftClick("add line")
         .rightClick("remove all")
         .build();
 
-    public static final LangItem SHOP_ICON = LangItem.builder(PREFIX + "Shop.Icon")
+    public static final LangItem SHOP_EDIT_ICON = LangItem.builder(PREFIX + "Shop.Icon")
         .name("Icon")
         .dragAndDrop("replace")
         .rightClick("get a copy")
         .build();
 
-    public static final LangItem SHOP_MENU_SLOT = LangItem.builder(PREFIX + "Shop.MenuSlot")
+    public static final LangItem SHOP_EDIT_MENU_SLOT = LangItem.builder(PREFIX + "Shop.MenuSlot")
         .name("Menu Slot")
         .current("Current", VIRTUAL_SHOP_MENU_SLOT)
         .emptyLine()
-        .text("Sets shop position in the Central Shop GUI.")
+        .text("Sets shop position for the " + LIGHT_YELLOW.enclose("/shop") + " GUI.")
         .emptyLine()
         .leftClick("change")
         .rightClick("disable")
         .build();
 
-    public static final LangItem SHOP_PERMISSION = LangItem.builder(PREFIX + "Shop.PermissionRequirement")
+    public static final LangItem SHOP_EDIT_PERMISSION = LangItem.builder(PREFIX + "Shop.PermissionRequirement")
         .name("Permission Requirement")
         .current("Enabled", VIRTUAL_SHOP_PERMISSION_REQUIRED)
         .current("Node", VIRTUAL_SHOP_PERMISSION_NODE)
         .emptyLine()
-        .text("Sets whether permission is required", "to use this shop.")
+        .text("Controls whether permission is required", "to use this shop.")
         .emptyLine()
         .click("toggle")
         .build();
 
-    public static final LangItem SHOP_BUYING = LangItem.builder(PREFIX + "Shop.Buying")
-        .name("Buying")
-        .current("State", SHOP_BUY_ALLOWED)
-        .emptyLine()
-        .text("Controls whether players can", "buy items in this shop.")
-        .emptyLine()
-        .click("toggle")
-        .build();
-
-    public static final LangItem SHOP_SELLING = LangItem.builder(PREFIX + "Shop.Selling")
-        .name("Selling")
-        .current("State", SHOP_SELL_ALLOWED)
-        .emptyLine()
-        .text("Controls whether players can", "sell items to this shop.")
-        .emptyLine()
-        .click("toggle")
-        .build();
-
-//    public static final LangItem SHOP_ATTACHED_NPCS = LangItem.builder(PREFIX + "Shop.AttachedNPCs")
-//        .name("Attached NPCs")
-//        .text(su.nightexpress.nexshop.Placeholders.SHOP_NPC_IDS)
-//        .emptyLine()
-//        .text("List of NPCs (id) attached to this shop", "to open it on interaction.")
-//        .text(LIGHT_RED.enclose("(Citizens required)"))
-//        .emptyLine()
-//        .leftClick("add NPC")
-//        .rightClick("remove all")
-//        .build();
-
-    public static final LangItem SHOP_LAYOUTS = LangItem.builder(PREFIX + "Shop.Layouts.Info")
-        .name("Layouts")
-        .text("Set GUI layout for this shop.")
-        .emptyLine()
-        .click("navigate")
-        .build();
-
-    public static final LangItem SHOP_LAYOUT_BY_DEFAULT = LangItem.builder(PREFIX + "Shop.Layouts.ByDefault")
-        .name("Default Layout")
-        .current("Current", VIRTUAL_SHOP_DEFAULT_LAYOUT)
-        .emptyLine()
-        .text("Sets default (all pages) GUI", "layout for this shop.")
-        .emptyLine()
-        .click("change")
-        .build();
-
-    public static final LangItem SHOP_LAYOUT_BY_PAGE = LangItem.builder(PREFIX + "Shop.Layouts.ByPage")
-        .name("Page #" + GENERIC_PAGE + " Layout")
-        .current("Current", GENERIC_NAME)
-        .emptyLine()
-        .leftClick("change")
-        .rightClick("reset")
-        .build();
-
-    public static final LangItem SHOP_DISCOUNTS = LangItem.builder(PREFIX + "Shop.Discounts")
-        .name("Discounts")
-        .text("Create and manage shop discounts here.")
-        .emptyLine()
-        .click("navigate")
-        .build();
-
-    public static final LangItem SHOP_PRODUCTS = LangItem.builder(PREFIX + "Shop.Products")
-        .name("Products")
-        .text("Create and manage products here.")
-        .emptyLine()
-        .click("navigate")
-        .build();
-
-    public static final LangItem SHOP_RESET_PRICE_DATA = LangItem.builder(PREFIX + "Shop.ResetPriceData")
-        .name("Reset Price & Update")
-        .text("Resets all price data stored", "in the database for all products", "of this shop.")
-        .emptyLine()
-        .text("After reset, all product prices will", "be regenerated according to", "their settings.")
-        .emptyLine()
-        .click(RED.enclose("reset"))
-        .build();
-
-    public static final LangItem SHOP_RESET_STOCK_DATA = LangItem.builder(PREFIX + "Shop.ResetStockData")
-        .name("Reset Stock & Update")
-        .text("Resets all stock and limit data stored", "in the database for all products", "of this shop.")
-        .emptyLine()
-        .text("After reset, all product stock and limit", "values will be regenerated according", "to their settings.")
-        .emptyLine()
-        .click(RED.enclose("reset"))
-        .build();
-
-    public static final LangItem SHOP_SPECIFIC = LangItem.builder(PREFIX + "Shop.Specific")
-        .name("Specific Settings")
-        .text("Additional settings based on shop type.")
-        .emptyLine()
-        .click("navigate")
-        .build();
-
-    public static final LangItem SHOP_STATIC_PAGES = LangItem.builder(PREFIX + "Shop.Pages")
+    public static final LangItem SHOP_EDIT_PAGES = LangItem.builder(PREFIX + "Shop.Pages")
         .name("Pages Amount")
         .current("Current", VIRTUAL_SHOP_PAGES)
         .emptyLine()
@@ -175,51 +88,224 @@ public class VirtualLocales {
         .rightClick("-1 page")
         .build();
 
-    public static final LangItem SHOP_ROTATION_TYPE = LangItem.builder(PREFIX + "Shop.Rotation.Type")
-        .name("Rotation Type")
-        .current("Current", VIRTUAL_SHOP_ROTATION_TYPE)
+    public static final LangItem SHOP_EDIT_BUYING = LangItem.builder(PREFIX + "Shop.Buying")
+        .name("Buying")
+        .current("State", SHOP_BUYING_ALLOWED)
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Types:")))
-        .current(RotationType.INTERVAL.name(), "Every X minutes.")
-        .current(RotationType.FIXED.name(), "Strictly at specified times.")
+        .text("Controls whether players can", "buy items in this shop.")
+        .emptyLine()
+        .click("toggle")
+        .build();
+
+    public static final LangItem SHOP_EDIT_SELLING = LangItem.builder(PREFIX + "Shop.Selling")
+        .name("Selling")
+        .current("State", SHOP_SELLING_ALLOWED)
+        .emptyLine()
+        .text("Controls whether players can", "sell items to this shop.")
+        .emptyLine()
+        .click("toggle")
+        .build();
+
+    public static final LangItem SHOP_EDIT_LAYOUTS = LangItem.builder(PREFIX + "Shop.Layouts.Info")
+        .name("Layouts")
+        .text("Sets GUI layout for this shop.")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem SHOP_EDIT_LAYOUT_BY_DEFAULT = LangItem.builder(PREFIX + "Shop.Layouts.ByDefault")
+        .name("Default Layout")
+        .current("Current", VIRTUAL_SHOP_DEFAULT_LAYOUT)
+        .emptyLine()
+        .text("Sets default (all pages) GUI", "layout for this shop.")
         .emptyLine()
         .click("change")
         .build();
 
-    public static final LangItem SHOP_ROTATION_INTERVAL = LangItem.builder(PREFIX + "Shop.Rotation.Interval")
-        .name("Rotation Interval")
-        .current("Current", VIRTUAL_SHOP_ROTATION_INTERVAL)
-        .emptyLine()
-        .text("Sets how often shop products", "will be rotated (changed).")
+    public static final LangItem SHOP_EDIT_LAYOUT_BY_PAGE = LangItem.builder(PREFIX + "Shop.Layouts.ByPage")
+        .name("Page #" + GENERIC_PAGE + " Layout")
+        .current("Current", GENERIC_NAME)
         .emptyLine()
         .leftClick("change")
-        .dropKey("force rotate")
+        .rightClick("reset")
         .build();
 
-    public static final LangItem SHOP_ROTATION_TIMES = LangItem.builder(PREFIX + "Shop.Rotation.Times")
-        .name("Rotation Times")
-        .text("Here you can set rotation", "times for each day of a week.").emptyLine()
+    public static final LangItem SHOP_EDIT_DISCOUNTS = LangItem.builder(PREFIX + "Shop.Discounts")
+        .name("Discounts")
+        .text("Create and manage shop discounts here.")
+        .emptyLine()
         .click("navigate")
         .build();
 
-    public static final LangItem SHOP_ROTATION_PRODUCTS = LangItem.builder(PREFIX + "Shop.Rotation.Products")
-        .name("Rotation Products")
-        .current("Min", VIRTUAL_SHOP_ROTATION_MIN_PRODUCTS)
-        .current("Max", VIRTUAL_SHOP_ROTATION_MAX_PRODUCTS)
-        .current("Slots", VIRTUAL_SHOP_ROTATION_PRODUCT_SLOTS)
+    public static final LangItem SHOP_EDIT_PRODUCTS_NORMAL = LangItem.builder(PREFIX + "Shop.Products")
+        .name("Normal Products")
+        .text("Regular, static shop items.")
         .emptyLine()
-        .text("Sets how many products", "will be used in rotations and", "slots where they will appear.")
-        .emptyLine()
-        .leftClick("change min")
-        .rightClick("change max")
-        .dropKey("change slots")
+        .click("navigate")
         .build();
+
+    public static final LangItem SHOP_EDIT_PRODUCTS_ROTATING = LangItem.builder(PREFIX + "Shop.RotatingProducts")
+        .name("Rotating Products")
+        .text("Items that will appear during", "shop rotations only.")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem SHOP_EDIT_ROTATIONS = LangItem.builder(PREFIX + "Shop.Rotations")
+        .name("Rotations")
+        .text("Add dynamics to your shop", "with product rotations.")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem SHOP_RESET_PRICE_DATA = LangItem.builder(PREFIX + "Shop.ResetPriceData")
+        .name("Reset Prices & Update")
+        .text("Resets price datas of all items", "and refreshes their prices.")
+        .emptyLine()
+        .click("reset")
+        .build();
+
+    public static final LangItem SHOP_RESET_STOCK_DATA = LangItem.builder(PREFIX + "Shop.ResetStockData")
+        .name("Reset Stocks & Update")
+        .text("Resets stock datas of all items", "and refreshes their stocks.")
+        .emptyLine()
+        .click("reset")
+        .build();
+
+    public static final LangItem SHOP_RESET_ROTATION_DATA = LangItem.builder(PREFIX + "Shop.ResetRotationData")
+        .name("Reset Rotations & Update")
+        .text("Resets rotation datas", "and performs new rotations.")
+        .emptyLine()
+        .click("reset")
+        .build();
+
+
+
+    public static final LangItem ROTATION_OBJECT = LangItem.builder(PREFIX + "Rotation.Object")
+        .name(ROTATION_ID)
+        .current("Slots Used", ROTATION_SLOTS_AMOUNT)
+        .current("Items Amount", ROTATION_ITEMS_AMOUNT)
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem ROTATION_CREATE = LangItem.builder(PREFIX + "Rotation.Create")
+        .name("New Rotation")
+        .click("create")
+        .build();
+
+    public static final LangItem ROTATION_DELETE = LangItem.builder(PREFIX + "Rotation.Delete")
+        .name("Delete Rotation")
+        .text("Deletes rotation with all", "settings and data.")
+        .emptyLine()
+        .click("delete")
+        .build();
+
+    public static final LangItem ROTATION_RESET = LangItem.builder(PREFIX + "Rotation.Reset")
+        .name("Reset & Update")
+        .text("Resets rotation's data and", "performs a fresh rotation.")
+        .emptyLine()
+        .click("reset")
+        .build();
+
+    public static final LangItem ROTATION_EDIT_ICON = LangItem.builder(PREFIX + "Rotation.Icon")
+        .name("Icon")
+        .text("Sets rotation icon", "so you can distinguish it", "from others :)")
+        .emptyLine()
+        .dragAndDrop("replace")
+        .rightClick("get a copy")
+        .build();
+
+    public static final LangItem ROTATION_EDIT_TYPE = LangItem.builder(PREFIX + "Rotation.Type")
+        .name("Rotation Type")
+        .current("Current", ROTATION_TYPE)
+        .emptyLine()
+        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Interval:")))
+        .text("Performs rotations every X seconds.")
+        .emptyLine()
+        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Fixed:")))
+        .text("Performs rotations at given times.")
+        .emptyLine()
+        .click("toggle")
+        .build();
+
+    public static final LangItem ROTATION_EDIT_INTERVAL = LangItem.builder(PREFIX + "Rotation.Interval")
+        .name("Rotation Interval")
+        .current("Current", ROTATION_INTERVAL)
+        .emptyLine()
+        .text("Sets rotation interval (in seconds).")
+        .emptyLine()
+        .click("change")
+        .build();
+
+    public static final LangItem ROTATION_EDIT_TIMES = LangItem.builder(PREFIX + "Rotation.Times")
+        .name("Rotation Times")
+        .text("Set rotation times.")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem ROTATION_EDIT_SLOTS = LangItem.builder(PREFIX + "Rotation.Slots")
+        .name("Used Slots")
+        .text("This rotation currently", "uses " + LIGHT_YELLOW.enclose(ROTATION_SLOTS_AMOUNT) + " slot(s).")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem ROTATION_EDIT_PRODUCTS = LangItem.builder(PREFIX + "Rotation.Items")
+        .name("Products")
+        .text("This rotation currently", "contains " + LIGHT_YELLOW.enclose(ROTATION_ITEMS_AMOUNT) + " item(s).")
+        .emptyLine()
+        .click("navigate")
+        .build();
+
+    public static final LangItem ROTATION_DAY_TIME_OBJECT = LangItem.builder(PREFIX + "Rotation.DayTimes.Object")
+        .name(GENERIC_NAME)
+        .textRaw(GENERIC_TIME)
+        .emptyLine()
+        .leftClick("add")
+        .rightClick("remove all")
+        .build();
+
+    public static final LangItem ROTATION_FREE_SLOT = LangItem.builder(PREFIX + "Rotation.FreeSlot")
+        .name(GREEN.enclose(BOLD.enclose("Free Slot")))
+        .text("This slot can be used", "for rotations.")
+        .emptyLine()
+        .click("select")
+        .build();
+
+    public static final LangItem ROTATION_SELECTED_SLOT = LangItem.builder(PREFIX + "Rotation.SelectedSlot")
+        .name(CYAN.enclose(BOLD.enclose("Selected Slot")))
+        .text("This slot is used", "for rotations.")
+        .emptyLine()
+        .click("unselect")
+        .build();
+
+    public static final LangItem ROTATION_OTHER_SLOT = LangItem.builder(PREFIX + "Rotation.OtherSlot")
+        .name(RED.enclose(BOLD.enclose("Other Rotation's Slot")))
+        .text("This slot is used by", "other rotation.")
+        .build();
+
+    public static final LangItem ROTATION_ITEM_OBJECT = LangItem.builder(PREFIX + "Rotation.Item.Object")
+        .name(PRODUCT_PREVIEW_NAME + RESET.getBracketsName() + GRAY.enclose(" (ID: " + WHITE.enclose(PRODUCT_ID) + ")"))
+        .current("Weight", GENERIC_WEIGHT)
+        .emptyLine()
+        .leftClick("set weight")
+        .dropKey("remove")
+        .build();
+
+    public static final LangItem ROTATION_ITEM_CREATE = LangItem.builder(PREFIX + "Rotation.Item.Create")
+        .name("New Item")
+        .click("select")
+        .build();
+
+
 
     public static final LangItem PRODUCT_OBJECT = LangItem.builder(PREFIX + "Product.Object.Static2")
         .name(PRODUCT_PREVIEW_NAME)
         .current("Handler", PRODUCT_HANDLER)
         .current("Currency", PRODUCT_CURRENCY)
-        .current("Price Type", Placeholders.PRODUCT_PRICE_TYPE)
+        .current("Price Type", PRODUCT_PRICE_TYPE)
         .current("Buy", PRODUCT_PRICE.apply(BUY))
         .current("Sell", PRODUCT_PRICE.apply(SELL))
         .emptyLine()
@@ -227,31 +313,46 @@ public class VirtualLocales {
         .emptyLine()
         .leftClick("edit")
         .rightClick("pick")
-        .dropKey("delete " + LIGHT_RED.enclose("(no undo)"))
         .build();
 
-    public static final LangItem ROTATING_PRODUCT_OBJECT = LangItem.builder(PREFIX + "Product.Object.Rotating2")
-        .name(PRODUCT_PREVIEW_NAME)
-        .current("Rotation Chance", su.nightexpress.nexshop.Placeholders.PRODUCT_ROTATION_CHANCE + "%")
-        .current("Currency", PRODUCT_CURRENCY)
-        .current("Buy Price", PRODUCT_PRICE.apply(BUY))
-        .current("Sell Price", PRODUCT_PRICE.apply(SELL))
+    public static final LangItem PRODUCT_DELETE = LangItem.builder(PREFIX + "Product.Delete")
+        .name("Delete Product")
+        .text("Permanently deletes the product", "with all settings and data.")
         .emptyLine()
-        .leftClick("edit")
-        .rightClick("pick")
-        .dropKey("delete " + LIGHT_RED.enclose("(no undo)"))
+        .click("delete")
+        .build();
+
+    public static final LangItem PRODUCT_ROTATING_OBJECT = LangItem.builder(PREFIX + "Product.Rotating.Object")
+        .name(PRODUCT_PREVIEW_NAME)
+        .current("Handler", PRODUCT_HANDLER)
+        .current("Currency", PRODUCT_CURRENCY)
+        .current("Price Type", PRODUCT_PRICE_TYPE)
+        .current("Buy", PRODUCT_PRICE.apply(BUY))
+        .current("Sell", PRODUCT_PRICE.apply(SELL))
+        .emptyLine()
+        .click("edit")
+        .build();
+
+    public static final LangItem PRODUCT_ROTATING_CREATE = LangItem.builder(PREFIX + "Product.Rotating.Create")
+        .name("New Product")
+        .text("Creates a new product", "to use in rotation(s).")
+        .emptyLine()
+        .click("create")
         .build();
 
     public static final LangItem PRODUCT_FREE_SLOT = LangItem.builder(PREFIX + "Product.FreeSlot")
         .name(GREEN.enclose(BOLD.enclose("Free Slot")))
         .emptyLine()
-        .text(GREEN.enclose(BOLD.enclose("ITEM PRODUCT:")))
-        .text("Click with item on cursor", "to create " + GREEN.enclose("item") + " product.")
+        .text(LIGHT_CYAN.enclose(BOLD.enclose("Quick Creation:")))
+        .text("Simply drag'n'drop item here!")
         .emptyLine()
-        .text("Hold " + WHITE.enclose("Shift") + " to bypass", "custom item detection.")
-        .emptyLine()
-        .text(LIGHT_ORANGE.enclose(BOLD.enclose("COMMAND PRODUCT:")))
-        .text("Click with empty cursor to", "create " + LIGHT_ORANGE.enclose("command") + " product.")
+        .text(LIGHT_PURPLE.enclose(BOLD.enclose("Manual Creation:")))
+        .text("Click with empty cursor to", "open creation wizard!")
+        .build();
+
+    public static final LangItem PRODUCT_ROTATION_SLOT = LangItem.builder(PREFIX + "Product.RotationSlot")
+        .name(RED.enclose(BOLD.enclose("Rotation Slot")))
+        .text("Slot reserved for", "rotating products.")
         .build();
 
     public static final LangItem PRODUCT_RESERVED_SLOT = LangItem.builder(PREFIX + "Product.ReservedSlot")
@@ -259,183 +360,162 @@ public class VirtualLocales {
         .text("This slot is occupied by a shop product.")
         .build();
 
+    public static final LangItem PRODUCT_CREATION_INFO = builder(PREFIX + "Product.Creation.Info")
+        .name("Creation Wizard")
+        .emptyLine()
+        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Step #1")))
+        .text("Click an item in your inventory")
+        .text("to select it as a base for new product.")
+        .emptyLine()
+        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Step #2")))
+        .text("Select and click product type button")
+        .text("to create a new product.")
+        .build();
+
+    public static final LangItem PRODUCT_CREATION_ITEM = builder(PREFIX + "Product.Creation.Item")
+        .name("Item Product")
+        .text("Gives item(s) directly to player's", "inventory when purchased.")
+        .emptyLine()
+        .text(GREEN.enclose("✔") + " Custom Items")
+        .text(GREEN.enclose("✔") + " NBT Support")
+        .text(GREEN.enclose("✔") + " Placeholders")
+        .text(GREEN.enclose("✔") + " Sellable")
+        .emptyLine()
+        .click("create")
+        .build();
+
+    public static final LangItem PRODUCT_CREATION_COMMAND = builder(PREFIX + "Product.Creation.Command")
+        .name("Command Product")
+        .text("Runs specified command(s) with", "placeholders when purchased.")
+        .emptyLine()
+        .text(GREEN.enclose("✔") + " Custom Name")
+        .text(GREEN.enclose("✔") + " Custom Lore")
+        .text(GREEN.enclose("✔") + " Placeholders")
+        .text(GREEN.enclose("✔") + " Unlimited Commands")
+        .text(RED.enclose("✘") + " Unsellable")
+        .emptyLine()
+        .click("create")
+        .build();
+
     // ===================================
     // Product Editor Locales
     // ===================================
 
-    public static final LangItem PRODUCT_ITEM = LangItem.builder(PREFIX + "Product.Item")
-        .name("Actual Item")
-        .text("This is the item that:")
-        .current("Players gets on " + GREEN.enclose("purchase") + ".")
-        .current("Players must have to " + RED.enclose("sell") + ".")
-        .emptyLine()
-        .dragAndDrop("replace")
-        .rightClick("get a copy")
-        .emptyLine()
-        .text("(Hold " + WHITE.enclose("Shift") + " to bypass item detection)")
-        .build();
-
-    public static final LangItem PRODUCT_PREVIEW = LangItem.builder(PREFIX + "Product.Preview")
-        .name("Preview Item")
-        .text("This item is used purely as", "visual product representation.")
-        .emptyLine()
-        .text("Feel free to " + LIGHT_YELLOW.enclose("rename") + " it, add " + LIGHT_YELLOW.enclose("lore") + " and " + LIGHT_YELLOW.enclose("enchants") + "!")
+    public static final LangItem PRODUCT_EDIT_ITEM = LangItem.builder(PREFIX + "Product.Item")
+        .name("Item")
+        .text("Defines product's item.")
         .emptyLine()
         .dragAndDrop("replace")
         .rightClick("get a copy")
         .build();
 
-    public static final LangItem PRODUCT_RESPECT_ITEM_META = LangItem.builder(PREFIX + "Product.RespectItemMeta")
-        .name("Respect Item Meta")
-        .current("Enabled", Placeholders.PRODUCT_ITEM_META_ENABLED)
+    public static final LangItem PRODUCT_EDIT_ICON = LangItem.builder(PREFIX + "Product.Preview")
+        .name("Icon")
+        .text("Defines product's icon.")
         .emptyLine()
-        .text("When " + GREEN.enclose("enabled") + ", players can sell only", "items with exact data as in " + WHITE.enclose("Actual Item") + ".")
-        .emptyLine()
-        .text("When " + RED.enclose("disabled") + ", players can sell any", "item of the same type as " + WHITE.enclose("Actual Item") + ".")
-        .emptyLine()
-        .leftClick("toggle")
+        .dragAndDrop("replace")
+        .rightClick("get a copy")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_MANAGER = LangItem.builder(PREFIX + "Product.PriceManager")
+    public static final LangItem PRODUCT_EDIT_NBT_MATCH = LangItem.builder(PREFIX + "Product.RespectItemMeta")
+        .name("Match NBT")
+        .current("Enabled", PRODUCT_RESPECT_META)
+        .emptyLine()
+        .text("Controls whether whole NBT", "must match to sell this product.")
+        .emptyLine()
+        .text("Otherwise any item with", "the same type is accepted.")
+        .emptyLine()
+        .click("toggle")
+        .build();
+
+    public static final LangItem PRODUCT_EDIT_PRICE = LangItem.builder(PREFIX + "Product.PriceManager")
         .name("Price Manager")
-        .current("Type", Placeholders.PRODUCT_PRICE_TYPE)
+        .current("Type", PRODUCT_PRICE_TYPE)
         .current("Currency", PRODUCT_CURRENCY)
         .current("Buy", PRODUCT_PRICE.apply(BUY))
         .current("Sell", PRODUCT_PRICE.apply(SELL))
         .emptyLine()
         .text("Sets product currency and price.")
         .emptyLine()
-        .leftClick("edit")
-        .dropKey("refresh")
+        .click("navigate")
         .build();
 
-    public static final LangItem PRODUCT_RANKS_REQUIRED = LangItem.builder(PREFIX + "Product.RanksRequired")
+    public static final LangItem PRODUCT_EDIT_RANKS_REQUIRED = LangItem.builder(PREFIX + "Product.RanksRequired")
         .name("Required Ranks")
-        .text(su.nightexpress.nexshop.Placeholders.PRODUCT_ALLOWED_RANKS)
+        .textRaw(PRODUCT_ALLOWED_RANKS)
         .emptyLine()
-        .text("Only players with listed ranks (groups)", "will have access to this product.")
+        .text("Only players with any of listed ranks", "will have access to this product.")
         .emptyLine()
         .leftClick("add rank")
         .rightClick("remove all & disable")
         .build();
 
-    public static final LangItem PRODUCT_PERMISIONS_REQUIRED = LangItem.builder(PREFIX + "Product.PermissionsRequired")
+    public static final LangItem PRODUCT_EDIT_PERMISIONS_REQUIRED = LangItem.builder(PREFIX + "Product.PermissionsRequired")
         .name("Required Permissions")
-        .text(su.nightexpress.nexshop.Placeholders.PRODUCT_REQUIRED_PERMISSIONS)
+        .textRaw(PRODUCT_REQUIRED_PERMISSIONS)
         .emptyLine()
-        .text("Only players with listed permissions", "will have access to this product.")
+        .text("Only players with any of listed permissions", "will have access to this product.")
         .emptyLine()
-        .shiftLeft("add permission")
-        .shiftRight("remove all & disable")
+        .leftClick("add permission")
+        .rightClick("remove all & disable")
         .build();
 
-    public static final LangItem PRODUCT_COMMANDS = LangItem.builder(PREFIX + "Product.Commands")
+    public static final LangItem PRODUCT_EDIT_COMMANDS = LangItem.builder(PREFIX + "Product.Commands")
         .name("Commands")
-        .text(su.nightexpress.nexshop.Placeholders.PRODUCT_COMMANDS)
+        .textRaw(PRODUCT_COMMANDS)
         .emptyLine()
-        .text("Commands to run when product is purchased.")
+        .text("Runs listed command when", "player purchases this item.")
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Placeholders:")))
-        .current(PLAYER_NAME, "Player (buyer) name.")
-        .current(Plugins.PLACEHOLDER_API, "All of them.")
+        .current("Use " + LIGHT_YELLOW.enclose(PLAYER_NAME) + " for player name.")
+        .current(LIGHT_YELLOW.enclose(Plugins.PLACEHOLDER_API) + " supported.")
         .emptyLine()
         .leftClick("add command")
         .rightClick("remove all")
         .build();
 
-    public static final LangItem PRODUCT_ROTATION_CHANCE = LangItem.builder(PREFIX + "Product.Rotation.Chance")
-        .name("Weight")
-        .current("Current", su.nightexpress.nexshop.Placeholders.PRODUCT_ROTATION_CHANCE + "%")
-        .emptyLine()
-        .text("Greater the weight, greater the chance", "that this product will appear", "in shop rotations.")
-        .emptyLine()
-        .click("change")
-        .build();
-
-    public static final LangItem PRODUCT_ROTATION_DAY_TIMES = LangItem.builder(PREFIX + "Product.Rotation.DayTimes")
-        .name(GENERIC_NAME)
-        .text(GENERIC_TIME)
-        .emptyLine()
-        .leftClick("add")
-        .rightClick("remove all")
-        .build();
-
-    // ===================================
-    // Stock Editor Locales
-    // ===================================
-
-    public static final LangItem PRODUCT_STOCK = LangItem.builder(PREFIX + "Product.Stock.Category")
+    public static final LangItem PRODUCT_EDIT_STOCK = LangItem.builder(PREFIX + "Product.Stock.Category")
         .name("Global & Player Stock")
-        .text("Here you can set how many of the product", "is available for sale and purchase", "globally and per player.")
+        .text("Controls product limits on", LIGHT_YELLOW.enclose("per server") + " and " + LIGHT_YELLOW.enclose("per player"), "basis.")
         .emptyLine()
         .click("navigate")
         .build();
 
-    public static final LangItem PRODUCT_STOCK_GLOBAL_INFO = LangItem.builder(PREFIX + "Product.Stock.Info.Global")
-        .name("Global Stock")
-        .text("Limits amount of the product available", "for sale/purchase globally for all players.")
+    public static final LangItem PRODUCT_EDIT_STOCK_RESET = LangItem.builder(PREFIX + "Product.Stocks.ResetData")
+        .name("Reset & Update")
+        .text("Resets stocks and limits datas", "and refreshes their values.")
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Manual Restock:")))
-        .current("By Purchase: " + GREEN.enclose("Sell Stock ↑") + " | " + RED.enclose("Buy Stock ↓"))
-        .current("By Sale: " + RED.enclose("Sell Stock ↓") + " | " + GREEN.enclose("Buy Stock ↑"))
-        .emptyLine()
-        .rightClick("wipe global stock data")
-        .build();
-
-    public static final LangItem PRODUCT_STOCK_PLAYER_INFO = LangItem.builder(PREFIX + "Product.Stock.Info.Player")
-        .name("Player Limits")
-        .text("Limits amount of the product available", "for sale/purchase per a player.")
-        .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Manual Restock:")))
-        .text("Manual restock for limits is " + RED.enclose("not possible") + ".")
-        .text("Players have to wait restock time.")
-        .emptyLine()
-        .rightClick("wipe player limit data")
+        .click("reset")
         .build();
 
     // ===================================
     // Global Stock Locales
     // ===================================
 
-    public static final LangItem PRODUCT_STOCK_GLOBAL_BUY_INITIAL = LangItem.builder(PREFIX + "Product.Stock.Global.BuyInitial")
-        .name("Initial Buy Amount")
+    public static final LangItem PRODUCT_EDIT_STOCK_BUY = LangItem.builder(PREFIX + "Product.Stock.Global.BuyInitial")
+        .name("Buy Stock")
         .current("Current", PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY))
         .emptyLine()
-        .text("Sets initial product amount for purchases.")
+        .text("Sets the global buy stock.")
         .emptyLine()
         .leftClick("change")
         .rightClick("set unlimited")
         .build();
 
-    public static final LangItem PRODUCT_STOCK_GLOBAL_SELL_INITIAL = LangItem.builder(PREFIX + "Product.Stock.Global.SellInitial")
-        .name("Initial Sell Amount")
+    public static final LangItem PRODUCT_EDIT_STOCK_SELL = LangItem.builder(PREFIX + "Product.Stock.Global.SellInitial")
+        .name("Sell Stock")
         .current("Current", PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL))
         .emptyLine()
-        .text("Sets initial product amount for sales.")
+        .text("Sets the global sell stock.")
         .emptyLine()
         .leftClick("change")
         .rightClick("set unlimited")
         .build();
 
-    public static final LangItem PRODUCT_STOCK_GLOBAL_RESTOCK_BUY = LangItem.builder(PREFIX + "Product.Stock.Global.BuyRestock")
-        .name("Buy Restock Time")
-        .current("Current", PRODUCT_STOCK_RESTOCK_TIME.apply(BUY))
+    public static final LangItem PRODUCT_EDIT_STOCK_RESET_TIME = LangItem.builder(PREFIX + "Product.Stocks.StockResetTime")
+        .name("Restock Time")
+        .current("Current", PRODUCT_STOCKS_RESET_TIME)
         .emptyLine()
-        .text("Sets how often product amount available", "for purchase will reset back", "to default (initial).")
-        .emptyLine()
-        .text("When disabled " + DARK_GRAY.enclose("(-1)") + ", auto-restock", "will never happen!")
-        .emptyLine()
-        .leftClick("change")
-        .rightClick("disable")
-        .build();
-
-    public static final LangItem PRODUCT_STOCK_GLOBAL_RESTOCK_SELL = LangItem.builder(PREFIX + "Product.Stock.Global.SellRestock")
-        .name("Sell Restock Time")
-        .current("Current", PRODUCT_STOCK_RESTOCK_TIME.apply(SELL))
-        .emptyLine()
-        .text("Sets how often product amount available", "for sale will reset back", "to default (initial).")
-        .emptyLine()
-        .text("When disabled " + DARK_GRAY.enclose("(-1)") + ", auto-restock", "will never happen!")
+        .text("Controls how soon stocks will", "reset back to default values.")
         .emptyLine()
         .leftClick("change")
         .rightClick("disable")
@@ -445,45 +525,31 @@ public class VirtualLocales {
     // Player Stock Locales
     // ===================================
 
-    public static final LangItem PRODUCT_STOCK_PLAYER_BUY_INITIAL = LangItem.builder(PREFIX + "Product.Stock.Player.BuyInitial")
-        .name("Initial Buy Amount")
+    public static final LangItem PRODUCT_EDIT_LIMIT_BUY = LangItem.builder(PREFIX + "Product.Stock.Player.BuyInitial")
+        .name("Buy Limit")
         .current("Current", PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY))
         .emptyLine()
-        .text("Sets initial product amount for purchases.")
+        .text("Sets an individual buy limit", "for a player.")
         .emptyLine()
         .leftClick("change")
         .rightClick("set unlimited")
         .build();
 
-    public static final LangItem PRODUCT_STOCK_PLAYER_SELL_INITIAL = LangItem.builder(PREFIX + "Product.Stock.Player.SellInitial")
-        .name("Initial Sell Amount")
+    public static final LangItem PRODUCT_EDIT_LIMIT_SELL = LangItem.builder(PREFIX + "Product.Stock.Player.SellInitial")
+        .name("Sell Limit")
         .current("Current", PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL))
         .emptyLine()
-        .text("Sets initial product amount for sales.")
+        .text("Sets an individual sell limit", "for a player.")
         .emptyLine()
         .leftClick("change")
         .rightClick("set unlimited")
         .build();
 
-    public static final LangItem PRODUCT_STOCK_PLAYER_RESTOCK_BUY = LangItem.builder(PREFIX + "Product.Stock.Player.BuyRestock")
-        .name("Buy Restock Time")
-        .current("Current", PRODUCT_LIMIT_RESTOCK_TIME.apply(BUY))
+    public static final LangItem PRODUCT_EDIT_LIMIT_RESET_TIME = LangItem.builder(PREFIX + "Product.Stocks.LimitResetTime")
+        .name("Reset Time")
+        .current("Current", PRODUCT_LIMITS_RESET_TIME)
         .emptyLine()
-        .text("Sets how often product amount available", "for purchase will reset back", "to default (initial).")
-        .emptyLine()
-        .text("When disabled " + DARK_GRAY.enclose("(-1)") + ", auto-restock", "will never happen!")
-        .emptyLine()
-        .leftClick("change")
-        .rightClick("disable")
-        .build();
-
-    public static final LangItem PRODUCT_STOCK_PLAYER_RESTOCK_SELL = LangItem.builder(PREFIX + "Product.Stock.Player.SellRestock")
-        .name("Sell Restock Time")
-        .current("Current", PRODUCT_LIMIT_RESTOCK_TIME.apply(SELL))
-        .emptyLine()
-        .text("Sets how often product amount available", "for sale will reset back", "to default (initial).")
-        .emptyLine()
-        .text("When disabled " + DARK_GRAY.enclose("(-1)") + ", auto-restock", "will never happen!")
+        .text("Controls how soon limits will", "reset back to default values.")
         .emptyLine()
         .leftClick("change")
         .rightClick("disable")
@@ -493,52 +559,40 @@ public class VirtualLocales {
     // Price Editor Locales
     // ===================================
 
-    public static final LangItem PRODUCT_PRICE_INFO = LangItem.builder(PREFIX + "Product.Price.Info")
-        .name("Price Info")
-        .current("Buy Current", PRODUCT_PRICE_FORMATTED.apply(BUY))
-        .current("Sell Current", PRODUCT_PRICE_FORMATTED.apply(SELL))
+    public static final LangItem PRODUCT_PRICE_RESET = LangItem.builder(PREFIX + "Product.Price.Reset")
+        .name("Reset & Update")
+        .current("Buy Price", PRODUCT_PRICE_FORMATTED.apply(BUY))
+        .current("Sell Price", PRODUCT_PRICE_FORMATTED.apply(SELL))
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Update:")))
-        .text("Fetches and applies the price data", "from the database.")
-        .text("If no data present or expired,", "creates a fresh one.")
+        .text("Resets product's price data", "and refreshes its values.")
         .emptyLine()
-        .text("In most cases won't change anything", "until you wipe it out.")
-        .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Wipe:")))
-        .text("Wipes out product price data", "from the database.")
-        .emptyLine()
-        .text("Use " + LIGHT_YELLOW.enclose("update") + " option to generate a new one.")
-        .emptyLine()
-        .leftClick("update")
-        .rightClick("wipe data")
+        .click("reset")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_TYPE = LangItem.builder(PREFIX + "Product.Price.Type")
+    public static final LangItem PRODUCT_EDIT_PRICE_TYPE = LangItem.builder(PREFIX + "Product.Price.Type")
         .name("Price Type")
-        .current("Current", Placeholders.PRODUCT_PRICE_TYPE)
-        .emptyLine()
-        .text("Sets product price type.", "Different types have different settings.")
+        .current("Current", PRODUCT_PRICE_TYPE)
         .emptyLine()
         .click("change")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_CURRENCY = LangItem.builder(PREFIX + "Product.Price.Currency")
+    public static final LangItem PRODUCT_EDIT_PRICE_CURRENCY = LangItem.builder(PREFIX + "Product.Price.Currency")
         .name("Currency")
-        .current("Current", PRODUCT_CURRENCY).emptyLine()
-        .text("Sets product currency.").emptyLine()
+        .current("Current", PRODUCT_CURRENCY)
+        .emptyLine()
         .click("change")
         .build();
 
-    public static final LangItem PRODUCT_DISCOUNT = LangItem.builder(PREFIX + "Product.Price.DiscountAllowed")
+    public static final LangItem PRODUCT_EDIT_DISCOUNT = LangItem.builder(PREFIX + "Product.Price.DiscountAllowed")
         .name("Discount Allowed")
-        .current("Enabled", su.nightexpress.nexshop.Placeholders.PRODUCT_DISCOUNT_ALLOWED)
+        .current("Enabled", PRODUCT_DISCOUNT_ALLOWED)
         .emptyLine()
-        .text("Sets whether or not this product", "can be affected by shop's discounts.")
+        .text("Sets whether product", "can be affected by shop's discounts.")
         .emptyLine()
         .leftClick("toggle")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLAT_BUY = LangItem.builder(PREFIX + "Product.Price.Flat.Buy")
+    public static final LangItem PRODUCT_EDIT_PRICE_FLAT_BUY = LangItem.builder(PREFIX + "Product.Price.Flat.Buy")
         .name("Buy Price")
         .current("Current", PRODUCT_PRICE.apply(BUY))
         .emptyLine()
@@ -546,7 +600,7 @@ public class VirtualLocales {
         .dropKey("disable")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLAT_SELL = LangItem.builder(PREFIX + "Product.Price.Flat.Sell")
+    public static final LangItem PRODUCT_EDIT_PRICE_FLAT_SELL = LangItem.builder(PREFIX + "Product.Price.Flat.Sell")
         .name("Sell Price")
         .current("Current", PRODUCT_PRICE.apply(SELL))
         .emptyLine()
@@ -554,10 +608,10 @@ public class VirtualLocales {
         .dropKey("disable")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLOAT_BUY = LangItem.builder(PREFIX + "Product.Price.Float.Buy")
+    public static final LangItem PRODUCT_EDIT_PRICE_BOUNDS_BUY = LangItem.builder(PREFIX + "Product.Price.Float.Buy")
         .name("Buy Price Bounds")
-        .current("Min", PRODUCT_PRICER_RANGE_MIN.apply(BUY))
-        .current("Max", PRODUCT_PRICER_RANGE_MAX.apply(BUY))
+        .current("Min", PRICER_RANGED_BOUNDS_MIN.apply(BUY))
+        .current("Max", PRICER_RANGED_BOUNDS_MAX.apply(BUY))
         .emptyLine()
         .text("Sets product buy price bounds.", "Final price will be within these values.")
         .emptyLine()
@@ -565,10 +619,10 @@ public class VirtualLocales {
         .dropKey("disable")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLOAT_SELL = LangItem.builder(PREFIX + "Product.Price.Float.Sell")
+    public static final LangItem PRODUCT_EDIT_PRICE_BOUNDS_SELL = LangItem.builder(PREFIX + "Product.Price.Float.Sell")
         .name("Sell Price Bounds")
-        .current("Min", PRODUCT_PRICER_RANGE_MIN.apply(SELL))
-        .current("Max", PRODUCT_PRICER_RANGE_MAX.apply(SELL))
+        .current("Min", PRICER_RANGED_BOUNDS_MIN.apply(SELL))
+        .current("Max", PRICER_RANGED_BOUNDS_MAX.apply(SELL))
         .emptyLine()
         .text("Sets product sell price bounds.", "Final price will be within these values.")
         .emptyLine()
@@ -576,52 +630,70 @@ public class VirtualLocales {
         .dropKey("disable")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLOAT_DECIMALS = LangItem.builder(PREFIX + "Product.Price.Float.Decimals")
+    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_DECIMALS = LangItem.builder(PREFIX + "Product.Price.Float.Decimals")
         .name("Cut Decimals")
-        .current("Enabled", PRODUCT_PRICER_FLOAT_ROUND_DECIMALS).emptyLine()
-        .text("Sets whether or not prices should", "generate as whole numbers.").emptyLine()
+        .current("Enabled", PRICER_FLOAT_ROUND_DECIMALS)
+        .emptyLine()
+        .text("Controls whether final price", "should be integer.")
+        .emptyLine()
         .click("toggle")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLOAT_REFRESH_DAYS = LangItem.builder(PREFIX + "Product.Price.Float.RefreshDays")
-        .name("Refresh Days")
-        .text(PRODUCT_PRICER_FLOAT_REFRESH_DAYS)
+    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_TYPE = LangItem.builder(PREFIX + "Product.Price.Float.RefreshType")
+        .name("Refresh Type")
+        .current("Current", PRICER_FLOAT_REFRESH_TYPE)
         .emptyLine()
-        .text("Sets days allowed for price generation.")
+        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Interval:")))
+        .text("Performs refresh every X seconds.")
+        .emptyLine()
+        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Fixed:")))
+        .text("Performs refresh at given times.")
+        .emptyLine()
+        .click("toggle")
+        .build();
+
+    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_INTERVAL = LangItem.builder(PREFIX + "Product.Price.Float.RefreshInterval")
+        .name("Refresh Interval")
+        .current("Current", PRICER_FLOAT_REFRESH_INTERVAL)
+        .emptyLine()
+        .text("Sets refresh interval (in seconds).")
+        .emptyLine()
+        .click("change")
+        .build();
+
+    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_DAYS = LangItem.builder(PREFIX + "Product.Price.Float.RefreshDays")
+        .name("Refresh Days")
+        .textRaw(PRICER_FLOAT_REFRESH_DAYS)
         .emptyLine()
         .leftClick("add day")
         .rightClick("remove all")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_FLOAT_REFRESH_TIMES = LangItem.builder(PREFIX + "Product.Price.Float.RefreshTimes")
+    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_TIMES = LangItem.builder(PREFIX + "Product.Price.Float.RefreshTimes")
         .name("Refresh Times")
-        .text(PRODUCT_PRICER_FLOAT_REFRESH_TIMES)
-        .emptyLine()
-        .text("Sets times used for price generation.")
+        .textRaw(PRICER_FLOAT_REFRESH_TIMES)
         .emptyLine()
         .leftClick("add time")
         .rightClick("remove all")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_DYNAMIC_INITIAL = LangItem.builder(PREFIX + "Product.Price.Dynamic.Initial")
-        .name("Initial Price")
-        .current("Buy", PRODUCT_PRICER_DYNAMIC_INITIAL_BUY)
-        .current("Sell", PRODUCT_PRICER_DYNAMIC_INITIAL_SELL)
+    public static final LangItem PRODUCT_EDIT_PRICE_DYNAMIC_INITIAL = LangItem.builder(PREFIX + "Product.Price.Dynamic.Initial")
+        .name("Initial Values")
+        .current("Buy", PRICER_DYNAMIC_INITIAL_BUY)
+        .current("Sell", PRICER_DYNAMIC_INITIAL_SELL)
         .emptyLine()
-        .text("Sets initial product price.", "These values will be used as default/start ones.")
+        .text("Sets initial (start) product price.")
         .emptyLine()
         .leftClick("change buy")
         .rightClick("change sell")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_DYNAMIC_STEP = LangItem.builder(PREFIX + "Product.Price.Dynamic.Step")
+    public static final LangItem PRODUCT_EDIT_PRICE_DYNAMIC_STEP = LangItem.builder(PREFIX + "Product.Price.Dynamic.Step")
         .name("Price Step")
-        .current("Buy", PRODUCT_PRICER_DYNAMIC_STEP_BUY)
-        .current("Sell", PRODUCT_PRICER_DYNAMIC_STEP_SELL)
+        .current("Buy", PRICER_DYNAMIC_STEP_BUY)
+        .current("Sell", PRICER_DYNAMIC_STEP_SELL)
         .emptyLine()
-        .text("Step defines for how much price will", "grow up/down on each sale/purchase.")
-        .emptyLine()
-        .text("Purchases = Price Up, Sales = Price Down")
+        .text("Adjusts prices by specified", "values on each purchase/sale.")
         .emptyLine()
         .leftClick("change buy")
         .rightClick("change sell")
@@ -630,37 +702,33 @@ public class VirtualLocales {
 
 
 
-    public static final LangItem PRODUCT_PRICE_PLAYERS_INITIAL = LangItem.builder(PREFIX + "Product.Price.Players.Initial")
-        .name("Initial Price")
-        .current("Buy", PRODUCT_PRICER_DYNAMIC_INITIAL_BUY)
-        .current("Sell", PRODUCT_PRICER_DYNAMIC_INITIAL_SELL)
+    public static final LangItem PRODUCT_EDIT_PRICE_PLAYERS_INITIAL = LangItem.builder(PREFIX + "Product.Price.Players.Initial")
+        .name("Initial Values")
+        .current("Buy", PRICER_DYNAMIC_INITIAL_BUY)
+        .current("Sell", PRICER_DYNAMIC_INITIAL_SELL)
         .emptyLine()
-        .text("Sets initial product price.", "These values will be used as default/start ones.")
-        .emptyLine()
-        .leftClick("change buy")
-        .rightClick("change sell")
-        .build();
-
-    public static final LangItem PRODUCT_PRICE_PLAYERS_ADJUST = LangItem.builder(PREFIX + "Product.Price.Players.Adjust")
-        .name("Price Adjust")
-        .current("Buy", PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_BUY)
-        .current("Sell", PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL)
-        .emptyLine()
-        .text("Defines for how much price will", "be adjusted for each X online players.")
+        .text("Sets initial (start) product price.")
         .emptyLine()
         .leftClick("change buy")
         .rightClick("change sell")
         .build();
 
-    public static final LangItem PRODUCT_PRICE_PLAYERS_STEP = LangItem.builder(PREFIX + "Product.Price.Players.Step")
+    public static final LangItem PRODUCT_EDIT_PRICE_PLAYERS_ADJUST = LangItem.builder(PREFIX + "Product.Price.Players.Adjust")
+        .name("Adjust Amount")
+        .current("Buy", PRICER_PLAYERS_ADJUST_AMOUNT_BUY)
+        .current("Sell", PRICER_PLAYERS_ADJUST_AMOUNT_SELL)
+        .emptyLine()
+        .text("Adjusts prices by specified", "values with a multiplier of", "online players amount.")
+        .emptyLine()
+        .leftClick("change buy")
+        .rightClick("change sell")
+        .build();
+
+    public static final LangItem PRODUCT_EDIT_PRICE_PLAYERS_STEP = LangItem.builder(PREFIX + "Product.Price.Players.Step")
         .name("Adjust Step")
-        .current("Current", PRODUCT_PRICER_PLAYERS_ADJUST_STEP)
+        .current("Current", PRICER_PLAYERS_ADJUST_STEP)
         .emptyLine()
-        .text("Sets amount of online players", "to adjust the price for.")
-        .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Examples:")))
-        .text(LIGHT_YELLOW.enclose("1") + " = for " + LIGHT_YELLOW.enclose("every player") + " online.")
-        .text(LIGHT_YELLOW.enclose("5") + " = for " + LIGHT_YELLOW.enclose("every 5") + " players (5, 10, 15, etc.)")
+        .text("Adjusts prices for", "every " + PRICER_PLAYERS_ADJUST_STEP + " player(s) online.")
         .emptyLine()
         .click("change")
         .build();

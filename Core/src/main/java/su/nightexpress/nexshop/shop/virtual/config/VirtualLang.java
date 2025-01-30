@@ -2,8 +2,6 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import org.bukkit.Sound;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.virtual.type.ShopType;
-import su.nightexpress.nightcore.language.entry.LangEnum;
 import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.language.entry.LangText;
 
@@ -12,8 +10,6 @@ import static su.nightexpress.nightcore.language.tag.MessageTags.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class VirtualLang extends Lang {
-
-    public static final LangEnum<ShopType> SHOP_TYPES = LangEnum.of("VirtualShop.ShopType", ShopType.class);
 
     public static final LangString COMMAND_ARGUMENT_NAME_SHOP = LangString.of("VirtualShop.Command.Argument.Name.Shop", "shop");
 
@@ -47,16 +43,16 @@ public class VirtualLang extends Lang {
     );
 
 
-    public static final LangText SHOP_ROTATION_NOTIFY = LangText.of("VirtualShop.Shop.Rotation.Notify",
+    public static final LangText SHOP_ROTATION_NOTIFY = LangText.of("VirtualShop.Shop.Rotation.Update",
         TAG_NO_PREFIX,
         " ",
-        LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose(GENERIC_AMOUNT) + " new items just appeared in the " + LIGHT_YELLOW.enclose(SHOP_NAME) + " shop!"),
+        LIGHT_GRAY.enclose("New items just appeared in the " + LIGHT_YELLOW.enclose(SHOP_NAME) + " shop!"),
         LIGHT_GRAY.enclose("Click " +
             CLICK.encloseRun(
                 HOVER.encloseHint(LIGHT_YELLOW.enclose(BOLD.enclose("HERE")), LIGHT_GRAY.enclose("Click to open shop!")),
                 "/shop " + SHOP_ID
             )
-            + " to open the shop!"),
+            + " to open the shop!"), // TODO Default command to const
         " "
     );
 
@@ -69,6 +65,11 @@ public class VirtualLang extends Lang {
     public static final LangText SHOP_ERROR_INVALID_LAYOUT = LangText.of("VirtualShop.Shop.Error.InvalidLayout",
         LIGHT_GRAY.enclose("Could not open shop " + LIGHT_RED.enclose(SHOP_NAME) + ": Invalid shop layout!"));
 
+    public static final LangText SHOP_CREATE_ERROR_EXIST = LangText.of("VirtualShop.Shop.Create.Error.Exist",
+        LIGHT_RED.enclose("Shop with such name already exists!"));
+
+    public static final LangText SHOP_CREATE_ERROR_BAD_NAME = LangText.of("VirtualShop.Shop.Create.Error.BadName",
+        LIGHT_RED.enclose("Only latin letters and numbers are allowed!"));
 
 
 
@@ -119,18 +120,55 @@ public class VirtualLang extends Lang {
         LIGHT_GRAY.enclose(LIGHT_RED.enclose(GENERIC_VALUE) + " is not a valid shop!")
     );
 
+    public static final LangText ERROR_EDITOR_ROTATION_EXISTS = LangText.of("VirtualShop.Error.Editor.RotationExists",
+        LIGHT_RED.enclose("Rotation with that name already exists!")
+    );
+
 
     public static final LangString EDITOR_TITLE_SHOP_LIST = LangString.of("Editor.Title.Shop.List",
-        BLACK.enclose("Virtual Shop Editor")
-    );
+        BLACK.enclose("Virtual Shop Editor"));
 
     public static final LangString EDITOR_TITLE_SHOP_SETTINGS = LangString.of("Editor.Title.Shop.Settings",
-        BLACK.enclose("Shop Settings: " + SHOP_NAME)
-    );
+        BLACK.enclose("Shop Settings"));
 
     public static final LangString EDITOR_TITLE_SHOP_LAYOUTS = LangString.of("Editor.Title.Shop.Layouts",
-        BLACK.enclose("Shop Layouts: " + SHOP_NAME)
-    );
+        BLACK.enclose("Shop Layouts"));
+
+    public static final LangString EDITOR_TITLE_PRODUCT_CREATION = LangString.of("Editor.Title.Product.Creation",
+        BLACK.enclose("Product Creation"));
+
+    public static final LangString EDITOR_TITLE_PRODUCTS_NORMAL = LangString.of("Editor.Title.Products.Normal",
+        BLACK.enclose("Shop Products (Normal)"));
+
+    public static final LangString EDITOR_TITLE_PRODUCTS_ROTATING = LangString.of("Editor.Title.Products.Rotating",
+        BLACK.enclose("Shop Products (Rotating)"));
+
+    public static final LangString EDITOR_TITLE_PRODUCT_OPTIONS = LangString.of("Editor.Title.Product.Settings",
+        BLACK.enclose("Product Options"));
+
+    public static final LangString EDITOR_TITLE_PRODUCT_STOCKS = LangString.of("Editor.Title.Product.Stocks",
+        BLACK.enclose("Product Stock Options"));
+
+    public static final LangString EDITOR_TITLE_PRODUCT_PRICE = LangString.of("Editor.Title.Product.Price",
+        BLACK.enclose("Product Price Options"));
+
+    public static final LangString EDITOR_TITLE_SHOP_ROTATIONS = LangString.of("Editor.Title.Shop.Rotations",
+        BLACK.enclose("Shop Rotations"));
+
+    public static final LangString EDITOR_TITLE_ROTATION_OPTIONS = LangString.of("Editor.Title.Shop.Rotation.Options",
+        BLACK.enclose("Rotation Options"));
+
+    public static final LangString EDITOR_TITLE_ROTATION_TIMES = LangString.of("Editor.Title.Shop.Rotation.Times",
+        BLACK.enclose("Rotation Times"));
+
+    public static final LangString EDITOR_TITLE_ROTATION_ITEMS = LangString.of("Editor.Title.Shop.Rotation.Items",
+        BLACK.enclose("Rotation Items"));
+
+    public static final LangString EDITOR_TITLE_ROTATION_ITEM_SELECTION = LangString.of("Editor.Title.Shop.Rotation.ItemSelection",
+        BLACK.enclose("Select Product..."));
+
+    public static final LangString EDITOR_TITLE_ROTATION_SLOT_SELECTION = LangString.of("Editor.Title.Shop.Rotation.SlotSelection",
+        BLACK.enclose("Select Slot(s)..."));
 
 
     public static final LangString EDITOR_PRODUCT_NO_RANK_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoRankRequirements",
@@ -139,8 +177,6 @@ public class VirtualLang extends Lang {
     public static final LangString EDITOR_PRODUCT_NO_PERM_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoPermissionRequirements",
         "No permissions required!");
 
-    public static final LangString EDITOR_SHOP_CREATE_ERROR_EXIST = LangString.of("VirtualShop.Editor.Create.Error.Exist",
-        LIGHT_RED.enclose("Shop already exists!"));
 
     public static final LangString EDITOR_ENTER_SHOP_ID = LangString.of("VirtualShop.Editor.Enter.Id",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Shop Identifier]")));
@@ -165,4 +201,10 @@ public class VirtualLang extends Lang {
 
     public static final LangString EDITOR_ENTER_PERMISSION = LangString.of("VirtualShop.Editor.Enter.Permission",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Permission Node]")));
+
+    public static final LangString EDITOR_ENTER_ROTATION_ID = LangString.of("VirtualShop.Editor.Enter.RotationId",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Rotation Name]")));
+
+    public static final LangString EDITOR_ENTER_WEIGHT = LangString.of("VirtualShop.Editor.Enter.Weight",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Weight]")));
 }

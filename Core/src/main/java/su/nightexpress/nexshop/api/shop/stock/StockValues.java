@@ -3,94 +3,108 @@ package su.nightexpress.nexshop.api.shop.stock;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nightcore.config.FileConfig;
-
-import java.util.HashMap;
-import java.util.Map;
+import su.nightexpress.nightcore.util.TimeUtil;
 
 public class StockValues {
 
-    private final Map<TradeType, Integer> initialAmountMap;
-    private final Map<TradeType, Long>    restockTimeMap;
+    public static final int UNLIMITED = -1;
 
-    public StockValues() {
-        this(new HashMap<>(), new HashMap<>());
+    private int buyAmount;
+    private int sellAmount;
+    private long restockTime;
 
-        for (TradeType tradeType : TradeType.values()) {
-            this.getInitialAmountMap().put(tradeType, -1);
-            this.getRestockTimeMap().put(tradeType, 0L);
-        }
+    public StockValues(int buyAmount, int sellAmount, long restockTime) {
+        this.setBuyAmount(buyAmount);
+        this.setSellAmount(sellAmount);
+        this.setRestockTime(restockTime);
     }
 
-    public StockValues(@NotNull Map<TradeType, Integer> initialAmountMap, @NotNull Map<TradeType, Long> restockTimeMap) {
-        this.initialAmountMap = initialAmountMap;
-        this.restockTimeMap = restockTimeMap;
+    @NotNull
+    public static StockValues unlimited()  {
+        return new StockValues(UNLIMITED, UNLIMITED, 0L);
     }
 
     @NotNull
     public static StockValues read(@NotNull FileConfig config, @NotNull String path) {
-        Map<TradeType, Integer> initialAmountMap = new HashMap<>();
-        Map<TradeType, Long> restockTimeMap = new HashMap<>();
+        if (!config.contains(path + ".RestockTime")) {
+            for (TradeType tradeType : TradeType.values()) {
+                String path2 = path + "." + tradeType.name();
+                int initialAmount = config.getInt(path2 + ".Initial_Amount", -1);
+                long restockTime = config.getLong(path2 + ".Restock_Time", 0);
 
-        for (TradeType tradeType : TradeType.values()) {
-            String path2 = path + "." + tradeType.name();
-            int initialAmount = config.getInt(path2 + ".Initial_Amount", -1);
-            long restockTime = config.getLong(path2 + ".Restock_Time", 0);
-
-            initialAmountMap.put(tradeType, initialAmount);
-            restockTimeMap.put(tradeType, restockTime);
+                String name = tradeType == TradeType.BUY ? "BuyAmount" : "SellAmount";
+                config.set(path + "." + name, initialAmount);
+                if (restockTime != 0L) {
+                    config.set(path + ".RestockTime", restockTime);
+                }
+                config.remove(path + "." + tradeType.name());
+            }
         }
-        return new StockValues(initialAmountMap, restockTimeMap);
+
+        int buyAmount = config.getInt(path + ".BuyAmount", -1);
+        int sellAmount = config.getInt(path + ".SellAmount", -1);
+        long restockTime = config.getLong(path + ".RestockTime", 0L);
+
+
+        return new StockValues(buyAmount, sellAmount, restockTime);
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        for (TradeType tradeType : TradeType.values()) {
-            config.set(path + "." + tradeType.name() + ".Initial_Amount", this.getInitialAmount(tradeType));
-            config.set(path + "." + tradeType.name() + ".Restock_Time", this.getRestockSeconds(tradeType));
-        }
+        config.set(path + ".BuyAmount", this.buyAmount);
+        config.set(path + ".SellAmount", this.sellAmount);
+        config.set(path + ".RestockTime", this.restockTime);
     }
 
     public boolean isUnlimited(@NotNull TradeType type) {
-        return this.getInitialAmount(type) < 0 || this.getRestockSeconds(type) == 0L;
+        return this.getInitialAmount(type) < 0 || this.getRestockTime() == 0L;
     }
 
-    public boolean isRestockable(@NotNull TradeType type) {
-        return this.getRestockSeconds(type) >= 0L;
+    public boolean isRestockable() {
+        return this.restockTime >= 0L;
     }
 
-    /**
-     * @return Amount of milliseconds.
-     */
-    public long getRestockTime(@NotNull TradeType tradeType) {
-        return this.getRestockSeconds(tradeType) * 1000L + 100L; // 100L for better visuals
+    public long getRestockTimeMillis() {
+        return this.restockTime <= 0L ? this.restockTime : this.restockTime * 1000L + 100L; // 100L for better visuals
     }
 
-    public long generateRestockTimestamp(@NotNull TradeType tradeType) {
-        return System.currentTimeMillis() + this.getRestockTime(tradeType);
+    public long generateRestockTimestamp() {
+        return TimeUtil.createFutureTimestamp(this.restockTime);
     }
 
-    @NotNull
-    public Map<TradeType, Integer> getInitialAmountMap() {
-        return initialAmountMap;
+    public int getBuyAmount() {
+        return this.buyAmount;
     }
 
-    @NotNull
-    public Map<TradeType, Long> getRestockTimeMap() {
-        return restockTimeMap;
+    public void setBuyAmount(int buyAmount) {
+        this.buyAmount = buyAmount;
+    }
+
+    public int getSellAmount() {
+        return this.sellAmount;
+    }
+
+    public void setSellAmount(int sellAmount) {
+        this.sellAmount = sellAmount;
+    }
+
+    public long getRestockTime() {
+        return this.restockTime;
+    }
+
+    public void setRestockTime(long restockTime) {
+        this.restockTime = restockTime;
     }
 
     public int getInitialAmount(@NotNull TradeType type) {
-        return this.getInitialAmountMap().getOrDefault(type, -1);
+        return type == TradeType.BUY ? this.buyAmount : this.sellAmount;
     }
 
-    public void setInitialAmount(@NotNull TradeType type, int amount) {
-        this.getInitialAmountMap().put(type, amount);
-    }
-
-    public long getRestockSeconds(@NotNull TradeType type) {
-        return this.getRestockTimeMap().getOrDefault(type, 0L);
-    }
-
-    public void setRestockSeconds(@NotNull TradeType type, long time) {
-        this.getRestockTimeMap().put(type, time);
+    public void setAmount(@NotNull TradeType type, int amount) {
+        if (type == TradeType.BUY) {
+            this.setBuyAmount(amount);
+        }
+        else {
+            this.setSellAmount(amount);
+        }
     }
 }

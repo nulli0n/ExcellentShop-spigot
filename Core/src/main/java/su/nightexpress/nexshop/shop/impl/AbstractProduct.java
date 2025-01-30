@@ -8,12 +8,15 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.data.product.PriceData;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FlatPricer;
-import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.product.price.impl.FloatPricer;
 
 import java.util.function.UnaryOperator;
 
@@ -67,12 +70,51 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     @Override
     public boolean isValid() {
         return this.type.isValid();
-//        if (this.packer.isDummy()) return false;
-//
-//        if (this.packer instanceof PluginItemPacker itemPacker && this.handler instanceof PluginItemHandler itemHandler) {
-//            return itemHandler.isValidId(itemPacker.getItemId());
-//        }
-//        return true;
+    }
+
+    @Override
+    public void updatePrice() {
+        this.updatePrice(false);
+    }
+
+    @Override
+    public void updatePrice(boolean force) {
+        if (this.pricer.getType() == PriceType.FLAT) return;
+        if (this.pricer.getType() == PriceType.PLAYER_AMOUNT) return;
+
+        PriceData priceData = this.plugin.getDataManager().getPriceDataOrCreate(this);
+
+        if (priceData.isExpired() || force) {
+            //plugin.debug("Flush prices for " + this.getId() + " product of " + shop.getId() + " shop.");
+            double buyPrice = priceData.getLatestBuyPrice();
+            double sellPrice = priceData.getLatestSellPrice();
+            long expireDate = priceData.getExpireDate();
+
+            if (this.pricer instanceof FloatPricer floatPricer) {
+                buyPrice = floatPricer.rollPrice(TradeType.BUY);
+                sellPrice = floatPricer.rollPrice(TradeType.SELL);
+                expireDate = floatPricer.getClosestTimestamp();
+            }
+            else if (this.pricer instanceof DynamicPricer dynamicPricer) {
+                double difference = priceData.getPurchases() - priceData.getSales();
+                buyPrice = dynamicPricer.getAdjustedPrice(TradeType.BUY, difference);
+                sellPrice = dynamicPricer.getAdjustedPrice(TradeType.SELL, difference);
+                expireDate = -1L;
+            }
+
+            if (sellPrice > buyPrice && buyPrice >= 0) {
+                sellPrice = buyPrice;
+            }
+
+            priceData.setLatestBuyPrice(buyPrice);
+            priceData.setLatestSellPrice(sellPrice);
+            priceData.setLatestUpdateDate(System.currentTimeMillis());
+            priceData.setExpireDate(expireDate);
+            priceData.setSaveRequired(true);
+        }
+
+        this.setPrice(TradeType.BUY, priceData.getLatestBuyPrice());
+        this.setPrice(TradeType.SELL, priceData.getLatestSellPrice());
     }
 
     @Override
@@ -105,20 +147,12 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     public double getPrice(@NotNull TradeType tradeType, @Nullable Player player) {
         double price = this.pricer.getPrice(tradeType);
 
-        if (this instanceof VirtualProduct virtualProduct) {
-            if (tradeType == TradeType.BUY && price > 0 && virtualProduct.isDiscountAllowed()) {
-                price *= virtualProduct.getShop().getDiscountModifier();
-            }
-            if (tradeType == TradeType.SELL) {
-                if (player != null) {
-                    double sellModifier = VirtualShopModule.getSellMultiplier(player);
-                    price *= sellModifier;
-                }
-            }
-        }
+        price = this.applyPriceModifiers(tradeType, price, player);
 
         return this.currency.fineValue(price);
     }
+
+    protected abstract double applyPriceModifiers(@NotNull TradeType type, double currentPrice, @Nullable Player player);
 
     @Override
     public void setPrice(@NotNull TradeType tradeType, double price) {
@@ -133,18 +167,21 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean isBuyable() {
-        return this.pricer.getBuyPrice() >= 0D;
+        return this.shop.isBuyingAllowed() && this.pricer.getBuyPrice() >= 0D;
     }
 
     @Override
     public boolean isSellable() {
+        if (!(this.type instanceof PhysicalTyping)) return false;
+        if (!this.shop.isSellingAllowed()) return false;
+
         double sellPrice = this.pricer.getSellPrice();
         if (sellPrice < 0D) {
             return false;
         }
 
         // Don't allow to sell items with sell price greater than buy one.
-        if (this.shop.isTransactionEnabled(TradeType.BUY) && this.isBuyable()) {
+        if (this.isBuyable()) {
             return sellPrice <= this.pricer.getBuyPrice();
         }
 

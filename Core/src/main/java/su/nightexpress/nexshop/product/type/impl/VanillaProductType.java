@@ -5,13 +5,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.shop.Module;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.ItemNbt;
 import su.nightexpress.nightcore.util.PDCUtil;
 
 import java.util.function.UnaryOperator;
@@ -27,7 +27,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
     }
 
     @NotNull
-    public static VanillaProductType read(@NotNull ShopModule module, @NotNull FileConfig config, @NotNull String path) {
+    public static VanillaProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
         // ------- REVERT 4.13.3 CHANGES - START ------- //
         String serialized = config.getString(path + ".Data");
         if (serialized != null) {
@@ -45,7 +45,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
         String tagString = config.getString(path + ".Content.Item", "null");
         boolean respectMeta = config.getBoolean(path + ".Item_Meta_Enabled");
 
-        ItemStack itemStack = tagString.contains("{") ? ItemNbt.fromTagString(tagString) : ItemNbt.decompress(tagString);
+        ItemStack itemStack = ShopUtils.readItemTag(tagString);
         if (itemStack == null || itemStack.getType().isAir()) {
             itemStack = getBrokenItem();
             module.error("Invalid item tag string '" + tagString + "'! Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
@@ -56,7 +56,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
 
     @Nullable
     public static VanillaProductType deserialize(@NotNull String serialized) {
-        ItemStack itemStack = serialized.contains("{") ? ItemNbt.fromTagString(serialized) : ItemNbt.decompress(serialized);
+        ItemStack itemStack = ShopUtils.readItemTag(serialized);
         if (itemStack == null) return null;
 
         return new VanillaProductType(itemStack, true);
@@ -64,7 +64,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
 
     @Override
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Content.Item", ItemNbt.getTagString(this.item));
+        config.set(path + ".Content.Item", ShopUtils.getItemTag(this.item));
         config.set(path + ".Item_Meta_Enabled", this.respectMeta);
         config.remove(path + ".Data"); // ------- REVERT 4.13.3 CHANGES ------- //
     }
@@ -72,7 +72,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
     @Override
     @NotNull
     public String serialize() {
-        return String.valueOf(ItemNbt.getTagString(this.item));
+        return String.valueOf(ShopUtils.getItemTag(this.item));
     }
 
     @Override

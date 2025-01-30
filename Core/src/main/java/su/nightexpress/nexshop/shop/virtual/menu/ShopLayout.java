@@ -1,138 +1,93 @@
 package su.nightexpress.nexshop.shop.virtual.menu;
 
-import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
-import su.nightexpress.nexshop.api.shop.product.VirtualProduct;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.virtual.data.RotationData;
+import su.nightexpress.nexshop.data.shop.RotationData;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.menu.MenuOptions;
-import su.nightexpress.nightcore.menu.MenuSize;
-import su.nightexpress.nightcore.menu.MenuViewer;
-import su.nightexpress.nightcore.menu.impl.ConfigMenu;
-import su.nightexpress.nightcore.menu.item.ItemHandler;
-import su.nightexpress.nightcore.menu.item.ItemOptions;
-import su.nightexpress.nightcore.menu.item.MenuItem;
-import su.nightexpress.nightcore.menu.link.Linked;
-import su.nightexpress.nightcore.menu.link.ViewLink;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.data.ConfigBased;
+import su.nightexpress.nightcore.ui.menu.data.MenuLoader;
+import su.nightexpress.nightcore.ui.menu.item.ItemHandler;
+import su.nightexpress.nightcore.ui.menu.item.MenuItem;
+import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
+import su.nightexpress.nightcore.util.placeholder.Replacer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.IntStream;
 
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<VirtualShop> {
+@SuppressWarnings("UnstableApiUsage")
+public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements ConfigBased {
+
+    private static final String TITLE_COLOR = "#3E3E3E";
 
     private final VirtualShopModule module;
-    private final ViewLink<VirtualShop> link;
-
-    private final ItemHandler returnHandler;
-    private final ItemHandler sellAllHandler;
+    private final Currency currency;
 
     public ShopLayout(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull FileConfig config) {
-        super(plugin, config);
+        super(plugin, MenuType.GENERIC_9X6, HEX_COLOR.enclose("Shop → " + SHOP_NAME + " (" + WHITE.enclose(GENERIC_PAGE) + "/" + WHITE.enclose(GENERIC_PAGES) + ")", TITLE_COLOR));
         this.module = module;
-        this.applyPAPI = Config.usePlaceholdersForGUI();
-        this.link = new ViewLink<>();
+        this.currency = module.getDefaultCurrency();
+        this.setApplyPlaceholderAPI(true);
 
-        config.options().setHeader(Lists.newList(
-            "=".repeat(50),
-            "Available Placeholders:",
-            "- " + GENERIC_BALANCE + " -> Player's balance for default Virtual Shop currency.",
-            "- " + Placeholders.GENERIC_SELL_MULTIPLIER + " -> Player's sell multiplier (set in VirtualShop settings.yml).",
-            "- " + URL_WIKI_PLACEHOLDERS + " -> Placeholders of: Shop, Virtual Shop, Static/Rotating Shop.",
-            "- " + Plugins.PLACEHOLDER_API + " -> Any of them. Enable PlaceholderAPI for GUIs in the plugin config.",
-            "=".repeat(50)
-        ));
+        this.load(config);
+    }
 
-//        this.addHandler(ItemHandler.forNextPage(this));
-//        this.addHandler(ItemHandler.forPreviousPage(this));
+    @Override
+    protected void onItemPrepare(@NotNull MenuViewer viewer, @NotNull MenuItem menuItem, @NotNull NightItem item) {
+        super.onItemPrepare(viewer, menuItem, item);
 
-        this.addHandler(new ItemHandler(ItemHandler.NEXT_PAGE, (viewer, event) -> {
-            viewer.setPage(viewer.getPage() + 1);
-            this.runNextTick(() -> module.openShop(viewer.getPlayer(), this.getLink(viewer), viewer.getPage()));
-        }, viewer -> viewer.getPage() < viewer.getPages()));
+        // Do not apply on product items.
+        if (viewer.hasItem(menuItem)) return;
 
-        this.addHandler(new ItemHandler(ItemHandler.PREVIOUS_PAGE, (viewer, event) -> {
-            viewer.setPage(viewer.getPage() - 1);
-            this.runNextTick(() -> module.openShop(viewer.getPlayer(), this.getLink(viewer), viewer.getPage()));
-        }, viewer -> viewer.getPage() > 1));
-
-        this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
-            this.runNextTick(() -> this.module.openMainMenu(viewer.getPlayer()));
-        }));
-
-        this.addHandler(this.sellAllHandler = new ItemHandler("sell_all", (viewer, event) -> {
-            Player player = viewer.getPlayer();
-            this.module.sellAll(player, player.getInventory(), this.getLink(player));
-        }));
-
-        this.load();
-
-        Currency currency = module.getDefaultCurrency();
-
-        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
-            ItemReplacer.create(itemStack).readMeta().trimmed()
+        item.replacement(replacer -> {
+            replacer
                 .replace(this.getLink(viewer).replacePlaceholders())
                 .replace(GENERIC_BALANCE, () -> currency.format(currency.getBalance(viewer.getPlayer())))
-                .replace(Placeholders.GENERIC_SELL_MULTIPLIER, () -> NumberUtil.format(VirtualShopModule.getSellMultiplier(viewer.getPlayer())))
-                .replacePlaceholderAPI(viewer.getPlayer())
-                .writeMeta();
-        }));
+                .replace(Placeholders.GENERIC_SELL_MULTIPLIER, () -> NumberUtil.format(VirtualShopModule.getSellMultiplier(viewer.getPlayer())));
+        });
     }
 
+    @Override
     @NotNull
-    @Override
-    public ViewLink<VirtualShop> getLink() {
-        return link;
+    protected String getTitle(@NotNull MenuViewer viewer) {
+        return Replacer.create()
+            .replace(this.getLink(viewer).replacePlaceholders())
+            .replacePlaceholderAPI(viewer.getPlayer())
+            .replace(GENERIC_PAGE, String.valueOf(viewer.getPage()))
+            .replace(GENERIC_PAGES, String.valueOf(viewer.getPages()))
+            .apply(this.title);
     }
 
     @Override
-    protected void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        Player player = viewer.getPlayer();
-        VirtualShop shop = this.getLink(player);
-        String title = options.getTitle();
+    protected void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
+        VirtualShop shop = this.getLink(viewer);
+        int page = viewer.getPage();
 
-        title = shop.replacePlaceholders().apply(title);
-
-        if (Plugins.hasPlaceholderAPI()) {
-            title = PlaceholderAPI.setPlaceholders(player, title);
-        }
-
-        if (shop instanceof StaticShop staticShop) {
-            this.displayStatic(staticShop, viewer);
-        }
-        else if (shop instanceof RotatingShop rotatingShop) {
-            this.displayRotating(rotatingShop, viewer);
-        }
-
-        title = title
-            .replace(GENERIC_PAGE, String.valueOf(viewer.getPage()))
-            .replace(GENERIC_PAGES, String.valueOf(viewer.getPages()));
-
-        options.setTitle(title);
+        this.displayStatic(shop, viewer, page);
+        this.displayRotating(shop, viewer, page);
     }
 
     @Override
@@ -140,62 +95,62 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
 
     }
 
-    private void displayStatic(@NotNull StaticShop shop, @NotNull MenuViewer viewer) {
-        viewer.setPages(shop.getPages());
+    private void displayStatic(@NotNull VirtualShop shop, @NotNull MenuViewer viewer, int page) {
+        shop.getValidProducts().forEach(product -> {
+            if (product.isRotating()) return;
+            if (product.getPage() != page) return;
 
-        int page = Math.min(viewer.getPage(), viewer.getPages());
-        Player player = viewer.getPlayer();
-
-        for (StaticProduct product : shop.getValidProducts()) {
-            if (product.getPage() != page) continue;
-
-            this.addProductItem(shop, player, product, product.getSlot());
-        }
+            this.addProductItem(shop, viewer, product, product.getSlot());
+        });
     }
 
-    private void displayRotating(@NotNull RotatingShop shop, @NotNull MenuViewer viewer) {
-        RotationData data = shop.getData();
-        Player player = viewer.getPlayer();
-        Set<String> products = data.getProducts();
-        int[] slots = shop.getProductSlots();
+    private void displayRotating(@NotNull VirtualShop shop, @NotNull MenuViewer viewer, int page) {
+        shop.getRotations().forEach(rotation -> {
+            RotationData data = plugin.getDataManager().getRotationData(rotation);
+            if (data == null) return;
 
-        int limit = slots.length;
-        int pages = (int) Math.ceil((double) products.size() / (double) limit);
+            List<Integer> slots = new ArrayList<>(rotation.getSlots(page));
+            int limit = slots.size();
+            //int skip = (page - 1) * limit;
 
-        viewer.setPages(pages);
-        int page = Math.min(viewer.getPage(), viewer.getPages());
+            //Map<Integer, List<String>> productsByPage = data.getProducts();
 
-        int skip = (page - 1) * limit;
-        List<String> list = products.stream().skip(skip).limit(limit).toList();
+            List<String> productIds = data.getProducts().getOrDefault(page, Collections.emptyList());//.stream()/*.skip(skip)*/.limit(limit).toList();
+            if (productIds.isEmpty()) return;
 
-        int count = 0;
-        for (String prodId : list) {
-            RotatingProduct product = shop.getProductById(prodId);
-            if (product == null) continue;
-            if (!product.isValid()) continue;
+            int count = 0;
+            for (String productId : productIds) {
+                if (count >= limit) break;
 
-            int slot = slots[count++];
-            this.addProductItem(shop, player, product, slot);
-        }
+                VirtualProduct product = shop.getProductById(productId);
+                if (product == null) continue;
+                if (!product.isRotating()) continue;
+                if (!product.isValid()) continue;
+
+                int slot = slots.get(count++);
+                this.addProductItem(shop, viewer, product, slot);
+            }
+        });
     }
 
-    private <T extends VirtualShop> void addProductItem(@NotNull T shop, @NotNull Player player, @NotNull VirtualProduct product, int slot) {
+    private void addProductItem(@NotNull VirtualShop shop, @NotNull MenuViewer viewer, @NotNull VirtualProduct product, int slot) {
+        Player player = viewer.getPlayer();
         ItemStack preview = product.getPreview();
 
-        List<String> loreFormat = VirtualConfig.PRODUCT_FORMAT_LORE_GENERAL.get();
-        List<String> buyLore = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable() ? VirtualConfig.PRODUCT_FORMAT_LORE_BUY.get() : Collections.emptyList();
-        List<String> sellLore = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable() ? VirtualConfig.PRODUCT_FORMAT_LORE_SELL.get() : Collections.emptyList();
+        List<String> buyLore = product.isBuyable() ? VirtualConfig.PRODUCT_FORMAT_LORE_BUY.get() : Collections.emptyList();
+        List<String> sellLore = product.isSellable() ? VirtualConfig.PRODUCT_FORMAT_LORE_SELL.get() : Collections.emptyList();
         List<String> discountLore = shop.hasDiscount(product) ? VirtualConfig.PRODUCT_FORMAT_LORE_DISCOUNT.get() : Collections.emptyList();
         List<String> noPermLore = !product.hasAccess(player) ? VirtualConfig.PRODUCT_FORMAT_LORE_NO_PERMISSION.get() : Collections.emptyList();
 
-        ItemReplacer replacer = ItemReplacer.create(preview).trimmed().readMeta()
-            .setLore(loreFormat)
+        List<String> loreFormat = Replacer.create()
             .replace(GENERIC_BUY, buyLore)
             .replace(GENERIC_SELL, sellLore)
             .replace(GENERIC_LORE, ItemUtil.getLore(preview))
             .replace(GENERIC_DISCOUNT, discountLore)
             .replace(GENERIC_PERMISSION, noPermLore)
-            ;
+            .apply(VirtualConfig.PRODUCT_FORMAT_LORE_GENERAL.get());
+
+        Replacer loreReplacer = Replacer.create();
 
         for (TradeType tradeType : TradeType.values()) {
             String stockPlaceholder = Placeholders.STOCK_TYPE.apply(tradeType);
@@ -206,105 +161,98 @@ public class ShopLayout extends ConfigMenu<ShopPlugin> implements Linked<Virtual
             List<String> limitLore = new ArrayList<>();
             List<String> priceDynamicLore = new ArrayList<>();
             if (!product.getStockValues().isUnlimited(tradeType)) {
-                stockLore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_STOCK.get().getOrDefault(tradeType, Collections.emptyList()));
+                stockLore.addAll((tradeType == TradeType.BUY ? VirtualConfig.PRODUCT_FORMAT_LORE_STOCK_BUY : VirtualConfig.PRODUCT_FORMAT_LORE_STOCK_SELL).get());
             }
             if (!product.getLimitValues().isUnlimited(tradeType)) {
-                limitLore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT.get().getOrDefault(tradeType, Collections.emptyList()));
+                limitLore.addAll((tradeType == TradeType.BUY ? VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT_BUY : VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT_SELL).get());
             }
             if (product.getPricer() instanceof RangedPricer) {
                 priceDynamicLore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_PRICE_DYNAMIC.get().getOrDefault(tradeType, Collections.emptyList()));
             }
 
-            replacer
+            loreReplacer
                 .replace(priceDynamicPlaceholder, priceDynamicLore)
                 .replace(stockPlaceholder, stockLore)
-                .replace(limitPlaceholder, limitLore);
+                .replace(limitPlaceholder, limitLore)
+                .apply(loreFormat);
         }
 
-        if (Config.GUI_PLACEHOLDER_API.get()) {
-            replacer.replacePlaceholderAPI(player);
-        }
+        loreFormat = loreReplacer.apply(loreFormat);
 
-        replacer
-            .replace(product.replacePlaceholders(player))
-            .replace(product.getCurrency().replacePlaceholders())
-            .replace(shop.replacePlaceholders());
-
-        replacer.writeMeta();
-
-        MenuItem menuItem = new MenuItem(preview)
+        this.addItem(viewer, NightItem.fromItemStack(preview)
+            .setLore(loreFormat)
+            .replacement(replacer -> {
+                replacer
+                    .replace(product.replacePlaceholders(player))
+                    .replace(product.getCurrency().replacePlaceholders())
+                    .replace(shop.replacePlaceholders());
+            })
+            .toMenuItem()
             .setSlots(slot)
             .setPriority(Integer.MAX_VALUE)
-            .setOptions(ItemOptions.personalWeak(player))
-            .setHandler((viewer, event) -> {
+            .setHandler((viewer1, event) -> {
                 plugin.getShopManager().onProductClick(player, product, event.getClick(), this);
-            });
-
-        this.addItem(menuItem);
+            })
+        );
     }
 
     @Override
-    @NotNull
-    protected MenuOptions createDefaultOptions() {
-        return new MenuOptions(BLACK.enclose(SHOP_NAME), MenuSize.CHEST_54);
-    }
+    public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
+        // TODO Put in wiki
+        config.options().setHeader(Lists.newList(
+            "=".repeat(50),
+            "Available Placeholders:",
+            "- " + GENERIC_BALANCE + " -> Player's balance for default Virtual Shop currency.",
+            "- " + GENERIC_SELL_MULTIPLIER + " -> Player's sell multiplier (set in VirtualShop settings.yml).",
+            "- " + URL_WIKI_PLACEHOLDERS + " -> Placeholders of: Shop, Virtual Shop.",
+            "=".repeat(50)
+        ));
 
-    @Override
-    @NotNull
-    protected List<MenuItem> createDefaultItems() {
-        List<MenuItem> list = new ArrayList<>();
+        loader.addDefaultItem(NightItem.fromType(Material.GRAY_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setPriority(-1).setSlots(IntStream.range(0, 54).toArray()));
+        //loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).toMenuItem().setSlots(IntStream.range(45, 54).toArray()));
 
-        ItemStack border = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        list.add(new MenuItem(border).setSlots(IntStream.range(45, 54).toArray()).setPriority(0));
+        loader.addDefaultItem(MenuItem.buildReturn(this, 49, (viewer, event) -> {
+            this.runNextTick(() -> this.module.openMainMenu(viewer.getPlayer()));
+        }).setPriority(10));
 
-        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
-        ItemUtil.editMeta(backItem, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
-        });
-        list.add(new MenuItem(backItem).setSlots(49).setPriority(10).setHandler(this.returnHandler));
+        loader.addDefaultItem(MenuItem.buildNextPage(this, 50).setPriority(10));
+        loader.addDefaultItem(MenuItem.buildPreviousPage(this, 48).setPriority(10));
 
-        ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
-        ItemUtil.editMeta(prevPage, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
-        });
-        list.add(new MenuItem(prevPage).setSlots(48).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
-
-        ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
-        ItemUtil.editMeta(nextPage, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
-        });
-        list.add(new MenuItem(nextPage).setSlots(50).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
-
-
-        ItemStack balanceItem = ItemUtil.getSkinHead("5f96717bef61c37ce4dcd0b067da4b57c8a1b0f83c2926868b083444f7eade54");
-        ItemUtil.editMeta(balanceItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Wallet")));
-            meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Balance: ") + GENERIC_BALANCE)
-            ));
-        });
-        list.add(new MenuItem(balanceItem).setSlots(46).setPriority(10));
-
-
-        ItemStack sellItem = ItemUtil.getSkinHead("9fd108383dfa5b02e86635609541520e4e158952d68c1c8f8f200ec7e88642d");
-        ItemUtil.editMeta(sellItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Sell All")));
-            meta.setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Sell everything from your"),
-                LIGHT_GRAY.enclose("inventory to this shop."),
+        loader.addDefaultItem(NightItem.asCustomHead("9fd108383dfa5b02e86635609541520e4e158952d68c1c8f8f200ec7e88642d")
+            .setDisplayName(HEX_COLOR.enclose(BOLD.enclose("SELL ALL"), "#ebd12a"))
+            .setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Sells everything from your"),
+                LIGHT_GRAY.enclose("inventory to all available shops."),
                 "",
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell Multiplier: ") + "x" + Placeholders.GENERIC_SELL_MULTIPLIER),
+                LIGHT_GRAY.enclose(HEX_COLOR.enclose("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.enclose("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
                 "",
-                LIGHT_YELLOW.enclose("[▶]") + LIGHT_GRAY.enclose(" Click to " + LIGHT_YELLOW.enclose("sell all") + ".")
-            ));
-        });
-        list.add(new MenuItem(sellItem).setSlots(52).setPriority(10).setHandler(this.sellAllHandler));
+                //LIGHT_GRAY.enclose(HEX_COLOR.enclose("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.enclose("sell all", "#ebd12a") + ".")
+                HEX_COLOR.enclose("→ " + BOLD.enclose(UNDERLINED.enclose("CLICK")) + " to sell", "#ebd12a")
+            ))
+            .toMenuItem()
+            .setSlots(52)
+            .setPriority(10)
+            .setHandler(new ItemHandler("sell_all", (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                this.module.sellAll(player, player.getInventory(), this.getLink(player));
+            })));
 
-        return list;
-    }
+        loader.addDefaultItem(NightItem.asCustomHead("3324a7d61ccd44b031744b517f911a5c461614b953b17f648282e147b29d10e")
+            .setDisplayName(HEX_COLOR.enclose(BOLD.enclose("BALANCE"), "#7cf1de"))
+            .setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Here's displayed how much"),
+                LIGHT_GRAY.enclose("money you have."),
+                "",
+                HEX_COLOR.enclose("➥", "#7cf1de") + " " + WHITE.enclose(GENERIC_BALANCE))
+            )
+            .toMenuItem().setSlots(46).setPriority(10)
+        );
 
-    @Override
-    protected void loadAdditional() {
-
+//        loader.addDefaultItem(NightItem.asCustomHead("5f96717bef61c37ce4dcd0b067da4b57c8a1b0f83c2926868b083444f7eade54")
+//            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Wallet")))
+//            .setLore(Lists.newList(
+//                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Balance: ") + GENERIC_BALANCE)
+//            ))
+//            .toMenuItem().setSlots(46).setPriority(10));
     }
 }

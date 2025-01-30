@@ -24,7 +24,7 @@ import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.product.type.ProductTypes;
-import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
+import su.nightexpress.nexshop.shop.impl.AbstractModule;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.config.DatabaseType;
@@ -35,7 +35,7 @@ import su.nightexpress.nightcore.util.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class AuctionManager extends AbstractShopModule {
+public class AuctionManager extends AbstractModule {
 
     public static final String ID = "auction";
 

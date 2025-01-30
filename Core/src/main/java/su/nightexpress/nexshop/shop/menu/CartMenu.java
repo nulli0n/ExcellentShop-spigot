@@ -3,180 +3,61 @@ package su.nightexpress.nexshop.shop.menu;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.dialog.Dialog;
-import su.nightexpress.nightcore.menu.MenuOptions;
-import su.nightexpress.nightcore.menu.MenuSize;
-import su.nightexpress.nightcore.menu.MenuViewer;
-import su.nightexpress.nightcore.menu.impl.ConfigMenu;
-import su.nightexpress.nightcore.menu.item.ItemHandler;
-import su.nightexpress.nightcore.menu.item.MenuItem;
-import su.nightexpress.nightcore.menu.link.Linked;
-import su.nightexpress.nightcore.menu.link.ViewLink;
-import su.nightexpress.nightcore.util.ItemReplacer;
-import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.ui.dialog.Dialog;
+import su.nightexpress.nightcore.ui.dialog.DialogManager;
+import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.data.ConfigBased;
+import su.nightexpress.nightcore.ui.menu.data.MenuLoader;
+import su.nightexpress.nightcore.ui.menu.item.ItemHandler;
+import su.nightexpress.nightcore.ui.menu.item.MenuItem;
+import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.Lists;
-import su.nightexpress.nightcore.util.text.tag.impl.ColorTag;
-import su.nightexpress.nightcore.util.wrapper.UniSound;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
+import su.nightexpress.nightcore.util.bukkit.NightSound;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedProduct> {
+@SuppressWarnings("UnstableApiUsage")
+public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>> implements ConfigBased {
 
-    //public static final String FILE_NAME = "product_cart.yml";
-
-    private final ViewLink<PreparedProduct> link;
-
-    private final ItemHandler confirmHandler;
-    private final ItemHandler declineHandler;
-    private final ItemHandler addHandler;
-    private final ItemHandler setHandler;
-    private final ItemHandler takeHandler;
-    private final ItemHandler customHandler;
-
-    private int[]    productSlots;
-    private UniSound productSound;
+    private int[]      productSlots;
+    private NightSound productSound;
 
     public CartMenu(@NotNull ShopPlugin plugin, @NotNull FileConfig config) {
-        super(plugin, config);
-        this.link = new ViewLink<>();
+        super(plugin, MenuType.GENERIC_9X6, BLACK.enclose("Product Cart"));
 
-        this.addHandler(this.confirmHandler = new ItemHandler("confirm", (viewer, event) -> {
-            Player player = viewer.getPlayer();
-            PreparedProduct preparedProduct = this.getLink(viewer);
-            Product product = preparedProduct.getProduct();
-
-            preparedProduct.trade();
-
-            if (Config.GENERAL_CLOSE_GUI_AFTER_TRADE.get()) {
-                this.runNextTick(player::closeInventory);
-            }
-            else {
-                int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
-                this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page, true));
-            }
-        }));
-
-        this.addHandler(this.declineHandler = new ItemHandler("decline", (viewer, event) -> {
-            Player player = viewer.getPlayer();
-            Product product = this.getLink(player).getProduct();
-            int page = product instanceof StaticProduct staticProduct ? staticProduct.getPage() : 1;
-
-            this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page, true));
-        }));
-
-        this.addHandler(this.addHandler = new ItemHandler("add", (viewer, event) -> {
-            this.onAmountClick(viewer, event, Integer::sum);
-        }));
-
-        this.addHandler(this.setHandler = new ItemHandler("set", (viewer, event) -> {
-            this.onAmountClick(viewer, event, (has, units) -> units);
-        }));
-
-        this.addHandler(this.takeHandler = new ItemHandler("take", (viewer, event) -> {
-            this.onAmountClick(viewer, event, (has, units) -> has - units);
-        }));
-
-        this.addHandler(this.customHandler = new ItemHandler("set_custom", (viewer, event) -> {
-            Player player = viewer.getPlayer();
-            PreparedProduct prepared = this.getLink(player);
-
-            Dialog.create(player, (dialog, input) -> {
-                prepared.setUnits(input.asInt());
-                this.open(player, prepared);
-                return true;
-            }).setLastMenu(null);
-
-            Lang.SHOP_CART_ENTER_AMOUNT.getMessage().send(player);
-
-            this.runNextTick(player::closeInventory);
-        }));
-
-        this.load();
-
-        this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            if (!item.hasItemMeta()) return;
-
-            PreparedProduct prepared = this.getLink(viewer);
-            Player player = viewer.getPlayer();
-            Currency currency = prepared.getProduct().getCurrency();
-
-            ItemReplacer replacer = ItemReplacer.create(item).readMeta()
-                .replace(currency.replacePlaceholders())
-                .replace(prepared.replacePlaceholders())
-                .replace(Placeholders.GENERIC_BALANCE, () -> currency.format(currency.getBalance(player)));
-
-            if (Config.GUI_PLACEHOLDER_API.get()) {
-                replacer.replacePlaceholderAPI(player);
-            }
-
-            replacer.writeMeta();
-        }));
+        this.load(config);
     }
 
-    @NotNull
-    @Override
-    public ViewLink<PreparedProduct> getLink() {
-        return link;
-    }
+    private void onAmountClick(@NotNull MenuViewer viewer, @NotNull Function<Integer, Integer> function) {
+        PreparedProduct product = this.getLink(viewer).source();
 
-    private void onAmountClick(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull BiFunction<Integer, Integer, Integer> function) {
-        MenuItem menuItem = this.getItem(viewer, event.getRawSlot());
-        if (!(menuItem instanceof CartMenuItem cartItem)) return;
-
-        PreparedProduct product = this.getLink(viewer);
-        int units = cartItem.getUnits();
-
-        product.setUnits(function.apply(product.getUnits(), units));
+        product.setUnits(function.apply(product.getUnits()));
         this.productSound.play(viewer.getPlayer());
 
         this.flush(viewer);
-    }
-
-    @Override
-    @NotNull
-    protected MenuItem readItem(@NotNull String path) {
-        MenuItem menuItem = super.readItem(path);
-
-        if (this.cfg.contains(path + ".Units")) {
-            CartMenuItem cartItem = new CartMenuItem(menuItem);
-            cartItem.setUnits(cfg.getInt(path + ".Units"));
-            return cartItem;
-        }
-
-        return menuItem;
-    }
-
-    @Override
-    protected void writeItem(@NotNull MenuItem menuItem, @NotNull String path) {
-        super.writeItem(menuItem, path);
-        if (menuItem instanceof CartMenuItem cartItem) {
-            cfg.set(path + ".Units", cartItem.getUnits());
-        }
     }
 
     private int getCartInventorySpace(@NotNull PreparedProduct prepared) {
@@ -234,8 +115,8 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
     }
 
     @Override
-    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        PreparedProduct prepared = this.getLink(viewer);
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
+        PreparedProduct prepared = this.getLink(viewer).source();
         Player player = viewer.getPlayer();
         this.validateAmount(player, prepared);
 
@@ -243,13 +124,32 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
         int stackSize = preview.getType().getMaxStackSize();
         int preparedAmount = prepared.getUnits() * prepared.getProduct().getUnitAmount();
         int count = 0;
+
         while (preparedAmount > 0 && count < this.productSlots.length) {
-            ItemStack preview2 = prepared.getProduct().getPreview();
-            preview2.setAmount(Math.min(preparedAmount, stackSize));
+            NightItem display = NightItem.fromItemStack(preview).setAmount(Math.min(preparedAmount, stackSize));
 
             preparedAmount -= stackSize;
-            this.addWeakItem(player, preview2, this.productSlots[count++]);
+
+            this.addItem(viewer, display.toMenuItem().setSlots(this.productSlots[count++]));
         }
+    }
+
+    @Override
+    protected void onItemPrepare(@NotNull MenuViewer viewer, @NotNull MenuItem menuItem, @NotNull NightItem item) {
+        super.onItemPrepare(viewer, menuItem, item);
+
+        // Do not apply on product items.
+        if (viewer.hasItem(menuItem)) return;
+
+        Player player = viewer.getPlayer();
+        PreparedProduct prepared = this.getLink(player).source();
+        Currency currency = prepared.getProduct().getCurrency();
+
+        item.replacement(replacer -> replacer
+            .replace(currency.replacePlaceholders())
+            .replace(prepared.replacePlaceholders())
+            .replace(Placeholders.GENERIC_BALANCE, () -> currency.format(currency.getBalance(player)))
+        );
     }
 
     @Override
@@ -258,101 +158,146 @@ public class CartMenu extends ConfigMenu<ShopPlugin> implements Linked<PreparedP
     }
 
     @Override
-    @NotNull
-    protected MenuOptions createDefaultOptions() {
-        return new MenuOptions(BLACK.enclose("Product Cart"), MenuSize.CHEST_54);
-    }
+    public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
+        int[] buttonAmounts = ConfigValue.create("Product.Amount_Buttons", new int[]{1,8,16,32,64},
+            "Registers 'add', 'set' and 'take' button types for specific amounts.",
+            "By default registers 'add_1', 'add_8', 'add_16', 'add_32', 'add_64' button types (the same for 'set' and 'take' ones)."
+        ).read(config);
 
-    @Override
-    @NotNull
-    protected List<MenuItem> createDefaultItems() {
-        List<MenuItem> list = new ArrayList<>();
+        this.productSlots = ConfigValue.create("Product.Slots", IntStream.range(0, 36).toArray()).read(config);
 
-        ItemStack acceptItem = ItemUtil.getSkinHead(SKIN_CHECK_MARK);
-        ItemUtil.editMeta(acceptItem, meta -> {
-            meta.setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("Accept")));
-            meta.setLore(Lists.newList(
+        this.productSound = ConfigValue.create("Product.Sound",
+            NightSound.of(Sound.ENTITY_ITEM_PICKUP),
+            "Sets sound to play when using amount buttons."
+        ).read(config);
+
+        loader.addDefaultItem(NightItem.asCustomHead(SKIN_CHECK_MARK)
+            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("Accept")))
+            .setLore(Lists.newList(
                 LIGHT_GREEN.enclose(BOLD.enclose("Details:")),
                 LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Quantity: ") + GENERIC_UNITS),
                 LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Total Amount: ") + GENERIC_AMOUNT),
                 LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Price: ") + GENERIC_PRICE),
                 LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Balance: ") + GENERIC_BALANCE)
-            ));
-        });
-        list.add(new MenuItem(acceptItem).setPriority(100).setHandler(this.confirmHandler).setSlots(53));
+            ))
+            .toMenuItem()
+            .setPriority(50)
+            .setSlots(53)
+            .setHandler(new ItemHandler("confirm", (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                var breadcumb = this.getLink(player);
+                int page = breadcumb.page();
+                PreparedProduct preparedProduct = breadcumb.source();
+                Product product = preparedProduct.getProduct();
 
-
-        ItemStack cancelItem = ItemUtil.getSkinHead(SKIN_WRONG_MARK);
-        ItemUtil.editMeta(cancelItem, meta -> {
-            meta.setDisplayName(LIGHT_RED.enclose(BOLD.enclose("Cancel")));
-        });
-        list.add(new MenuItem(cancelItem).setPriority(100).setHandler(this.declineHandler).setSlots(45));
-
-
-        ItemStack paneItem = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        ItemUtil.editMeta(paneItem, meta -> {
-
-        });
-        list.add(new MenuItem(paneItem).setPriority(1).setSlots(46,47,48,49,50,51,52));
-
-
-        for (ItemHandler handler : new ItemHandler[] {this.addHandler, this.takeHandler, this.setHandler}) {
-
-            int[] units = handler == this.setHandler ? new int[] {1, 10000, -1} : new int[] {1, 8, 16};
-            int[] slots = handler == this.addHandler ? new int[] {42, 43, 44} : handler == this.takeHandler ?  new int[] {36, 37, 38} : new int[] {39, 40, 41};
-            String[] textures = handler == this.addHandler ?
-                new String[]{
-                    "6d65ce83f1aa5b6e84f9b233595140d5b6beceb62b6d0c67d1a1d83625ffd",
-                    "f2ee1371d8f0f5a8b759c291863d704adc421ad519f17462b87704dbf1c78a4",
-                    "19f62a469a206add73887c7366376a6c4f3377b2f5b979351e96ac634572"
-                } : handler == this.takeHandler ?
-                new String[]{
-                    "8d2454e4c67b323d5be953b5b3d54174aa271460374ee28410c5aeae2c11f5",
-                    "1683440c6447c195aaf764e27a1259219e91c6d8ab6bd89a11ca8d2cc799fa8",
-                    "ae3e4bc71e3ac330836181eda96bc6f128e5c5313ab952c8ff6ded549e13a5"
-                } :
-                new String[] {
-                    "bd21b0bafb89721cac494ff2ef52a54a18339858e4dca99a413c42d9f88e0f6",
-                    "d5e1be33374fd7b2bae9c8fc9146b6ed3eedcb1476b3b7b8010f5f44bfa843e",
-                    "117f3666d3cedfae57778c78230d480c719fd5f65ffa2ad3255385e433b86e"
-                };
-
-            String namePrefix = handler == this.addHandler ? "+" : handler == this.takeHandler ? "-" : "Set ";
-            ColorTag tag = handler == this.addHandler ? LIGHT_GREEN : handler == this.takeHandler ? LIGHT_RED : LIGHT_BLUE;
-
-            for (int index = 0; index < 3; index++) {
-                int unitAmount = units[index];
-                String name;
-                if (unitAmount == 10000) {
-                    name = namePrefix + "Max";
+                if (product.isAvailable(player)) {
+                    preparedProduct.trade();
                 }
-                else if (unitAmount == -1) {
-                    name = namePrefix + "Custom";
-                    handler = this.customHandler;
+
+                if (Config.GENERAL_CLOSE_GUI_AFTER_TRADE.get()) {
+                    this.runNextTick(player::closeInventory);
                 }
-                else name = namePrefix + unitAmount;
+                else {
+                    this.runNextTick(() -> product.getShop().open(viewer.getPlayer(), page, true));
+                }
+            }))
+        );
 
-                ItemStack cartStack = ItemUtil.getSkinHead(textures[index]);
-                ItemUtil.editMeta(cartStack, meta -> meta.setDisplayName(tag.enclose(BOLD.enclose(name))));
+        loader.addDefaultItem(NightItem.asCustomHead(SKIN_WRONG_MARK)
+            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("Cancel")))
+            .toMenuItem()
+            .setPriority(50)
+            .setSlots(45)
+            .setHandler(new ItemHandler("decline", (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                var breadcumb = this.getLink(player);
+                Product product = breadcumb.source().getProduct();
+                int page = breadcumb.page();
 
-                CartMenuItem cartItem = new CartMenuItem(new MenuItem(cartStack).setPriority(100).setSlots(slots[index]));
-                cartItem.setHandler(handler);
-                cartItem.setUnits(unitAmount);
-                list.add(cartItem);
-            }
+                this.runNextTick(() -> product.getShop().open(player, page, true));
+            }))
+        );
+
+        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).toMenuItem().setSlots(46,47,48,49,50,51,52));
+
+        // Add Buttons
+
+        loader.addDefaultItem(NightItem.asCustomHead("6d65ce83f1aa5b6e84f9b233595140d5b6beceb62b6d0c67d1a1d83625ffd")
+            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("+1")))
+            .toMenuItem().setSlots(42).setHandler(new ItemHandler("add_1"))
+        );
+
+        loader.addDefaultItem(NightItem.asCustomHead("f2ee1371d8f0f5a8b759c291863d704adc421ad519f17462b87704dbf1c78a4")
+            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("+8")))
+            .toMenuItem().setSlots(43).setHandler(new ItemHandler("add_8"))
+        );
+
+        loader.addDefaultItem(NightItem.asCustomHead("19f62a469a206add73887c7366376a6c4f3377b2f5b979351e96ac634572")
+            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("+16")))
+            .toMenuItem().setSlots(44).setHandler(new ItemHandler("add_16"))
+        );
+
+        // Take Buttons
+
+        loader.addDefaultItem(NightItem.asCustomHead("8d2454e4c67b323d5be953b5b3d54174aa271460374ee28410c5aeae2c11f5")
+            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("-1")))
+            .toMenuItem().setSlots(36).setHandler(new ItemHandler("take_1"))
+        );
+
+        loader.addDefaultItem(NightItem.asCustomHead("1683440c6447c195aaf764e27a1259219e91c6d8ab6bd89a11ca8d2cc799fa8")
+            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("-8")))
+            .toMenuItem().setSlots(37).setHandler(new ItemHandler("take_8"))
+        );
+
+        loader.addDefaultItem(NightItem.asCustomHead("ae3e4bc71e3ac330836181eda96bc6f128e5c5313ab952c8ff6ded549e13a5")
+            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("-16")))
+            .toMenuItem().setSlots(38).setHandler(new ItemHandler("take_16"))
+        );
+
+        // Set Buttons
+
+        loader.addDefaultItem(NightItem.asCustomHead("bd21b0bafb89721cac494ff2ef52a54a18339858e4dca99a413c42d9f88e0f6")
+            .setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Set to 1")))
+            .toMenuItem().setSlots(39).setHandler(new ItemHandler("set_1"))
+        );
+
+        loader.addDefaultItem(NightItem.asCustomHead("d5e1be33374fd7b2bae9c8fc9146b6ed3eedcb1476b3b7b8010f5f44bfa843e")
+            .setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Set to Max.")))
+            .toMenuItem().setSlots(40).setHandler(new ItemHandler("set_max", (viewer, event) -> {
+                this.onAmountClick(viewer, current -> 10000);
+            }))
+        );
+
+        loader.addDefaultItem(NightItem.asCustomHead("117f3666d3cedfae57778c78230d480c719fd5f65ffa2ad3255385e433b86e")
+            .setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Custom Amount")))
+            .toMenuItem().setSlots(41).setHandler(new ItemHandler("set_custom", (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                var breadcumb = this.getLink(viewer);
+                this.cache.addAnchor(player);
+
+                DialogManager.startDialog(Dialog.builder(viewer, input -> {
+                    breadcumb.source().setUnits(input.asIntAbs(1));
+                    this.open(player, breadcumb);
+                    return true;
+                }).setPrompt(Lang.SHOP_CART_ENTER_AMOUNT).build().setLastMenu(null));
+
+                this.runNextTick(player::closeInventory);
+            }))
+        );
+
+        // This will override 'empty' handlers of 'addDefaultItem' items.
+        for (int amount : buttonAmounts) {
+            loader.addHandler("add_" + amount, (viewer, event) -> {
+                this.onAmountClick(viewer, current -> current + amount);
+            });
+
+            loader.addHandler("take_" + amount, (viewer, event) -> {
+                this.onAmountClick(viewer, current -> current - amount);
+            });
+
+            loader.addHandler("set_" + amount, (viewer, event) -> {
+                this.onAmountClick(viewer, current -> amount);
+            });
         }
-
-        return list;
-    }
-
-    @Override
-    protected void loadAdditional() {
-        this.productSlots = ConfigValue.create("Product.Slots", IntStream.range(0, 36).toArray()).read(cfg);
-
-        this.productSound = ConfigValue.create("Product.Sound",
-            UniSound.of(Sound.ENTITY_ITEM_PICKUP),
-            "Sets sound to play when using 'ADD', 'SET' or 'TAKE' buttons.",
-            "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html"
-        ).read(cfg);
     }
 }

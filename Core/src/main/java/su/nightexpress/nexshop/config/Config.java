@@ -3,13 +3,13 @@ package su.nightexpress.nexshop.config;
 import org.bukkit.event.inventory.ClickType;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.StringUtil;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class Config {
 
@@ -17,7 +17,8 @@ public class Config {
     public static final String DIR_CARTS = "/menu/product_carts/";
 
     public static final ConfigValue<String> DATE_FORMAT = ConfigValue.create("General.DateFormat",
-        "MM/dd/yyyy HH:mm");
+        "MM/dd/yyyy HH:mm"
+    ).whenRead(ShopUtils::setDateFormatter);
 
     public static final ConfigValue<Integer> SHOP_UPDATE_INTERVAL = ConfigValue.create("General.Shop_Update_Interval",
         60,
@@ -27,11 +28,6 @@ public class Config {
         "- Update time for Float prices of both, Virtual and Static Shops.",
         "Do not touch unless you know what and why you're doing.",
         "[Default is 60 seconds]"
-    );
-
-    public static final ConfigValue<Set<String>> DISABLED_PRODUCT_HANDLERS = ConfigValue.create("General.Disabled_Product_Handlers",
-        Lists.newSet(),
-        "List of product handlers that won't be registered on plugin load."
     );
 
     public static final ConfigValue<Boolean> MODULES_VIRTUAL_SHOP_ENABLED = ConfigValue.create("Modules.VirtualShop.Enabled",
@@ -67,18 +63,28 @@ public class Config {
         "[*] You must reboot the server to apply changes."
     );
 
-    public static final ConfigValue<Boolean> DATA_PRODUCT_CLEAN_UP = ConfigValue.create("Data.Products.CleanUp",
-        false,
-        "Sets whether or not plugin will clean up database from product data (price, stock and player limits) of shops or products that does not exist anymore.",
-        "It's recommended to enable if you're using the same shops configuration on all your servers.",
-        "[*] Do not enable if you have multiple servers with different shop configurations."
+    public static final ConfigValue<Integer> DATA_SAVE_INTERVAL = ConfigValue.create("Data.SaveInterval",
+        5,
+        "Sets how often (in seconds) modified product & shop datas will be saved to the database.",
+        "Data including:",
+        "- Product's price data (float, dynamic).",
+        "- Product's stock data (global, player).",
+        "- Shop's rotation data.",
+        "[*] Data is also saved on server reboot and plugin reload.",
+        "[*] You can disable it if you're on SQLite or don't care about syncing across multiple servers."
     );
 
-//    public static final ConfigValue<Integer> DATA_PRODUCT_SAVE_INTERVAL = ConfigValue.create("Data.Products.SaveInterval",
-//        5,
-//        "Sets how often (in seconds) modified product data (such as price, stock and player limit values) will be saved to the database.",
-//        "[*] Do NOT disable if you're using Float/Dynamic prices and Global/Player stock features."
-//    );
+    public static final ConfigValue<String> DATA_PRICE_TABLE = ConfigValue.create("Data.PriceTable",
+        "price_data"
+    );
+
+    public static final ConfigValue<String> DATA_STOCKS_TABLE = ConfigValue.create("Data.StocksTable",
+        "stocks"
+    );
+
+    public static final ConfigValue<String> DATA_ROTATIONS_TABLE = ConfigValue.create("Data.RotationsTable",
+        "rotations"
+    );
 
     public static final ConfigValue<Boolean> GENERAL_BUY_WITH_FULL_INVENTORY = ConfigValue.create("General.Buy_With_Full_Inventory",
         false,
@@ -132,9 +138,5 @@ public class Config {
 
     private static String[] getAliases(@NotNull String[] aliases, @NotNull String fallback) {
         return aliases.length == 0 ? new String[]{fallback} : aliases;
-    }
-
-    public static boolean usePlaceholdersForGUI() {
-        return GUI_PLACEHOLDER_API.get();
     }
 }

@@ -8,23 +8,24 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
+import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.hook.HookId;
-import su.nightexpress.nightcore.util.Players;
-import su.nightexpress.nightcore.util.Plugins;
-import su.nightexpress.nightcore.util.StringUtil;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.text.NightMessage;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,12 +36,23 @@ public class ShopUtils {
 
     private static DateTimeFormatter dateFormatter;
 
+    public static void setDateFormatter(@NotNull String pattern) {
+        ShopUtils.dateFormatter = DateTimeFormatter.ofPattern(pattern);
+    }
+
     @NotNull
     public static DateTimeFormatter getDateFormatter() {
-        if (dateFormatter == null) {
-            dateFormatter = DateTimeFormatter.ofPattern(Config.DATE_FORMAT.get());
-        }
         return dateFormatter;
+    }
+
+    @Nullable
+    public static ItemStack readItemTag(@NotNull String serialized) {
+        return Version.isAtLeast(Version.MC_1_21) && serialized.contains("{") ? ItemNbt.fromTagString(serialized) : ItemNbt.decompress(serialized);
+    }
+
+    @Nullable
+    public static String getItemTag(@NotNull ItemStack itemStack) {
+        return Version.isAtLeast(Version.MC_1_21) ? ItemNbt.getTagString(itemStack) : ItemNbt.compress(itemStack);
     }
 
     public static boolean hasEconomyBridge() {
@@ -48,11 +60,36 @@ public class ShopUtils {
     }
 
     @NotNull
-    public static ShopClickAction getClickAction(@NotNull Player player, @NotNull ClickType click, @NotNull Shop shop, @NotNull Product product) {
-        //ShopClickAction clickType = Config.GUI_CLICK_ACTIONS.get().get(click);
+    public static String generateProductId(@NotNull VirtualShop shop, @NotNull ProductTyping typing) {
+        String id = switch (typing) {
+            case VanillaTyping vanilla -> {
+                ItemStack item = vanilla.getItem();
+                String name = StringUtil.transformForID(NightMessage.stripAll(ItemUtil.getItemName(item)).toLowerCase()); // Remove all non-latins from item display name.
 
-        boolean isBuyable = shop.isTransactionEnabled(TradeType.BUY) && product.isBuyable();
-        boolean isSellable = shop.isTransactionEnabled(TradeType.SELL) && product.isSellable();
+                yield name.isBlank() ? BukkitThing.toString(item.getType()) : name;
+            }
+            case PluginTyping pluginTyping -> (pluginTyping.getHandler().getName() + "_" + pluginTyping.getItemId()).toLowerCase();
+            case CommandTyping ignored -> "command_item";
+            default -> UUID.randomUUID().toString().substring(0, 8);
+        };
+
+        int count = 0;
+        while (shop.getProductById(addCount(id, count)) != null) {
+            count++;
+        }
+
+        return addCount(id, count);
+    }
+
+    @NotNull
+    private static String addCount(@NotNull String id, int count) {
+        return count == 0 ? id : id + "_" + count;
+    }
+
+    @NotNull
+    public static ShopClickAction getClickAction(@NotNull Player player, @NotNull ClickType click, @NotNull Shop shop, @NotNull Product product) {
+        boolean isBuyable = product.isBuyable();
+        boolean isSellable = product.isSellable();
         if (!isBuyable && !isSellable) return ShopClickAction.UNDEFINED;
 
         if (Players.isBedrock(player)) {
@@ -152,39 +189,12 @@ public class ShopUtils {
         Arrays.asList(items).forEach(item -> addItem(inventory, item, item.getAmount()));
     }
 
-//    public static boolean addItem(@NotNull Inventory inventory, @NotNull ItemStack itemStack, int amount) {
-//        if (amount <= 0 || itemStack.getType().isAir()) return;
-//
-//        Location location = inventory.getLocation();
-//        World world = location == null ? null : location.getWorld();
-//        ItemStack copyStack = new ItemStack(itemStack);
-//
-//        int realAmount = Math.min(copyStack.getMaxStackSize(), amount);
-//        copyStack.setAmount(realAmount);
-//        inventory.addItem(copyStack).values().forEach(left -> {
-//            if (world != null) {
-//                world.dropItem(location, left);
-//            }
-//        });
-//
-//        amount -= realAmount;
-//        if (amount > 0) addItem(inventory, itemStack, amount);
-//    }
-
     public static boolean addItem(@NotNull Inventory inventory, @NotNull ItemStack origin, int amount) {
         if (amount <= 0 || origin.getType().isAir()) return false;
         if (countItemSpace(inventory, origin) < amount) return false;
 
         Location location = inventory.getLocation();
         World world = location == null ? null : location.getWorld();
-//        ItemStack copyStack = new ItemStack(itemStack);
-//        copyStack.setAmount(amount);
-//
-//        inventory.addItem(copyStack).values().forEach(left -> {
-//            if (world != null) {
-//                world.dropItem(location, left);
-//            }
-//        });
 
         ItemStack split = new ItemStack(origin);
 

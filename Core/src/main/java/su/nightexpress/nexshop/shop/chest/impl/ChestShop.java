@@ -67,12 +67,12 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private Location displayItemLocation;
     private Location displayShowcaseLocation;
 
-    private final ChestStock stock;
+    //private final ChestStock stock;
 
     public ChestShop(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
         this.module = module;
-        this.stock = new ChestStock(this.plugin, this);
+        //this.stock = new ChestStock(this.plugin, this);
     }
 
     @Override
@@ -121,10 +121,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         this.setName(config.getString("Name", this.getOwnerName()));
         this.setType(config.getEnum("Type", ShopType.class, ShopType.PLAYER));
         this.setItemCreated(config.getBoolean("ItemCreated", false));
-
-        for (TradeType tradeType : TradeType.values()) {
-            this.setTransactionEnabled(tradeType, config.getBoolean("Transaction_Allowed." + tradeType.name(), true));
-        }
+        this.setBuyingAllowed(config.getBoolean("Transaction_Allowed.BUY", true));
+        this.setSellingAllowed(config.getBoolean("Transaction_Allowed.SELL", true));
 
         this.setHologramEnabled(config.getBoolean("Display.Hologram.Enabled", true));
         this.setShowcaseEnabled(config.getBoolean("Display.Showcase.Enabled", true));
@@ -196,6 +194,11 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         config.saveChanges();
     }
 
+    @Override
+    public void saveRotations() {
+        // TODO wtf
+    }
+
     private void writeSettings(@NotNull FileConfig config) {
         this.blockPos.write(config, "Placement.BlockPos");
         config.set("Placement.World", this.worldName);
@@ -203,9 +206,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         config.set("Owner.Id", this.getOwnerId().toString());
         config.set("Type", this.getType().name());
         config.set("ItemCreated", this.isItemCreated());
-        this.transactions.forEach((type, isAllowed) -> {
-            config.set("Transaction_Allowed." + type.name(), isAllowed);
-        });
+        config.set("Transaction_Allowed.BUY", this.buyingAllowed);
+        config.set("Transaction_Allowed.SELL", this.sellingAllowed);
         config.set("Display.Hologram.Enabled", this.isHologramEnabled());
         config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
         config.set("Display.Showcase.Type", this.getShowcaseType());
@@ -240,7 +242,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public boolean isActive() {
-        return active;
+        return this.active;
     }
 
     public boolean isInactive() {
@@ -359,11 +361,11 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return module;
     }
 
-    @NotNull
-    @Override
-    public ChestStock getStock() {
-        return stock;
-    }
+//    @NotNull
+//    @Override
+//    public ChestStock getStock() {
+//        return stock;
+//    }
 
     @NotNull
     public ChestBank getOwnerBank() {
@@ -394,12 +396,12 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return products.isEmpty() ? null : Rnd.get(products);
     }
 
-    @Override
-    public void addProduct(@NotNull Product product) {
-        if (product instanceof ChestProduct chestProduct) {
-            this.addProduct(chestProduct);
-        }
-    }
+//    @Override
+//    public void addProduct(@NotNull Product product) {
+//        if (product instanceof ChestProduct chestProduct) {
+//            this.addProduct(chestProduct);
+//        }
+//    }
 
     @Nullable
     public ChestProduct createProduct(@NotNull Player player, @NotNull ItemStack item, boolean bypassHandler) {
@@ -453,13 +455,16 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         if (this.isInactive()) return false;
 
         Location location = this.getLocation();
-        Block block = location.getBlock();
-        BlockData data = block.getBlockData();
-        if (data instanceof Directional directional) {
-            Block opposite = block.getRelative(directional.getFacing()).getLocation().clone().add(0, 0.5, 0).getBlock();
-            location = LocationUtil.setCenter3D(opposite.getLocation());
-            location.setDirection(directional.getFacing().getOppositeFace().getDirection());
-            location.setPitch(35F);
+
+        if (ChestConfig.CHECK_SAFE_LOCATION.get()) {
+            Block block = location.getBlock();
+            BlockData data = block.getBlockData();
+            if (data instanceof Directional directional) {
+                Block opposite = block.getRelative(directional.getFacing()).getLocation().clone().add(0, 0.5, 0).getBlock();
+                location = LocationUtil.setCenter3D(opposite.getLocation());
+                location.setDirection(directional.getFacing().getOppositeFace().getDirection());
+                location.setPitch(35F);
+            }
         }
 
         if (!this.isOwner(player) && !ChestUtils.isSafeLocation(location)) {
@@ -548,8 +553,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         var buyTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_BUY.get();
         var sellTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_SELL.get();
 
-        boolean isBuyable = this.isTransactionEnabled(TradeType.BUY) && product != null && product.isBuyable();
-        boolean isSellable = this.isTransactionEnabled(TradeType.SELL) & product != null && product.isSellable();
+        boolean isBuyable = product != null && product.isBuyable();
+        boolean isSellable = product != null && product.isSellable();
 
         List<String> text = new ArrayList<>();
         for (String line : this.getDisplayText()) {

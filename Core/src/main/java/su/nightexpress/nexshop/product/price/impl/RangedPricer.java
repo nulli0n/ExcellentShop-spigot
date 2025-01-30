@@ -23,6 +23,10 @@ public abstract class RangedPricer extends AbstractProductPricer {
         return this.priceRange.computeIfAbsent(tradeType, k -> UniDouble.of(-1, -1));
     }
 
+    public double rollPrice(@NotNull TradeType type) {
+        return this.getPriceRange(type).roll();
+    }
+
     public double getPriceAverage(@NotNull TradeType tradeType) {
         UniDouble range = this.getPriceRange(tradeType);
         double min = range.getMinValue();

@@ -11,7 +11,6 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.impl.ChestStock;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -86,7 +85,7 @@ public class StorageMenu extends ShopEditorMenu implements AutoFilled<ChestProdu
     public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ChestProduct> autoFill) {
         Player player = viewer.getPlayer();
         ChestShop shop = this.getLink(player);
-        ChestStock stock = shop.getStock();
+        //ChestStock stock = shop.getStock();
 
         autoFill.setSlots(this.objectSlots);
         autoFill.setItems(shop.getValidProducts());
@@ -110,7 +109,7 @@ public class StorageMenu extends ShopEditorMenu implements AutoFilled<ChestProdu
             }
 
             if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                int units = stock.count(product, TradeType.BUY, player);
+                int units = product.countStock(TradeType.BUY, null);
                 this.module.withdrawFromStorage(player, product, units);
                 this.runNextTick(() -> this.flush(viewer));
                 return;

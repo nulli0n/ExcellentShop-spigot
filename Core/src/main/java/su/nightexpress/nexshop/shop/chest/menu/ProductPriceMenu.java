@@ -18,7 +18,7 @@ import su.nightexpress.nexshop.product.price.impl.RangedPricer;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -49,7 +49,7 @@ import java.util.function.Predicate;
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProduct>, ShopEditor {
+public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProduct>, LegacyShopEditor {
 
     public static final  String FILE_NAME  = "product_price.yml";
     private static final String PRICE_BUY  = "%price_buy%";
@@ -105,7 +105,8 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
 
             PriceType priceType = Lists.next(product.getPricer().getType(), predicate);
             product.setPricer(AbstractProductPricer.from(priceType));
-            product.getShop().getPricer().deleteData(product);
+            //product.getShop().getPricer().deleteData(product);
+            plugin.getDataManager().deletePriceData(product);
 
             if (product.getPricer() instanceof RangedPricer pricer) {
                 pricer.setPriceRange(TradeType.BUY, UniDouble.of(buy, buy));
@@ -360,11 +361,11 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
             meta.setLore(Lists.newList(
                 LIGHT_RED.enclose("Days and Times are required!"),
                 "",
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Round Decimals: ") + PRODUCT_PRICER_FLOAT_ROUND_DECIMALS),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Round Decimals: ") + PRICER_FLOAT_ROUND_DECIMALS),
                 LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Days: ") ),
-                PRODUCT_PRICER_FLOAT_REFRESH_DAYS,
+                PRICER_FLOAT_REFRESH_DAYS,
                 LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Times:")),
-                PRODUCT_PRICER_FLOAT_REFRESH_TIMES,
+                PRICER_FLOAT_REFRESH_TIMES,
                 "",
                 LIGHT_GRAY.enclose("Defines how often price should"),
                 LIGHT_GRAY.enclose("be regenerated with new values."),
@@ -386,8 +387,8 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
         ItemUtil.editMeta(stepPriceItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Price Step")));
             meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRODUCT_PRICER_DYNAMIC_STEP_BUY),
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRODUCT_PRICER_DYNAMIC_STEP_SELL),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRICER_DYNAMIC_STEP_BUY),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRICER_DYNAMIC_STEP_SELL),
                 "",
                 LIGHT_GRAY.enclose("Defines on how much the price will"),
                 LIGHT_GRAY.enclose("go up/down on each purchase/sale."),
@@ -402,8 +403,8 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
         ItemUtil.editMeta(initPriceItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Initial Price")));
             meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRODUCT_PRICER_DYNAMIC_INITIAL_BUY),
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRODUCT_PRICER_DYNAMIC_INITIAL_SELL),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRICER_DYNAMIC_INITIAL_BUY),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRICER_DYNAMIC_INITIAL_SELL),
                 "",
                 LIGHT_GRAY.enclose("Sets initial (start) price for the product."),
                 "",
@@ -421,8 +422,8 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
         ItemUtil.editMeta(playerInitPriceItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Initial Price")));
             meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRODUCT_PRICER_DYNAMIC_INITIAL_BUY),
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRODUCT_PRICER_DYNAMIC_INITIAL_SELL),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRICER_DYNAMIC_INITIAL_BUY),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRICER_DYNAMIC_INITIAL_SELL),
                 "",
                 LIGHT_GRAY.enclose("Sets initial (start) price for the product."),
                 "",
@@ -436,8 +437,8 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
         ItemUtil.editMeta(playerAdjustPriceItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Price Adjust")));
             meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_BUY),
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRODUCT_PRICER_PLAYERS_ADJUST_AMOUNT_SELL),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Buy: ") + PRICER_PLAYERS_ADJUST_AMOUNT_BUY),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Sell: ") + PRICER_PLAYERS_ADJUST_AMOUNT_SELL),
                 "",
                 LIGHT_GRAY.enclose("Defines how much the price will"),
                 LIGHT_GRAY.enclose("be adjusted for each X online players set"),
@@ -453,7 +454,7 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
         ItemUtil.editMeta(playerStepItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Adjust Step")));
             meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Current: ") + PRODUCT_PRICER_PLAYERS_ADJUST_STEP),
+                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Current: ") + PRICER_PLAYERS_ADJUST_STEP),
                 "",
                 LIGHT_GRAY.enclose("Sets for how much online players"),
                 LIGHT_GRAY.enclose("price will be adjusted by values set"),
@@ -502,8 +503,8 @@ public class ProductPriceMenu extends ShopEditorMenu implements Linked<ChestProd
                                 LIGHT_GRAY.enclose(LIGHT_RED.enclose("[▶]") + " [Q/Drop] Key to " + LIGHT_RED.enclose("disable") + ".")
                             );
                             case FLOAT, DYNAMIC, PLAYER_AMOUNT -> Lists.newList(
-                                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Min: ") + PRODUCT_PRICER_RANGE_MIN.apply(tradeType)),
-                                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Max: ") + PRODUCT_PRICER_RANGE_MAX.apply(tradeType)),
+                                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Min: ") + PRICER_RANGED_BOUNDS_MIN.apply(tradeType)),
+                                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Max: ") + PRICER_RANGED_BOUNDS_MAX.apply(tradeType)),
                                 "",
                                 LIGHT_GRAY.enclose("Sets price bounds."),
                                 "",

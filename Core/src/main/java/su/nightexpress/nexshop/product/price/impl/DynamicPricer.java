@@ -51,6 +51,20 @@ public class DynamicPricer extends RangedPricer {
         return Placeholders.DYNAMIC_PRICER.replacer(this);
     }
 
+    public double getAdjustedPrice(@NotNull TradeType type, double difference) {
+        double min = this.getPriceMin(type);
+        double max = this.getPriceMax(type);
+        if (min < 0 && max < 0) {
+            return -1D;
+        }
+
+        double price = this.getInitial(type) + (difference * this.getStep(type));
+        if (price > max && max >= 0) price = max;
+        else if (price < min) price = min;
+
+        return price;
+    }
+
     @Override
     public double getPriceAverage(@NotNull TradeType tradeType) {
         return this.getInitial(tradeType);

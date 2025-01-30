@@ -4,37 +4,63 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
+import su.nightexpress.nexshop.api.shop.Transaction;
+import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
+import su.nightexpress.nexshop.data.product.PriceData;
 import su.nightexpress.nightcore.manager.AbstractFileData;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop {
 
-    protected final ShopDataPricer          pricer;
-    protected final Map<TradeType, Boolean> transactions;
-    protected final Map<String, P>          products;
+    protected final Map<String, P> products;
 
-    protected String name;
+    protected String  name;
+    protected boolean buyingAllowed;
+    protected boolean sellingAllowed;
 
     public AbstractShop(@NotNull ShopPlugin plugin, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
-        this.pricer = new ShopDataPricer(plugin, this);
-        this.transactions = new HashMap<>();
         this.products = new LinkedHashMap<>();
     }
 
     @Override
-    public boolean isLoaded() {
-        return this.plugin.getShopManager().getProductDataManager().isLoaded();
+    public void onTransaction(@NotNull ShopTransactionEvent event) {
+        Transaction result = event.getTransaction();
+        Product product = result.getProduct();
+        if (product.getPricer().getType() == PriceType.FLAT) return;
+        if (product.getPricer().getType() == PriceType.PLAYER_AMOUNT) return;
+
+        PriceData priceData = this.plugin.getDataManager().getPriceDataOrCreate(product);
+        priceData.countTransaction(result.getTradeType(), result.getUnits());
+        priceData.setSaveRequired(true);
+
+        if (product.getPricer().getType() == PriceType.DYNAMIC) {
+            priceData.setExpired(); // To trigger isExpired in update.
+        }
+
+        product.updatePrice();
     }
 
-    @NotNull
     @Override
-    public ShopDataPricer getPricer() {
-        return pricer;
+    public void update() {
+        this.updatePrices();
+    }
+
+    @Override
+    public void updatePrices() {
+        this.updatePrices(false);
+    }
+
+    @Override
+    public void updatePrices(boolean force) {
+        this.getValidProducts().forEach(product -> product.updatePrice(force));
     }
 
     @Override
@@ -49,28 +75,39 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     }
 
     @Override
-    public boolean isTransactionEnabled(@NotNull TradeType tradeType) {
-        return this.transactions.getOrDefault(tradeType, true);
+    public boolean isBuyingAllowed() {
+        return this.buyingAllowed;
     }
 
     @Override
-    public void setTransactionEnabled(@NotNull TradeType tradeType, boolean enabled) {
-        this.transactions.put(tradeType, enabled);
+    public void setBuyingAllowed(boolean buyingAllowed) {
+        this.buyingAllowed = buyingAllowed;
     }
 
-    protected void addProduct(@NotNull P product) {
+    @Override
+    public boolean isSellingAllowed() {
+        return this.sellingAllowed;
+    }
+
+    @Override
+    public void setSellingAllowed(boolean sellingAllowed) {
+        this.sellingAllowed = sellingAllowed;
+    }
+
+    public void addProduct(@NotNull P product) {
         this.removeProduct(product.getId());
         this.products.put(product.getId(), product);
     }
 
     @Override
-    public final void removeProduct(@NotNull Product product) {
+    public void removeProduct(@NotNull Product product) {
         this.removeProduct(product.getId());
     }
 
     @Override
     public void removeProduct(@NotNull String id) {
         this.products.remove(id);
+        // TODO Delete product datas?
     }
 
     @Override

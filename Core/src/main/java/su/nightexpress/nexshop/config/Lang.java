@@ -97,10 +97,10 @@ public class Lang extends CoreLang {
         SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
         LIGHT_RED.enclose(BOLD.enclose("Sorry! ")) + LIGHT_GRAY.enclose("You have to clean up your inventory before purchase!"));
 
-    public static final LangText SHOP_CART_ENTER_AMOUNT = LangText.of("Shop.Cart.EnterAmount",
-        OUTPUT.enclose(20, 1200),
-        LIGHT_GREEN.enclose(BOLD.enclose("< Custom Amount >")),
-        LIGHT_GRAY.enclose("Enter your amount")
+    public static final LangString SHOP_CART_ENTER_AMOUNT = LangString.of("Shop.Cart.CustomAmount",
+        //OUTPUT.enclose(20, 1200),
+        //LIGHT_GREEN.enclose(BOLD.enclose("< Custom Amount >")),
+        LIGHT_GRAY.enclose("Enter your amount...")
     );
 
 
@@ -129,10 +129,10 @@ public class Lang extends CoreLang {
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Value]")));
 
     public static final LangString EDITOR_GENERIC_ENTER_DAY = LangString.of("Editor.Generic.Enter.Day",
-        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[English Day Name]")));
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Day Name]")));
 
     public static final LangString EDITOR_GENERIC_ENTER_TIME = LangString.of("Editor.Generic.Enter.Time",
-        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Hours:Minutes:Seconds]")));
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Time]") + " like " + LIGHT_GREEN.enclose("22:00")));
 
     public static final LangString EDITOR_GENERIC_ENTER_SECONDS = LangString.of("Editor.Generic.Enter.Seconds",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Seconds Amount]")));

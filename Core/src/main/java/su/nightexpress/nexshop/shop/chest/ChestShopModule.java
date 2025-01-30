@@ -24,8 +24,8 @@ import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.ShopModule;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
-import su.nightexpress.nexshop.api.shop.TransactionModule;
 import su.nightexpress.nexshop.api.shop.event.ChestShopCreateEvent;
 import su.nightexpress.nexshop.api.shop.event.ChestShopRemoveEvent;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
@@ -45,7 +45,6 @@ import su.nightexpress.nexshop.shop.chest.display.ProtocolLibHandler;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.chest.impl.ChestStock;
 import su.nightexpress.nexshop.shop.chest.listener.RegionMarketListener;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
 import su.nightexpress.nexshop.shop.chest.listener.UpgradeHopperListener;
@@ -53,11 +52,10 @@ import su.nightexpress.nexshop.shop.chest.menu.*;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nexshop.shop.chest.util.ShopMap;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
-import su.nightexpress.nexshop.shop.impl.AbstractShopModule;
+import su.nightexpress.nexshop.shop.impl.AbstractModule;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.LangAssets;
-import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.text.NightMessage;
 
@@ -68,7 +66,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class ChestShopModule extends AbstractShopModule implements TransactionModule {
+public class ChestShopModule extends AbstractModule implements ShopModule {
 
     public static final String ID = "chest_shop";
     public static final String DIR_SHOPS = "/shops/";
@@ -257,10 +255,10 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public void loadBanks() {
-        this.plugin.getData().getChestDataHandler().getChestBanks().forEach(bank -> {
+        this.plugin.getDataHandler().loadChestBanks().forEach(bank -> {
             // Add missing currencies to display them as 0 in balance placeholder, so they are visible.
             this.getAllowedCurrencies().forEach(currency -> {
-                bank.getBalanceMap().computeIfAbsent(currency, k -> 0D);
+                bank.getBalanceMap().computeIfAbsent(currency.getInternalId(), k -> 0D);
             });
 
             this.getBankMap().put(bank.getHolder(), bank);
@@ -293,16 +291,17 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             for (Currency currency : this.getAllowedCurrencies()) {
                 bank.deposit(currency, config.getDouble("Bank." + currency.getInternalId()));
             }
-            this.plugin.getData().getChestDataHandler().saveChestBank(bank);
+            this.plugin.getDataHandler().saveChestBank(bank);
             config.remove("Bank");
             config.saveChanges();
         }
         // ----- OLD BANK UPDATE - END -----
 
         shop.updatePosition();
-        if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
-            shop.getPricer().updatePrices(); // Need to load price data from ProductDataManager on /cshop reload.
-        }
+        // Prob not needed anymore since all data is stored in central data manager
+//        if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
+//            shop.getPricer().updatePrices(); // Need to load price data from ProductDataManager on /cshop reload.
+//        }
 
         this.shopMap.put(shop);
         return true;
@@ -340,7 +339,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         ChestBank bank = this.getBankMap().get(uuid);
         if (bank == null) {
             ChestBank bank2 = new ChestBank(uuid, new HashMap<>());
-            this.plugin.runTaskAsync(task -> this.plugin.getData().getChestDataHandler().createChestBank(bank2));
+            this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().createChestBank(bank2));
             this.getBankMap().put(uuid, bank2);
             return bank2;
         }
@@ -355,7 +354,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public void savePlayerBank(@NotNull ChestBank bank) {
-        this.plugin.runTaskAsync(task -> this.plugin.getData().getChestDataHandler().saveChestBank(bank));
+        this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().saveChestBank(bank));
     }
 
     @NotNull
@@ -460,16 +459,13 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
     }
 
     public boolean openShop(@NotNull Player player, @NotNull ChestShop shop, int page, boolean force) {
-        if (!shop.isLoaded()) return false;
+        if (!this.plugin.getDataManager().isLoaded()) return false;
 
         if (!force) {
             if (!shop.canAccess(player, true)) return false;
         }
 
-        MenuViewer viewer = this.shopView.getViewerOrCreate(player);
-        viewer.setPage(Math.abs(page));
-
-        return this.shopView.open(player, shop);
+        return this.shopView.open(player, shop, viewer -> viewer.setPage(Math.abs(page)));
     }
 
     public void remakeDisplay(@NotNull ChestShop shop) {
@@ -779,7 +775,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         }
 
         if (ChestUtils.isInfiniteStorage()) {
-            if (shop.getValidProducts().stream().anyMatch(product -> shop.getStock().count(product, TradeType.BUY) > 0)) {
+            if (shop.getValidProducts().stream().anyMatch(product -> product.countStock(TradeType.BUY, null) > 0)) {
                 ChestLang.SHOP_REMOVAL_ERROR_NOT_EMPTY.getMessage().send(player);
                 return false;
             }
@@ -877,7 +873,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     public boolean depositToStorage(@NotNull Player player, @NotNull ChestProduct product, int units) {
         ChestShop shop = product.getShop();
-        ChestStock stock = shop.getStock();
+        //ChestStock stock = shop.getStock();
 
         int playerUnits = product.countUnits(player);
         if (playerUnits < units) {
@@ -885,7 +881,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
             return false;
         }
 
-        stock.store(product, units, TradeType.BUY, player);
+        product.storeStock(TradeType.BUY, units, null);
         product.take(player, units);
         shop.save();
 
@@ -898,9 +894,9 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
 
     public boolean withdrawFromStorage(@NotNull Player player, @NotNull ChestProduct product, int units) {
         ChestShop shop = product.getShop();
-        ChestStock stock = shop.getStock();
+        //ChestStock stock = shop.getStock();
 
-        int shopUnits = stock.count(product, TradeType.BUY, player);
+        int shopUnits = product.countStock(TradeType.BUY, null);
         if (shopUnits < units) {
             ChestLang.STORAGE_WITHDRAW_ERROR_NOT_ENOUGH.getMessage().send(player);
             return false;
@@ -910,7 +906,7 @@ public class ChestShopModule extends AbstractShopModule implements TransactionMo
         int maxUnits = Math.min(spaceUnits, units);
 
         product.delivery(player, maxUnits);
-        stock.consume(product, maxUnits, TradeType.BUY, player);
+        product.consumeStock(TradeType.BUY, maxUnits, null);
         shop.save();
 
         ChestLang.STORAGE_WITHDRAW_SUCCESS.getMessage()

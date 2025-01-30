@@ -1,26 +1,15 @@
 package su.nightexpress.nexshop.api.shop;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 
-public interface ShopModule {
+public interface ShopModule extends Module {
 
-    @NotNull String getId();
+    @NotNull String getDefaultCartUI();
 
-    @NotNull String getName();
+    @NotNull default String getDefaultCartUI(@NotNull TradeType type) {
+        return this.getDefaultCartUI();
+    }
 
-    @NotNull FileConfig getConfig();
-
-    @NotNull String getLocalPath();
-
-    @NotNull String getAbsolutePath();
-
-    @NotNull Currency getDefaultCurrency();
-
-    void info(@NotNull String msg);
-
-    void warn(@NotNull String msg);
-
-    void error(@NotNull String msg);
+    @NotNull TransactionLogger getLogger();
 }

@@ -6,13 +6,13 @@ import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.command.CommandArguments;
 import su.nightexpress.nexshop.shop.virtual.command.CommandFlags;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nightcore.command.experimental.CommandContext;
 import su.nightexpress.nightcore.command.experimental.RootCommand;
 import su.nightexpress.nightcore.command.experimental.ServerCommand;
@@ -63,7 +63,7 @@ public class VirtualCommands {
                 .playerOnly()
                 .permission(VirtualPerms.COMMAND_SHOP)
                 .description(VirtualLang.COMMAND_SHOP_DESC)
-                .withArgument(CommandArguments.forShop(module))
+                .withArgument(CommandArguments.forShop(module).required(!VirtualConfig.isCentralMenuEnabled()))
                 .executes((context, arguments) -> openDirectShop(module, context, arguments))
             ));
         }
@@ -137,7 +137,7 @@ public class VirtualCommands {
         Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
         if (player == null) return false;
 
-        module.openSellMenu(player);
+        module.openSellMenu(player, false);
 
         if (player != context.getSender()) {
             VirtualLang.COMMAND_SELL_MENU_DONE_OTHERS.getMessage().send(context.getSender(), replacer -> replacer.replace(Placeholders.forPlayer(player)));

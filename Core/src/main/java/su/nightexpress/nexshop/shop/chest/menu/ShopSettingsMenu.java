@@ -14,7 +14,7 @@ import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -34,7 +34,7 @@ import java.util.List;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.Placeholders.*;
 
-public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop>, ShopEditor {
+public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop>, LegacyShopEditor {
 
     public static final String FILE = "shop_settings.yml";
 
@@ -72,8 +72,8 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
         this.addHandler(this.transactHandler = new ItemHandler("shop_change_transactions", (viewer, event) -> {
             ChestShop shop = this.getLink(viewer);
             if (Players.isBedrock(viewer.getPlayer())) {
-                boolean isBuy = shop.isTransactionEnabled(TradeType.BUY);
-                boolean isSell = shop.isTransactionEnabled(TradeType.SELL);
+                boolean isBuy = shop.isTradeAllowed(TradeType.BUY);
+                boolean isSell = shop.isTradeAllowed(TradeType.SELL);
                 if (isBuy && isSell) {
                     shop.setTransactionEnabled(TradeType.BUY, false);
                 }
@@ -90,10 +90,10 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
             }
 
             if (event.isLeftClick()) {
-                shop.setTransactionEnabled(TradeType.BUY, !shop.isTransactionEnabled(TradeType.BUY));
+                shop.setTransactionEnabled(TradeType.BUY, !shop.isTradeAllowed(TradeType.BUY));
             }
             else if (event.isRightClick()) {
-                shop.setTransactionEnabled(TradeType.SELL, !shop.isTransactionEnabled(TradeType.SELL));
+                shop.setTransactionEnabled(TradeType.SELL, !shop.isTradeAllowed(TradeType.SELL));
             }
             this.saveAndFlush(viewer, shop);
         }));
@@ -252,8 +252,8 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
         ItemUtil.editMeta(transactItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Trade Modes")));
             meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Buying: ") + SHOP_BUY_ALLOWED),
-                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Selling: ") + SHOP_SELL_ALLOWED),
+                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Buying: ") + SHOP_BUYING_ALLOWED),
+                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Selling: ") + SHOP_SELLING_ALLOWED),
                 "",
                 LIGHT_GRAY.enclose("Enable/disable certain operations in the shop."),
                 "",

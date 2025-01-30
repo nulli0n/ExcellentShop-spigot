@@ -24,6 +24,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -36,6 +38,7 @@ import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nightcore.manager.AbstractListener;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class ShopListener extends AbstractListener<ShopPlugin> {
@@ -61,12 +64,19 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
         Player player = event.getPlayer();
         ChestBank bank = this.module.getPlayerBank(player);
-        bank.getBalanceMap().forEach((currency, amount) -> {
-            currency.give(player, amount);
+        bank.getBalanceMap().forEach((currencyId, amount) -> {
+            EconomyBridge.deposit(player, currencyId, amount);
         });
 
         if (bank.getBalanceMap().values().stream().anyMatch(amount -> amount > 0)) {
-            String balances = bank.getBalanceMap().entrySet().stream().map(entry -> entry.getKey().format(entry.getValue())).collect(Collectors.joining(", "));
+            String balances = bank.getBalanceMap().entrySet().stream().map(entry -> {
+                    Currency currency = EconomyBridge.getCurrency(entry.getKey());
+                    if (currency == null) return null;
+
+                    return currency.format(entry.getValue());
+                })
+                .filter(Objects::nonNull).collect(Collectors.joining(", "));
+
             ChestLang.NOTIFICATION_SHOP_EARNINGS.getMessage()
                 .replace(Placeholders.GENERIC_AMOUNT, balances)
                 .send(player);
@@ -210,7 +220,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
             if (ChestUtils.isInfiniteStorage()) {
                 // Do not cancel, instead reduce item quantity.
                 item.setAmount(item.getAmount() - 1);
-                shop.getStock().store(product, 1, TradeType.BUY);
+                product.storeStock(TradeType.BUY, 1, null);
             }
         }
     }

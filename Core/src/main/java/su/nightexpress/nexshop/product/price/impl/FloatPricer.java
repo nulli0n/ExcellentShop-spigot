@@ -5,8 +5,11 @@ import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.api.type.RefreshType;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.wrapper.UniDouble;
 
@@ -14,7 +17,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.UnaryOperator;
@@ -22,23 +24,30 @@ import java.util.stream.Collectors;
 
 public class FloatPricer extends RangedPricer {
 
-    private Set<DayOfWeek>   days;
+    private RefreshType    refreshType;
+    private long           refreshInterval;
+    private Set<DayOfWeek> days;
     private Set<LocalTime> times;
-    private boolean roundDecimals;
+    private boolean        roundDecimals;
 
     public FloatPricer() {
         super(PriceType.FLOAT);
-        this.days = new HashSet<>(Arrays.asList(DayOfWeek.values()));
+        this.setRefreshType(RefreshType.INTERVAL);
+        this.days = Lists.newSet(DayOfWeek.values());
         this.times = new HashSet<>();
     }
 
     @NotNull
     public static FloatPricer read(@NotNull FileConfig config, @NotNull String path) {
         FloatPricer pricer = new FloatPricer();
+
         for (TradeType tradeType : TradeType.values()) {
             UniDouble price = UniDouble.read(config, path + "." + tradeType.name());
             pricer.setPriceRange(tradeType, price);
         }
+
+        pricer.setRefreshType(config.getEnum(path + ".Refresh.Type", RefreshType.class, RefreshType.FIXED));
+        pricer.setRefreshInterval(config.getLong(path + ".Refresh.Interval", 0L));
         pricer.setDays(ShopUtils.parseDays(config.getString(path + ".Refresh.Days", "")));
         pricer.setTimes(ShopUtils.parseTimes(config.getStringList(path + ".Refresh.Times")));
         pricer.setRoundDecimals(config.getBoolean(path + ".Round_Decimals"));
@@ -51,15 +60,24 @@ public class FloatPricer extends RangedPricer {
         this.priceRange.forEach((tradeType, price) -> {
             price.write(config, path + "." + tradeType.name());
         });
-        config.set(path + ".Refresh.Days", this.getDays().stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
-        config.set(path + ".Refresh.Times", this.getTimes().stream().map(ShopUtils.TIME_FORMATTER::format).toList());
-        config.set(path + ".Round_Decimals", this.isRoundDecimals());
+        config.set(path + ".Refresh.Type", this.refreshType.name());
+        config.set(path + ".Refresh.Interval", this.refreshInterval);
+        config.set(path + ".Refresh.Days", this.days.stream().map(DayOfWeek::name).collect(Collectors.joining(",")));
+        config.set(path + ".Refresh.Times", this.times.stream().map(ShopUtils.TIME_FORMATTER::format).toList());
+        config.set(path + ".Round_Decimals", this.roundDecimals);
     }
 
     @Override
     @NotNull
     public UnaryOperator<String> replacePlaceholders() {
         return Placeholders.FLOAT_PRICER.replacer(this);
+    }
+
+    @Override
+    public double rollPrice(@NotNull TradeType type) {
+        double rolled = super.rollPrice(type);
+
+        return this.roundDecimals ? Math.floor(rolled) : NumberUtil.round(rolled);
     }
 
     /*@Deprecated
@@ -99,8 +117,33 @@ public class FloatPricer extends RangedPricer {
     }
 
     public long getClosestTimestamp() {
+        if (this.refreshType == RefreshType.INTERVAL) {
+            return TimeUtil.createTimestamp(this.refreshInterval);
+        }
+
         LocalDateTime dateTime = this.getClosest();
         return dateTime == null ? 0L : TimeUtil.toEpochMillis(dateTime);
+    }
+
+    @NotNull
+    public RefreshType getRefreshType() {
+        return this.refreshType;
+    }
+
+    public void setRefreshType(@NotNull RefreshType refreshType) {
+        this.refreshType = refreshType;
+    }
+
+    public long getRefreshInterval() {
+        return this.refreshInterval;
+    }
+
+    public long getRefreshIntervalMillis() {
+        return this.refreshInterval * 1000L;
+    }
+
+    public void setRefreshInterval(long refreshInterval) {
+        this.refreshInterval = refreshInterval;
     }
 
     @NotNull

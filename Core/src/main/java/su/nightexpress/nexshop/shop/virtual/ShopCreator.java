@@ -2,31 +2,27 @@ package su.nightexpress.nexshop.shop.virtual;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
-import su.nightexpress.nexshop.product.type.impl.VanillaProductType;
-import su.nightexpress.nexshop.shop.impl.AbstractVirtualShop;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.RotatingShop;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticProduct;
-import su.nightexpress.nexshop.shop.virtual.impl.StaticShop;
+import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
-import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.FileUtil;
-import su.nightexpress.nightcore.util.ItemUtil;
-import su.nightexpress.nightcore.util.wrapper.UniDouble;
-import su.nightexpress.nightcore.util.wrapper.UniInt;
+import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
@@ -34,18 +30,15 @@ public class ShopCreator {
 
     private final ShopPlugin plugin;
     private final VirtualShopModule module;
-    private final Currency currency;
 
     public ShopCreator(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         this.plugin = plugin;
         this.module = module;
-        this.currency = this.module.getDefaultCurrency();
     }
 
     public void createDefaults() {
         this.createLayouts();
-        this.createVirtual();
-        this.createRotating();
+        this.createShops();
     }
 
     private void createLayouts() {
@@ -61,748 +54,1233 @@ public class ShopCreator {
         new ShopLayout(this.plugin, this.module, config);
     }
 
-    private void createVirtual() {
+    private void createShops() {
         File dir = new File(this.module.getAbsolutePath(), VirtualShopModule.DIR_SHOPS);
         if (dir.exists()) return;
 
         dir.mkdirs();
 
-        this.createBlockShop();
-        this.createIngredientsShop();
-        this.createFarmerShop();
-        this.createFishShop();
-        this.createFoodShop();
-        this.createHostileLootShop();
-        this.createPeacefulLoot();
-        this.createToolShop();
-        this.createWeaponShop();
-        this.createWoolShop();
+        //this.createTravellerShop();
+
+        this.createShop("building_blocks",
+            "#15A2DD",
+            "BUILDING BLOCKS",
+            Lists.newList("Search your favorite items for", "build and make your best builds."),
+            NightItem.asCustomHead("99ddfda73dd88c669b62f6a0baea91c3c688df55d65e812fec8782ab87497c4d"),
+            12,
+            11,
+            this::addBuildingBlocksItems);
+
+        this.createShop("colored_blocks",
+            "#FF7222",
+            "COLORED BLOCKS",
+            Lists.newList("Beautify your builds with", "different block colors."),
+            NightItem.asCustomHead("7a7d6c0accd2e9ccaefa96b9438d6e202fec795acf7072bcfd9cd9d4b5a32b0e"),
+            11,
+            12,
+            this::addColoredBlocksItems);
+
+        this.createShop("food",
+            "#ABE5A7",
+            "FOOD",
+            Lists.newList("Don't be hungry! Buy some", "yummy food and feed yourself."),
+            NightItem.asCustomHead("ca9c8753780ebc39c351da8efd91bce90bd8cca7b511f93e78df75f6615c79a6"),
+            2,
+            13,
+            this::addFoodItems);
+
+        this.createShop("mob_drops",
+            "#D7BB9A",
+            "MOB DROPS",
+            Lists.newList("Make your money by killing or", "farming mobs and sell their drops."),
+            NightItem.asCustomHead("f26bde45049c7b7d34605d806a06829b6f955b856a5991fd33e7eabce44c0834"),
+            2,
+            14,
+            this::addMobDropsItems);
+
+        this.createShop("miscellaneous",
+            "#B240CE",
+            "MISCELLANEOUS",
+            Lists.newList("There are some rare", "and random items."),
+            NightItem.asCustomHead("e02eace744e0c913778fe8b35e13e3b0549d459ae713dfc480a2b41073cd7492"),
+            2,
+            15,
+            this::addMiscellaneousItems);
+
+        this.createShop("minerals",
+            "#91F0FF",
+            "MINERALS",
+            Lists.newList("Precious minerals are on sale."),
+            NightItem.asCustomHead("2c21799fdb23ea44432d6a449c747d3bbd566cc29392c0fe3153a9ddca5e5d5"),
+            2,
+            20,
+            this::addMineralsItems);
+
+        this.createShop("potions",
+            "#56FF5C",
+            "POTIONS & ARROWS",
+            Lists.newList("Be stronger by using potions", "and arrows with effects!"),
+            NightItem.asCustomHead("42f57c9eed9f90b7c33b0a447568150cb7b5ec62afddf280b4f981ffd480a766"),
+            4,
+            21,
+            this::addPotionsItems);
+
+        this.createShop("combat_tools",
+            "#7FEFD0",
+            "COMBAT & TOOLS",
+            Lists.newList("Do you need PvP equipment", "or some tools?"),
+            NightItem.asCustomHead("f20cca630a71638f646ab5ab7ff053951e796d8559f816152e11560588fd501c"),
+            3,
+            23,
+            this::addCombatToolsItems);
+
+        this.createShop("redstone",
+            "#D93636",
+            "REDSTONE",
+            Lists.newList("You love to play with redstone?"),
+            NightItem.asCustomHead("c168291abac4a5f86fe8b360338986aee7abcb7f4b8169eb55dfec928561258"),
+            1,
+            24,
+            this::addRedstoneItems);
+
+        this.createShop("farming",
+            "#FFD05A",
+            "FARMING",
+            Lists.newList("Make your own garden and", "start earning your money."),
+            NightItem.asCustomHead("26459be09998e50abd2ccf4cd383e6b38ab5bc905facb66dce0e14e038ba1968"),
+            2,
+            30,
+            this::addFarmingItems);
+
+        this.createShop("decoration",
+            "#E78A8A",
+            "DECORATION",
+            Lists.newList("Decorate your builds with", "flowers, leaves and more!"),
+            NightItem.asCustomHead("3052520ee99b6fcdbe70ed1f7cfbc3fb7175f04a2ceb007c9b11d8d727bca044"),
+            4,
+            32,
+            this::addDecorationItems);
     }
 
-    private void createRotating() {
-        File dir = new File(this.module.getAbsolutePath(), VirtualShopModule.DIR_ROTATING_SHOPS);
-        if (dir.exists()) return;
-
-        dir.mkdirs();
-
-        this.createTravellerShop();
-    }
-
-    private void createBlockShop() {
-        String name = YELLOW.enclose(BOLD.enclose("Block Market"));
-        List<String> desc = List.of(GRAY.enclose("Building blocks and resources."));
-
-        StaticShop shop = this.createStaticShop("blocks", name, desc, new ItemStack(Material.JUNGLE_LOG), 3, 14);
-
-        this.addShopProduct(shop, Material.STONE, 50, 20, 1, 0);
-        this.addShopProduct(shop, Material.STONE_BRICKS, 50, 20, 1, 1);
-        this.addShopProduct(shop, Material.CHISELED_STONE_BRICKS, 50, 20, 1, 2);
-        this.addShopProduct(shop, Material.COBBLESTONE, 20, 10, 1, 3);
-        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE, 50, 20, 1, 4);
-        this.addShopProduct(shop, Material.MOSSY_STONE_BRICKS, 60, 30, 1, 5);
-        this.addShopProduct(shop, Material.GRASS_BLOCK, 50, 20, 1, 6);
-        this.addShopProduct(shop, Material.RED_SAND, 50, 20, 1, 7);
-        this.addShopProduct(shop, Material.SAND, 30, 15, 1, 8);
-        this.addShopProduct(shop, Material.GRANITE, 50, 20, 1, 9);
-        this.addShopProduct(shop, Material.POLISHED_GRANITE, 60, 30, 1, 10);
-        this.addShopProduct(shop, Material.DIORITE, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.ANDESITE, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.GRAVEL, 30, 15, 1, 13);
-        this.addShopProduct(shop, Material.PODZOL, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.DIRT, 10, 5, 1, 15);
-        this.addShopProduct(shop, Material.RED_SANDSTONE, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.SANDSTONE, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.DEEPSLATE, 60, 30, 1, 18);
-        this.addShopProduct(shop, Material.COBBLED_DEEPSLATE, 40, 20, 1, 19);
-        this.addShopProduct(shop, Material.CHISELED_DEEPSLATE, 60, 30, 1, 20);
-        this.addShopProduct(shop, Material.POLISHED_DEEPSLATE, 70, 40, 1, 21);
-        this.addShopProduct(shop, Material.TUFF, 50, 20, 1, 22);
-        this.addShopProduct(shop, Material.MYCELIUM, 50, 20, 1, 23);
-        this.addShopProduct(shop, Material.PACKED_MUD, 60, 40, 1, 24);
-        this.addShopProduct(shop, Material.CHISELED_RED_SANDSTONE, 50, 20, 1, 25);
-        this.addShopProduct(shop, Material.CHISELED_SANDSTONE, 50, 20, 1, 26);
-        this.addShopProduct(shop, Material.DEEPSLATE_BRICKS, 70, 35, 1, 27);
-        this.addShopProduct(shop, Material.CRACKED_DEEPSLATE_BRICKS, 80, 45, 1, 28);
-        this.addShopProduct(shop, Material.DEEPSLATE_TILES, 80, 45, 1, 29);
-        this.addShopProduct(shop, Material.CRACKED_DEEPSLATE_TILES, 90, 50, 1, 30);
-        this.addShopProduct(shop, Material.CLAY, 50, 20, 1, 31);
-        this.addShopProduct(shop, Material.BRICKS, 60, 30, 1, 32);
-        this.addShopProduct(shop, Material.MUD_BRICKS, 60, 45, 1, 33);
-        this.addShopProduct(shop, Material.SMOOTH_RED_SANDSTONE, 50, 20, 1, 34);
-        this.addShopProduct(shop, Material.SMOOTH_SANDSTONE, 50, 20, 1, 35);
-        this.addShopProduct(shop, Material.PRISMARINE, 50, 20, 1, 36);
-        this.addShopProduct(shop, Material.PRISMARINE_BRICKS, 50, 20, 1, 37);
-        this.addShopProduct(shop, Material.DARK_PRISMARINE, 50, 20, 1, 38);
-        this.addShopProduct(shop, Material.SLIME_BLOCK, 50, 20, 1, 40);
-        this.addShopProduct(shop, Material.CALCITE, 500, 250, 1, 42);
-        this.addShopProduct(shop, Material.CUT_RED_SANDSTONE, 50, 20, 1, 43);
-        this.addShopProduct(shop, Material.CUT_SANDSTONE, 50, 20, 1, 44);
-        this.addShopProduct(shop, Material.OAK_LOG, 50, 20, 2, 0);
-        this.addShopProduct(shop, Material.OAK_PLANKS, 50, 20, 2, 1);
-        this.addShopProduct(shop, Material.MANGROVE_LOG, 50, 20, 2, 2);
-        this.addShopProduct(shop, Material.MANGROVE_PLANKS, 50, 20, 2, 3);
-        this.addShopProduct(shop, Material.NETHERRACK, 50, 20, 2, 4);
-        this.addShopProduct(shop, Material.NETHER_BRICKS, 50, 20, 2, 5);
-        this.addShopProduct(shop, Material.RED_NETHER_BRICKS, 50, 20, 2, 6);
-        this.addShopProduct(shop, Material.PURPUR_BLOCK, 50, 20, 2, 7);
-        this.addShopProduct(shop, Material.PURPUR_PILLAR, 50, 20, 2, 8);
-        this.addShopProduct(shop, Material.SPRUCE_LOG, 50, 20, 2, 9);
-        this.addShopProduct(shop, Material.SPRUCE_PLANKS, 50, 20, 2, 10);
-        this.addShopProduct(shop, Material.CRIMSON_STEM, 50, 20, 2, 11);
-        this.addShopProduct(shop, Material.CRIMSON_PLANKS, 50, 20, 2, 12);
-        this.addShopProduct(shop, Material.BASALT, 50, 20, 2, 13);
-        this.addShopProduct(shop, Material.POLISHED_BASALT, 50, 20, 2, 14);
-        this.addShopProduct(shop, Material.SMOOTH_BASALT, -1, -1, 2, 15);
-        this.addShopProduct(shop, Material.END_STONE, 50, 20, 2, 16);
-        this.addShopProduct(shop, Material.END_STONE_BRICKS, 50, 20, 2, 17);
-        this.addShopProduct(shop, Material.BIRCH_LOG, 50, 20, 2, 18);
-        this.addShopProduct(shop, Material.BIRCH_PLANKS, 50, 20, 2, 19);
-        this.addShopProduct(shop, Material.WARPED_STEM, 50, 20, 2, 20);
-        this.addShopProduct(shop, Material.WARPED_PLANKS, 50, 20, 2, 21);
-        this.addShopProduct(shop, Material.OBSIDIAN, 50, 20, 2, 22);
-        this.addShopProduct(shop, Material.CRYING_OBSIDIAN, 100, 50, 2, 23);
-        this.addShopProduct(shop, Material.MAGMA_BLOCK, 50, 20, 2, 24);
-        this.addShopProduct(shop, Material.QUARTZ_BLOCK, 50, 20, 2, 25);
-        this.addShopProduct(shop, Material.QUARTZ_BRICKS, 50, 20, 2, 26);
-        this.addShopProduct(shop, Material.JUNGLE_LOG, 50, 20, 2, 27);
-        this.addShopProduct(shop, Material.JUNGLE_PLANKS, 50, 20, 2, 28);
-        this.addShopProduct(shop, Material.BLACKSTONE, 50, 20, 2, 29);
-        this.addShopProduct(shop, Material.GILDED_BLACKSTONE, 50, 20, 2, 30);
-        this.addShopProduct(shop, Material.CHISELED_POLISHED_BLACKSTONE, 50, 20, 2, 31);
-        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE, 50, 20, 2, 32);
-        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_BRICKS, 50, 20, 2, 33);
-        this.addShopProduct(shop, Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 50, 20, 2, 34);
-        this.addShopProduct(shop, Material.SOUL_SAND, 50, 20, 2, 35);
-        this.addShopProduct(shop, Material.ACACIA_LOG, 50, 20, 2, 36);
-        this.addShopProduct(shop, Material.ACACIA_PLANKS, 50, 20, 2, 37);
-        this.addShopProduct(shop, Material.DARK_OAK_LOG, 50, 20, 2, 38);
-        this.addShopProduct(shop, Material.DARK_OAK_PLANKS, -1, -1, 2, 39);
-        this.addShopProduct(shop, Material.BONE_BLOCK, 50, 20, 2, 40);
-        this.addShopProduct(shop, Material.GLASS, 50, 20, 2, 41);
-        this.addShopProduct(shop, Material.WARPED_NYLIUM, 50, 20, 2, 42);
-        this.addShopProduct(shop, Material.CRIMSON_NYLIUM, 50, 20, 2, 43);
-        this.addShopProduct(shop, Material.SOUL_SOIL, 50, 20, 2, 44);
-        this.addShopProduct(shop, Material.COPPER_BLOCK, 50, 20, 3, 0);
-        this.addShopProduct(shop, Material.CUT_COPPER, 50, 20, 3, 1);
-        this.addShopProduct(shop, Material.EXPOSED_COPPER, 50, 20, 3, 2);
-        this.addShopProduct(shop, Material.EXPOSED_CUT_COPPER, 50, 20, 3, 3);
-        this.addShopProduct(shop, Material.RED_MUSHROOM_BLOCK, 50, 20, 3, 4);
-        this.addShopProduct(shop, Material.ANCIENT_DEBRIS, 10_000, 10_000, 3, 6);
-        this.addShopProduct(shop, Material.SCULK, 200, 100, 3, 7);
-        this.addShopProduct(shop, Material.MOSS_BLOCK, 50, 20, 3, 8);
-        this.addShopProduct(shop, Material.WEATHERED_COPPER, 50, 20, 3, 9);
-        this.addShopProduct(shop, Material.WEATHERED_CUT_COPPER, 50, 20, 3, 10);
-        this.addShopProduct(shop, Material.OXIDIZED_COPPER, 50, 20, 3, 11);
-        this.addShopProduct(shop, Material.OXIDIZED_CUT_COPPER, -1, -1, 3, 12);
-        this.addShopProduct(shop, Material.BROWN_MUSHROOM_BLOCK, 50, 20, 3, 13);
-        this.addShopProduct(shop, Material.SCULK_CATALYST, 5_000, 2_500, 3, 16);
-        this.addShopProduct(shop, Material.MOSS_CARPET, 50, 20, 3, 17);
-        this.addShopProduct(shop, Material.WAXED_COPPER_BLOCK, 50, 20, 3, 18);
-        this.addShopProduct(shop, Material.WAXED_CUT_COPPER, 50, 20, 3, 19);
-        this.addShopProduct(shop, Material.WAXED_EXPOSED_COPPER, 50, 20, 3, 20);
-        this.addShopProduct(shop, Material.WAXED_EXPOSED_CUT_COPPER, 50, 20, 3, 21);
-        this.addShopProduct(shop, Material.MUSHROOM_STEM, 50, 20, 3, 22);
-        this.addShopProduct(shop, Material.SCULK_SENSOR, 10_000, 10_000, 3, 25);
-        this.addShopProduct(shop, Material.WAXED_WEATHERED_COPPER, 50, 20, 3, 27);
-        this.addShopProduct(shop, Material.WAXED_WEATHERED_CUT_COPPER, 50, 20, 3, 28);
-        this.addShopProduct(shop, Material.WAXED_OXIDIZED_COPPER, 50, 20, 3, 29);
-        this.addShopProduct(shop, Material.WAXED_OXIDIZED_CUT_COPPER, -1, -1, 3, 30);
-        this.addShopProduct(shop, Material.NETHER_WART_BLOCK, 50, 20, 3, 31);
-        this.addShopProduct(shop, Material.SCULK_VEIN, 10_000, 10_000, 3, 34);
-        this.addShopProduct(shop, Material.PACKED_ICE, 50, 20, 3, 36);
-        this.addShopProduct(shop, Material.ICE, 50, 20, 3, 37);
-        this.addShopProduct(shop, Material.SNOW_BLOCK, 50, 20, 3, 38);
-        this.addShopProduct(shop, Material.WARPED_WART_BLOCK, 50, 20, 3, 40);
-        this.addShopProduct(shop, Material.AMETHYST_BLOCK, 50, 20, 3, 43);
-        this.addShopProduct(shop, Material.BUDDING_AMETHYST, 10_000, 5_000, 3, 44);
-
-        shop.save();
-    }
-
-    private void createIngredientsShop() {
-        String name = LIGHT_RED.enclose(BOLD.enclose("Ingredients"));
-        List<String> desc = List.of(GRAY.enclose("Potions and Ingredients."));
-
-        StaticShop shop = this.createStaticShop("ingredients", name, desc, new ItemStack(Material.REDSTONE), 1, 12);
-
-        this.addShopProduct(shop, Material.COAL, 10, 10, 1, 0);
-        this.addShopProduct(shop, Material.IRON_INGOT, 100, 100, 1, 1);
-        this.addShopProduct(shop, Material.GOLD_INGOT, 100, 100, 1, 2);
-        this.addShopProduct(shop, Material.NETHERITE_INGOT, 100_000, 100_000, 1, 3);
-        this.addShopProduct(shop, Material.REDSTONE, 20, 20, 1, 4);
-        this.addShopProduct(shop, Material.DIAMOND, 1_000, 1_000, 1, 5);
-        this.addShopProduct(shop, Material.EMERALD, 1_000, 1_000, 1, 6);
-        this.addShopProduct(shop, Material.LAPIS_LAZULI, 20, 20, 1, 7);
-        this.addShopProduct(shop, Material.COPPER_INGOT, 1_000, 1_000, 1, 8);
-        this.addShopProduct(shop, Material.QUARTZ, 50, 20, 1, 9);
-        this.addShopProduct(shop, Material.SNOWBALL, 20, 10, 1, 10);
-        this.addShopProduct(shop, Material.AMETHYST_SHARD, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.COBWEB, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.FLINT, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.GLASS_BOTTLE, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.POTION, 50, 20, 1, 15);
-        this.addShopProduct(shop, Material.GLISTERING_MELON_SLICE, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.RABBIT_FOOT, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.GOLDEN_CARROT, 1_000, 500, 1, 18);
-        this.addShopProduct(shop, Material.PHANTOM_MEMBRANE, 50, 20, 1, 19);
-        this.addShopProduct(shop, Material.FERMENTED_SPIDER_EYE, 50, 20, 1, 20);
-        this.addShopProduct(shop, Material.BLAZE_POWDER, 50, 20, 1, 21);
-        this.addShopProduct(shop, Material.MAGMA_CREAM, 150, 75, 1, 22);
-        this.addShopProduct(shop, Material.GHAST_TEAR, 500, 250, 1, 23);
-        this.addShopProduct(shop, Material.CAULDRON, 50, 20, 1, 34);
-        this.addShopProduct(shop, Material.BREWING_STAND, 50, 20, 1, 35);
-
-        shop.save();
-    }
-
-    private void createFarmerShop() {
-        String name = LIGHT_YELLOW.enclose(BOLD.enclose("Farmer's Market"));
-        List<String> desc = List.of(GRAY.enclose("Everything your garden need."));
-
-        StaticShop shop = this.createStaticShop("farmers_market", name, desc, new ItemStack(Material.WHEAT), 2, 23);
-
-        this.addShopProduct(shop, Material.OAK_SAPLING, 50, 20, 1, 0);
-        this.addShopProduct(shop, Material.SPRUCE_SAPLING, 50, 20, 1, 1);
-        this.addShopProduct(shop, Material.BIRCH_SAPLING, 50, 20, 1, 2);
-        this.addShopProduct(shop, Material.JUNGLE_SAPLING, 50, 20, 1, 3);
-        this.addShopProduct(shop, Material.ACACIA_SAPLING, 50, 20, 1, 4);
-        this.addShopProduct(shop, Material.DARK_OAK_SAPLING, 50, 20, 1, 5);
-        this.addShopProduct(shop, Material.AZALEA, 50, 20, 1, 6);
-        this.addShopProduct(shop, Material.FLOWERING_AZALEA, 50, 20, 1, 7);
-        this.addShopProduct(shop, Material.MANGROVE_PROPAGULE, 50, 20, 1, 8);
-        this.addShopProduct(shop, Material.RED_MUSHROOM, 50, 20, 1, 9);
-        this.addShopProduct(shop, Material.BROWN_MUSHROOM, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.WARPED_FUNGUS, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.CRIMSON_FUNGUS, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.NETHER_WART, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.SHROOMLIGHT, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.POPPY, 50, 20, 1, 18);
-        this.addShopProduct(shop, Material.BLUE_ORCHID, 50, 20, 1, 19);
-        this.addShopProduct(shop, Material.ALLIUM, 50, 20, 1, 20);
-        this.addShopProduct(shop, Material.AZURE_BLUET, 50, 20, 1, 21);
-        this.addShopProduct(shop, Material.ORANGE_TULIP, 50, 20, 1, 22);
-        this.addShopProduct(shop, Material.WHITE_TULIP, 50, 20, 1, 23);
-        this.addShopProduct(shop, Material.PINK_TULIP, 50, 20, 1, 24);
-        this.addShopProduct(shop, Material.RED_TULIP, 50, 20, 1, 25);
-        this.addShopProduct(shop, Material.DANDELION, 50, 20, 1, 26);
-        this.addShopProduct(shop, Material.LILY_OF_THE_VALLEY, 50, 20, 1, 27);
-        this.addShopProduct(shop, Material.WITHER_ROSE, 500, 250, 1, 28);
-        this.addShopProduct(shop, Material.SUNFLOWER, 50, 20, 1, 29);
-        this.addShopProduct(shop, Material.OXEYE_DAISY, 50, 20, 1, 30);
-        this.addShopProduct(shop, Material.LILAC, 50, 20, 1, 31);
-        this.addShopProduct(shop, Material.CORNFLOWER, 50, 20, 1, 32);
-        this.addShopProduct(shop, Material.PEONY, 50, 20, 1, 33);
-        this.addShopProduct(shop, Material.ROSE_BUSH, 50, 20, 1, 34);
-        this.addShopProduct(shop, Material.CHORUS_FLOWER, 50, 20, 1, 35);
-        this.addShopProduct(shop, Material.SUGAR_CANE, 50, 20, 1, 36);
-        this.addShopProduct(shop, Material.CACTUS, 50, 20, 1, 37);
-        this.addShopProduct(shop, Material.BAMBOO, 50, 20, 1, 38);
-        this.addShopProduct(shop, Material.WEEPING_VINES, 50, 20, 1, 39);
-        this.addShopProduct(shop, Material.CRIMSON_ROOTS, 50, 20, 1, 40);
-        this.addShopProduct(shop, Material.WARPED_ROOTS, 50, 20, 1, 41);
-        this.addShopProduct(shop, Material.TWISTING_VINES, 50, 20, 1, 42);
-        this.addShopProduct(shop, Material.NETHER_SPROUTS, 50, 20, 1, 43);
-        this.addShopProduct(shop, Material.SPORE_BLOSSOM, 50, 20, 1, 44);
-        this.addShopProduct(shop, Material.WHEAT_SEEDS, 50, 20, 2, 0);
-        this.addShopProduct(shop, Material.BEETROOT_SEEDS, 50, 20, 2, 1);
-        this.addShopProduct(shop, Material.PUMPKIN_SEEDS, 50, 20, 2, 2);
-        this.addShopProduct(shop, Material.MELON_SEEDS, 50, 20, 2, 3);
-        this.addShopProduct(shop, Material.COCOA_BEANS, 50, 20, 2, 4);
-        this.addShopProduct(shop, Material.POTATO, 50, 20, 2, 5);
-        this.addShopProduct(shop, Material.KELP, 50, 20, 2, 6);
-        this.addShopProduct(shop, Material.WHEAT, 50, 20, 2, 9);
-        this.addShopProduct(shop, Material.BEETROOT, 50, 20, 2, 10);
-        this.addShopProduct(shop, Material.PUMPKIN, 50, 20, 2, 11);
-        this.addShopProduct(shop, Material.MELON, 50, 20, 2, 12);
-        this.addShopProduct(shop, Material.CARROT, 50, 20, 2, 13);
-        this.addShopProduct(shop, Material.SUGAR, 50, 20, 2, 14);
-        this.addShopProduct(shop, Material.DRIED_KELP, 60, 30, 2, 15);
-        this.addShopProduct(shop, Material.HAY_BLOCK, 450, 225, 2, 18);
-        this.addShopProduct(shop, Material.BEE_NEST, 500, 250, 2, 19);
-        this.addShopProduct(shop, Material.HONEYCOMB_BLOCK, 500, 250, 2, 20);
-        this.addShopProduct(shop, Material.HONEY_BLOCK, 1_000, 500, 2, 21);
-        this.addShopProduct(shop, Material.CHORUS_PLANT, 50, 20, 2, 23);
-        this.addShopProduct(shop, Material.DRIED_KELP_BLOCK, 540, 270, 2, 24);
-        this.addShopProduct(shop, Material.SEAGRASS, 50, 20, 2, 27);
-        this.addShopProduct(shop, Material.SEA_PICKLE, 50, 20, 2, 28);
-        this.addShopProduct(shop, Material.HANGING_ROOTS, 50, 20, 2, 29);
-        this.addShopProduct(shop, Material.SPONGE, 1_000, 500, 2, 30);
-        this.addShopProduct(shop, Material.TURTLE_EGG, 1_000, 500, 2, 31);
-        this.addShopProduct(shop, Material.FROGSPAWN, 500, 20, 2, 32);
-        this.addShopProduct(shop, Material.BONE_MEAL, 50, 20, 2, 33);
-
-        shop.save();
-    }
-
-    private void createFishShop() {
-        String name = LIGHT_ORANGE.enclose(BOLD.enclose("Fish Market"));
-        List<String> desc = List.of(GRAY.enclose("Everything you can obtain"), GRAY.enclose("when fishing."));
-
-        StaticShop shop = this.createStaticShop("fish_market", name, desc, new ItemStack(Material.TROPICAL_FISH), 1, 21);
-
-        this.addShopProduct(shop, Material.COD_SPAWN_EGG, 200, 100, 1, 0);
-        this.addShopProduct(shop, Material.SALMON_SPAWN_EGG, 200, 100, 1, 1);
-        this.addShopProduct(shop, Material.TROPICAL_FISH_SPAWN_EGG, 200, 100, 1, 2);
-        this.addShopProduct(shop, Material.PUFFERFISH_SPAWN_EGG, 200, 100, 1, 3);
-        this.addShopProduct(shop, Material.TRIPWIRE_HOOK, 1_000, 500, 1, 6);
-        this.addShopProduct(shop, Material.LILY_PAD, 50, 20, 1, 7);
-        this.addShopProduct(shop, Material.LEATHER_BOOTS, 50, 20, 1, 8);
-        this.addShopProduct(shop, Material.COOKED_COD, 75, 75, 1, 9);
-        this.addShopProduct(shop, Material.COOKED_SALMON, 75, 75, 1, 10);
-        this.addShopProduct(shop, Material.TROPICAL_FISH, 300, 300, 1, 11);
-        this.addShopProduct(shop, Material.PUFFERFISH, 50, 50, 1, 12);
-        this.addShopProduct(shop, Material.INK_SAC, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.BONE, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.COD, 50, 50, 1, 18);
-        this.addShopProduct(shop, Material.SALMON, 50, 50, 1, 19);
-        this.addShopProduct(shop, Material.NAUTILUS_SHELL, 10_000, 5_000, 1, 25);
-        this.addShopProduct(shop, Material.SADDLE, 1_000, 500, 1, 26);
-        this.addShopProduct(shop, Material.BONE_MEAL, 50, 20, 1, 27);
-        this.addShopProduct(shop, Material.BONE_MEAL, 50, 20, 1, 28);
-
-        shop.save();
-    }
-
-    private void createFoodShop() {
-        String name = LIGHT_RED.enclose(BOLD.enclose("Food Market"));
-        List<String> desc = List.of(GRAY.enclose("All regular food."));
-
-        StaticShop shop = this.createStaticShop("food", name, desc, new ItemStack(Material.SWEET_BERRIES), 1, 22);
-
-        this.addShopProduct(shop, Material.APPLE, 50, 20, 1, 0);
-        this.addShopProduct(shop, Material.GOLDEN_APPLE, 1_000, 500, 1, 1);
-        this.addShopProduct(shop, Material.ENCHANTED_GOLDEN_APPLE, 50_000, 25_000, 1, 2);
-        this.addShopProduct(shop, Material.BREAD, 50, 20, 1, 7);
-        this.addShopProduct(shop, Material.RABBIT_STEW, 500, 250, 1, 8);
-        this.addShopProduct(shop, Material.COOKIE, 50, 20, 1, 9);
-        this.addShopProduct(shop, Material.PUMPKIN_PIE, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.CAKE, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.MUSHROOM_STEW, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.MELON_SLICE, 50, 20, 1, 18);
-        this.addShopProduct(shop, Material.CARROT, 50, 20, 1, 19);
-        this.addShopProduct(shop, Material.GOLDEN_CARROT, 1_000, 500, 1, 20);
-        this.addShopProduct(shop, Material.BAKED_POTATO, 75, 50, 1, 21);
-        this.addShopProduct(shop, Material.BOWL, 50, 20, 1, 26);
-        this.addShopProduct(shop, Material.COOKED_PORKCHOP, 100, 50, 1, 27);
-        this.addShopProduct(shop, Material.COOKED_BEEF, 100, 50, 1, 28);
-        this.addShopProduct(shop, Material.COOKED_MUTTON, 100, 50, 1, 29);
-        this.addShopProduct(shop, Material.COOKED_RABBIT, 100, 50, 1, 30);
-        this.addShopProduct(shop, Material.COOKED_CHICKEN, 100, 50, 1, 31);
-        this.addShopProduct(shop, Material.COOKED_SALMON, 100, 50, 1, 32);
-        this.addShopProduct(shop, Material.COOKED_COD, 100, 50, 1, 33);
-        this.addShopProduct(shop, Material.SWEET_BERRIES, 50, 20, 1, 36);
-        this.addShopProduct(shop, Material.GLOW_BERRIES, 50, 20, 1, 37);
-        this.addShopProduct(shop, Material.CHORUS_FRUIT, 50, 20, 1, 38);
-
-        shop.save();
-    }
-
-    private void createHostileLootShop() {
-        String name = LIGHT_GREEN.enclose(BOLD.enclose("Hostile Loot"));
-        List<String> desc = List.of(GRAY.enclose("Everything related to"), GRAY.enclose("hostile mobs and their loot."));
-
-        StaticShop shop = this.createStaticShop("hostile_loot", name, desc, new ItemStack(Material.CREEPER_HEAD), 4, 16);
-
-        this.addShopProduct(shop, Material.SPIDER_SPAWN_EGG, 100, 50, 1, 0);
-        this.addShopProduct(shop, Material.SKELETON_SPAWN_EGG, 100, 50, 1, 1);
-        this.addShopProduct(shop, Material.CREEPER_SPAWN_EGG, 100, 50, 1, 2);
-        this.addShopProduct(shop, Material.SLIME_SPAWN_EGG, 150, 75, 1, 3);
-        this.addShopProduct(shop, Material.SHULKER_SHELL, 500, 250, 1, 4);
-        this.addShopProduct(shop, Material.ENDERMAN_SPAWN_EGG, 100, 50, 1, 5);
-        this.addShopProduct(shop, Material.ENDER_DRAGON_SPAWN_EGG, 2_500_000, 1_250_000, 1, 6);
-        this.addShopProduct(shop, Material.CAVE_SPIDER_SPAWN_EGG, 100, 50, 1, 7);
-        this.addShopProduct(shop, Material.ZOMBIE_SPAWN_EGG, 100, 50, 1, 8);
-        this.addShopProduct(shop, Material.SPIDER_EYE, 80, 40, 1, 9);
-        this.addShopProduct(shop, Material.BONE, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.GUNPOWDER, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.SLIME_BALL, 100, 50, 1, 12);
-        this.addShopProduct(shop, Material.ENDER_PEARL, 100, 50, 1, 14);
-        this.addShopProduct(shop, Material.DRAGON_EGG, 20_000_000, 10_000_000, 1, 15);
-        this.addShopProduct(shop, Material.ROTTEN_FLESH, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.STRING, 50, 20, 1, 18);
-        this.addShopProduct(shop, Material.BONE_MEAL, 50, 20, 1, 19);
-        this.addShopProduct(shop, Material.IRON_INGOT, 100, 100, 1, 26);
-        this.addShopProduct(shop, Material.ARROW, 10, 5, 1, 28);
-        this.addShopProduct(shop, Material.BAKED_POTATO, 75, 50, 1, 34);
-        this.addShopProduct(shop, Material.IRON_NUGGET, 10, 10, 1, 35);
-        this.addShopProduct(shop, Material.POTATO, 50, 20, 1, 43);
-        this.addShopProduct(shop, Material.CARROT, 50, 20, 1, 44);
-        this.addShopProduct(shop, Material.BLAZE_SPAWN_EGG, 200, 100, 2, 0);
-        this.addShopProduct(shop, Material.MAGMA_CUBE_SPAWN_EGG, 200, 100, 2, 1);
-        this.addShopProduct(shop, Material.STRIDER_SPAWN_EGG, 300, 150, 2, 2);
-        this.addShopProduct(shop, Material.HOGLIN_SPAWN_EGG, 150, 75, 2, 3);
-        this.addShopProduct(shop, Material.PIGLIN_SPAWN_EGG, 150, 75, 2, 4);
-        this.addShopProduct(shop, Material.ZOGLIN_SPAWN_EGG, 150, 75, 2, 5);
-        this.addShopProduct(shop, Material.ZOMBIFIED_PIGLIN_SPAWN_EGG, 150, 75, 2, 6);
-        this.addShopProduct(shop, Material.GHAST_SPAWN_EGG, 1_000, 500, 2, 7);
-        this.addShopProduct(shop, Material.WITHER_SKELETON_SPAWN_EGG, 10_000, 1_000, 2, 8);
-        this.addShopProduct(shop, Material.BLAZE_ROD, 200, 100, 2, 9);
-        this.addShopProduct(shop, Material.MAGMA_CREAM, 150, 75, 2, 10);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 2, 11);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 2, 12);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 2, 14);
-        this.addShopProduct(shop, Material.ROTTEN_FLESH, 50, 20, 2, 15);
-        this.addShopProduct(shop, Material.GUNPOWDER, 50, 20, 2, 16);
-        this.addShopProduct(shop, Material.BONE, 50, 20, 2, 17);
-        this.addShopProduct(shop, Material.SADDLE, 1_000, 500, 2, 20);
-        this.addShopProduct(shop, Material.COOKED_PORKCHOP, 100, 50, 2, 21);
-        this.addShopProduct(shop, Material.GOLD_INGOT, 100, 100, 2, 24);
-        this.addShopProduct(shop, Material.GHAST_TEAR, 500, 250, 2, 25);
-        this.addShopProduct(shop, Material.BONE_MEAL, 50, 20, 2, 26);
-        this.addShopProduct(shop, Material.STRING, 50, 20, 2, 29);
-        this.addShopProduct(shop, Material.PORKCHOP, 50, 20, 2, 30);
-        this.addShopProduct(shop, Material.GOLD_NUGGET, 10, 10, 2, 33);
-        this.addShopProduct(shop, Material.DROWNED_SPAWN_EGG, 150, 75, 3, 0);
-        this.addShopProduct(shop, Material.HUSK_SPAWN_EGG, 150, 75, 3, 1);
-        this.addShopProduct(shop, Material.EVOKER_SPAWN_EGG, 200, 100, 3, 2);
-        this.addShopProduct(shop, Material.PILLAGER_SPAWN_EGG, 200, 100, 3, 3);
-        this.addShopProduct(shop, Material.VINDICATOR_SPAWN_EGG, -1, -1, 3, 4);
-        this.addShopProduct(shop, Material.RAVAGER_SPAWN_EGG, 300, 150, 3, 5);
-        this.addShopProduct(shop, Material.WITCH_SPAWN_EGG, 200, 100, 3, 7);
-        this.addShopProduct(shop, Material.ROTTEN_FLESH, 50, 20, 3, 9);
-        this.addShopProduct(shop, Material.ROTTEN_FLESH, 50, 20, 3, 10);
-        this.addShopProduct(shop, Material.TOTEM_OF_UNDYING, 5_000, 2_500, 3, 11);
-        this.addShopProduct(shop, Material.CROSSBOW, 50, 20, 3, 12);
-        this.addShopProduct(shop, Material.EMERALD, 1_000, 1_000, 3, 13);
-        this.addShopProduct(shop, Material.SADDLE, 1_000, 500, 3, 14);
-        this.addShopProduct(shop, Material.EMERALD, 1_000, 1_000, 3, 16);
-        this.addShopProduct(shop, Material.STICK, 50, 20, 3, 17);
-        this.addShopProduct(shop, Material.TRIDENT, 5_000, 2_000, 3, 18);
-        this.addShopProduct(shop, Material.EMERALD, 1_000, 1_000, 3, 20);
-        this.addShopProduct(shop, Material.SUGAR, 50, 50, 3, 25);
-        this.addShopProduct(shop, Material.GLASS_BOTTLE, 50, 20, 3, 26);
-        this.addShopProduct(shop, Material.NAUTILUS_SHELL, 10_000, 5_000, 3, 27);
-        this.addShopProduct(shop, Material.GLOWSTONE_DUST, 50, 20, 3, 34);
-        this.addShopProduct(shop, Material.REDSTONE, 50, 20, 3, 35);
-        this.addShopProduct(shop, Material.COPPER_INGOT, 100, 100, 3, 36);
-        this.addShopProduct(shop, Material.GUNPOWDER, 50, 20, 3, 43);
-        this.addShopProduct(shop, Material.GUARDIAN_SPAWN_EGG, 5_000, 2_500, 4, 0);
-        this.addShopProduct(shop, Material.ELDER_GUARDIAN_SPAWN_EGG, 10_000, 5_000, 4, 1);
-        this.addShopProduct(shop, Material.STRAY_SPAWN_EGG, 1_000, 500, 4, 2);
-        this.addShopProduct(shop, Material.PHANTOM_SPAWN_EGG, 1_000, 500, 4, 3);
-        this.addShopProduct(shop, Material.VEX_SPAWN_EGG, 1_000, 500, 4, 4);
-        this.addShopProduct(shop, Material.ENDERMITE_SPAWN_EGG, 5_000, 2_500, 4, 5);
-        this.addShopProduct(shop, Material.ZOMBIE_VILLAGER_SPAWN_EGG, 300, 150, 4, 6);
-        this.addShopProduct(shop, Material.WARDEN_SPAWN_EGG, 30_000_000, 0, 4, 8);
-        this.addShopProduct(shop, Material.PRISMARINE_CRYSTALS, 50, 20, 4, 9);
-        this.addShopProduct(shop, Material.PRISMARINE_CRYSTALS, 50, 20, 4, 10);
-        this.addShopProduct(shop, Material.TIPPED_ARROW, -1, -1, 4, 11);
-        this.addShopProduct(shop, Material.PHANTOM_MEMBRANE, 300, 150, 4, 12);
-        this.addShopProduct(shop, Material.ROTTEN_FLESH, 50, 20, 4, 15);
-        this.addShopProduct(shop, Material.SCULK_CATALYST, 50_000, 25_000, 4, 17);
-        this.addShopProduct(shop, Material.PRISMARINE_SHARD, 100, 50, 4, 18);
-        this.addShopProduct(shop, Material.PRISMARINE_SHARD, 100, 50, 4, 19);
-        this.addShopProduct(shop, Material.ARROW, 10, 5, 4, 20);
-        this.addShopProduct(shop, Material.PUFFERFISH, 50, 50, 4, 27);
-        this.addShopProduct(shop, Material.WET_SPONGE, 1_000, 500, 4, 28);
-        this.addShopProduct(shop, Material.BONE, 50, 20, 4, 29);
-        this.addShopProduct(shop, Material.COOKED_COD, 100, 50, 4, 36);
-        this.addShopProduct(shop, Material.COD, 50, 50, 4, 37);
-        this.addShopProduct(shop, Material.BOW, 50, 20, 4, 38);
-
-        shop.save();
-    }
-
-    private void createPeacefulLoot() {
-        String name = LIGHT_PINK.enclose(BOLD.enclose("Peaceful Loot"));
-        List<String> desc = List.of(GRAY.enclose("Everything related to"), GRAY.enclose("peaceful mobs and their loot."));
-        ItemStack icon = ItemUtil.getSkinHead("9b1760e3778f8087046b86bec6a0a83a567625f30f0d6bce866d4bed95dba6c1");
-
-        StaticShop shop = this.createStaticShop("peaceful_loot", name, desc, icon, 3, 15);
-
-        this.addShopProduct(shop, Material.COW_SPAWN_EGG, 100, 50, 1, 0);
-        this.addShopProduct(shop, Material.MOOSHROOM_SPAWN_EGG, 1_000, 500, 1, 1);
-        this.addShopProduct(shop, Material.PIG_SPAWN_EGG, 100, 50, 1, 2);
-        this.addShopProduct(shop, Material.SHEEP_SPAWN_EGG, 100, 50, 1, 3);
-        this.addShopProduct(shop, Material.HORSE_SPAWN_EGG, 100, 50, 1, 4);
-        this.addShopProduct(shop, Material.SKELETON_HORSE_SPAWN_EGG, 1_000, 500, 1, 5);
-        this.addShopProduct(shop, Material.ZOMBIE_HORSE_SPAWN_EGG, 5_000, 2_500, 1, 6);
-        this.addShopProduct(shop, Material.DONKEY_SPAWN_EGG, 100, 50, 1, 7);
-        this.addShopProduct(shop, Material.MULE_SPAWN_EGG, 100, 50, 1, 8);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 1, 9);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.COOKED_PORKCHOP, 100, 50, 1, 11);
-        this.addShopProduct(shop, Material.COOKED_MUTTON, 100, 50, 1, 12);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.BONE, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.ROTTEN_FLESH, 50, 20, 1, 15);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 1, 17);
-        this.addShopProduct(shop, Material.COOKED_BEEF, 100, 50, 1, 18);
-        this.addShopProduct(shop, Material.COOKED_BEEF, 100, 50, 1, 19);
-        this.addShopProduct(shop, Material.PORKCHOP, 50, 20, 1, 20);
-        this.addShopProduct(shop, Material.MUTTON, 50, 20, 1, 21);
-        this.addShopProduct(shop, Material.BEEF, 50, 20, 1, 27);
-        this.addShopProduct(shop, Material.BEEF, 50, 20, 1, 28);
-        this.addShopProduct(shop, Material.BEE_SPAWN_EGG, 5_000, 2_500, 1, 34);
-        this.addShopProduct(shop, Material.ALLAY_SPAWN_EGG, 100_000, 50_000, 1, 35);
-        this.addShopProduct(shop, Material.WOLF_SPAWN_EGG, 300, 150, 1, 43);
-        this.addShopProduct(shop, Material.FROG_SPAWN_EGG, 5_000, 2_500, 1, 44);
-        this.addShopProduct(shop, Material.CHICKEN_SPAWN_EGG, 50, 20, 2, 0);
-        this.addShopProduct(shop, Material.RABBIT_SPAWN_EGG, 50, 20, 2, 1);
-        this.addShopProduct(shop, Material.TURTLE_SPAWN_EGG, 100, 50, 2, 2);
-        this.addShopProduct(shop, Material.GLOW_SQUID_SPAWN_EGG, 100, 50, 2, 3);
-        this.addShopProduct(shop, Material.IRON_GOLEM_SPAWN_EGG, 100, 50, 2, 4);
-        this.addShopProduct(shop, Material.SNOW_GOLEM_SPAWN_EGG, 300, 150, 2, 5);
-        this.addShopProduct(shop, Material.CAT_SPAWN_EGG, 50, 20, 2, 6);
-        this.addShopProduct(shop, Material.OCELOT_SPAWN_EGG, 300, 150, 2, 7);
-        this.addShopProduct(shop, Material.FOX_SPAWN_EGG, 300, 150, 2, 8);
-        this.addShopProduct(shop, Material.COOKED_CHICKEN, 100, 50, 2, 9);
-        this.addShopProduct(shop, Material.COOKED_RABBIT, 100, 50, 2, 10);
-        this.addShopProduct(shop, Material.SCUTE, 10_000, 10_000, 2, 11);
-        this.addShopProduct(shop, Material.INK_SAC, 50, 20, 2, 12);
-        this.addShopProduct(shop, Material.POPPY, 50, 20, 2, 13);
-        this.addShopProduct(shop, Material.SNOWBALL, 50, 20, 2, 14);
-        this.addShopProduct(shop, Material.STRING, 50, 20, 2, 15);
-        this.addShopProduct(shop, Material.CHICKEN, 50, 20, 2, 18);
-        this.addShopProduct(shop, Material.RABBIT, 50, 20, 2, 19);
-        this.addShopProduct(shop, Material.SEAGRASS, 50, 20, 2, 20);
-        this.addShopProduct(shop, Material.GLOW_INK_SAC, 50, 20, 2, 21);
-        this.addShopProduct(shop, Material.IRON_INGOT, 100, 100, 2, 22);
-        this.addShopProduct(shop, Material.EGG, 50, 20, 2, 27);
-        this.addShopProduct(shop, Material.RABBIT_HIDE, 50, 20, 2, 28);
-        this.addShopProduct(shop, Material.BOWL, 50, 20, 2, 29);
-        this.addShopProduct(shop, Material.FEATHER, 50, 20, 2, 36);
-        this.addShopProduct(shop, Material.RABBIT_FOOT, 50, 20, 2, 37);
-        this.addShopProduct(shop, Material.POLAR_BEAR_SPAWN_EGG, 500, 250, 3, 0);
-        this.addShopProduct(shop, Material.PANDA_SPAWN_EGG, 1_000, 500, 3, 1);
-        this.addShopProduct(shop, Material.PARROT_SPAWN_EGG, 100, 50, 3, 2);
-        this.addShopProduct(shop, Material.AXOLOTL_SPAWN_EGG, 10_000, 5_000, 3, 3);
-        this.addShopProduct(shop, Material.DOLPHIN_SPAWN_EGG, 5_000, 2_500, 3, 4);
-        this.addShopProduct(shop, Material.GOAT_SPAWN_EGG, 1_000, 500, 3, 5);
-        this.addShopProduct(shop, Material.WANDERING_TRADER_SPAWN_EGG, 1_000, 500, 3, 6);
-        this.addShopProduct(shop, Material.TRADER_LLAMA_SPAWN_EGG, 1_000, 500, 3, 7);
-        this.addShopProduct(shop, Material.LLAMA_SPAWN_EGG, 1_000, 500, 3, 8);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 3, 9);
-        this.addShopProduct(shop, Material.BAMBOO, 50, 20, 3, 10);
-        this.addShopProduct(shop, Material.FEATHER, 50, 20, 3, 11);
-        this.addShopProduct(shop, Material.COOKED_COD, 75, 75, 3, 13);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 3, 16);
-        this.addShopProduct(shop, Material.LEATHER, 50, 20, 3, 17);
-        this.addShopProduct(shop, Material.COOKED_COD, 75, 75, 3, 18);
-        this.addShopProduct(shop, Material.COD, 50, 50, 3, 22);
-        this.addShopProduct(shop, Material.LEAD, 50, 20, 3, 25);
-        this.addShopProduct(shop, Material.COD, 50, 50, 3, 27);
-
-        shop.save();
-    }
-
-    private void createToolShop() {
-        String name = LIGHT_CYAN.enclose(BOLD.enclose("Tool Store"));
-        List<String> desc = List.of(GRAY.enclose("All type tools."));
-
-        StaticShop shop = this.createStaticShop("tools", name, desc, new ItemStack(Material.DIAMOND_PICKAXE), 1, 10);
-
-        this.addShopProduct(shop, Material.COMPASS, 50, 20, 1, 1);
-        this.addShopProduct(shop, Material.SHEARS, 50, 20, 1, 3);
-        this.addShopProduct(shop, Material.FISHING_ROD, 50, 20, 1, 5);
-        this.addShopProduct(shop, Material.CLOCK, 50, 20, 1, 7);
-        this.addShopProduct(shop, Material.WOODEN_SHOVEL, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.STONE_SHOVEL, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.IRON_SHOVEL, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.DIAMOND_SHOVEL, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.WOODEN_PICKAXE, 50, 20, 1, 19);
-        this.addShopProduct(shop, Material.STONE_PICKAXE, 50, 20, 1, 21);
-        this.addShopProduct(shop, Material.IRON_PICKAXE, 50, 20, 1, 23);
-        this.addShopProduct(shop, Material.DIAMOND_PICKAXE, 50, 20, 1, 25);
-        this.addShopProduct(shop, Material.WOODEN_HOE, 50, 20, 1, 28);
-        this.addShopProduct(shop, Material.STONE_HOE, 50, 20, 1, 30);
-        this.addShopProduct(shop, Material.IRON_HOE, 50, 20, 1, 32);
-        this.addShopProduct(shop, Material.DIAMOND_HOE, 50, 20, 1, 34);
-        this.addShopProduct(shop, Material.WOODEN_AXE, 50, 20, 1, 37);
-        this.addShopProduct(shop, Material.STONE_AXE, 50, 20, 1, 39);
-        this.addShopProduct(shop, Material.IRON_AXE, 50, 20, 1, 41);
-        this.addShopProduct(shop, Material.DIAMOND_AXE, 50, 20, 1, 43);
-
-        shop.save();
-    }
-
-    private void createWeaponShop() {
-        String name = YELLOW.enclose(BOLD.enclose("Armory"));
-        List<String> desc = List.of(GRAY.enclose("All type armors and weapons."));
-
-        StaticShop shop = this.createStaticShop("weapons", name, desc, new ItemStack(Material.GOLDEN_SWORD), 2, 11);
-
-        this.addShopProduct(shop, Material.SHIELD, 50, 20, 1, 4);
-        this.addShopProduct(shop, Material.BOW, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.ARROW, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.CROSSBOW, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.WOODEN_SWORD, 50, 20, 1, 20);
-        this.addShopProduct(shop, Material.STONE_SWORD, 50, 20, 1, 21);
-        this.addShopProduct(shop, Material.GOLDEN_SWORD, 50, 20, 1, 22);
-        this.addShopProduct(shop, Material.IRON_SWORD, 50, 20, 1, 23);
-        this.addShopProduct(shop, Material.DIAMOND_SWORD, 50, 20, 1, 24);
-        this.addShopProduct(shop, Material.TRIDENT, 5_000, 2_000, 1, 31);
-        this.addShopProduct(shop, Material.LEATHER_HELMET, 50, 20, 2, 1);
-        this.addShopProduct(shop, Material.GOLDEN_HELMET, 50, 20, 2, 2);
-        this.addShopProduct(shop, Material.DIAMOND_HELMET, 50, 20, 2, 4);
-        this.addShopProduct(shop, Material.CHAINMAIL_HELMET, 50, 20, 2, 6);
-        this.addShopProduct(shop, Material.IRON_HELMET, 50, 20, 2, 7);
-        this.addShopProduct(shop, Material.LEATHER_CHESTPLATE, 50, 20, 2, 10);
-        this.addShopProduct(shop, Material.GOLDEN_CHESTPLATE, 50, 20, 2, 11);
-        this.addShopProduct(shop, Material.DIAMOND_CHESTPLATE, 50, 20, 2, 13);
-        this.addShopProduct(shop, Material.CHAINMAIL_CHESTPLATE, 50, 20, 2, 15);
-        this.addShopProduct(shop, Material.IRON_CHESTPLATE, 50, 20, 2, 16);
-        this.addShopProduct(shop, Material.LEATHER_LEGGINGS, 50, 20, 2, 19);
-        this.addShopProduct(shop, Material.GOLDEN_LEGGINGS, 50, 20, 2, 20);
-        this.addShopProduct(shop, Material.DIAMOND_LEGGINGS, 50, 20, 2, 22);
-        this.addShopProduct(shop, Material.CHAINMAIL_LEGGINGS, 50, 20, 2, 24);
-        this.addShopProduct(shop, Material.IRON_LEGGINGS, 50, 20, 2, 25);
-        this.addShopProduct(shop, Material.LEATHER_BOOTS, 50, 20, 2, 28);
-        this.addShopProduct(shop, Material.GOLDEN_BOOTS, 50, 20, 2, 29);
-        this.addShopProduct(shop, Material.DIAMOND_BOOTS, 50, 20, 2, 31);
-        this.addShopProduct(shop, Material.CHAINMAIL_BOOTS, 50, 20, 2, 33);
-        this.addShopProduct(shop, Material.IRON_BOOTS, 50, 20, 2, 34);
-
-        shop.save();
-    }
-
-    private void createWoolShop() {
-        String name = LIGHT_GREEN.enclose(BOLD.enclose("Wool Market"));
-        List<String> desc = List.of(GRAY.enclose("Wool with colors."));
-
-        StaticShop shop = this.createStaticShop("wool", name, desc, new ItemStack(Material.LIME_WOOL), 1, 13);
-
-        this.addShopProduct(shop, Material.WHITE_WOOL, 50, 20, 1, 10);
-        this.addShopProduct(shop, Material.ORANGE_WOOL, 50, 20, 1, 11);
-        this.addShopProduct(shop, Material.MAGENTA_WOOL, 50, 20, 1, 12);
-        this.addShopProduct(shop, Material.LIGHT_BLUE_WOOL, 50, 20, 1, 13);
-        this.addShopProduct(shop, Material.YELLOW_WOOL, 50, 20, 1, 14);
-        this.addShopProduct(shop, Material.LIME_WOOL, 50, 20, 1, 15);
-        this.addShopProduct(shop, Material.PINK_WOOL, 50, 20, 1, 16);
-        this.addShopProduct(shop, Material.GRAY_WOOL, 50, 20, 1, 19);
-        this.addShopProduct(shop, Material.LIGHT_GRAY_WOOL, 50, 20, 1, 20);
-        this.addShopProduct(shop, Material.CYAN_WOOL, 50, 20, 1, 21);
-        this.addShopProduct(shop, Material.PURPLE_WOOL, 50, 20, 1, 22);
-        this.addShopProduct(shop, Material.BLUE_WOOL, 50, 20, 1, 23);
-        this.addShopProduct(shop, Material.BROWN_WOOL, 50, 20, 1, 24);
-        this.addShopProduct(shop, Material.GREEN_WOOL, 50, 20, 1, 25);
-        this.addShopProduct(shop, Material.RED_WOOL, 50, 20, 1, 30);
-        this.addShopProduct(shop, Material.BLACK_WOOL, 50, 20, 1, 32);
-
-        shop.save();
-    }
-
-    private void createTravellerShop() {
-        String name = GREEN.enclose(BOLD.enclose("Traveller Shop"));
-        List<String> desc = List.of(GRAY.enclose("Shop with items changing"), GRAY.enclose("every 24 hours."));
-
-        RotatingShop shop = this.createRotatingShop("traveller", name, desc, new ItemStack(Material.ENDER_EYE));
-
-        this.addShopProduct(shop, Material.EXPERIENCE_BOTTLE, 100, 25);
-        this.addShopProduct(shop, Material.ENDER_EYE, 350, 15);
-        this.addShopProduct(shop, Material.IRON_INGOT, 100, 25);
-        this.addShopProduct(shop, Material.GOLD_INGOT, 100, 25);
-        this.addShopProduct(shop, Material.LAPIS_LAZULI, 100, 25);
-        this.addShopProduct(shop, Material.FLINT, 100, 25);
-        this.addShopProduct(shop, Material.EGG, 25, 5);
-        this.addShopProduct(shop, Material.TNT, 400, 35);
-        this.addShopProduct(shop, Material.CARROT, 35, 5);
-        this.addShopProduct(shop, Material.GOLD_NUGGET, 100, 25);
-        this.addShopProduct(shop, Material.IRON_NUGGET, 100, 25);
-        this.addShopProduct(shop, Material.WHEAT, 100, 25);
-        this.addShopProduct(shop, Material.STICK, 100, 25);
-        this.addShopProduct(shop, Material.LEATHER, 100, 25);
-        this.addShopProduct(shop, Material.COPPER_INGOT, 100, 25);
-        this.addShopProduct(shop, Material.GRAY_DYE, 15, 1);
-        this.addShopProduct(shop, Material.BOOK, 10, 1);
-        this.addShopProduct(shop, Material.GLASS_BOTTLE, 20, 2);
-        this.addShopProduct(shop, Material.MELON_SLICE, 100, 25);
-        this.addShopProduct(shop, Material.NAUTILUS_SHELL, 100, 25);
-        this.addShopProduct(shop, Material.HEART_OF_THE_SEA, 100, 25);
-        this.addShopProduct(shop, Material.FIRE_CHARGE, 100, 25);
-        this.addShopProduct(shop, Material.NAME_TAG, 100, 25);
-        this.addShopProduct(shop, Material.APPLE, 100, 25);
-        this.addShopProduct(shop, Material.LEAD, 100, 25);
-        this.addShopProduct(shop, Material.COOKED_COD, 100, 25);
-        this.addShopProduct(shop, Material.SPIDER_EYE, 100, 25);
-
-        shop.save();
-        shop.rotate();
-    }
-
-    @NotNull
-    private RotatingShop createRotatingShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon) {
-        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_ROTATING_SHOPS + id, AbstractVirtualShop.FILE_NAME);
-        FileUtil.create(file);
-
-        RotatingShop shop = new RotatingShop(this.plugin, this.module, file, id);
-        shop.setDefaultLayout(Placeholders.DEFAULT);
-        shop.setRotationType(RotationType.INTERVAL);
-        shop.setRotationInterval(86400);
-        shop.setProductMinAmount(15);
-        shop.setProductMaxAmount(15);
-        shop.setProductSlots(new int[]{10,11,12,13,14,15,16,20,21,22,23,24,30,31,32});
-        this.setShopSettings(shop, name, description, icon);
-
-        return shop;
-    }
-
-    @NotNull
-    private StaticShop createStaticShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon, int pages, int menuSlot) {
-        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, AbstractVirtualShop.FILE_NAME);
-        FileUtil.create(file);
-
-        StaticShop shop = new StaticShop(this.plugin, this.module, file, id);
-        shop.setPages(pages);
-        shop.setMainMenuSlot(menuSlot);
-        shop.setDefaultLayout(Placeholders.DEFAULT);
-        this.setShopSettings(shop, name, description, icon);
-
-        return shop;
-    }
-
-    private void setShopSettings(@NotNull AbstractVirtualShop<?> shop, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon) {
-        shop.setName(name);
-        shop.setDescription(new ArrayList<>(description));
-        shop.setIcon(icon);
-        shop.setPermissionRequired(false);
-        for (TradeType tradeType : TradeType.values()) {
-            shop.setTransactionEnabled(tradeType, true);
+    private void addBuildingBlocksItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.GRASS_BLOCK, 50, 2, 1, 1);
+        this.addShopProduct(shop, Material.DIRT, 20, 1, 1, 2);
+        this.addShopProduct(shop, Material.COARSE_DIRT, 20, 1, 1, 3);
+        this.addShopProduct(shop, Material.FARMLAND, -1, -1, 1, 4);
+        this.addShopProduct(shop, Material.ROOTED_DIRT, 25, 1, 1, 5);
+        this.addShopProduct(shop, Material.PODZOL, 20, 1, 1, 6);
+        this.addShopProduct(shop, Material.MYCELIUM, 50, -1, 1, 7);
+        this.addShopProduct(shop, Material.CRIMSON_NYLIUM, 75, 1, 1, 10);
+        this.addShopProduct(shop, Material.WARPED_NYLIUM, 150, 2, 1, 11);
+        this.addShopProduct(shop, Material.WARPED_WART_BLOCK, -1, -1, 1, 12);
+        this.addShopProduct(shop, Material.GRAVEL, 50, 2, 1, 13);
+        this.addShopProduct(shop, Material.GLASS, 4, 0.5, 1, 14);
+        this.addShopProduct(shop, Material.GLASS_PANE, 2.5, 0.1, 1, 15);
+        this.addShopProduct(shop, Material.ICE, 20, 2.5, 1, 16);
+        this.addShopProduct(shop, Material.BLUE_ICE, 20, 2.5, 1, 19);
+        this.addShopProduct(shop, Material.PACKED_ICE, 40, 3, 1, 20);
+        this.addShopProduct(shop, Material.SNOW_BLOCK, -1, -1, 1, 21);
+        this.addShopProduct(shop, Material.OBSIDIAN, 500, 25, 1, 22);
+        this.addShopProduct(shop, Material.CRYING_OBSIDIAN, 1_500, 50, 1, 23);
+        this.addShopProduct(shop, Material.RESPAWN_ANCHOR, 185_000, 500, 1, 24);
+        this.addShopProduct(shop, Material.BOOKSHELF, 100, -1, 1, 25);
+        this.addShopProduct(shop, Material.SOUL_SAND, 2_000, 15, 1, 28);
+        this.addShopProduct(shop, Material.SOUL_SOIL, 2_000, 25, 1, 29);
+        this.addShopProduct(shop, Material.ANCIENT_DEBRIS, -1, -1, 1, 30);
+        this.addShopProduct(shop, Material.GLOWSTONE, 20, 10, 1, 31);
+        this.addShopProduct(shop, Material.HAY_BLOCK, 250, -1, 1, 32);
+        this.addShopProduct(shop, Material.MAGMA_BLOCK, 175, 10, 1, 33);
+        this.addShopProduct(shop, Material.BONE_BLOCK, 200, 15, 1, 34);
+        this.addShopProduct(shop, Material.MUD, 20, 1, 2, 3);
+        this.addShopProduct(shop, Material.SCULK, 35, 2.5, 2, 5);
+        this.addShopProduct(shop, Material.DRIED_KELP_BLOCK, 150, 15, 2, 11);
+        this.addShopProduct(shop, Material.BEE_NEST, 200, 4, 2, 12);
+        this.addShopProduct(shop, Material.BEEHIVE, 130, 2, 2, 13);
+        this.addShopProduct(shop, Material.HONEY_BLOCK, 100, 1, 2, 14);
+        this.addShopProduct(shop, Material.HONEYCOMB_BLOCK, 160, 2, 2, 15);
+        this.addShopProduct(shop, Material.BASALT, 250, 3, 2, 19);
+        this.addShopProduct(shop, Material.POLISHED_BASALT, 275, 3, 2, 20);
+        this.addShopProduct(shop, Material.SMOOTH_BASALT, 275, 3, 2, 21);
+        this.addShopProduct(shop, Material.TUFF, 40, 1.5, 2, 22);
+        this.addShopProduct(shop, Material.DRIPSTONE_BLOCK, 125, 1, 2, 23);
+        this.addShopProduct(shop, Material.CALCITE, 150, 1.5, 2, 24);
+        this.addShopProduct(shop, Material.MOSS_BLOCK, 100, 1, 2, 25);
+        this.addShopProduct(shop, Material.AMETHYST_BLOCK, 750, 50, 2, 29);
+        this.addShopProduct(shop, Material.BUDDING_AMETHYST, 350, 20, 2, 30);
+        this.addShopProduct(shop, Material.PEARLESCENT_FROGLIGHT, 40, 5, 2, 31);
+        this.addShopProduct(shop, Material.OCHRE_FROGLIGHT, 40, 5, 2, 32);
+        this.addShopProduct(shop, Material.VERDANT_FROGLIGHT, 40, 5, 2, 33);
+        this.addShopProduct(shop, Material.OAK_WOOD, 20, 1, 3, 0);
+        this.addShopProduct(shop, Material.OAK_LOG, 15, 1, 3, 1);
+        this.addShopProduct(shop, Material.OAK_PLANKS, 4, 0.2, 3, 2);
+        this.addShopProduct(shop, Material.OAK_STAIRS, 8, 1.1, 3, 3);
+        this.addShopProduct(shop, Material.OAK_SLAB, 3, 0.1, 3, 4);
+        this.addShopProduct(shop, Material.OAK_FENCE, 8, 1, 3, 5);
+        this.addShopProduct(shop, Material.OAK_FENCE_GATE, 12, 0.5, 3, 6);
+        this.addShopProduct(shop, Material.OAK_DOOR, 20, 1, 3, 7);
+        this.addShopProduct(shop, Material.OAK_TRAPDOOR, 25, 1, 3, 8);
+        this.addShopProduct(shop, Material.SPRUCE_WOOD, 20, 1, 3, 9);
+        this.addShopProduct(shop, Material.SPRUCE_LOG, 15, 1, 3, 10);
+        this.addShopProduct(shop, Material.SPRUCE_PLANKS, 4, 0.2, 3, 11);
+        this.addShopProduct(shop, Material.SPRUCE_STAIRS, 8, 1.1, 3, 12);
+        this.addShopProduct(shop, Material.SPRUCE_SLAB, 3, 0.1, 3, 13);
+        this.addShopProduct(shop, Material.SPRUCE_FENCE, 8, 1, 3, 14);
+        this.addShopProduct(shop, Material.SPRUCE_FENCE_GATE, 12, 0.5, 3, 15);
+        this.addShopProduct(shop, Material.SPRUCE_DOOR, 20, 1, 3, 16);
+        this.addShopProduct(shop, Material.SPRUCE_TRAPDOOR, 25, 1, 3, 17);
+        this.addShopProduct(shop, Material.BIRCH_WOOD, 20, 1, 3, 18);
+        this.addShopProduct(shop, Material.BIRCH_LOG, 15, 1, 3, 19);
+        this.addShopProduct(shop, Material.BIRCH_PLANKS, 4, 0.2, 3, 20);
+        this.addShopProduct(shop, Material.BIRCH_STAIRS, 8, 1.1, 3, 21);
+        this.addShopProduct(shop, Material.BIRCH_SLAB, 3, 0.1, 3, 22);
+        this.addShopProduct(shop, Material.BIRCH_FENCE, 8, 1, 3, 23);
+        this.addShopProduct(shop, Material.BIRCH_FENCE_GATE, 12, 0.5, 3, 24);
+        this.addShopProduct(shop, Material.BIRCH_DOOR, 20, 1, 3, 25);
+        this.addShopProduct(shop, Material.BIRCH_TRAPDOOR, 25, 1, 3, 26);
+        this.addShopProduct(shop, Material.JUNGLE_WOOD, 20, 1, 3, 27);
+        this.addShopProduct(shop, Material.JUNGLE_LOG, 15, 1, 3, 28);
+        this.addShopProduct(shop, Material.JUNGLE_PLANKS, 4, 0.2, 3, 29);
+        this.addShopProduct(shop, Material.JUNGLE_STAIRS, 8, 1.1, 3, 30);
+        this.addShopProduct(shop, Material.JUNGLE_SLAB, 3, 0.1, 3, 31);
+        this.addShopProduct(shop, Material.JUNGLE_FENCE, 8, 1, 3, 32);
+        this.addShopProduct(shop, Material.JUNGLE_FENCE_GATE, 12, 0.5, 3, 33);
+        this.addShopProduct(shop, Material.JUNGLE_DOOR, 20, 1, 3, 34);
+        this.addShopProduct(shop, Material.JUNGLE_TRAPDOOR, 25, 1, 3, 35);
+        this.addShopProduct(shop, Material.ACACIA_WOOD, 20, 1, 4, 0);
+        this.addShopProduct(shop, Material.ACACIA_LOG, 15, 1, 4, 1);
+        this.addShopProduct(shop, Material.ACACIA_PLANKS, 4, 0.2, 4, 2);
+        this.addShopProduct(shop, Material.ACACIA_STAIRS, 8, 1.1, 4, 3);
+        this.addShopProduct(shop, Material.ACACIA_SLAB, 3, 0.1, 4, 4);
+        this.addShopProduct(shop, Material.ACACIA_FENCE, 8, 1, 4, 5);
+        this.addShopProduct(shop, Material.ACACIA_FENCE_GATE, 12, 0.5, 4, 6);
+        this.addShopProduct(shop, Material.ACACIA_DOOR, 20, 1, 4, 7);
+        this.addShopProduct(shop, Material.ACACIA_TRAPDOOR, 25, 1, 4, 8);
+        this.addShopProduct(shop, Material.DARK_OAK_WOOD, 20, 1, 4, 9);
+        this.addShopProduct(shop, Material.DARK_OAK_LOG, 15, 1, 4, 10);
+        this.addShopProduct(shop, Material.DARK_OAK_PLANKS, 4, 0.2, 4, 11);
+        this.addShopProduct(shop, Material.DARK_OAK_STAIRS, 8, 1.1, 4, 12);
+        this.addShopProduct(shop, Material.DARK_OAK_SLAB, 3, 0.1, 4, 13);
+        this.addShopProduct(shop, Material.DARK_OAK_FENCE, 8, 1, 4, 14);
+        this.addShopProduct(shop, Material.DARK_OAK_FENCE_GATE, 12, 0.5, 4, 15);
+        this.addShopProduct(shop, Material.DARK_OAK_DOOR, 20, 1, 4, 16);
+        this.addShopProduct(shop, Material.DARK_OAK_TRAPDOOR, 25, 1, 4, 17);
+        this.addShopProduct(shop, Material.COBBLESTONE, 3.5, 0.1, 4, 18);
+        this.addShopProduct(shop, Material.COBBLESTONE_STAIRS, 6, 0.15, 4, 19);
+        this.addShopProduct(shop, Material.COBBLESTONE_SLAB, 3.5, 0.08, 4, 20);
+        this.addShopProduct(shop, Material.COBBLESTONE_WALL, 4, 0.1, 4, 21);
+        this.addShopProduct(shop, Material.STONE, 5, 0.2, 4, 22);
+        this.addShopProduct(shop, Material.STONE_STAIRS, 10, 0.3, 4, 23);
+        this.addShopProduct(shop, Material.STONE_SLAB, 35, 0.1, 4, 24);
+        this.addShopProduct(shop, Material.SMOOTH_STONE, 30, 1, 4, 25);
+        this.addShopProduct(shop, Material.SMOOTH_STONE_SLAB, 25, 0.5, 4, 26);
+        this.addShopProduct(shop, Material.STONE_BRICKS, 25, 0.5, 4, 28);
+        this.addShopProduct(shop, Material.STONE_BRICK_STAIRS, 45, 1, 4, 29);
+        this.addShopProduct(shop, Material.STONE_BRICK_SLAB, 15, 0.2, 4, 30);
+        this.addShopProduct(shop, Material.STONE_BRICK_WALL, 30, 0.5, 4, 32);
+        this.addShopProduct(shop, Material.CRACKED_STONE_BRICKS, 25, 0.5, 4, 33);
+        this.addShopProduct(shop, Material.CHISELED_STONE_BRICKS, 35, 0.5, 4, 34);
+        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE, 5, 0.1, 5, 0);
+        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE_STAIRS, 10, 0.2, 5, 1);
+        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE_SLAB, 5, 0.1, 5, 2);
+        this.addShopProduct(shop, Material.MOSSY_COBBLESTONE_WALL, 4, 0.1, 5, 3);
+        this.addShopProduct(shop, Material.MOSSY_STONE_BRICKS, 30, 0.5, 5, 5);
+        this.addShopProduct(shop, Material.MOSSY_STONE_BRICK_STAIRS, 60, 1, 5, 6);
+        this.addShopProduct(shop, Material.MOSSY_STONE_BRICK_SLAB, 30, 0.1, 5, 7);
+        this.addShopProduct(shop, Material.MOSSY_STONE_BRICK_WALL, 40, 0.5, 5, 8);
+        this.addShopProduct(shop, Material.ANDESITE, 4, 0.5, 5, 10);
+        this.addShopProduct(shop, Material.ANDESITE_STAIRS, 8, 0.5, 5, 11);
+        this.addShopProduct(shop, Material.ANDESITE_SLAB, 4, 0.5, 5, 12);
+        this.addShopProduct(shop, Material.ANDESITE_WALL, 10, 0.5, 5, 13);
+        this.addShopProduct(shop, Material.POLISHED_ANDESITE, 8, 0.6, 5, 14);
+        this.addShopProduct(shop, Material.POLISHED_ANDESITE_STAIRS, 16, 1, 5, 15);
+        this.addShopProduct(shop, Material.POLISHED_ANDESITE_SLAB, 8, 0.6, 5, 16);
+        this.addShopProduct(shop, Material.DIORITE, 4, 0.5, 5, 19);
+        this.addShopProduct(shop, Material.DIORITE_STAIRS, 8, 0.5, 5, 20);
+        this.addShopProduct(shop, Material.DIORITE_SLAB, 4, 0.5, 5, 21);
+        this.addShopProduct(shop, Material.DIORITE_WALL, 10, 0.5, 5, 22);
+        this.addShopProduct(shop, Material.POLISHED_DIORITE, 8, 0.6, 5, 23);
+        this.addShopProduct(shop, Material.POLISHED_DIORITE_STAIRS, 16, 1, 5, 24);
+        this.addShopProduct(shop, Material.POLISHED_DIORITE_SLAB, 8, 0.6, 5, 25);
+        this.addShopProduct(shop, Material.GRANITE, 4, 0.5, 5, 28);
+        this.addShopProduct(shop, Material.GRANITE_STAIRS, 8, 0.5, 5, 29);
+        this.addShopProduct(shop, Material.GRANITE_SLAB, 4, 0.5, 5, 30);
+        this.addShopProduct(shop, Material.GRANITE_WALL, 10, 0.5, 5, 31);
+        this.addShopProduct(shop, Material.POLISHED_GRANITE, 8, 0.6, 5, 32);
+        this.addShopProduct(shop, Material.POLISHED_GRANITE_STAIRS, 16, 1, 5, 33);
+        this.addShopProduct(shop, Material.POLISHED_GRANITE_SLAB, 8, 0.6, 5, 34);
+        this.addShopProduct(shop, Material.SAND, 10, 0.5, 6, 0);
+        this.addShopProduct(shop, Material.CHISELED_SANDSTONE, 35, 0.3, 6, 1);
+        this.addShopProduct(shop, Material.SANDSTONE, 25, 0.5, 6, 2);
+        this.addShopProduct(shop, Material.CUT_SANDSTONE, 35, 0.3, 6, 3);
+        this.addShopProduct(shop, Material.DARK_PRISMARINE, 30, 2.5, 6, 4);
+        this.addShopProduct(shop, Material.SMOOTH_SANDSTONE, 35, 0.3, 6, 5);
+        this.addShopProduct(shop, Material.SANDSTONE_STAIRS, 45, 1, 6, 6);
+        this.addShopProduct(shop, Material.SANDSTONE_SLAB, 15, 0.2, 6, 7);
+        this.addShopProduct(shop, Material.SANDSTONE_WALL, 50, 1, 6, 8);
+        this.addShopProduct(shop, Material.RED_SAND, 15, 1, 6, 9);
+        this.addShopProduct(shop, Material.CHISELED_RED_SANDSTONE, 85, 1.5, 6, 10);
+        this.addShopProduct(shop, Material.RED_SANDSTONE, 50, 0.2, 6, 11);
+        this.addShopProduct(shop, Material.CUT_RED_SANDSTONE, 35, 0.3, 6, 12);
+        this.addShopProduct(shop, Material.DARK_PRISMARINE_STAIRS, 75, 4, 6, 13);
+        this.addShopProduct(shop, Material.SMOOTH_RED_SANDSTONE, 35, 0.3, 6, 14);
+        this.addShopProduct(shop, Material.RED_SANDSTONE_STAIRS, 80, 2, 6, 15);
+        this.addShopProduct(shop, Material.RED_SANDSTONE_SLAB, 40, 1, 6, 16);
+        this.addShopProduct(shop, Material.RED_SANDSTONE_WALL, 60, 1.1, 6, 17);
+        this.addShopProduct(shop, Material.PRISMARINE, 15, 1, 6, 18);
+        this.addShopProduct(shop, Material.PRISMARINE_STAIRS, 60, 2.5, 6, 19);
+        this.addShopProduct(shop, Material.PRISMARINE_SLAB, 8, 0.5, 6, 20);
+        this.addShopProduct(shop, Material.PRISMARINE_WALL, 45, 1, 6, 21);
+        this.addShopProduct(shop, Material.DARK_PRISMARINE_SLAB, 25, 1, 6, 22);
+        this.addShopProduct(shop, Material.SEA_LANTERN, 150, 5, 6, 23);
+        this.addShopProduct(shop, Material.PRISMARINE_BRICKS, 30, 2.5, 6, 24);
+        this.addShopProduct(shop, Material.PRISMARINE_BRICK_STAIRS, 75, 4, 6, 25);
+        this.addShopProduct(shop, Material.PRISMARINE_BRICK_SLAB, 25, 1, 6, 26);
+        this.addShopProduct(shop, Material.PURPUR_BLOCK, 25, 0.5, 6, 27);
+        this.addShopProduct(shop, Material.PURPUR_PILLAR, 25, 0.5, 6, 28);
+        this.addShopProduct(shop, Material.PURPUR_STAIRS, 45, 1, 6, 29);
+        this.addShopProduct(shop, Material.PURPUR_SLAB, 15, 0.2, 6, 30);
+        this.addShopProduct(shop, Material.BRICKS, 30, 1.5, 6, 32);
+        this.addShopProduct(shop, Material.BRICK_STAIRS, 50, 2, 6, 33);
+        this.addShopProduct(shop, Material.BRICK_SLAB, 25, 1, 6, 34);
+        this.addShopProduct(shop, Material.BRICK_WALL, 70, 2, 6, 35);
+        this.addShopProduct(shop, Material.PACKED_MUD, 45, 5, 7, 2);
+        this.addShopProduct(shop, Material.MUD_BRICKS, 45, 5, 7, 3);
+        this.addShopProduct(shop, Material.MUD_BRICK_STAIRS, 70, 15, 7, 4);
+        this.addShopProduct(shop, Material.MUD_BRICK_SLAB, 25, 1.5, 7, 5);
+        this.addShopProduct(shop, Material.MUD_BRICK_WALL, 275, 20, 7, 6);
+        this.addShopProduct(shop, Material.NETHERRACK, 5, 0.5, 7, 10);
+        this.addShopProduct(shop, Material.NETHER_BRICKS, 100, 3, 7, 11);
+        this.addShopProduct(shop, Material.CRACKED_NETHER_BRICKS, 100, 2, 7, 12);
+        this.addShopProduct(shop, Material.NETHER_BRICK_STAIRS, 175, 15, 7, 13);
+        this.addShopProduct(shop, Material.NETHER_BRICK_SLAB, 30, 2.5, 7, 14);
+        this.addShopProduct(shop, Material.NETHER_BRICK_FENCE, 110, 10, 7, 15);
+        this.addShopProduct(shop, Material.NETHER_BRICK_WALL, 110, 10, 7, 16);
+        this.addShopProduct(shop, Material.QUARTZ_BLOCK, 80, 1, 7, 18);
+        this.addShopProduct(shop, Material.NETHER_WART_BLOCK, 500, 5, 7, 20);
+        this.addShopProduct(shop, Material.RED_NETHER_BRICKS, 450, 10, 7, 21);
+        this.addShopProduct(shop, Material.RED_NETHER_BRICK_STAIRS, 450, 10, 7, 22);
+        this.addShopProduct(shop, Material.RED_NETHER_BRICK_SLAB, 450, 10, 7, 23);
+        this.addShopProduct(shop, Material.RED_NETHER_BRICK_WALL, 475, 10, 7, 24);
+        this.addShopProduct(shop, Material.SMOOTH_QUARTZ_SLAB, 105, 2, 7, 26);
+        this.addShopProduct(shop, Material.QUARTZ_STAIRS, 140, 3, 7, 28);
+        this.addShopProduct(shop, Material.QUARTZ_SLAB, 50, 2, 7, 29);
+        this.addShopProduct(shop, Material.CHISELED_QUARTZ_BLOCK, 105, 2, 7, 30);
+        this.addShopProduct(shop, Material.QUARTZ_PILLAR, 80, 1, 7, 32);
+        this.addShopProduct(shop, Material.SMOOTH_QUARTZ, 105, 2, 7, 33);
+        this.addShopProduct(shop, Material.SMOOTH_QUARTZ_STAIRS, 185, 3, 7, 34);
+        this.addShopProduct(shop, Material.MANGROVE_WOOD, 20, 1, 8, 0);
+        this.addShopProduct(shop, Material.MANGROVE_LOG, 15, 1, 8, 1);
+        this.addShopProduct(shop, Material.MANGROVE_PLANKS, 4, 0.2, 8, 2);
+        this.addShopProduct(shop, Material.MANGROVE_STAIRS, 8, 1, 8, 3);
+        this.addShopProduct(shop, Material.MANGROVE_SLAB, 3, 0.1, 8, 4);
+        this.addShopProduct(shop, Material.MANGROVE_FENCE, 8, 1, 8, 5);
+        this.addShopProduct(shop, Material.MANGROVE_FENCE_GATE, 12, 1, 8, 6);
+        this.addShopProduct(shop, Material.MANGROVE_DOOR, 20, 1, 8, 7);
+        this.addShopProduct(shop, Material.MANGROVE_TRAPDOOR, 25, 1, 8, 8);
+        this.addShopProduct(shop, Material.CHERRY_WOOD, 20, 1, 8, 9);
+        this.addShopProduct(shop, Material.CHERRY_LOG, 15, 1, 8, 10);
+        this.addShopProduct(shop, Material.CHERRY_PLANKS, 4, 0.5, 8, 11);
+        this.addShopProduct(shop, Material.CHERRY_STAIRS, 8, 1, 8, 12);
+        this.addShopProduct(shop, Material.CHERRY_SLAB, 3, 0.1, 8, 13);
+        this.addShopProduct(shop, Material.CHERRY_FENCE, 8, 1, 8, 14);
+        this.addShopProduct(shop, Material.CHERRY_FENCE_GATE, 12, 1, 8, 15);
+        this.addShopProduct(shop, Material.CHERRY_DOOR, 20, 1, 8, 16);
+        this.addShopProduct(shop, Material.CHERRY_TRAPDOOR, 25, 1, 8, 17);
+        this.addShopProduct(shop, Material.CRIMSON_HYPHAE, 100, 2, 8, 18);
+        this.addShopProduct(shop, Material.CRIMSON_STEM, 100, 2, 8, 19);
+        this.addShopProduct(shop, Material.CRIMSON_PLANKS, 30, 1, 8, 20);
+        this.addShopProduct(shop, Material.CRIMSON_STAIRS, 75, 2, 8, 21);
+        this.addShopProduct(shop, Material.CRIMSON_SLAB, 30, 1, 8, 22);
+        this.addShopProduct(shop, Material.CRIMSON_FENCE, 65, 2, 8, 23);
+        this.addShopProduct(shop, Material.CRIMSON_FENCE_GATE, 75, 2, 8, 24);
+        this.addShopProduct(shop, Material.CRIMSON_DOOR, 90, 2, 8, 25);
+        this.addShopProduct(shop, Material.CRIMSON_TRAPDOOR, 100, 1.5, 8, 26);
+        this.addShopProduct(shop, Material.WARPED_HYPHAE, 125, 3, 8, 27);
+        this.addShopProduct(shop, Material.WARPED_STEM, 125, 3, 8, 28);
+        this.addShopProduct(shop, Material.WARPED_PLANKS, 40, 1, 8, 29);
+        this.addShopProduct(shop, Material.WARPED_STAIRS, 85, 2, 8, 30);
+        this.addShopProduct(shop, Material.WARPED_SLAB, 30, 1, 8, 31);
+        this.addShopProduct(shop, Material.WARPED_FENCE, 75, 2, 8, 32);
+        this.addShopProduct(shop, Material.WARPED_FENCE_GATE, 85, 2, 8, 33);
+        this.addShopProduct(shop, Material.WARPED_DOOR, 115, 2.5, 8, 34);
+        this.addShopProduct(shop, Material.WARPED_TRAPDOOR, 125, 2.5, 8, 35);
+        this.addShopProduct(shop, Material.COPPER_BLOCK, 165, 15, 9, 0);
+        this.addShopProduct(shop, Material.CUT_COPPER, 170, 15, 9, 1);
+        this.addShopProduct(shop, Material.CUT_COPPER_STAIRS, 260, 18, 9, 2);
+        this.addShopProduct(shop, Material.CUT_COPPER_SLAB, 60, 1.5, 9, 3);
+        this.addShopProduct(shop, Material.WAXED_COPPER_BLOCK, 230, 18, 9, 5);
+        this.addShopProduct(shop, Material.WAXED_CUT_COPPER, 235, 18, 9, 6);
+        this.addShopProduct(shop, Material.WAXED_CUT_COPPER_STAIRS, 355, 20, 9, 7);
+        this.addShopProduct(shop, Material.WAXED_CUT_COPPER_SLAB, 120, 3, 9, 8);
+        this.addShopProduct(shop, Material.EXPOSED_COPPER, 165, 15, 9, 9);
+        this.addShopProduct(shop, Material.EXPOSED_CUT_COPPER, 170, 15, 9, 10);
+        this.addShopProduct(shop, Material.EXPOSED_CUT_COPPER_STAIRS, 260, 18, 9, 11);
+        this.addShopProduct(shop, Material.EXPOSED_CUT_COPPER_SLAB, 60, 1.5, 9, 12);
+        this.addShopProduct(shop, Material.WAXED_EXPOSED_COPPER, 230, 18, 9, 14);
+        this.addShopProduct(shop, Material.WAXED_EXPOSED_CUT_COPPER, 235, 18, 9, 15);
+        this.addShopProduct(shop, Material.WAXED_EXPOSED_CUT_COPPER_STAIRS, 355, 20, 9, 16);
+        this.addShopProduct(shop, Material.WAXED_EXPOSED_CUT_COPPER_SLAB, 120, 3, 9, 17);
+        this.addShopProduct(shop, Material.WEATHERED_COPPER, 165, 15, 9, 18);
+        this.addShopProduct(shop, Material.WEATHERED_CUT_COPPER, 170, 15, 9, 19);
+        this.addShopProduct(shop, Material.WEATHERED_CUT_COPPER_STAIRS, 260, 18, 9, 20);
+        this.addShopProduct(shop, Material.WEATHERED_CUT_COPPER_SLAB, 60, 1.5, 9, 21);
+        this.addShopProduct(shop, Material.WAXED_WEATHERED_COPPER, 230, 18, 9, 23);
+        this.addShopProduct(shop, Material.WAXED_WEATHERED_CUT_COPPER, 235, 18, 9, 24);
+        this.addShopProduct(shop, Material.WAXED_WEATHERED_CUT_COPPER_STAIRS, 355, 20, 9, 25);
+        this.addShopProduct(shop, Material.WAXED_WEATHERED_CUT_COPPER_SLAB, 120, 3, 9, 26);
+        this.addShopProduct(shop, Material.OXIDIZED_COPPER, 165, 15, 9, 27);
+        this.addShopProduct(shop, Material.OXIDIZED_CUT_COPPER, 170, 15, 9, 28);
+        this.addShopProduct(shop, Material.OXIDIZED_CUT_COPPER_STAIRS, 260, 18, 9, 29);
+        this.addShopProduct(shop, Material.OXIDIZED_CUT_COPPER_SLAB, 60, 1.5, 9, 30);
+        this.addShopProduct(shop, Material.WAXED_OXIDIZED_COPPER, 230, 18, 9, 32);
+        this.addShopProduct(shop, Material.WAXED_OXIDIZED_CUT_COPPER, 235, 18, 9, 33);
+        this.addShopProduct(shop, Material.WAXED_OXIDIZED_CUT_COPPER_STAIRS, 355, 20, 9, 34);
+        this.addShopProduct(shop, Material.WAXED_OXIDIZED_CUT_COPPER_SLAB, 120, 3, 9, 35);
+        this.addShopProduct(shop, Material.GILDED_BLACKSTONE, 100, 10, 10, 11);
+        this.addShopProduct(shop, Material.BLACKSTONE, 50, 2, 10, 12);
+        this.addShopProduct(shop, Material.BLACKSTONE_STAIRS, 90, 3, 10, 13);
+        this.addShopProduct(shop, Material.BLACKSTONE_SLAB, 50, 1.5, 10, 14);
+        this.addShopProduct(shop, Material.BLACKSTONE_WALL, 50, 1.5, 10, 15);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE, 65, 2, 10, 20);
+        this.addShopProduct(shop, Material.CHISELED_POLISHED_BLACKSTONE, 125, 3, 10, 21);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_STAIRS, 125, 3, 10, 22);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_SLAB, 125, 3, 10, 23);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_WALL, 65, 2, 10, 24);
+        this.addShopProduct(shop, Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 125, 3, 10, 29);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_BRICKS, 70, 2, 10, 30);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_BRICK_STAIRS, 135, 3, 10, 31);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_BRICK_SLAB, 70, 1.5, 10, 32);
+        this.addShopProduct(shop, Material.POLISHED_BLACKSTONE_BRICK_WALL, 70, 2, 10, 33);
+        this.addShopProduct(shop, Material.DEEPSLATE, 30, 0.5, 11, 9);
+        this.addShopProduct(shop, Material.INFESTED_DEEPSLATE, 35, -1, 11, 10);
+        this.addShopProduct(shop, Material.DEEPSLATE_BRICKS, 40, -1, 11, 11);
+        this.addShopProduct(shop, Material.CHISELED_DEEPSLATE, 50, -1, 11, 12);
+        this.addShopProduct(shop, Material.DEEPSLATE_BRICK_WALL, 40, -1, 11, 13);
+        this.addShopProduct(shop, Material.CRACKED_DEEPSLATE_BRICKS, 35, -1, 11, 14);
+        this.addShopProduct(shop, Material.DEEPSLATE_BRICK_STAIRS, 90, -1, 11, 15);
+        this.addShopProduct(shop, Material.DEEPSLATE_BRICK_SLAB, 40, -1, 11, 16);
+        this.addShopProduct(shop, Material.POLISHED_DEEPSLATE, 65, -1, 11, 18);
+        this.addShopProduct(shop, Material.POLISHED_DEEPSLATE_STAIRS, 125, -1, 11, 19);
+        this.addShopProduct(shop, Material.POLISHED_DEEPSLATE_SLAB, 65, -1, 11, 20);
+        this.addShopProduct(shop, Material.POLISHED_DEEPSLATE_WALL, 65, -1, 11, 21);
+        this.addShopProduct(shop, Material.COBBLED_DEEPSLATE, 35, 0.5, 11, 23);
+        this.addShopProduct(shop, Material.COBBLED_DEEPSLATE_STAIRS, 65, -1, 11, 24);
+        this.addShopProduct(shop, Material.COBBLED_DEEPSLATE_SLAB, 35, -1, 11, 25);
+        this.addShopProduct(shop, Material.COBBLED_DEEPSLATE_WALL, 35, -1, 11, 26);
+        this.addShopProduct(shop, Material.DEEPSLATE_TILES, 60, -1, 11, 29);
+        this.addShopProduct(shop, Material.CRACKED_DEEPSLATE_TILES, 50, -1, 11, 30);
+        this.addShopProduct(shop, Material.DEEPSLATE_TILE_STAIRS, 115, -1, 11, 31);
+        this.addShopProduct(shop, Material.DEEPSLATE_TILE_SLAB, 50, -1, 11, 32);
+        this.addShopProduct(shop, Material.DEEPSLATE_TILE_WALL, 50, -1, 11, 33);
+        if (Version.isAtLeast(Version.MC_1_21_2)) {
+            this.addShopProduct(shop, Material.PALE_OAK_WOOD, 20, 1, 12, 0);
+            this.addShopProduct(shop, Material.PALE_OAK_LOG, 15, 1, 12, 1);
+            this.addShopProduct(shop, Material.PALE_OAK_PLANKS, 4, 0.2, 12, 2);
+            this.addShopProduct(shop, Material.PALE_OAK_STAIRS, 8, 1.1, 12, 3);
+            this.addShopProduct(shop, Material.PALE_OAK_SLAB, 3, 0.1, 12, 4);
+            this.addShopProduct(shop, Material.PALE_OAK_FENCE, 8, 1, 12, 5);
+            this.addShopProduct(shop, Material.PALE_OAK_FENCE_GATE, 12, 0.5, 12, 6);
+            this.addShopProduct(shop, Material.PALE_OAK_DOOR, 20, 1, 12, 7);
+            this.addShopProduct(shop, Material.PALE_OAK_TRAPDOOR, 25, 1, 12, 8);
         }
-        shop.saveSettings();
+        this.addShopProduct(shop, Material.BAMBOO_BLOCK, 20, 1, 12, 9);
+        this.addShopProduct(shop, Material.STRIPPED_BAMBOO_BLOCK, 15, 1, 12, 10);
+        this.addShopProduct(shop, Material.BAMBOO_PLANKS, 4, 0.2, 12, 11);
+        this.addShopProduct(shop, Material.BAMBOO_STAIRS, 8, 1.1, 12, 12);
+        this.addShopProduct(shop, Material.BAMBOO_SLAB, 3, 0.1, 12, 13);
+        this.addShopProduct(shop, Material.BAMBOO_FENCE, 8, 1, 12, 14);
+        this.addShopProduct(shop, Material.BAMBOO_FENCE_GATE, 12, 0.5, 12, 15);
+        this.addShopProduct(shop, Material.BAMBOO_DOOR, 20, 1, 12, 16);
+        this.addShopProduct(shop, Material.BAMBOO_TRAPDOOR, 25, 1, 12, 17);
     }
 
-    private void addShopProduct(@NotNull StaticShop shop, @NotNull Material material, double buyPrice, double sellPrice, int page, int slot) {
-        this.addShopProduct(shop, material, UniDouble.of(buyPrice, sellPrice), UniInt.of(page, slot));
+    private void addFarmingItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.WHEAT_SEEDS, 25, 1, 1, 11);
+        this.addShopProduct(shop, Material.PUMPKIN_SEEDS, 30, 1, 1, 12);
+        this.addShopProduct(shop, Material.MELON_SEEDS, 25, 1, 1, 13);
+        this.addShopProduct(shop, Material.BEETROOT_SEEDS, 25, 1, 1, 14);
+        this.addShopProduct(shop, Material.BEETROOT, 20, 2.5, 1, 15);
+        this.addShopProduct(shop, Material.COCOA_BEANS, 25, 2.5, 1, 19);
+        this.addShopProduct(shop, Material.NETHER_WART, 200, 4, 1, 20);
+        this.addShopProduct(shop, Material.SUGAR_CANE, 30, 3, 1, 21);
+        this.addShopProduct(shop, Material.WHEAT, 20, 2.5, 1, 22);
+        this.addShopProduct(shop, Material.PUMPKIN, 50, 2, 1, 23);
+        this.addShopProduct(shop, Material.MELON, 25, 1.5, 1, 24);
+        this.addShopProduct(shop, Material.CACTUS, 300, 2.5, 1, 25);
+        this.addShopProduct(shop, Material.OAK_SAPLING, 30, 1, 1, 29);
+        this.addShopProduct(shop, Material.SPRUCE_SAPLING, 30, 1, 1, 30);
+        this.addShopProduct(shop, Material.BIRCH_SAPLING, 30, 1, 1, 31);
+        this.addShopProduct(shop, Material.JUNGLE_SAPLING, 30, 1, 1, 32);
+        this.addShopProduct(shop, Material.ACACIA_SAPLING, 30, 1, 1, 33);
+        this.addShopProduct(shop, Material.DARK_OAK_SAPLING, 30, 1, 2, 11);
+        this.addShopProduct(shop, Material.MANGROVE_PROPAGULE, 30, 1, 2, 12);
+        this.addShopProduct(shop, Material.CARROT, 25, 3, 2, 14);
+        this.addShopProduct(shop, Material.POTATO, 25, 3, 2, 15);
+        this.addShopProduct(shop, Material.BROWN_MUSHROOM, 25, 2.5, 2, 19);
+        this.addShopProduct(shop, Material.RED_MUSHROOM, 25, 2.5, 2, 20);
+        this.addShopProduct(shop, Material.CRIMSON_FUNGUS, 40, 3, 2, 21);
+        this.addShopProduct(shop, Material.WARPED_FUNGUS, 55, 3.5, 2, 22);
+        this.addShopProduct(shop, Material.WEEPING_VINES, 30, 1.2, 2, 23);
+        this.addShopProduct(shop, Material.WARPED_ROOTS, 45, 1.4, 2, 24);
+        this.addShopProduct(shop, Material.TWISTING_VINES, 50, 1.5, 2, 25);
+        this.addShopProduct(shop, Material.POPPY, 10, 0.5, 2, 29);
+        this.addShopProduct(shop, Material.CHORUS_PLANT, 15, -1, 2, 30);
+        this.addShopProduct(shop, Material.CHORUS_FRUIT, 6, 2, 2, 31);
+        this.addShopProduct(shop, Material.KELP, 5, 0.5, 2, 32);
+        this.addShopProduct(shop, Material.SHROOMLIGHT, 50, 3.5, 2, 33);
     }
 
-    private void addShopProduct(@NotNull RotatingShop shop, @NotNull Material material, double buyPrice, double sellPrice) {
-        this.addShopProduct(shop, material, UniDouble.of(buyPrice, sellPrice));
+    private void addRedstoneItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.REDSTONE, 15, 3, 1, 3);
+        this.addShopProduct(shop, Material.LECTERN, 300, 1, 1, 5);
+        this.addShopProduct(shop, Material.REPEATER, 350, -1, 1, 11);
+        this.addShopProduct(shop, Material.COMPARATOR, 400, -1, 1, 12);
+        this.addShopProduct(shop, Material.HOPPER, 400, -1, 1, 13);
+        this.addShopProduct(shop, Material.PISTON, 500, -1, 1, 14);
+        this.addShopProduct(shop, Material.STICKY_PISTON, 800, -1, 1, 15);
+        this.addShopProduct(shop, Material.DAYLIGHT_DETECTOR, 800, -1, 1, 19);
+        this.addShopProduct(shop, Material.TARGET, 100, 3, 1, 20);
+        this.addShopProduct(shop, Material.NOTE_BLOCK, 700, -1, 1, 21);
+        this.addShopProduct(shop, Material.DROPPER, 500, -1, 1, 22);
+        this.addShopProduct(shop, Material.DISPENSER, 500, -1, 1, 23);
+        this.addShopProduct(shop, Material.OBSERVER, 500, -1, 1, 24);
+        this.addShopProduct(shop, Material.CRAFTER, 500, -1, 1, 25);
+        this.addShopProduct(shop, Material.TRAPPED_CHEST, 250, -1, 1, 29);
+        this.addShopProduct(shop, Material.REDSTONE_TORCH, 35, -1, 1, 30);
+        this.addShopProduct(shop, Material.REDSTONE_LAMP, 800, -1, 1, 31);
+        this.addShopProduct(shop, Material.LEVER, 50, -1, 1, 32);
+        this.addShopProduct(shop, Material.TRIPWIRE_HOOK, 85, -1, 1, 33);
     }
 
-    private void addShopProduct(@NotNull StaticShop shop, @NotNull Material material, @NotNull UniDouble price, @NotNull UniInt pageSlot) {
+    private void addFoodItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.APPLE, 20, 4, 1, 3);
+        this.addShopProduct(shop, Material.GOLDEN_APPLE, 100, 10, 1, 4);
+        this.addShopProduct(shop, Material.ENCHANTED_GOLDEN_APPLE, 2_000, 80, 1, 5);
+        this.addShopProduct(shop, Material.BREAD, 25, 5, 1, 11);
+        this.addShopProduct(shop, Material.MUSHROOM_STEW, 20, 4, 1, 12);
+        this.addShopProduct(shop, Material.RABBIT_STEW, 40, 3, 1, 13);
+        this.addShopProduct(shop, Material.BEETROOT_SOUP, 20, 4, 1, 14);
+        this.addShopProduct(shop, Material.PUMPKIN_PIE, 20, 5, 1, 15);
+        this.addShopProduct(shop, Material.COOKED_CHICKEN, 25, 2, 1, 19);
+        this.addShopProduct(shop, Material.BAKED_POTATO, 30, 6, 1, 20);
+        this.addShopProduct(shop, Material.COOKED_COD, 20, 4, 1, 21);
+        this.addShopProduct(shop, Material.COOKED_SALMON, 25, 5, 1, 22);
+        this.addShopProduct(shop, Material.COOKED_RABBIT, 20, 3, 1, 23);
+        this.addShopProduct(shop, Material.COOKED_PORKCHOP, 30, 3, 1, 24);
+        this.addShopProduct(shop, Material.COOKED_BEEF, 30, 3, 1, 25);
+        this.addShopProduct(shop, Material.COOKED_MUTTON, 25, 3, 1, 28);
+        this.addShopProduct(shop, Material.COOKIE, 30, 3, 1, 29);
+        this.addShopProduct(shop, Material.CAKE, 50, 10, 1, 30);
+        this.addShopProduct(shop, Material.SWEET_BERRIES, 35, 1, 1, 32);
+        this.addShopProduct(shop, Material.GLOW_BERRIES, 40, 1.1, 1, 33);
+        this.addShopProduct(shop, Material.DRIED_KELP, 15, 1, 1, 34);
+        this.addShopProduct(shop, Material.COD, 10, 1.5, 2, 12);
+        this.addShopProduct(shop, Material.TROPICAL_FISH, 12, 2, 2, 14);
+        this.addShopProduct(shop, Material.SALMON, 12, 2, 2, 20);
+        this.addShopProduct(shop, Material.RABBIT, 10, 1.5, 2, 21);
+        this.addShopProduct(shop, Material.PORKCHOP, 15, 1.5, 2, 22);
+        this.addShopProduct(shop, Material.MUTTON, 12, 1.5, 2, 23);
+        this.addShopProduct(shop, Material.PUFFERFISH, 50, 3, 2, 24);
+        this.addShopProduct(shop, Material.CHICKEN, 10, 0.5, 2, 29);
+        this.addShopProduct(shop, Material.BEEF, 15, 1.5, 2, 33);
+    }
+
+    private void addMobDropsItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.ROTTEN_FLESH, 12, 5, 1, 11);
+        this.addShopProduct(shop, Material.BONE, 30, 5, 1, 12);
+        this.addShopProduct(shop, Material.GUNPOWDER, 30, 5, 1, 13);
+        this.addShopProduct(shop, Material.STRING, 30, 3, 1, 14);
+        this.addShopProduct(shop, Material.SPIDER_EYE, 40, 3, 1, 15);
+        this.addShopProduct(shop, Material.ENDER_PEARL, 50, 8, 1, 20);
+        this.addShopProduct(shop, Material.SLIME_BALL, 40, 4, 1, 21);
+        this.addShopProduct(shop, Material.BLAZE_ROD, 50, 5, 1, 22);
+        this.addShopProduct(shop, Material.MAGMA_CREAM, 40, 4, 1, 23);
+        this.addShopProduct(shop, Material.GHAST_TEAR, 200, 12, 1, 24);
+        this.addShopProduct(shop, Material.LEATHER, 50, 6, 1, 29);
+        this.addShopProduct(shop, Material.RABBIT_HIDE, 20, 3, 1, 30);
+        this.addShopProduct(shop, Material.RABBIT_FOOT, 50, 8, 1, 31);
+        this.addShopProduct(shop, Material.INK_SAC, 30, 6, 1, 32);
+        this.addShopProduct(shop, Material.GLOW_INK_SAC, 30, 7, 1, 33);
+        this.addShopProduct(shop, Material.FEATHER, 20, 3, 2, 11);
+        this.addShopProduct(shop, Material.EGG, 20, 3, 2, 12);
+        this.addShopProduct(shop, Material.ARROW, 50, 3, 2, 13);
+        this.addShopProduct(shop, Material.PRISMARINE_SHARD, 10, 2, 2, 14);
+        this.addShopProduct(shop, Material.PRISMARINE_CRYSTALS, 10, 2, 2, 15);
+        this.addShopProduct(shop, Material.TOTEM_OF_UNDYING, 100_000, 3, 2, 20);
+        this.addShopProduct(shop, Material.TURTLE_SCUTE, 150, 10, 2, 21);
+        this.addShopProduct(shop, Material.PHANTOM_MEMBRANE, 250, 12, 2, 22);
+        this.addShopProduct(shop, Material.NAUTILUS_SHELL, 1_000, 10, 2, 23);
+        this.addShopProduct(shop, Material.ARMADILLO_SCUTE, 150, 10, 2, 24);
+        this.addShopProduct(shop, Material.SCULK_CATALYST, 1_250, 12, 2, 31);
+    }
+
+    private void addMiscellaneousItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.COMPOSTER, 50, -1, 1, 3);
+        this.addShopProduct(shop, Material.HONEYCOMB, 60, 1, 1, 4);
+        this.addShopProduct(shop, Material.SPYGLASS, 350, -1, 1, 5);
+        this.addShopProduct(shop, Material.BREWING_STAND, 1_000, -1, 1, 11);
+        this.addShopProduct(shop, Material.NETHER_STAR, 500_000, -1, 1, 12);
+        this.addShopProduct(shop, Material.ENDER_EYE, 30_000, -1, 1, 13);
+        this.addShopProduct(shop, Material.CAULDRON, 400, -1, 1, 14);
+        this.addShopProduct(shop, Material.CLOCK, 350, -1, 1, 15);
+        this.addShopProduct(shop, Material.COMPASS, 300, -1, 1, 19);
+        this.addShopProduct(shop, Material.SADDLE, 8_500, -1, 1, 20);
+        this.addShopProduct(shop, Material.ANVIL, 3_000, -1, 1, 21);
+        this.addShopProduct(shop, Material.BEACON, 550_000, -1, 1, 22);
+        this.addShopProduct(shop, Material.ENDER_CHEST, 50_000, -1, 1, 23);
+        this.addShopProduct(shop, Material.ELYTRA, 1_000_000, -1, 1, 24);
+        this.addShopProduct(shop, Material.HEART_OF_THE_SEA, 100_000, -1, 1, 25);
+        this.addShopProduct(shop, Material.CONDUIT, 110_000, -1, 1, 29);
+        this.addShopProduct(shop, Material.AMETHYST_SHARD, 190, -1, 1, 30);
+        this.addShopProduct(shop, Material.ECHO_SHARD, 3_000, 50, 1, 31);
+        this.addShopProduct(shop, Material.SCULK_SHRIEKER, 5_000, 50, 1, 32);
+        this.addShopProduct(shop, Material.SCULK_SENSOR, 6_500, 100, 1, 33);
+        this.addShopProduct(shop, Material.LEATHER_HORSE_ARMOR, 1_500, -1, 2, 2);
+        this.addShopProduct(shop, Material.IRON_HORSE_ARMOR, 3_500, -1, 2, 3);
+        this.addShopProduct(shop, Material.GOLDEN_HORSE_ARMOR, 4_000, -1, 2, 5);
+        this.addShopProduct(shop, Material.DIAMOND_HORSE_ARMOR, 5_000, -1, 2, 6);
+        this.addShopProduct(shop, Material.BUCKET, 100, -1, 2, 11);
+        this.addShopProduct(shop, Material.MILK_BUCKET, 120, -1, 2, 12);
+        this.addShopProduct(shop, Material.WATER_BUCKET, 200, -1, 2, 14);
+        this.addShopProduct(shop, Material.LAVA_BUCKET, 3_000, -1, 2, 15);
+        this.addShopProduct(shop, Material.POWDER_SNOW_BUCKET, 200, -1, 2, 19);
+        this.addShopProduct(shop, Material.PUFFERFISH_BUCKET, 1_250, -1, 2, 20);
+        this.addShopProduct(shop, Material.SALMON_BUCKET, 1_250, -1, 2, 21);
+        this.addShopProduct(shop, Material.COD_BUCKET, 1_250, -1, 2, 22);
+        this.addShopProduct(shop, Material.TROPICAL_FISH_BUCKET, 1_250, -1, 2, 23);
+        this.addShopProduct(shop, Material.AXOLOTL_BUCKET, 1_250, -1, 2, 24);
+        this.addShopProduct(shop, Material.TADPOLE_BUCKET, 1_250, -1, 2, 25);
+        this.addShopProduct(shop, Material.OAK_BOAT, 125, -1, 2, 28);
+        this.addShopProduct(shop, Material.SPRUCE_BOAT, 125, -1, 2, 29);
+        this.addShopProduct(shop, Material.BIRCH_BOAT, 125, -1, 2, 30);
+        this.addShopProduct(shop, Material.JUNGLE_BOAT, 125, -1, 2, 31);
+        this.addShopProduct(shop, Material.ACACIA_BOAT, 125, -1, 2, 32);
+        this.addShopProduct(shop, Material.DARK_OAK_BOAT, 125, -1, 2, 33);
+        this.addShopProduct(shop, Material.MANGROVE_BOAT, 125, -1, 2, 34);
+        this.addShopProduct(shop, Material.CHERRY_BOAT, 125, -1, 2, 39);
+        this.addShopProduct(shop, Material.BAMBOO_RAFT, 125, -1, 2, 40);
+        this.addShopProduct(shop, Material.PALE_OAK_BOAT, 125, -1, 2, 41);
+    }
+
+    private void addPotionsItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_REGENERATION, 300, -1, 1, 1);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_SWIFTNESS, 350, -1, 1, 2);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_STRENGTH, 450, -1, 1, 3);
+        this.addShopProduct(shop, Material.POTION, PotionType.HEALING, 250, -1, 1, 4);
+        this.addShopProduct(shop, Material.POTION, PotionType.FIRE_RESISTANCE, 400, -1, 1, 5);
+        this.addShopProduct(shop, Material.POTION, PotionType.WATER_BREATHING, 200, -1, 1, 6);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_LEAPING, 250, -1, 1, 7);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_REGENERATION, 400, -1, 1, 10);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_SWIFTNESS, 500, -1, 1, 11);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_STRENGTH, 600, -1, 1, 12);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_HEALING, 350, -1, 1, 13);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_FIRE_RESISTANCE, 500, -1, 1, 14);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_WATER_BREATHING, 300, -1, 1, 15);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_LEAPING, 400, -1, 1, 16);
+        this.addShopProduct(shop, Material.POTION, PotionType.NIGHT_VISION, 250, -1, 1, 19);
+        this.addShopProduct(shop, Material.POTION, PotionType.INVISIBILITY, 250, -1, 1, 20);
+        this.addShopProduct(shop, Material.POTION, PotionType.HARMING, 300, -1, 1, 21);
+        this.addShopProduct(shop, Material.POTION, PotionType.SLOW_FALLING, 250, -1, 1, 22);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_POISON, 250, -1, 1, 23);
+        this.addShopProduct(shop, Material.POTION, PotionType.SLOWNESS, 150, -1, 1, 24);
+        this.addShopProduct(shop, Material.POTION, PotionType.WEAKNESS, 150, -1, 1, 25);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_NIGHT_VISION, 400, -1, 1, 28);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_INVISIBILITY, 400, -1, 1, 29);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_HARMING, 400, -1, 1, 30);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_SLOW_FALLING, 350, -1, 1, 31);
+        this.addShopProduct(shop, Material.POTION, PotionType.STRONG_POISON, 400, -1, 1, 32);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_SLOWNESS, 250, -1, 1, 33);
+        this.addShopProduct(shop, Material.POTION, PotionType.LONG_WEAKNESS, 250, -1, 1, 34);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_REGENERATION, 300, -1, 2, 1);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_SWIFTNESS, 350, -1, 2, 2);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_STRENGTH, 450, -1, 2, 3);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.HEALING, 250, -1, 2, 4);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.FIRE_RESISTANCE, 400, -1, 2, 5);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.WATER_BREATHING, 200, -1, 2, 6);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_LEAPING, 250, -1, 2, 7);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_REGENERATION, 400, -1, 2, 10);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_SWIFTNESS, 500, -1, 2, 11);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_STRENGTH, 650, -1, 2, 12);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_HEALING, 350, -1, 2, 13);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_FIRE_RESISTANCE, 500, -1, 2, 14);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_WATER_BREATHING, 300, -1, 2, 15);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_LEAPING, 400, -1, 2, 16);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.NIGHT_VISION, 250, -1, 2, 19);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.INVISIBILITY, 250, -1, 2, 20);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.HARMING, 300, -1, 2, 21);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.SLOW_FALLING, 250, -1, 2, 22);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_POISON, 250, -1, 2, 23);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.SLOWNESS, 150, -1, 2, 24);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.WEAKNESS, 150, -1, 2, 25);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_NIGHT_VISION, 400, -1, 2, 28);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_INVISIBILITY, 400, -1, 2, 29);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_HARMING, 400, -1, 2, 30);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_SLOW_FALLING, 350, -1, 2, 31);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.STRONG_POISON, 400, -1, 2, 32);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_SLOWNESS, 250, -1, 2, 33);
+        this.addShopProduct(shop, Material.SPLASH_POTION, PotionType.LONG_WEAKNESS, 250, -1, 2, 34);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_REGENERATION, 200, -1, 3, 1);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_SWIFTNESS, 200, -1, 3, 2);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_STRENGTH, 250, -1, 3, 3);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.HEALING, 200, -1, 3, 4);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.FIRE_RESISTANCE, 200, -1, 3, 5);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.WATER_BREATHING, 100, -1, 3, 6);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_LEAPING, 200, -1, 3, 7);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_REGENERATION, 300, -1, 3, 10);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_SWIFTNESS, 300, -1, 3, 11);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_STRENGTH, 300, -1, 3, 12);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_HEALING, 300, -1, 3, 13);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_FIRE_RESISTANCE, 300, -1, 3, 14);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_WATER_BREATHING, 150, -1, 3, 15);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_LEAPING, 300, -1, 3, 16);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.NIGHT_VISION, 150, -1, 3, 19);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.INVISIBILITY, 150, -1, 3, 20);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.HARMING, 200, -1, 3, 21);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.SLOW_FALLING, 200, -1, 3, 22);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_POISON, 150, -1, 3, 23);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.SLOWNESS, 100, -1, 3, 24);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.WEAKNESS, 100, -1, 3, 25);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_NIGHT_VISION, 200, -1, 3, 28);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_INVISIBILITY, 200, -1, 3, 29);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_HARMING, 300, -1, 3, 30);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_SLOW_FALLING, 300, -1, 3, 31);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.STRONG_POISON, 300, -1, 3, 32);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_SLOWNESS, 250, -1, 3, 33);
+        this.addShopProduct(shop, Material.LINGERING_POTION, PotionType.LONG_WEAKNESS, 250, -1, 3, 34);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_REGENERATION, 350, -1, 4, 1);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_SWIFTNESS, 400, -1, 4, 2);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_STRENGTH, 500, -1, 4, 3);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.HEALING, 350, -1, 4, 4);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.FIRE_RESISTANCE, 350, -1, 4, 5);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.WATER_BREATHING, 250, -1, 4, 6);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_LEAPING, 250, -1, 4, 7);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_REGENERATION, 450, -1, 4, 10);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_SWIFTNESS, 600, -1, 4, 11);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_STRENGTH, 700, -1, 4, 12);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_HEALING, 500, -1, 4, 13);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_FIRE_RESISTANCE, 500, -1, 4, 14);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_WATER_BREATHING, 400, -1, 4, 15);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_LEAPING, 350, -1, 4, 16);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.NIGHT_VISION, 250, -1, 4, 19);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.INVISIBILITY, 400, -1, 4, 20);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.HARMING, 500, -1, 4, 21);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.SLOW_FALLING, 350, -1, 4, 22);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_POISON, 400, -1, 4, 23);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.SLOWNESS, 250, -1, 4, 24);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.WEAKNESS, 250, -1, 4, 25);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_NIGHT_VISION, 350, -1, 4, 28);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_INVISIBILITY, 650, -1, 4, 29);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_HARMING, 700, -1, 4, 30);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_SLOW_FALLING, 500, -1, 4, 31);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.STRONG_POISON, 500, -1, 4, 32);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_SLOWNESS, 400, -1, 4, 33);
+        this.addShopProduct(shop, Material.TIPPED_ARROW, PotionType.LONG_WEAKNESS, 400, -1, 4, 34);
+    }
+
+    private void addDecorationItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.OAK_LEAVES, 3, -1, 1, 1);
+        this.addShopProduct(shop, Material.SPRUCE_LEAVES, 3, -1, 1, 2);
+        this.addShopProduct(shop, Material.BIRCH_LEAVES, 3, -1, 1, 3);
+        this.addShopProduct(shop, Material.JUNGLE_LEAVES, 3, -1, 1, 4);
+        this.addShopProduct(shop, Material.ACACIA_LEAVES, 3, -1, 1, 5);
+        this.addShopProduct(shop, Material.DARK_OAK_LEAVES, 3, -1, 1, 6);
+        this.addShopProduct(shop, Material.AZALEA_LEAVES, 3, -1, 1, 7);
+        this.addShopProduct(shop, Material.FLOWERING_AZALEA_LEAVES, 3, -1, 1, 9);
+        this.addShopProduct(shop, Material.MANGROVE_LEAVES, 3, -1, 1, 10);
+        this.addShopProduct(shop, Material.SMALL_DRIPLEAF, 3, -1, 1, 11);
+        this.addShopProduct(shop, Material.BIG_DRIPLEAF, 5, -1, 1, 12);
+        this.addShopProduct(shop, Material.VINE, 1, -1, 1, 13);
+        this.addShopProduct(shop, Material.AZALEA, 3, -1, 1, 14);
+        this.addShopProduct(shop, Material.FLOWERING_AZALEA, 3, -1, 1, 15);
+        this.addShopProduct(shop, Material.MANGROVE_ROOTS, 3, -1, 1, 16);
+        this.addShopProduct(shop, Material.MUDDY_MANGROVE_ROOTS, 3, -1, 1, 17);
+        this.addShopProduct(shop, Material.SHORT_GRASS, 1, -1, 1, 19);
+        this.addShopProduct(shop, Material.SEAGRASS, 5, 0.1, 1, 20);
+        this.addShopProduct(shop, Material.FERN, 1, -1, 1, 21);
+        this.addShopProduct(shop, Material.TALL_GRASS, 1, -1, 1, 22);
+        this.addShopProduct(shop, Material.LARGE_FERN, 1, -1, 1, 23);
+        this.addShopProduct(shop, Material.LILY_PAD, 1, -1, 1, 24);
+        this.addShopProduct(shop, Material.BAMBOO, 20, 0.5, 1, 25);
+        this.addShopProduct(shop, Material.SEA_PICKLE, 20, 2, 1, 30);
+        this.addShopProduct(shop, Material.CRIMSON_ROOTS, 2.5, -1, 1, 31);
+        this.addShopProduct(shop, Material.NETHER_SPROUTS, 3, -1, 1, 32);
+        this.addShopProduct(shop, Material.DANDELION, 4, 0.5, 2, 10);
+        this.addShopProduct(shop, Material.POPPY, 10, 0.5, 2, 11);
+        this.addShopProduct(shop, Material.ALLIUM, 4, 0.5, 2, 12);
+        this.addShopProduct(shop, Material.AZURE_BLUET, 4, 0.5, 2, 13);
+        this.addShopProduct(shop, Material.BLUE_ORCHID, 4, 0.5, 2, 14);
+        this.addShopProduct(shop, Material.OXEYE_DAISY, 4, 0.5, 2, 15);
+        this.addShopProduct(shop, Material.SUNFLOWER, 4, 0.5, 2, 16);
+        this.addShopProduct(shop, Material.LILY_OF_THE_VALLEY, 4, 0.5, 2, 19);
+        this.addShopProduct(shop, Material.CORNFLOWER, 4, 0.5, 2, 20);
+        this.addShopProduct(shop, Material.WITHER_ROSE, 5_000, 100, 2, 21);
+        this.addShopProduct(shop, Material.RED_TULIP, 4, 0.5, 2, 22);
+        this.addShopProduct(shop, Material.ORANGE_TULIP, 4, 0.5, 2, 23);
+        this.addShopProduct(shop, Material.PINK_TULIP, 4, 0.5, 2, 24);
+        this.addShopProduct(shop, Material.WHITE_TULIP, 4, 0.5, 2, 25);
+        this.addShopProduct(shop, Material.ROSE_BUSH, 4, 0.5, 2, 29);
+        this.addShopProduct(shop, Material.PEONY, 4, 0.5, 2, 30);
+        this.addShopProduct(shop, Material.LILAC, 4, 0.5, 2, 31);
+        this.addShopProduct(shop, Material.CHORUS_FLOWER, 50, 1, 2, 32);
+        this.addShopProduct(shop, Material.DEAD_BUSH, 3, 0.5, 2, 33);
+        this.addShopProduct(shop, Material.HANGING_ROOTS, 3, 0.1, 3, 11);
+        this.addShopProduct(shop, Material.POINTED_DRIPSTONE, 4, 0.1, 3, 12);
+        this.addShopProduct(shop, Material.SPORE_BLOSSOM, 20, 0.2, 3, 13);
+        this.addShopProduct(shop, Material.END_ROD, 25, 0.5, 3, 14);
+        this.addShopProduct(shop, Material.LIGHTNING_ROD, 25, 0.5, 3, 15);
+        this.addShopProduct(shop, Material.COBWEB, 35, -1, 3, 19);
+        this.addShopProduct(shop, Material.ARMOR_STAND, 125, -1, 3, 20);
+        this.addShopProduct(shop, Material.RED_BED, 50, -1, 3, 21);
+        this.addShopProduct(shop, Material.FLOWER_POT, 4, 0.5, 3, 22);
+        this.addShopProduct(shop, Material.PAINTING, 80, -1, 3, 23);
+        this.addShopProduct(shop, Material.ITEM_FRAME, 75, -1, 3, 24);
+        this.addShopProduct(shop, Material.GLOW_ITEM_FRAME, 80, -1, 3, 25);
+        this.addShopProduct(shop, Material.SMALL_AMETHYST_BUD, 100, -1, 3, 29);
+        this.addShopProduct(shop, Material.MEDIUM_AMETHYST_BUD, 125, -1, 3, 30);
+        this.addShopProduct(shop, Material.MOSS_CARPET, 5, -1, 3, 31);
+        this.addShopProduct(shop, Material.LARGE_AMETHYST_BUD, 150, -1, 3, 32);
+        this.addShopProduct(shop, Material.AMETHYST_CLUSTER, 175, -1, 3, 33);
+        this.addShopProduct(shop, Material.GLOW_LICHEN, 3, -1, 4, 3);
+        this.addShopProduct(shop, Material.SCULK_VEIN, 20, 1, 4, 4);
+        this.addShopProduct(shop, Material.FROGSPAWN, 5, -1, 4, 5);
+        this.addShopProduct(shop, Material.CRAFTING_TABLE, 75, -1, 4, 10);
+        this.addShopProduct(shop, Material.CARTOGRAPHY_TABLE, 85, -1, 4, 11);
+        this.addShopProduct(shop, Material.FLETCHING_TABLE, 100, -1, 4, 12);
+        this.addShopProduct(shop, Material.SMITHING_TABLE, 250, -1, 4, 13);
+        this.addShopProduct(shop, Material.LOOM, 50, -1, 4, 14);
+        this.addShopProduct(shop, Material.STONECUTTER, 150, -1, 4, 15);
+        this.addShopProduct(shop, Material.GRINDSTONE, 125, -1, 4, 16);
+        this.addShopProduct(shop, Material.LODESTONE, 5_500, 750, 4, 18);
+        this.addShopProduct(shop, Material.BELL, 1_000, -1, 4, 19);
+        this.addShopProduct(shop, Material.SCAFFOLDING, 100, -1, 4, 20);
+        this.addShopProduct(shop, Material.FURNACE, 50, -1, 4, 21);
+        this.addShopProduct(shop, Material.BLAST_FURNACE, 600, -1, 4, 22);
+        this.addShopProduct(shop, Material.SMOKER, 125, -1, 4, 23);
+        this.addShopProduct(shop, Material.CHEST, 75, -1, 4, 24);
+        this.addShopProduct(shop, Material.BARREL, 50, -1, 4, 25);
+        this.addShopProduct(shop, Material.CHAIN, 85, 1, 4, 26);
+        this.addShopProduct(shop, Material.TORCH, 35, -1, 4, 28);
+        this.addShopProduct(shop, Material.LANTERN, 105, -1, 4, 29);
+        this.addShopProduct(shop, Material.CAMPFIRE, 110, -1, 4, 30);
+        this.addShopProduct(shop, Material.SOUL_CAMPFIRE, 130, -1, 4, 32);
+        this.addShopProduct(shop, Material.SOUL_LANTERN, 120, -1, 4, 33);
+        this.addShopProduct(shop, Material.SOUL_TORCH, 45, -1, 4, 34);
+    }
+
+    private void addMineralsItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.DIAMOND_ORE, 225, 30, 1, 1);
+        this.addShopProduct(shop, Material.EMERALD_ORE, 175, 20, 1, 2);
+        this.addShopProduct(shop, Material.GOLD_ORE, 12, 1.5, 1, 3);
+        this.addShopProduct(shop, Material.IRON_ORE, 9.5, 1, 1, 4);
+        this.addShopProduct(shop, Material.LAPIS_ORE, 150, 15, 1, 5);
+        this.addShopProduct(shop, Material.REDSTONE_ORE, 125, 25, 1, 6);
+        this.addShopProduct(shop, Material.COAL_ORE, 40, 2, 1, 7);
+        this.addShopProduct(shop, Material.NETHERITE_SCRAP, 1_250, 80, 1, 9);
+        this.addShopProduct(shop, Material.DEEPSLATE_DIAMOND_ORE, 225, 30, 1, 10);
+        this.addShopProduct(shop, Material.DEEPSLATE_EMERALD_ORE, 175, 20, 1, 11);
+        this.addShopProduct(shop, Material.DEEPSLATE_GOLD_ORE, 12, 1.5, 1, 12);
+        this.addShopProduct(shop, Material.DEEPSLATE_IRON_ORE, 9.5, 1, 1, 13);
+        this.addShopProduct(shop, Material.DEEPSLATE_LAPIS_ORE, 150, 15, 1, 14);
+        this.addShopProduct(shop, Material.DEEPSLATE_REDSTONE_ORE, 125, 25, 1, 15);
+        this.addShopProduct(shop, Material.DEEPSLATE_COAL_ORE, 40, 2, 1, 16);
+        this.addShopProduct(shop, Material.NETHER_QUARTZ_ORE, 30, 0.5, 1, 17);
+        this.addShopProduct(shop, Material.NETHERITE_INGOT, 5_500, 400, 1, 18);
+        this.addShopProduct(shop, Material.DIAMOND, 200, 30, 1, 19);
+        this.addShopProduct(shop, Material.EMERALD, 150, 20, 1, 20);
+        this.addShopProduct(shop, Material.GOLD_INGOT, 80, 15, 1, 21);
+        this.addShopProduct(shop, Material.IRON_INGOT, 70, 10, 1, 22);
+        this.addShopProduct(shop, Material.LAPIS_LAZULI, 15, 1, 1, 23);
+        this.addShopProduct(shop, Material.REDSTONE, 15, 3, 1, 24);
+        this.addShopProduct(shop, Material.COAL, 30, 2, 1, 25);
+        this.addShopProduct(shop, Material.QUARTZ, 25, 0.3, 1, 26);
+        this.addShopProduct(shop, Material.NETHERITE_BLOCK, 49_500, 3_600, 1, 27);
+        this.addShopProduct(shop, Material.DIAMOND_BLOCK, 2_000, 270, 1, 28);
+        this.addShopProduct(shop, Material.EMERALD_BLOCK, 1_350, 180, 1, 29);
+        this.addShopProduct(shop, Material.GOLD_BLOCK, 720, 135, 1, 30);
+        this.addShopProduct(shop, Material.IRON_BLOCK, 630, 90, 1, 31);
+        this.addShopProduct(shop, Material.LAPIS_BLOCK, 135, 9, 1, 32);
+        this.addShopProduct(shop, Material.REDSTONE_BLOCK, 135, 27, 1, 33);
+        this.addShopProduct(shop, Material.COAL_BLOCK, 270, 18, 1, 34);
+        this.addShopProduct(shop, Material.QUARTZ_BLOCK, 80, 1, 1, 35);
+        this.addShopProduct(shop, Material.GOLD_NUGGET, 9, 1.5, 2, 2);
+        this.addShopProduct(shop, Material.IRON_NUGGET, 8, 1, 2, 3);
+        this.addShopProduct(shop, Material.COPPER_ORE, 35, 1.5, 2, 6);
+        this.addShopProduct(shop, Material.RAW_GOLD, 12, 1.5, 2, 11);
+        this.addShopProduct(shop, Material.RAW_IRON, 9.5, 1, 2, 12);
+        this.addShopProduct(shop, Material.CHARCOAL, 32, 2, 2, 13);
+        this.addShopProduct(shop, Material.RAW_COPPER, 35, 1.5, 2, 14);
+        this.addShopProduct(shop, Material.DEEPSLATE_COPPER_ORE, 35, 1.5, 2, 15);
+        this.addShopProduct(shop, Material.NETHER_GOLD_ORE, 10, 1.5, 2, 20);
+        this.addShopProduct(shop, Material.RAW_IRON_BLOCK, 80.5, 9, 2, 21);
+        this.addShopProduct(shop, Material.RAW_COPPER_BLOCK, 31.5, 13.5, 2, 23);
+        this.addShopProduct(shop, Material.COPPER_INGOT, 41.5, 3, 2, 24);
+        this.addShopProduct(shop, Material.RAW_GOLD_BLOCK, 108, 13.5, 2, 29);
+        this.addShopProduct(shop, Material.COPPER_BLOCK, 165, 15, 2, 33);
+    }
+
+    private void addCombatToolsItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.TURTLE_HELMET, 500, -1, 1, 4);
+        this.addShopProduct(shop, Material.IRON_HELMET, 500, -1, 1, 11);
+        this.addShopProduct(shop, Material.IRON_CHESTPLATE, 700, -1, 1, 12);
+        this.addShopProduct(shop, Material.IRON_LEGGINGS, 650, -1, 1, 13);
+        this.addShopProduct(shop, Material.IRON_BOOTS, 450, -1, 1, 14);
+        this.addShopProduct(shop, Material.IRON_SWORD, 300, -1, 1, 15);
+        this.addShopProduct(shop, Material.DIAMOND_HELMET, 1_200, -1, 1, 20);
+        this.addShopProduct(shop, Material.DIAMOND_CHESTPLATE, 1_800, -1, 1, 21);
+        this.addShopProduct(shop, Material.DIAMOND_LEGGINGS, 1_600, -1, 1, 22);
+        this.addShopProduct(shop, Material.DIAMOND_BOOTS, 1_000, -1, 1, 23);
+        this.addShopProduct(shop, Material.DIAMOND_SWORD, 800, -1, 1, 24);
+        this.addShopProduct(shop, Material.IRON_PICKAXE, 300, -1, 2, 2);
+        this.addShopProduct(shop, Material.DIAMOND_PICKAXE, 700, -1, 2, 6);
+        this.addShopProduct(shop, Material.IRON_AXE, 250, -1, 2, 11);
+        this.addShopProduct(shop, Material.DIAMOND_AXE, 700, -1, 2, 15);
+        this.addShopProduct(shop, Material.IRON_SHOVEL, 100, -1, 2, 20);
+        this.addShopProduct(shop, Material.DIAMOND_SHOVEL, 250, -1, 2, 24);
+        this.addShopProduct(shop, Material.IRON_HOE, 200, -1, 2, 29);
+        this.addShopProduct(shop, Material.DIAMOND_HOE, 450, -1, 2, 33);
+        this.addShopProduct(shop, Material.FISHING_ROD, 150, -1, 3, 12);
+        this.addShopProduct(shop, Material.CARROT_ON_A_STICK, 175, -1, 3, 13);
+        this.addShopProduct(shop, Material.WARPED_FUNGUS_ON_A_STICK, 200, -1, 3, 14);
+        this.addShopProduct(shop, Material.BOW, 500, -1, 3, 19);
+        this.addShopProduct(shop, Material.ARROW, 50, 3, 3, 20);
+        this.addShopProduct(shop, Material.SPECTRAL_ARROW, 65, -1, 3, 21);
+        this.addShopProduct(shop, Material.CROSSBOW, 500, -1, 3, 22);
+        this.addShopProduct(shop, Material.TRIDENT, 50_000, 1_000, 3, 23);
+        this.addShopProduct(shop, Material.SHIELD, 120, -1, 3, 24);
+        this.addShopProduct(shop, Material.FLINT_AND_STEEL, 500, -1, 3, 25);
+        this.addShopProduct(shop, Material.NAME_TAG, 3_000, -1, 3, 30);
+        this.addShopProduct(shop, Material.LEAD, 1_000, -1, 3, 31);
+        this.addShopProduct(shop, Material.SHEARS, 200, -1, 3, 32);
+    }
+
+    private void addColoredBlocksItems(@NotNull VirtualShop shop) {
+        this.addShopProduct(shop, Material.BLACK_WOOL, 5, 1, 1, 11);
+        this.addShopProduct(shop, Material.GRAY_WOOL, 5, 1, 1, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_WOOL, 5, 1, 1, 14);
+        this.addShopProduct(shop, Material.WHITE_WOOL, 5, 1, 1, 15);
+        this.addShopProduct(shop, Material.BLUE_WOOL, 5, 1, 1, 19);
+        this.addShopProduct(shop, Material.CYAN_WOOL, 5, 1, 1, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_WOOL, 5, 1, 1, 21);
+        this.addShopProduct(shop, Material.PURPLE_WOOL, 5, 1, 1, 22);
+        this.addShopProduct(shop, Material.MAGENTA_WOOL, 5, 1, 1, 23);
+        this.addShopProduct(shop, Material.PINK_WOOL, 5, 1, 1, 24);
+        this.addShopProduct(shop, Material.RED_WOOL, 5, 1, 1, 25);
+        this.addShopProduct(shop, Material.BROWN_WOOL, 5, 1, 1, 29);
+        this.addShopProduct(shop, Material.ORANGE_WOOL, 5, 1, 1, 30);
+        this.addShopProduct(shop, Material.YELLOW_WOOL, 5, 1, 1, 31);
+        this.addShopProduct(shop, Material.LIME_WOOL, 5, 1, 1, 32);
+        this.addShopProduct(shop, Material.GREEN_WOOL, 5, 1, 1, 33);
+        this.addShopProduct(shop, Material.BLACK_CARPET, 4, 0.5, 2, 11);
+        this.addShopProduct(shop, Material.GRAY_CARPET, 4, 0.5, 2, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_CARPET, 4, 0.5, 2, 14);
+        this.addShopProduct(shop, Material.WHITE_CARPET, 4, 0.5, 2, 15);
+        this.addShopProduct(shop, Material.BLUE_CARPET, 4, 0.5, 2, 19);
+        this.addShopProduct(shop, Material.CYAN_CARPET, 4, 0.5, 2, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_CARPET, 4, 0.5, 2, 21);
+        this.addShopProduct(shop, Material.PURPLE_CARPET, 4, 0.5, 2, 22);
+        this.addShopProduct(shop, Material.MAGENTA_CARPET, 4, 0.5, 2, 23);
+        this.addShopProduct(shop, Material.PINK_CARPET, 4, 0.5, 2, 24);
+        this.addShopProduct(shop, Material.RED_CARPET, 4, 0.5, 2, 25);
+        this.addShopProduct(shop, Material.BROWN_CARPET, 4, 0.5, 2, 29);
+        this.addShopProduct(shop, Material.ORANGE_CARPET, 4, 0.5, 2, 30);
+        this.addShopProduct(shop, Material.YELLOW_CARPET, 4, 0.5, 2, 31);
+        this.addShopProduct(shop, Material.LIME_CARPET, 4, 0.5, 2, 32);
+        this.addShopProduct(shop, Material.GREEN_CARPET, 4, 0.5, 2, 33);
+        this.addShopProduct(shop, Material.BLACK_STAINED_GLASS, 5, 1, 3, 11);
+        this.addShopProduct(shop, Material.GRAY_STAINED_GLASS, 5, 1, 3, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_STAINED_GLASS, 5, 1, 3, 14);
+        this.addShopProduct(shop, Material.WHITE_STAINED_GLASS, 5, 1, 3, 15);
+        this.addShopProduct(shop, Material.BLUE_STAINED_GLASS, 5, 1, 3, 19);
+        this.addShopProduct(shop, Material.CYAN_STAINED_GLASS, 5, 1, 3, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_STAINED_GLASS, 5, 1, 3, 21);
+        this.addShopProduct(shop, Material.PURPLE_STAINED_GLASS, 5, 1, 3, 22);
+        this.addShopProduct(shop, Material.MAGENTA_STAINED_GLASS, 5, 1, 3, 23);
+        this.addShopProduct(shop, Material.PINK_STAINED_GLASS, 5, 1, 3, 24);
+        this.addShopProduct(shop, Material.RED_STAINED_GLASS, 5, 1, 3, 25);
+        this.addShopProduct(shop, Material.BROWN_STAINED_GLASS, 5, 1, 3, 29);
+        this.addShopProduct(shop, Material.ORANGE_STAINED_GLASS, 5, 1, 3, 30);
+        this.addShopProduct(shop, Material.YELLOW_STAINED_GLASS, 5, 1, 3, 31);
+        this.addShopProduct(shop, Material.LIME_STAINED_GLASS, 5, 1, 3, 32);
+        this.addShopProduct(shop, Material.GREEN_STAINED_GLASS, 5, 1, 3, 33);
+        this.addShopProduct(shop, Material.BLACK_STAINED_GLASS_PANE, 3.5, 0.3, 4, 11);
+        this.addShopProduct(shop, Material.GRAY_STAINED_GLASS_PANE, 3.5, 0.3, 4, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_STAINED_GLASS_PANE, 3.5, 0.3, 4, 14);
+        this.addShopProduct(shop, Material.WHITE_STAINED_GLASS_PANE, 3.5, 0.3, 4, 15);
+        this.addShopProduct(shop, Material.BLUE_STAINED_GLASS_PANE, 3.5, 0.3, 4, 19);
+        this.addShopProduct(shop, Material.CYAN_STAINED_GLASS_PANE, 3.5, 0.3, 4, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_STAINED_GLASS_PANE, 3.5, 0.3, 4, 21);
+        this.addShopProduct(shop, Material.PURPLE_STAINED_GLASS_PANE, 3.5, 0.3, 4, 22);
+        this.addShopProduct(shop, Material.MAGENTA_STAINED_GLASS_PANE, 3.5, 0.3, 4, 23);
+        this.addShopProduct(shop, Material.PINK_STAINED_GLASS_PANE, 3.5, 0.3, 4, 24);
+        this.addShopProduct(shop, Material.RED_STAINED_GLASS_PANE, 3.5, 0.3, 4, 25);
+        this.addShopProduct(shop, Material.BROWN_STAINED_GLASS_PANE, 3.5, 0.3, 4, 29);
+        this.addShopProduct(shop, Material.ORANGE_STAINED_GLASS_PANE, 3.5, 0.3, 4, 30);
+        this.addShopProduct(shop, Material.YELLOW_STAINED_GLASS_PANE, 3.5, 0.3, 4, 31);
+        this.addShopProduct(shop, Material.LIME_STAINED_GLASS_PANE, 3.5, 0.3, 4, 32);
+        this.addShopProduct(shop, Material.GREEN_STAINED_GLASS_PANE, 3.5, 0.3, 4, 33);
+        this.addShopProduct(shop, Material.BLACK_TERRACOTTA, 5, 1, 5, 11);
+        this.addShopProduct(shop, Material.GRAY_TERRACOTTA, 5, 1, 5, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_TERRACOTTA, 5, 1, 5, 14);
+        this.addShopProduct(shop, Material.WHITE_TERRACOTTA, 5, 1, 5, 15);
+        this.addShopProduct(shop, Material.BLUE_TERRACOTTA, 5, 1, 5, 19);
+        this.addShopProduct(shop, Material.CYAN_TERRACOTTA, 5, 1, 5, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_TERRACOTTA, 5, 1, 5, 21);
+        this.addShopProduct(shop, Material.PURPLE_TERRACOTTA, 5, 1, 5, 22);
+        this.addShopProduct(shop, Material.MAGENTA_TERRACOTTA, 5, 1, 5, 23);
+        this.addShopProduct(shop, Material.PINK_TERRACOTTA, 5, 1, 5, 24);
+        this.addShopProduct(shop, Material.RED_TERRACOTTA, 5, 1, 5, 25);
+        this.addShopProduct(shop, Material.BROWN_TERRACOTTA, 5, 1, 5, 29);
+        this.addShopProduct(shop, Material.ORANGE_TERRACOTTA, 5, 1, 5, 30);
+        this.addShopProduct(shop, Material.YELLOW_TERRACOTTA, 5, 1, 5, 31);
+        this.addShopProduct(shop, Material.LIME_TERRACOTTA, 5, 1, 5, 32);
+        this.addShopProduct(shop, Material.GREEN_TERRACOTTA, 5, 1, 5, 33);
+        this.addShopProduct(shop, Material.BLACK_BANNER, 35, 3, 6, 11);
+        this.addShopProduct(shop, Material.GRAY_BANNER, 35, 3, 6, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_BANNER, 35, 3, 6, 14);
+        this.addShopProduct(shop, Material.WHITE_BANNER, 35, 3, 6, 15);
+        this.addShopProduct(shop, Material.BLUE_BANNER, 35, 3, 6, 19);
+        this.addShopProduct(shop, Material.CYAN_BANNER, 35, 3, 6, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_BANNER, 35, 3, 6, 21);
+        this.addShopProduct(shop, Material.PURPLE_BANNER, 35, 3, 6, 22);
+        this.addShopProduct(shop, Material.MAGENTA_BANNER, 35, 3, 6, 23);
+        this.addShopProduct(shop, Material.PINK_BANNER, 35, 3, 6, 24);
+        this.addShopProduct(shop, Material.RED_BANNER, 35, 3, 6, 25);
+        this.addShopProduct(shop, Material.BROWN_BANNER, 35, 3, 6, 29);
+        this.addShopProduct(shop, Material.ORANGE_BANNER, 35, 3, 6, 30);
+        this.addShopProduct(shop, Material.YELLOW_BANNER, 35, 3, 6, 31);
+        this.addShopProduct(shop, Material.LIME_BANNER, 35, 3, 6, 32);
+        this.addShopProduct(shop, Material.GREEN_BANNER, 35, 3, 6, 33);
+        this.addShopProduct(shop, Material.BLACK_CONCRETE_POWDER, 100, 5, 7, 11);
+        this.addShopProduct(shop, Material.GRAY_CONCRETE_POWDER, 100, 5, 7, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_CONCRETE_POWDER, 100, 5, 7, 14);
+        this.addShopProduct(shop, Material.WHITE_CONCRETE_POWDER, 100, 5, 7, 15);
+        this.addShopProduct(shop, Material.BLUE_CONCRETE_POWDER, 100, 5, 7, 19);
+        this.addShopProduct(shop, Material.CYAN_CONCRETE_POWDER, 100, 5, 7, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_CONCRETE_POWDER, 100, 5, 7, 21);
+        this.addShopProduct(shop, Material.PURPLE_CONCRETE_POWDER, 100, 5, 7, 22);
+        this.addShopProduct(shop, Material.MAGENTA_CONCRETE_POWDER, 100, 5, 7, 23);
+        this.addShopProduct(shop, Material.PINK_CONCRETE_POWDER, 100, 5, 7, 24);
+        this.addShopProduct(shop, Material.RED_CONCRETE_POWDER, 100, 5, 7, 25);
+        this.addShopProduct(shop, Material.BROWN_CONCRETE_POWDER, 100, 5, 7, 29);
+        this.addShopProduct(shop, Material.ORANGE_CONCRETE_POWDER, 100, 5, 7, 30);
+        this.addShopProduct(shop, Material.YELLOW_CONCRETE_POWDER, 100, 5, 7, 31);
+        this.addShopProduct(shop, Material.LIME_CONCRETE_POWDER, 100, 5, 7, 32);
+        this.addShopProduct(shop, Material.GREEN_CONCRETE_POWDER, 100, 5, 7, 33);
+        this.addShopProduct(shop, Material.BLACK_CONCRETE, 105, 5, 8, 11);
+        this.addShopProduct(shop, Material.GRAY_CONCRETE, 105, 5, 8, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_CONCRETE, 105, 5, 8, 14);
+        this.addShopProduct(shop, Material.WHITE_CONCRETE, 105, 5, 8, 15);
+        this.addShopProduct(shop, Material.BLUE_CONCRETE, 105, 5, 8, 19);
+        this.addShopProduct(shop, Material.CYAN_CONCRETE, 105, 5, 8, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_CONCRETE, 105, 5, 8, 21);
+        this.addShopProduct(shop, Material.PURPLE_CONCRETE, 105, 5, 8, 22);
+        this.addShopProduct(shop, Material.MAGENTA_CONCRETE, 105, 5, 8, 23);
+        this.addShopProduct(shop, Material.PINK_CONCRETE, 105, 5, 8, 24);
+        this.addShopProduct(shop, Material.RED_CONCRETE, 105, 5, 8, 25);
+        this.addShopProduct(shop, Material.BROWN_CONCRETE, 105, 5, 8, 29);
+        this.addShopProduct(shop, Material.ORANGE_CONCRETE, 105, 5, 8, 30);
+        this.addShopProduct(shop, Material.YELLOW_CONCRETE, 105, 5, 8, 31);
+        this.addShopProduct(shop, Material.LIME_CONCRETE, 105, 5, 8, 32);
+        this.addShopProduct(shop, Material.GREEN_CONCRETE, 105, 5, 8, 33);
+        this.addShopProduct(shop, Material.BLACK_GLAZED_TERRACOTTA, 110, 5, 9, 11);
+        this.addShopProduct(shop, Material.GRAY_GLAZED_TERRACOTTA, 110, 5, 9, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_GLAZED_TERRACOTTA, 110, 5, 9, 14);
+        this.addShopProduct(shop, Material.WHITE_GLAZED_TERRACOTTA, 110, 5, 9, 15);
+        this.addShopProduct(shop, Material.BLUE_GLAZED_TERRACOTTA, 110, 5, 9, 19);
+        this.addShopProduct(shop, Material.CYAN_GLAZED_TERRACOTTA, 110, 5, 9, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_GLAZED_TERRACOTTA, 110, 5, 9, 21);
+        this.addShopProduct(shop, Material.PURPLE_GLAZED_TERRACOTTA, 110, 5, 9, 22);
+        this.addShopProduct(shop, Material.MAGENTA_GLAZED_TERRACOTTA, 110, 5, 9, 23);
+        this.addShopProduct(shop, Material.PINK_GLAZED_TERRACOTTA, 110, 5, 9, 24);
+        this.addShopProduct(shop, Material.RED_GLAZED_TERRACOTTA, 110, 5, 9, 25);
+        this.addShopProduct(shop, Material.BROWN_GLAZED_TERRACOTTA, 110, 5, 9, 29);
+        this.addShopProduct(shop, Material.ORANGE_GLAZED_TERRACOTTA, 110, 5, 9, 30);
+        this.addShopProduct(shop, Material.YELLOW_GLAZED_TERRACOTTA, 110, 5, 9, 31);
+        this.addShopProduct(shop, Material.LIME_GLAZED_TERRACOTTA, 110, 5, 9, 32);
+        this.addShopProduct(shop, Material.GREEN_GLAZED_TERRACOTTA, 110, 5, 9, 33);
+        this.addShopProduct(shop, Material.BLACK_BED, 50, -1, 10, 11);
+        this.addShopProduct(shop, Material.GRAY_BED, 50, -1, 10, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_BED, 50, -1, 10, 14);
+        this.addShopProduct(shop, Material.WHITE_BED, 50, -1, 10, 15);
+        this.addShopProduct(shop, Material.BLUE_BED, 50, -1, 10, 19);
+        this.addShopProduct(shop, Material.CYAN_BED, 50, -1, 10, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_BED, 50, -1, 10, 21);
+        this.addShopProduct(shop, Material.PURPLE_BED, 50, -1, 10, 22);
+        this.addShopProduct(shop, Material.MAGENTA_BED, 50, -1, 10, 23);
+        this.addShopProduct(shop, Material.PINK_BED, 50, -1, 10, 24);
+        this.addShopProduct(shop, Material.RED_BED, 50, -1, 10, 25);
+        this.addShopProduct(shop, Material.BROWN_BED, 50, -1, 10, 29);
+        this.addShopProduct(shop, Material.ORANGE_BED, 50, -1, 10, 30);
+        this.addShopProduct(shop, Material.YELLOW_BED, 50, -1, 10, 31);
+        this.addShopProduct(shop, Material.LIME_BED, 50, -1, 10, 32);
+        this.addShopProduct(shop, Material.GREEN_BED, 50, -1, 10, 33);
+        this.addShopProduct(shop, Material.BLACK_SHULKER_BOX, 1_000, 150, 11, 11);
+        this.addShopProduct(shop, Material.GRAY_SHULKER_BOX, 1_000, 150, 11, 12);
+        this.addShopProduct(shop, Material.LIGHT_GRAY_SHULKER_BOX, 1_000, 150, 11, 14);
+        this.addShopProduct(shop, Material.WHITE_SHULKER_BOX, 1_000, 150, 11, 15);
+        this.addShopProduct(shop, Material.BLUE_SHULKER_BOX, 1_000, 150, 11, 19);
+        this.addShopProduct(shop, Material.CYAN_SHULKER_BOX, 1_000, 150, 11, 20);
+        this.addShopProduct(shop, Material.LIGHT_BLUE_SHULKER_BOX, 1_000, 150, 11, 21);
+        this.addShopProduct(shop, Material.PURPLE_SHULKER_BOX, 1_000, 150, 11, 22);
+        this.addShopProduct(shop, Material.MAGENTA_SHULKER_BOX, 1_000, 150, 11, 23);
+        this.addShopProduct(shop, Material.PINK_SHULKER_BOX, 1_000, 150, 11, 24);
+        this.addShopProduct(shop, Material.RED_SHULKER_BOX, 1_000, 150, 11, 25);
+        this.addShopProduct(shop, Material.BROWN_SHULKER_BOX, 1_000, 150, 11, 29);
+        this.addShopProduct(shop, Material.ORANGE_SHULKER_BOX, 1_000, 150, 11, 30);
+        this.addShopProduct(shop, Material.YELLOW_SHULKER_BOX, 1_000, 150, 11, 31);
+        this.addShopProduct(shop, Material.LIME_SHULKER_BOX, 1_000, 150, 11, 32);
+        this.addShopProduct(shop, Material.GREEN_SHULKER_BOX, 1_000, 150, 11, 33);
+    }
+
+//    private void createTravellerShop() {
+//        String name = GREEN.enclose(BOLD.enclose("Traveller Shop"));
+//        List<String> desc = List.of(GRAY.enclose("Shop with items changing"), GRAY.enclose("every 24 hours."));
+//
+//        VirtualShop shop = this.createRotatingShop("traveller", name, desc, new ItemStack(Material.ENDER_EYE));
+//
+//        this.addShopProduct(shop, Material.EXPERIENCE_BOTTLE, 100, 25);
+//        this.addShopProduct(shop, Material.ENDER_EYE, 350, 15);
+//        this.addShopProduct(shop, Material.IRON_INGOT, 100, 25);
+//        this.addShopProduct(shop, Material.GOLD_INGOT, 100, 25);
+//        this.addShopProduct(shop, Material.LAPIS_LAZULI, 100, 25);
+//        this.addShopProduct(shop, Material.FLINT, 100, 25);
+//        this.addShopProduct(shop, Material.EGG, 25, 5);
+//        this.addShopProduct(shop, Material.TNT, 400, 35);
+//        this.addShopProduct(shop, Material.CARROT, 35, 5);
+//        this.addShopProduct(shop, Material.GOLD_NUGGET, 100, 25);
+//        this.addShopProduct(shop, Material.IRON_NUGGET, 100, 25);
+//        this.addShopProduct(shop, Material.WHEAT, 100, 25);
+//        this.addShopProduct(shop, Material.STICK, 100, 25);
+//        this.addShopProduct(shop, Material.LEATHER, 100, 25);
+//        this.addShopProduct(shop, Material.COPPER_INGOT, 100, 25);
+//        this.addShopProduct(shop, Material.GRAY_DYE, 15, 1);
+//        this.addShopProduct(shop, Material.BOOK, 10, 1);
+//        this.addShopProduct(shop, Material.GLASS_BOTTLE, 20, 2);
+//        this.addShopProduct(shop, Material.MELON_SLICE, 100, 25);
+//        this.addShopProduct(shop, Material.NAUTILUS_SHELL, 100, 25);
+//        this.addShopProduct(shop, Material.HEART_OF_THE_SEA, 100, 25);
+//        this.addShopProduct(shop, Material.FIRE_CHARGE, 100, 25);
+//        this.addShopProduct(shop, Material.NAME_TAG, 100, 25);
+//        this.addShopProduct(shop, Material.APPLE, 100, 25);
+//        this.addShopProduct(shop, Material.LEAD, 100, 25);
+//        this.addShopProduct(shop, Material.COOKED_COD, 100, 25);
+//        this.addShopProduct(shop, Material.SPIDER_EYE, 100, 25);
+//
+//        shop.save();
+//        shop.performRotation();
+//    }
+
+//    @NotNull
+//    private VirtualShop createRotatingShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon) {
+//        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, VirtualShop.FILE_NAME);
+//        FileUtil.create(file);
+//
+//        VirtualShop shop = new VirtualShop(this.plugin, this.module, file, id);
+////        shop.setDefaultLayout(Placeholders.DEFAULT);
+////        shop.setRotationType(RotationType.INTERVAL);
+////        shop.setRotationInterval(86400);
+////        shop.setProductMinAmount(15);
+////        shop.setProductMaxAmount(15);
+////        shop.setProductSlots(new int[]{10,11,12,13,14,15,16,20,21,22,23,24,30,31,32});
+////        this.setShopSettings(shop, name, description, icon);
+//
+//        return shop;
+//    }
+
+    private void createShop(@NotNull String id,
+                            @NotNull String hexColor,
+                            @NotNull String name,
+                            @NotNull List<String> description,
+                            @NotNull NightItem icon,
+                            int pages,
+                            int menuSlot,
+                            @NotNull Consumer<VirtualShop> consumer) {
+
+        List<String> realDescription = new ArrayList<>();
+        description.forEach(line -> realDescription.add(LIGHT_GRAY.enclose(line)));
+        realDescription.add(" ");
+        realDescription.add(HEX_COLOR.enclose("→ " + BOLD.enclose(UNDERLINED.enclose("CLICK")) + " to browse", hexColor));
+
+        this.createShop(id, shop -> {
+            shop.setName(StringUtil.capitalizeUnderscored(id));
+            shop.setDescription(realDescription);
+            shop.setIcon(icon.setDisplayName(HEX_COLOR.enclose(BOLD.enclose(name), hexColor)));
+            shop.setPermissionRequired(false);
+            shop.setBuyingAllowed(true);
+            shop.setSellingAllowed(true);
+            shop.setPages(pages);
+            shop.setMainMenuSlot(menuSlot);
+            shop.setDefaultLayout(Placeholders.DEFAULT);
+            consumer.accept(shop);
+        });
+    }
+
+    private void createShop(@NotNull String id, @NotNull Consumer<VirtualShop> consumer) {
+        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, VirtualShop.FILE_NAME);
+        FileUtil.create(file);
+
+        VirtualShop shop = new VirtualShop(this.plugin, this.module, file, id);
+
+        consumer.accept(shop);
+
+        shop.save();
+    }
+
+    private void addShopProduct(@NotNull VirtualShop shop, @NotNull Material material, double buyPrice, double sellPrice, int page, int slot) {
+        this.addShopProduct(shop, new ItemStack(material), buyPrice, sellPrice, page, slot);
+    }
+
+    private void addShopProduct(@NotNull VirtualShop shop, @NotNull Material material, @NotNull PotionType type, double buyPrice, double sellPrice, int page, int slot) {
         ItemStack itemStack = new ItemStack(material);
+        ItemUtil.editMeta(itemStack, PotionMeta.class, potionMeta -> {
+            potionMeta.setBasePotionType(type);
+        });
 
-//        ItemHandler handler = ItemBridge.getItemManager().forBukkitItem();
-//        ItemWrapper packer = handler.wrap(itemStack);
+        this.addShopProduct(shop, itemStack, buyPrice, sellPrice, page, slot);
+    }
 
-        ProductTyping type = new VanillaProductType(itemStack, itemStack.hasItemMeta());
+//    @Deprecated
+//    private void addShopProduct(@NotNull VirtualShop shop, @NotNull Material material, double buyPrice, double sellPrice) {
+//        this.addShopProduct(shop, material, UniDouble.of(buyPrice, sellPrice));
+//    }
 
-        StaticProduct product = shop.createProduct(this.currency, type);
+    private void addShopProduct(@NotNull VirtualShop shop, @NotNull ItemStack itemStack, double buyPrice, double sellPrice, int page, int slot) {
+        this.addShopProduct(shop, itemStack, product -> {
+            product.getPricer().setPrice(TradeType.BUY, buyPrice);
+            product.getPricer().setPrice(TradeType.SELL, sellPrice);
+            product.setPage(page);
+            product.setSlot(slot);
+        });
+    }
+
+    private void addShopProduct(@NotNull VirtualShop shop, @NotNull ItemStack itemStack, @NotNull Consumer<VirtualProduct> consumer) {
+        VirtualProduct product = ProductTypes.wizardCreation(plugin, shop, itemStack, ProductType.VANILLA, false);
+        if (product == null) return;
+
         product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
-        product.getPricer().setPrice(TradeType.BUY, price.getMinValue());
-        product.getPricer().setPrice(TradeType.SELL, price.getMaxValue());
-        product.setPage(pageSlot.getMinValue());
-        product.setSlot(pageSlot.getMaxValue());
+
+        consumer.accept(product);
 
         shop.addProduct(product);
     }
 
-    private void addShopProduct(@NotNull RotatingShop shop, @NotNull Material material, @NotNull UniDouble price) {
-        ItemStack itemStack = new ItemStack(material);
-
-        //ItemHandler handler = ItemBridge.getItemManager().forBukkitItem();
-        //ItemWrapper packer = handler.wrap(itemStack);
-
-        ProductTyping type = new VanillaProductType(itemStack, itemStack.hasItemMeta());
-
-        RotatingProduct product = shop.createProduct(this.currency, type);
-        product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
-        product.getPricer().setPrice(TradeType.BUY, price.getMinValue());
-        product.getPricer().setPrice(TradeType.SELL, price.getMaxValue());
-        product.setRotationChance(50D);
-
-        shop.addProduct(product);
-    }
+//    @Deprecated
+//    private void addShopProduct(@NotNull VirtualShop shop, @NotNull Material material, @NotNull UniDouble price) {
+//        ItemStack itemStack = new ItemStack(material);
+//
+//        //ItemHandler handler = ItemBridge.getItemManager().forBukkitItem();
+//        //ItemWrapper packer = handler.wrap(itemStack);
+//
+//        ProductTyping type = new VanillaProductType(itemStack, itemStack.hasItemMeta());
+//
+//        VirtualProduct product = ProductTypes.wizardCreation(plugin, shop, itemStack, ProductType.VANILLA, false);//shop.createProduct(this.currency, type);
+//        if (product == null) return;
+//
+//        product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
+//        product.getPricer().setPrice(TradeType.BUY, price.getMinValue());
+//        product.getPricer().setPrice(TradeType.SELL, price.getMaxValue());
+//        product.setRotating(true);
+//
+//        shop.addProduct(product);
+//    }
 }

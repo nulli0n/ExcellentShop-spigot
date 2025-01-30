@@ -8,7 +8,7 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -23,7 +23,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> implements ShopEditor {
+public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> implements LegacyShopEditor {
 
     private final VirtualShopModule module;
 

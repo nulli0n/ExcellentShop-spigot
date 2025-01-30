@@ -8,8 +8,8 @@ import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.data.DataHandler;
-import su.nightexpress.nexshop.data.UserManager;
-import su.nightexpress.nexshop.data.user.ShopUser;
+import su.nightexpress.nexshop.data.DataManager;
+import su.nightexpress.nexshop.user.UserManager;
 import su.nightexpress.nexshop.hook.HookId;
 import su.nightexpress.nexshop.hook.PlaceholderHook;
 import su.nightexpress.nexshop.shop.ShopManager;
@@ -17,16 +17,17 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nightcore.NightDataPlugin;
+import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.command.experimental.ImprovedCommands;
 import su.nightexpress.nightcore.command.experimental.impl.ReloadCommand;
 import su.nightexpress.nightcore.command.experimental.node.ChainedNode;
 import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.util.Plugins;
 
-public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCommands {
+public class ShopPlugin extends NightPlugin implements ImprovedCommands {
 
     private DataHandler dataHandler;
+    private DataManager dataManager;
     private UserManager userManager;
 
     private ShopManager shopManager;
@@ -60,14 +61,17 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
             this.error("https://github.com/nulli0n/economy-bridge/releases");
         }
 
-        Keys.load(this);
-
+        this.loadAPI();
         this.loadCommands();
 
         this.dataHandler = new DataHandler(this);
         this.dataHandler.setup();
+        this.dataHandler.updateStockDatas();
 
-        this.userManager = new UserManager(this);
+        this.dataManager = new DataManager(this);
+        this.dataManager.setup();
+
+        this.userManager = new UserManager(this, this.dataHandler);
         this.userManager.setup();
 
         this.shopManager = new ShopManager(this);
@@ -113,8 +117,17 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
             this.auction.shutdown();
             this.auction = null;
         }
+        if (this.userManager != null) this.userManager.shutdown();
+        if (this.dataManager != null) this.dataManager.shutdown();
+        if (this.dataHandler != null) this.dataHandler.shutdown();
 
         Keys.clear();
+        ShopAPI.clear();
+    }
+
+    private void loadAPI() {
+        ShopAPI.load(this);
+        Keys.load(this);
     }
 
     private void loadCommands() {
@@ -123,14 +136,17 @@ public class ShopPlugin extends NightDataPlugin<ShopUser> implements ImprovedCom
         ReloadCommand.inject(this, rootNode, Perms.COMMAND_RELOAD);
     }
 
-    @Override
     @NotNull
-    public DataHandler getData() {
+    public DataHandler getDataHandler() {
         return this.dataHandler;
     }
 
     @NotNull
-    @Override
+    public DataManager getDataManager() {
+        return this.dataManager;
+    }
+
+    @NotNull
     public UserManager getUserManager() {
         return userManager;
     }

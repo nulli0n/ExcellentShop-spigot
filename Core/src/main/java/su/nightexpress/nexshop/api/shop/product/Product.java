@@ -11,6 +11,7 @@ import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 
+import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 public interface Product {
@@ -29,6 +30,22 @@ public interface Product {
     boolean isAvailable(@NotNull Player player);
 
     int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType);
+
+
+    int countStock(@NotNull TradeType type, @Nullable UUID playerId);
+
+    boolean consumeStock(@NotNull TradeType type, int amount, @Nullable UUID playerId);
+
+    boolean storeStock(@NotNull TradeType type, int amount, @Nullable UUID playerId);
+
+    boolean restock(@NotNull TradeType type, boolean force, @Nullable UUID playerId);
+
+    long getRestockDate(@Nullable UUID playerId);
+
+
+    void updatePrice();
+
+    void updatePrice(boolean force);
 
     double getPriceBuy(@NotNull Player player);
 
@@ -82,8 +99,7 @@ public interface Product {
 
     @NotNull Shop getShop();
 
-    @NotNull
-    ProductTyping getType();
+    @NotNull ProductTyping getType();
 
     void setType(@NotNull ProductTyping type);
 
@@ -92,12 +108,6 @@ public interface Product {
     @NotNull Currency getCurrency();
 
     void setCurrency(@NotNull Currency currency);
-
-//    @NotNull ProductHandler getHandler();
-//
-//    void setHandler(@NotNull ProductHandler handler, @NotNull ProductPacker packer);
-//
-//    @NotNull ProductPacker getPacker();
 
     @NotNull AbstractProductPricer getPricer();
 

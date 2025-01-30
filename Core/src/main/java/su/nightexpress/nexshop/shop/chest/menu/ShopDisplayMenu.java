@@ -9,7 +9,7 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.menu.ShopEditor;
+import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -28,7 +28,7 @@ import java.util.List;
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop>, ShopEditor {
+public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop>, LegacyShopEditor {
 
     public static final String FILE_NAME = "shop_display.yml";
 
