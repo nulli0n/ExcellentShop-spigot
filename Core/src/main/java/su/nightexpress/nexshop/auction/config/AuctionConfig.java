@@ -44,6 +44,16 @@ public class AuctionConfig {
         "https://hub.spigotmc.org/javadocs/spigot/org/bukkit/GameMode.html"
     );
 
+    public static final ConfigValue<Boolean> NOTIFY_UNCLAIMED_ON_JOIN = ConfigValue.create("Settings.Notify_Unclaimed_On_Join",
+            true,
+            "When enabled, players will receive a message about unclaimed listings when they join the server."
+    );
+
+    public static final ConfigValue<Boolean> NOTIFY_EXPIRED_ON_JOIN = ConfigValue.create("Settings.Notify_Expired_On_Join",
+            true,
+            "When enabled, players will receive a message about expired listings when they join the server."
+    );
+
     public static final ConfigValue<Boolean> LISTINGS_HIDE_ATTRIBUTES = ConfigValue.create("Settings.Listings.Hide_Attributes",
         false,
         "When enabled, will hide item attributes (damage, durability, etc.) of auction listings.");
