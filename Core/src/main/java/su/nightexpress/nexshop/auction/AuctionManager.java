@@ -12,6 +12,7 @@ import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.economybridge.api.item.ItemHandler;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.event.AuctionListingCreateEvent;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.command.child.*;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
@@ -435,6 +436,11 @@ public class AuctionManager extends AbstractModule {
         PhysicalTyping typing = ProductTypes.fromItem(item, false);
 
         ActiveListing listing = ActiveListing.create(player, typing, currency, price);
+
+        AuctionListingCreateEvent event = new AuctionListingCreateEvent(player, currency, listing);
+        plugin.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return null;
+
         this.listings.add(listing);
         this.plugin.runTaskAsync(task -> this.database.addListing(listing));
 
