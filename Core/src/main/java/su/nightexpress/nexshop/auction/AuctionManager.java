@@ -10,6 +10,8 @@ import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.economybridge.api.item.ItemHandler;
+import su.nightexpress.economybridge.item.ItemManager;
+import su.nightexpress.economybridge.item.handler.impl.MMOItemsHandler;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
@@ -433,6 +435,10 @@ public class AuctionManager extends AbstractModule {
         //ItemHandler handler = ProductHandlerRegistry.getHandler(item);
         //ItemPacker packer = handler.createPacker(item);
         PhysicalTyping typing = ProductTypes.fromItem(item, false);
+
+        if (AuctionConfig.DISABLED_ITEM_HANDLERS.get().contains(typing.getName().toLowerCase())) {
+            typing = ProductTypes.fromItem(item, true);
+        }
 
         ActiveListing listing = ActiveListing.create(player, typing, currency, price);
         this.listings.add(listing);

@@ -1,42 +1,33 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nightcore.core.CoreLang;
-import su.nightexpress.nightcore.language.entry.LangEnum;
 import su.nightexpress.nightcore.language.entry.LangString;
 import su.nightexpress.nightcore.language.entry.LangText;
 
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
-import static su.nightexpress.nightcore.language.tag.MessageTags.*;
 import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nightcore.language.tag.MessageTags.OUTPUT;
+import static su.nightexpress.nightcore.language.tag.MessageTags.SOUND;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ChestLang extends CoreLang {
-
-    public static final LangEnum<ShopType> SHOP_TYPES = LangEnum.of("ChestShop.ShopType", ShopType.class);
 
     public static final LangString COMMAND_ARGUMENT_NAME_BUY_PRICE  = LangString.of("ChestShop.Command.Argument.Name.BuyPrice", "buyPrice");
     public static final LangString COMMAND_ARGUMENT_NAME_SELL_PRICE = LangString.of("ChestShop.Command.Argument.Name.SellPrice", "sellPrice");
 
-    public static final LangString COMMAND_LIST_DESC = LangString.of("ChestShop.Command.List.Desc", "List of [player's] shops.");
-
-    public static final LangString COMMAND_BANK_DESC = LangString.of("ChestShop.Command.Bank.Desc", "Open [player's] bank.");
-
-    public static final LangString COMMAND_CREATE_DESC = LangString.of("ChestShop.Command.Create.Desc", "Create a shop.");
-
-    public static final LangString COMMAND_BROWSE_DESC = LangString.of("ChestShop.Command.Browse.Desc", "Player shops GUI.");
-
+    public static final LangString COMMAND_LIST_DESC      = LangString.of("ChestShop.Command.List.Desc", "List of [player's] shops.");
+    public static final LangString COMMAND_BANK_DESC      = LangString.of("ChestShop.Command.Bank.Desc", "Open [player's] bank.");
+    public static final LangString COMMAND_CREATE_DESC    = LangString.of("ChestShop.Command.Create.Desc", "Create a shop.");
+    public static final LangString COMMAND_BROWSE_DESC    = LangString.of("ChestShop.Command.Browse.Desc", "Player shops GUI.");
     public static final LangString COMMAND_GIVE_ITEM_DESC = LangString.of("ChestShop.Command.GiveItem.Desc", "Give shop creation item.");
+    public static final LangString COMMAND_REMOVE_DESC    = LangString.of("ChestShop.Command.Remove.Desc", "Removes the shop from the chest that you're looking at.");
+    public static final LangString COMMAND_OPEN_DESC      = LangString.of("ChestShop.Command.Open.Desc", "Open inventory of the target shop.");
 
     public static final LangText COMMAND_GIVE_ITEM_BAD_MATERIAL = LangText.of("ChestShop.Command.GiveItem.BadMaterial",
         LIGHT_RED.enclose("Invalid shop type!"));
 
     public static final LangText COMMAND_GIVE_ITEM_DONE = LangText.of("ChestShop.Command.GiveItem.Done",
         LIGHT_GRAY.enclose("Given " + LIGHT_YELLOW.enclose(GENERIC_NAME) + " to " + LIGHT_YELLOW.enclose(PLAYER_DISPLAY_NAME) + "."));
-
-    public static final LangString COMMAND_REMOVE_DESC = LangString.of("ChestShop.Command.Remove.Desc", "Removes the shop from the chest that you're looking at.");
-
-    public static final LangString COMMAND_OPEN_DESC = LangString.of("ChestShop.Command.Open.Desc", "Open inventory of the target shop.");
 
     public static final LangText SHOP_ERROR_NOT_OWNER = LangText.of("ChestShop.Shop.Error.NotOwner",
         LIGHT_RED.enclose("You don't own this shop!"));
@@ -67,9 +58,6 @@ public class ChestLang extends CoreLang {
 
     public static final LangText SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS = LangText.of("ChestShop.Shop.Creation.Error.NotEnoughFunds",
         LIGHT_RED.enclose("You don't have enough funds!"));
-
-    public static final LangText SHOP_CREATION_ERROR_TYPE_PERMISSION = LangText.of("ChestShop.Shop.Creation.Error.TypePermission",
-        LIGHT_RED.enclose("You don't have permission to create this type shops!"));
 
     public static final LangText SHOP_REMOVAL_ERROR_NOT_EMPTY = LangText.of("ChestShop.Shop.Removal.Error.NotEmpty",
         LIGHT_RED.enclose("Please withdraw items from shop storage to remove it."));
@@ -124,6 +112,54 @@ public class ChestLang extends CoreLang {
         OUTPUT.enclose(20, -1) + SOUND.enclose(Sound.BLOCK_LAVA_POP),
         LIGHT_YELLOW.enclose(BOLD.enclose("Shop Search")),
         LIGHT_GRAY.enclose("Enter item " + LIGHT_YELLOW.enclose("name") + " to search for.")
+    );
+
+
+    public static final LangText ERROR_SHOP_INACTIVE = LangText.of("ChestShop.Shop.Error.Inactive", "This shop is not available currently.");
+
+    public static final LangText RENT_ERROR_ALREADY_RENTED = LangText.of("ChestShop.Rent.Error.AlreadyRented",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_RED.enclose(BOLD.enclose("Already Rented!")),
+        LIGHT_GRAY.enclose("This shop is already rented by someone.")
+    );
+
+    public static final LangText RENT_ERROR_NOT_RENTED = LangText.of("ChestShop.Rent.Error.NotRented",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_RED.enclose(BOLD.enclose("Not Rented!")),
+        LIGHT_GRAY.enclose("You don't rent this shop.")
+    );
+
+    public static final LangText RENT_ERROR_NOT_RENTABLE = LangText.of("ChestShop.Rent.Error.NotRentable",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_RED.enclose(BOLD.enclose("Not Rentable!")),
+        LIGHT_GRAY.enclose("This shop is not available for rent.")
+    );
+
+    public static final LangText RENT_ERROR_INSUFFICIENT_FUNDS = LangText.of("ChestShop.Rent.Error.InsufficientFunds",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.ENTITY_VILLAGER_NO),
+        LIGHT_RED.enclose(BOLD.enclose("Insufficient Funds!")),
+        LIGHT_GRAY.enclose("You need " + LIGHT_RED.enclose(GENERIC_PRICE) + " to rent this shop.")
+    );
+
+    public static final LangString RENT_PROMPT_DURATION = LangString.of("ChestShop.Rent.Prompt.Duration",
+        GRAY.enclose("Enter " + GREEN.enclose("[Days Amount]")));
+
+    public static final LangString RENT_PROMPT_CURRENCY = LangString.of("ChestShop.Rent.Prompt.Currency",
+        GRAY.enclose("Enter " + GREEN.enclose("[Currency]")));
+
+    public static final LangString RENT_PROMPT_PRICE = LangString.of("ChestShop.Rent.Prompt.Price",
+        GRAY.enclose("Enter " + GREEN.enclose("[Rent Price]")));
+
+    public static final LangText RENT_RENT_SUCCESS = LangText.of("ChestShop.Rent.Rent.Success",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.BLOCK_IRON_DOOR_OPEN),
+        LIGHT_GREEN.enclose(BOLD.enclose("Shop Rented!")),
+        LIGHT_GRAY.enclose("You rented this shop for " + LIGHT_GREEN.enclose(GENERIC_TIME) + ".")
+    );
+
+    public static final LangText RENT_EXTEND_SUCCESS = LangText.of("ChestShop.Rent.Extend.Success",
+        OUTPUT.enclose(20, 60) + SOUND.enclose(Sound.BLOCK_IRON_DOOR_OPEN),
+        LIGHT_GREEN.enclose(BOLD.enclose("Rent Extended!")),
+        LIGHT_GRAY.enclose("You extended shop rent for " + LIGHT_GREEN.enclose(GENERIC_TIME) + ".")
     );
 
     public static final LangText BANK_ERROR_INVALID_CURRENCY = LangText.of("ChestShop.Shop.Bank.Error.InvalidCurrency",

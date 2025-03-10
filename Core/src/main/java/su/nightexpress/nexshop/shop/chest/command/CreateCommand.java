@@ -7,7 +7,6 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
-import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nightcore.command.experimental.CommandContext;
 import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
 import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
@@ -45,6 +44,6 @@ public class CreateCommand {
         double buyPrice = arguments.getDoubleArgument(ARG_BUY_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
         double sellPrice = arguments.getDoubleArgument(ARG_SELL_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
 
-        return module.createShopNaturally(player, block, ShopType.PLAYER, buyPrice, sellPrice);
+        return module.createShopNaturally(player, block, buyPrice, sellPrice);
     }
 }

@@ -98,44 +98,44 @@ public class PlaceholderHook {
                 if (subParams.startsWith("unclaimed_income_raw_")) {
                     String currency = subParams.substring("unclaimed_income_raw_".length());
                     return String.valueOf(
-                            module.getListings().getUnclaimed(player).stream()
-                                    .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency))
-                                    .mapToDouble(CompletedListing::getPrice)
-                                    .sum()
+                        module.getListings().getUnclaimed(player).stream()
+                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency))
+                            .mapToDouble(CompletedListing::getPrice)
+                            .sum()
                     );
                 }
                 if (subParams.startsWith("unclaimed_income_")) {
                     Currency currency = EconomyBridge.getCurrency(subParams.substring("unclaimed_income_".length()));
                     return (currency == null) ? null : currency.format(
-                            module.getListings().getUnclaimed(player).stream()
-                                    .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency.getInternalId()))
-                                    .mapToDouble(CompletedListing::getPrice)
-                                    .sum()
+                        module.getListings().getUnclaimed(player).stream()
+                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency.getInternalId()))
+                            .mapToDouble(CompletedListing::getPrice)
+                            .sum()
                     );
                 }
                 if (subParams.startsWith("claimed_income_raw_")) {
                     String currency = subParams.substring("claimed_income_raw_".length());
                     return String.valueOf(
-                            module.getListings().getClaimed(player).stream()
-                                    .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency))
-                                    .mapToDouble(CompletedListing::getPrice)
-                                    .sum()
+                        module.getListings().getClaimed(player).stream()
+                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency))
+                            .mapToDouble(CompletedListing::getPrice)
+                            .sum()
                     );
                 }
                 if (subParams.startsWith("claimed_income_")) {
                     Currency currency = EconomyBridge.getCurrency(subParams.substring("claimed_income_".length()));
                     return (currency == null) ? null : currency.format(
-                            module.getListings().getClaimed(player).stream()
-                                    .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency.getInternalId()))
-                                    .mapToDouble(CompletedListing::getPrice)
-                                    .sum()
+                        module.getListings().getClaimed(player).stream()
+                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency.getInternalId()))
+                            .mapToDouble(CompletedListing::getPrice)
+                            .sum()
                     );
                 }
             }
 
             if (player == null) return null;
 
-            else if (params.startsWith("chestshop_")) {
+            if (params.startsWith("chestshop_")) {
                 ChestShopModule module = this.plugin.getChestShop();
                 if (module == null) return null;
 

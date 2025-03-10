@@ -14,11 +14,6 @@ public class UserManager extends AbstractUserManager<ShopPlugin, ShopUser> {
     }
 
     @Override
-    protected void onLoad() {
-        super.onLoad();
-    }
-
-    @Override
     @NotNull
     public ShopUser create(@NotNull UUID uuid, @NotNull String name) {
         return ShopUser.create(uuid, name);

@@ -9,7 +9,7 @@ public interface Confirmation {
 
     void onAccept(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event);
 
-    void onDecline(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event);
+    void returnBack(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event);
 
     @NotNull
     static Confirmation create(@NotNull ItemClick accept, @NotNull ItemClick decline) {
@@ -21,7 +21,7 @@ public interface Confirmation {
             }
 
             @Override
-            public void onDecline(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event) {
+            public void returnBack(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event) {
                 decline.onClick(viewer, event);
             }
         };

@@ -1,6 +1,8 @@
 package su.nightexpress.nexshop.shop.chest.compatibility;
 
+import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.PlayerData;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +17,10 @@ public class GriefPreventionHook implements ClaimHook {
 
     @Override
     public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
-        return this.griefPrevention.allowBuild(player, block.getLocation()) == null;
+        PlayerData playerData = this.griefPrevention.dataStore.getPlayerData(player.getUniqueId());
+        Claim claim = this.griefPrevention.dataStore.getClaimAt(block.getLocation(), true, playerData.lastClaim);
+
+        return claim != null && claim.getOwnerID().equals(player.getUniqueId());
     }
 
 }

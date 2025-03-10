@@ -659,7 +659,9 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.MANGROVE_BOAT, 125, -1, 2, 34);
         this.addShopProduct(shop, Material.CHERRY_BOAT, 125, -1, 2, 39);
         this.addShopProduct(shop, Material.BAMBOO_RAFT, 125, -1, 2, 40);
-        this.addShopProduct(shop, Material.PALE_OAK_BOAT, 125, -1, 2, 41);
+        if (Version.isAtLeast(Version.MC_1_21_2)) {
+            this.addShopProduct(shop, Material.PALE_OAK_BOAT, 125, -1, 2, 41);
+        }
     }
 
     private void addPotionsItems(@NotNull VirtualShop shop) {

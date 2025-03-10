@@ -23,6 +23,25 @@ import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ChestConfig {
 
+    public static final ConfigValue<Boolean> RENT_ENABLED = ConfigValue.create("Rent.Enabled",
+        true,
+        "Controls whether Shop Rent feature is enabled.");
+
+    public static final ConfigValue<Integer> RENT_MAX_DURATION = ConfigValue.create("Rent.MaxDuration",
+        60,
+        "Sets limit for rent duration value.",
+        "[*] Use -1 for unlimited."
+    );
+
+    public static final ConfigValue<Map<String, Double>> RENT_MAX_PRICE = ConfigValue.forMapById("Rent.MaxPrice",
+        (cfg, path, id) -> cfg.getDouble(path + "." + id),
+        map -> {
+            map.put(CurrencyId.VAULT, 100_00D);
+        },
+        "Sets limit for rent price per currency.",
+        "[*] Use -1 for unlimited."
+    );
+
     public static final ConfigValue<Boolean> DELETE_INVALID_SHOP_CONFIGS = ConfigValue.create("Shops.Delete_Invalid_Shop_Configs",
         false,
         "Sets whether or not invalid shops (that can not be loaded properly) will be auto deleted.");
@@ -352,27 +371,40 @@ public class ChestConfig {
         "Sets distance between hologram lines."
     );
 
-    public static final ConfigValue<Map<ShopType, List<String>>> DISPLAY_HOLOGRAM_TEXT_ALL = ConfigValue.forMap("Display.Title.Values",
-        str -> StringUtil.getEnum(str, ShopType.class).orElse(null),
-        (cfg, path, type) -> cfg.getStringList(path + "." + type),
-        (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
-        Map.of(
-            ShopType.ADMIN, Lists.newList(
-                LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
-                LIGHT_GRAY.enclose(Placeholders.GENERIC_PRODUCT_NAME),
-                GENERIC_BUY + " " + GENERIC_SELL
-            ),
-            ShopType.PLAYER, Lists.newList(
-                LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
-                LIGHT_GRAY.enclose(Placeholders.GENERIC_PRODUCT_NAME),
-                GENERIC_BUY + " " + GENERIC_SELL
-            )
+    public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_ADMIN = ConfigValue.create("Display.Title.Values.ADMIN",
+        Lists.newList(
+            LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
+            LIGHT_GRAY.enclose(Placeholders.GENERIC_PRODUCT_NAME),
+            GENERIC_BUY + " " + GENERIC_SELL
         ),
         "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
         "You can use 'Chest Shop' placeholders: " + URL_WIKI_PLACEHOLDERS,
         "Display item name: " + Placeholders.GENERIC_PRODUCT_NAME,
         "Display item price: " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
         Plugins.PLACEHOLDER_API + " is also supported here."
+    );
+
+    public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_NORMAL = ConfigValue.create("Display.Title.Values.PLAYER",
+
+        Lists.newList(
+            LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
+            LIGHT_GRAY.enclose(Placeholders.GENERIC_PRODUCT_NAME),
+            GENERIC_BUY + " " + GENERIC_SELL
+        ),
+        "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
+        "You can use 'Chest Shop' placeholders: " + URL_WIKI_PLACEHOLDERS,
+        "Display item name: " + Placeholders.GENERIC_PRODUCT_NAME,
+        "Display item price: " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
+        Plugins.PLACEHOLDER_API + " is also supported here."
+    );
+
+    public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_RENT = ConfigValue.create("Display.Title.Rent",
+        Lists.newList(
+            LIGHT_YELLOW.enclose(BOLD.enclose("For Rent")),
+            LIGHT_GRAY.enclose(GENERIC_TIME),
+            LIGHT_GRAY.enclose(GENERIC_PRICE)
+        ),
+        "Sets hologram text for rentable shops."
     );
 
     public static final ConfigValue<Map<ShopType, String>> DISPLAY_HOLOGRAM_TEXT_BUY = ConfigValue.forMap("Display.Title.BuyValue",
@@ -403,5 +435,9 @@ public class ChestConfig {
 
     public static boolean isAutoBankEnabled() {
         return SHOP_AUTO_BANK.get();
+    }
+
+    public static boolean isRentEnabled() {
+        return RENT_ENABLED.get();
     }
 }

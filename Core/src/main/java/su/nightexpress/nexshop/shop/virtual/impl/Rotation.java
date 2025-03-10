@@ -152,28 +152,25 @@ public class Rotation implements Writeable {
         if (this.rotationTimes.isEmpty()) return 0L;
 
         int count = 0;
-        LocalDate dateLookup = LocalDate.now();
+        while (count < 8) {
+            LocalDate dateLookup = LocalDate.now().plusDays(count++);
 
-        LocalTime fit = null;
-        while (count < 6) {
-            fit = this.findTime(dateLookup.getDayOfWeek());
-            if (fit != null) break;
-
-            dateLookup = dateLookup.plusDays(1);
-            count++;
+            LocalTime fit = this.findTime(dateLookup);
+            if (fit != null) {
+                return TimeUtil.toEpochMillis(LocalDateTime.of(dateLookup, fit));
+            }
         }
-        if (fit == null) return 0L;
 
-        return TimeUtil.toEpochMillis(LocalDateTime.of(dateLookup, fit));
+        return 0L;
     }
 
     @Nullable
-    private LocalTime findTime(@NotNull DayOfWeek dayOfWeek) {
-        TreeSet<LocalTime> times = this.rotationTimes.get(dayOfWeek);
+    private LocalTime findTime(@NotNull LocalDate dateLookup) {
+        TreeSet<LocalTime> times = this.rotationTimes.get(dateLookup.getDayOfWeek());
         if (times == null || times.isEmpty()) return null;
 
         LocalTime fit;
-        if (dayOfWeek != LocalDate.now().getDayOfWeek()) {
+        if (dateLookup.getDayOfYear() != LocalDate.now().getDayOfYear()) {
             fit = times.stream().min(LocalTime::compareTo).orElse(null);
         }
         else {

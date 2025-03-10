@@ -46,7 +46,7 @@ public class ConfirmMenu extends LinkedMenu<ShopPlugin, Confirmation> implements
             .setPriority(10)
             .setSlots(0)
             .setHandler(new ItemHandler("decline", (viewer, event) -> {
-                this.getLink(viewer).onDecline(viewer, event);
+                this.getLink(viewer).returnBack(viewer, event);
             }))
         );
 
@@ -56,7 +56,9 @@ public class ConfirmMenu extends LinkedMenu<ShopPlugin, Confirmation> implements
             .setPriority(10)
             .setSlots(4)
             .setHandler(new ItemHandler("accept", (viewer, event) -> {
-                this.getLink(viewer).onAccept(viewer, event);
+                Confirmation confirmation = this.getLink(viewer);
+                confirmation.onAccept(viewer, event);
+                this.runNextTick(() -> confirmation.returnBack(viewer, event));
             }))
         );
     }

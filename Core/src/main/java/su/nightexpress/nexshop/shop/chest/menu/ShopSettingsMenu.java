@@ -3,169 +3,64 @@ package su.nightexpress.nexshop.shop.chest.menu;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
+import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.menu.MenuOptions;
-import su.nightexpress.nightcore.menu.MenuSize;
-import su.nightexpress.nightcore.menu.MenuViewer;
-import su.nightexpress.nightcore.menu.item.ItemHandler;
-import su.nightexpress.nightcore.menu.item.MenuItem;
-import su.nightexpress.nightcore.menu.link.Linked;
-import su.nightexpress.nightcore.menu.link.ViewLink;
-import su.nightexpress.nightcore.util.ItemReplacer;
-import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.ui.dialog.Dialog;
+import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.data.ConfigBased;
+import su.nightexpress.nightcore.ui.menu.data.MenuLoader;
+import su.nightexpress.nightcore.ui.menu.item.ItemHandler;
+import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
+import su.nightexpress.nightcore.ui.menu.item.MenuItem;
+import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Players;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop>, LegacyShopEditor {
+@SuppressWarnings("UnstableApiUsage")
+public class ShopSettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements ConfigBased {
 
     public static final String FILE = "shop_settings.yml";
 
-    private final ViewLink<ChestShop> link;
-
-    private final ItemHandler nameHandler;
-    private final ItemHandler typeHandler;
-    private final ItemHandler bankHandler;
-    private final ItemHandler storageHandler;
-    private final ItemHandler displayHandler;
-    private final ItemHandler transactHandler;
-    private final ItemHandler productsHandler;
-    private final ItemHandler deleteHandler;
+    private final ChestShopModule module;
 
     public ShopSettingsMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE));
-        this.link = new ViewLink<>();
+        super(plugin, MenuType.GENERIC_9X5, BLACK.enclose(SHOP_NAME));
+        this.module = module;
 
-        this.addHandler(this.nameHandler = new ItemHandler("shop_change_name", (viewer, event) -> {
-            ChestShop shop = this.getLink(viewer);
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, (dialog, input) -> {
-                module.renameShop(viewer.getPlayer(), shop, input.getText());
-                this.save(viewer, shop);
-                return true;
-            });
-        }));
-
-        this.addHandler(this.typeHandler = new ItemHandler("shop_change_type", (viewer, event) -> {
-            ChestShop shop = this.getLink(viewer);
-            shop.setType(Lists.next(shop.getType(), shopType -> shopType.hasPermission(viewer.getPlayer())));
-            module.remakeDisplay(shop);
-            this.saveAndFlush(viewer, shop);
-        }));
-
-        this.addHandler(this.transactHandler = new ItemHandler("shop_change_transactions", (viewer, event) -> {
-            ChestShop shop = this.getLink(viewer);
-            if (Players.isBedrock(viewer.getPlayer())) {
-                boolean isBuy = shop.isTradeAllowed(TradeType.BUY);
-                boolean isSell = shop.isTradeAllowed(TradeType.SELL);
-                if (isBuy && isSell) {
-                    shop.setTransactionEnabled(TradeType.BUY, false);
-                }
-                else if (!isBuy && isSell) {
-                    shop.setTransactionEnabled(TradeType.SELL, false);
-                }
-                else if (!isBuy) {
-                    shop.setTransactionEnabled(TradeType.BUY, true);
-                }
-                else {
-                    shop.setTransactionEnabled(TradeType.SELL, true);
-                }
-                return;
-            }
-
-            if (event.isLeftClick()) {
-                shop.setTransactionEnabled(TradeType.BUY, !shop.isTradeAllowed(TradeType.BUY));
-            }
-            else if (event.isRightClick()) {
-                shop.setTransactionEnabled(TradeType.SELL, !shop.isTradeAllowed(TradeType.SELL));
-            }
-            this.saveAndFlush(viewer, shop);
-        }));
-
-        this.addHandler(this.productsHandler = new ItemHandler("shop_change_products", (viewer, event) -> {
-            this.runNextTick(() -> module.openProductsMenu(viewer.getPlayer(), this.getLink(viewer)));
-        }));
-
-        this.addHandler(this.bankHandler = new ItemHandler("shop_bank", (viewer, event) -> {
-            this.runNextTick(() -> module.openBank(viewer.getPlayer(), this.getLink(viewer)));
-        }));
-
-        this.addHandler(this.storageHandler = new ItemHandler("shop_storage", (viewer, event) -> {
-            this.runNextTick(() -> module.openStorage(viewer.getPlayer(), this.getLink(viewer)));
-        }));
-
-        this.addHandler(this.displayHandler = new ItemHandler("shop_display", (viewer, event) -> {
-            ChestShop shop = this.getLink(viewer);
-            this.runNextTick(() -> module.openDisplayMenu(viewer.getPlayer(), shop));
-        }));
-
-        this.addHandler(this.deleteHandler = new ItemHandler("shop_delete", (viewer, event) -> {
-            Player player = viewer.getPlayer();
-            if (!event.isShiftClick() && !Players.isBedrock(player)) return;
-
-            module.deleteShop(player, this.getLink(viewer));
-            this.runNextTick(player::closeInventory);
-        }));
-
-        this.load();
-
-        this.getItems().forEach(menuItem -> {
-            menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-                ItemReplacer.create(item).readMeta().trimmed()
-                    .replace(this.getLink(viewer).replacePlaceholders())
-                    .replacePlaceholderAPI(viewer.getPlayer())
-                    .writeMeta();
-            });
-
-            if (menuItem.getHandler() == this.bankHandler) {
-                menuItem.getOptions().setVisibilityPolicy(viewer -> {
-                    if (ChestConfig.isAutoBankEnabled()) return false;
-                    if (viewer.getPlayer().hasPermission(ChestPerms.COMMAND_BANK_OTHERS)) return true;
-
-                    return this.getLink(viewer).isOwner(viewer.getPlayer());
-                });
-            }
-            else if (menuItem.getHandler() == this.typeHandler) {
-                menuItem.getOptions().setVisibilityPolicy(viewer -> {
-                    ChestShop shop = this.getLink(viewer);
-                    return Lists.next(shop.getType(), shopType -> shopType.hasPermission(viewer.getPlayer())) != shop.getType();
-                });
-            }
-            else if (menuItem.getHandler() == this.displayHandler) {
-                menuItem.getOptions().setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.DISPLAY_CUSTOMIZATION));
-            }
-            else if (menuItem.getHandler() == this.storageHandler) {
-                menuItem.getOptions().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage());
-            }
-        });
+        this.load(FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE));
     }
 
+    @Override
     @NotNull
-    @Override
-    public ViewLink<ChestShop> getLink() {
-        return link;
+    protected String getTitle(@NotNull MenuViewer viewer) {
+        return this.getLink(viewer).replacePlaceholders().apply(this.title);
     }
 
     @Override
-    protected void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
-        ChestShop shop = this.getLink(viewer);
-        options.setTitle(shop.replacePlaceholders().apply(options.getTitle()));
+    protected void onItemPrepare(@NotNull MenuViewer viewer, @NotNull MenuItem menuItem, @NotNull NightItem item) {
+        super.onItemPrepare(viewer, menuItem, item);
+
+        item.replacement(replacer -> replacer.replace(this.getLink(viewer).replacePlaceholders()));
+    }
+
+    @Override
+    protected void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
+
     }
 
     @Override
@@ -174,44 +69,143 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
     }
 
     @Override
-    @NotNull
-    protected MenuOptions createDefaultOptions() {
-        return new MenuOptions(BLACK.enclose(SHOP_NAME), MenuSize.CHEST_9);
-    }
+    public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
+        loader.addDefaultItem(NightItem.fromType(Material.RED_BANNER)
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Admin Shop")))
+            .setLore(Lists.newList(
+                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Enabled: ") + CHEST_SHOP_IS_ADMIN),
+                "",
+                LIGHT_GRAY.enclose("Controls whether shop is " + LIGHT_YELLOW.enclose("admin shop") + "."),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("toggle") + ".")
+            ))
+            .toMenuItem().setSlots(4).setPriority(10).setHandler(new ItemHandler("shop_change_type", (viewer, event) -> {
+                ChestShop shop = this.getLink(viewer);
+                shop.setAdminShop(!shop.isAdminShop());
+                module.remakeDisplay(shop);
+                shop.saveSettings();
+                this.runNextTick(() -> this.flush(viewer));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.ADMIN_SHOP)).build())));
 
-    @Override
-    @NotNull
-    protected List<MenuItem> createDefaultItems() {
-        List<MenuItem> list = new ArrayList<>();
 
-        ItemStack nameItem = ItemUtil.getSkinHead("f5a19af0e61ca42532c0599fa0a391753df6b71f9fa4a177f1aa9b1d81fe6ee2");
-        ItemUtil.editMeta(nameItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Display Name")));
-            meta.setLore(Lists.newList(
+        loader.addDefaultItem(NightItem.asCustomHead("f5a19af0e61ca42532c0599fa0a391753df6b71f9fa4a177f1aa9b1d81fe6ee2")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Display Name")))
+            .setLore(Lists.newList(
                 LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Current: ") + SHOP_NAME),
                 "",
-                LIGHT_GRAY.enclose("Name your shop!"),
-                "",
                 LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("change") + ".")
-            ));
-        });
-        list.add(new MenuItem(nameItem).setSlots(0).setPriority(10).setHandler(this.nameHandler));
+            ))
+            .toMenuItem().setSlots(20).setPriority(10).setHandler(new ItemHandler("shop_change_name", (viewer, event) -> {
+                ChestShop shop = this.getLink(viewer);
+                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, input -> {
+                    this.module.renameShop(viewer.getPlayer(), shop, input.getText());
+                    shop.saveSettings();
+                    return true;
+                }));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> this.getLink(viewer).canRename(viewer.getPlayer())).build())));
 
-        ItemStack productsItem = ItemUtil.getSkinHead("900d28ff7b543dd088d004b1b1f95b38d444ea0461ff5ae3c68d76c0c16e2527");
-        ItemUtil.editMeta(productsItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Products")));
-            meta.setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Manage your products here!"),
+
+        loader.addDefaultItem(NightItem.asCustomHead("900d28ff7b543dd088d004b1b1f95b38d444ea0461ff5ae3c68d76c0c16e2527")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Products")))
+            .setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Manage shop products here."),
                 "",
                 LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
-            ));
-        });
-        list.add(new MenuItem(productsItem).setSlots(1).setPriority(10).setHandler(this.productsHandler));
+            ))
+            .toMenuItem().setSlots(21).setPriority(10).setHandler(new ItemHandler("shop_change_products", (viewer, event) -> {
+                this.runNextTick(() -> this.module.openProductsMenu(viewer.getPlayer(), this.getLink(viewer)));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> this.getLink(viewer).canManageProducts(viewer.getPlayer())).build())));
 
-        ItemStack bankItem = ItemUtil.getSkinHead("5f96717bef61c37ce4dcd0b067da4b57c8a1b0f83c2926868b083444f7eade54");
-        ItemUtil.editMeta(bankItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Bank")));
-            meta.setLore(Lists.newList(
+
+        loader.addDefaultItem(NightItem.asCustomHead("28a47804b73e454a5992cf6411a7872df56788237c246bb245199d30a1eed58e")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Display Settings")))
+            .setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Customize display of your shop!"),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
+            ))
+            .toMenuItem().setSlots(22).setPriority(10).setHandler(new ItemHandler("shop_display", (viewer, event) -> {
+                ChestShop shop = this.getLink(viewer);
+                this.runNextTick(() -> module.openDisplayMenu(viewer.getPlayer(), shop));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.DISPLAY_CUSTOMIZATION)).build())));
+
+
+        loader.addDefaultItem(NightItem.fromType(Material.GREEN_DYE)
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Buying")))
+            .setLore(Lists.newList(
+                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Allowed: ") + SHOP_BUYING_ALLOWED),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("toggle") + ".")
+                ))
+            .toMenuItem().setSlots(23).setPriority(10).setHandler(new ItemHandler("shop_buying", (viewer, event) -> {
+                ChestShop shop = this.getLink(viewer);
+                shop.setBuyingAllowed(!shop.isBuyingAllowed());
+                shop.saveSettings();
+                this.runNextTick(() -> this.flush(viewer));
+            })));
+
+        loader.addDefaultItem(NightItem.fromType(Material.RED_DYE)
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Selling")))
+            .setLore(Lists.newList(
+                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Allowed: ") + SHOP_SELLING_ALLOWED),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("toggle") + ".")
+            ))
+            .toMenuItem().setSlots(24).setPriority(10).setHandler(new ItemHandler("shop_selling", (viewer, event) -> {
+                ChestShop shop = this.getLink(viewer);
+                shop.setSellingAllowed(!shop.isSellingAllowed());
+                shop.saveSettings();
+                this.runNextTick(() -> this.flush(viewer));
+            })));
+
+        loader.addDefaultItem(NightItem.asCustomHead("8fa065f04290ecf431f9aa900ab6ea17bc354f70a596f1826bb23592f87ddba7")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Rent Settings")))
+            .setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Manage rent settings here."),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
+            ))
+            .toMenuItem().setSlots(30).setPriority(10).setHandler(new ItemHandler("shop_rent_settings", (viewer, event) -> {
+                this.runNextTick(() -> this.module.openRentSettings(viewer.getPlayer(), this.getLink(viewer)));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestConfig.isRentEnabled() && this.getLink(viewer).canManageRent(viewer.getPlayer())).build())));
+
+        loader.addDefaultItem(NightItem.asCustomHead("a77be664b48eb834c05a79cf2bcea4a0b49215211254b0b4d965ccb221dbedbb")
+            .setDisplayName(GREEN.enclose(BOLD.enclose("Extend Rent")))
+            .setLore(Lists.newList(
+                GREEN.enclose("● " + LIGHT_GRAY.enclose("Expires in ") + CHEST_SHOP_RENT_EXPIRES_IN),
+                GREEN.enclose("● " + LIGHT_GRAY.enclose("Period: ") + CHEST_SHOP_RENT_DURATION),
+                GREEN.enclose("● " + LIGHT_GRAY.enclose("Price: ") + CHEST_SHOP_RENT_PRICE),
+                "",
+                LIGHT_GRAY.enclose(GREEN.enclose("➥") + " Click to " + GREEN.enclose("extend") + ".")
+            ))
+            .toMenuItem().setSlots(30).setPriority(10).setHandler(new ItemHandler("shop_rent_extend", (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                ChestShop shop = this.getLink(player);
+                this.runNextTick(() -> plugin.getShopManager().openConfirmation(player, Confirmation.create(
+                    (viewer1, event1) -> {
+                        this.module.extendRentShop(viewer.getPlayer(), shop);
+                        this.runNextTick(() -> module.openShopSettings(player, shop));
+                    },
+                    (viewer1, event1) -> {
+                        this.runNextTick(() -> module.openShopSettings(player, shop));
+                    }
+                )));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestConfig.isRentEnabled() && this.getLink(viewer).isRenter(viewer.getPlayer())).build())));
+
+        loader.addDefaultItem(NightItem.asCustomHead("edc36c9cb50a527aa55607a0df7185ad20aabaa903e8d9abfc78260705540def")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Storage")))
+            .setLore(Lists.newList(
+                LIGHT_GRAY.enclose("Store items here."),
+                "",
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
+            ))
+            .toMenuItem().setSlots(31).setPriority(10).setHandler(new ItemHandler("shop_storage", (viewer, event) -> {
+                this.runNextTick(() -> module.openStorage(viewer.getPlayer(), this.getLink(viewer)));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage()).build())));
+
+        loader.addDefaultItem(NightItem.asCustomHead("5f96717bef61c37ce4dcd0b067da4b57c8a1b0f83c2926868b083444f7eade54")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Bank")))
+            .setLore(Lists.newList(
                 LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Balance: ") + Placeholders.CHEST_SHOP_BANK_BALANCE),
                 "",
                 LIGHT_GRAY.enclose("Bank used to store your funds."),
@@ -220,83 +214,25 @@ public class ShopSettingsMenu extends ShopEditorMenu implements Linked<ChestShop
                 LIGHT_GRAY.enclose("and " + LIGHT_RED.enclose("spends") + " them on purchases."),
                 "",
                 LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
-            ));
-        });
-        list.add(new MenuItem(bankItem).setSlots(2).setPriority(10).setHandler(this.bankHandler));
-
-        ItemStack storageItem = ItemUtil.getSkinHead("edc36c9cb50a527aa55607a0df7185ad20aabaa903e8d9abfc78260705540def");
-        ItemUtil.editMeta(storageItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Storage")));
-            meta.setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Store items here."),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
-            ));
-        });
-        list.add(new MenuItem(storageItem).setSlots(3).setPriority(10).setHandler(this.storageHandler));
+            ))
+            .toMenuItem().setSlots(32).setPriority(10).setHandler(new ItemHandler("shop_bank", (viewer, event) -> {
+                this.runNextTick(() -> module.openBank(viewer.getPlayer(), this.getLink(viewer)));
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> !ChestConfig.isAutoBankEnabled() && this.getLink(viewer).canManageBank(viewer.getPlayer())).build())));
 
 
-
-        ItemStack displayItem = ItemUtil.getSkinHead("28a47804b73e454a5992cf6411a7872df56788237c246bb245199d30a1eed58e");
-        ItemUtil.editMeta(displayItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Display Settings")));
-            meta.setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Customize display of your shop!"),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("navigate") + ".")
-            ));
-        });
-        list.add(new MenuItem(displayItem).setSlots(4).setPriority(10).setHandler(this.displayHandler));
-
-        ItemStack transactItem = new ItemStack(Material.WRITABLE_BOOK);
-        ItemUtil.editMeta(transactItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Trade Modes")));
-            meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Buying: ") + SHOP_BUYING_ALLOWED),
-                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Selling: ") + SHOP_SELLING_ALLOWED),
-                "",
-                LIGHT_GRAY.enclose("Enable/disable certain operations in the shop."),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Left-click to toggle " + LIGHT_YELLOW.enclose("buying") + "."),
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Right-click to toggle " + LIGHT_YELLOW.enclose("selling") + ".")
-            ));
-        });
-        list.add(new MenuItem(transactItem).setSlots(5).setPriority(10).setHandler(this.transactHandler));
-
-        ItemStack typeItem = new ItemStack(Material.RED_BANNER);
-        ItemUtil.editMeta(typeItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Shop Type")));
-            meta.setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("✔ " + LIGHT_GRAY.enclose("Current: ") + Placeholders.CHEST_SHOP_TYPE),
-                "",
-                LIGHT_GRAY.enclose("Setting shop as " + LIGHT_YELLOW.enclose("admin shop") + " will"),
-                LIGHT_GRAY.enclose("make it with unlimited funds and items."),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("change") + ".")
-            ));
-        });
-        list.add(new MenuItem(typeItem).setSlots(6).setPriority(10).setHandler(this.typeHandler));
-
-
-
-        ItemStack deleteItem = ItemUtil.getSkinHead("b465f80bf02b408885987b00957ca5e9eb874c3fa88305099597a333a336ee15");
-        ItemUtil.editMeta(deleteItem, meta -> {
-            meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Destroy Shop")));
-            meta.setLore(Lists.newList(
+        loader.addDefaultItem(NightItem.asCustomHead("b465f80bf02b408885987b00957ca5e9eb874c3fa88305099597a333a336ee15")
+            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Destroy Shop")))
+            .setLore(Lists.newList(
                 LIGHT_GRAY.enclose("Permanently removes the shop."),
                 "",
-                LIGHT_GRAY.enclose(LIGHT_RED.enclose("[❗]") + " You have to remove all items first!"),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Sneak + Click to " + LIGHT_YELLOW.enclose("confirm") + ".")
-            ));
-        });
-        list.add(new MenuItem(deleteItem).setSlots(8).setPriority(10).setHandler(this.deleteHandler));
+                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("remove") + ".")
+            ))
+            .toMenuItem().setSlots(8).setPriority(10).setHandler(new ItemHandler("shop_delete", (viewer, event) -> {
+                Player player = viewer.getPlayer();
+                if (!event.isShiftClick() && !Players.isBedrock(player)) return;
 
-        return list;
-    }
-
-    @Override
-    protected void loadAdditional() {
-
+                module.deleteShop(player, this.getLink(viewer));
+                this.runNextTick(player::closeInventory);
+            }, ItemOptions.builder().setVisibilityPolicy(viewer -> this.getLink(viewer).canRemove(viewer.getPlayer())).build())));
     }
 }

@@ -22,6 +22,7 @@ import su.nightexpress.nightcore.manager.SimpleManager;
 import su.nightexpress.nightcore.util.EntityUtil;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Plugins;
+import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.placeholder.Replacer;
 
 import java.util.*;
@@ -149,12 +150,18 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
         if (ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get() && shop.isHologramEnabled()) {
             Replacer replacer = new Replacer();
 
-            for (TradeType tradeType : TradeType.values()) {
-                replacer.replace(Placeholders.GENERIC_PRODUCT_PRICE.apply(tradeType), () -> {
-                    return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
-                });
+            if (shop.isRentable() && !shop.isRented()) {
+                replacer.replace(Placeholders.GENERIC_TIME, TimeUtil.formatTime(shop.getRentSettings().getDurationMillis()));
+                replacer.replace(Placeholders.GENERIC_PRICE, shop.getRentSettings().getPriceFormatted());
             }
-            replacer.replace(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
+            else {
+                for (TradeType tradeType : TradeType.values()) {
+                    replacer.replace(Placeholders.GENERIC_PRODUCT_PRICE.apply(tradeType), () -> {
+                        return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
+                    });
+                }
+                replacer.replace(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
+            }
 
             originText.addAll(shop.getHologramText(product));
             originText.replaceAll(shop.replacePlaceholders());

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.14.0</version>
+        <version>4.15.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.github.TechFortress</groupId>
             <artifactId>GriefPrevention</artifactId>
-            <version>16.17.1</version>
+            <version>16.18.2</version>
             <scope>provided</scope>
         </dependency>
 

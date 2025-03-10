@@ -72,6 +72,7 @@ public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Fille
                         .replace(product.replacePlaceholders(viewer.getPlayer()))
                         .replace(product.getCurrency().replacePlaceholders())
                         .replace(shop.replacePlaceholders())
+                        .replacePlaceholderAPI(viewer.getPlayer())
                     );
             })
             .setItemClick(product -> (viewer1, event) -> {

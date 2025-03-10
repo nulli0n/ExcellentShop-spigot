@@ -124,9 +124,9 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
     @NotNull
     public ItemStack getItem() {
         ItemStack itemStack = this.getHandler().createItem(this.itemId);
-        if (itemStack == null) {
-            itemStack = getBrokenItem();
-        }
+        if (itemStack == null) return getBrokenItem();
+
+        itemStack.setAmount(this.amount);
         return itemStack;
     }
 

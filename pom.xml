@@ -7,7 +7,7 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.14.0</version>
+    <version>4.15.0</version>
     <modules>
         <module>Core</module>
     </modules>
@@ -17,6 +17,13 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nightexpress</id>
+            <url>https://repo.nightexpressdev.com/releases</url>
+        </repository>
+    </distributionManagement>
 
     <repositories>
         <repository>
@@ -51,7 +58,7 @@
         <dependency>
             <groupId>su.nightexpress.nightcore</groupId>
             <artifactId>nightcore</artifactId>
-            <version>2.7.3.1</version>
+            <version>2.7.4</version>
         </dependency>
     </dependencies>
 

@@ -116,7 +116,10 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
 
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
-        PreparedProduct prepared = this.getLink(viewer).source();
+        Breadcumb<PreparedProduct> bread = this.getLink(viewer);
+        if (bread == null) return;
+
+        PreparedProduct prepared = bread.source();
         Player player = viewer.getPlayer();
         this.validateAmount(player, prepared);
 

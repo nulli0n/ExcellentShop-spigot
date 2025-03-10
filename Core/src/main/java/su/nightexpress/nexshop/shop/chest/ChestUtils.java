@@ -82,8 +82,16 @@ public class ChestUtils {
         return ChestConfig.SHOP_PRODUCTS_MAX_PER_RANK.get().getGreatestOrNegative(player);
     }
 
+    public static int getRentDurationLimit() {
+        return ChestConfig.RENT_MAX_DURATION.get();
+    }
+
+    public static double getRentPriceLimit(@NotNull Currency currency) {
+        return ChestConfig.RENT_MAX_PRICE.get().getOrDefault(currency.getInternalId(), -1D);
+    }
+
     public static boolean hasCurrencyPermission(@NotNull Player player, @NotNull Currency currency) {
-        return player.hasPermission(ChestPerms.CURRENCY.apply(currency));
+        return player.hasPermission(ChestPerms.PREFIX_CURRENCY + currency.getInternalId());
     }
 
     public static boolean isAllowedItem(@NotNull ItemStack item) {

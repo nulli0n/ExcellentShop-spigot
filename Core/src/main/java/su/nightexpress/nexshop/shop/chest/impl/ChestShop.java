@@ -31,12 +31,15 @@ import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
+import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.LocationUtil;
 import su.nightexpress.nightcore.util.Pair;
+import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.random.Rnd;
 
 import java.io.File;
@@ -53,26 +56,27 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private BlockPos blockPos;
     private Material blockType;
 
-    private UUID          ownerId;
-    private String        ownerName;
-    private OfflinePlayer ownerPlayer;
-    private ShopType      type;
+    private UUID    ownerId;
+    private String  ownerName;
+    private boolean adminShop;
     private boolean itemCreated;
 
     private boolean hologramEnabled;
     private boolean showcaseEnabled;
     private String showcaseType;
 
+    private RentSettings rentSettings;
+    private UUID renterId;
+    private String renterName;
+    private long rentedUntil;
+
     private Location displayTextLocation;
     private Location displayItemLocation;
     private Location displayShowcaseLocation;
 
-    //private final ChestStock stock;
-
     public ChestShop(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
         this.module = module;
-        //this.stock = new ChestStock(this.plugin, this);
     }
 
     @Override
@@ -99,6 +103,11 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             config.set("Placement.World", worldName);
             config.remove("Location");
         }
+
+        if (config.contains("Type")) {
+            config.set("AdminShop", config.getString("Type", "player").equalsIgnoreCase("admin"));
+            config.remove("Type");
+        }
         // ============== LOCATION UPDATE END ==============
 
         this.worldName = config.getString("Placement.World");
@@ -110,8 +119,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         try {
             this.ownerId = UUID.fromString(config.getString("Owner.Id", ""));
-            this.ownerPlayer = plugin.getServer().getOfflinePlayer(this.getOwnerId());
-            this.ownerName = String.valueOf(this.ownerPlayer.getName());
+            this.ownerName = String.valueOf(this.getOwner().getName());
         }
         catch (IllegalArgumentException exception) {
             this.plugin.error("Invalid UUID of the shop owner!");
@@ -119,10 +127,22 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
 
         this.setName(config.getString("Name", this.getOwnerName()));
-        this.setType(config.getEnum("Type", ShopType.class, ShopType.PLAYER));
+        this.setAdminShop(config.getBoolean("AdminShop"));
         this.setItemCreated(config.getBoolean("ItemCreated", false));
         this.setBuyingAllowed(config.getBoolean("Transaction_Allowed.BUY", true));
         this.setSellingAllowed(config.getBoolean("Transaction_Allowed.SELL", true));
+
+        if (ChestConfig.isRentEnabled()) {
+            this.rentSettings = RentSettings.read(config, "Rent.Settings");
+            try {
+                this.renterId = UUID.fromString(config.getString("Rent.RenterId", ""));
+                this.renterName = String.valueOf(this.getRenter().getName());
+            }
+            catch (IllegalArgumentException exception) {
+                this.renterId = null;
+            }
+            this.rentedUntil = config.getLong("Rent.RentedUntil", -1);
+        }
 
         this.setHologramEnabled(config.getBoolean("Display.Hologram.Enabled", true));
         this.setShowcaseEnabled(config.getBoolean("Display.Showcase.Enabled", true));
@@ -196,7 +216,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @Override
     public void saveRotations() {
-        // TODO wtf
+
     }
 
     private void writeSettings(@NotNull FileConfig config) {
@@ -204,10 +224,15 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         config.set("Placement.World", this.worldName);
         config.set("Name", this.getName());
         config.set("Owner.Id", this.getOwnerId().toString());
-        config.set("Type", this.getType().name());
+        config.set("AdminShop", this.adminShop);
         config.set("ItemCreated", this.isItemCreated());
         config.set("Transaction_Allowed.BUY", this.buyingAllowed);
         config.set("Transaction_Allowed.SELL", this.sellingAllowed);
+        if (ChestConfig.isRentEnabled()) {
+            config.set("Rent.Settings", this.rentSettings);
+            config.set("Rent.RenterId", this.renterId == null ? null : this.renterId.toString());
+            config.set("Rent.RentedUntil", this.renterId == null ? null : this.rentedUntil);
+        }
         config.set("Display.Hologram.Enabled", this.isHologramEnabled());
         config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
         config.set("Display.Showcase.Type", this.getShowcaseType());
@@ -307,6 +332,16 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         this.active = false;
     }
 
+    @Override
+    public void update() {
+        super.update();
+
+        if (ChestConfig.isRentEnabled() && this.isRented() && this.isRentExpired()) {
+            // TODO Notify
+            this.cancelRent();
+        }
+    }
+
     public void updatePosition() {
         this.deactivate();
 
@@ -382,12 +417,44 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return true;
     }
 
+    public boolean canRename(@NotNull Player player) {
+        return this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+    }
+
+    public boolean canManageProducts(@NotNull Player player) {
+        return this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+    }
+
+    public boolean canManageBank(@NotNull Player player) {
+        return this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.COMMAND_BANK_OTHERS);
+    }
+
+    public boolean canManageRent(@NotNull Player player) {
+        return this.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+    }
+
+    public boolean canRemove(@NotNull Player player) {
+        return this.isOwner(player) || player.hasPermission(ChestPerms.REMOVE_OTHERS);
+    }
+
     public boolean isOwner(@NotNull Player player) {
-        return this.getOwnerId().equals(player.getUniqueId());
+        return this.ownerId.equals(player.getUniqueId());
+    }
+
+    public boolean isRenter(@NotNull Player player) {
+        return this.renterId != null && this.renterId.equals(player.getUniqueId());
+    }
+
+    public boolean isOwnerOrRenter(@NotNull Player player) {
+        return this.isOwner(player) || this.isRenter(player);
     }
 
     public boolean isAdminShop() {
-        return this.getType() == ShopType.ADMIN;
+        return this.adminShop;
+    }
+
+    public void setAdminShop(boolean adminShop) {
+        this.adminShop = adminShop;
     }
 
     @Nullable
@@ -418,7 +485,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
 
         String id = UUID.randomUUID().toString();
-        ProductTyping typing = ProductTypes.fromItem(item, bypassHandler);
+        ProductTyping typing = ProductTypes.fromItem(stack, bypassHandler);
         Currency currency = this.module.getDefaultCurrency();
         ChestProduct product = new ChestProduct(this.plugin, id, this, currency, typing);
 
@@ -476,12 +543,72 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     @NotNull
-    public ShopType getType() {
-        return type;
+    public RentSettings getRentSettings() {
+        return this.rentSettings;
     }
 
-    public void setType(@NotNull ShopType type) {
-        this.type = type;
+    public void setRentSettings(@Nullable RentSettings rentSettings) {
+        this.rentSettings = rentSettings;
+    }
+
+    public boolean isRentable() {
+        return ChestConfig.isRentEnabled() && this.rentSettings.isEnabled();
+    }
+
+    public boolean isRented() {
+        return ChestConfig.isRentEnabled() && this.renterId != null && !this.isRentExpired();
+    }
+
+    public boolean isRentExpired() {
+        return TimeUtil.isPassed(this.rentedUntil);
+    }
+
+    @NotNull
+    public OfflinePlayer getRenter() {
+        return this.plugin.getServer().getOfflinePlayer(this.renterId);
+    }
+
+    @NotNull
+    public OfflinePlayer getRenterOrOwner() {
+        return this.renterId == null ? this.getOwner() : this.getRenter();
+    }
+
+    @Nullable
+    public UUID getRenterId() {
+        return this.renterId;
+    }
+
+    @NotNull
+    public String getRenterName() {
+        return this.renterName;
+    }
+
+    public long getRentedUntil() {
+        return this.rentedUntil;
+    }
+
+    public void setRentedUntil(long rentedUntil) {
+        this.rentedUntil = rentedUntil;
+    }
+
+    public void setRentedBy(@NotNull Player player) {
+        this.setRentedBy(player.getUniqueId());
+        this.renterName = player.getName();
+    }
+
+    public void setRentedBy(@NotNull UUID playerId) {
+        this.renterId = playerId;
+    }
+
+    public void cancelRent() {
+        this.renterId = null;
+        this.rentedUntil = -1;
+    }
+
+    public void extendRent() {
+        if (!this.isRented()) return;
+
+        this.rentedUntil += this.rentSettings.getDurationMillis();
     }
 
     public boolean isItemCreated() {
@@ -505,7 +632,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     public void setOwner(@NotNull OfflinePlayer player) {
         this.ownerId = player.getUniqueId();
         this.ownerName = player.getName();
-        this.ownerPlayer = player;
     }
 
     @NotNull
@@ -515,7 +641,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @NotNull
     public OfflinePlayer getOwner() {
-        return this.ownerPlayer;
+        return this.plugin.getServer().getOfflinePlayer(this.ownerId);
     }
 
     public boolean isHologramEnabled() {
@@ -545,11 +671,15 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @NotNull
     public List<String> getDisplayText() {
-        return new ArrayList<>(ChestConfig.DISPLAY_HOLOGRAM_TEXT_ALL.get().getOrDefault(this.getType(), Collections.emptyList()));
+        return new ArrayList<>((this.isAdminShop() ? ChestConfig.DISPLAY_HOLOGRAM_TEXT_ADMIN : ChestConfig.DISPLAY_HOLOGRAM_TEXT_NORMAL).get());
     }
 
     @NotNull
     public List<String> getHologramText(@Nullable ChestProduct product) {
+        if (this.isRentable() && !this.isRented()) {
+            return new ArrayList<>(ChestConfig.DISPLAY_HOLOGRAM_TEXT_RENT.get()).reversed();
+        }
+
         var buyTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_BUY.get();
         var sellTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_SELL.get();
 
@@ -559,8 +689,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         List<String> text = new ArrayList<>();
         for (String line : this.getDisplayText()) {
             text.addFirst(line
-                .replace(Placeholders.GENERIC_BUY, !isBuyable ? "" : buyTextMap.getOrDefault(this.getType(), ""))
-                .replace(Placeholders.GENERIC_SELL, !isSellable ? "" : sellTextMap.getOrDefault(this.getType(), ""))
+                .replace(Placeholders.GENERIC_BUY, !isBuyable ? "" : buyTextMap.getOrDefault(this.isAdminShop() ? ShopType.ADMIN : ShopType.PLAYER, ""))
+                .replace(Placeholders.GENERIC_SELL, !isSellable ? "" : sellTextMap.getOrDefault(this.isAdminShop() ? ShopType.ADMIN : ShopType.PLAYER, ""))
                 .trim()
             );
         }

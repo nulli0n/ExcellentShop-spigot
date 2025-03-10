@@ -47,20 +47,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         transaction.sendError(player);
 
         if (result == Transaction.Result.SUCCESS) {
-            shop.onTransaction(event);
-            //shop.getStock().onTransaction(event);
-
-            if (!shop.isAdminShop()) {
-                product.consumeStock(TradeType.BUY, transaction.getUnits(), null); // Take item from shop's inventory.
-                shop.getOwnerBank().deposit(product.getCurrency(), transaction.getPrice());
-                shop.getModule().savePlayerBank(shop.getOwnerBank());
-            }
-
-            // Process transaction
-            product.delivery(this.getInventory(), transaction.getUnits());
-            product.getCurrency().take(player, transaction.getPrice());
-            shop.getModule().getLogger().logTransaction(event);
-
+            // TODO Store price in prepared product?
             if (!this.isSilent()) {
                 ChestLang.SHOP_TRADE_BUY_INFO_USER.getMessage()
                     .replace(this.replacePlaceholders())
@@ -76,8 +63,21 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
                         .send(owner);
                 }
             }
-        }
 
+            shop.onTransaction(event);
+            //shop.getStock().onTransaction(event);
+
+            if (!shop.isAdminShop()) {
+                product.consumeStock(TradeType.BUY, transaction.getUnits(), null); // Take item from shop's inventory.
+                shop.getOwnerBank().deposit(product.getCurrency(), transaction.getPrice());
+                shop.getModule().savePlayerBank(shop.getOwnerBank());
+            }
+
+            // Process transaction
+            product.delivery(this.getInventory(), transaction.getUnits());
+            product.getCurrency().take(player, transaction.getPrice());
+            shop.getModule().getLogger().logTransaction(event);
+        }
 
         return transaction;
     }

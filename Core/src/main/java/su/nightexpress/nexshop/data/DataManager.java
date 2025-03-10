@@ -89,7 +89,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     private void loadPriceDatas() {
         this.plugin.getDataHandler().loadPriceDatas().forEach(this::loadPriceData);
-        this.plugin.debug("Loaded " + priceDataMap.size() + " product price datas.");
+        //this.plugin.debug("Loaded " + priceDataMap.size() + " product price datas.");
     }
 
     private void loadPriceData(@NotNull PriceData data) {
@@ -100,7 +100,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     private void loadStockDatas() {
         this.plugin.getDataHandler().loadStockDatas().forEach(this::loadStockData);
-        this.plugin.debug("Loaded " + stockDataMap.size() + " product stock datas.");
+        //this.plugin.debug("Loaded " + stockDataMap.size() + " product stock datas.");
     }
 
     private void loadStockData(@NotNull StockData data) {
@@ -111,7 +111,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     private void loadRotationDatas() {
         this.plugin.getDataHandler().loadRotationDatas().forEach(this::loadRotationData);
-        this.plugin.debug("Loaded " + this.rotationDataMap.size() + " rotation datas.");
+        //this.plugin.debug("Loaded " + this.rotationDataMap.size() + " rotation datas.");
     }
 
     private void loadRotationData(@NotNull RotationData data) {

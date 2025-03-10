@@ -8,7 +8,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.shop.chest.util.ShopType;
 
 public class ChestShopCreateEvent extends Event implements Cancellable {
 
@@ -26,19 +25,17 @@ public class ChestShopCreateEvent extends Event implements Cancellable {
 
     private final Player player;
     private final Block  block;
-    private final ShopType shopType;
     private final ItemStack item;
 
     private boolean cancelled;
 
-    public ChestShopCreateEvent(@NotNull Player player, @NotNull Block block, @NotNull ShopType shopType) {
-        this(player, block, shopType, null);
+    public ChestShopCreateEvent(@NotNull Player player, @NotNull Block block) {
+        this(player, block, null);
     }
 
-    public ChestShopCreateEvent(@NotNull Player player, @NotNull Block block, @NotNull ShopType shopType, @Nullable ItemStack item) {
+    public ChestShopCreateEvent(@NotNull Player player, @NotNull Block block, @Nullable ItemStack item) {
         this.player = player;
         this.block = block;
-        this.shopType = shopType;
         this.item = item;
     }
 
@@ -60,11 +57,6 @@ public class ChestShopCreateEvent extends Event implements Cancellable {
     @NotNull
     public Block getBlock() {
         return block;
-    }
-
-    @NotNull
-    public ShopType getShopType() {
-        return shopType;
     }
 
     /**

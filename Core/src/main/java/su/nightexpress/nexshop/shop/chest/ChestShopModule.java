@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.ShopModule;
@@ -49,10 +50,11 @@ import su.nightexpress.nexshop.shop.chest.listener.RegionMarketListener;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
 import su.nightexpress.nexshop.shop.chest.listener.UpgradeHopperListener;
 import su.nightexpress.nexshop.shop.chest.menu.*;
+import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
 import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nexshop.shop.chest.util.ShopMap;
-import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.impl.AbstractModule;
+import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.LangAssets;
@@ -62,6 +64,7 @@ import su.nightexpress.nightcore.util.text.NightMessage;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -81,6 +84,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     private ShopShowcaseMenu showcaseMenu;
     private ProductPriceMenu productPriceMenu;
 
+    private RentMenu       rentMenu;
     private BankMenu       bankMenu;
     private StorageMenu    storageMenu;
     private ShopBrowseMenu browseMenu;
@@ -127,6 +131,9 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         if (ChestUtils.isInfiniteStorage()) {
             this.storageMenu = new StorageMenu(this.plugin, this);
         }
+        if (ChestConfig.isRentEnabled()) {
+            this.rentMenu = new RentMenu(this.plugin, this);
+        }
 
         this.bankMenu = new BankMenu(this.plugin, this);
         this.browseMenu = new ShopBrowseMenu(this.plugin, this);
@@ -155,6 +162,10 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         if (this.storageMenu != null) {
             this.storageMenu.clear();
             this.storageMenu = null;
+        }
+        if (this.rentMenu != null) {
+            this.rentMenu.clear();
+            this.rentMenu = null;
         }
 
         if (this.productsMenu != null) this.productsMenu.clear();
@@ -250,7 +261,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         if (this.displayHandler != null) {
             this.displayHandler.setup();
 
-            this.addTask(this.plugin.createAsyncTask(() -> this.displayHandler.update()).setSecondsInterval(ChestConfig.DISPLAY_UPDATE_INTERVAL.get()));
+            this.addAsyncTask(() -> this.displayHandler.update(), ChestConfig.DISPLAY_UPDATE_INTERVAL.get());
         }
     }
 
@@ -298,10 +309,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         // ----- OLD BANK UPDATE - END -----
 
         shop.updatePosition();
-        // Prob not needed anymore since all data is stored in central data manager
-//        if (this.plugin.getShopManager().getProductDataManager().isLoaded()) {
-//            shop.getPricer().updatePrices(); // Need to load price data from ProductDataManager on /cshop reload.
-//        }
 
         this.shopMap.put(shop);
         return true;
@@ -390,9 +397,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     @NotNull
     public Currency getDefaultCurrency() {
         return EconomyBridge.getCurrencyOrDummy(ChestConfig.DEFAULT_CURRENCY.get());
-
-//        Currency currency = this.plugin.getCurrencyManager().getCurrency(ChestConfig.DEFAULT_CURRENCY.get());
-//        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
     }
 
     @Override
@@ -444,6 +448,12 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         if (this.storageMenu == null) return;
 
         this.storageMenu.open(player, shop);
+    }
+
+    public void openRentSettings(@NotNull Player player, @NotNull ChestShop shop) {
+        if (this.rentMenu == null) return;
+
+        this.rentMenu.open(player, shop);
     }
 
     public boolean openShop(@NotNull Player player, @NotNull ChestShop shop) {
@@ -567,7 +577,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             ItemStack item = event.getItem();
             if (item != null && !originalDeny) {
                 if (Tag.SIGNS.isTagged(item.getType()) || item.getType() == Material.ITEM_FRAME || item.getType() == Material.GLOW_ITEM_FRAME || item.getType() == Material.HOPPER) {
-                    if (!shop.isOwner(player) && !player.hasPermission(ChestPerms.EDIT_OTHERS)) {
+                    if (!shop.isOwnerOrRenter(player) && !player.hasPermission(ChestPerms.EDIT_OTHERS)) {
                         ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
                     }
                     else event.setUseInteractedBlock(Event.Result.ALLOW);
@@ -575,7 +585,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
                 }
             }
 
-            if (shop.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) {
+            if (shop.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) {
                 this.openShopSettings(player, shop);
             }
             else {
@@ -584,10 +594,21 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             return;
         }
 
-        if (shop.isOwner(player) && ChestUtils.isInfiniteStorage()) {
+        if (shop.isOwnerOrRenter(player) && ChestUtils.isInfiniteStorage()) {
             this.openShopSettings(player, shop);
         }
-        else if (shop.isAdminShop() || !shop.isOwner(player)) {
+        else if (shop.isAdminShop() || !shop.isOwnerOrRenter(player)) {
+            if (shop.isRentable() && !shop.isRented()) {
+                this.plugin.getShopManager().openConfirmation(player, Confirmation.create(
+                    (viewer, event1) -> {
+                        this.rentShop(player, shop);
+                        player.closeInventory();
+                    },
+                    (viewer, event1) -> player.closeInventory()
+                ));
+                return;
+            }
+
             if (shop.canAccess(player, true)) {
                 shop.open(player);
             }
@@ -597,7 +618,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         }
     }
 
-    public boolean checkShopCreation(@NotNull Player player, @NotNull Block block, @NotNull ShopType shopType) {
+    public boolean checkShopCreation(@NotNull Player player, @NotNull Block block) {
         if (this.isShop(block)) {
             ChestLang.SHOP_CREATION_ERROR_ALREADY_SHOP.getMessage().send(player);
             return false;
@@ -610,11 +631,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         if (!this.checkCreationClaim(player, block)) {
             ChestLang.SHOP_CREATION_ERROR_BAD_AREA.getMessage().send(player);
-            return false;
-        }
-
-        if (!shopType.hasPermission(player)) {
-            ChestLang.SHOP_CREATION_ERROR_TYPE_PERMISSION.getMessage().send(player);
             return false;
         }
 
@@ -642,9 +658,9 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             return false;
         }
 
-        if (!this.checkShopCreation(player, block, ShopType.PLAYER)) return false;
+        if (!this.checkShopCreation(player, block)) return false;
 
-        ChestShopCreateEvent event = new ChestShopCreateEvent(player, block, ShopType.PLAYER, itemStack);
+        ChestShopCreateEvent event = new ChestShopCreateEvent(player, block, itemStack);
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
@@ -658,7 +674,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         block.getWorld().setBlockData(block.getLocation(), blockData);
 
-        this.createShop(player, block, ShopType.PLAYER, shop -> {
+        this.createShop(player, block, shop -> {
             shop.setItemCreated(true);
         });
 
@@ -667,17 +683,17 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return true;
     }
 
-    public boolean createShopNaturally(@NotNull Player player, @NotNull Block block, @NotNull ShopType shopType) {
-        return this.createShopNaturally(player, block, shopType, -1, -1);
+    public boolean createShopNaturally(@NotNull Player player, @NotNull Block block) {
+        return this.createShopNaturally(player, block, -1, -1);
     }
 
-    public boolean createShopNaturally(@NotNull Player player, @NotNull Block block, @NotNull ShopType shopType, double buyPrice, double sellPrice) {
+    public boolean createShopNaturally(@NotNull Player player, @NotNull Block block, double buyPrice, double sellPrice) {
         if (!ChestUtils.isValidContainer(block)) {
             ChestLang.SHOP_CREATION_ERROR_NOT_A_CHEST.getMessage().send(player);
             return false;
         }
 
-        if (!this.checkShopCreation(player, block, shopType)) return false;
+        if (!this.checkShopCreation(player, block)) return false;
 
         Container container = (Container) block.getState();
         Inventory inventory = container.getInventory();
@@ -686,13 +702,13 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             return false;
         }
 
-        ChestShopCreateEvent event = new ChestShopCreateEvent(player, block, shopType);
+        ChestShopCreateEvent event = new ChestShopCreateEvent(player, block);
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
         this.payForCreate(player);
 
-        this.createShop(player, block, shopType, shop -> {
+        this.createShop(player, block, shop -> {
             ItemStack hand = new ItemStack(player.getInventory().getItemInMainHand());
             if (!ChestUtils.isShopItem(hand)) {
                 ChestProduct product = shop.createProduct(player, hand, false);
@@ -707,19 +723,23 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     @NotNull
-    public ChestShop createShop(@NotNull Player player, @NotNull Block block, @NotNull ShopType shopType, @NotNull Consumer<ChestShop> consumer) {
+    public ChestShop createShop(@NotNull Player player, @NotNull Block block, @NotNull Consumer<ChestShop> consumer) {
         String id = ChestUtils.generateShopId(player, block.getLocation());
         File file = new File(this.getAbsolutePath() + DIR_SHOPS, id + ".yml");
         ChestShop shop = new ChestShop(this.plugin, this, file, id);
 
         shop.assignLocation(block.getWorld(), block.getLocation());
-        shop.setType(shopType);
+        shop.setAdminShop(player.hasPermission(ChestPerms.ADMIN_SHOP));
         shop.setOwner(player);
         shop.setName(Placeholders.forPlayer(player).apply(ChestConfig.DEFAULT_NAME.get()));
         shop.setHologramEnabled(true);
         shop.setShowcaseEnabled(true);
         shop.setShowcaseType(null);
-        Arrays.asList(TradeType.values()).forEach(tradeType -> shop.setTransactionEnabled(tradeType, true));
+        shop.setBuyingAllowed(true);
+        shop.setSellingAllowed(true);
+        if (ChestConfig.isRentEnabled()) {
+            shop.setRentSettings(new RentSettings(false, 7, CurrencyId.VAULT, 1000));
+        }
 
         consumer.accept(shop);
         shop.save();
@@ -731,6 +751,92 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         ChestLang.SHOP_CREATION_INFO_DONE.getMessage().send(player);
         return shop;
+    }
+
+    public boolean rentShop(@NotNull Player player, @NotNull ChestShop shop) {
+        if (!ChestConfig.isRentEnabled()) return false;
+
+        if (!shop.isActive()) {
+            ChestLang.ERROR_SHOP_INACTIVE.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            return false;
+        }
+
+        if (shop.isRented()) {
+            ChestLang.RENT_ERROR_ALREADY_RENTED.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            return false;
+        }
+
+        RentSettings settings = shop.getRentSettings();
+
+        if (!shop.isRentable() || !settings.isValid()) {
+            ChestLang.RENT_ERROR_NOT_RENTABLE.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            return false;
+        }
+
+        String currencyId = settings.getCurrencyId();
+        double price = settings.getPrice();
+        if (!EconomyBridge.hasEnough(player, currencyId, price)) {
+            ChestLang.RENT_ERROR_INSUFFICIENT_FUNDS.getMessage().send(player, replacer -> replacer
+                .replace(Placeholders.GENERIC_PRICE, settings.getPriceFormatted())
+                .replace(shop.replacePlaceholders())
+            );
+            return false;
+        }
+
+        EconomyBridge.withdraw(player, currencyId, price);
+        EconomyBridge.deposit(shop.getOwnerId(), currencyId, price); // TODO Notify?
+        shop.setRentedBy(player);
+        shop.setRentedUntil(TimeUtil.createFutureTimestamp(TimeUnit.DAYS.toSeconds(shop.getRentSettings().getDuration())));
+        shop.saveSettings();
+
+        ChestLang.RENT_RENT_SUCCESS.getMessage().send(player, replacer -> replacer
+            .replace(Placeholders.GENERIC_TIME, TimeUtil.formatTime(settings.getDurationMillis()))
+            .replace(Placeholders.GENERIC_PRICE, settings.getPriceFormatted())
+            .replace(shop.replacePlaceholders())
+        );
+        return true;
+    }
+
+    public boolean extendRentShop(@NotNull Player player, @NotNull ChestShop shop) {
+        if (!ChestConfig.isRentEnabled()) return false;
+
+        if (!shop.isActive()) {
+            ChestLang.ERROR_SHOP_INACTIVE.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            return false;
+        }
+
+        if (!shop.isRenter(player)) {
+            ChestLang.RENT_ERROR_NOT_RENTED.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            return false;
+        }
+
+        RentSettings settings = shop.getRentSettings();
+        if (!settings.isValid()) {
+            ChestLang.RENT_ERROR_NOT_RENTABLE.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            return false;
+        }
+
+        String currencyId = settings.getCurrencyId();
+        double price = settings.getPrice();
+        if (!EconomyBridge.hasEnough(player, currencyId, price)) {
+            ChestLang.RENT_ERROR_INSUFFICIENT_FUNDS.getMessage().send(player, replacer -> replacer
+                .replace(Placeholders.GENERIC_PRICE, settings.getPriceFormatted())
+                .replace(shop.replacePlaceholders())
+            );
+            return false;
+        }
+
+        EconomyBridge.withdraw(player, currencyId, price);
+        EconomyBridge.deposit(shop.getOwnerId(), currencyId, price); // TODO Notify?
+        shop.extendRent();
+        shop.saveSettings();
+
+        ChestLang.RENT_EXTEND_SUCCESS.getMessage().send(player, replacer -> replacer
+            .replace(Placeholders.GENERIC_TIME, TimeUtil.formatTime(settings.getDurationMillis()))
+            .replace(Placeholders.GENERIC_PRICE, settings.getPriceFormatted())
+            .replace(shop.replacePlaceholders())
+        );
+        return true;
     }
 
     public boolean canBreak(@NotNull Player player, @NotNull ChestShop shop) {
@@ -811,15 +917,14 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return this.depositToBank(player, player.getUniqueId(), currency, amount);
     }
 
-    public boolean depositToBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double amount) {
+    public boolean depositToBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double value) {
         if (!this.isAllowedCurrency(currency, player)) {
             ChestLang.BANK_ERROR_INVALID_CURRENCY.getMessage().send(player);
             return false;
         }
 
         double balance = currency.getBalance(player);
-
-        if (amount < 0D) amount = balance;
+        double amount = value < 0 ? balance : value;
 
         if (balance < amount) {
             ChestLang.BANK_DEPOSIT_ERROR_NOT_ENOUGH.getMessage().send(player);
@@ -837,9 +942,9 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         bank.deposit(currency, amount);
         this.savePlayerBank(bank);
 
-        ChestLang.BANK_DEPOSIT_SUCCESS.getMessage()
+        ChestLang.BANK_DEPOSIT_SUCCESS.getMessage().send(player, replacer -> replacer
             .replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))
-            .send(player);
+        );
         return true;
     }
 
@@ -847,14 +952,14 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return this.withdrawFromBank(player, player.getUniqueId(), currency, amount);
     }
 
-    public boolean withdrawFromBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double amount) {
+    public boolean withdrawFromBank(@NotNull Player player, @NotNull UUID target, @NotNull Currency currency, double value) {
         if (!this.isAllowedCurrency(currency, player)) {
             ChestLang.BANK_ERROR_INVALID_CURRENCY.getMessage().send(player);
             return false;
         }
 
         ChestBank bank = this.getPlayerBank(target);
-        if (amount < 0D) amount = bank.getBalance(currency);
+        double amount = value < 0D ? bank.getBalance(currency) : value;
 
         if (!bank.hasEnough(currency, amount)) {
             ChestLang.BANK_WITHDRAW_ERROR_NOT_ENOUGH.getMessage().send(player);
@@ -865,15 +970,14 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         bank.withdraw(currency, amount);
         this.savePlayerBank(bank);
 
-        ChestLang.BANK_WITHDRAW_SUCCESS.getMessage()
+        ChestLang.BANK_WITHDRAW_SUCCESS.getMessage().send(player, replacer -> replacer
             .replace(Placeholders.GENERIC_AMOUNT, currency.format(amount))
-            .send(player);
+        );
         return true;
     }
 
     public boolean depositToStorage(@NotNull Player player, @NotNull ChestProduct product, int units) {
         ChestShop shop = product.getShop();
-        //ChestStock stock = shop.getStock();
 
         int playerUnits = product.countUnits(player);
         if (playerUnits < units) {
@@ -885,16 +989,15 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         product.take(player, units);
         shop.save();
 
-        ChestLang.STORAGE_DEPOSIT_SUCCESS.getMessage()
+        ChestLang.STORAGE_DEPOSIT_SUCCESS.getMessage().send(player, replacer -> replacer
             .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(units))
             .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
-            .send(player);
+        );
         return true;
     }
 
     public boolean withdrawFromStorage(@NotNull Player player, @NotNull ChestProduct product, int units) {
         ChestShop shop = product.getShop();
-        //ChestStock stock = shop.getStock();
 
         int shopUnits = product.countStock(TradeType.BUY, null);
         if (shopUnits < units) {
@@ -909,10 +1012,10 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         product.consumeStock(TradeType.BUY, maxUnits, null);
         shop.save();
 
-        ChestLang.STORAGE_WITHDRAW_SUCCESS.getMessage()
+        ChestLang.STORAGE_WITHDRAW_SUCCESS.getMessage().send(player, replacer -> replacer
             .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(maxUnits))
             .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
-            .send(player);
+        );
         return true;
     }
 
