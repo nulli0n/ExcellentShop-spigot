@@ -10,8 +10,6 @@ import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.economybridge.api.item.ItemHandler;
-import su.nightexpress.economybridge.item.ItemManager;
-import su.nightexpress.economybridge.item.handler.impl.MMOItemsHandler;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.event.AuctionListingCreateEvent;
@@ -28,6 +26,7 @@ import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.impl.AbstractModule;
+import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.config.DatabaseType;
@@ -42,14 +41,13 @@ public class AuctionManager extends AbstractModule {
 
     public static final String ID = "auction";
 
-    private final Listings      listings;
-    private final Set<Currency> allowedCurrencies;
+    private final Listings                     listings;
+    private final Set<Currency>                allowedCurrencies;
     private final Map<String, ListingCategory> categoryMap;
 
     private AuctionDatabase database;
 
     private AuctionMenu           mainMenu;
-    private PurchaseConfirmMenu   purchaseConfirmMenu;
     private ExpiredListingsMenu   expiredMenu;
     private SalesHistoryMenu      historyMenu;
     private UnclaimedListingsMenu unclaimedMenu;
@@ -83,7 +81,6 @@ public class AuctionManager extends AbstractModule {
         this.database.onSynchronize();
 
         this.mainMenu = new AuctionMenu(this.plugin, this);
-        this.purchaseConfirmMenu = new PurchaseConfirmMenu(this.plugin, this);
         this.expiredMenu = new ExpiredListingsMenu(this.plugin, this);
         this.historyMenu = new SalesHistoryMenu(this.plugin, this);
         this.unclaimedMenu = new UnclaimedListingsMenu(this.plugin, this);
@@ -91,14 +88,11 @@ public class AuctionManager extends AbstractModule {
         this.currencySelectMenu = new CurrencySelectMenu(this.plugin, this);
 
         this.addListener(new AuctionListener(this.plugin, this));
-
-        //AuctionUtils.fillDummy(this);
     }
 
     @Override
     protected void disableModule() {
         if (this.currencySelectMenu != null) this.currencySelectMenu.clear();
-        if (this.purchaseConfirmMenu != null) this.purchaseConfirmMenu.clear();
         if (this.mainMenu != null) this.mainMenu.clear();
         if (this.expiredMenu != null) this.expiredMenu.clear();
         if (this.historyMenu != null) this.historyMenu.clear();
@@ -192,9 +186,6 @@ public class AuctionManager extends AbstractModule {
     @NotNull
     public Currency getDefaultCurrency() {
         return EconomyBridge.getCurrencyOrDummy(AuctionConfig.DEFAULT_CURRENCY.get());
-
-//        Currency currency = this.plugin.getCurrencyManager().getCurrency(AuctionConfig.DEFAULT_CURRENCY.get());
-//        return currency == null ? CurrencyManager.DUMMY_CURRENCY : currency;
     }
 
     @NotNull
@@ -205,10 +196,6 @@ public class AuctionManager extends AbstractModule {
     @NotNull
     public Set<Currency> getAllowedCurrencies(@NotNull Player player) {
         return this.getAllowedCurrencies();
-
-        /*return AuctionConfig.CURRENCIES.values().stream()
-            .filter(setting -> setting.hasPermission(player) || setting.isDefault())
-            .map(CurrencySetting::getCurrency).collect(Collectors.toSet());*/
     }
 
     private boolean needEnsureListingExists() {
@@ -267,7 +254,22 @@ public class AuctionManager extends AbstractModule {
     }
 
     public void openPurchaseConfirmation(@NotNull Player player, @NotNull ActiveListing listing) {
-        this.purchaseConfirmMenu.open(player, listing);
+        //this.purchaseConfirmMenu.open(player, listing);
+
+        this.plugin.getShopManager().openConfirmation(player, Confirmation.create(
+            (viewer, event) -> {
+                this.buy(player, listing);
+                this.plugin.runTask(task -> {
+                    if (AuctionConfig.MENU_REOPEN_ON_PURCHASE.get()) {
+                        this.openAuction(player);
+                    }
+                    else player.closeInventory();
+                });
+            },
+            (viewer, event) -> {
+                this.plugin.runTask(task -> this.openAuction(viewer.getPlayer()));
+            }
+        ));
     }
 
     private boolean openAuctionMenu(@NotNull Player player, @NotNull UUID target, @NotNull AbstractAuctionMenu<?> menu, boolean force) {

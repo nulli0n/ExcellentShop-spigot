@@ -18,6 +18,7 @@ public class VirtualPerms {
     public static final UniPermission BYPASS  = new UniPermission(PREFIX_BYPASS + Placeholders.WILDCARD);
 
     public static final UniPermission COMMAND_EDITOR               = new UniPermission(PREFIX_COMMAND + "editor");
+    public static final UniPermission COMMAND_ROTATE               = new UniPermission(PREFIX_COMMAND + "rotate");
     public static final UniPermission COMMAND_OPEN                 = new UniPermission(PREFIX_COMMAND + "open");
     public static final UniPermission COMMAND_OPEN_OTHERS          = new UniPermission(PREFIX_COMMAND + "open.others");
     public static final UniPermission COMMAND_MENU                 = new UniPermission(PREFIX_COMMAND + "menu");
@@ -46,6 +47,7 @@ public class VirtualPerms {
 
         COMMAND.addChildren(
             COMMAND_EDITOR,
+            COMMAND_ROTATE,
             COMMAND_OPEN, COMMAND_OPEN_OTHERS,
             COMMAND_MENU, COMMAND_MENU_OTHERS,
             COMMAND_SELL_MENU, COMMAND_SELL_MENU_OTHERS,

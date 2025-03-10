@@ -35,15 +35,11 @@ public class AuctionListener extends AbstractListener<ShopPlugin> {
                 this.auctionManager.claimRewards(player, unclaimed);
             }
             else if (AuctionConfig.NOTIFY_UNCLAIMED_ON_JOIN.get()) {
-                AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.getMessage()
-                    .replace(Placeholders.GENERIC_AMOUNT, unclaimed.size())
-                    .send(player);
+                AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.getMessage().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, unclaimed.size()));
             }
         }
         if (expired > 0 && AuctionConfig.NOTIFY_EXPIRED_ON_JOIN.get()) {
-            AuctionLang.NOTIFY_EXPIRED_LISTINGS.getMessage()
-                .replace(Placeholders.GENERIC_AMOUNT, expired)
-                .send(player);
+            AuctionLang.NOTIFY_EXPIRED_LISTINGS.getMessage().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, expired));
         }
     }
 }

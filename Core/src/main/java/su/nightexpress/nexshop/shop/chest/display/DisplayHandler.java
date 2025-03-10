@@ -21,9 +21,11 @@ import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nightcore.manager.SimpleManager;
 import su.nightexpress.nightcore.util.EntityUtil;
 import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.Plugins;
-import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.placeholder.Replacer;
+import su.nightexpress.nightcore.util.time.TimeFormatType;
+import su.nightexpress.nightcore.util.time.TimeFormats;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,7 +153,7 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
             Replacer replacer = new Replacer();
 
             if (shop.isRentable() && !shop.isRented()) {
-                replacer.replace(Placeholders.GENERIC_TIME, TimeUtil.formatTime(shop.getRentSettings().getDurationMillis()));
+                replacer.replace(Placeholders.GENERIC_TIME, TimeFormats.formatDuration(shop.getRentSettings().getDurationMillis(), TimeFormatType.LITERAL));
                 replacer.replace(Placeholders.GENERIC_PRICE, shop.getRentSettings().getPriceFormatted());
             }
             else {
@@ -161,6 +163,7 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
                     });
                 }
                 replacer.replace(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
+                replacer.replace(Placeholders.GENERIC_PRODUCT_STOCK, () -> product == null ? "0" : NumberUtil.format(product.getCachedStock()));
             }
 
             originText.addAll(shop.getHologramText(product));

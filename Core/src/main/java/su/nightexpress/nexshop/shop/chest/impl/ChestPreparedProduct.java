@@ -65,7 +65,6 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             }
 
             shop.onTransaction(event);
-            //shop.getStock().onTransaction(event);
 
             if (!shop.isAdminShop()) {
                 product.consumeStock(TradeType.BUY, transaction.getUnits(), null); // Take item from shop's inventory.
@@ -124,7 +123,6 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             if (!product.storeStock(TradeType.SELL, transaction.getUnits(), null)) {
                 transaction.setResult(Transaction.Result.OUT_OF_SPACE);
             }
-            //shop.getStock().onTransaction(event); // May still fail.
         }
 
         transaction.sendError(player);

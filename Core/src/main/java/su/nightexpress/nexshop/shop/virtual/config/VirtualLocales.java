@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual.config;
 
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.language.entry.LangItem;
+import su.nightexpress.nightcore.language.entry.LangUIButton;
 import su.nightexpress.nightcore.util.Plugins;
 
 import static su.nightexpress.nightcore.language.entry.LangItem.builder;
@@ -104,6 +105,13 @@ public class VirtualLocales {
         .text("Controls whether players can", "sell items to this shop.")
         .emptyLine()
         .click("toggle")
+        .build();
+
+    public static final LangUIButton SHOP_EDIT_ALIASES = LangUIButton.builder(PREFIX + "Shop.Aliases", "Command Aliases")
+        .current(VIRTUAL_SHOP_ALIASES)
+        .description("Provides direct shop access with", "listed command aliases.", "", LIGHT_RED.enclose("Requires module reload."))
+        .leftClick("add alias")
+        .rightClick("remove all")
         .build();
 
     public static final LangItem SHOP_EDIT_LAYOUTS = LangItem.builder(PREFIX + "Shop.Layouts.Info")

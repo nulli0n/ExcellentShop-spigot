@@ -5,7 +5,6 @@ import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.economybridge.item.ItemPlugins;
-import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.hook.HookId;
@@ -16,9 +15,9 @@ import su.nightexpress.nightcore.util.*;
 
 import java.util.*;
 
+import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
-import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ChestConfig {
@@ -305,13 +304,13 @@ public class ChestConfig {
         (cfg, path, id) -> cfg.getItem(path + "." + id),
         (cfg, path, map) -> map.forEach((type, item) -> cfg.setItem(path + "." + type, item)),
         () -> Map.of(
-            Placeholders.DEFAULT, new ItemStack(Material.GLASS),
+            DEFAULT, new ItemStack(Material.GLASS),
             BukkitThing.toString(Material.CHEST), new ItemStack(Material.WHITE_STAINED_GLASS)
         ),
         "Sets an item that will be used as default shop showcase.",
         "You can provide different showcases for different shop types you set in 'Allowed_Containers' option.",
-        "Use '" + Placeholders.DEFAULT + "' keyword to set showcase item for all unlisted here container types.",
-        "Available item options including model data: " + Placeholders.WIKI_ITEMS_URL
+        "Use '" + DEFAULT + "' keyword to set showcase item for all unlisted here container types.",
+        "Available item options including model data: " + WIKI_ITEMS_URL
     );
 
     public static final ConfigValue<Boolean> DISPLAY_PLAYER_CUSTOMIZATION_ENABLED = ConfigValue.create("Display.PlayerCustomization.Enabled",
@@ -374,13 +373,13 @@ public class ChestConfig {
     public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_ADMIN = ConfigValue.create("Display.Title.Values.ADMIN",
         Lists.newList(
             LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
-            LIGHT_GRAY.enclose(Placeholders.GENERIC_PRODUCT_NAME),
+            LIGHT_GRAY.enclose(GENERIC_PRODUCT_NAME),
             GENERIC_BUY + " " + GENERIC_SELL
         ),
         "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
         "You can use 'Chest Shop' placeholders: " + URL_WIKI_PLACEHOLDERS,
-        "Display item name: " + Placeholders.GENERIC_PRODUCT_NAME,
-        "Display item price: " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
+        "Display item name: " + GENERIC_PRODUCT_NAME,
+        "Display item price: " + GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
         Plugins.PLACEHOLDER_API + " is also supported here."
     );
 
@@ -388,13 +387,15 @@ public class ChestConfig {
 
         Lists.newList(
             LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
-            LIGHT_GRAY.enclose(Placeholders.GENERIC_PRODUCT_NAME),
-            GENERIC_BUY + " " + GENERIC_SELL
+            LIGHT_GRAY.enclose(GENERIC_PRODUCT_NAME),
+            GENERIC_BUY + " " + GENERIC_SELL,
+            LIGHT_GRAY.enclose("Stock: " + LIGHT_YELLOW.enclose(GENERIC_PRODUCT_STOCK))
         ),
         "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
         "You can use 'Chest Shop' placeholders: " + URL_WIKI_PLACEHOLDERS,
-        "Display item name: " + Placeholders.GENERIC_PRODUCT_NAME,
-        "Display item price: " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
+        "Display item name: " + GENERIC_PRODUCT_NAME,
+        "Display item price: " + GENERIC_PRODUCT_PRICE.apply(TradeType.BUY) + ", " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
+        "Display item stock: " + GENERIC_PRODUCT_STOCK,
         Plugins.PLACEHOLDER_API + " is also supported here."
     );
 
@@ -412,11 +413,11 @@ public class ChestConfig {
         (cfg, path, type) -> cfg.getString(path + "." + type),
         (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
         Map.of(
-            ShopType.ADMIN, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY))),
-            ShopType.PLAYER, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)))
+            ShopType.ADMIN, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY))),
+            ShopType.PLAYER, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)))
         ),
         "Sets hologram text to appear for '" + GENERIC_BUY + "' placeholder when buying option is available for displayed product.",
-        "Price placeholder: " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.BUY),
+        "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.BUY),
         "All placeholders from 'Title -> Values' option are available here too."
     );
 
@@ -425,11 +426,11 @@ public class ChestConfig {
         (cfg, path, type) -> cfg.getString(path + "." + type),
         (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
         Map.of(
-            ShopType.ADMIN, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL))),
-            ShopType.PLAYER, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
+            ShopType.ADMIN, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL))),
+            ShopType.PLAYER, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
         ),
         "Sets hologram text to appear for '" + GENERIC_SELL + "' placeholder when selling option is available for displayed product.",
-        "Price placeholder: " + Placeholders.GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
+        "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
         "All placeholders from 'Title -> Values' option are available here too."
     );
 

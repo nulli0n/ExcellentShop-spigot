@@ -43,18 +43,19 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     public static final String FILE_NAME     = "config.yml";
     public static final String FILE_PRODUCTS = "products.yml";
 
-    protected final VirtualShopModule     module;
-    protected final FileConfig            configProducts;
-    protected final Set<Discount>         discounts;
-    protected final Map<Integer, String>  pageLayouts;
-    private final   Map<String, Rotation> rotationByIdMap;
+    private final VirtualShopModule     module;
+    private final FileConfig            configProducts;
+    private final Set<Discount>         discounts;
+    private final Map<Integer, String>  pageLayouts;
+    private final Map<String, Rotation> rotationByIdMap;
 
-    protected List<String> description;
-    protected boolean      permissionRequired;
-    protected NightItem    icon;
-    protected int          mainMenuSlot;
-    protected String       layoutName;
-    private   int          pages;
+    private Set<String>  aliases;
+    private List<String> description;
+    private boolean      permissionRequired;
+    private NightItem    icon;
+    private int          mainMenuSlot;
+    private String       layoutName;
+    private int          pages;
 
     public VirtualShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
@@ -65,6 +66,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         this.setIcon(NightItem.fromType(Material.CHEST));
         this.setDefaultLayout(Placeholders.DEFAULT);
         this.setPages(1);
+        this.setAliases(new HashSet<>());
         this.configProducts = new FileConfig(this.getFile().getParentFile().getAbsolutePath(), FILE_PRODUCTS);
         this.discounts = new HashSet<>();
         this.pageLayouts = new HashMap<>();
@@ -86,6 +88,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         this.setIcon(config.getCosmeticItem("Icon"));
         this.setMainMenuSlot(config.getInt("MainMenu.Slot", -1));
         this.setPages(config.getInt("Pages", 1));
+        this.setAliases(config.getStringSet("Aliases"));
 
         this.setDefaultLayout(ConfigValue.create("Layout.Name", Placeholders.DEFAULT).read(config));
         config.getSection("Layout.ByPage").forEach(sId -> {
@@ -128,6 +131,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     private void writeSettings(@NotNull FileConfig config) {
+
         config.set("Name", this.name);
         config.set("Description", this.description);
         config.set("Icon", this.icon);
@@ -136,6 +140,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         config.set("Transaction_Allowed.BUY", this.buyingAllowed);
         config.set("Transaction_Allowed.SELL", this.sellingAllowed);
         config.set("MainMenu.Slot", this.mainMenuSlot);
+        config.set("Aliases", this.aliases);
         config.set("Layout.Name", this.layoutName);
         config.remove("Layout.ByPage");
         this.pageLayouts.forEach((page, lName) -> config.set("Layout.ByPage." + page, lName));
@@ -398,6 +403,15 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @NotNull
     public FileConfig getConfigProducts() {
         return this.configProducts;
+    }
+
+    @NotNull
+    public Set<String> getAliases() {
+        return this.aliases;
+    }
+
+    public void setAliases(@NotNull Set<String> aliases) {
+        this.aliases = new HashSet<>(aliases);
     }
 
     @NotNull

@@ -76,6 +76,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String GENERIC_WEIGHT     = "%weight%";
 
     public static final String                      GENERIC_PRODUCT_NAME    = "%product_name%";
+    public static final String                      GENERIC_PRODUCT_STOCK   = "%product_stock%";
     public static final Function<TradeType, String> GENERIC_PRODUCT_PRICE   = tradeType -> "%product_price_" + tradeType.getLowerCase() + "%";
     public static final String                      GENERIC_SELL_MULTIPLIER = "%sell_multiplier%";
 
@@ -114,14 +115,15 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String RENT_DURATION = "%rent_duration%";
 
     // Virtual shop
-    public static final String VIRTUAL_SHOP_ICON_NAME            = "%shop_icon_name%";
-    public static final String VIRTUAL_SHOP_DESCRIPTION            = "%shop_description%";
-    public static final String VIRTUAL_SHOP_PERMISSION_REQUIRED    = "%shop_permission_required%";
-    public static final String VIRTUAL_SHOP_PERMISSION_NODE        = "%shop_permission_node%";
-    public static final String VIRTUAL_SHOP_PAGES                  = "%shop_pages%";
-    public static final String VIRTUAL_SHOP_MENU_SLOT              = "%shop_menu_slot%";
-    public static final String VIRTUAL_SHOP_DEFAULT_LAYOUT         = "%shop_layout%";
-    public static final String VIRTUAL_SHOP_DISCOUNT_AMOUNT        = "%shop_discount_amount%";
+    public static final String VIRTUAL_SHOP_ICON_NAME           = "%shop_icon_name%";
+    public static final String VIRTUAL_SHOP_DESCRIPTION         = "%shop_description%";
+    public static final String VIRTUAL_SHOP_PERMISSION_REQUIRED = "%shop_permission_required%";
+    public static final String VIRTUAL_SHOP_PERMISSION_NODE     = "%shop_permission_node%";
+    public static final String VIRTUAL_SHOP_PAGES               = "%shop_pages%";
+    public static final String VIRTUAL_SHOP_ALIASES             = "%shop_aliases%";
+    public static final String VIRTUAL_SHOP_MENU_SLOT           = "%shop_menu_slot%";
+    public static final String VIRTUAL_SHOP_DEFAULT_LAYOUT      = "%shop_layout%";
+    public static final String VIRTUAL_SHOP_DISCOUNT_AMOUNT     = "%shop_discount_amount%";
 
     public static final Function<Integer, String>              CHEST_SHOP_PRODUCT_NAME  = (slot) -> "%shop_product_name_" + slot + "%";
     public static final BiFunction<TradeType, Integer, String> CHEST_SHOP_PRODUCT_PRICE = (tradeType, slot) -> "%shop_product_price_" + tradeType.getLowerCase() + "_" + slot + "%";
@@ -301,6 +303,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(VIRTUAL_SHOP_PERMISSION_NODE, shop -> VirtualPerms.PREFIX_SHOP + shop.getId())
         .add(VIRTUAL_SHOP_PERMISSION_REQUIRED, shop -> Lang.getYesOrNo(shop.isPermissionRequired()))
         .add(VIRTUAL_SHOP_MENU_SLOT, shop -> shop.isMainMenuSlotDisabled() ? Lang.OTHER_DISABLED.getString() : String.valueOf(shop.getMainMenuSlot()))
+        .add(VIRTUAL_SHOP_ALIASES, shop -> shop.getAliases().stream().map(str -> "/" + str).collect(Collectors.joining(", ")))
         .add(VIRTUAL_SHOP_DEFAULT_LAYOUT, VirtualShop::getDefaultLayout)
     );
 

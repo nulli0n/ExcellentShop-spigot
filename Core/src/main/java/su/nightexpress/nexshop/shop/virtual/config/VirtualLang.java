@@ -14,9 +14,11 @@ public class VirtualLang extends Lang {
     public static final LangString COMMAND_ARGUMENT_NAME_SHOP = LangString.of("VirtualShop.Command.Argument.Name.Shop", "shop");
 
     public static final LangString COMMAND_EDITOR_DESC        = LangString.of("VirtualShop.Command.Editor.Desc", "Open VirtualShop editor.");
+    public static final LangString COMMAND_ROTATE_DESC        = LangString.of("VirtualShop.Command.Rotate.Desc", "Force rotate a shop.");
     public static final LangString COMMAND_OPEN_DESC          = LangString.of("VirtualShop.Command.Open.Desc", "Opens specified shop.");
     public static final LangString COMMAND_MENU_DESC          = LangString.of("VirtualShop.Command.Menu.Desc", "Opens Main Menu.");
     public static final LangString COMMAND_SHOP_DESC          = LangString.of("VirtualShop.Command.Shop.Desc", "Open specified shop or main menu.");
+    public static final LangString COMMAND_SHOP_ALIAS_DESC    = LangString.of("VirtualShop.Command.ShopAlias.Desc", "Open " + SHOP_NAME + " shop.");
     public static final LangString COMMAND_SELL_MENU_DESC     = LangString.of("VirtualShop.Command.SellMenu.Desc", "Open Sell GUI.");
     public static final LangString COMMAND_SELL_ALL_DESC      = LangString.of("VirtualShop.Command.SellAll.Desc", "Quickly sell all items in inventory.");
     public static final LangString COMMAND_SELL_HAND_DESC     = LangString.of("VirtualShop.Command.SellHand.Desc", "Quickly sell hand item.");
@@ -40,6 +42,10 @@ public class VirtualLang extends Lang {
 
     public static final LangText COMMAND_SELL_HAND_DONE_OTHERS = LangText.of("VirtualShop.Command.SellHand.Done.Others",
         LIGHT_GRAY.enclose("Forced player " + LIGHT_YELLOW.enclose(PLAYER_NAME) + " to sell hand item.")
+    );
+
+    public static final LangText COMMAND_ROTATE_DONE = LangText.of("VirtualShop.Command.Rotate.Done",
+        LIGHT_GRAY.enclose("Force rotated " + LIGHT_YELLOW.enclose(SHOP_NAME) + " shop")
     );
 
 
@@ -184,14 +190,14 @@ public class VirtualLang extends Lang {
     public static final LangString EDITOR_ENTER_DESCRIPTION = LangString.of("VirtualShop.Editor.Enter.Description",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Description]")));
 
-    public static final LangString EDITOR_ENTER_NPC_ID = LangString.of("VirtualShop.Editor.Enter.NpcId",
-        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[NPC ID]")));
-
     public static final LangString EDITOR_ENTER_TITLE = LangString.of("VirtualShop.Editor.Enter.Title",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Title]")));
 
     public static final LangString EDITOR_ENTER_COMMAND = LangString.of("VirtualShop.Editor.Enter.Command",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Command]")));
+
+    public static final LangString EDITOR_ENTER_ALIAS = LangString.of("VirtualShop.Editor.Enter.Alias",
+        LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Command Alias]")));
 
     public static final LangString EDITOR_ENTER_SLOTS = LangString.of("VirtualShop.Editor.Enter.Slots",
         LIGHT_GRAY.enclose("Enter " + LIGHT_GREEN.enclose("[Slots] -> [1,2,5,etc]")));

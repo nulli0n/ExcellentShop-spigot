@@ -51,13 +51,13 @@ public class AuctionConfig {
     );
 
     public static final ConfigValue<Boolean> NOTIFY_UNCLAIMED_ON_JOIN = ConfigValue.create("Settings.Notify_Unclaimed_On_Join",
-            true,
-            "When enabled, players will receive a message about unclaimed listings when they join the server."
+        true,
+        "When enabled, players will receive a message about unclaimed listings when they join the server."
     );
 
     public static final ConfigValue<Boolean> NOTIFY_EXPIRED_ON_JOIN = ConfigValue.create("Settings.Notify_Expired_On_Join",
-            true,
-            "When enabled, players will receive a message about expired listings when they join the server."
+        true,
+        "When enabled, players will receive a message about expired listings when they join the server."
     );
 
     public static final ConfigValue<Boolean> LISTINGS_HIDE_ATTRIBUTES = ConfigValue.create("Settings.Listings.Hide_Attributes",
@@ -185,6 +185,11 @@ public class AuctionConfig {
             Material.DIAMOND_HELMET, Set.of(1002, 1016)
         ),
         "List of item's model data values to be disabled from adding in Auction."
+    );
+
+    public static final ConfigValue<Boolean> MENU_REOPEN_ON_PURCHASE = ConfigValue.create("Menu.ReOpen_On_Purchase",
+        true,
+        "Controls whether Auction GUI should re-open on purchase instead of closing."
     );
 
     public static final ConfigValue<Boolean> MENU_CONTAINER_PREVIEW_ENABLED = ConfigValue.create("Menu.Container_Preview.Enabled",

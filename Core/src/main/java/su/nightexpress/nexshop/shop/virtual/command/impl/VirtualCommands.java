@@ -48,6 +48,13 @@ public class VirtualCommands {
             .executes((context, arguments) -> openShop(module, context, arguments))
         );
 
+        builder.addDirect("rotate", child -> child
+            .permission(VirtualPerms.COMMAND_ROTATE)
+            .description(VirtualLang.COMMAND_ROTATE_DESC)
+            .withArgument(CommandArguments.forShop(module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.getString()).required())
+            .executes(VirtualCommands::rotateShop)
+        );
+
         if (VirtualConfig.isCentralMenuEnabled()) {
             builder.addDirect("menu", child -> child
                 .permission(VirtualPerms.COMMAND_MENU)
@@ -66,6 +73,17 @@ public class VirtualCommands {
                 .withArgument(CommandArguments.forShop(module).required(!VirtualConfig.isCentralMenuEnabled()))
                 .executes((context, arguments) -> openDirectShop(module, context, arguments))
             ));
+
+            module.getShops().forEach(shop -> {
+                if (shop.getAliases().isEmpty()) return;
+
+                register(plugin, RootCommand.direct(plugin, shop.getAliases().toArray(new String[0]), child -> child
+                    .playerOnly()
+                    .permission(VirtualPerms.COMMAND_SHOP)
+                    .description(shop.replacePlaceholders().apply(VirtualLang.COMMAND_SHOP_ALIAS_DESC.getString()))
+                    .executes((context, arguments) -> openExplicitShop(shop, context))
+                ));
+            });
         }
 
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
@@ -130,6 +148,12 @@ public class VirtualCommands {
         else {
             module.openMainMenu(player);
         }
+        return true;
+    }
+
+    private static boolean openExplicitShop(@NotNull VirtualShop shop, @NotNull CommandContext context) {
+        Player player = context.getPlayerOrThrow();
+        shop.open(player);
         return true;
     }
 
@@ -231,5 +255,13 @@ public class VirtualCommands {
 
         boolean force = arguments.hasFlag(CommandFlags.FORCE);
         return module.openShop(player, shop, force);
+    }
+
+    private static boolean rotateShop(@NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        VirtualShop shop = arguments.getArgument(CommandArguments.SHOP, VirtualShop.class);
+
+        shop.performRotation();
+        VirtualLang.COMMAND_ROTATE_DONE.getMessage().send(context.getSender(), replacer -> replacer.replace(shop.replacePlaceholders()));
+        return true;
     }
 }

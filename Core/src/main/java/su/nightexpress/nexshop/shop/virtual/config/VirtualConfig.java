@@ -68,7 +68,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<Boolean> SHOP_SHORTCUTS_ENABLED = ConfigValue.create("General.Shop_Shortcut.Enabled",
         true,
-        "Enables the Shop Shortcut commands feature. Allows to quickly open shops."
+        "Enables the Shop Shortcut and Shop Aliases commands features. Allows to quickly open shops."
     );
 
     public static final ConfigValue<String[]> SHOP_SHORTCUTS_COMMANDS = ConfigValue.create("General.Shop_Shortcut.Commands",

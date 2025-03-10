@@ -120,6 +120,21 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
 
 
+
+        this.addItem(NightItem.asCustomHead("d719b564f01def417b2beecdb5f4ac474133c12f2b4c4808f27ea01d3fe49ed8"), VirtualLocales.SHOP_EDIT_ALIASES, 13, (viewer, event, shop) -> {
+            if (event.isRightClick()) {
+                shop.getAliases().clear();
+                this.saveAndFlush(viewer, shop);
+                return;
+            }
+
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_ALIAS, input -> {
+                shop.getAliases().add(input.getTextRaw());
+                shop.saveSettings();
+                return true;
+            }));
+        }, ItemOptions.builder().setVisibilityPolicy(viewer -> VirtualConfig.SHOP_SHORTCUTS_ENABLED.get()).build());
+
         this.addItem(Material.ENDER_EYE, VirtualLocales.SHOP_EDIT_PAGES, 22, (viewer, event, shop) -> {
             int add = event.isLeftClick() ? 1 : -1;
             shop.setPages(shop.getPages() + add);

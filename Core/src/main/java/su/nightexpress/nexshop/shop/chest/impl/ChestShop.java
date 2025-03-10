@@ -340,6 +340,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             // TODO Notify
             this.cancelRent();
         }
+
+        this.updateStockCache();
     }
 
     public void updatePosition() {
@@ -361,9 +363,14 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         this.world = world;
         this.blockType = block.getType();
         this.updateDisplayLocations();
+        this.updateStockCache();
         this.module.getShopMap().updatePositionCache(this);
 
         //this.module.info("Shop activated: " + this.getId());
+    }
+
+    public void updateStockCache() {
+        this.getProducts().forEach(ChestProduct::updateStockCache);
     }
 
     private void updateDisplayLocations() {

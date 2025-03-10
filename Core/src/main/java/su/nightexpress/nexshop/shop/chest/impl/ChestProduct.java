@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 public class ChestProduct extends AbstractProduct<ChestShop> {
 
     private long quantity;
+    private int cachedStock;
 
     public ChestProduct(@NotNull ShopPlugin plugin,
                         @NotNull String id,
@@ -106,7 +107,10 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
             }).sum();
         }
 
-        return (int) Math.floor(totalAmount / unitAmount);
+        int result = (int) Math.floor(totalAmount / unitAmount);
+        this.setCachedStock(result);
+
+        return result;
     }
 
     @Override
@@ -123,6 +127,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
 
         Inventory inventory = this.shop.getInventory();
         ShopUtils.takeItem(inventory, typing::isItemMatches, amount);
+        this.updateStockCache();
         return true;
     }
 
@@ -139,7 +144,12 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
         }
 
         Inventory inventory = this.shop.getInventory();
-        return ShopUtils.addItem(inventory, typing.getItem(), amount);
+        if (ShopUtils.addItem(inventory, typing.getItem(), amount)) {
+            this.updateStockCache();
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -166,5 +176,25 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
      */
     public void setQuantity(long quantity) {
         this.quantity = Math.max(0, Math.abs(quantity));
+    }
+
+    public void updateStockCache() {
+        this.setCachedStock(this.countStock(TradeType.BUY, null));
+    }
+
+    /**
+     * Get cached product's stock value. Used in shop holograms to bypass async access of tile entities.
+     * @return Product's stock value.
+     */
+    public int getCachedStock() {
+        return this.cachedStock;
+    }
+
+    /**
+     * Set cached product's stock value. Used in shop holograms to bypass async access of tile entities.
+     * @param cachedStock Cached product's stock value.
+     */
+    public void setCachedStock(int cachedStock) {
+        this.cachedStock = cachedStock;
     }
 }
