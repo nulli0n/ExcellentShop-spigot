@@ -34,13 +34,13 @@ public class AuctionListener extends AbstractListener<ShopPlugin> {
             if (AuctionConfig.LISINGS_AUTO_CLAIM.get()) {
                 this.auctionManager.claimRewards(player, unclaimed);
             }
-            else {
+            else if (AuctionConfig.NOTIFY_UNCLAIMED_ON_JOIN.get()) {
                 AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.getMessage()
                     .replace(Placeholders.GENERIC_AMOUNT, unclaimed.size())
                     .send(player);
             }
         }
-        if (expired > 0) {
+        if (expired > 0 && AuctionConfig.NOTIFY_EXPIRED_ON_JOIN.get()) {
             AuctionLang.NOTIFY_EXPIRED_LISTINGS.getMessage()
                 .replace(Placeholders.GENERIC_AMOUNT, expired)
                 .send(player);
