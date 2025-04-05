@@ -6,7 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nightcore.util.geodata.ChunkPos;
+import su.nightexpress.nightcore.util.geodata.pos.ChunkPos;
 
 import java.util.UUID;
 
