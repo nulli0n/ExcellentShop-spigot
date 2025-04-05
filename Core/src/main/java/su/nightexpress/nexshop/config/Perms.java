@@ -11,6 +11,8 @@ public class Perms {
     public static final UniPermission PLUGIN  = new UniPermission(PREFIX + Placeholders.WILDCARD);
     public static final UniPermission COMMAND = new UniPermission(PREFIX_COMMAND + Placeholders.WILDCARD);
 
+    public static final UniPermission KEY_SELL_ALL = new UniPermission(PREFIX + "key.sellall");
+
     @Deprecated
     public static final UniPermission COMMAND_FLAGS = new UniPermission(PREFIX_COMMAND + "flags", "Allows to use flags in commands.");
 
@@ -23,7 +25,8 @@ public class Perms {
     static {
         PLUGIN.addChildren(
             COMMAND,
-            COMMAND_FLAGS
+            COMMAND_FLAGS,
+            KEY_SELL_ALL
         );
 
         COMMAND.addChildren(

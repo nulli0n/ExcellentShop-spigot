@@ -31,6 +31,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
     private StockValues limitValues;
     private Set<String> allowedRanks;
     private Set<String> requiredPermissions;
+    private Set<String> forbiddenPermissions;
 
     private boolean discountAllowed;
     private boolean rotating;
@@ -45,6 +46,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         super(plugin, id, shop, currency, type);
         this.allowedRanks = new HashSet<>();
         this.requiredPermissions = new HashSet<>();
+        this.forbiddenPermissions = new HashSet<>();
         this.stockValues = StockValues.unlimited();
         this.limitValues = StockValues.unlimited();
     }
@@ -113,18 +115,26 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         return this.shop.getRotations().stream().filter(rotation -> rotation.hasProduct(this))
             .map(rotation -> plugin.getDataManager().getRotationData(rotation)).filter(Objects::nonNull)
             .anyMatch(data -> data.containsProduct(this.getId()));
-
-//        Rotation rotation = this.shop.getRotations().stream().filter(r -> r.hasProduct(this)).findFirst().orElse(null);
-//        if (rotation == null) return false;
-//
-//        RotationData data = this.plugin.getDataManager().getRotationData(rotation);
-//        if (data == null) return false;
-//
-//        return data.containsProduct(this.getId());
     }
 
-    public boolean hasRequiredPermissions(@NotNull Player player) {
-        return this.requiredPermissions.isEmpty() || this.requiredPermissions.stream().anyMatch(player::hasPermission);
+    public boolean hasRequiredPermissions() {
+        return !this.requiredPermissions.isEmpty();
+    }
+
+    public boolean hasForbiddenPermissions() {
+        return !this.forbiddenPermissions.isEmpty();
+    }
+
+    public boolean hasRequiredPermission(@NotNull Player player) {
+        return this.hasListedPermissions(player, this.requiredPermissions);
+    }
+
+    public boolean hasForbiddenPermission(@NotNull Player player) {
+        return this.hasListedPermissions(player, this.forbiddenPermissions);
+    }
+
+    private boolean hasListedPermissions(@NotNull Player player, @NotNull Set<String> set) {
+        return set.stream().anyMatch(player::hasPermission);
     }
 
     public boolean hasRequiredRanks(@NotNull Player player) {
@@ -134,7 +144,8 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public boolean hasAccess(@NotNull Player player) {
         if (!this.hasRequiredRanks(player)) return false;
-        if (!this.hasRequiredPermissions(player)) return false;
+        if (this.hasRequiredPermissions() && !this.hasRequiredPermission(player)) return false;
+        if (this.hasForbiddenPermissions() && this.hasForbiddenPermission(player)) return false;
 
         if (this.isRotating()) {
             return this.isInRotation();
@@ -269,6 +280,15 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public void setRequiredPermissions(@NotNull Set<String> requiredPermissions) {
         this.requiredPermissions = requiredPermissions;
+    }
+
+    @NotNull
+    public Set<String> getForbiddenPermissions() {
+        return this.forbiddenPermissions;
+    }
+
+    public void setForbiddenPermissions(@NotNull Set<String> forbiddenPermissions) {
+        this.forbiddenPermissions = forbiddenPermissions;
     }
 
     public boolean isDiscountAllowed() {

@@ -5,11 +5,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -25,10 +25,10 @@ import su.nightexpress.nightcore.util.Lists;
 import java.util.ArrayList;
 import java.util.List;
 
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.SKIN_ARROW_DOWN;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop>, LegacyShopEditor {
+public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop> {
 
     public static final String FILE_NAME = "shop_display.yml";
 
@@ -94,6 +94,11 @@ public class ShopDisplayMenu extends ShopEditorMenu implements Linked<ChestShop>
                     .writeMeta();
             });
         });
+    }
+
+    private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull Shop shop) {
+        shop.saveSettings();
+        this.runNextTick(() -> this.flush(viewer));
     }
 
     @Override

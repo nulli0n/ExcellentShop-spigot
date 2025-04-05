@@ -11,13 +11,7 @@ softdepend:
   - Kingdoms
   - AdvancedRegionMarket
   - GriefPrevention
-  - Oraxen
-  - ItemsAdder
-  - Nexo
-  - ExecutableItems
-  - SCore
-  - MMOItems
-  - ExcellentCrates
+  - HuskClaims
   - PlaceholderAPI
   - ProtocolLib
   - packetevents

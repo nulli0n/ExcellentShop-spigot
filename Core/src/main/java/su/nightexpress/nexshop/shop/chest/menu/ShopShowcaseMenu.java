@@ -9,7 +9,6 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -26,15 +25,15 @@ import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Pair;
 
-import static su.nightexpress.nexshop.Placeholders.*;
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop>, AutoFilled<Pair<String, ItemStack>>, LegacyShopEditor {
+import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+
+public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop>, AutoFilled<Pair<String, ItemStack>> {
 
     public static final String FILE_NAME = "shop_showcase.yml";
 
@@ -101,7 +100,7 @@ public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop
         autoFill.setClickAction(pair -> (viewer1, event) -> {
             ChestShop shop = this.getLink(viewer1);
             shop.setShowcaseType(pair.getFirst());
-            this.save(viewer1, shop);
+            shop.saveSettings();
             this.runNextTick(() -> this.module.openDisplayMenu(viewer1.getPlayer(), shop));
         });
     }

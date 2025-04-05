@@ -9,13 +9,13 @@ import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.util.PDCUtil;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 public abstract class PhysicalProductType implements PhysicalTyping {
 
     @NotNull
     protected static ItemStack getBrokenItem() {
-        ItemStack itemStack = new ItemStack(Material.BARRIER);
-        Lang.EDITOR_GENERIC_BROKEN_ITEM.apply(itemStack);
+        ItemStack itemStack = NightItem.fromType(Material.BARRIER).localized(Lang.EDITOR_GENERIC_BROKEN_ITEM).getItemStack();
         PDCUtil.set(itemStack, Keys.brokenItem, true);
         return itemStack;
     }

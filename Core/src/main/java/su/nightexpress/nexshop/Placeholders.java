@@ -40,6 +40,8 @@ import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderList;
+import su.nightexpress.nightcore.util.time.TimeFormatType;
+import su.nightexpress.nightcore.util.time.TimeFormats;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -185,6 +187,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String PRODUCT_DISCOUNT_AMOUNT      = "%product_discount_amount%";
     public static final String PRODUCT_ALLOWED_RANKS        = "%product_allowed_ranks%";
     public static final String PRODUCT_REQUIRED_PERMISSIONS = "%product_required_permissions%";
+    public static final String PRODUCT_FORBIDDEN_PERMISSIONS = "%product_forbidden_permissions%";
 
     public static final String DISCOUNT_CONFIG_AMOUNT   = "%discount_amount%";
     public static final String DISCOUNT_CONFIG_DURATION = "%discount_duration%";
@@ -263,9 +266,9 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             .add(CHEST_SHOP_IS_ADMIN, shop -> ChestLang.getYesOrNo(shop.isAdminShop()))
             .add(CHEST_SHOP_HOLOGRAM_ENABLED, shop -> ChestLang.getYesOrNo(shop.isHologramEnabled()))
             .add(CHEST_SHOP_SHOWCASE_ENABLED, shop -> ChestLang.getYesOrNo(shop.isShowcaseEnabled()))
-            .add(CHEST_SHOP_RENT_EXPIRES_IN, shop -> shop.isRented() ? TimeUtil.formatDuration(shop.getRentedUntil()) : "-")
+            .add(CHEST_SHOP_RENT_EXPIRES_IN, shop -> shop.isRented() ? TimeFormats.formatDuration(shop.getRentedUntil(), TimeFormatType.LITERAL) : "-")
             .add(CHEST_SHOP_RENTER_NAME, shop -> shop.isRented() ? shop.getRenterName() : "-")
-            .add(CHEST_SHOP_RENT_DURATION, shop -> shop.isRentable() ? TimeUtil.formatTime(shop.getRentSettings().getDurationMillis()) : "-")
+            .add(CHEST_SHOP_RENT_DURATION, shop -> shop.isRentable() ? TimeFormats.toLiteral(shop.getRentSettings().getDurationMillis()) : "-")
             .add(CHEST_SHOP_RENT_PRICE, shop -> shop.isRentable() ? shop.getRentSettings().getPriceFormatted() : "-");
 
         for (int slot = 0; slot < 27; slot++) {
@@ -311,7 +314,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<Rotation> ROTATION = PlaceholderList.create(list -> list
         .add(ROTATION_ID, Rotation::getId)
         .add(ROTATION_TYPE, rotation -> rotation.getRotationType().name())
-        .add(ROTATION_INTERVAL, rotation -> TimeUtil.formatTime(rotation.getRotationInterval() * 1000L))
+        .add(ROTATION_INTERVAL, rotation -> TimeFormats.toLiteral(rotation.getRotationInterval() * 1000L))
         .add(ROTATION_SLOTS_AMOUNT, rotation -> String.valueOf(rotation.countAllSlots()))
         .add(ROTATION_ITEMS_AMOUNT, rotation -> String.valueOf(rotation.countItems()))
     );
@@ -403,30 +406,36 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
                 return pov.product.getAllowedRanks().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
             })
             .add(PRODUCT_REQUIRED_PERMISSIONS, pov -> {
-                if (pov.product.getRequiredPermissions().isEmpty()) {
+                if (!pov.product.hasRequiredPermissions()) {
                     return Lang.goodEntry(VirtualLang.EDITOR_PRODUCT_NO_PERM_REQUIREMENTS.getString());
                 }
                 return pov.product.getRequiredPermissions().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
             })
+            .add(PRODUCT_FORBIDDEN_PERMISSIONS, pov -> {
+                if (!pov.product.hasForbiddenPermissions()) {
+                    return Lang.goodEntry(VirtualLang.EDITOR_PRODUCT_NO_FORBIDDEN_PERMS.getString());
+                }
+                return pov.product.getForbiddenPermissions().stream().map(Lang::goodEntry).collect(Collectors.joining("\n"));
+            })
             .add(PRODUCT_STOCKS_RESET_IN, pov -> {
                 long restockDate = pov.product.getRestockDate(null);
-                if (restockDate == 0L) return TimeUtil.formatTime(pov.product.getStockValues().getRestockTimeMillis());
+                if (restockDate == 0L) return TimeFormats.toLiteral(pov.product.getStockValues().getRestockTimeMillis());
 
-                return restockDate < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatDuration(restockDate);
+                return restockDate < 0 ? Lang.OTHER_NEVER.getString() : TimeFormats.formatDuration(restockDate, TimeFormatType.LITERAL);
             })
             .add(PRODUCT_LIMITS_RESET_IN, pov -> {
                 long restockDate = pov.product.getRestockDate(pov.playerId());
-                if (restockDate == 0L) return TimeUtil.formatTime(pov.product.getLimitValues().getRestockTimeMillis());
+                if (restockDate == 0L) return TimeFormats.toLiteral(pov.product.getLimitValues().getRestockTimeMillis());
 
-                return restockDate < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatDuration(restockDate);
+                return restockDate < 0 ? Lang.OTHER_NEVER.getString() : TimeFormats.formatDuration(restockDate, TimeFormatType.LITERAL);
             })
             .add(PRODUCT_STOCKS_RESET_TIME, pov -> {
                 long restockTime = pov.product.getStockValues().getRestockTimeMillis();
-                return restockTime < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatTime(restockTime);
+                return restockTime < 0 ? Lang.OTHER_NEVER.getString() : TimeFormats.toLiteral(restockTime);
             })
             .add(PRODUCT_LIMITS_RESET_TIME, pov -> {
                 long cooldown = pov.product.getLimitValues().getRestockTimeMillis();
-                return cooldown < 0 ? Lang.OTHER_NEVER.getString() : TimeUtil.formatTime(cooldown);
+                return cooldown < 0 ? Lang.OTHER_NEVER.getString() : TimeFormats.toLiteral(cooldown);
             });
 
         for (TradeType tradeType : TradeType.values()) {
@@ -477,7 +486,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final PlaceholderList<FloatPricer> FLOAT_PRICER = PlaceholderList.create(list -> list
         .add(RANGED_PRICER)
         .add(PRICER_FLOAT_REFRESH_TYPE, pricer -> pricer.getRefreshType().name())
-        .add(PRICER_FLOAT_REFRESH_INTERVAL, pricer -> TimeUtil.formatTime(pricer.getRefreshIntervalMillis()))
+        .add(PRICER_FLOAT_REFRESH_INTERVAL, pricer -> TimeFormats.toLiteral(pricer.getRefreshIntervalMillis()))
         .add(PRICER_FLOAT_REFRESH_DAYS, pricer -> {
             if (pricer.getDays().isEmpty()) {
                 return Lang.badEntry(Lang.EDITOR_PRICE_FLOAT_NO_DAYS.getString());
@@ -522,7 +531,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(LISTING_ITEM_NAME, listing -> ItemUtil.getItemName(listing.getItemStack()))
         .add(LISTING_ITEM_LORE, listing -> String.join("\n", ItemUtil.getLore(listing.getItemStack())))
         .add(LISTING_ITEM_VALUE, listing -> String.valueOf(ItemNbt.compress(listing.getItemStack())))
-        .add(LISTING_DELETES_IN, listing -> TimeUtil.formatDuration(listing.getDeleteDate()))
+        .add(LISTING_DELETES_IN, listing -> TimeFormats.formatDuration(listing.getDeleteDate(), TimeFormatType.LITERAL))
         .add(LISTING_DELETE_DATE, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getDeleteDate())))
     );
 
@@ -532,12 +541,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(RENT_CURRENCY, RentSettings::getCurrencyId)
         .add(RENT_CURRENCY_NAME, RentSettings::getCurrencyName)
         .add(RENT_PRICE, RentSettings::getPriceFormatted)
-        .add(RENT_DURATION, rentSettings -> TimeUtil.formatTime(rentSettings.getDurationMillis()))
+        .add(RENT_DURATION, rentSettings -> TimeFormats.toLiteral(rentSettings.getDurationMillis()))
     );
 
     public static final PlaceholderList<ActiveListing> ACTIVE_LISTING = PlaceholderList.create(list -> list
         .add(LISTING)
-        .add(LISTING_EXPIRES_IN, listing -> TimeUtil.formatDuration(listing.getExpireDate()))
+        .add(LISTING_EXPIRES_IN, listing -> TimeFormats.formatDuration(listing.getExpireDate(), TimeFormatType.LITERAL))
         .add(LISTING_EXPIRE_DATE, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getExpireDate())))
     );
 
@@ -583,7 +592,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
                 RotationData data = ShopAPI.getDataManager().getRotationData(rotation);
                 if (data == null) return Lang.OTHER_NEVER.getString();
 
-                return TimeUtil.formatDuration(data.getNextRotationDate());
+                return TimeFormats.formatDuration(data.getNextRotationDate(), TimeFormatType.LITERAL);
             });
         });
 

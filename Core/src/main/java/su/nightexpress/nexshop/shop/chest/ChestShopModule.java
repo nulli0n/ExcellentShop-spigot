@@ -60,6 +60,8 @@ import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.text.NightMessage;
+import su.nightexpress.nightcore.util.text.tag.TagPool;
+import su.nightexpress.nightcore.util.time.TimeFormats;
 
 import java.io.File;
 import java.util.*;
@@ -82,7 +84,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     private ShopProductsMenu productsMenu;
     private ShopDisplayMenu  displayMenu;
     private ShopShowcaseMenu showcaseMenu;
-    private ProductPriceMenu productPriceMenu;
+    private PriceMenu productPriceMenu;
 
     private RentMenu       rentMenu;
     private BankMenu       bankMenu;
@@ -127,7 +129,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         this.displayMenu = new ShopDisplayMenu(this.plugin, this);
         this.showcaseMenu = new ShopShowcaseMenu(this.plugin, this);
         this.productsMenu = new ShopProductsMenu(this.plugin, this);
-        this.productPriceMenu = new ProductPriceMenu(this.plugin, this);
+        this.productPriceMenu = new PriceMenu(this.plugin, this);
         if (ChestUtils.isInfiniteStorage()) {
             this.storageMenu = new StorageMenu(this.plugin, this);
         }
@@ -229,6 +231,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             this.loadClaimHook(HookId.GRIEF_DEFENDER, GriefDefenderHook::new);
             this.loadClaimHook(HookId.WORLD_GUARD, WorldGuardHook::new);
             this.loadClaimHook(HookId.KINGDOMS, KingdomsHook::new);
+            this.loadClaimHook(HookId.HUSK_CLAIMS, HuskClaimsHook::new);
         }
 
         if (Plugins.isInstalled(HookId.ADVANCED_REGION_MARKET)) {
@@ -508,7 +511,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
                 ItemStack item = typing.getItem();
                 String material = BukkitThing.toString(item.getType()).toLowerCase();
                 String localized = LangAssets.get(item.getType()).toLowerCase();
-                String displayName = NightMessage.stripAll(ItemUtil.getItemName(item)).toLowerCase();
+                String displayName = NightMessage.stripTags(ItemUtil.getSerializedName(item)).toLowerCase();
                 if (material.contains(searchFor) || localized.contains(searchFor) || displayName.contains(searchFor)) {
                     products.add(product);
                     return;
@@ -527,13 +530,17 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         this.searchMenu.open(player, products);
     }
 
-    public void renameShop(@NotNull Player player, @NotNull ChestShop shop, @NotNull String name) {
-        int maxLength = ChestConfig.SHOP_MAX_NAME_LENGTH.get(); // TODO Ignore colors
-        if (name.length() > maxLength) {
-            name = name.substring(0, maxLength);
+    public boolean renameShop(@NotNull Player player, @NotNull ChestShop shop, @NotNull String name) {
+        String rawName = NightMessage.stripTags(name, TagPool.ALL_COLORS_AND_STYLES);
+        int maxLength = ChestConfig.SHOP_MAX_NAME_LENGTH.get();
+
+        if (rawName.length() > maxLength) {
+            ChestLang.SHOP_RENAME_ERROR_LONG_NAME.getMessage().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, maxLength));
+            return false;
         }
 
         shop.setName(name);
+        return true;
     }
 
     public void interactShop(@NotNull PlayerInteractEvent event, @NotNull Player player, @NotNull Block block) {
@@ -790,7 +797,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         shop.saveSettings();
 
         ChestLang.RENT_RENT_SUCCESS.getMessage().send(player, replacer -> replacer
-            .replace(Placeholders.GENERIC_TIME, TimeUtil.formatTime(settings.getDurationMillis()))
+            .replace(Placeholders.GENERIC_TIME, TimeFormats.toLiteral(settings.getDurationMillis()))
             .replace(Placeholders.GENERIC_PRICE, settings.getPriceFormatted())
             .replace(shop.replacePlaceholders())
         );
@@ -832,7 +839,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         shop.saveSettings();
 
         ChestLang.RENT_EXTEND_SUCCESS.getMessage().send(player, replacer -> replacer
-            .replace(Placeholders.GENERIC_TIME, TimeUtil.formatTime(settings.getDurationMillis()))
+            .replace(Placeholders.GENERIC_TIME, TimeFormats.toLiteral(settings.getDurationMillis()))
             .replace(Placeholders.GENERIC_PRICE, settings.getPriceFormatted())
             .replace(shop.replacePlaceholders())
         );

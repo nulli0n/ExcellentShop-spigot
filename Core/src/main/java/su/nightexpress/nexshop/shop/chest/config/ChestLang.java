@@ -67,6 +67,9 @@ public class ChestLang extends CoreLang {
         LIGHT_RED.enclose(BOLD.enclose("Shop Removed!"))
     );
 
+    public static final LangText SHOP_RENAME_ERROR_LONG_NAME = LangText.of("ChestShop.Shop.Rename.Error.TooLong",
+        LIGHT_RED.wrap("Name is too long! Max. length is " + GENERIC_AMOUNT));
+
     public static final LangText SHOP_TELEPORT_ERROR_UNSAFE = LangText.of("ChestShop.Shop.Teleport.Error.Unsafe",
         LIGHT_RED.enclose("Teleport cancelled due to unsafe shop location.")
     );
@@ -113,6 +116,8 @@ public class ChestLang extends CoreLang {
         LIGHT_YELLOW.enclose(BOLD.enclose("Shop Search")),
         LIGHT_GRAY.enclose("Enter item " + LIGHT_YELLOW.enclose("name") + " to search for.")
     );
+
+    public static final LangString SHOP_PRICE_MENU_TITLE = LangString.of("ChestShop.Editor.PriceMenu", BLACK.wrap("Price Settings"));
 
 
     public static final LangText ERROR_SHOP_INACTIVE = LangText.of("ChestShop.Shop.Error.Inactive", "This shop is not available currently.");

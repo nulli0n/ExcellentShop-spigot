@@ -152,7 +152,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
             this.runNextTick(() -> module.openPriceOptions(viewer.getPlayer(), product));
         });
 
-        this.addItem(Material.GOLDEN_HELMET, VirtualLocales.PRODUCT_EDIT_RANKS_REQUIRED, 29, (viewer, event, product) -> {
+        this.addItem(Material.GOLDEN_HELMET, VirtualLocales.PRODUCT_EDIT_RANKS_REQUIRED, 28, (viewer, event, product) -> {
             if (event.isRightClick()) {
                 product.getAllowedRanks().clear();
                 this.saveAndFlush(viewer, product);
@@ -166,7 +166,11 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
             }));
         });
 
-        this.addItem(Material.REDSTONE, VirtualLocales.PRODUCT_EDIT_PERMISIONS_REQUIRED, 33, (viewer, event, product) -> {
+        this.addItem(NightItem.asCustomHead(SKULL_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK, 30, (viewer, event, product) -> {
+            this.runNextTick(() -> module.openStockOptions(viewer.getPlayer(), product));
+        });
+
+        this.addItem(Material.REDSTONE, VirtualLocales.PRODUCT_EDIT_REQUIRED_PERMISSIONS, 32, (viewer, event, product) -> {
             if (event.isRightClick()) {
                 product.getRequiredPermissions().clear();
                 this.saveAndFlush(viewer, product);
@@ -180,8 +184,18 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
             }));
         });
 
-        this.addItem(NightItem.asCustomHead(SKULL_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK, 31, (viewer, event, product) -> {
-            this.runNextTick(() -> module.openStockOptions(viewer.getPlayer(), product));
+        this.addItem(Material.GUNPOWDER, VirtualLocales.PRODUCT_EDIT_FORBIDDEN_PERMISSIONS, 34, (viewer, event, product) -> {
+            if (event.isRightClick()) {
+                product.getForbiddenPermissions().clear();
+                this.saveAndFlush(viewer, product);
+                return;
+            }
+
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION, input -> {
+                product.getForbiddenPermissions().add(input.getTextRaw());
+                product.save();
+                return true;
+            }));
         });
     }
 

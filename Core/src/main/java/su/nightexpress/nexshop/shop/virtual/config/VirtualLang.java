@@ -178,10 +178,13 @@ public class VirtualLang extends Lang {
 
 
     public static final LangString EDITOR_PRODUCT_NO_RANK_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoRankRequirements",
-        "No ranks required!");
+        "No rank(s) required!");
 
     public static final LangString EDITOR_PRODUCT_NO_PERM_REQUIREMENTS = LangString.of("VirtualShop.Editor.Product.NoPermissionRequirements",
-        "No permissions required!");
+        "No permission(s) required!");
+
+    public static final LangString EDITOR_PRODUCT_NO_FORBIDDEN_PERMS = LangString.of("VirtualShop.Editor.Product.NoForbiddenPerms",
+        "No permission(s) forbidden!");
 
 
     public static final LangString EDITOR_ENTER_SHOP_ID = LangString.of("VirtualShop.Editor.Enter.Id",

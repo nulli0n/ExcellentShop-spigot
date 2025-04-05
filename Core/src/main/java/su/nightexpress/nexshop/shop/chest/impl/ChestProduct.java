@@ -68,7 +68,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
 
     @Override
     public boolean isAvailable(@NotNull Player player) {
-        return this.shop.isActive();
+        return this.shop.isActive() && (this.isBuyable() || this.isSellable());
     }
 
     @Override

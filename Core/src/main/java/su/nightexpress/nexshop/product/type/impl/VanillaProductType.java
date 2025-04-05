@@ -30,7 +30,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
     public static VanillaProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
         // ------- REVERT 4.13.3 CHANGES - START ------- //
         String serialized = config.getString(path + ".Data");
-        if (serialized != null) {
+        if (serialized != null && !serialized.isBlank()) {
             String delimiter = " \\| ";
             String[] split = serialized.split(delimiter);
             String tagString = split[0];

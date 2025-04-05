@@ -47,7 +47,7 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
     private final Currency currency;
 
     public ShopLayout(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull FileConfig config) {
-        super(plugin, MenuType.GENERIC_9X6, HEX_COLOR.enclose("Shop → " + SHOP_NAME + " (" + WHITE.enclose(GENERIC_PAGE) + "/" + WHITE.enclose(GENERIC_PAGES) + ")", TITLE_COLOR));
+        super(plugin, MenuType.GENERIC_9X6, HEX_COLOR.wrap("Shop → " + SHOP_NAME + " (" + WHITE.wrap(GENERIC_PAGE) + "/" + WHITE.wrap(GENERIC_PAGES) + ")", TITLE_COLOR));
         this.module = module;
         this.currency = module.getDefaultCurrency();
         this.setApplyPlaceholderAPI(true);
@@ -219,15 +219,15 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
         loader.addDefaultItem(MenuItem.buildPreviousPage(this, 48).setPriority(10));
 
         loader.addDefaultItem(NightItem.asCustomHead("9fd108383dfa5b02e86635609541520e4e158952d68c1c8f8f200ec7e88642d")
-            .setDisplayName(HEX_COLOR.enclose(BOLD.enclose("SELL ALL"), "#ebd12a"))
+            .setDisplayName(HEX_COLOR.wrap(BOLD.wrap("SELL ALL"), "#ebd12a"))
             .setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Sells everything from your"),
-                LIGHT_GRAY.enclose("inventory to all available shops."),
+                LIGHT_GRAY.wrap("Sells everything from your"),
+                LIGHT_GRAY.wrap("inventory to all available shops."),
                 "",
-                LIGHT_GRAY.enclose(HEX_COLOR.enclose("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.enclose("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
+                LIGHT_GRAY.wrap(HEX_COLOR.wrap("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.wrap("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
                 "",
-                //LIGHT_GRAY.enclose(HEX_COLOR.enclose("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.enclose("sell all", "#ebd12a") + ".")
-                HEX_COLOR.enclose("→ " + BOLD.enclose(UNDERLINED.enclose("CLICK")) + " to sell", "#ebd12a")
+                //LIGHT_GRAY.wrap(HEX_COLOR.wrap("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.wrap("sell all", "#ebd12a") + ".")
+                HEX_COLOR.wrap("→ " + BOLD.wrap(UNDERLINED.wrap("CLICK")) + " to sell", "#ebd12a")
             ))
             .toMenuItem()
             .setSlots(52)
@@ -238,20 +238,20 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
             })));
 
         loader.addDefaultItem(NightItem.asCustomHead("3324a7d61ccd44b031744b517f911a5c461614b953b17f648282e147b29d10e")
-            .setDisplayName(HEX_COLOR.enclose(BOLD.enclose("BALANCE"), "#7cf1de"))
+            .setDisplayName(HEX_COLOR.wrap(BOLD.wrap("BALANCE"), "#7cf1de"))
             .setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Here's displayed how much"),
-                LIGHT_GRAY.enclose("money you have."),
+                LIGHT_GRAY.wrap("Here's displayed how much"),
+                LIGHT_GRAY.wrap("money you have."),
                 "",
-                HEX_COLOR.enclose("➥", "#7cf1de") + " " + WHITE.enclose(GENERIC_BALANCE))
+                HEX_COLOR.wrap("➥", "#7cf1de") + " " + WHITE.wrap(GENERIC_BALANCE))
             )
             .toMenuItem().setSlots(46).setPriority(10)
         );
 
 //        loader.addDefaultItem(NightItem.asCustomHead("5f96717bef61c37ce4dcd0b067da4b57c8a1b0f83c2926868b083444f7eade54")
-//            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Wallet")))
+//            .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Wallet")))
 //            .setLore(Lists.newList(
-//                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Balance: ") + GENERIC_BALANCE)
+//                LIGHT_YELLOW.wrap("▪ " + LIGHT_GRAY.wrap("Balance: ") + GENERIC_BALANCE)
 //            ))
 //            .toMenuItem().setSlots(46).setPriority(10));
     }

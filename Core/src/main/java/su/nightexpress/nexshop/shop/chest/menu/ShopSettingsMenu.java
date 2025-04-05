@@ -98,8 +98,9 @@ public class ShopSettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implemen
             .toMenuItem().setSlots(20).setPriority(10).setHandler(new ItemHandler("shop_change_name", (viewer, event) -> {
                 ChestShop shop = this.getLink(viewer);
                 this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, input -> {
-                    this.module.renameShop(viewer.getPlayer(), shop, input.getText());
-                    shop.saveSettings();
+                    if (this.module.renameShop(viewer.getPlayer(), shop, input.getText())) {
+                        shop.saveSettings();
+                    }
                     return true;
                 }));
             }, ItemOptions.builder().setVisibilityPolicy(viewer -> this.getLink(viewer).canRename(viewer.getPlayer())).build())));

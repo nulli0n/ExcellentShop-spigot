@@ -174,7 +174,7 @@ public class VirtualConfig {
             EMPTY_IF_ABOVE,
             GENERIC_SELL,
             EMPTY_IF_ABOVE,
-            DARK_GRAY.enclose("Hold " + LIGHT_GRAY.enclose("Shift") + " to buy & sell quickly.")
+            DARK_GRAY.wrap("Hold " + LIGHT_GRAY.wrap("Shift") + " to buy & sell quickly.")
         ),
         "Product lore format. Use '" + GENERIC_LORE + "' placeholder to insert original lore of the product item.",
         "You can use 'Virtual Product' placeholders: " + URL_WIKI_PLACEHOLDERS
@@ -182,8 +182,8 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_BUY = ConfigValue.create("GUI.Product_Format.Lore.Buy",
         Lists.newList(
-            GREEN.enclose(BOLD.enclose("BUY:")),
-            GREEN.enclose("←" + WHITE.enclose(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
+            GREEN.wrap(BOLD.wrap("BUY:")),
+            GREEN.wrap("←" + WHITE.wrap(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
             EMPTY_IF_BELOW,
             PRICE_DYNAMIC.apply(BUY),
             EMPTY_IF_ABOVE,
@@ -196,9 +196,9 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_SELL = ConfigValue.create("GUI.Product_Format.Lore.Sell",
         Lists.newList(
-            RED.enclose(BOLD.enclose("SELL:")),
-            RED.enclose("→" + WHITE.enclose(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
-            RED.enclose("→" + WHITE.enclose(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
+            RED.wrap(BOLD.wrap("SELL:")),
+            RED.wrap("→" + WHITE.wrap(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
+            RED.wrap("→" + WHITE.wrap(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
             EMPTY_IF_BELOW,
             PRICE_DYNAMIC.apply(SELL),
             EMPTY_IF_ABOVE,
@@ -211,7 +211,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_DISCOUNT = ConfigValue.create("GUI.Product_Format.Lore.Discount",
         Lists.newList(
-            GRAY.enclose(GREEN.enclose("✔") + " Discount " + GREEN.enclose(BOLD.enclose(su.nightexpress.nexshop.Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%")) + "!")
+            GRAY.wrap(GREEN.wrap("✔") + " Discount " + GREEN.wrap(BOLD.wrap(su.nightexpress.nexshop.Placeholders.PRODUCT_DISCOUNT_AMOUNT + "%")) + "!")
         ),
         "Text to appear if product has active discount.",
         "Placeholder to insert: " + GENERIC_DISCOUNT
@@ -219,7 +219,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_NO_PERMISSION = ConfigValue.create("GUI.Product_Format.Lore.NoPermission",
         Lists.newList(
-            GRAY.enclose(RED.enclose("✘") + " You don't have access to this item!")
+            GRAY.wrap(RED.wrap("✘") + " You don't have access to this item!")
         ),
         "Text to appear if player don't have access to a product.",
         "Placeholder to insert: " + GENERIC_PERMISSION
@@ -232,10 +232,10 @@ public class VirtualConfig {
         () -> {
             return Map.of(
                 TradeType.BUY, Lists.newList(
-                    GREEN.enclose("[?]" + WHITE.enclose(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(BUY) + WHITE.enclose(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(BUY))
+                    GREEN.wrap("[?]" + WHITE.wrap(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(BUY) + WHITE.wrap(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(BUY))
                 ),
                 TradeType.SELL, Lists.newList(
-                    RED.enclose("[?]" + WHITE.enclose(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(SELL) + WHITE.enclose(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(SELL))
+                    RED.wrap("[?]" + WHITE.wrap(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(SELL) + WHITE.wrap(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(SELL))
                 ));
         },
         "Text to appear when product has dynamic/float price.",
@@ -246,7 +246,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_STOCK_BUY = ConfigValue.create("GUI.Product_Format.Lore.Stock.GLOBAL.BUY",
         Lists.newList(
-            GREEN.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCKS_RESET_IN) + ")")
+            GREEN.wrap("● " + WHITE.wrap("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY) + WHITE.wrap("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(BUY)) + GRAY.wrap(" (" + WHITE.wrap(PRODUCT_STOCKS_RESET_IN) + ")")
         ),
         "Text to appear when product has buy/sell stock configured.",
         "Placeholders to insert:",
@@ -255,7 +255,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_STOCK_SELL = ConfigValue.create("GUI.Product_Format.Lore.Stock.GLOBAL.SELL",
         Lists.newList(
-            RED.enclose("● " + WHITE.enclose("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_STOCKS_RESET_IN) + ")")
+            RED.wrap("● " + WHITE.wrap("Stock: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL) + WHITE.wrap("/") + PRODUCT_STOCK_AMOUNT_INITIAL.apply(SELL)) + GRAY.wrap(" (" + WHITE.wrap(PRODUCT_STOCKS_RESET_IN) + ")")
         ),
         "Text to appear when product has buy/sell stock configured.",
         "Placeholders to insert:",
@@ -264,7 +264,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_LIMIT_BUY = ConfigValue.create("GUI.Product_Format.Lore.Stock.PLAYER.BUY",
         Lists.newList(
-            GREEN.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMITS_RESET_IN) + ")")
+            GREEN.wrap("● " + WHITE.wrap("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(BUY) + WHITE.wrap("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(BUY)) + GRAY.wrap(" (" + WHITE.wrap(PRODUCT_LIMITS_RESET_IN) + ")")
         ),
         "Text to appear when product has buy/sell limits configured.",
         "Placeholders to insert:",
@@ -273,7 +273,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_LIMIT_SELL = ConfigValue.create("GUI.Product_Format.Lore.Stock.PLAYER.SELL",
         Lists.newList(
-            RED.enclose("● " + WHITE.enclose("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + WHITE.enclose("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL)) + GRAY.enclose(" (" + WHITE.enclose(PRODUCT_LIMITS_RESET_IN) + ")")
+            RED.wrap("● " + WHITE.wrap("Your Limit: ") + PRODUCT_LIMIT_AMOUNT_LEFT.apply(SELL) + WHITE.wrap("/") + PRODUCT_LIMIT_AMOUNT_INITIAL.apply(SELL)) + GRAY.wrap(" (" + WHITE.wrap(PRODUCT_LIMITS_RESET_IN) + ")")
         ),
         "Text to appear when product has buy/sell limits configured.",
         "Placeholders to insert:",

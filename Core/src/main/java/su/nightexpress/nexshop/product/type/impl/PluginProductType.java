@@ -38,7 +38,7 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
 
         // ------- REVERT 4.13.3 CHANGES - START ------- //
         String serialized = config.getString(path + ".Data");
-        if (serialized != null) {
+        if (serialized != null && !serialized.isBlank()) {
             String delimiter = " \\| ";
             String[] split = serialized.split(delimiter);
             String itemId = split[0];

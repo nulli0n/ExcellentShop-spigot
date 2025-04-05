@@ -75,7 +75,8 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
 
         this.addHandler(this.orderHandler = new ItemHandler("listing_order", (viewer, event) -> {
             Player player = viewer.getPlayer();
-            setListingOrder(player, Lists.next(getListingOrder(player)));
+            SortType type = getListingOrder(player);
+            setListingOrder(player, event.isLeftClick() ? Lists.next(type) : Lists.previous(type));
             this.runNextTick(() -> this.flush(viewer));
         }));
 
@@ -222,6 +223,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
                 .replace(listing.replacePlaceholders())
                 .replacePlaceholderAPI(player)
                 .writeMeta();
+
             return item;
         });
 

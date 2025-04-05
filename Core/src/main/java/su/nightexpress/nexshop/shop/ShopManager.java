@@ -13,6 +13,7 @@ import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.menu.*;
@@ -79,7 +80,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
                 if (units == 0) return;
 
                 String type = config.getString("Content." + itemId + ".Type");
-                if (type == null) return;
+                if (type == null || type.isBlank()) return;
 
                 String result;
                 if (units > 1000 && type.equalsIgnoreCase("set")) result = "set_max";
@@ -135,6 +136,11 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
         ShopClickAction action = ShopUtils.getClickAction(player, clickType, shop, product);
         if (action == ShopClickAction.UNDEFINED) return;
+
+        if (action == ShopClickAction.SELL_ALL && !player.hasPermission(Perms.KEY_SELL_ALL)) {
+            Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
+            return;
+        }
 
         source.runNextTick(() -> this.startTrade(player, product, action, source));
     }

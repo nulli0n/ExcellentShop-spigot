@@ -4,12 +4,12 @@ import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
-import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualDiscount;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
 import su.nightexpress.nightcore.menu.MenuViewer;
@@ -23,7 +23,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> implements LegacyShopEditor {
+public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> {
 
     private final VirtualShopModule module;
 
@@ -38,7 +38,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         this.addItem(Material.GOLD_NUGGET, VirtualLocales.DISCOUNT_AMOUNT, 10, (viewer, event, discount)  -> {
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, (dialog, input) -> {
                 discount.setDiscount(input.asDouble());
-                this.save(viewer, discount.getShop());
+                discount.getShop().saveSettings();
                 return true;
             });
         });
@@ -46,7 +46,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         this.addItem(Material.REPEATER, VirtualLocales.DISCOUNT_DURATION, 12, (viewer, event, discount) -> {
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS, (dialog, input) -> {
                 discount.setDuration(input.asInt());
-                this.save(viewer, discount.getShop());
+                discount.getShop().saveSettings();
                 return true;
             });
         });
@@ -63,7 +63,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
                 if (day == null) return true;
 
                 discount.getDays().add(day);
-                this.save(viewer, discount.getShop());
+                discount.getShop().saveSettings();
                 return true;
             }).setSuggestions(Lists.getEnums(DayOfWeek.class), true);
         });
@@ -78,7 +78,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
             this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, (dialog, input) -> {
                 try {
                     discount.getTimes().add(LocalTime.parse(input.getTextRaw(), ShopUtils.TIME_FORMATTER));
-                    this.save(viewer, discount.getShop());
+                    discount.getShop().saveSettings();
                 }
                 catch (DateTimeParseException ignored) {}
                 return true;
@@ -88,6 +88,11 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
             ItemReplacer.replace(item, this.getLink(viewer).replacePlaceholders());
         }));
+    }
+
+    private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull Shop shop) {
+        shop.saveSettings();
+        this.runNextTick(() -> this.flush(viewer));
     }
 
     @Override

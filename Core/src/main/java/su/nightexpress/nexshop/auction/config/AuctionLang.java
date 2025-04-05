@@ -43,10 +43,10 @@ public class AuctionLang extends Lang {
     public static final LangText LISTING_ADD_SUCCESS_ANNOUNCE = LangText.of("Auction.Listing.Add.Success.Broadcast",
         TAG_NO_PREFIX,
         " ",
-        LIGHT_YELLOW.enclose(BOLD.enclose("Auction:")),
-        LIGHT_GRAY.enclose("Player " + LIGHT_YELLOW.enclose(PLAYER_DISPLAY_NAME) + " added " + LIGHT_YELLOW.enclose("x" + LISTING_ITEM_AMOUNT) + " " +
-            HOVER.enclose(LIGHT_YELLOW.enclose(LISTING_ITEM_NAME), HoverEvent.Action.SHOW_ITEM, LISTING_ITEM_VALUE) +
-            " on the auction for " + LIGHT_YELLOW.enclose(LISTING_PRICE) + "."),
+        LIGHT_YELLOW.wrap(BOLD.wrap("Auction:")),
+        LIGHT_GRAY.wrap("Player " + LIGHT_YELLOW.wrap(PLAYER_DISPLAY_NAME) + " added " + LIGHT_YELLOW.wrap("x" + LISTING_ITEM_AMOUNT) + " " +
+            HOVER.wrapShowText(LIGHT_YELLOW.wrap(LISTING_ITEM_NAME), LISTING_ITEM_VALUE) +
+            " on the auction for " + LIGHT_YELLOW.wrap(LISTING_PRICE) + "."),
         " "
     );
 

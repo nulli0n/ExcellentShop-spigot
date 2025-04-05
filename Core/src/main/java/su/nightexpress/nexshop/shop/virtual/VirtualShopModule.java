@@ -23,10 +23,7 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.DiscountListEditor;
 import su.nightexpress.nexshop.shop.virtual.editor.DiscountMainEditor;
-import su.nightexpress.nexshop.shop.virtual.editor.product.ProductCreationMenu;
-import su.nightexpress.nexshop.shop.virtual.editor.product.ProductOptionsMenu;
-import su.nightexpress.nexshop.shop.virtual.editor.product.ProductPriceMenu;
-import su.nightexpress.nexshop.shop.virtual.editor.product.ProductStocksMenu;
+import su.nightexpress.nexshop.shop.virtual.editor.product.*;
 import su.nightexpress.nexshop.shop.virtual.editor.rotation.*;
 import su.nightexpress.nexshop.shop.virtual.editor.shop.*;
 import su.nightexpress.nexshop.shop.virtual.impl.*;
@@ -65,9 +62,9 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     private NormalProductsMenu     normalProductsMenu;
     private RotatingProductsMenu   rotatingProductsMenu;
     private ProductCreationMenu    productCreationMenu;
-    private ProductOptionsMenu     productOptionsMenu;
-    private ProductPriceMenu       productPriceMenu;
-    private ProductStocksMenu      productStocksMenu;
+    private ProductOptionsMenu productOptionsMenu;
+    private PriceMenu          productPriceMenu;
+    private ProductStocksMenu  productStocksMenu;
     private ShopListMenu           shopListMenu;
     private ShopOptionsMenu        shopOptionsMenu;
     private ShopLayoutsMenu        shopLayoutsMenu;
@@ -177,7 +174,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         this.rotatingProductsMenu = this.addMenu(new RotatingProductsMenu(this.plugin, this));
         this.productCreationMenu = this.addMenu(new ProductCreationMenu(this.plugin, this));
         this.productOptionsMenu = this.addMenu(new ProductOptionsMenu(this.plugin, this));
-        this.productPriceMenu = this.addMenu(new ProductPriceMenu(this.plugin, this));
+        this.productPriceMenu = this.addMenu(new PriceMenu(this.plugin, this));
         this.productStocksMenu = this.addMenu(new ProductStocksMenu(this.plugin, this));
 
         this.shopListMenu = this.addMenu(new ShopListMenu(this.plugin, this));

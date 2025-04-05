@@ -6,6 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
@@ -15,7 +16,6 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
-import su.nightexpress.nexshop.shop.virtual.menu.LegacyShopEditor;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -27,7 +27,10 @@ import su.nightexpress.nightcore.menu.item.ItemOptions;
 import su.nightexpress.nightcore.menu.item.MenuItem;
 import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.ItemReplacer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.Players;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,7 +41,7 @@ import java.util.stream.IntStream;
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop>, LegacyShopEditor {
+public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop> {
 
     public static final String FILE_NAME = "shop_products.yml";
 
@@ -106,7 +109,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
 
                         event.getView().setCursor(null);
                         Players.addItem(viewer2.getPlayer(), cursor);
-                        this.saveProductsAndFlush(viewer, shop);
+                        this.saveAndFlush(viewer, shop);
                     });
                 }
                 else {
@@ -137,7 +140,7 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
                             return;
                         }
                         shop.removeProduct(product.getId());
-                        this.saveProductsAndFlush(viewer, shop);
+                        this.saveAndFlush(viewer, shop);
                         return;
                     }
 
@@ -146,6 +149,11 @@ public class ShopProductsMenu extends ShopEditorMenu implements Linked<ChestShop
                 this.addItem(item);
             }
         }
+    }
+
+    private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull Shop shop) {
+        shop.saveProducts();
+        this.runNextTick(() -> this.flush(viewer));
     }
 
     @Override

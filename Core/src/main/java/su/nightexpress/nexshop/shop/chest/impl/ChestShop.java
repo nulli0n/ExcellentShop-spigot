@@ -172,7 +172,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
 
         String itemOld = config.getString(path + ".Reward.Item");
-        if (itemOld != null) {
+        if (itemOld != null && !itemOld.isBlank()) {
             config.remove(path + ".Reward.Item");
             config.set(path + ".Content.Item", itemOld);
         }

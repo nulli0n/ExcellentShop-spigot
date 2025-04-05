@@ -166,7 +166,7 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.GRASS_BLOCK, 50, 2, 1, 1);
         this.addShopProduct(shop, Material.DIRT, 20, 1, 1, 2);
         this.addShopProduct(shop, Material.COARSE_DIRT, 20, 1, 1, 3);
-        this.addShopProduct(shop, Material.FARMLAND, -1, -1, 1, 4);
+        this.addShopProduct(shop, Material.FARMLAND, 25, 1, 1, 4);
         this.addShopProduct(shop, Material.ROOTED_DIRT, 25, 1, 1, 5);
         this.addShopProduct(shop, Material.PODZOL, 20, 1, 1, 6);
         this.addShopProduct(shop, Material.MYCELIUM, 50, -1, 1, 7);
@@ -179,14 +179,14 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.ICE, 20, 2.5, 1, 16);
         this.addShopProduct(shop, Material.BLUE_ICE, 20, 2.5, 1, 19);
         this.addShopProduct(shop, Material.PACKED_ICE, 40, 3, 1, 20);
-        this.addShopProduct(shop, Material.SNOW_BLOCK, -1, -1, 1, 21);
+        this.addShopProduct(shop, Material.SNOW_BLOCK, 2, 0.2, 1, 21);
         this.addShopProduct(shop, Material.OBSIDIAN, 500, 25, 1, 22);
         this.addShopProduct(shop, Material.CRYING_OBSIDIAN, 1_500, 50, 1, 23);
         this.addShopProduct(shop, Material.RESPAWN_ANCHOR, 185_000, 500, 1, 24);
         this.addShopProduct(shop, Material.BOOKSHELF, 100, -1, 1, 25);
         this.addShopProduct(shop, Material.SOUL_SAND, 2_000, 15, 1, 28);
         this.addShopProduct(shop, Material.SOUL_SOIL, 2_000, 25, 1, 29);
-        this.addShopProduct(shop, Material.ANCIENT_DEBRIS, -1, -1, 1, 30);
+        this.addShopProduct(shop, Material.ANCIENT_DEBRIS, 1250, 45, 1, 30);
         this.addShopProduct(shop, Material.GLOWSTONE, 20, 10, 1, 31);
         this.addShopProduct(shop, Material.HAY_BLOCK, 250, -1, 1, 32);
         this.addShopProduct(shop, Material.MAGMA_BLOCK, 175, 10, 1, 33);
@@ -1199,14 +1199,14 @@ public class ShopCreator {
                             @NotNull Consumer<VirtualShop> consumer) {
 
         List<String> realDescription = new ArrayList<>();
-        description.forEach(line -> realDescription.add(LIGHT_GRAY.enclose(line)));
+        description.forEach(line -> realDescription.add(LIGHT_GRAY.wrap(line)));
         realDescription.add(" ");
-        realDescription.add(HEX_COLOR.enclose("→ " + BOLD.enclose(UNDERLINED.enclose("CLICK")) + " to browse", hexColor));
+        realDescription.add(HEX_COLOR.wrap("→ " + BOLD.wrap(UNDERLINED.wrap("CLICK")) + " to browse", hexColor));
 
         this.createShop(id, shop -> {
             shop.setName(StringUtil.capitalizeUnderscored(id));
             shop.setDescription(realDescription);
-            shop.setIcon(icon.setDisplayName(HEX_COLOR.enclose(BOLD.enclose(name), hexColor)));
+            shop.setIcon(icon.setDisplayName(HEX_COLOR.wrap(BOLD.wrap(name), hexColor)));
             shop.setPermissionRequired(false);
             shop.setBuyingAllowed(true);
             shop.setSellingAllowed(true);

@@ -458,12 +458,14 @@ public class VirtualLocales {
         .rightClick("remove all & disable")
         .build();
 
-    public static final LangItem PRODUCT_EDIT_PERMISIONS_REQUIRED = LangItem.builder(PREFIX + "Product.PermissionsRequired")
-        .name("Required Permissions")
-        .textRaw(PRODUCT_REQUIRED_PERMISSIONS)
-        .emptyLine()
-        .text("Only players with any of listed permissions", "will have access to this product.")
-        .emptyLine()
+    public static final LangUIButton PRODUCT_EDIT_REQUIRED_PERMISSIONS = LangUIButton.builder(PREFIX + "Product.RequiredPerms", "Required Permissions")
+        .description(PRODUCT_REQUIRED_PERMISSIONS, "", "Only players with " + GREEN.wrap("any") + " of listed permissions", "will have access to this product.")
+        .leftClick("add permission")
+        .rightClick("remove all & disable")
+        .build();
+
+    public static final LangUIButton PRODUCT_EDIT_FORBIDDEN_PERMISSIONS = LangUIButton.builder(PREFIX + "Product.ForbiddenPerms", "Forbidden Permissions")
+        .description(PRODUCT_FORBIDDEN_PERMISSIONS, "", "Only players with " + RED.wrap("none") + " of listed permissions", "will have access to this product.")
         .leftClick("add permission")
         .rightClick("remove all & disable")
         .build();
@@ -563,34 +565,6 @@ public class VirtualLocales {
         .rightClick("disable")
         .build();
 
-    // ===================================
-    // Price Editor Locales
-    // ===================================
-
-    public static final LangItem PRODUCT_PRICE_RESET = LangItem.builder(PREFIX + "Product.Price.Reset")
-        .name("Reset & Update")
-        .current("Buy Price", PRODUCT_PRICE_FORMATTED.apply(BUY))
-        .current("Sell Price", PRODUCT_PRICE_FORMATTED.apply(SELL))
-        .emptyLine()
-        .text("Resets product's price data", "and refreshes its values.")
-        .emptyLine()
-        .click("reset")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_TYPE = LangItem.builder(PREFIX + "Product.Price.Type")
-        .name("Price Type")
-        .current("Current", PRODUCT_PRICE_TYPE)
-        .emptyLine()
-        .click("change")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_CURRENCY = LangItem.builder(PREFIX + "Product.Price.Currency")
-        .name("Currency")
-        .current("Current", PRODUCT_CURRENCY)
-        .emptyLine()
-        .click("change")
-        .build();
-
     public static final LangItem PRODUCT_EDIT_DISCOUNT = LangItem.builder(PREFIX + "Product.Price.DiscountAllowed")
         .name("Discount Allowed")
         .current("Enabled", PRODUCT_DISCOUNT_ALLOWED)
@@ -600,146 +574,10 @@ public class VirtualLocales {
         .leftClick("toggle")
         .build();
 
-    public static final LangItem PRODUCT_EDIT_PRICE_FLAT_BUY = LangItem.builder(PREFIX + "Product.Price.Flat.Buy")
-        .name("Buy Price")
-        .current("Current", PRODUCT_PRICE.apply(BUY))
-        .emptyLine()
-        .leftClick("change")
-        .dropKey("disable")
-        .build();
+    // ===================================
+    // Price Editor Locales
+    // ===================================
 
-    public static final LangItem PRODUCT_EDIT_PRICE_FLAT_SELL = LangItem.builder(PREFIX + "Product.Price.Flat.Sell")
-        .name("Sell Price")
-        .current("Current", PRODUCT_PRICE.apply(SELL))
-        .emptyLine()
-        .leftClick("change")
-        .dropKey("disable")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_BOUNDS_BUY = LangItem.builder(PREFIX + "Product.Price.Float.Buy")
-        .name("Buy Price Bounds")
-        .current("Min", PRICER_RANGED_BOUNDS_MIN.apply(BUY))
-        .current("Max", PRICER_RANGED_BOUNDS_MAX.apply(BUY))
-        .emptyLine()
-        .text("Sets product buy price bounds.", "Final price will be within these values.")
-        .emptyLine()
-        .leftClick("change")
-        .dropKey("disable")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_BOUNDS_SELL = LangItem.builder(PREFIX + "Product.Price.Float.Sell")
-        .name("Sell Price Bounds")
-        .current("Min", PRICER_RANGED_BOUNDS_MIN.apply(SELL))
-        .current("Max", PRICER_RANGED_BOUNDS_MAX.apply(SELL))
-        .emptyLine()
-        .text("Sets product sell price bounds.", "Final price will be within these values.")
-        .emptyLine()
-        .leftClick("change")
-        .dropKey("disable")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_DECIMALS = LangItem.builder(PREFIX + "Product.Price.Float.Decimals")
-        .name("Cut Decimals")
-        .current("Enabled", PRICER_FLOAT_ROUND_DECIMALS)
-        .emptyLine()
-        .text("Controls whether final price", "should be integer.")
-        .emptyLine()
-        .click("toggle")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_TYPE = LangItem.builder(PREFIX + "Product.Price.Float.RefreshType")
-        .name("Refresh Type")
-        .current("Current", PRICER_FLOAT_REFRESH_TYPE)
-        .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Interval:")))
-        .text("Performs refresh every X seconds.")
-        .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Fixed:")))
-        .text("Performs refresh at given times.")
-        .emptyLine()
-        .click("toggle")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_INTERVAL = LangItem.builder(PREFIX + "Product.Price.Float.RefreshInterval")
-        .name("Refresh Interval")
-        .current("Current", PRICER_FLOAT_REFRESH_INTERVAL)
-        .emptyLine()
-        .text("Sets refresh interval (in seconds).")
-        .emptyLine()
-        .click("change")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_DAYS = LangItem.builder(PREFIX + "Product.Price.Float.RefreshDays")
-        .name("Refresh Days")
-        .textRaw(PRICER_FLOAT_REFRESH_DAYS)
-        .emptyLine()
-        .leftClick("add day")
-        .rightClick("remove all")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_FLOAT_REFRESH_TIMES = LangItem.builder(PREFIX + "Product.Price.Float.RefreshTimes")
-        .name("Refresh Times")
-        .textRaw(PRICER_FLOAT_REFRESH_TIMES)
-        .emptyLine()
-        .leftClick("add time")
-        .rightClick("remove all")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_DYNAMIC_INITIAL = LangItem.builder(PREFIX + "Product.Price.Dynamic.Initial")
-        .name("Initial Values")
-        .current("Buy", PRICER_DYNAMIC_INITIAL_BUY)
-        .current("Sell", PRICER_DYNAMIC_INITIAL_SELL)
-        .emptyLine()
-        .text("Sets initial (start) product price.")
-        .emptyLine()
-        .leftClick("change buy")
-        .rightClick("change sell")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_DYNAMIC_STEP = LangItem.builder(PREFIX + "Product.Price.Dynamic.Step")
-        .name("Price Step")
-        .current("Buy", PRICER_DYNAMIC_STEP_BUY)
-        .current("Sell", PRICER_DYNAMIC_STEP_SELL)
-        .emptyLine()
-        .text("Adjusts prices by specified", "values on each purchase/sale.")
-        .emptyLine()
-        .leftClick("change buy")
-        .rightClick("change sell")
-        .build();
-
-
-
-
-    public static final LangItem PRODUCT_EDIT_PRICE_PLAYERS_INITIAL = LangItem.builder(PREFIX + "Product.Price.Players.Initial")
-        .name("Initial Values")
-        .current("Buy", PRICER_DYNAMIC_INITIAL_BUY)
-        .current("Sell", PRICER_DYNAMIC_INITIAL_SELL)
-        .emptyLine()
-        .text("Sets initial (start) product price.")
-        .emptyLine()
-        .leftClick("change buy")
-        .rightClick("change sell")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_PLAYERS_ADJUST = LangItem.builder(PREFIX + "Product.Price.Players.Adjust")
-        .name("Adjust Amount")
-        .current("Buy", PRICER_PLAYERS_ADJUST_AMOUNT_BUY)
-        .current("Sell", PRICER_PLAYERS_ADJUST_AMOUNT_SELL)
-        .emptyLine()
-        .text("Adjusts prices by specified", "values with a multiplier of", "online players amount.")
-        .emptyLine()
-        .leftClick("change buy")
-        .rightClick("change sell")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_PRICE_PLAYERS_STEP = LangItem.builder(PREFIX + "Product.Price.Players.Step")
-        .name("Adjust Step")
-        .current("Current", PRICER_PLAYERS_ADJUST_STEP)
-        .emptyLine()
-        .text("Adjusts prices for", "every " + PRICER_PLAYERS_ADJUST_STEP + " player(s) online.")
-        .emptyLine()
-        .click("change")
-        .build();
 
     // ===================================
     // Discount Locales
