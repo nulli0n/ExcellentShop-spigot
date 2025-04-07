@@ -49,6 +49,15 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     }
 
     @Override
+    public void printBadProducts() {
+        this.getProducts().forEach(product -> {
+            if (!product.getType().isValid()) {
+                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.getFile().getPath() + "' shop.");
+            }
+        });
+    }
+
+    @Override
     public void update() {
         this.updatePrices();
     }

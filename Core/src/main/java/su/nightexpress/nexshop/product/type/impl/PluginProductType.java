@@ -53,9 +53,9 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
         String itemId = config.getString(path + ".Content.ItemId", "null");
         int amount = config.getInt(path + ".Content.Amount", 1);
 
-        if (!handler.isDummy() && !handler.isValidId(itemId)) {
-            module.error("Invalid item ID '" + itemId + "' for '" + handlerId + "' handler. Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
-        }
+//        if (!handler.isDummy() && !handler.isValidId(itemId)) {
+//            module.error("Invalid item ID '" + itemId + "' for '" + handlerId + "' handler. Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
+//        }
 
         return new PluginProductType(handler.getName(), itemId, amount);
     }

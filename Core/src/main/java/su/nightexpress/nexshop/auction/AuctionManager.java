@@ -26,13 +26,15 @@ import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.impl.AbstractModule;
-import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.config.DatabaseType;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.UIUtils;
+import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -254,22 +256,19 @@ public class AuctionManager extends AbstractModule {
     }
 
     public void openPurchaseConfirmation(@NotNull Player player, @NotNull ActiveListing listing) {
-        //this.purchaseConfirmMenu.open(player, listing);
-
-        this.plugin.getShopManager().openConfirmation(player, Confirmation.create(
-            (viewer, event) -> {
+        UIUtils.openConfirmation(player, Confirmation.builder()
+            .onAccept((viewer, event) -> {
                 this.buy(player, listing);
-                this.plugin.runTask(task -> {
-                    if (AuctionConfig.MENU_REOPEN_ON_PURCHASE.get()) {
-                        this.openAuction(player);
-                    }
-                    else player.closeInventory();
-                });
-            },
-            (viewer, event) -> {
+                if (!AuctionConfig.MENU_REOPEN_ON_PURCHASE.get()) {
+                    this.plugin.runTask(task -> player.closeInventory());
+                }
+            })
+            .onReturn((viewer, event) -> {
                 this.plugin.runTask(task -> this.openAuction(viewer.getPlayer()));
-            }
-        ));
+            })
+            .setIcon(NightItem.fromItemStack(listing.getItemStack()).localized(AuctionLang.UI_BUY_CONFIRM).replacement(replacer -> replacer.replace(listing.replacePlaceholders())))
+            .returnOnAccept(AuctionConfig.MENU_REOPEN_ON_PURCHASE.get())
+            .build());
     }
 
     private boolean openAuctionMenu(@NotNull Player player, @NotNull UUID target, @NotNull AbstractAuctionMenu<?> menu, boolean force) {
@@ -341,7 +340,7 @@ public class AuctionManager extends AbstractModule {
 
         if (!this.isAllowedItem(item) || !checkItemModel(item)) {
             AuctionLang.LISTING_ADD_ERROR_BAD_ITEM.getMessage().send(player, replacer -> replacer
-                .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
+                .replace(Placeholders.GENERIC_ITEM, ItemUtil.getSerializedName(item))
             );
             return false;
         }

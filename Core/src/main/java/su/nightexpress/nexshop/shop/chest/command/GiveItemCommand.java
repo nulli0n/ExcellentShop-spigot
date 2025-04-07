@@ -50,7 +50,7 @@ public class GiveItemCommand {
         Players.addItem(player, itemStack);
 
         context.send(ChestLang.COMMAND_GIVE_ITEM_DONE.getMessage()
-            .replace(Placeholders.GENERIC_NAME, ItemUtil.getItemName(itemStack))
+            .replace(Placeholders.GENERIC_NAME, ItemUtil.getSerializedName(itemStack))
             .replace(Placeholders.forPlayer(player))
         );
         return true;

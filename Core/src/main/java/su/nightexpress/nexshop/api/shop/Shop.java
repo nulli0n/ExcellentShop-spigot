@@ -23,6 +23,8 @@ public interface Shop {
 
     void saveProducts();
 
+    void printBadProducts();
+
     @Deprecated
     void saveProduct(@NotNull Product product);
 

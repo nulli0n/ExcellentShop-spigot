@@ -746,7 +746,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
                 .replace(Placeholders.GENERIC_ENTRY, list -> {
                     resultMap.forEach((item, result) -> {
                         list.add(VirtualLang.SELL_MENU_SALE_ENTRY.getString()
-                            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(item))
+                            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getSerializedName(item))
                             .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
                             .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
                         );

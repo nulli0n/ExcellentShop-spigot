@@ -235,7 +235,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(GENERIC_AMOUNT, transaction -> String.valueOf(transaction.getAmount()))
         .add(GENERIC_UNITS, transaction -> String.valueOf(transaction.getUnits()))
         .add(GENERIC_PRICE, transaction -> transaction.getProduct().getCurrency().format(transaction.getPrice()))
-        .add(GENERIC_ITEM, transaction -> ItemUtil.getItemName(transaction.getProduct().getPreview()))
+        .add(GENERIC_ITEM, transaction -> ItemUtil.getSerializedName(transaction.getProduct().getPreview()))
     );
 
     // ------------------------------
@@ -281,7 +281,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             }
             list.add(CHEST_SHOP_PRODUCT_NAME.apply(slot), shop -> {
                 ChestProduct product = shop.getProductAtSlot(index);
-                return product == null ? "-" : ItemUtil.getItemName(product.getPreview());
+                return product == null ? "-" : ItemUtil.getSerializedName(product.getPreview());
             });
         }
     });
@@ -324,7 +324,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     // ------------------------------
 
     public static final PlaceholderList<PreparedProduct> PREPARED_PRODUCT = PlaceholderList.create(list -> list
-        .add(GENERIC_ITEM, product -> ItemUtil.getItemName(product.getProduct().getPreview()))
+        .add(GENERIC_ITEM, product -> ItemUtil.getSerializedName(product.getProduct().getPreview()))
         .add(GENERIC_AMOUNT, product -> String.valueOf(product.getAmount()))
         .add(GENERIC_UNITS, product -> String.valueOf(product.getUnits()))
         .add(GENERIC_TYPE, product -> Lang.TRADE_TYPES.getLocalized(product.getTradeType()))
@@ -345,8 +345,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
                 double price = pov.player == null ? 0D : pov.product.getPriceSellAll(pov.player);
                 return price >= 0 ? pov.product.getCurrency().format(price) : Lang.OTHER_PRICE_DISABLED.getString();
             })
-            .add(PRODUCT_PREVIEW_NAME, pov -> ItemUtil.getItemName(pov.product.getPreview()))
-            .add(PRODUCT_PREVIEW_LORE, pov -> String.join("\n", ItemUtil.getLore(pov.product.getPreview())));
+            .add(PRODUCT_PREVIEW_NAME, pov -> ItemUtil.getSerializedName(pov.product.getPreview()))
+            .add(PRODUCT_PREVIEW_LORE, pov -> String.join("\n", ItemUtil.getSerializedLore(pov.product.getPreview())));
 
 
         for (TradeType tradeType : TradeType.values()) {
@@ -528,7 +528,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(LISTING_PRICE, listing -> listing.getCurrency().format(listing.getPrice()))
         .add(LISTING_DATE_CREATION, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getCreationDate())))
         .add(LISTING_ITEM_AMOUNT, listing -> String.valueOf(listing.getItemStack().getAmount()))
-        .add(LISTING_ITEM_NAME, listing -> ItemUtil.getItemName(listing.getItemStack()))
+        .add(LISTING_ITEM_NAME, listing -> ItemUtil.getSerializedName(listing.getItemStack()))
         .add(LISTING_ITEM_LORE, listing -> String.join("\n", ItemUtil.getLore(listing.getItemStack())))
         .add(LISTING_ITEM_VALUE, listing -> String.valueOf(ItemNbt.compress(listing.getItemStack())))
         .add(LISTING_DELETES_IN, listing -> TimeFormats.formatDuration(listing.getDeleteDate(), TimeFormatType.LITERAL))

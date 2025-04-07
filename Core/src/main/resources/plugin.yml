@@ -15,4 +15,11 @@ softdepend:
   - PlaceholderAPI
   - ProtocolLib
   - packetevents
+  - Oraxen
+  - ItemsAdder
+  - Nexo
+  - ExecutableItems
+  - SCore
+  - MMOItems
+  - ExcellentCrates
 api-version: 1.18

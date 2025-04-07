@@ -5,14 +5,15 @@ import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.text.NightMessage;
 
 import java.util.Comparator;
 
 public enum SortType {
 
     NAME((l1, l2) -> {
-        String name1 = ItemUtil.getItemName(l1.getItemStack());
-        String name2 = ItemUtil.getItemName(l2.getItemStack());
+        String name1 = NightMessage.stripTags(ItemUtil.getSerializedName(l1.getItemStack()));
+        String name2 = NightMessage.stripTags(ItemUtil.getSerializedName(l2.getItemStack()));
         return name1.compareTo(name2);
     }),
     MATERIAL((l1, l2) -> {

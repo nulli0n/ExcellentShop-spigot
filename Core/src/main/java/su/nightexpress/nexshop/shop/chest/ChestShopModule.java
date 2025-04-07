@@ -998,7 +998,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         ChestLang.STORAGE_DEPOSIT_SUCCESS.getMessage().send(player, replacer -> replacer
             .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(units))
-            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
+            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getSerializedName(product.getPreview()))
         );
         return true;
     }
@@ -1021,7 +1021,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         ChestLang.STORAGE_WITHDRAW_SUCCESS.getMessage().send(player, replacer -> replacer
             .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(maxUnits))
-            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getItemName(product.getPreview()))
+            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getSerializedName(product.getPreview()))
         );
         return true;
     }

@@ -35,10 +35,10 @@ public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Fille
 
     public static final String FILE_NAME = "view.yml";
 
-    private int[]        productSlots;
+    private int[] productSlots;
 
     public ShopView(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, MenuType.GENERIC_9X3, BLACK.enclose(SHOP_NAME));
+        super(plugin, MenuType.GENERIC_9X3, BLACK.wrap(SHOP_NAME));
 
         this.load(FileConfig.loadOrExtract(plugin, module.getLocalPath(), FILE_NAME));
     }
@@ -68,7 +68,7 @@ public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Fille
                     .replacement(replacer -> replacer
                         .replace(GENERIC_BUY, buyLore)
                         .replace(GENERIC_SELL, sellLore)
-                        .replace(GENERIC_LORE, ItemUtil.getLore(preview))
+                        .replace(GENERIC_LORE, ItemUtil.getSerializedLore(preview))
                         .replace(product.replacePlaceholders(viewer.getPlayer()))
                         .replace(product.getCurrency().replacePlaceholders())
                         .replace(shop.replacePlaceholders())
@@ -106,7 +106,7 @@ public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Fille
         this.productSlots = ConfigValue.create("Item.Product_Slots", new int[]{11,12,13,14,15}).read(config);
 
         loader.addDefaultItem(NightItem.asCustomHead("2a52d579afe2fdf7b8ecfa746cd016150d96beb75009bb2733ade15d487c42a1")
-            .setDisplayName(LIGHT_GRAY.enclose("<Empty Slot>"))
+            .setDisplayName(LIGHT_GRAY.wrap("<Empty Slot>"))
             .toMenuItem().setSlots(11,12,13,14,15).setPriority(-1));
 
         loader.addDefaultItem(MenuItem.buildNextPage(this, 17).setPriority(10));

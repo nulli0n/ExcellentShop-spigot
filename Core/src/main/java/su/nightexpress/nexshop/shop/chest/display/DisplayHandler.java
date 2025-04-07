@@ -162,7 +162,7 @@ public abstract class DisplayHandler<T> extends SimpleManager<ShopPlugin> {
                         return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
                     });
                 }
-                replacer.replace(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getItemName(product.getPreview()));
+                replacer.replace(Placeholders.GENERIC_PRODUCT_NAME, () -> product == null ? "" : ItemUtil.getSerializedName(product.getPreview()));
                 replacer.replace(Placeholders.GENERIC_PRODUCT_STOCK, () -> product == null ? "0" : NumberUtil.format(product.getCachedStock()));
             }
 

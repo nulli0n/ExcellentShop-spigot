@@ -64,7 +64,7 @@ public class ShopUtils {
         String id = switch (typing) {
             case VanillaTyping vanilla -> {
                 ItemStack item = vanilla.getItem();
-                String name = StringUtil.transformForID(NightMessage.stripAll(ItemUtil.getItemName(item)).toLowerCase()); // Remove all non-latins from item display name.
+                String name = StringUtil.transformForID(NightMessage.stripTags(ItemUtil.getSerializedName(item)).toLowerCase()); // Remove all non-latins from item display name.
 
                 yield name.isBlank() ? BukkitThing.toString(item.getType()) : name;
             }

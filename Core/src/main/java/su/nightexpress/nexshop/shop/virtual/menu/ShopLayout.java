@@ -145,7 +145,7 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
         List<String> loreFormat = Replacer.create()
             .replace(GENERIC_BUY, buyLore)
             .replace(GENERIC_SELL, sellLore)
-            .replace(GENERIC_LORE, ItemUtil.getLore(preview))
+            .replace(GENERIC_LORE, ItemUtil.getSerializedLore(preview))
             .replace(GENERIC_DISCOUNT, discountLore)
             .replace(GENERIC_PERMISSION, noPermLore)
             .apply(VirtualConfig.PRODUCT_FORMAT_LORE_GENERAL.get());
@@ -180,6 +180,7 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
         loreFormat = loreReplacer.apply(loreFormat);
 
         this.addItem(viewer, NightItem.fromItemStack(preview)
+            .setHideComponents(false)
             .setLore(loreFormat)
             .replacement(replacer -> {
                 replacer

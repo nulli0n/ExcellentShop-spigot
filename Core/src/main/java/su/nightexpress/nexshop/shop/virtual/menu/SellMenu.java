@@ -110,8 +110,8 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)
                 .replacement(replacer -> replacer
-                    .replace(ITEM_LORE, ItemUtil.getLore(item))
-                    .replace(ITEM_NAME, ItemUtil.getItemName(item))
+                    .replace(ITEM_LORE, ItemUtil.getSerializedLore(item))
+                    .replace(ITEM_NAME, ItemUtil.getSerializedName(item))
                     .replace(product.getShop().replacePlaceholders())
                     .replace(product.replacePlaceholders(player))
                     .replace(GENERIC_PRICE, () -> product.getCurrency().format(price))

@@ -92,7 +92,7 @@ public class ShopShowcaseMenu extends ShopEditorMenu implements Linked<ChestShop
             ItemReplacer.create(icon).hideFlags().trimmed()
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)
-                .replace(GENERIC_NAME, ItemUtil.getItemName(pair.getSecond()))
+                .replace(GENERIC_NAME, ItemUtil.getSerializedName(pair.getSecond()))
                 .replacePlaceholderAPI(viewer.getPlayer())
                 .writeMeta();
             return icon;

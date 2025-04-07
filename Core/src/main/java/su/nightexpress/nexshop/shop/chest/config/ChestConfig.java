@@ -271,7 +271,7 @@ public class ChestConfig {
             "",
             GENERIC_SELL,
             "",
-            DARK_GRAY.enclose("Hold " + LIGHT_GRAY.enclose("Shift") + " to buy & sell quickly.")
+            DARK_GRAY.wrap("Hold " + LIGHT_GRAY.wrap("Shift") + " to buy & sell quickly.")
         ),
         "Product lore format. Use '" + GENERIC_LORE + "' placeholder to insert original lore of the product item.",
         "You can use 'Chest Product' placeholders: " + URL_WIKI_PLACEHOLDERS
@@ -279,9 +279,9 @@ public class ChestConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_BUY = ConfigValue.create("Shops.Products.Format.Buy",
         Lists.newList(
-            GREEN.enclose(BOLD.enclose("BUY:")),
-            GREEN.enclose("←" + WHITE.enclose(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
-            GREEN.enclose("✔" + WHITE.enclose(" Items Left: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY))
+            GREEN.wrap(BOLD.wrap("BUY:")),
+            GREEN.wrap("←" + WHITE.wrap(" Left Click to buy for ") + PRODUCT_PRICE_FORMATTED.apply(BUY)),
+            GREEN.wrap("✔" + WHITE.wrap(" Items Left: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(BUY))
         ),
         "Lore that will appear if product is buyable.",
         "Placeholder: " + GENERIC_BUY
@@ -289,10 +289,10 @@ public class ChestConfig {
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_SELL = ConfigValue.create("Shops.Products.Format.Sell",
         Lists.newList(
-            RED.enclose(BOLD.enclose("SELL:")),
-            RED.enclose("→" + WHITE.enclose(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
-            RED.enclose("→" + WHITE.enclose(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
-            RED.enclose("✔" + WHITE.enclose(" Shop Space: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL))
+            RED.wrap(BOLD.wrap("SELL:")),
+            RED.wrap("→" + WHITE.wrap(" Right Click to sell for ") + PRODUCT_PRICE_FORMATTED.apply(SELL)),
+            RED.wrap("→" + WHITE.wrap(" Press [F] to sell all for ") + PRODUCT_PRICE_SELL_ALL_FORMATTED),
+            RED.wrap("✔" + WHITE.wrap(" Shop Space: ") + PRODUCT_STOCK_AMOUNT_LEFT.apply(SELL))
         ),
         "Text to appear if product is sellable.",
         "Placeholder: " + GENERIC_SELL
@@ -372,8 +372,8 @@ public class ChestConfig {
 
     public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_ADMIN = ConfigValue.create("Display.Title.Values.ADMIN",
         Lists.newList(
-            LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
-            LIGHT_GRAY.enclose(GENERIC_PRODUCT_NAME),
+            LIGHT_YELLOW.wrap(BOLD.wrap(SHOP_NAME)),
+            LIGHT_GRAY.wrap(GENERIC_PRODUCT_NAME),
             GENERIC_BUY + " " + GENERIC_SELL
         ),
         "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
@@ -386,10 +386,10 @@ public class ChestConfig {
     public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_NORMAL = ConfigValue.create("Display.Title.Values.PLAYER",
 
         Lists.newList(
-            LIGHT_YELLOW.enclose(BOLD.enclose(SHOP_NAME)),
-            LIGHT_GRAY.enclose(GENERIC_PRODUCT_NAME),
+            LIGHT_YELLOW.wrap(BOLD.wrap(SHOP_NAME)),
+            LIGHT_GRAY.wrap(GENERIC_PRODUCT_NAME),
             GENERIC_BUY + " " + GENERIC_SELL,
-            LIGHT_GRAY.enclose("Stock: " + LIGHT_YELLOW.enclose(GENERIC_PRODUCT_STOCK))
+            LIGHT_GRAY.wrap("Stock: " + LIGHT_YELLOW.wrap(GENERIC_PRODUCT_STOCK))
         ),
         "Sets hologram text format for player and admin shops when both options, buying and selling, are available.",
         "You can use 'Chest Shop' placeholders: " + URL_WIKI_PLACEHOLDERS,
@@ -401,9 +401,9 @@ public class ChestConfig {
 
     public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_RENT = ConfigValue.create("Display.Title.Rent",
         Lists.newList(
-            LIGHT_YELLOW.enclose(BOLD.enclose("For Rent")),
-            LIGHT_GRAY.enclose(GENERIC_TIME),
-            LIGHT_GRAY.enclose(GENERIC_PRICE)
+            LIGHT_YELLOW.wrap(BOLD.wrap("For Rent")),
+            LIGHT_GRAY.wrap(CHEST_SHOP_RENT_DURATION),
+            LIGHT_GRAY.wrap(CHEST_SHOP_RENT_PRICE)
         ),
         "Sets hologram text for rentable shops."
     );
@@ -413,8 +413,8 @@ public class ChestConfig {
         (cfg, path, type) -> cfg.getString(path + "." + type),
         (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
         Map.of(
-            ShopType.ADMIN, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY))),
-            ShopType.PLAYER, LIGHT_GRAY.enclose(GREEN.enclose("B: ") + LIGHT_GREEN.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)))
+            ShopType.ADMIN, LIGHT_GRAY.wrap(GREEN.wrap("B: ") + LIGHT_GREEN.wrap(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY))),
+            ShopType.PLAYER, LIGHT_GRAY.wrap(GREEN.wrap("B: ") + LIGHT_GREEN.wrap(GENERIC_PRODUCT_PRICE.apply(TradeType.BUY)))
         ),
         "Sets hologram text to appear for '" + GENERIC_BUY + "' placeholder when buying option is available for displayed product.",
         "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.BUY),
@@ -426,8 +426,8 @@ public class ChestConfig {
         (cfg, path, type) -> cfg.getString(path + "." + type),
         (cfg, path, map) -> map.forEach((type, list) -> cfg.set(path + "." + type.name(), list)),
         Map.of(
-            ShopType.ADMIN, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL))),
-            ShopType.PLAYER, LIGHT_GRAY.enclose(RED.enclose("S: ") + LIGHT_RED.enclose(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
+            ShopType.ADMIN, LIGHT_GRAY.wrap(RED.wrap("S: ") + LIGHT_RED.wrap(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL))),
+            ShopType.PLAYER, LIGHT_GRAY.wrap(RED.wrap("S: ") + LIGHT_RED.wrap(GENERIC_PRODUCT_PRICE.apply(TradeType.SELL)))
         ),
         "Sets hologram text to appear for '" + GENERIC_SELL + "' placeholder when selling option is available for displayed product.",
         "Price placeholder: " + GENERIC_PRODUCT_PRICE.apply(TradeType.SELL),
