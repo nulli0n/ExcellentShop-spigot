@@ -8,6 +8,7 @@ import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.nexshop.util.UnitUtils;
 import su.nightexpress.nightcore.util.PDCUtil;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 
@@ -28,14 +29,14 @@ public abstract class PhysicalProductType implements PhysicalTyping {
 
     @Override
     public void delivery(@NotNull Inventory inventory, int count) {
-        int amount = this.getUnitAmount() * count;
-        ShopUtils.addItem(inventory, this.getItem(), amount);
+        //int amount = this.getUnitAmount() * count;
+        ShopUtils.addItem(inventory, this.getItem(), UnitUtils.unitsToAmount(this.getUnitAmount(), count));
     }
 
     @Override
     public void take(@NotNull Inventory inventory, int count) {
-        int amount = this.getUnitAmount() * count;
-        ShopUtils.takeItem(inventory, this::isItemMatches, amount);
+        //int amount = this.getUnitAmount() * count;
+        ShopUtils.takeItem(inventory, this::isItemMatches, UnitUtils.unitsToAmount(this.getUnitAmount(), count));
     }
 
     @Override

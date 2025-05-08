@@ -65,6 +65,8 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
         item.replacement(replacer -> {
             replacer
                 .replace(this.getLink(viewer).replacePlaceholders())
+                .replace(GENERIC_PAGE, () -> String.valueOf(viewer.getPage()))
+                .replace(GENERIC_PAGES, () -> String.valueOf(viewer.getPages()))
                 .replace(GENERIC_BALANCE, () -> currency.format(currency.getBalance(viewer.getPlayer())))
                 .replace(Placeholders.GENERIC_SELL_MULTIPLIER, () -> NumberUtil.format(VirtualShopModule.getSellMultiplier(viewer.getPlayer())));
         });
@@ -76,8 +78,8 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
         return Replacer.create()
             .replace(this.getLink(viewer).replacePlaceholders())
             .replacePlaceholderAPI(viewer.getPlayer())
-            .replace(GENERIC_PAGE, String.valueOf(viewer.getPage()))
-            .replace(GENERIC_PAGES, String.valueOf(viewer.getPages()))
+            .replace(GENERIC_PAGE, () -> String.valueOf(viewer.getPage()))
+            .replace(GENERIC_PAGES, () -> String.valueOf(viewer.getPages()))
             .apply(this.title);
     }
 
@@ -199,16 +201,6 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
 
     @Override
     public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
-        // TODO Put in wiki
-        config.options().setHeader(Lists.newList(
-            "=".repeat(50),
-            "Available Placeholders:",
-            "- " + GENERIC_BALANCE + " -> Player's balance for default Virtual Shop currency.",
-            "- " + GENERIC_SELL_MULTIPLIER + " -> Player's sell multiplier (set in VirtualShop settings.yml).",
-            "- " + URL_WIKI_PLACEHOLDERS + " -> Placeholders of: Shop, Virtual Shop.",
-            "=".repeat(50)
-        ));
-
         loader.addDefaultItem(NightItem.fromType(Material.GRAY_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setPriority(-1).setSlots(IntStream.range(0, 54).toArray()));
         //loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).toMenuItem().setSlots(IntStream.range(45, 54).toArray()));
 

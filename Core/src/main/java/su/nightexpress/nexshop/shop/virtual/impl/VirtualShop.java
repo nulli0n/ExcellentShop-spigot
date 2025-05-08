@@ -261,29 +261,46 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     @Nullable
-    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player) {
-//        if (player != null) {
-//            if (!this.module.isAvailable(player, false)) return null;
-//            if (!this.canAccess(player, false)) return null;
-//        }
+    public VirtualProduct getBestProduct(@NotNull ItemStack itemStack, @NotNull TradeType tradeType, @Nullable Player player) {
         if (!this.isTradeAllowed(tradeType)) return null;
 
-        var stream = this.getValidProducts().stream().filter(product -> {
-            if (!product.isTradeable(tradeType)) return false;
-            if (!(product.getType() instanceof PhysicalTyping typing)) return false;
-            if (!typing.isItemMatches(item)) return false;
-            if (product.isRotating() && !product.isInRotation()) return false;
+        int stackSize = itemStack.getAmount();
+        Set<VirtualProduct> candidates = new HashSet<>();
+
+        this.getValidProducts().forEach(product -> {
+            if (!product.isTradeable(tradeType)) return;
+            if (!(product.getType() instanceof PhysicalTyping typing)) return;
+            if (!typing.isItemMatches(itemStack)) return;
+            if (stackSize < product.getUnitAmount()) return;
+            if (product.isRotating() && !product.isInRotation()) return;
 
             if (player != null) {
-                return product.hasAccess(player) && product.getAvailableAmount(player, tradeType) != 0;
+                if (!product.hasAccess(player)) return;
+                if (product.getAvailableAmount(player, tradeType) == 0) return;
             }
 
-            return true;
+            candidates.add(product);
         });
 
-        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
+        return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
 
-        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
+//        var stream = this.getValidProducts().stream().filter(product -> {
+//            if (!product.isTradeable(tradeType)) return false;
+//            if (!(product.getType() instanceof PhysicalTyping typing)) return false;
+//            if (!typing.isItemMatches(itemStack)) return false;
+//            if (stackSize < product.getUnitAmount()) return false;
+//            if (product.isRotating() && !product.isInRotation()) return false;
+//
+//            if (player != null) {
+//                return product.hasAccess(player) && product.getAvailableAmount(player, tradeType) != 0;
+//            }
+//
+//            return true;
+//        });
+//
+//        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
+//
+//        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
     }
 
     @Override

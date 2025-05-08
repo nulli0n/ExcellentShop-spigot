@@ -1,9 +1,11 @@
 package su.nightexpress.nexshop.shop.virtual;
 
+import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.EconomyBridge;
@@ -13,6 +15,7 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.ShopModule;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
+import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.shop.impl.AbstractModule;
@@ -32,10 +35,12 @@ import su.nightexpress.nexshop.shop.virtual.menu.SellMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.nexshop.util.UnitUtils;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
+import su.nightexpress.nightcore.util.placeholder.Replacer;
 import su.nightexpress.nightcore.util.text.tag.Tags;
 
 import java.io.File;
@@ -404,60 +409,44 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         return shops.stream().filter(shop -> this.isAvailable(player, false) && shop.canAccess(player, false)).toList();
     }
 
-//    @Nullable
-//    @Deprecated
-//    public VirtualProduct getBestProduct(@NotNull ItemStack item, @NotNull TradeType type, @Nullable VirtualShop shop, @Nullable Player player) {
-//        return this.getBestProductFor(item, type, shop, player);
-//        //return shop == null ? this.getBestProductFor(item, type, player) : shop.getBestProduct(item, type, player);
-//    }
-
     @Nullable
-    public VirtualProduct getBestProductFor(@NotNull ItemStack item, @NotNull TradeType tradeType) {
-        return this.getBestProductFor(item, tradeType, null, null);
+    public VirtualProduct getBestProductFor(@NotNull ItemStack itemStack, @NotNull TradeType tradeType) {
+        return this.getBestProductFor(itemStack, tradeType, null, null);
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NotNull ItemStack item, @NotNull TradeType type, @Nullable VirtualShop shop) {
-        return this.getBestProductFor(item, type, shop, null);
-        //return this.getBestProduct(item, type, shop, null);
+    public VirtualProduct getBestProductFor(@NotNull ItemStack itemStack, @NotNull TradeType type, @Nullable VirtualShop shop) {
+        return this.getBestProductFor(itemStack, type, shop, null);
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable Player player) {
-        return this.getBestProductFor(item, tradeType, null, player);
-
-//        Set<VirtualProduct> products = new HashSet<>();
-//        this.getShops().forEach(shop -> {
-//            VirtualProduct best = shop.getBestProduct(item, tradeType, player);
-//            if (best != null) {
-//                products.add(best);
-//            }
-//        });
-//
-//        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
-//        return (tradeType == TradeType.BUY ? products.stream().min(comparator) : products.stream().max(comparator)).orElse(null);
+    public VirtualProduct getBestProductFor(@NotNull ItemStack itemStack, @NotNull TradeType tradeType, @Nullable Player player) {
+        return this.getBestProductFor(itemStack, tradeType, null, player);
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NotNull ItemStack item, @NotNull TradeType tradeType, @Nullable VirtualShop shop, @Nullable Player player) {
+    public VirtualProduct getBestProductFor(@NotNull ItemStack itemStack, @NotNull TradeType tradeType, @Nullable VirtualShop shop, @Nullable Player player) {
         // No product if player is in bad world/gamemode.
         if (player != null && !this.isAvailable(player, false)) return null;
 
         Set<VirtualShop> shopsLookup = shop == null ? this.getShops() : Lists.newSet(shop);
         Set<VirtualProduct> candidates = new HashSet<>();
+        int stackSize = itemStack.getAmount();
 
         shopsLookup.forEach(shopLookup -> {
             // No product if player can't access a shop.
             if (player != null && !shopLookup.canAccess(player, false)) return;
 
-            VirtualProduct best = shopLookup.getBestProduct(item, tradeType, player);
+            VirtualProduct best = shopLookup.getBestProduct(itemStack, tradeType, player);
             if (best != null) {
                 candidates.add(best);
             }
         });
 
-        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player));
-        return (tradeType == TradeType.BUY ? candidates.stream().min(comparator) : candidates.stream().max(comparator)).orElse(null);
+        return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
+
+//        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
+//        return (tradeType == TradeType.BUY ? candidates.stream().min(comparator) : candidates.stream().max(comparator)).orElse(null);
     }
 
     public boolean createShop(@NotNull Player player, @NotNull String name) {
@@ -475,7 +464,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         File file = new File(this.getAbsolutePath() + DIR_SHOPS + id, VirtualShop.FILE_NAME);
         VirtualShop shop = new VirtualShop(plugin, this, file, id);
 
-        shop.setName(Tags.LIGHT_YELLOW.enclose(Tags.BOLD.enclose(StringUtil.capitalizeUnderscored(id))));
+        shop.setName(Tags.LIGHT_YELLOW.wrap(Tags.BOLD.wrap(StringUtil.capitalizeUnderscored(id))));
         shop.setDescription(new ArrayList<>());
         shop.setIcon(NightItem.asCustomHead("34ccb52750e97e830aebfa8a21d5da0d364d0fdad9fb0cc220fe2ca8411842c3"));
         shop.setDefaultLayout(Placeholders.DEFAULT);
@@ -696,63 +685,107 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     }
 
     public void sellAll(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop, boolean silent) {
-        Map<Currency, Double> profitMap = new HashMap<>();
-        Map<ItemStack, Transaction> resultMap = new HashMap<>();
-        Map<VirtualProduct, Integer> productAmountMap = new HashMap<>();
-
-        for (ItemStack item : inventory.getContents()) {
-            if (item == null || item.getType().isAir()) continue;
-
-            VirtualProduct product = this.getBestProductFor(item, TradeType.SELL, shop, player);
-            if (product == null) continue;
-
-            int amount = item.getAmount();
-            int has = productAmountMap.computeIfAbsent(product, k -> 0);
-
-            productAmountMap.put(product, has + amount);
-        }
-
-        productAmountMap.forEach((product, amount) -> {
-            int left = amount % product.getUnitAmount();
-            int units = (amount - left) / product.getUnitAmount();
-
-            VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, false);
-            preparedProduct.setUnits(units);
-            preparedProduct.setInventory(inventory);
-            preparedProduct.setSilent(silent);
-
-            Transaction result = preparedProduct.trade();
-            if (result.getResult() == Transaction.Result.SUCCESS) {
-                ItemStack copy = new ItemStack(product.getPreview());
-                copy.setAmount(amount);
-
-                Currency currency = result.getProduct().getCurrency();
-                double has = profitMap.getOrDefault(currency, 0D) + result.getPrice();
-                profitMap.put(currency, has);
-                resultMap.put(copy, result);
-            }
-        });
-        if (profitMap.isEmpty()) return;
-
-        String total = profitMap.entrySet().stream()
-            .map(entry -> entry.getKey().format(entry.getValue()))
-            .collect(Collectors.joining(", "));
+        SellResult sellResult = this.bulkSell(player, inventory, shop);
 
         if (!silent) {
+            if (sellResult.isEmpty()) {
+                VirtualLang.SELL_MENU_NOTHING_RESULT.getMessage().send(player);
+                VirtualLang.SELL_MENU_NOTHING_DETAILS.getMessage().send(player);
+                return;
+            }
+
+            String total = sellResult.getTotalIncome();
+
             VirtualLang.SELL_MENU_SALE_RESULT.getMessage().send(player, replacer -> replacer.replace(Placeholders.GENERIC_TOTAL, total));
 
             VirtualLang.SELL_MENU_SALE_DETAILS.getMessage().send(player, replacer -> replacer
                 .replace(Placeholders.GENERIC_TOTAL, total)
                 .replace(Placeholders.GENERIC_ENTRY, list -> {
-                    resultMap.forEach((item, result) -> {
-                        list.add(VirtualLang.SELL_MENU_SALE_ENTRY.getString()
-                            .replace(Placeholders.GENERIC_ITEM, ItemUtil.getSerializedName(item))
-                            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(item.getAmount()))
-                            .replace(Placeholders.GENERIC_PRICE, result.getProduct().getCurrency().format(result.getPrice()))
+                    sellResult.getTransactions().forEach(transaction -> {
+                        Product product = transaction.getProduct();
+
+                        list.add(Replacer.create()
+                            .replace(Placeholders.GENERIC_ITEM, () -> ItemUtil.getSerializedName(product.getPreview()))
+                            .replace(Placeholders.GENERIC_AMOUNT, () -> NumberUtil.format(transaction.getAmount()))
+                            .replace(Placeholders.GENERIC_PRICE, () -> transaction.getCurrency().format(transaction.getPrice()))
+                            .replace(Placeholders.SHOP_NAME, () -> product.getShop().getName())
+                            .apply(VirtualLang.SELL_MENU_SALE_ENTRY.getString())
                         );
                     });
                 })
             );
         }
+    }
+
+    @NotNull
+    public SellResult bulkSell(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop) {
+        SellResult sellResult = new SellResult();
+
+        Map<VirtualProduct, Integer> products = new HashMap<>();
+        Map<ItemStack, Integer> distinctItems = new HashMap<>(); // Distinct itemStack map to find the best products more effectively.
+
+        for (ItemStack itemStack : inventory.getContents()) {
+            if (itemStack == null || itemStack.getType().isAir()) continue;
+
+            if (VirtualConfig.SELL_CONTAINERS_CONTENT_INCLUDED.get()) {
+                if (itemStack.hasItemMeta() && itemStack.getItemMeta() instanceof BlockStateMeta stateMeta) {
+                    if (stateMeta.getBlockState() instanceof Container container) {
+                        // Do not handle stacked containers.
+                        // Because of complex selling process (stocks, limits, dynamic prices, etc.) it's a mandatory to handle each item stack individually.
+                        // Which means that each container's inventory must be handled individually as well.
+                        // Which means that the ItemStack of said containers must be split to handle each container with it's inventory invididually.
+                        // Which may result in theory in a up to 64 different ItemStacks split from said container, that should be given back to a player.
+                        // So it seems more safer to disable this behavior.
+                        if (itemStack.getAmount() == 1) {
+                            sellResult.inherit(this.bulkSell(player, container.getInventory(), shop));
+                            stateMeta.setBlockState(container);
+                            itemStack.setItemMeta(stateMeta);
+                        }
+                        continue;
+                    }
+                }
+            }
+
+            ItemStack copy = new ItemStack(itemStack);
+            copy.setAmount(1);
+
+            int has = distinctItems.getOrDefault(copy, 0);
+            distinctItems.put(copy, has + itemStack.getAmount());
+        }
+
+        distinctItems.forEach((itemStack, amount) -> {
+            ItemStack copy = new ItemStack(itemStack);
+            copy.setAmount(amount);
+
+            VirtualProduct product = this.getBestProductFor(copy, TradeType.SELL, shop, player);
+            if (product == null) return;
+
+            int has = products.computeIfAbsent(product, k -> 0);
+
+            products.put(product, has + amount);
+        });
+
+        sellResult.inherit(this.bulkSell(player, inventory, products));
+
+        return sellResult;
+    }
+
+    @NotNull
+    private SellResult bulkSell(@NotNull Player player, @NotNull Inventory inventory, @NotNull Map<VirtualProduct, Integer> products) {
+        SellResult result = new SellResult();
+
+        products.forEach((product, amount) -> {
+            int units = UnitUtils.amountToUnits(product, amount);
+
+            VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, false);
+            preparedProduct.setUnits(units);
+            preparedProduct.setInventory(inventory);
+            preparedProduct.setSilent(true);
+
+            Transaction transaction = preparedProduct.trade();
+            result.addTransaction(product, amount, transaction);
+        });
+
+        return result;
     }
 }

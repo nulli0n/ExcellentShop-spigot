@@ -60,7 +60,7 @@ public class VirtualLocales {
         .name("Menu Slot")
         .current("Current", VIRTUAL_SHOP_MENU_SLOT)
         .emptyLine()
-        .text("Sets shop position for the " + LIGHT_YELLOW.enclose("/shop") + " GUI.")
+        .text("Sets shop position for the " + LIGHT_YELLOW.wrap("/shop") + " GUI.")
         .emptyLine()
         .leftClick("change")
         .rightClick("disable")
@@ -109,7 +109,7 @@ public class VirtualLocales {
 
     public static final LangUIButton SHOP_EDIT_ALIASES = LangUIButton.builder(PREFIX + "Shop.Aliases", "Command Aliases")
         .current(VIRTUAL_SHOP_ALIASES)
-        .description("Provides direct shop access with", "listed command aliases.", "", LIGHT_RED.enclose("Requires module reload."))
+        .description("Provides direct shop access with", "listed command aliases.", "", LIGHT_RED.wrap("Requires module reload."))
         .leftClick("add alias")
         .rightClick("remove all")
         .build();
@@ -228,10 +228,10 @@ public class VirtualLocales {
         .name("Rotation Type")
         .current("Current", ROTATION_TYPE)
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Interval:")))
+        .text(LIGHT_YELLOW.wrap(BOLD.wrap("Interval:")))
         .text("Performs rotations every X seconds.")
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Fixed:")))
+        .text(LIGHT_YELLOW.wrap(BOLD.wrap("Fixed:")))
         .text("Performs rotations at given times.")
         .emptyLine()
         .click("toggle")
@@ -255,14 +255,14 @@ public class VirtualLocales {
 
     public static final LangItem ROTATION_EDIT_SLOTS = LangItem.builder(PREFIX + "Rotation.Slots")
         .name("Used Slots")
-        .text("This rotation currently", "uses " + LIGHT_YELLOW.enclose(ROTATION_SLOTS_AMOUNT) + " slot(s).")
+        .text("This rotation currently", "uses " + LIGHT_YELLOW.wrap(ROTATION_SLOTS_AMOUNT) + " slot(s).")
         .emptyLine()
         .click("navigate")
         .build();
 
     public static final LangItem ROTATION_EDIT_PRODUCTS = LangItem.builder(PREFIX + "Rotation.Items")
         .name("Products")
-        .text("This rotation currently", "contains " + LIGHT_YELLOW.enclose(ROTATION_ITEMS_AMOUNT) + " item(s).")
+        .text("This rotation currently", "contains " + LIGHT_YELLOW.wrap(ROTATION_ITEMS_AMOUNT) + " item(s).")
         .emptyLine()
         .click("navigate")
         .build();
@@ -276,26 +276,26 @@ public class VirtualLocales {
         .build();
 
     public static final LangItem ROTATION_FREE_SLOT = LangItem.builder(PREFIX + "Rotation.FreeSlot")
-        .name(GREEN.enclose(BOLD.enclose("Free Slot")))
+        .name(GREEN.wrap(BOLD.wrap("Free Slot")))
         .text("This slot can be used", "for rotations.")
         .emptyLine()
         .click("select")
         .build();
 
     public static final LangItem ROTATION_SELECTED_SLOT = LangItem.builder(PREFIX + "Rotation.SelectedSlot")
-        .name(CYAN.enclose(BOLD.enclose("Selected Slot")))
+        .name(CYAN.wrap(BOLD.wrap("Selected Slot")))
         .text("This slot is used", "for rotations.")
         .emptyLine()
         .click("unselect")
         .build();
 
     public static final LangItem ROTATION_OTHER_SLOT = LangItem.builder(PREFIX + "Rotation.OtherSlot")
-        .name(RED.enclose(BOLD.enclose("Other Rotation's Slot")))
+        .name(RED.wrap(BOLD.wrap("Other Rotation's Slot")))
         .text("This slot is used by", "other rotation.")
         .build();
 
     public static final LangItem ROTATION_ITEM_OBJECT = LangItem.builder(PREFIX + "Rotation.Item.Object")
-        .name(PRODUCT_PREVIEW_NAME + RESET.getBracketsName() + GRAY.enclose(" (ID: " + WHITE.enclose(PRODUCT_ID) + ")"))
+        .name(PRODUCT_PREVIEW_NAME + RESET.getBracketsName() + GRAY.wrap(" (ID: " + WHITE.wrap(PRODUCT_ID) + ")"))
         .current("Weight", GENERIC_WEIGHT)
         .emptyLine()
         .leftClick("set weight")
@@ -349,33 +349,33 @@ public class VirtualLocales {
         .build();
 
     public static final LangItem PRODUCT_FREE_SLOT = LangItem.builder(PREFIX + "Product.FreeSlot")
-        .name(GREEN.enclose(BOLD.enclose("Free Slot")))
+        .name(GREEN.wrap(BOLD.wrap("Free Slot")))
         .emptyLine()
-        .text(LIGHT_CYAN.enclose(BOLD.enclose("Quick Creation:")))
+        .text(LIGHT_CYAN.wrap(BOLD.wrap("Quick Creation:")))
         .text("Simply drag'n'drop item here!")
         .emptyLine()
-        .text(LIGHT_PURPLE.enclose(BOLD.enclose("Manual Creation:")))
+        .text(LIGHT_PURPLE.wrap(BOLD.wrap("Manual Creation:")))
         .text("Click with empty cursor to", "open creation wizard!")
         .build();
 
     public static final LangItem PRODUCT_ROTATION_SLOT = LangItem.builder(PREFIX + "Product.RotationSlot")
-        .name(RED.enclose(BOLD.enclose("Rotation Slot")))
+        .name(RED.wrap(BOLD.wrap("Rotation Slot")))
         .text("Slot reserved for", "rotating products.")
         .build();
 
     public static final LangItem PRODUCT_RESERVED_SLOT = LangItem.builder(PREFIX + "Product.ReservedSlot")
-        .name(RED.enclose(BOLD.enclose("Reserved Slot")))
+        .name(RED.wrap(BOLD.wrap("Reserved Slot")))
         .text("This slot is occupied by a shop product.")
         .build();
 
     public static final LangItem PRODUCT_CREATION_INFO = builder(PREFIX + "Product.Creation.Info")
         .name("Creation Wizard")
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Step #1")))
+        .text(LIGHT_YELLOW.wrap(BOLD.wrap("Step #1")))
         .text("Click an item in your inventory")
         .text("to select it as a base for new product.")
         .emptyLine()
-        .text(LIGHT_YELLOW.enclose(BOLD.enclose("Step #2")))
+        .text(LIGHT_YELLOW.wrap(BOLD.wrap("Step #2")))
         .text("Select and click product type button")
         .text("to create a new product.")
         .build();
@@ -384,10 +384,10 @@ public class VirtualLocales {
         .name("Item Product")
         .text("Gives item(s) directly to player's", "inventory when purchased.")
         .emptyLine()
-        .text(GREEN.enclose("✔") + " Custom Items")
-        .text(GREEN.enclose("✔") + " NBT Support")
-        .text(GREEN.enclose("✔") + " Placeholders")
-        .text(GREEN.enclose("✔") + " Sellable")
+        .text(GREEN.wrap("✔") + " Custom Items")
+        .text(GREEN.wrap("✔") + " NBT Support")
+        .text(GREEN.wrap("✔") + " Placeholders")
+        .text(GREEN.wrap("✔") + " Sellable")
         .emptyLine()
         .click("create")
         .build();
@@ -396,11 +396,11 @@ public class VirtualLocales {
         .name("Command Product")
         .text("Runs specified command(s) with", "placeholders when purchased.")
         .emptyLine()
-        .text(GREEN.enclose("✔") + " Custom Name")
-        .text(GREEN.enclose("✔") + " Custom Lore")
-        .text(GREEN.enclose("✔") + " Placeholders")
-        .text(GREEN.enclose("✔") + " Unlimited Commands")
-        .text(RED.enclose("✘") + " Unsellable")
+        .text(GREEN.wrap("✔") + " Custom Name")
+        .text(GREEN.wrap("✔") + " Custom Lore")
+        .text(GREEN.wrap("✔") + " Placeholders")
+        .text(GREEN.wrap("✔") + " Unlimited Commands")
+        .text(RED.wrap("✘") + " Unsellable")
         .emptyLine()
         .click("create")
         .build();
@@ -476,8 +476,8 @@ public class VirtualLocales {
         .emptyLine()
         .text("Runs listed command when", "player purchases this item.")
         .emptyLine()
-        .current("Use " + LIGHT_YELLOW.enclose(PLAYER_NAME) + " for player name.")
-        .current(LIGHT_YELLOW.enclose(Plugins.PLACEHOLDER_API) + " supported.")
+        .current("Use " + LIGHT_YELLOW.wrap(PLAYER_NAME) + " for player name.")
+        .current(LIGHT_YELLOW.wrap(Plugins.PLACEHOLDER_API) + " supported.")
         .emptyLine()
         .leftClick("add command")
         .rightClick("remove all")
@@ -485,7 +485,7 @@ public class VirtualLocales {
 
     public static final LangItem PRODUCT_EDIT_STOCK = LangItem.builder(PREFIX + "Product.Stock.Category")
         .name("Global & Player Stock")
-        .text("Controls product limits on", LIGHT_YELLOW.enclose("per server") + " and " + LIGHT_YELLOW.enclose("per player"), "basis.")
+        .text("Controls product limits on", LIGHT_YELLOW.wrap("per server") + " and " + LIGHT_YELLOW.wrap("per player"), "basis.")
         .emptyLine()
         .click("navigate")
         .build();
@@ -594,7 +594,7 @@ public class VirtualLocales {
         .current("Times", Placeholders.DISCOUNT_CONFIG_TIMES)
         .emptyLine()
         .leftClick("edit")
-        .shiftRight("delete " + LIGHT_RED.enclose("(no undo)"))
+        .shiftRight("delete " + LIGHT_RED.wrap("(no undo)"))
         .build();
 
     public static final LangItem DISCOUNT_AMOUNT = LangItem.builder(PREFIX + "Discount.Amount")

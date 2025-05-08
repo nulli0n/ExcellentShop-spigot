@@ -16,8 +16,10 @@ import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.text.NightMessage;
@@ -84,6 +86,14 @@ public class ShopUtils {
     @NotNull
     private static String addCount(@NotNull String id, int count) {
         return count == 0 ? id : id + "_" + count;
+    }
+
+    @Nullable
+    public static VirtualProduct getBestProduct(@NotNull Collection<VirtualProduct> products, @NotNull TradeType tradeType, int stackSize, @Nullable Player player) {
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
+        Stream<VirtualProduct> stream = products.stream();
+
+        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
     }
 
     @NotNull

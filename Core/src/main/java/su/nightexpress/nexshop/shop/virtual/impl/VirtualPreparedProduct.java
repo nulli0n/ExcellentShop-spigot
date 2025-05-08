@@ -46,9 +46,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
             }
 
             shop.onTransaction(event);
-            //shop.getStock().onTransaction(event);
-
-            // Process transaction
             product.delivery(this.getInventory(), transaction.getUnits());
             product.getCurrency().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);

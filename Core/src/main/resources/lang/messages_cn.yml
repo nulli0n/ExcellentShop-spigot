@@ -1,5 +1,5 @@
-# Plugin Version 4.10.0
-# 插件版本 4.10.0
+# Plugin Version 4.15.0
+# 插件版本 4.15.0
 Command:
   Argument:
     Name:
@@ -10,10 +10,10 @@ Command:
     Desc: 货币管理
     Give:
       Desc: 给予玩家货币
-      Done: "&7已给予 &e%amount% &b%currency_name% &7给 &a%player_name%"
+      Done: "&7已给予 &a%player_name% &6%amount%%currency_name%"
     Take:
       Desc: 从玩家处取走货币
-      Done: "&7已从 &a%player_name% &7处取走 &e%amount% &b%currency_name%"
+      Done: "&7已从 &a%player_name% &7处取走 &6%amount%%currency_name%"
     Create:
       Desc: 创建一个物品货币
       Done:
@@ -26,7 +26,7 @@ Module:
   Command:
     Reloaded: "&a%name% 已重新加载！"
     Reload:
-      Desc: "重新加载模块"
+      Desc: 重新加载模块
 Error:
   Currency:
     Invalid: "&c无效的货币！"
@@ -35,38 +35,42 @@ Shop:
     Error:
       Unbuyable:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7该商品目前无法购买！"
+        - "&c抱歉！&7该商品目前无法购买！"
       Unsellable:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7该商品目前无法出售！"
+        - "&c抱歉！&7该商品目前无法出售！"
       OutOfStock:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7该商品缺货！"
+        - "&c抱歉！&7该商品缺货！"
       OutOfSpace:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7商店空间已满！"
+        - "&c抱歉！&7商店空间已满！"
       OutOfFunds:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7商店余额不足！"
+        - "&c抱歉！&7商店余额不足！"
       FullStock:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7该商品库存已满！"
+        - "&c抱歉！&7该商品库存已满！"
       FullInventory:
         - <sound:'entity_villager_no'>
-        - "&c<b>抱歉！ </b>&7购买前你需要清理你的背包！"
+        - "&c抱歉！&7购买前你需要清理你的背包！"
       TooExpensive:
         - <output:'titles:15:60:15'><sound:'block_anvil_place'>
-        - "&c<b>太贵了！</b>"
+        - "&c太贵了！"
         - "&7你需要 &6%price%&7！"
       NotEnoughItems:
         - <output:'titles:15:60:15'><sound:'block_anvil_place'>
-        - "&c<b>物品不足！</b>"
-        - "&7你需要 &b%item% &7x &e%amount% &7！"
+        - "&c物品不足！"
+        - "&7你需要 &b%item% &8x &e%amount%"
+      InvalidCartUI:
+        - <sound:'entity_villager_no'>
+        - "&c无法打开购买菜单: &7购物车UI未找到"
   Cart:
     EnterAmount:
       - <output:'titles:20:1200:20'>
-      - "&a<b><自定义数量></b>"
+      - "&a<自定义数量>"
       - "&7输入数量"
+    CustomAmount: "&7输入你的数字"
 Editor:
   Price:
     Float:
@@ -80,11 +84,35 @@ Editor:
       Day: "&7输入 &b[英文星期名]"
       Time: "&7输入 &b[小时:分钟:秒]"
       Seconds: "&7输入 &b[秒数]"
+    BrokenItem:
+      Name: "&c< 无效的物品 >"
+      Lore:
+        - "&7物品 标签/ID 损坏或无效"
   Product:
     Enter:
       Price: "&7输入 &b[价格]"
       UniPrice: "&7输入 &b[最小] [最大]"
       Currency: "&7输入 &b[货币标识符]"
+  Title:
+    Shop:
+      List: "&8虚拟商店编辑器"
+      Settings: "&8商店设置: %shop_name%"
+      Layouts: "&8商店布局: %shop_name%"
+      Rotations: "&8商店轮换规则"
+      Rotation:
+        Options: "&8轮换选项"
+        Times: "&8轮换时间表"
+        Items: "&8轮换商品列表"
+        ItemSelection: "&8选择商品..."
+        SlotSelection: "&8选择槽位..."
+    Product:
+      Creation: "&8商品创建向导"
+      Settings: "&8商品设置"
+      Stocks: "&8商品库存设置"
+      Price: "&8商品价格设置"
+    Products:
+      Normal: "&8常规商品列表"
+      Rotating: "&8轮换商品列表"
 Days:
   MONDAY: 星期一
   TUESDAY: 星期二
@@ -123,126 +151,141 @@ VirtualShop:
       Done:
         Others: "&7为 &a%player_name% &7打开了出售菜单"
     SellAll:
-      Desc: 快速出售库存中的所有物品
+      Desc: 快速出售背包中的所有物品
       Done:
         Others: "&7强制玩家 &a%player_name% &7出售所有物品"
     SellHand:
       Desc: 快速出售手中物品
       Done:
         Others: "&7强制玩家 &a%player_name% &7出售手中物品"
+    SellHandAll:
+      Desc: 快速出售全部手持物品
+    Rotate:
+      Desc: 强制轮换指定的商店
+      Done: "&7强制轮换 &b%shop_name% &7商店"
+    ShopAlias:
+      Desc: 打开 %shop_name% 商店
   Shop:
     Rotation:
       Notify:
         - <noprefix>
-        - " "
+        - ""
         - "&e%amount% &7新物品刚刚出现在 &b%shop_name% &7商店中！"
-        - "&7点击 <click:run_command:'/shop %shop_id%'><hover:show_text:'&7点击以打开商店！'>&b<b>这里</b></hover></click> &7打开商店！"
+        - "&7点击 <click:run_command:'/shop %shop_id%'><hover:show_text:'&7点击以打开商店！'>&b这里</hover></click> &7打开商店！"
+        - ""
+      Update:
+        - <noprefix>
+        - " "
+        - "&7新物品刚刚出现在 &b%shop_name% &7商店中"
+        - "&7点击 <click:run_command:'/shop %shop_id%'><hover:show_text:'&7点击以打开商店'>&b这里</hover></click> &7打开商店"
         - " "
     Error:
       BadWorld: "&c你不能在这个世界使用商店！"
       BadGamemode: "&c你不能在当前游戏模式中使用商店！"
-      InvalidLayout: "&7无法打开商店 &b%shop_name%&7: &c无效的商店布局！"
+      InvalidLayout: "&c无法打开 &b%shop_name% &c商店: &7无效的商店布局！"
       Invalid: "&c无效的商店！"
+    Create:
+      Error:
+        Exist: "&c已经存在相同名字的商店！"
+        BadName: "&c只允许使用拉丁字母和数字！"
   Product:
     Purchase:
       Sell:
         - <output:'titles:15:60:15'><sound:'entity_experience_orb_pickup'>
-        - "&a<b>成功出售！</b>"
-        - "&7你以 &6%price% &7的价格出售了 &b%item% &7x &e%amount%"
+        - "&a成功出售！"
+        - "&7你以 &6%price% &7的价格出售了 &b%item% &8x &e%amount%"
       Buy:
         - <output:'titles:15:60:15'><sound:'entity_experience_orb_pickup'>
-        - "&a<b>成功购买！</b>"
-        - "&7你以 &6%price% &7的价格购买了 &b%item% &7x &e%amount%"
+        - "&a成功购买！"
+        - "&7你以 &6%price% &7的价格购买了 &b%item% &8x &e%amount%"
   SellMenu:
     SaleResult:
       - <output:'titles:15:60:15'><sound:'entity_experience_orb_pickup'>
-      - "&b<b>物品已出售！</b>"
+      - "&a物品已出售！"
       - "&6+%total%"
     SaleDetails:
       - <noprefix>
-      - " "
-      - "&b<b>出售详情:</b>"
+      - ""
+      - "&b出售详情:"
       - "%entry%"
-      - " "
+      - ""
       - "&7总计: &6%total%"
-      - " "
-    SaleEntry: "&7%item% x &e%amount%&7: &6%price%"
+      - ""
+    SaleEntry: "&7%item% &8x &e%amount%&7: &6%price%"
   Price:
     AverageDynamics:
       Up: "&a↑ &e%value%%"
       Down: "&c↓ &e%value%%"
   Editor:
     Product:
-      NoRankRequirements: 无需等级要求！
-      NoPermissionRequirements: 无需权限要求！
+      NoRankRequirements: 没有等级要求！
+      NoPermissionRequirements: 没有权限要求！
       Object:
         Static2:
-          Name: "&b<b>%product_preview_name%</b>"
+          Name: "&b%product_preview_name%"
           Lore:
-            - "&b| &7处理: %product_handler%"
-            - "&b| &7货币: %product_currency%"
-            - "&b| &7价格类型: %product_price_type%"
-            - "&e| &7购买价格: %product_price_buy%"
-            - "&e| &7出售价格: %product_price_sell%"
+            - "&7处理: &b%product_handler%"
+            - "&7货币: &b%product_currency%"
+            - "&7价格类型: &b%product_price_type%"
+            - "&7购买价格: &6%product_price_buy%"
+            - "&7出售价格: &6%product_price_sell%"
             - ""
             - "&7你可以自由地将此商品在槽位、页"
             - "&7面和商店之间移动！"
             - ""
-            - "&b| &7左键点击 &b编辑"
+            - "&e| &7左键点击 &e编辑"
             - "&a| &7右键点击 &a选择"
             - "&c| &7[Q] 键 &c删除 &7(&c无法撤销&7)"
         Rotating2:
-          Name: "&b<b>%product_preview_name%</b>"
+          Name: "&b%product_preview_name%"
           Lore:
-            - "&b| &7轮换概率: %product_rotation_chance%%"
-            - "&b| &7货币: %product_currency%"
-            - "&e| &7购买价格: %product_price_buy%"
-            - "&e| &7出售价格: %product_price_sell%"
+            - "&7轮换概率: &e%product_rotation_chance%%"
+            - "&7货币: &b%product_currency%"
+            - "&7购买价格: &6%product_price_buy%"
+            - "&7出售价格: &6%product_price_sell%"
             - ""
-            - "&b| &7左键点击 &e编辑"
-            - "&a| &7右键点击 &e选择"
+            - "&e| &7左键点击 &e编辑"
+            - "&a| &7右键点击 &a选择"
             - "&c| &7[Q] 键 &c删除 &7(&c无法撤销&7)"
       FreeSlot:
-        Name: "&a<b>空闲槽位</b>"
+        Name: "&a空闲槽位"
         Lore:
-          - ""
-          - "&b<b>物品商品:</b>"
+          - "&b物品商品:"
           - "&7将物品放在光标上点击以创建 &a物"
           - "&a品商品"
           - ""
           - "&7按住 &bSHIFT &7以绕过自定义物品检测"
           - ""
-          - "&b<l><b>命令商品:</b></l>"
-          - "&7空光标点击以创建 &b<l>命令</l> &7商品"
+          - "&b命令商品:"
+          - "&7空光标点击以创建 &b命令 &7商品"
       ReservedSlot:
-        Name: "&c<b>保留槽位</b>"
+        Name: "&c无效槽位"
         Lore:
           - "&7此槽位被商店商品占用"
       Item:
-        Name: "&b<b>实际物品</b>"
+        Name: "&b真实物品"
         Lore:
-          - "&7这是玩家: "
-          - "&b| &7购买时获得的物品"
-          - "&b| &7出售时必须拥有的物品"
-          - ""
-          - "&a| &7拖放 &a替换"
-          - "&b| &7右键点击 &b获得副本"
+          - "&7这是玩家购买时获得的物品，也是"
+          - "&7出售时必须拥有的物品"
           - ""
           - "&7按住 &bSHIFT &7以绕过物品检测"
+          - ""
+          - "&e| &7拖放 &e替换"
+          - "&a| &7右键点击 &a获得 &7副本"
       Preview:
-        Name: "&b<b>预览物品</b>"
+        Name: "&b预览物品"
         Lore:
           - "&7此物品仅作为预览展示使用"
           - ""
           - "&7可以随意 &b重命名 &7它，添加 &b描述 "
           - "&7和 &b附魔！"
           - ""
-          - "&a| &7拖放 &a替换"
-          - "&b| &7右键点击 &b获得副本"
+          - "&e| &7拖放 &e替换"
+          - "&a| &7右键点击 &a获得 &7副本"
       RespectItemMeta:
-        Name: "&b<b>尊重物品元数据</b>"
+        Name: "&b尊重物品元数据"
         Lore:
-          - "&a| &7启用: %product_item_meta_enabled%"
+          - "&7启用: &b%product_item_meta_enabled%"
           - ""
           - "&7当 &a启用 &7时，玩家只能出售与实际"
           - "&7物品完全相同数据的物品"
@@ -252,70 +295,70 @@ VirtualShop:
           - ""
           - "&a| &7左键点击 &a切换"
       PriceManager:
-        Name: "&b<b>价格管理器</b>"
+        Name: "&b价格管理器"
         Lore:
-          - "&b| &7价格类型: %product_price_type%"
-          - "&b| &7货币: %product_currency%"
-          - "&e| &7购买价格: %product_price_buy%"
-          - "&e| &7出售价格: %product_price_sell%"
+          - "&7价格类型: &b%product_price_type%"
+          - "&7货币: &b%product_currency%"
+          - "&7购买价格: &6%product_price_buy%"
+          - "&7出售价格: &6%product_price_sell%"
           - ""
           - "&7设置商品货币和价格"
           - ""
           - "&a| &7左键点击 &a编辑"
           - "&e| &7[Q] 键 &e刷新"
       RanksRequired:
-        Name: "&b<b>所需等级</b>"
+        Name: "&b所需等级"
         Lore:
-          - "&7%product_allowed_ranks%"
+          - "&d%product_allowed_ranks%"
           - ""
           - "&7只有列出等级(组)的玩家才能访"
           - "&7问此商品"
           - ""
-          - "&a| &7左键点击 &a添加等级"
-          - "&c| &7右键点击 &c移除所有并禁用"
+          - "&a| &7左键点击 &a添加 &7等级"
+          - "&c| &7右键点击 &c移除 &7所有并禁用"
       PermissionsRequired:
-        Name: "&b<b>所需权限</b>"
+        Name: "&b所需权限"
         Lore:
-          - "&7%product_required_permissions%"
+          - "&d%product_required_permissions%"
           - ""
           - "&7只有拥有列出权限的玩家才能访问"
           - "&7此商品"
           - ""
-          - "&a| &7SHIFT+左键点击 &a添加权限"
-          - "&c| &7SHIFT+右键点击 &c移除所有并禁用"
+          - "&a| &7SHIFT+左键点击 &a添加 &7权限"
+          - "&c| &7SHIFT+右键点击 &c移除 &7所有并 &c禁用"
       Commands:
-        Name: "&b<b>命令</b>"
+        Name: "&b命令"
         Lore:
-          - "&7%product_commands%"
+          - "&d%product_commands%"
           - ""
           - "&7购买商品时运行的命令"
           - ""
-          - "&b<b>占位符:</b>"
-          - "&a| &7%player_name%: 玩家(购买者)姓名"
-          - "&b| &7PlaceholderAPI: 全部"
+          - "&b占位符:"
+          - "&7%player_name%: 玩家(购买者)姓名"
+          - "&7PlaceholderAPI: 全部"
           - ""
-          - "&a| &7左键点击 &a添加命令"
-          - "&c| &7右键点击 &c移除所有命令"
+          - "&a| &7左键点击 &a添加 &7命令"
+          - "&c| &7右键点击 &c移除 &7所有命令"
       Rotation:
         Chance:
-          Name: "&b<b>权重</b>"
+          Name: "&b权重"
           Lore:
-            - "&b| &7当前: %product_rotation_chance%%"
+            - "&7当前: &e%product_rotation_chance%%"
             - ""
             - "&7权重越大，该商品出现在商店轮换"
             - "&7中的概率越大"
             - ""
-            - "&a| &7左键点击 &a更改"
+            - "&e| &7左键点击 &e更改"
         DayTimes:
-          Name: "&b<b>%name%</b>"
+          Name: "&b%name%"
           Lore:
-            - "&7%time%"
+            - "&a%time%"
             - ""
             - "&a| &7左键点击 &a添加"
-            - "&c| &7右键点击 &c移除所有"
+            - "&c| &7右键点击 &c移除 &7所有"
       Stock:
         Category:
-          Name: "&b<b>全局 & 玩家</b>"
+          Name: "&b全局 & 玩家"
           Lore:
             - "&7在这里你可以设置该商品在全服和"
             - "&7每个玩家可以出售和购买的数量"
@@ -323,50 +366,50 @@ VirtualShop:
             - "&a| &7左键点击 &a跳转"
         Info:
           Global:
-            Name: "&b<b>全局库存</b>"
+            Name: "&b全局库存"
             Lore:
               - "&7限制所有玩家可出售或购买的商品"
               - "&7数量"
               - ""
-              - "&b<b>手动补货:</b>"
-              - "&b| &7通过购买: &a出售库存 ↑ &7| &c购买库存 ↓"
-              - "&b| &7通过出售: &c出售库存 ↓ &7| &a购买库存 ↑"
+              - "&b手动补货:"
+              - "&7通过购买: &a出售库存 ↑ &8| &c购买库存 ↓"
+              - "&7通过出售: &c出售库存 ↓ &8| &a购买库存 ↑"
               - ""
-              - "&c| &7右键点击 &c清除全局库存数据"
+              - "&c| &7右键点击 &c清除 &7全局库存数据"
           Player:
-            Name: "&b<b>玩家限制</b>"
+            Name: "&b玩家限制"
             Lore:
               - "&7限制每位玩家可出售或购买的商品"
               - "&7数量"
               - ""
-              - "&b<b>手动补货:</b>"
+              - "&b手动补货:"
               - "&7手动补充限制是 &c不可能的 &7玩家必"
               - "&7须等待补货时间"
               - ""
-              - "&c| &7右键点击 &c清除玩家限制数据"
+              - "&c| &7右键点击 &c清除 &7玩家限制数据"
         Global:
           BuyInitial:
-            Name: "&b<b>初始购买数量</b>"
+            Name: "&b初始购买数量"
             Lore:
-              - "&b| &7当前: %product_stock_global_buy_amount_initial%"
+              - "&7当前: &e%product_stock_global_buy_amount_initial%"
               - ""
               - "&7设置购买的初始商品数量"
               - ""
-              - "&a| &7左键点击 &a更改"
-              - "&d| &7右键点击 &d设置为无限"
+              - "&e| &7左键点击 &e更改"
+              - "&a| &7右键点击 &a设置 &7为 &d无限"
           SellInitial:
-            Name: "&b<b>初始出售数量</b>"
+            Name: "&b初始出售数量"
             Lore:
-              - "&b| &7当前: %product_stock_global_sell_amount_initial%"
+              - "&7当前: &e%product_stock_global_sell_amount_initial%"
               - ""
               - "&7设置出售的初始商品数量"
               - ""
-              - "&a| &7左键点击 &a更改"
-              - "&d| &7右键点击 &d设置为无限"
+              - "&e| &7左键点击 &e更改"
+              - "&a| &7右键点击 &a设置 &7为 &d无限"
           BuyRestock:
-            Name: "&b<b>购买补货时间</b>"
+            Name: "&b购买补货时间"
             Lore:
-              - "&b| &7当前: %product_stock_global_buy_restock_time%"
+              - "&7当前: &a%product_stock_global_buy_restock_time%"
               - ""
               - "&7设置可购买的商品数量多久重置回"
               - "&7默认(初始值)"
@@ -374,12 +417,12 @@ VirtualShop:
               - "&7当 &c禁用 <d>(-1)</d> &7时，自动补货"
               - "&7永远不会发生！"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7右键点击 &c禁用"
           SellRestock:
-            Name: "&b<b>出售补货时间</b>"
+            Name: "&b出售补货时间"
             Lore:
-              - "&b| &7当前: %product_stock_global_sell_restock_time%"
+              - "&7当前: &a%product_stock_global_sell_restock_time%"
               - ""
               - "&7设置可出售的商品数量多久重置回"
               - "&7默认(初始值)"
@@ -387,31 +430,31 @@ VirtualShop:
               - "&7当 &c禁用<d>(-1)</d> &7时，自动补货"
               - "&7永远不会发生！"
               - ""
-              - "&a| &7左键点击 &a更改"
-              - "&b| &7右键点击 &c禁用"
+              - "&e| &7左键点击 &e更改"
+              - "&c| &7右键点击 &c禁用"
         Player:
           BuyInitial:
-            Name: "&b<b>初始购买数量</b>"
+            Name: "&b初始购买数量"
             Lore:
-              - "&b| &7当前: %product_stock_player_buy_amount_initial%"
+              - "&7当前: &e%product_stock_player_buy_amount_initial%"
               - ""
               - "&7设置初始购买商品数量"
               - ""
-              - "&a| &7左键点击 &a更改"
-              - "&d| &7右键点击 &d设置为无限"
+              - "&e| &7左键点击 &e更改"
+              - "&a| &7右键点击 &a设置 &7为 &d无限"
           SellInitial:
-            Name: "&b<b>初始出售数量</b>"
+            Name: "&b初始出售数量"
             Lore:
-              - "&b| &7当前: %product_stock_player_sell_amount_initial%"
+              - "&7当前: &e%product_stock_player_sell_amount_initial%"
               - ""
               - "&7设置初始出售商品数量"
               - ""
-              - "&a| &7左键点击 &a更改"
-              - "&d| &7右键点击 &d设置为无限"
+              - "&e| &7左键点击 &e更改"
+              - "&a| &7右键点击 &a设置 &7为 &d无限"
           BuyRestock:
-            Name: "&b<b>购买补货时间</b>"
+            Name: "&b购买补货时间"
             Lore:
-              - "&b| &7当前: %product_stock_player_buy_restock_time%"
+              - "&7当前: &a%product_stock_player_buy_restock_time%"
               - ""
               - "&7设置可购买商品数量恢复至默认"
               - "&7(初始值)的频率"
@@ -419,12 +462,12 @@ VirtualShop:
               - "&7当 &c禁用<d>(-1)</d> &7时，自动补货"
               - "&7将不会发生！"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7右键点击 &c禁用"
           SellRestock:
-            Name: "&b<b>出售补货时间</b>"
+            Name: "&b出售补货时间"
             Lore:
-              - "&b| &7当前: %product_stock_player_sell_restock_time%"
+              - "&7当前: &a%product_stock_player_sell_restock_time%"
               - ""
               - "&7设置可出售商品数量恢复至默认"
               - "&7(初始值)的频率"
@@ -432,49 +475,49 @@ VirtualShop:
               - "&7当 &c禁用<d>(-1)</d> &7时，自动补货"
               - "&7将不会发生！"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7右键点击 &c禁用"
       Price:
         Info:
-          Name: "&b<b>价格信息</b>"
+          Name: "&b价格信息"
           Lore:
-            - "&e| &7当前购买价: %product_price_buy_formatted%"
-            - "&e| &7当前出售价: %product_price_sell_formatted%"
+            - "&7当前购买价: &6%product_price_buy_formatted%"
+            - "&7当前出售价: &6%product_price_sell_formatted%"
             - ""
-            - "&b<b>更新:</b>"
-            - "&7从数据库获取并应用价格数据"
-            - "&7若数据不存在或已过期，则创建新"
-            - "&7数据"
+            - "&b更新:"
+            - "&7从数据库获取并应用价格数据，若"
+            - "&7数据不存在或已过期，则创建新数"
+            - "&7据"
             - "&7在大多数情况下，除非您将其清除"
             - "&7否则不会更改任何内容"
             - ""
-            - "&c<b>清除:</b>"
+            - "&c清除:"
             - "&7从数据库中清除商品价格数据使用"
             - "&b更新 &7选项生成新数据"
             - ""
             - "&a| &7左键点击 &a更新"
             - "&c| &7右键点击 &c清除数据"
         Type:
-          Name: "&b<b>价格类型</b>"
+          Name: "&b价格类型"
           Lore:
-            - "&b| &7当前: %product_price_type%"
+            - "&7当前: &b%product_price_type%"
             - ""
-            - "&7设置商品价格类型"
-            - "&7不同类型有不同的设置"
+            - "&7设置商品价格类型，不同的类型有"
+            - "&7不同的设置"
             - ""
-            - "&a| &7左键点击 &a更改"
+            - "&e| &7左键点击 &e更改"
         Currency:
-          Name: "&b<b>货币</b>"
+          Name: "&b货币"
           Lore:
-            - "&b| &7当前: %product_currency%"
+            - "&7当前: &b%product_currency%"
             - ""
             - "&7设置商品货币"
             - ""
-            - "&a| &7左键点击 &a更改"
+            - "&e| &7左键点击 &e更改"
         DiscountAllowed:
-          Name: "&b<b>允许折扣</b>"
+          Name: "&b允许折扣"
           Lore:
-            - "&b| &7启用: %product_discount_allowed%"
+            - "&7启用: &b%product_discount_allowed%"
             - ""
             - "&7设置此商品是否可以受到商店折扣"
             - "&7的影响"
@@ -482,128 +525,248 @@ VirtualShop:
             - "&a| &7左键点击 &a切换"
         Flat:
           Buy:
-            Name: "&b<b>购买价格</b>"
+            Name: "&b购买价格"
             Lore:
-              - "&b| &7当前: %product_price_buy%"
+              - "&7当前: &6%product_price_buy%"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7[Q] 键 &c禁用"
           Sell:
-            Name: "&b<b>出售价格</b>"
+            Name: "&b出售价格"
             Lore:
-              - "&b| &7当前: %product_price_sell%"
+              - "&7当前: &6%product_price_sell%"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7[Q] 键 &c禁用"
         Float:
           Buy:
-            Name: "&b<b>购买价格范围</b>"
+            Name: "&b购买价格范围"
             Lore:
-              - "&e| &7最低购买价格: %product_pricer_buy_min%"
-              - "&e| &7最高购买价格: %product_pricer_buy_max%"
+              - "&7最低购买价格: &6%product_pricer_buy_min%"
+              - "&7最高购买价格: &6%product_pricer_buy_max%"
               - ""
-              - "&7设置商品购买价格范围"
-              - "&7最终价格将在这些值之间"
+              - "&7设置商品购买价格范围，最终价格"
+              - "&7将在这些值之间"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7[Q] 键 &c禁用"
           Sell:
-            Name: "&b<b>出售价格范围</b>"
+            Name: "&b出售价格范围"
             Lore:
-              - "&e| &7最低出售价格: %product_pricer_sell_min%"
-              - "&e| &7最高出售价格: %product_pricer_sell_max%"
+              - "&7最低出售价格: &6%product_pricer_sell_min%"
+              - "&7最高出售价格: &6%product_pricer_sell_max%"
               - ""
-              - "&7设置商品出售价格范围"
-              - "&7最终价格将在这些值之间"
+              - "&7设置商品出售价格范围，最终价格"
+              - "&7将在这些值之间"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
               - "&c| &7[Q] 键 &c禁用"
           Decimals:
-            Name: "&b<b>去除小数点</b>"
+            Name: "&b去除小数点"
             Lore:
-              - "&e| &7启用: %product_pricer_float_round_decimals%"
+              - "&7启用: &b%product_pricer_float_round_decimals%"
               - ""
               - "&7设置价格是否应该生成为整数"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
           RefreshDays:
-            Name: "&b<b>刷新天数</b>"
+            Name: "&b刷新天数"
             Lore:
-              - "&7%product_pricer_float_refresh_days%"
+              - "&a%product_pricer_float_refresh_days%"
               - ""
               - "&7设置允许价格生成的天数"
               - ""
-              - "&a| &7左键点击 &a增加天数"
-              - "&c| &7右键点击 &c移除所有"
+              - "&a| &7左键点击 &a增加 &7天数"
+              - "&c| &7右键点击 &c移除 &7所有"
           RefreshTimes:
-            Name: "&b<b>刷新次数</b>"
+            Name: "&b刷新次数"
             Lore:
-              - "&7%product_pricer_float_refresh_times%"
+              - "&e%product_pricer_float_refresh_times%"
               - ""
               - "&7设置用于价格生成的次数"
               - ""
-              - "&a| &7左键点击 &a增加次数"
-              - "&c| &7右键点击 &c移除所有"
+              - "&a| &7左键点击 &a增加 &7次数"
+              - "&c| &7右键点击 &c移除 &7所有"
+          RefreshType:
+            Name: "&b刷新类型"
+            Lore:
+              - "&7当前: &b%product_pricer_float_refresh_type%"
+              - ""
+              - "&b时间间隔:"
+              - "&7每X秒刷新一次"
+              - ""
+              - "&b固定:"
+              - "&7在指定时间执行刷新"
+              - ""
+              - "&a| &7左键点击 &a切换"
+          RefreshInterval:
+            Name: "&b刷新间隔"
+            Lore:
+              - "&7当前: &a%product_pricer_float_refresh_interval%"
+              - ""
+              - "&7设置刷新间隔 (&8单位为秒&7)"
+              - ""
+              - "&e| &7左键点击 &e更改"
         Dynamic:
           Initial:
-            Name: "&b<b>初始价格</b>"
+            Name: "&b初始价格"
             Lore:
-              - "&e| &7购买: %product_pricer_dynamic_initial_buy%"
-              - "&e| &7出售: %product_pricer_dynamic_initial_sell%"
+              - "&7购买: &6%product_pricer_dynamic_initial_buy%"
+              - "&7出售: &6%product_pricer_dynamic_initial_sell%"
               - ""
-              - "&7设置商品的初始价格"
-              - "&7这些值将被用作默认或起始值"
+              - "&7设置商品的初始价格，这些值将被"
+              - "&7用作默认或初始值"
               - ""
-              - "&a| &7左键点击 &a更改购买价格"
-              - "&d| &7右键点击 &d更改出售价格"
+              - "&e| &7左键点击 &e更改 &7购买价格"
+              - "&e| &7右键点击 &e更改 &7出售价格"
           Step:
-            Name: "&b<b>价格阶段</b>"
+            Name: "&b价格阶段"
             Lore:
-              - "&e| &7购买价格: %product_pricer_dynamic_step_buy%"
-              - "&e| &7出售价格: %product_pricer_dynamic_step_sell%"
+              - "&7购买价格: &6%product_pricer_dynamic_step_buy%"
+              - "&7出售价格: &6%product_pricer_dynamic_step_sell%"
               - ""
               - "&7阶段定义了每次出售或购买价格上"
               - "&7升或下降的金额"
               - ""
               - "&7购买=价格上升，出售=价格下降"
               - ""
-              - "&a| &7左键点击 &a更改购买价格"
-              - "&d| &7右键点击 &d更改出售价格"
+              - "&e| &7左键点击 &e更改 &7购买价格"
+              - "&e| &7右键点击 &e更改 &7出售价格"
         Players:
           Initial:
-            Name: "&b<b>初始价格</b>"
+            Name: "&b初始价格"
             Lore:
-              - "&e| &7购买价格: %product_pricer_dynamic_initial_buy%"
-              - "&e| &7出售价格: %product_pricer_dynamic_initial_sell%"
+              - "&7购买价格: &6%product_pricer_dynamic_initial_buy%"
+              - "&7出售价格: &6%product_pricer_dynamic_initial_sell%"
               - ""
-              - "&7设置商品的初始价格"
-              - "&7这些值将作为默认或起始值使用"
+              - "&7设置商品的初始价格，这些值将作"
+              - "&7为默认或起始值使用"
               - ""
-              - "&a| &7左键点击 &a更改购买价格"
-              - "&d| &7右键点击 &d更改出售价格"
+              - "&e| &7左键点击 &e更改 &7购买价格"
+              - "&e| &7右键点击 &e更改 &7出售价格"
           Adjust:
-            Name: "&b<b>价格调整</b>"
+            Name: "&b价格调整"
             Lore:
-              - "&e| &7购买: %product_pricer_players_adjust_amount_buy%"
-              - "&e| &7出售: %product_pricer_players_adjust_amount_sell%"
+              - "&7购买: &6%product_pricer_players_adjust_amount_buy%"
+              - "&7出售: &6%product_pricer_players_adjust_amount_sell%"
               - ""
-              - "&7定义每？名在线玩家，价格将被调"
+              - "&7定义每X名在线玩家，价格将被调"
               - "&7整的数量"
               - ""
-              - "&a| &7左键点击 &a更改购买价格"
-              - "&d| &7右键点击 &d更改出售价格"
+              - "&e| &7左键点击 &e更改 &7购买价格"
+              - "&e| &7右键点击 &e更改 &7出售价格"
           Step:
-            Name: "&b<b>调整阶段</b>"
+            Name: "&b调整阶段"
             Lore:
-              - "&b| &7当前: %product_pricer_players_adjust_step%"
+              - "&7当前: &e%product_pricer_players_adjust_step%"
               - ""
               - "&7设置在线玩家数量以此来调整价格"
               - ""
-              - "&b<b>示例:</b>"
+              - "&b示例:"
               - "&e1 &7对于每个在线玩家"
               - "&e5 &7对于每 &e5 &7个在线玩家"
               - ""
-              - "&a| &7左键点击 &a更改"
+              - "&e| &7左键点击 &e更改"
+        Reset:
+          Name: "&b重置和更新"
+          Lore:
+            - "&7购买: &6%product_price_buy_formatted%"
+            - "&7出售: &6%product_price_sell_formatted%"
+            - ""
+            - "&7重置商品的价格数据并刷新其值"
+            - ""
+            - "&e| &7左键点击 &d重置"
+      Delete:
+        Name: "&b删除商品"
+        Lore:
+          - "&7永久删除商品及其所有设置和数据"
+          - ""
+          - "&c| &7左键点击 &c删除"
+      Rotating:
+        Object:
+          Name: "&b%product_preview_name%"
+          Lore:
+            - "&7处理: &b%product_handler%"
+            - "&7货币类型: &b%product_currency%"
+            - "&7价格类型: &b%product_price_type%"
+            - "&7购买价格: &6%product_price_buy%"
+            - "&7出售价格: &6%product_price_sell%"
+            - ""
+            - "&a| &7左键点击 &a编辑"
+        Create:
+          Name: "&b新建商品"
+          Lore:
+            - "&7创建新商品用于轮换商店"
+            - ""
+            - "&a| &7左键点击 &a创建"
+      RotationSlot:
+        Name: "&b轮换商品槽位"
+        Lore:
+          - "&7为轮换商品保留的专用槽位"
+      Creation:
+        Info:
+          Name: "&a创建指南"
+          Lore:
+            - ""
+            - "&7步骤 &e#1"
+            - "&7点击您背包中的物品作为新商品的"
+            - "&7基础模板"
+            - ""
+            - "&7步骤 &e#2"
+            - "&7选择并点击商品类型按钮以创建新"
+            - "&7商品"
+        Item:
+          Name: "&b物品类商品"
+          Lore:
+            - "&7购买后直接将物品发放至玩家背包"
+            - ""
+            - "&a✔ &7自定义物品"
+            - "&a✔ &7NBT支持"
+            - "&a✔ &7占位符"
+            - "&a✔ &7可出售"
+            - ""
+            - "&a| &7左键点击 &a创建"
+        Command:
+          Name: "&b命令类商品"
+          Lore:
+            - "&7购买时执行包含占位符的自定义命"
+            - "&7令"
+            - ""
+            - "&a✔ &7自定义名称"
+            - "&a✔ &7自定义描述"
+            - "&a✔ &7占位符"
+            - "&a✔ &7无限命令"
+            - "&c✘ &7不可出售"
+            - ""
+            - "&a| &7左键点击 &a创建"
+      Stocks:
+        ResetData:
+          Name: "&7重置与更新"
+          Lore:
+            - "&7重置库存和限制数据并刷新相关数"
+            - "&7值"
+            - ""
+            - "&e| &7左键点击 &a重置"
+        StockResetTime:
+          Name: "&b补货时间"
+          Lore:
+            - "&7当前: &a%product_stocks_restock_time%"
+            - ""
+            - "&7控制库存何时会重置回默认数值的"
+            - "&7时间间隔"
+            - ""
+            - "&a| &7左键点击 &a编辑"
+            - "&c| &7左键点击 &c禁用"
+        LimitResetTime:
+          Name: "&b重置时限"
+          Lore:
+            - "&7当前: &a%product_limits_restock_time%"
+            - ""
+            - "&7控制购买限制何时会重置回默认数"
+            - "&7值"
+            - ""
+            - "&a| &7左键点击 &a编辑"
+            - "&c| &7左键点击 &c禁用"
     Create:
       Error:
         Exist: "&c商店已存在！"
@@ -613,32 +776,35 @@ VirtualShop:
       NpcId: "&7输入 &b[NPC ID]"
       Title: "&7输入 &b[标题]"
       Command: "&7输入 &b[命令]"
-      Slots: "&7输入 &b[槽位] -> [1,2,5等]"
+      Slots: "&7输入 &b[槽位] &8-> &b[1,2,5等]"
       Rank: "&7输入 &b[等级名称]"
       Permission: "&7输入 &b[权限节点]"
+      RotationId: "&7输入 &b[轮换名字]"
+      Weight: "&7输入 &b[权重]"
+      Alias: "&7输入 &b[命令别名]"
     Shop:
       Create:
-        Name: "&b<b>新建商店</b>"
+        Name: "&b新建商店"
         Lore:
           - ""
           - "&a| &7左键点击 &a创建静态商店"
           - "&d| &7右键点击 &d创建循环商店"
       Object:
-        Name: "&b<b>%shop_name%</b>"
+        Name: "&b%shop_name%"
         Lore:
-          - "&e| &7类型: %shop_type%"
-          - "&e| &7页面: %shop_pages%"
+          - "&7类型: &B%shop_type%"
+          - "&7页面: &e%shop_pages%"
           - ""
           - "&a| &7左键点击 &a编辑"
           - "&c| &7SHIFT+右键 &c删除 &7(&c无法撤销&7)"
       DisplayName:
-        Name: "&b<b>显示名称</b>"
+        Name: "&b显示名称"
         Lore:
-          - "&e| &7当前: %shop_name%"
+          - "&7当前: &b%shop_name%"
           - ""
-          - "&a| &7左键点击 &a更改"
+          - "&e| &7左键点击 &e更改"
       Description:
-        Name: "&b<b>描述</b>"
+        Name: "&b描述"
         Lore:
           - "&7%shop_description%"
           - ""
@@ -646,35 +812,34 @@ VirtualShop:
           - "&a| &7左键点击 &a添加一行"
           - "&c| &7右键点击 &c移除全部"
       Pages:
-        Name: "&b<b>页面数量</b>"
+        Name: "&b页面数量"
         Lore:
-          - "&b| &7当前: %shop_pages%"
+          - "&7当前: &e%shop_pages%"
           - ""
           - "&7商店中的页面数量"
-          - ""
           - "&7确保商店布局配置包含页面按钮"
           - ""
           - "&a| &7左键点击 &a增加一页"
           - "&c| &7右键点击 &c减少一页"
       Icon:
-        Name: "&b<b>图标</b>"
+        Name: "&b图标"
         Lore:
           - "&a| &7拖放 &a替换"
           - "&d| &7右键点击 &d获取副本"
       PermissionRequirement:
-        Name: "&b<b>权限需求</b>"
+        Name: "&b权限需求"
         Lore:
-          - "&b| &7启用: %shop_permission_required%"
-          - "&d| &7节点: %shop_permission_node%"
+          - "&7启用: &b%shop_permission_required%"
+          - "&7权限: &d%shop_permission_node%"
           - ""
           - "&7设置是否需要权限才能使用此商店"
           - ""
           - "&a| &7左键点击 &a切换"
       Transactions:
-        Name: "&b<b>交易</b>"
+        Name: "&b交易"
         Lore:
-          - "&b| &7允许购买: %shop_buy_allowed%"
-          - "&b| &7允许出售: %shop_sell_allowed%"
+          - "&7允许购买: &b%shop_buy_allowed%"
+          - "&7允许出售: &b%shop_sell_allowed%"
           - ""
           - "&7全局规则允许或禁止在此商店中购"
           - "&7买或出售"
@@ -682,9 +847,9 @@ VirtualShop:
           - "&a| &7左键点击 &a切换购买"
           - "&d| &7右键点击 &d切换出售"
       AttachedNPCs:
-        Name: "&b<b>关联的NPC</b>"
+        Name: "&b关联的NPC"
         Lore:
-          - "&7%shop_npc_ids%"
+          - "&e%shop_npc_ids%"
           - ""
           - "&7列出附加到此商店的NPC(ID)"
           - "&7与之互动时打开 (&c需要Citizens插件&7)"
@@ -692,23 +857,22 @@ VirtualShop:
           - "&a| &7左键点击 &a添加NPC"
           - "&c| &7右键点击 &c移除全部"
       Layout:
-        Name: "&b<b>布局</b>"
+        Name: "&b布局"
         Lore:
-          - "&e| &7当前: %shop_layout%"
+          - "&7当前: &b%shop_layout%"
           - ""
           - "&7设置此商店中使用的GUI布局"
+          - "&7在 &d/layouts &7中创建更多布局"
           - ""
-          - "&7在 &b/layouts &7中创建更多布局"
-          - ""
-          - "&a| &7左键点击 &a更改"
+          - "&e| &7左键点击 &e更改"
       Discounts:
-        Name: "&b<b>折扣</b>"
+        Name: "&b折扣"
         Lore:
           - "&7在此处创建和管理商店折扣"
           - ""
           - "&a| &7左键点击 &a跳转"
       Products:
-        Name: "&b<b>商品</b>"
+        Name: "&b商品"
         Lore:
           - "&7在此处创建和管理商品"
           - ""
@@ -717,97 +881,317 @@ VirtualShop:
           - "&c| &7[F] 键 &c重置所有库存和限制"
       Rotation:
         Type:
-          Name: "&b<b>轮换类型</b>"
+          Name: "&b轮换类型"
           Lore:
-            - "&e| &7当前: %shop_rotation_type%"
+            - "&7当前: &b%shop_rotation_type%"
             - ""
-            - "&b<b>类型:</b>"
-            - "&e| &7间隔: 每X分钟"
-            - "&e| &7固定: 严格按照指定时间"
+            - "&b时间间隔:"
+            - "&7每X秒刷新一次"
             - ""
-            - "&a| &7左键点击 &a更改"
+            - "&b固定:"
+            - "&7在指定时间执行刷新"
+            - ""
+            - "&a| &7左键点击 &a切换"
         Interval:
-          Name: "&b<b>轮换间隔</b>"
+          Name: "&b轮换间隔"
           Lore:
-            - "&e| &7当前: %shop_rotation_interval%"
+            - "&7当前: &e%shop_rotation_interval%"
             - ""
             - "&7设置商店商品轮换(更改)的频率"
             - ""
-            - "&a| &7左键点击 &a更改"
+            - "&e| &7左键点击 &e更改"
             - "&d| &7[Q] 键 &d强制轮换"
         Times:
-          Name: "&b<b>轮换时间</b>"
+          Name: "&b轮换时间"
           Lore:
             - "&7在这里可以设置每周每天轮换时间"
             - ""
             - "&a| &7左键点击 &a跳转"
         Products:
-          Name: "&b<b>轮换商品</b>"
+          Name: "&b轮换商品"
           Lore:
-            - "&e| &7最少商品: %shop_rotation_min_products%"
-            - "&e| &7最多商品: %shop_rotation_max_products%"
-            - "&e| &7槽位: %shop_rotation_product_slots%"
+            - "&7最少商品: &e%shop_rotation_min_products%"
+            - "&7最多商品: &e%shop_rotation_max_products%"
+            - "&7槽位: &e%shop_rotation_product_slots%"
             - ""
             - "&7设置轮换中使用的商品数量以及它"
             - "&7们将出现的槽位"
             - ""
-            - "&a| &7左键点击 &a更改最小值"
+            - "&e| &7左键点击 &e更改最小值"
             - "&a| &7右键点击 &a更改最大值"
             - "&d| &7[Q] 键 &d更改槽位"
+      MenuSlot:
+        Name: "&b菜单栏位"
+        Lore:
+          - "&7当前: &e%shop_menu_slot%"
+          - ""
+          - "&7设置商店在中央商店GUI中的位置"
+          - ""
+          - "&a| &7左键点击 &a修改"
+          - "&c| &7右键点击 &c禁用"
+      Buying:
+        Name: "&b购买功能"
+        Lore:
+          - "&7状态: &b%shop_buy_allowed%"
+          - ""
+          - "&7控制玩家是否能够在此商店购买物"
+          - "&7品"
+          - ""
+          - "&e| &7左键点击 &e切换"
+      Selling:
+        Name: "&b出售功能"
+        Lore:
+          - "&7状态: &b%shop_sell_allowed%"
+          - ""
+          - "&7控制玩家是否能够向此商店出售物"
+          - "&7品"
+          - ""
+          - "&e| &7左键点击 &e切换"
+      Layouts:
+        Info:
+          Name: "&b界面布局"
+          Lore:
+            - "&7设置此商店的GUI布局"
+            - ""
+            - "&a| &7左键点击 &a查看"
+        ByDefault:
+          Name: "&b默认布局"
+          Lore:
+            - "&7当前: &b%shop_layout%"
+            - ""
+            - "&7设置商店所有页面的默认GUI布局"
+            - ""
+            - "&a| &7左键点击 &a修改"
+        ByPage:
+          Name: "&b第 &e#%page% &b页布局"
+          Lore:
+            - "&7当前: &b%name%"
+            - ""
+            - "&a| &7左键点击 &a修改"
+            - "&c| &7右键点击 &c重置"
+      ResetPriceData:
+        Name: "&c重置价格并更新"
+        Lore:
+          - "&7重置此商店所有商品的数据库价格"
+          - "&7数据"
+          - ""
+          - "&7重置后，所有商品价格将根据其设"
+          - "&7置重新生成"
+          - ""
+          - "&c| &7左键点击 &c重置"
+      ResetStockData:
+        Name: "&c重置库存并更新"
+        Lore:
+          - "&7重置此商店所有商品的库存和限额数"
+          - "&7据"
+          - ""
+          - "&7重置后，所有库存和限额将根据其"
+          - "&7设置重新生成"
+          - ""
+          - "&c| &7左键点击 &c重置"
+      Specific:
+        Name: "&b特殊设置"
+        Lore:
+          - "&7根据商店类型的附加设置"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      Delete:
+        Name: "&c删除商店"
+        Lore:
+          - "&7永久删除该商店，包含所有设置和"
+          - "&7物品"
+          - ""
+          - "&c| &7左键点击 &c删除"
+      RotatingProducts:
+        Name: "&b轮换商品"
+        Lore:
+          - "&7仅在商店轮换期间出现的物品"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      Rotations:
+        Name: "&b商品轮换"
+        Lore:
+          - "&7通过商品轮换为商店增加动态效果"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      ResetRotationData:
+        Name: "&b重置轮换数据"
+        Lore:
+          - "&7重置轮换数据并执行新轮换"
+          - ""
+          - "&c| &7左键点击 &c重置"
+      Aliases:
+        Name: "&b指令别名"
+        Description:
+          - "&7通过列出的指令别名直接访问商店"
+          - ""
+          - "&7(&8需要重载插件&7)"
+        CurrentInfo:
+          Current: "%shop_aliases%"
+        ClickActions:
+          LEFT: "&a添加别名"
+          RIGHT: "&c移除全部"
     Discount:
       Create:
-        Name: "&b<b>新建折扣</b>"
+        Name: "&b新建折扣"
         Lore: []
       Object:
-        Name: "&b<b>折扣</b>"
+        Name: "&b折扣"
         Lore:
-          - "&e| &7金额: %discount_amount%"
-          - "&e| &7天数: %discount_days%"
-          - "&a| &7时间: %discount_times%"
+          - "&7金额: &6%discount_amount%"
+          - "&7天数: &e%discount_days%"
+          - "&7时间: &a%discount_times%"
           - ""
           - "&a| &7左键点击 &a编辑"
           - "&c| &7SHIFT+右键点击 &c删除 &7(&c不可撤销&7)"
       Amount:
-        Name: "&b<b>金额</b>"
+        Name: "&b金额"
         Lore:
-          - "&e| &7金额: %discount_amount%%"
+          - "&7金额: &6%discount_amount%%"
           - ""
           - "&7设置折扣金额(百分比)"
           - ""
-          - "&a| &7左键点击 &a更改"
+          - "&e| &7左键点击 &e更改"
       Duration:
-        Name: "&b<b>持续时间</b>"
+        Name: "&b持续时间"
         Lore:
-          - "&e| &7持续时间: %discount_duration%"
+          - "&7持续时间: &a%discount_duration%"
           - ""
           - "&7设置此折扣活动的持续时间(秒)"
           - ""
-          - "&a| &7左键点击 &a更改"
+          - "&e| &7左键点击 &e更改"
       Days:
-        Name: "&b<b>活动日</b>"
+        Name: "&b活动日"
         Lore:
-          - "&e| &7天数: %discount_days%"
+          - "&7天数: &a%discount_days%"
           - ""
           - "&7此折扣有效的日期列表"
-          - ""
-          - "&7至少需要一个有效的日期和时间！"
+          - "&e至少需要一个有效的日期和时间！"
           - ""
           - "&a| &7左键点击 &a添加日期"
           - "&c| &7右键点击 &c全部移除"
       Times:
-        Name: "&b<b>活动时间</b>"
+        Name: "&b活动时间"
         Lore:
-          - "&e| &7时间: %discount_times%"
+          - "&7时间: &a%discount_times%"
           - ""
           - "&7此折扣将被激活的时间列表"
-          - ""
-          - "&7至少需要一个有效的日期和时间！"
+          - "&e至少需要一个有效的日期和时间！"
           - ""
           - "&a| &7左键点击 &a添加时间"
           - "&c| &7右键点击 &c全部移除"
+    Rotation:
+      Object:
+        Name: "&e%rotation_id%"
+        Lore:
+          - "&7已用槽位: &e%rotation_slots_amount%"
+          - "&7商品数量: &e%rotation_items_amount%"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      Create:
+        Name: "&b新建轮换"
+        Lore:
+          - "&a| &7左键点击 &a创建"
+      Delete:
+        Name: "&c删除轮换"
+        Lore:
+          - "&7删除该轮换及其所有设置和数据"
+          - ""
+          - "&c| &7左键点击 &c删除"
+      Reset:
+        Name: "&c重置并更新"
+        Lore:
+          - "&7重置轮换数据并执行全新轮换"
+          - ""
+          - "&c| &7左键点击 &c重置"
+      Icon:
+        Name: "&b轮换图标"
+        Lore:
+          - "&7设置轮换图标便于与其他轮换区分"
+          - ""
+          - "&a| &7拖放 &a替换"
+          - "&a| &7右键点击 &a获取 &7副本"
+      Type:
+        Name: "&b轮换类型"
+        Lore:
+          - "&7当前: &b%rotation_type%"
+          - ""
+          - "&b间隔时间:"
+          - "&7每隔X秒自动执行轮换"
+          - ""
+          - "&b固定时间:"
+          - "&7在指定时间点执行轮换"
+          - ""
+          - "&e| &7左键点击 &e切换"
+      Interval:
+        Name: "&b轮换间隔"
+        Lore:
+          - "&7当前: &a%rotation_interval%"
+          - ""
+          - "&7设置轮换间隔时间 (&8单位：秒&7)"
+          - ""
+          - ""
+          - "&a| &7左键点击 &a修改"
+      Times:
+        Name: "&b轮换时间"
+        Lore:
+          - "&7设置具体的轮换时间点"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      Slots:
+        Name: "&b已用槽位"
+        Lore:
+          - "&7当前已使用 &e%rotation_slots_amount%个 &7槽位"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      Items:
+        Name: "&b轮换商品"
+        Lore:
+          - "&7当前包含 &e%rotation_items_amount%件 &7商品"
+          - ""
+          - "&a| &7左键点击 &a查看"
+      DayTimes:
+        Object:
+          Name: "&b%name%"
+          Lore:
+            - "&a%time%"
+            - ""
+            - "&a| &7左键点击 &a添加"
+            - "&c| &7左键点击 &c全部删除"
+      FreeSlot:
+        Name: "&a空闲槽位"
+        Lore:
+          - "&7该槽位当前可用于轮换"
+          - ""
+          - "&a| &7左键点击 &a选择"
+      SelectedSlot:
+        Name: "&e已选槽位"
+        Lore:
+          - "&7该槽位已被轮换使用"
+          - ""
+          - "&c| &7左键点击 &c取消选择"
+      OtherSlot:
+        Name: "&c其他轮换的槽位"
+        Lore:
+          - "&7该槽位已被其他轮换占用"
+      Item:
+        Object:
+          Name: "&b%product_preview_name% &7(&8ID: &e%product_id%&7)"
+          Lore:
+            - "&7权重: &e%weight%"
+            - ""
+            - "&a| &7左键点击 &a设置 &7权重"
+            - "&c| &7[Q] 键 &c删除"
+        Create:
+          Name: "&a新建商品"
+          Lore:
+            - "&a| &7左键点击 &a选择"
   ShopType:
     STATIC: 静态
-    ROTATING: 旋转
+    ROTATING: 轮换
+  Error:
+    Editor:
+      RotationExists: "&c该名称的轮换商店已经存在"
 ChestShop:
   Command:
     Argument:
@@ -826,15 +1210,20 @@ ChestShop:
       Desc: 移除你正在查看的箱子商店
     Open:
       Desc: 打开目标商店的库存
+    GiveItem:
+      Desc: 给商店创造物品
+      BadMaterial: "&c无效的商店类型！"
+      Done: "&7给予 &b%player_display_name% &7了 &b%name%"
   Shop:
     Error:
       NotOwner: "&c你不是这个商店的主人！"
+      Inactive: "&c这个商店目前没有商品"
     Creation:
       Info:
         Done:
           - <output:'titles:10:80:10'><sound:'block_note_block_bell'>
-          - "&a<b>商店创建成功！</b>"
-          - "&7SHIFT+右键点击 打开设置"
+          - "&a商店创建成功！"
+          - "&7SHIFT+右键点击 &a打开设置"
       Error:
         AlreadyShop: "&c这个箱子已经是商店了！"
         NotEmpty: "&c请先从箱子里移除所有物品"
@@ -848,51 +1237,63 @@ ChestShop:
       Info:
         Done:
           - <output:'titles:10:80:10'><sound:'entity_generic_explode'>
-          - "&c<b>商店已移除！</b>"
+          - "&c商店已移除！"
       Error:
         NotAShop: "&c这个方块不是商店！"
+        NotEmpty: "&c请从商店仓库取出物品以移除它"
     Trade:
       Buy:
         Info:
           User:
             - <noprefix>
-            - "&7你从 &b%shop_name% &7商店购买了 &b%item% &7x &e%amount%&7，花费了 &6%price%"
+            - "&7你从 &b%shop_name% &7商店购买了 &b%item% &8x &e%amount%&7，花费了 &6%price%"
           Owner:
             - <noprefix>
-            - "&a%player_display_name% &7从你的 &b%shop_name% &7商店购买了 &b%item%&7x &e%amount%&7，花费了 &6%price%"
+            - "&a%player_display_name% &7从你的 &b%shop_name% &7商店购买了 &b%item%&8x &e%amount%&7，花费了 &6%price%"
       Sell:
         Info:
           User:
             - <noprefix>
-            - "&7你向 &b%shop_name% &7商店出售了 &b%item% &7x &e%amount%&7，获得了 &6%price%"
+            - "&7你向 &b%shop_name% &7商店出售了 &b%item% &8x &e%amount%&7，获得了 &6%price%"
           Owner:
             - <noprefix>
-            - "&a%player_display_name% &7向你的 &b%shop_name% &7商店出售了 &b%item% &7x &e%amount%&7，获得了 &6%price%"
+            - "&a%player_display_name% &7向你的 &b%shop_name% &7商店出售了 &b%item% &8x &e%amount%&7，获得了 &6%price%"
     Bank:
       Error:
         InvalidCurrency:
           - <output:'titles:20:60:20'>
-          - "&c<b>操作失败！</b>"
+          - "&c操作失败！"
           - "&7货币错误！"
       Deposit:
         Success:
           - <output:'titles:20:60:20'>
-          - "&a<b>存款成功！</b>"
+          - "&a存款成功！"
           - "&7你向商店银行存入了 &6%amount%"
         Error:
           NotEnough:
             - <output:'titles:20:60:20'>
-            - "&c<b>存款失败！</b>"
+            - "&c存款失败！"
             - "&7你没有足够的余额！"
       Withdraw:
         Success:
           - <output:'titles:20:60:20'>
-          - "&a<b>取款成功！</b>"
+          - "&a取款成功！"
           - "&7你从商店银行取出了 &6%amount%"
         NotEnough:
           - <output:'titles:20:60:20'>
-          - "&c<b>取款失败！</b>"
+          - "&c取款失败！"
           - "&7银行没有足够的余额！"
+    InfiniteStorage:
+      Deposit:
+        Success: "&7你存入了 &b%item% &8x &e%amount% &7到商店仓库中！"
+        Error:
+          NotEnough: "&7你没有足够多的物品"
+      Withdraw:
+        Success: "&7你从商店仓库中取出了 &b%item% &8x &e%amount%"
+        NotEnough: "&7商店仓库中没有这么多的物品"
+    Teleport:
+      Error:
+        Unsafe: "&c由于商店位置不安全，传送取消"
   Product:
     Error:
       BadItem: "&c这个物品不能用于商店！"
@@ -902,18 +1303,50 @@ ChestShop:
   Notification:
     ShopEarnings:
       - <noprefix>
-      - " "
-      - "&b<b>商店收入:</b>"
+      - ""
+      - "&b商店收入:"
       - "&7你在离线期间你的商店赚了: &6%amount%"
-      - " "
+      - ""
   Search:
     ItemPrompt:
       - <output:'titles:20:-1:20'><sound:'block_lava_pop'>
-      - "&b<b>商店搜索</b>"
+      - "&b商店搜索"
       - "&7输入 &e物品名称 &7进行搜索"
   ShopType:
     PLAYER: 玩家
     ADMIN: 管理员
+  Rent:
+    Error:
+      AlreadyRented:
+        - <output:"titles:20:60:20"><sound:"entity.villager.no:0.6:1.0">
+        - "&c商店已被租赁！"
+        - "&7该商店已被其他玩家租用"
+      NotRented:
+        - <output:"titles:20:60:20"><sound:"entity.villager.no:0.6:1.0">
+        - "&c尚未租赁！"
+        - "&7你未租赁此商店"
+      NotRentable:
+        - <output:"titles:20:60:20"><sound:"entity.villager.no:0.6:1.0">
+        - "&c不可租赁！"
+        - "&7该商店未开放租赁功能"
+      InsufficientFunds:
+        - <output:"titles:20:60:20"><sound:"entity.villager.no:0.6:1.0">
+        - "&c资金不足！"
+        - "&7需要 &6%price% &7方可租赁"
+    Prompt:
+      Duration: "&7输入 &b[天数]"
+      Currency: "&7输入 &b[货币类型]"
+      Price: "&7输入 &b[租赁价格]"
+    Rent:
+      Success:
+        - <output:"titles:20:60:20"><sound:"block.iron_door.open:0.6:1.0">
+        - "&a商店租赁成功！"
+        - "&7已租用该商店 &a%time%"
+    Extend:
+      Success:
+        - <output:"titles:20:60:20"><sound:"block.iron_door.open:0.6:1.0">
+        - "&a租期已延长！"
+        - "&7商店租期延长 &a%time%"
 Auction:
   Command:
     Argument:
@@ -938,79 +1371,79 @@ Auction:
       Success:
         Info:
           - <noprefix><sound:'block_note_block_bell'>
-          - " "
-          - "&a<b>成功！</b>"
-          - " "
-          - "&7你在拍卖行上架了 &b%listing_item_name% &7x &e%listing_item_amount%&7，价格为 &6%listing_price%！"
+          - ""
+          - "&a成功！"
+          - ""
+          - "&7你在拍卖行上架了 &b%listing_item_name% &8x &e%listing_item_amount%&7，价格为 &6%listing_price%！"
           - "&7税收: &6%tax%"
-          - " "
+          - ""
         Broadcast:
           - <noprefix>
-          - " "
-          - "&b<b>拍卖:</b>"
-          - "&7玩家 &a%player_display_name% &7在拍卖行上架了 <hover:show_item:'%listing_item_value%'>&b%listing_item_name%</hover> &7x &e%listing_item_amount%&7，价格为 &6%listing_price%"
-          - " "
+          - ""
+          - "&b拍卖:"
+          - "&7玩家 &a%player_display_name% &7在拍卖行上架了 <hover:show_item:'%listing_item_value%'>&b%listing_item_name%</hover> &8x &e%listing_item_amount%&7，价格为 &6%listing_price%"
+          - ""
       Error:
         BadItem:
           - <sound:'entity_villager_no'>
-          - "&c| &b%item% &7不能被上架在拍卖行！"
+          - "&c&b%item% &7不能被上架在拍卖行！"
         Limit:
           - <sound:'entity_villager_no'>
-          - "&c| 你不能在拍卖行上超过 &e%amount% &7个拍卖物品！"
+          - "&c你不能在拍卖行上超过 &e%amount% &c个拍卖物品！"
         Price:
           Tax:
             - <sound:'entity_villager_no'>
-            - "&c| &7你支付不起 &6%tax% &7的价格税: &e%amount%！"
+            - "&c&7你支付不起 &6%tax% &7的价格税: &6%amount%！"
           Currency:
             Min:
               - <sound:'entity_villager_no'>
-              - "&c| 最低 &b%currency_name% &7价格是 &6%amount%！"
+              - "&c最低 &b%currency_name% &c的价格是: &6%amount%！"
             Max:
               - <sound:'entity_villager_no'>
-              - "&c| 最高 &b%currency_name% &7价格是 &6%amount%！"
+              - "&c最高 &b%currency_name% &c的价格是: &6%amount%！"
           Negative:
             - <sound:'entity_villager_no'>
-            - "&c| 无效的价格！"
+            - "&c无效的价格！"
           Material:
             Min:
               - <sound:'entity_villager_no'>
-              - "&c| 最低 &b%item% &7x &e1 &7价格是 &6%amount%！"
+              - "&c最低 &b%item% &8x &e1 &c的价格是: &6%amount%！"
             Max:
               - <sound:'entity_villager_no'>
-              - "&c| 最高 &b%item% &7x &e1 &7价格是 &6%amount%！"
+              - "&c最高 &b%item% &8x &e1 &c的价格是: &6%amount%！"
         DisabledGamemode:
           - <sound:'entity_villager_no'>
-          - "&c| 你当前的游戏模式下不能添加物品！"
+          - "&c你当前的游戏模式下不能添加物品！"
     Buy:
       Success:
         Info:
           - <output:'titles:20:60:20'><sound:'entity_player_levelup'>
-          - "&a<b>购买成功！</b>"
-          - "&7你从 &a%listing_seller% &7购买了 &b%listing_item_name% &7x &e%listing_item_amount%&7，花费了 &6%listing_price%！"
+          - "&a购买成功！"
+          - "&7你从 &a%listing_seller% &7购买了 &b%listing_item_name% &8x &e%listing_item_amount%&7，花费了 &6%listing_price%"
       Error:
         NotEnoughFunds:
           - <output:'titles:20:60:20'><sound:'block_anvil_place'>
-          - "&c<b>余额不足！</b>"
-          - "&7你需要 &6%listing_price%&7。你有 &6%balance%"
+          - "&c余额不足！"
+          - "&7你需要 &6%listing_price%&7，当前你有 &6%balance%"
   Notify:
     Listing:
-      Claim: "&7你领取了 &a%listing_price% &7为 &b%listing_item_name%！"
+      Claim: "&7你领取了 &a%listing_price% &7的 &b%listing_item_name%！"
       Unclaimed:
         - <noprefix>
-        - " "
-        - "&b<b>拍卖:</b>"
+        - ""
+        - "&b拍卖:"
         - "&7你有 &6%amount% &7未领取的拍卖收入！"
         - ""
-        - "&7点击 <click:run_command:'/ah unclaimed'><hover:show_text:'&7点击这里领取你的收入！'>&b<b>这里</b></hover></click> &7现在就领取！"
-        - " "
+        - "&7点击 <click:run_command:'/ah unclaimed'><hover:show_text:'&7点击这里领取你的收入！'>&b这里</hover></click> &7现在就领取！"
+        - ""
       Expired:
         - <noprefix>
-        - " "
-        - "&b<l><b>拍卖:</b></l>"
-        - "&7你有 &e<l>%amount%</l> &7过期的列表！"
         - ""
-        - "&7点击 <click:run_command:'/ah expired'><hover:show_text:'&7点击这里返回你的物品'>&b<l><b>这里</b></l></hover></click> &7将它们取回"
-        - " "
+        - "&b拍卖:"
+        - "&7你有 &e%amount% &7个过期的列表！"
+        - ""
+        - "&7点击 <click:run_command:'/ah expired'><hover:show_text:'&7点击这里返回你的物品'>&b这里</hover></click> &7将它们取回"
+        - ""
   Error:
     DisabledWorld: "&c在这个世界中拍卖功能被禁用！"
   SortType:
@@ -1021,3 +1454,9 @@ Auction:
     OLDEST: 最旧
     MOST_EXPENSIVE: 最贵
     LEAST_EXPENSIVE: 最便宜
+Other:
+  PriceDisabled: N/A
+ProductType:
+  VANILLA: 原版
+  COMMAND: 命令
+  PLUGIN: 插件

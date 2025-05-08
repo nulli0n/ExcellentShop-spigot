@@ -2,11 +2,13 @@ package su.nightexpress.nexshop.api.shop;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.util.UnitUtils;
 import su.nightexpress.nightcore.language.entry.LangText;
 
 import java.util.function.UnaryOperator;
@@ -19,6 +21,8 @@ public class Transaction {
     private int    units;
     private double price;
     private Result result;
+
+    // TODO Save currency field, bc product currency may be changed at any time after transaction.
 
     public Transaction(@NotNull ShopPlugin plugin,
                        @NotNull Product product,
@@ -59,12 +63,18 @@ public class Transaction {
     }
 
     @NotNull
+    public Currency getCurrency() {
+        return this.product.getCurrency();
+    }
+
+    @NotNull
     public TradeType getTradeType() {
         return this.tradeType;
     }
 
     public int getAmount() {
-        return this.product.getUnitAmount() * this.getUnits();
+        return UnitUtils.unitsToAmount(this.product, this.units);
+        //return this.product.getUnitAmount() * this.getUnits();
     }
 
     public int getUnits() {

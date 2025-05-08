@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -130,7 +131,16 @@ public class ChestUtils {
     }
 
     public static boolean isValidContainer(@NotNull Material material) {
-        return material != Material.ENDER_CHEST && ChestConfig.ALLOWED_CONTAINERS.get().contains(material);
+        if (material == Material.ENDER_CHEST) return false;
+
+        Set<Material> allowed = ChestConfig.ALLOWED_CONTAINERS.get();
+
+        // Unify colored shulker boxes as single material.
+        if (material != Material.SHULKER_BOX && material.createBlockData().createBlockState() instanceof ShulkerBox) {
+            material = Material.SHULKER_BOX;
+        }
+
+        return allowed.contains(material);
     }
 
     public static boolean isInfiniteStorage() {

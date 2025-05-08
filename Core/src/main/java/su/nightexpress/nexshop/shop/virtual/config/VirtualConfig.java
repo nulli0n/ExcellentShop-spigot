@@ -115,7 +115,7 @@ public class VirtualConfig {
 
     public static final ConfigValue<Boolean> SELL_HAND_ALL_ENABLED = ConfigValue.create("General.Sell_Hand_All.Enabled",
         true,
-        "Enables the Sell Hand feature."
+        "Enables the Sell Hand All feature."
     );
 
     public static final ConfigValue<String[]> SELL_HAND_ALL_COMMANDS = ConfigValue.create("General.Sell_Hand_All.Commands",
@@ -134,6 +134,12 @@ public class VirtualConfig {
         "If you want to use permission based system, you can use '" + VirtualPerms.PREFIX_SELL_MULTIPLIER + "[name]' permission pattern.",
         "(make sure to use names different from your permission ranks then)",
         "Formula: '<sellPrice> * <sellMultiplier>'. So, 1.0 = 100% (no changes), 1.5 = +50%, 0.75 = -25%, etc."
+    );
+
+    public static final ConfigValue<Boolean> SELL_CONTAINERS_CONTENT_INCLUDED = ConfigValue.create("SellFeatures.Containers.ContentIncluded",
+        true,
+        "Controls whether content of the 'container' items, such as Shulker Boxes, Chests, etc, is included for the Sell All, Sell GUI features.",
+        "[*] Does not includes Bundles yet."
     );
 
     public static final ConfigValue<Set<GameMode>> DISABLED_GAMEMODES = ConfigValue.forSet("General.Disabled_In_Gamemodes",

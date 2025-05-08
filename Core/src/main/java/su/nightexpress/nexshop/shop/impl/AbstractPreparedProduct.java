@@ -10,6 +10,7 @@ import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.util.UnitUtils;
 
 import java.util.function.UnaryOperator;
 
@@ -95,7 +96,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
     }
 
     public int getAmount() {
-        return this.getProduct().getUnitAmount() * this.getUnits();
+        return UnitUtils.unitsToAmount(this.product, this.units);// this.getProduct().getUnitAmount() * this.getUnits();
     }
 
     public double getPrice() {

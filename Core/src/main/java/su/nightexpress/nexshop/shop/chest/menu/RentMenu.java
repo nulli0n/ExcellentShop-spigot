@@ -36,7 +36,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
     private final ChestShopModule module;
 
     public RentMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, MenuType.GENERIC_9X4, BLACK.enclose("Rent Settings"));
+        super(plugin, MenuType.GENERIC_9X4, BLACK.wrap("Rent Settings"));
         this.module = module;
 
         this.load(FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE));
@@ -68,11 +68,11 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
         }));
 
         loader.addDefaultItem(NightItem.fromType(Material.LIME_DYE)
-            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Enabled")))
+            .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Enabled")))
             .setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("● " + LIGHT_GRAY.enclose("Current: ") + RENT_ENABLED),
+                LIGHT_YELLOW.wrap("● " + LIGHT_GRAY.wrap("Current: ") + RENT_ENABLED),
                 "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("➥") + " Click to " + LIGHT_YELLOW.enclose("toggle") + ".")
+                LIGHT_GRAY.wrap(LIGHT_YELLOW.wrap("➥") + " Click to " + LIGHT_YELLOW.wrap("toggle") + ".")
             ))
             .toMenuItem().setSlots(10).setPriority(10).setHandler(new ItemHandler("rent_enabled", (viewer, event) -> {
                 ChestShop shop = this.getLink(viewer);
@@ -83,11 +83,11 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
             })));
 
         loader.addDefaultItem(NightItem.fromType(Material.CLOCK)
-            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Duration")))
+            .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Duration")))
             .setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("● " + LIGHT_GRAY.enclose("Current: ") + RENT_DURATION),
+                LIGHT_YELLOW.wrap("● " + LIGHT_GRAY.wrap("Current: ") + RENT_DURATION),
                 "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("➥") + " Click to " + LIGHT_YELLOW.enclose("change") + ".")
+                LIGHT_GRAY.wrap(LIGHT_YELLOW.wrap("➥") + " Click to " + LIGHT_YELLOW.wrap("change") + ".")
             ))
             .toMenuItem().setSlots(12).setPriority(10).setHandler(new ItemHandler("rent_duration", (viewer, event) -> {
                 ChestShop shop = this.getLink(viewer);
@@ -100,11 +100,11 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
             })));
 
         loader.addDefaultItem(NightItem.fromType(Material.MAP)
-            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Currency")))
+            .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Currency")))
             .setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("● " + LIGHT_GRAY.enclose("Current: ") + RENT_CURRENCY_NAME),
+                LIGHT_YELLOW.wrap("● " + LIGHT_GRAY.wrap("Current: ") + RENT_CURRENCY_NAME),
                 "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("➥") + " Click to " + LIGHT_YELLOW.enclose("change") + ".")
+                LIGHT_GRAY.wrap(LIGHT_YELLOW.wrap("➥") + " Click to " + LIGHT_YELLOW.wrap("change") + ".")
             ))
             .toMenuItem().setSlots(14).setPriority(10).setHandler(new ItemHandler("rent_currency", (viewer, event) -> {
                 Player player = viewer.getPlayer();
@@ -127,11 +127,11 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
             })));
 
         loader.addDefaultItem(NightItem.fromType(Material.DIAMOND)
-            .setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Price")))
+            .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Price")))
             .setLore(Lists.newList(
-                LIGHT_YELLOW.enclose("● " + LIGHT_GRAY.enclose("Current: ") + RENT_PRICE),
+                LIGHT_YELLOW.wrap("● " + LIGHT_GRAY.wrap("Current: ") + RENT_PRICE),
                 "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("➥") + " Click to " + LIGHT_YELLOW.enclose("change") + ".")
+                LIGHT_GRAY.wrap(LIGHT_YELLOW.wrap("➥") + " Click to " + LIGHT_YELLOW.wrap("change") + ".")
             ))
             .toMenuItem().setSlots(16).setPriority(10).setHandler(new ItemHandler("rent_price", (viewer, event) -> {
                 ChestShop shop = this.getLink(viewer);
@@ -145,14 +145,14 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
 
 
         loader.addDefaultItem(NightItem.fromType(Material.REDSTONE)
-            .setDisplayName(RED.enclose(BOLD.enclose("Cancel Rent")))
+            .setDisplayName(RED.wrap(BOLD.wrap("Cancel Rent")))
             .setLore(Lists.newList(
-                RED.enclose("● " + LIGHT_GRAY.enclose("Rented by: ") + CHEST_SHOP_RENTER_NAME),
+                RED.wrap("● " + LIGHT_GRAY.wrap("Rented by: ") + CHEST_SHOP_RENTER_NAME),
                 "",
-                LIGHT_GRAY.enclose("Cancels current rent and revokes"),
-                LIGHT_GRAY.enclose("renter's access to the shop."),
+                LIGHT_GRAY.wrap("Cancels current rent and revokes"),
+                LIGHT_GRAY.wrap("renter's access to the shop."),
                 "",
-                LIGHT_GRAY.enclose(RED.enclose("➥") + " Click to " + RED.enclose("cancel") + ".")
+                LIGHT_GRAY.wrap(RED.wrap("➥") + " Click to " + RED.wrap("cancel") + ".")
             ))
             .toMenuItem().setSlots(4).setPriority(10).setHandler(new ItemHandler("rent_cancel", (viewer, event) -> {
                 Player player = viewer.getPlayer();

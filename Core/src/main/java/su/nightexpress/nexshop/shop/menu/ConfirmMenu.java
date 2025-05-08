@@ -18,6 +18,7 @@ import static su.nightexpress.nightcore.util.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 @SuppressWarnings("UnstableApiUsage")
+@Deprecated
 public class ConfirmMenu extends LinkedMenu<ShopPlugin, Confirmation> implements ConfigBased {
 
     public static final String FILE_NAME = "confirmation.yml";

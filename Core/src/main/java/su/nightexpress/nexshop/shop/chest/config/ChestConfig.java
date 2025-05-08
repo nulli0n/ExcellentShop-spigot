@@ -1,7 +1,6 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.inventory.ItemStack;
 import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.economybridge.item.ItemPlugins;
@@ -91,10 +90,11 @@ public class ChestConfig {
         BukkitThing::getMaterial,
         (cfg, path, set) -> cfg.set(path, set.stream().map(BukkitThing::toString).toList()),
         () -> {
-            Set<Material> set = new HashSet<>(Tag.SHULKER_BOXES.getValues());
+            Set<Material> set = new HashSet<>(/*Tag.SHULKER_BOXES.getValues()*/);
             set.add(Material.CHEST);
             set.add(Material.TRAPPED_CHEST);
             set.add(Material.BARREL);
+            set.add(Material.SHULKER_BOX);
             return set;
         },
         "A list of Materials, that can be used for shop creation.",
@@ -115,7 +115,7 @@ public class ChestConfig {
         "",
         "Why? Even with 'Auto_Bank' option enabled, players can't sell items to shops with offline owners",
         "unless there are enough funds in the shop bank.",
-        "This setting will fix bypass that.",
+        "This setting will bypass that.",
         "",
         "[*] This feature may damage performance (depends on the currency plugin and its offline player data handling).",
         "[*] This feature is not available for some currencies.");

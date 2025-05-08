@@ -55,6 +55,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         this.setRotating(config.getBoolean(path + ".Rotating"));
         this.setAllowedRanks(config.getStringSet(path + ".Allowed_Ranks"));
         this.setRequiredPermissions(config.getStringSet(path + ".Required_Permissions"));
+        this.setForbiddenPermissions(config.getStringSet(path + ".Forbidden_Permissions"));
         this.setPricer(AbstractProductPricer.read(config, path + ".Price"));
         this.setStockValues(StockValues.read(config, path + ".Stock.GLOBAL"));
         this.setLimitValues(StockValues.read(config, path + ".Stock.PLAYER"));
@@ -70,6 +71,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         config.set(path + ".Rotating", this.rotating);
         config.set(path + ".Allowed_Ranks", this.allowedRanks);
         config.set(path + ".Required_Permissions", this.requiredPermissions);
+        config.set(path + ".Forbidden_Permissions", this.forbiddenPermissions);
         if (!this.currency.isDummy()) {
             config.set(path + ".Currency", this.currency.getInternalId());
         }

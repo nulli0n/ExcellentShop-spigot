@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.item.ItemClick;
 
+@Deprecated
 public interface Confirmation {
 
     void onAccept(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event);

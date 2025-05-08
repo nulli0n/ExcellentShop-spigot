@@ -75,6 +75,8 @@ public interface Product {
 
     int countUnits(@NotNull Inventory inventory);
 
+    int countUnits(int amount);
+
     int count(@NotNull Inventory inventory);
 
     int countSpace(@NotNull Player player);

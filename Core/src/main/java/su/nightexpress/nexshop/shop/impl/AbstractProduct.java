@@ -17,6 +17,7 @@ import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
 import su.nightexpress.nexshop.product.price.impl.FlatPricer;
 import su.nightexpress.nexshop.product.price.impl.FloatPricer;
+import su.nightexpress.nexshop.util.UnitUtils;
 
 import java.util.function.UnaryOperator;
 
@@ -226,7 +227,13 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int countUnits(@NotNull Inventory inventory) {
-        return this.count(inventory) / this.getUnitAmount();
+        return this.countUnits(this.count(inventory));// / this.getUnitAmount();
+    }
+
+    @Override
+    public int countUnits(int amount) {
+        return UnitUtils.amountToUnits(this, amount);
+        //return amount / this.getUnitAmount();
     }
 
     @Override

@@ -20,12 +20,12 @@ import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.NormalMenu;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.NumberUtil;
-import su.nightexpress.nightcore.util.Plugins;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nexshop.Placeholders.GENERIC_BALANCE;
+import static su.nightexpress.nexshop.Placeholders.GENERIC_SELL_MULTIPLIER;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -38,7 +38,7 @@ public class CentralMenu extends NormalMenu<ShopPlugin> implements ConfigBased {
     private final Currency currency;
 
     public CentralMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, HEX_COLOR.enclose("Shop → Main", TITLE_COLOR));
+        super(plugin, MenuType.GENERIC_9X5, HEX_COLOR.wrap("Shop → Main", TITLE_COLOR));
         this.module = module;
         this.currency = module.getDefaultCurrency();
         this.setApplyPlaceholderAPI(true);
@@ -91,40 +91,29 @@ public class CentralMenu extends NormalMenu<ShopPlugin> implements ConfigBased {
 
     @Override
     public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
-        // TODO Put in wiki
-        config.options().setHeader(Lists.newList(
-            "=".repeat(50),
-            "Available Placeholders:",
-            "- " + GENERIC_BALANCE + " -> Player's balance for default Virtual Shop currency.",
-            "- " + GENERIC_SELL_MULTIPLIER + " -> Player's sell multiplier (set in VirtualShop settings.yml).",
-            "- " + URL_WIKI_PLACEHOLDERS + " -> Placeholders of: Shop, Virtual Shop, Static/Rotating Shop.",
-            "- " + Plugins.PLACEHOLDER_API + " -> Any of them. Enable PlaceholderAPI setting.",
-            "=".repeat(50)
-        ));
-
         loader.addDefaultItem(NightItem.fromType(Material.GRAY_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(IntStream.range(0, 54).toArray()));
 
         loader.addDefaultItem(NightItem.asCustomHead("3324a7d61ccd44b031744b517f911a5c461614b953b17f648282e147b29d10e")
-            .setDisplayName(HEX_COLOR.enclose(BOLD.enclose("BALANCE"), "#7cf1de"))
+            .setDisplayName(HEX_COLOR.wrap(BOLD.wrap("BALANCE"), "#7cf1de"))
             .setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Here's displayed how much"),
-                LIGHT_GRAY.enclose("money you have."),
+                LIGHT_GRAY.wrap("Here's displayed how much"),
+                LIGHT_GRAY.wrap("money you have."),
                 "",
-                HEX_COLOR.enclose("➥", "#7cf1de") + " " + WHITE.enclose(GENERIC_BALANCE))
+                HEX_COLOR.wrap("➥", "#7cf1de") + " " + WHITE.wrap(GENERIC_BALANCE))
             )
             .toMenuItem().setSlots(37).setPriority(10)
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("9fd108383dfa5b02e86635609541520e4e158952d68c1c8f8f200ec7e88642d")
-            .setDisplayName(HEX_COLOR.enclose(BOLD.enclose("SELL ALL"), "#ebd12a"))
+            .setDisplayName(HEX_COLOR.wrap(BOLD.wrap("SELL ALL"), "#ebd12a"))
             .setLore(Lists.newList(
-                LIGHT_GRAY.enclose("Sells everything from your"),
-                LIGHT_GRAY.enclose("inventory to all available shops."),
+                LIGHT_GRAY.wrap("Sells everything from your"),
+                LIGHT_GRAY.wrap("inventory to all available shops."),
                 "",
-                LIGHT_GRAY.enclose(HEX_COLOR.enclose("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.enclose("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
+                LIGHT_GRAY.wrap(HEX_COLOR.wrap("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.wrap("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
                 "",
-                //LIGHT_GRAY.enclose(HEX_COLOR.enclose("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.enclose("sell all", "#ebd12a") + ".")
-                HEX_COLOR.enclose("→ " + BOLD.enclose(UNDERLINED.enclose("CLICK")) + " to sell", "#ebd12a")
+                //LIGHT_GRAY.wrap(HEX_COLOR.wrap("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.wrap("sell all", "#ebd12a") + ".")
+                HEX_COLOR.wrap("→ " + BOLD.wrap(UNDERLINED.wrap("CLICK")) + " to sell", "#ebd12a")
             ))
             .toMenuItem().setSlots(43).setPriority(10).setHandler(new ItemHandler("sell_all", (viewer, event) -> {
                 Player player = viewer.getPlayer();

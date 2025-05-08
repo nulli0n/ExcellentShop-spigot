@@ -46,7 +46,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
     private NightSound productSound;
 
     public CartMenu(@NotNull ShopPlugin plugin, @NotNull FileConfig config) {
-        super(plugin, MenuType.GENERIC_9X6, BLACK.enclose("Product Cart"));
+        super(plugin, MenuType.GENERIC_9X6, BLACK.wrap("Product Cart"));
 
         this.load(config);
     }
@@ -125,7 +125,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
 
         ItemStack preview = prepared.getProduct().getPreview();
         int stackSize = preview.getType().getMaxStackSize();
-        int preparedAmount = prepared.getUnits() * prepared.getProduct().getUnitAmount();
+        int preparedAmount = prepared.getAmount();// prepared.getUnits() * prepared.getProduct().getUnitAmount();
         int count = 0;
 
         while (preparedAmount > 0 && count < this.productSlots.length) {
@@ -175,13 +175,13 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
         ).read(config);
 
         loader.addDefaultItem(NightItem.asCustomHead(SKIN_CHECK_MARK)
-            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("Accept")))
+            .setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("Accept")))
             .setLore(Lists.newList(
-                LIGHT_GREEN.enclose(BOLD.enclose("Details:")),
-                LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Quantity: ") + GENERIC_UNITS),
-                LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Total Amount: ") + GENERIC_AMOUNT),
-                LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Price: ") + GENERIC_PRICE),
-                LIGHT_GREEN.enclose("▪ " + LIGHT_GRAY.enclose("Balance: ") + GENERIC_BALANCE)
+                LIGHT_GREEN.wrap(BOLD.wrap("Details:")),
+                LIGHT_GREEN.wrap("▪ " + LIGHT_GRAY.wrap("Quantity: ") + GENERIC_UNITS),
+                LIGHT_GREEN.wrap("▪ " + LIGHT_GRAY.wrap("Total Amount: ") + GENERIC_AMOUNT),
+                LIGHT_GREEN.wrap("▪ " + LIGHT_GRAY.wrap("Price: ") + GENERIC_PRICE),
+                LIGHT_GREEN.wrap("▪ " + LIGHT_GRAY.wrap("Balance: ") + GENERIC_BALANCE)
             ))
             .toMenuItem()
             .setPriority(50)
@@ -207,7 +207,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
         );
 
         loader.addDefaultItem(NightItem.asCustomHead(SKIN_WRONG_MARK)
-            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("Cancel")))
+            .setDisplayName(LIGHT_RED.wrap(BOLD.wrap("Cancel")))
             .toMenuItem()
             .setPriority(50)
             .setSlots(45)
@@ -226,53 +226,53 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
         // Add Buttons
 
         loader.addDefaultItem(NightItem.asCustomHead("6d65ce83f1aa5b6e84f9b233595140d5b6beceb62b6d0c67d1a1d83625ffd")
-            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("+1")))
+            .setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("+1")))
             .toMenuItem().setSlots(42).setHandler(new ItemHandler("add_1"))
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("f2ee1371d8f0f5a8b759c291863d704adc421ad519f17462b87704dbf1c78a4")
-            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("+8")))
+            .setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("+8")))
             .toMenuItem().setSlots(43).setHandler(new ItemHandler("add_8"))
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("19f62a469a206add73887c7366376a6c4f3377b2f5b979351e96ac634572")
-            .setDisplayName(LIGHT_GREEN.enclose(BOLD.enclose("+16")))
+            .setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("+16")))
             .toMenuItem().setSlots(44).setHandler(new ItemHandler("add_16"))
         );
 
         // Take Buttons
 
         loader.addDefaultItem(NightItem.asCustomHead("8d2454e4c67b323d5be953b5b3d54174aa271460374ee28410c5aeae2c11f5")
-            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("-1")))
+            .setDisplayName(LIGHT_RED.wrap(BOLD.wrap("-1")))
             .toMenuItem().setSlots(36).setHandler(new ItemHandler("take_1"))
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("1683440c6447c195aaf764e27a1259219e91c6d8ab6bd89a11ca8d2cc799fa8")
-            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("-8")))
+            .setDisplayName(LIGHT_RED.wrap(BOLD.wrap("-8")))
             .toMenuItem().setSlots(37).setHandler(new ItemHandler("take_8"))
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("ae3e4bc71e3ac330836181eda96bc6f128e5c5313ab952c8ff6ded549e13a5")
-            .setDisplayName(LIGHT_RED.enclose(BOLD.enclose("-16")))
+            .setDisplayName(LIGHT_RED.wrap(BOLD.wrap("-16")))
             .toMenuItem().setSlots(38).setHandler(new ItemHandler("take_16"))
         );
 
         // Set Buttons
 
         loader.addDefaultItem(NightItem.asCustomHead("bd21b0bafb89721cac494ff2ef52a54a18339858e4dca99a413c42d9f88e0f6")
-            .setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Set to 1")))
+            .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Set to 1")))
             .toMenuItem().setSlots(39).setHandler(new ItemHandler("set_1"))
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("d5e1be33374fd7b2bae9c8fc9146b6ed3eedcb1476b3b7b8010f5f44bfa843e")
-            .setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Set to Max.")))
+            .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Set to Max.")))
             .toMenuItem().setSlots(40).setHandler(new ItemHandler("set_max", (viewer, event) -> {
                 this.onAmountClick(viewer, current -> 10000);
             }))
         );
 
         loader.addDefaultItem(NightItem.asCustomHead("117f3666d3cedfae57778c78230d480c719fd5f65ffa2ad3255385e433b86e")
-            .setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Custom Amount")))
+            .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Custom Amount")))
             .toMenuItem().setSlots(41).setHandler(new ItemHandler("set_custom", (viewer, event) -> {
                 Player player = viewer.getPlayer();
                 var breadcumb = this.getLink(viewer);

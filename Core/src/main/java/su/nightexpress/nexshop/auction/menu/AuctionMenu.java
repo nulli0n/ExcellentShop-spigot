@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.ListingCategory;
@@ -27,7 +27,9 @@ import su.nightexpress.nightcore.menu.api.AutoFill;
 import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.item.MenuItem;
 import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderMap;
+import su.nightexpress.nightcore.util.placeholder.Replacer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -215,16 +217,26 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
 
             AuctionUtils.hideListingAttributes(item);
 
-            ItemReplacer.create(item).trimmed()
+            return NightItem.fromItemStack(item)
                 .setDisplayName(this.itemName)
                 .setLore(this.itemLore)
-                .injectLore(PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, listing))
-                .replaceLoreExact(PLACEHOLDER_ACTION_PREVIEW, previewLore)
-                .replace(listing.replacePlaceholders())
-                .replacePlaceholderAPI(player)
-                .writeMeta();
+                .replacement(replacer -> replacer
+                    .replace(PLACEHOLDER_LORE_FORMAT, Replacer.create().replace(PLACEHOLDER_ACTION_PREVIEW, previewLore).apply(this.getLoreFormat(player, listing)))
+                    //.replace(PLACEHOLDER_ACTION_PREVIEW, previewLore)
+                    .replace(listing.replacePlaceholders())
+                )
+                .getItemStack();
 
-            return item;
+//            ItemReplacer.create(item).trimmed()
+//                .setDisplayName(this.itemName)
+//                .setLore(this.itemLore)
+//                .injectLore(PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, listing))
+//                .replaceLoreExact(PLACEHOLDER_ACTION_PREVIEW, previewLore)
+//                .replace(listing.replacePlaceholders())
+//                .replacePlaceholderAPI(player)
+//                .writeMeta();
+//
+//            return item;
         });
 
         autoFill.setItems(this.auctionManager.getListings().getActive().stream()

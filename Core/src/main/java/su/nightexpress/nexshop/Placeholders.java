@@ -52,10 +52,9 @@ import java.util.stream.Collectors;
 
 public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
 
-    public static final String URL_WIKI               = "https://nightexpress.gitbook.io/excellentshop";
-    public static final String URL_WIKI_PLACEHOLDERS  = URL_WIKI + "/utility/placeholders#internal-placeholders";
-    public static final String URL_WIKI_PRODUCT_STOCK = URL_WIKI + "/features/product-stock";
-    public static final String URL_WIKI_CURRENCY      = URL_WIKI + "/features/multi-currency";
+    public static final String URL_WIKI               = "https://nightexpressdev.com/excellentshop/";
+    public static final String URL_WIKI_PLACEHOLDERS  = URL_WIKI + "placeholders";
+    public static final String URL_WIKI_CURRENCY      = URL_WIKI + "features/multi-currency";
 
     public static final String GENERIC_BUY        = "%buy%";
     public static final String GENERIC_SELL       = "%sell%";
@@ -89,8 +88,8 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String ITEM_NAME = "%item_name%";
     public static final String ITEM_LORE = "%item_lore%";
 
-    public static final String SHOP_ID           = "%shop_id%";
-    public static final String SHOP_NAME           = "%shop_name%";
+    public static final String SHOP_ID              = "%shop_id%";
+    public static final String SHOP_NAME            = "%shop_name%";
     public static final String SHOP_BUYING_ALLOWED  = "%shop_buy_allowed%";
     public static final String SHOP_SELLING_ALLOWED = "%shop_sell_allowed%";
     public static final String SHOP_PRODUCTS        = "%shop_products%";
@@ -107,14 +106,14 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String CHEST_SHOP_SHOWCASE_ENABLED = "%shop_showcase_enabled%";
     public static final String CHEST_SHOP_RENT_EXPIRES_IN  = "%shop_rent_expires_in%";
     public static final String CHEST_SHOP_RENTER_NAME      = "%shop_rented_by%";
-    public static final String CHEST_SHOP_RENT_DURATION      = "%shop_rent_duration%";
-    public static final String CHEST_SHOP_RENT_PRICE      = "%shop_rent_price%";
+    public static final String CHEST_SHOP_RENT_DURATION    = "%shop_rent_duration%";
+    public static final String CHEST_SHOP_RENT_PRICE       = "%shop_rent_price%";
 
-    public static final String RENT_ENABLED = "%rent_enabled%";
-    public static final String RENT_CURRENCY = "%rent_currency%";
+    public static final String RENT_ENABLED       = "%rent_enabled%";
+    public static final String RENT_CURRENCY      = "%rent_currency%";
     public static final String RENT_CURRENCY_NAME = "%rent_currency_name%";
-    public static final String RENT_PRICE = "%rent_price%";
-    public static final String RENT_DURATION = "%rent_duration%";
+    public static final String RENT_PRICE         = "%rent_price%";
+    public static final String RENT_DURATION      = "%rent_duration%";
 
     // Virtual shop
     public static final String VIRTUAL_SHOP_ICON_NAME           = "%shop_icon_name%";
