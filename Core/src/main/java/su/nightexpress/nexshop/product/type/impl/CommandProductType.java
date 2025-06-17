@@ -6,7 +6,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.Module;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
 import su.nightexpress.nexshop.config.Lang;
@@ -34,7 +33,7 @@ public class CommandProductType implements CommandTyping {
     }
 
     @NotNull
-    public static CommandProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
+    public static CommandProductType read(@NotNull FileConfig config, @NotNull String path) {
         // ------- REVERT 4.13.3 CHANGES - START ------- //
         String serialized = config.getString(path + ".Data");
         if (serialized != null && !serialized.isBlank()) {

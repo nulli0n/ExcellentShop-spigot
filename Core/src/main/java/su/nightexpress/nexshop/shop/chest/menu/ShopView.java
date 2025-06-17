@@ -1,5 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
+import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
@@ -26,11 +28,11 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Filled<ChestProduct>, ConfigBased {
 
     public static final String FILE_NAME = "view.yml";
@@ -68,7 +70,7 @@ public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Fille
                     .replacement(replacer -> replacer
                         .replace(GENERIC_BUY, buyLore)
                         .replace(GENERIC_SELL, sellLore)
-                        .replace(GENERIC_LORE, ItemUtil.getSerializedLore(preview))
+                        .replace(GENERIC_LORE, ItemUtil.getLoreSerialized(preview))
                         .replace(product.replacePlaceholders(viewer.getPlayer()))
                         .replace(product.getCurrency().replacePlaceholders())
                         .replace(shop.replacePlaceholders())
@@ -103,13 +105,23 @@ public class ShopView extends LinkedMenu<ShopPlugin, ChestShop> implements Fille
 
     @Override
     public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
-        this.productSlots = ConfigValue.create("Item.Product_Slots", new int[]{11,12,13,14,15}).read(config);
+        this.productSlots = ConfigValue.create("Item.Product_Slots", new int[]{10,13,16}).read(config);
 
-        loader.addDefaultItem(NightItem.asCustomHead("2a52d579afe2fdf7b8ecfa746cd016150d96beb75009bb2733ade15d487c42a1")
-            .setDisplayName(LIGHT_GRAY.wrap("<Empty Slot>"))
-            .toMenuItem().setSlots(11,12,13,14,15).setPriority(-1));
+        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem()
+            .setSlots(IntStream.range(0, 27).toArray())
+            .setPriority(0)
+        );
 
-        loader.addDefaultItem(MenuItem.buildNextPage(this, 17).setPriority(10));
-        loader.addDefaultItem(MenuItem.buildPreviousPage(this, 9).setPriority(10));
+        loader.addDefaultItem(NightItem.fromType(Material.FIREWORK_STAR)
+            .setDisplayName(GRAY.wrap("Out of Stock"))
+            .setColor(Color.GRAY)
+            .hideAllComponents()
+            .toMenuItem()
+            .setSlots(10,13,16)
+            .setPriority(1)
+        );
+
+        loader.addDefaultItem(MenuItem.buildNextPage(this, 26).setPriority(10));
+        loader.addDefaultItem(MenuItem.buildPreviousPage(this, 18).setPriority(10));
     }
 }

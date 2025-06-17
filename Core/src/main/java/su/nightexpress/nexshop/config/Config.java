@@ -1,8 +1,8 @@
 package su.nightexpress.nexshop.config;
 
 import org.bukkit.event.inventory.ClickType;
-import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
+import su.nightexpress.nexshop.module.ModuleConfig;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.Lists;
@@ -20,6 +20,13 @@ public class Config {
         "MM/dd/yyyy HH:mm"
     ).whenRead(ShopUtils::setDateFormatter);
 
+    public static final ConfigValue<Boolean> CURRENCY_NEED_PERMISSION = ConfigValue.create("General.Currency_Need_Permission",
+        false,
+        "Controls whether players must have '" + Perms.PREFIX_CURRENCY + "[name]' permission to use specific currency for their shops and listings.",
+        "[*] Useful only for ChestShop and Auction modules.",
+        "[*] Currencies set as default are always allowed to use."
+    );
+
     public static final ConfigValue<Integer> SHOP_UPDATE_INTERVAL = ConfigValue.create("General.Shop_Update_Interval",
         60,
         "Sets how often (in seconds) plugin will check shops for possible 'updates', such as:",
@@ -28,62 +35,6 @@ public class Config {
         "- Update time for Float prices of both, Virtual and Static Shops.",
         "Do not touch unless you know what and why you're doing.",
         "[Default is 60 seconds]"
-    );
-
-    public static final ConfigValue<Boolean> MODULES_VIRTUAL_SHOP_ENABLED = ConfigValue.create("Modules.VirtualShop.Enabled",
-        true,
-        "Sets whether or not Virtual Shop module is enabled."
-    );
-
-    public static final ConfigValue<String[]> MODULES_VIRTUAL_SHOP_ALIASES = ConfigValue.create("Modules.VirtualShop.Command_Aliases",
-        new String[]{"vshop"},
-        "Command aliases (names) for the Virtual Shop module. Split with commas.",
-        "[*] You must reboot the server to apply changes."
-    );
-
-    public static final ConfigValue<Boolean> MODULES_CHEST_SHOP_ENABLED = ConfigValue.create("Modules.ChestShop.Enabled",
-        true,
-        "Sets whether or not Chest Shop module is enabled."
-    );
-
-    public static final ConfigValue<String[]> MODULES_CHEST_SHOP_ALIASES = ConfigValue.create("Modules.ChestShop.Command_Aliases",
-        new String[]{"chestshop", "cshop", "cs"},
-        "Command aliases (names) for the Chest Shop module. Split with commas.",
-        "[*] You must reboot the server to apply changes."
-    );
-
-    public static final ConfigValue<Boolean> MODULES_AUCTION_ENABLED = ConfigValue.create("Modules.Auction.Enabled",
-        true,
-        "Sets whether or not Auction module is enabled."
-    );
-
-    public static final ConfigValue<String[]> MODULES_AUCTION_ALIASES = ConfigValue.create("Modules.Auction.Command_Aliases",
-        new String[]{"auction", "auc", "ah"},
-        "Command aliases (names) for the Auction module. Split with commas.",
-        "[*] You must reboot the server to apply changes."
-    );
-
-    public static final ConfigValue<Integer> DATA_SAVE_INTERVAL = ConfigValue.create("Data.SaveInterval",
-        5,
-        "Sets how often (in seconds) modified product & shop datas will be saved to the database.",
-        "Data including:",
-        "- Product's price data (float, dynamic).",
-        "- Product's stock data (global, player).",
-        "- Shop's rotation data.",
-        "[*] Data is also saved on server reboot and plugin reload.",
-        "[*] You can disable it if you're on SQLite or don't care about syncing across multiple servers."
-    );
-
-    public static final ConfigValue<String> DATA_PRICE_TABLE = ConfigValue.create("Data.PriceTable",
-        "price_data"
-    );
-
-    public static final ConfigValue<String> DATA_STOCKS_TABLE = ConfigValue.create("Data.StocksTable",
-        "stocks"
-    );
-
-    public static final ConfigValue<String> DATA_ROTATIONS_TABLE = ConfigValue.create("Data.RotationsTable",
-        "rotations"
     );
 
     public static final ConfigValue<Boolean> GENERAL_BUY_WITH_FULL_INVENTORY = ConfigValue.create("General.Buy_With_Full_Inventory",
@@ -124,19 +75,32 @@ public class Config {
         "Allowed values: " + String.join(", ", Lists.getEnums(ShopClickAction.class))
     );
 
-    public static String[] getVirtualShopAliases() {
-        return getAliases(MODULES_VIRTUAL_SHOP_ALIASES.get(), "vshop");
-    }
+    public static final ConfigValue<Integer> DATA_SAVE_INTERVAL = ConfigValue.create("Data.SaveInterval",
+        5,
+        "Sets how often (in seconds) modified product & shop datas will be saved to the database.",
+        "Data including:",
+        "- Product's price data (float, dynamic).",
+        "- Product's stock data (global, player).",
+        "- Shop's rotation data.",
+        "[*] Data is also saved on server reboot and plugin reload.",
+        "[*] You can disable it if you're on SQLite or don't care about syncing across multiple servers."
+    );
 
-    public static String[] getChestShopAliases() {
-        return getAliases(MODULES_CHEST_SHOP_ALIASES.get(), "chestshop");
-    }
+    public static final ConfigValue<String> DATA_PRICE_TABLE = ConfigValue.create("Data.PriceTable",
+        "price_data"
+    );
 
-    public static String[] getAuctionAliases() {
-        return getAliases(MODULES_AUCTION_ALIASES.get(), "auction");
-    }
+    public static final ConfigValue<String> DATA_STOCKS_TABLE = ConfigValue.create("Data.StocksTable",
+        "stocks"
+    );
 
-    private static String[] getAliases(@NotNull String[] aliases, @NotNull String fallback) {
-        return aliases.length == 0 ? new String[]{fallback} : aliases;
-    }
+    public static final ConfigValue<String> DATA_ROTATIONS_TABLE = ConfigValue.create("Data.RotationsTable",
+        "rotations"
+    );
+
+    public static final ConfigValue<Map<String, ModuleConfig>> MODULE_CONFIG = ConfigValue.forMapById("Module",
+        ModuleConfig::read,
+        map -> map.putAll(ModuleConfig.getDefaultConfigs()),
+        "Module settings."
+    );
 }

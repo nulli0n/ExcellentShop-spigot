@@ -3,6 +3,7 @@ package su.nightexpress.nexshop.api.shop;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.nexshop.api.module.Module;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
@@ -24,8 +25,8 @@ public class TransactionLogger {
 
     public static final String FILE_NAME = "transactions.log";
 
-    private final Module  module;
-    private final boolean outFile;
+    private final su.nightexpress.nexshop.api.module.Module module;
+    private final boolean                                   outFile;
     private final boolean           outConsole;
     private final DateTimeFormatter dateFormat;
     private final String            format;
@@ -67,7 +68,7 @@ public class TransactionLogger {
     }
 
     private void print(@NotNull String text) {
-        text = NightMessage.stripAll(text);
+        text = NightMessage.stripTags(text);
 
         if (this.outConsole) {
             this.module.info(text);

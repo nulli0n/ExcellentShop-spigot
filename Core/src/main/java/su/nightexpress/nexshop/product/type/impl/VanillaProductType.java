@@ -5,11 +5,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.Module;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.util.ErrorHandler;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.PDCUtil;
@@ -27,7 +27,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
     }
 
     @NotNull
-    public static VanillaProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
+    public static VanillaProductType read(@NotNull FileConfig config, @NotNull String path) {
         // ------- REVERT 4.13.3 CHANGES - START ------- //
         String serialized = config.getString(path + ".Data");
         if (serialized != null && !serialized.isBlank()) {
@@ -48,7 +48,7 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
         ItemStack itemStack = ShopUtils.readItemTag(tagString);
         if (itemStack == null || itemStack.getType().isAir()) {
             itemStack = getBrokenItem();
-            module.error("Invalid item tag string '" + tagString + "'! Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
+            ErrorHandler.configError("Invalid item tag string '" + tagString + "'!", config, path);
         }
 
         return new VanillaProductType(itemStack, respectMeta);

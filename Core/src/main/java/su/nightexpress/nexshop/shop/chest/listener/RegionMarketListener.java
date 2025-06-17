@@ -8,8 +8,8 @@ import org.bukkit.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
-import su.nightexpress.nexshop.shop.chest.util.BlockPos;
 import su.nightexpress.nightcore.manager.AbstractListener;
+import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
 
 public class RegionMarketListener extends AbstractListener<ShopPlugin> {
 
@@ -25,7 +25,7 @@ public class RegionMarketListener extends AbstractListener<ShopPlugin> {
         World world = event.getRegion().getRegionworld();
         WGRegion region = event.getRegion().getRegion();
 
-        this.module.getShops(world).forEach(shop -> {
+        this.module.lookup().getAll(world).forEach(shop -> {
             BlockPos blockPos = shop.getBlockPos();
             if (region.contains(blockPos.getX(), blockPos.getY(), blockPos.getZ())) {
                 this.module.removeShop(shop);

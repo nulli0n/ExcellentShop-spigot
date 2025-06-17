@@ -20,8 +20,14 @@ public class ShopAPI {
         plugin = null;
     }
 
+    public static boolean isInitialized() {
+        return plugin != null;
+    }
+
     @NotNull
     public static ShopPlugin getPlugin() {
+        if (plugin == null) throw new IllegalStateException("API is not yet initialized!");
+
         return plugin;
     }
 

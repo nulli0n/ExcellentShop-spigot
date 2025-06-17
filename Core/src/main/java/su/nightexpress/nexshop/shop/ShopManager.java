@@ -111,7 +111,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
         ChestShopModule chestShopModule = plugin.getChestShop();
         if (chestShopModule != null) {
-            shops.addAll(chestShopModule.getShops());
+            shops.addAll(chestShopModule.lookup().getAll());
         }
 
         return shops;

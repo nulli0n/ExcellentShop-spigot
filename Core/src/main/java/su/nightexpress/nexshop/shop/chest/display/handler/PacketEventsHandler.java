@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.chest.display;
+package su.nightexpress.nexshop.shop.chest.display.handler;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.manager.player.PlayerManager;
@@ -14,13 +14,15 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.display.impl.FakeEntity;
+import su.nightexpress.nightcore.bridge.paper.PaperComponent;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.text.NightMessage;
 
@@ -31,8 +33,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
     private final PlayerManager playerManager;
 
-    public PacketEventsHandler(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, module);
+    public PacketEventsHandler() {
         this.playerManager = PacketEvents.getAPI().getPlayerManager();
     }
 
@@ -43,23 +44,21 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
     @Override
     protected void broadcastPacket(@NotNull PacketWrapper<?> packet) {
-        this.plugin.getServer().getOnlinePlayers().forEach(player -> this.playerManager.sendPacket(player, packet));
+        Bukkit.getServer().getOnlinePlayers().forEach(player -> this.playerManager.sendPacket(player, packet));
     }
 
 
     @Override
     @NotNull
-    protected List<PacketWrapper<?>> getItemPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketWrapper<?>> getItemPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull ItemStack item) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
-        PacketWrapper<?> spawnPacket = this.createSpawnPacket(type, location, entityID);
-        PacketWrapper<?> dataPacket = this.createMetadataPacket(entityID, dataList -> {
+        PacketWrapper<?> dataPacket = this.createMetadataPacket(entity.getId(), dataList -> {
             dataList.add(new EntityData(5, EntityDataTypes.BOOLEAN, true)); // no gravity
             dataList.add(new EntityData(8, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(item))); // item
         });
 
-
-        if (create) list.add(spawnPacket);
+        if (needSpawn) list.add(this.createSpawnPacket(this.itemType, entity));
         list.add(dataPacket);
 
         return list;
@@ -67,13 +66,11 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
     @Override
     @NotNull
-    protected List<PacketWrapper<?>> getShowcasePackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketWrapper<?>> getShowcasePackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull ItemStack item) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
-        PacketWrapper<?> spawnPacket = this.createSpawnPacket(type, location, entityID);
-
-        PacketWrapper<?> dataPacket = this.createMetadataPacket(entityID, dataList -> {
-            if (type == EntityType.ARMOR_STAND) {
+        PacketWrapper<?> dataPacket = this.createMetadataPacket(entity.getId(), dataList -> {
+            if (this.showcaseType == EntityType.ARMOR_STAND) {
                 dataList.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x20)); // invisible
                 dataList.add(new EntityData(3, EntityDataTypes.BOOLEAN, false)); // custom name visible
                 dataList.add(new EntityData(5, EntityDataTypes.BOOLEAN, true)); // no gravity
@@ -87,30 +84,31 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
             }
         });
 
-        if (create) list.add(spawnPacket);
+        if (needSpawn) list.add(this.createSpawnPacket(this.showcaseType, entity));
         list.add(dataPacket);
 
-        if (type == EntityType.ARMOR_STAND) {
+        if (this.showcaseType == EntityType.ARMOR_STAND) {
             List<Equipment> equipment = Lists.newList(new Equipment(EquipmentSlot.HELMET, SpigotConversionUtil.fromBukkitItemStack(item)));
-            PacketWrapper<?> armorPacket = new WrapperPlayServerEntityEquipment(entityID, equipment);
+            PacketWrapper<?> armorPacket = new WrapperPlayServerEntityEquipment(entity.getId(), equipment);
             list.add(armorPacket);
         }
 
         return list;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     @NotNull
-    protected List<PacketWrapper<?>> getHologramPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine) {
+    protected List<PacketWrapper<?>> getHologramPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull String textLine) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
-        PacketWrapper<?> spawnPacket = this.createSpawnPacket(type, location, entityID);
-        PacketWrapper<?> dataPacket = this.createMetadataPacket(entityID, dataList -> {
+        PaperComponent component = (PaperComponent) NightMessage.parse(textLine);
+        Component textComponent = component.getParent();
+
+        PacketWrapper<?> dataPacket = this.createMetadataPacket(entity.getId(), dataList -> {
             // Armor Stands (legacy)
-            if (type == EntityType.ARMOR_STAND) {
+            if (this.hologramType == EntityType.ARMOR_STAND) {
                 dataList.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x20)); // invisible
-                dataList.add(new EntityData(2, EntityDataTypes.OPTIONAL_COMPONENT, Optional.of(NightMessage.asJson(textLine)))); // display name
+                dataList.add(new EntityData(2, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(textComponent))); // display name
                 dataList.add(new EntityData(3, EntityDataTypes.BOOLEAN, true)); // custom name visible
                 dataList.add(new EntityData(5, EntityDataTypes.BOOLEAN, true)); // no gravity
                 dataList.add(new EntityData(15, EntityDataTypes.BYTE, (byte) (0x01 | 0x08 | 0x10))); // isSmall noBasePlate setMarker
@@ -118,12 +116,12 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
             // Displays (modern)
             else {
                 dataList.add(new EntityData(15, EntityDataTypes.BYTE, (byte) 1)); // billboard
-                dataList.add(new EntityData(23, EntityDataTypes.COMPONENT, NightMessage.asJson(textLine))); // text
+                dataList.add(new EntityData(23, EntityDataTypes.ADV_COMPONENT, textComponent)); // text
                 dataList.add(new EntityData(27, EntityDataTypes.BYTE, (byte) 0x1)); // shadow
             }
         });
 
-        if (create) list.add(spawnPacket);
+        if (needSpawn) list.add(this.createSpawnPacket(this.hologramType, entity));
         list.add(dataPacket);
 
         return list;
@@ -131,11 +129,14 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
     @Override
     @NotNull
-    protected PacketWrapper<?> createSpawnPacket(@NotNull EntityType entityType, @NotNull Location location, int entityID) {
+    protected PacketWrapper<?> createSpawnPacket(@NotNull EntityType entityType, @NotNull FakeEntity entity) {
+        Location location = entity.getLocation();
+        int entityId = entity.getId();
+
         com.github.retrooper.packetevents.protocol.entity.type.EntityType type = SpigotConversionUtil.fromBukkitEntityType(entityType);
         com.github.retrooper.packetevents.protocol.world.Location loc = SpigotConversionUtil.fromBukkitLocation(location);
 
-        return new WrapperPlayServerSpawnEntity(entityID, UUID.randomUUID(), type, loc, 0F, 0, new Vector3d());
+        return new WrapperPlayServerSpawnEntity(entityId, UUID.randomUUID(), type, loc, 0F, 0, new Vector3d());
     }
 
     @Override

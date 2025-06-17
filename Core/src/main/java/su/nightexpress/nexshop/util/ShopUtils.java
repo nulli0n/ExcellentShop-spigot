@@ -9,6 +9,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
@@ -18,7 +19,9 @@ import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.config.Perms;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nightcore.util.*;
@@ -47,6 +50,11 @@ public class ShopUtils {
         return dateFormatter;
     }
 
+    @NotNull
+    public static String formatOrInfinite(double value) {
+        return value < 0 ? Lang.OTHER_INFINITY.getString() : NumberUtil.format(value);
+    }
+
     @Nullable
     public static ItemStack readItemTag(@NotNull String serialized) {
         return Version.isAtLeast(Version.MC_1_21) && serialized.contains("{") ? ItemNbt.fromTagString(serialized) : ItemNbt.decompress(serialized);
@@ -57,8 +65,10 @@ public class ShopUtils {
         return Version.isAtLeast(Version.MC_1_21) ? ItemNbt.getTagString(itemStack) : ItemNbt.compress(itemStack);
     }
 
-    public static boolean hasEconomyBridge() {
-        return Plugins.isInstalled(HookId.ECONOMY_BRIDGE);
+    public static boolean hasCurrencyPermission(@NotNull Player player, @NotNull Currency currency) {
+        boolean hasOldPerm = player.hasPermission(ChestPerms.PREFIX + "currency." + currency.getInternalId());
+
+        return player.hasPermission(Perms.CURRENCY) || player.hasPermission(Perms.PREFIX_CURRENCY + currency.getInternalId()) || hasOldPerm;
     }
 
     @NotNull
@@ -66,9 +76,9 @@ public class ShopUtils {
         String id = switch (typing) {
             case VanillaTyping vanilla -> {
                 ItemStack item = vanilla.getItem();
-                String name = StringUtil.transformForID(NightMessage.stripTags(ItemUtil.getSerializedName(item)).toLowerCase()); // Remove all non-latins from item display name.
+                String name = StringUtil.transformForID(NightMessage.stripTags(ItemUtil.getNameSerialized(item)).toLowerCase()); // Remove all non-latins from item display name.
 
-                yield name.isBlank() ? BukkitThing.toString(item.getType()) : name;
+                yield name.isBlank() ? BukkitThing.getValue(item.getType()) : name;
             }
             case PluginTyping pluginTyping -> (pluginTyping.getHandler().getName() + "_" + pluginTyping.getItemId()).toLowerCase();
             case CommandTyping ignored -> "command_item";
@@ -81,6 +91,16 @@ public class ShopUtils {
         }
 
         return addCount(id, count);
+    }
+
+    @NotNull
+    public static String getProductLogName(@NotNull Product product) {
+        ItemStack preview = product.getPreview();
+        String name = ItemUtil.getCustomNameSerialized(preview);
+        if (name == null) name = ItemUtil.getItemNameSerialized(preview);
+        if (name == null) name = StringUtil.capitalizeUnderscored(BukkitThing.getValue(preview.getType()));
+
+        return name;
     }
 
     @NotNull

@@ -1,9 +1,9 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.Transaction.Result;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
@@ -13,8 +13,8 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 
 public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProduct> {
 
-    public VirtualPreparedProduct(@NotNull ShopPlugin plugin, @NotNull Player player, @NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
-        super(plugin, player, product, tradeType, all);
+    public VirtualPreparedProduct(@NotNull Player player, @NotNull VirtualProduct product, @NotNull TradeType tradeType, boolean all) {
+        super(player, product, tradeType, all);
     }
 
     @Override
@@ -33,9 +33,9 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         }
 
         // Call custom event
-        Transaction transaction = new Transaction(plugin, product, TradeType.BUY, this.getUnits(), price, result);
+        Transaction transaction = new Transaction(product, TradeType.BUY, this.getUnits(), price, result);
         ShopTransactionEvent event = new ShopTransactionEvent(player, shop, transaction);
-        plugin.getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         result = event.getTransaction().getResult();
         transaction.sendError(player);
@@ -61,7 +61,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         VirtualProduct product = this.getProduct();
         VirtualShop shop = product.getShop();
 
-        int possible = product.getAvailableAmount(player, TradeType.SELL);//.getShop().getStock().count(player, product, this.getTradeType());
+        int possible = product.getAvailableAmount(player, TradeType.SELL);
         int userHas = product.countUnits(inventory);
         int fined;
         if (this.isAll()) {
@@ -83,9 +83,9 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
         }
 
         // Call custom event
-        Transaction transaction = new Transaction(plugin, product, TradeType.SELL, fined, price, result);
+        Transaction transaction = new Transaction(product, TradeType.SELL, fined, price, result);
         ShopTransactionEvent event = new ShopTransactionEvent(player, shop, transaction);
-        plugin.getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
 
         result = event.getTransaction().getResult();
         transaction.sendError(player);
@@ -96,8 +96,6 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
             }
 
             shop.onTransaction(event);
-            //shop.getStock().onTransaction(event);
-
             shop.getModule().getLogger().logTransaction(event);
             product.getCurrency().give(player, transaction.getPrice());
             product.take(inventory, transaction.getUnits());

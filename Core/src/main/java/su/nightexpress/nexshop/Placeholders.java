@@ -60,8 +60,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String GENERIC_SELL       = "%sell%";
     public static final String GENERIC_NAME       = "%name%";
     public static final String GENERIC_ITEM       = "%item%";
-    public static final String GENERIC_TOTAL      = "%total%";
-    public static final String GENERIC_LORE       = "%lore%";
+    public static final String GENERIC_TOTAL        = "%total%";
+    public static final String GENERIC_PRODUCTS = "%products%";
+    public static final String GENERIC_MAX_PRODUCTS = "%max_products%";
+    public static final String GENERIC_MAX_SHOPS = "%max_shops%";
+    public static final String GENERIC_SHOPS_AMOUNT = "%shops_amount%";
+    public static final String GENERIC_LORE         = "%lore%";
     public static final String GENERIC_AMOUNT     = "%amount%";
     public static final String GENERIC_UNITS      = "%units%";
     public static final String GENERIC_TYPE       = "%type%";
@@ -76,9 +80,6 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String GENERIC_PAGES      = "%pages%";
     public static final String GENERIC_WEIGHT     = "%weight%";
 
-    public static final String                      GENERIC_PRODUCT_NAME    = "%product_name%";
-    public static final String                      GENERIC_PRODUCT_STOCK   = "%product_stock%";
-    public static final Function<TradeType, String> GENERIC_PRODUCT_PRICE   = tradeType -> "%product_price_" + tradeType.getLowerCase() + "%";
     public static final String                      GENERIC_SELL_MULTIPLIER = "%sell_multiplier%";
 
     public static final Function<TradeType, String> STOCK_TYPE    = tradeType -> "%stock_global_" + tradeType.name().toLowerCase() + "%";
@@ -180,6 +181,11 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     public static final String PRODUCT_LIMITS_RESET_IN   = "%product_limits_restock_date%";
     public static final String PRODUCT_LIMITS_RESET_TIME = "%product_limits_restock_time%";
 
+    // Chest
+    public static final String PRODUCT_CAPACITY = "%product_capacity%";
+    public static final String PRODUCT_SPACE    = "%product_space%";
+    public static final String PRODUCT_AMOUNT   = "%product_amount%";
+
     // Virtual
     public static final String PRODUCT_COMMANDS             = "%product_commands%";
     public static final String PRODUCT_DISCOUNT_ALLOWED     = "%product_discount_allowed%";
@@ -234,7 +240,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(GENERIC_AMOUNT, transaction -> String.valueOf(transaction.getAmount()))
         .add(GENERIC_UNITS, transaction -> String.valueOf(transaction.getUnits()))
         .add(GENERIC_PRICE, transaction -> transaction.getProduct().getCurrency().format(transaction.getPrice()))
-        .add(GENERIC_ITEM, transaction -> ItemUtil.getSerializedName(transaction.getProduct().getPreview()))
+        .add(GENERIC_ITEM, transaction -> ShopUtils.getProductLogName(transaction.getProduct()))
     );
 
     // ------------------------------
@@ -261,12 +267,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             .add(CHEST_SHOP_X, shop -> NumberUtil.format(shop.getBlockPos().getX()))
             .add(CHEST_SHOP_Y, shop -> NumberUtil.format(shop.getBlockPos().getY()))
             .add(CHEST_SHOP_Z, shop -> NumberUtil.format(shop.getBlockPos().getZ()))
-            .add(CHEST_SHOP_WORLD, shop -> shop.isActive() ? LangAssets.get(shop.getWorld()) : shop.getWorldName())
+            .add(CHEST_SHOP_WORLD, shop -> shop.isActive() ? LangAssets.get(shop.location().getWorld()) : shop.getWorldName()) // TODO Lang
             .add(CHEST_SHOP_IS_ADMIN, shop -> ChestLang.getYesOrNo(shop.isAdminShop()))
             .add(CHEST_SHOP_HOLOGRAM_ENABLED, shop -> ChestLang.getYesOrNo(shop.isHologramEnabled()))
             .add(CHEST_SHOP_SHOWCASE_ENABLED, shop -> ChestLang.getYesOrNo(shop.isShowcaseEnabled()))
-            .add(CHEST_SHOP_RENT_EXPIRES_IN, shop -> shop.isRented() ? TimeFormats.formatDuration(shop.getRentedUntil(), TimeFormatType.LITERAL) : "-")
-            .add(CHEST_SHOP_RENTER_NAME, shop -> shop.isRented() ? shop.getRenterName() : "-")
+            .add(CHEST_SHOP_RENT_EXPIRES_IN, shop -> shop.isRented() ? TimeFormats.formatDuration(shop.getRentedUntil(), TimeFormatType.LITERAL) : Lang.OTHER_NO_RENT.getString())
+            .add(CHEST_SHOP_RENTER_NAME, shop -> shop.isRented() ? shop.getRenterName() : Lang.OTHER_NO_RENT.getString())
             .add(CHEST_SHOP_RENT_DURATION, shop -> shop.isRentable() ? TimeFormats.toLiteral(shop.getRentSettings().getDurationMillis()) : "-")
             .add(CHEST_SHOP_RENT_PRICE, shop -> shop.isRentable() ? shop.getRentSettings().getPriceFormatted() : "-");
 
@@ -274,12 +280,12 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             int index = slot;
             for (TradeType tradeType : TradeType.values()) {
                 list.add(CHEST_SHOP_PRODUCT_PRICE.apply(tradeType, slot), shop -> {
-                    ChestProduct product = shop.getProductAtSlot(index);
+                    ChestProduct product = shop.getProductByIndex(index);
                     return product == null ? "-" : product.getCurrency().format(product.getPricer().getPrice(tradeType));
                 });
             }
             list.add(CHEST_SHOP_PRODUCT_NAME.apply(slot), shop -> {
-                ChestProduct product = shop.getProductAtSlot(index);
+                ChestProduct product = shop.getProductByIndex(index);
                 return product == null ? "-" : ItemUtil.getSerializedName(product.getPreview());
             });
         }
@@ -382,15 +388,13 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
     });
 
     public static final PlaceholderList<ProductPOV<ChestProduct>> CHEST_PRODUCT = PlaceholderList.create(list -> {
-        list.add(PRODUCT);
-
-        for (TradeType tradeType : TradeType.values()) {
-            list
-                .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(tradeType), pov -> {
-                    int leftAmount = pov.product.countStock(tradeType, null);
-                    return leftAmount < 0 ? ChestLang.OTHER_INFINITY.getString() : NumberUtil.format(leftAmount);
-                });
-        }
+        list.add(PRODUCT)
+            .add(PRODUCT_AMOUNT, pov -> ShopUtils.formatOrInfinite(pov.product.getCachedAmount()))
+            .add(PRODUCT_SPACE, pov -> ShopUtils.formatOrInfinite(pov.product.getCachedSpace()))
+            .add(PRODUCT_CAPACITY, pov -> ShopUtils.formatOrInfinite(pov.product.getCachedCapacity()))
+            .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(TradeType.BUY), pov -> ShopUtils.formatOrInfinite(pov.product.getCachedAmount()))
+            .add(PRODUCT_STOCK_AMOUNT_LEFT.apply(TradeType.SELL), pov -> ShopUtils.formatOrInfinite(pov.product.getCachedSpace()))
+            ;
     });
 
     public static final PlaceholderList<ProductPOV<? extends VirtualProduct>> VIRTUAL_PRODUCT = PlaceholderList.create(list -> {
@@ -528,7 +532,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(LISTING_DATE_CREATION, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getCreationDate())))
         .add(LISTING_ITEM_AMOUNT, listing -> String.valueOf(listing.getItemStack().getAmount()))
         .add(LISTING_ITEM_NAME, listing -> ItemUtil.getSerializedName(listing.getItemStack()))
-        .add(LISTING_ITEM_LORE, listing -> String.join("\n", ItemUtil.getLore(listing.getItemStack())))
+        .add(LISTING_ITEM_LORE, listing -> String.join("\n", ItemUtil.getSerializedLore(listing.getItemStack())))
         .add(LISTING_ITEM_VALUE, listing -> String.valueOf(ItemNbt.compress(listing.getItemStack())))
         .add(LISTING_DELETES_IN, listing -> TimeFormats.formatDuration(listing.getDeleteDate(), TimeFormatType.LITERAL))
         .add(LISTING_DELETE_DATE, listing -> ShopUtils.getDateFormatter().format(TimeUtil.getLocalDateTimeOf(listing.getDeleteDate())))

@@ -208,7 +208,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @NotNull
     @Deprecated
     public VirtualProduct createProduct(@NotNull Currency currency, @NotNull ProductTyping typing) {
-        return new VirtualProduct(plugin, ShopUtils.generateProductId(this, typing), this, currency, typing);
+        return new VirtualProduct(ShopUtils.generateProductId(this, typing), this, currency, typing);
     }
 
     @Nullable
@@ -239,9 +239,9 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         }
 
         ProductType type = config.getEnum(path + ".Type", ProductType.class, ProductType.VANILLA);
-        ProductTyping typing = ProductTypes.read(this.module, type, config, path);
+        ProductTyping typing = ProductTypes.read(type, config, path);
 
-        VirtualProduct product = new VirtualProduct(plugin, id, this, currency, typing);
+        VirtualProduct product = new VirtualProduct(id, this, currency, typing);
         product.load(config, path);
 
         return product;

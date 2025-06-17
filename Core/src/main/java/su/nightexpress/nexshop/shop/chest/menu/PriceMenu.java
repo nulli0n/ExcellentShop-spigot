@@ -19,7 +19,6 @@ import su.nightexpress.nightcore.util.wrapper.UniDouble;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class PriceMenu extends ProductPriceMenu<ChestProduct> {
 
@@ -47,7 +46,7 @@ public class PriceMenu extends ProductPriceMenu<ChestProduct> {
 
     @Override
     protected void handleCurrency(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull ChestProduct product) {
-        List<Currency> currencies = new ArrayList<>(module.getAllowedCurrencies(viewer.getPlayer()));
+        List<Currency> currencies = new ArrayList<>(this.module.getAvailableCurrencies(viewer.getPlayer()));
         if (currencies.isEmpty()) return;
 
         int index = currencies.indexOf(product.getCurrency()) + 1;
@@ -59,12 +58,12 @@ public class PriceMenu extends ProductPriceMenu<ChestProduct> {
 
     @Override
     protected void handlePriceType(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull ChestProduct product) {
-        Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PREFIX_PRICE_TYPE + priceType.name().toLowerCase());
+        //Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PREFIX_PRICE_TYPE + priceType.name().toLowerCase());
 
         double sell = product.getPricer().getPrice(TradeType.SELL);
         double buy = product.getPricer().getPrice(TradeType.BUY);
 
-        PriceType priceType = Lists.next(product.getPricer().getType(), predicate);
+        PriceType priceType = Lists.next(product.getPricer().getType()/*, predicate*/);
         product.setPricer(AbstractProductPricer.from(priceType));
         plugin.getDataManager().deletePriceData(product);
 

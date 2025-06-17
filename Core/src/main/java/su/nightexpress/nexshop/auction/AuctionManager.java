@@ -23,9 +23,9 @@ import su.nightexpress.nexshop.auction.listener.AuctionListener;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
-import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.module.AbstractModule;
+import su.nightexpress.nexshop.module.ModuleConfig;
 import su.nightexpress.nexshop.product.type.ProductTypes;
-import su.nightexpress.nexshop.shop.impl.AbstractModule;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.config.DatabaseType;
@@ -41,10 +41,7 @@ import java.util.stream.Collectors;
 
 public class AuctionManager extends AbstractModule {
 
-    public static final String ID = "auction";
-
     private final Listings                     listings;
-    private final Set<Currency>                allowedCurrencies;
     private final Map<String, ListingCategory> categoryMap;
 
     private AuctionDatabase database;
@@ -56,22 +53,15 @@ public class AuctionManager extends AbstractModule {
     private PlayerListingsMenu    sellingMenu;
     private CurrencySelectMenu    currencySelectMenu;
 
-    public AuctionManager(@NotNull ShopPlugin plugin) {
-        super(plugin, ID, Config.getAuctionAliases());
+    public AuctionManager(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleConfig config) {
+        super(plugin, id, config);
         this.listings = new Listings();
-        this.allowedCurrencies = new HashSet<>();
         this.categoryMap = new LinkedHashMap<>();
     }
 
     @Override
     protected void loadModule(@NotNull FileConfig config) {
         config.initializeOptions(AuctionConfig.class);
-
-        this.loadCurrencies();
-
-        if (this.getDefaultCurrency().isDummy()) {
-            this.error("Invalid default currency. Adding items to the auction will be disabled until fixed.");
-        }
 
         this.loadCategories();
 
@@ -107,7 +97,6 @@ public class AuctionManager extends AbstractModule {
         }
 
         this.listings.clear();
-        this.allowedCurrencies.clear();
         this.categoryMap.clear();
     }
 
@@ -128,30 +117,6 @@ public class AuctionManager extends AbstractModule {
         SellCommand.build(this.plugin, this, builder);
         UnclaimedCommand.build(this.plugin, this, builder);
         FillDummyCommand.build(this.plugin, this, builder);
-    }
-
-    private void loadCurrencies() {
-        Set<String> allowedList = AuctionConfig.ALLOWED_CURRENCIES.get();
-        if (allowedList.contains(Placeholders.WILDCARD)) {
-            this.allowedCurrencies.addAll(EconomyBridge.getCurrencies());
-        }
-        else {
-            for (String id : AuctionConfig.ALLOWED_CURRENCIES.get()) {
-                Currency currency = EconomyBridge.getCurrency(id);
-                if (currency == null) {
-                    this.error("Unknown currency: '" + id + "'. Skipping.");
-                    continue;
-                }
-                this.allowedCurrencies.add(currency);
-            }
-        }
-
-        Currency defaultCurrency = this.getDefaultCurrency();
-        if (!defaultCurrency.isDummy()) {
-            this.allowedCurrencies.add(defaultCurrency);
-        }
-
-        this.info("Allowed currencies: [" + this.allowedCurrencies.stream().map(Currency::getInternalId).collect(Collectors.joining(", ")) + "]");
     }
 
     private void loadCategories() {
@@ -183,21 +148,6 @@ public class AuctionManager extends AbstractModule {
         if (category == null) category = this.getCategories().stream().findFirst().orElseThrow();
 
         return category;
-    }
-
-    @NotNull
-    public Currency getDefaultCurrency() {
-        return EconomyBridge.getCurrencyOrDummy(AuctionConfig.DEFAULT_CURRENCY.get());
-    }
-
-    @NotNull
-    public Set<Currency> getAllowedCurrencies() {
-        return this.allowedCurrencies;
-    }
-
-    @NotNull
-    public Set<Currency> getAllowedCurrencies(@NotNull Player player) {
-        return this.getAllowedCurrencies();
     }
 
     private boolean needEnsureListingExists() {
@@ -325,7 +275,7 @@ public class AuctionManager extends AbstractModule {
     }
 
     public boolean sell(@NotNull Player player, @NotNull ItemStack item, double price) {
-        Set<Currency> currencies = this.getAllowedCurrencies(player);
+        Set<Currency> currencies = this.getAvailableCurrencies(player);
         if (currencies.isEmpty()) {
             AuctionLang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
             return false;

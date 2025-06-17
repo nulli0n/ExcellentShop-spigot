@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
@@ -38,12 +38,8 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
     private int     shopSlot;
     private int     shopPage;
 
-    public VirtualProduct(@NotNull ShopPlugin plugin,
-                          @NotNull String id,
-                          @NotNull VirtualShop shop,
-                          @NotNull Currency currency,
-                          @NotNull ProductTyping type) {
-        super(plugin, id, shop, currency, type);
+    public VirtualProduct(@NotNull String id, @NotNull VirtualShop shop, @NotNull Currency currency, @NotNull ProductTyping type) {
+        super(id, shop, currency, type);
         this.allowedRanks = new HashSet<>();
         this.requiredPermissions = new HashSet<>();
         this.forbiddenPermissions = new HashSet<>();
@@ -95,7 +91,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
     @Override
     @NotNull
     public VirtualPreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all) {
-        return new VirtualPreparedProduct(this.plugin, player, this, buyType, all);
+        return new VirtualPreparedProduct(player, this, buyType, all);
     }
 
     @Override
@@ -115,7 +111,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public boolean isInRotation() {
         return this.shop.getRotations().stream().filter(rotation -> rotation.hasProduct(this))
-            .map(rotation -> plugin.getDataManager().getRotationData(rotation)).filter(Objects::nonNull)
+            .map(rotation -> ShopAPI.getDataManager().getRotationData(rotation)).filter(Objects::nonNull)
             .anyMatch(data -> data.containsProduct(this.getId()));
     }
 
@@ -159,7 +155,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
     @Override
     public boolean isAvailable(@NotNull Player player) {
         if (!this.hasAccess(player)) {
-            Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
+            Lang.ERROR_NO_PERMISSION.getMessage(ShopAPI.getPlugin()).send(player); // TODO Move message out?
             return false;
         }
 
@@ -180,7 +176,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     @NotNull
     private StockData getStockData(@Nullable UUID playerId) {
-        return plugin.getDataManager().getStockDataOrCreate(this, playerId); // Already restocked if needed.
+        return ShopAPI.getDataManager().getStockDataOrCreate(this, playerId); // Already restocked if needed.
     }
 
     @Override

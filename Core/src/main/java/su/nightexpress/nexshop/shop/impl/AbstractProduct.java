@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
@@ -23,7 +23,6 @@ import java.util.function.UnaryOperator;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
 
-    protected final ShopPlugin plugin;
     protected final String     id;
 
     protected S                     shop;
@@ -31,12 +30,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     protected Currency              currency;
     protected AbstractProductPricer pricer;
 
-    public AbstractProduct(@NotNull ShopPlugin plugin,
-                           @NotNull String id,
-                           @NotNull S shop,
-                           @NotNull Currency currency,
-                           @NotNull ProductTyping type) {
-        this.plugin = plugin;
+    public AbstractProduct(@NotNull String id, @NotNull S shop, @NotNull Currency currency, @NotNull ProductTyping type) {
         this.id = id.toLowerCase();
         this.shop = shop;
         this.setCurrency(currency);
@@ -83,7 +77,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         if (this.pricer.getType() == PriceType.FLAT) return;
         if (this.pricer.getType() == PriceType.PLAYER_AMOUNT) return;
 
-        PriceData priceData = this.plugin.getDataManager().getPriceDataOrCreate(this);
+        PriceData priceData = ShopAPI.getDataManager().getPriceDataOrCreate(this);
 
         if (priceData.isExpired() || force) {
             //plugin.debug("Flush prices for " + this.getId() + " product of " + shop.getId() + " shop.");
@@ -168,25 +162,35 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean isBuyable() {
-        return this.shop.isBuyingAllowed() && this.pricer.getBuyPrice() >= 0D;
+        return this.shop.isBuyingAllowed() && this.hasBuyPrice();
     }
 
     @Override
     public boolean isSellable() {
         if (!(this.type instanceof PhysicalTyping)) return false;
         if (!this.shop.isSellingAllowed()) return false;
-
-        double sellPrice = this.pricer.getSellPrice();
-        if (sellPrice < 0D) {
-            return false;
-        }
+        if (!this.hasSellPrice()) return false;
 
         // Don't allow to sell items with sell price greater than buy one.
         if (this.isBuyable()) {
-            return sellPrice <= this.pricer.getBuyPrice();
+            return this.pricer.getSellPrice() <= this.pricer.getBuyPrice();
         }
 
         return true;
+    }
+
+    @Override
+    public boolean hasBuyPrice() {
+        return this.hasPrice(TradeType.BUY);
+    }
+
+    @Override
+    public boolean hasSellPrice() {
+        return this.hasPrice(TradeType.SELL);
+    }
+
+    private boolean hasPrice(@NotNull TradeType type) {
+        return this.pricer.getPrice(type) >= 0D;
     }
 
 
@@ -227,13 +231,12 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int countUnits(@NotNull Inventory inventory) {
-        return this.countUnits(this.count(inventory));// / this.getUnitAmount();
+        return this.countUnits(this.count(inventory));
     }
 
     @Override
     public int countUnits(int amount) {
         return UnitUtils.amountToUnits(this, amount);
-        //return amount / this.getUnitAmount();
     }
 
     @Override

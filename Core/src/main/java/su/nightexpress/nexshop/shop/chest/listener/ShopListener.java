@@ -1,10 +1,12 @@
 package su.nightexpress.nexshop.shop.chest.listener;
 
+import org.bukkit.Chunk;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,12 +16,14 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -52,10 +56,12 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        var displayHandler = this.module.getDisplayHandler();
-        if (displayHandler != null) {
-            displayHandler.handleQuit(event.getPlayer());
-        }
+        this.module.getDisplayManager().removeForViewer(event.getPlayer());
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerWorldChange(PlayerChangedWorldEvent event) {
+        this.module.getDisplayManager().removeForViewer(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -77,7 +83,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
                 })
                 .filter(Objects::nonNull).collect(Collectors.joining(", "));
 
-            ChestLang.NOTIFICATION_SHOP_EARNINGS.getMessage()
+            this.module.getPrefixed(ChestLang.NOTIFICATION_SHOP_EARNINGS)
                 .replace(Placeholders.GENERIC_AMOUNT, balances)
                 .send(player);
         }
@@ -106,6 +112,8 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         }
     }
 
+    // TODO Update stock cache on container close
+
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onShopInteract(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
@@ -127,48 +135,35 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
             return;
         }
 
-        if (ChestUtils.isInfiniteStorage() && !shop.getBlock().getLocation().equals(block.getLocation())) {
-            var sides = shop.getSides();
-            if (sides.getFirst() != sides.getSecond()) {
-                if (!this.module.canBreak(player, shop)) {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                this.plugin.runTask(task -> {
-                    this.module.getShopMap().updatePositionCache(shop);
-                });
-                return;
-            }
-        }
-
-//        if (!shop.isOwner(player)) {
-//            event.setCancelled(true);
-//            ChestLang.SHOP_ERROR_NOT_OWNER.getMessage().send(player);
-//            return;
-//        }
-
         if (!this.module.deleteShop(player, block)) {
             event.setCancelled(true);
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopExpansion(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        if (player.isSneaking()) return;
+
         Block block = event.getBlockPlaced();
-        this.plugin.runTask(task -> {
-            if (!(block.getState() instanceof Chest chest)) return;
-            if (!(chest.getInventory() instanceof DoubleChestInventory inventory)) return;
+        if (!(block.getBlockData() instanceof Chest chest)) return;
 
-            Location left = inventory.getLeftSide().getLocation();
-            Location right = inventory.getRightSide().getLocation();
-            ChestShop shopLeft = left == null ? null : this.module.getShop(left);
-            ChestShop shopRight = right == null ? null : this.module.getShop(right);
-            if ((shopLeft == null && shopRight == null)) return;
+        BlockFace face = chest.getFacing();
+        BlockFace[] lookup = switch (face) {
+            case SOUTH, NORTH -> new BlockFace[]{BlockFace.WEST, BlockFace.EAST};
+            case WEST, EAST -> new BlockFace[]{BlockFace.NORTH, BlockFace.SOUTH};
+            default -> null;
+        };
+        if (lookup == null) return;
 
-            ChestShop shop = shopRight == null ? shopLeft : shopRight;
-            shop.updatePosition();
-        });
+        for (BlockFace blockFace : lookup) {
+            Block neighibor = block.getRelative(blockFace);
+            if (!(neighibor.getBlockData() instanceof Chest nearChest)) continue;
+            if (nearChest.getFacing() != face) continue;
+
+            event.setCancelled(true);
+            break;
+        }
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -197,8 +192,8 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         Inventory from = event.getSource();
 
         // Prevent to steal items from the chest shop.
-        if (target.getType() == InventoryType.HOPPER && from.getHolder() instanceof Container) {
-            ChestShop shop = this.module.getShop(from);
+        if (target.getType() == InventoryType.HOPPER && from.getHolder() instanceof Container container) {
+            ChestShop shop = this.module.getShop(container.getBlock());
             if (shop != null) {
                 event.setCancelled(true);
                 return;
@@ -206,8 +201,8 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         }
 
         // Prevent to put different from a product items to the chest shop.
-        if (target.getHolder() instanceof Container && from.getType() == InventoryType.HOPPER) {
-            ChestShop shop = this.module.getShop(target);
+        if (target.getHolder() instanceof Container container && from.getType() == InventoryType.HOPPER) {
+            ChestShop shop = this.module.getShop(container.getBlock());
             if (shop == null) return;
 
             ItemStack item = event.getItem();
@@ -228,10 +223,12 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onShopBadProductClick(InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
-        ChestShop shop = this.module.getShop(inventory);
+        if (!(inventory.getHolder() instanceof Container container)) return;
+
+        ChestShop shop = this.module.getShop(container.getBlock());
         if (shop == null) return;
 
-        if (event.getAction() == InventoryAction.HOTBAR_SWAP || event.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD) {
+        if (event.getAction() == InventoryAction.HOTBAR_SWAP) {
             event.setCancelled(true);
             return;
         }
@@ -251,12 +248,28 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onShopWorldLoad(WorldLoadEvent event) {
-        this.module.getShops(event.getWorld()).forEach(ChestShop::updatePosition);
+    public void onWorldLoad(WorldLoadEvent event) {
+        World world = event.getWorld();
+        this.module.lookup().getAll(world).forEach(shop -> this.module.activateShop(shop, world));
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onWorldUnload(WorldUnloadEvent event) {
+        World world = event.getWorld();
+        this.module.lookup().getAll(world).forEach(this.module::deactivateShop);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onShopWorldUnload(WorldUnloadEvent event) {
-        this.module.getShops(event.getWorld()).forEach(ChestShop::deactivate);
+    public void onChunkLoad(ChunkLoadEvent event) {
+        if (event.isNewChunk()) return;
+
+        Chunk chunk = event.getChunk();
+        this.module.lookup().getAll(chunk).forEach(this.module::onChunkLoad);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onChunkUnload(ChunkUnloadEvent event) {
+        Chunk chunk = event.getChunk();
+        this.module.lookup().getAll(chunk).forEach(this.module::onChunkUnload);
     }
 }

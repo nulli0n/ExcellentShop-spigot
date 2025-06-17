@@ -2,50 +2,84 @@ package su.nightexpress.nexshop.shop.chest.impl;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.util.ErrorHandler;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 
 import java.util.UUID;
 import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
 
 public class ChestProduct extends AbstractProduct<ChestShop> {
 
     private long quantity;
-    private int cachedStock;
+    private int  cachedAmount;
+    private int  cachedSpace;
 
-    public ChestProduct(@NotNull ShopPlugin plugin,
-                        @NotNull String id,
-                        @NotNull ChestShop shop,
-                        @NotNull Currency currency,
-                        @NotNull ProductTyping typing) {
-        super(plugin, id, shop, currency, typing);
+    public ChestProduct(@NotNull String id, @NotNull ChestShop shop, @NotNull Currency currency, @NotNull ProductTyping typing) {
+        super(id, shop, currency, typing);
+    }
+
+    @NotNull
+    public static ChestProduct load(@NotNull FileConfig config, @NotNull String path, @NotNull String id, @NotNull ChestShop shop) {
+        String currencyId = CurrencyId.reroute(config.getString(path + ".Currency", CurrencyId.VAULT));
+        Currency currency = EconomyBridge.getCurrencyOrDummy(currencyId);
+        if (currency.isDummy()) {
+            ErrorHandler.configError("Invalid/Unknown currency '" + currencyId + "'.", config, path);
+        }
+
+        String itemOld = config.getString(path + ".Reward.Item");
+        if (itemOld != null && !itemOld.isBlank()) {
+            config.remove(path + ".Reward.Item");
+            config.set(path + ".Content.Item", itemOld);
+        }
+
+        if (!config.contains(path + ".Type")) {
+            String handlerId = config.getString(path + ".Handler", "bukkit_item");
+            if (handlerId.equalsIgnoreCase("bukkit_command")) {
+                config.set(path + ".Type", ProductType.COMMAND.name());
+            }
+            else if (handlerId.equalsIgnoreCase("bukkit_item")) {
+                config.set(path + ".Type", ProductType.VANILLA.name());
+            }
+            else {
+                config.set(path + ".Type", ProductType.PLUGIN.name());
+            }
+        }
+
+        ProductType typed = config.getEnum(path + ".Type", ProductType.class, ProductType.VANILLA);
+        ProductTyping typing = ProductTypes.read(typed, config, path);
+
+        int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
+
+        ChestProduct product = new ChestProduct(id, shop, currency, typing);
+        product.setPricer(AbstractProductPricer.read(config, path + ".Price"));
+        product.setQuantity(infQuantity);
+        return product;
     }
 
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        this.writeQuantity(config, path);
+        config.set(path + ".InfiniteStorage.Quantity", this.quantity);
 
         config.set(path + ".Type", this.type.type().name());
         this.type.write(config, path);
 
         config.set(path + ".Currency", this.getCurrency().getInternalId());
         this.getPricer().write(config, path + ".Price");
-    }
-
-    public void writeQuantity(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".InfiniteStorage.Quantity", this.quantity);
     }
 
     @Override
@@ -57,12 +91,11 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     @Override
     @NotNull
     public ChestPreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all) {
-        return new ChestPreparedProduct(this.plugin, player, this, buyType, all);
+        return new ChestPreparedProduct(player, this, buyType, all);
     }
 
     @Override
     public int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType) {
-        //return this.shop.getStock().count(this, tradeType, player);
         return this.countStock(tradeType, null);
     }
 
@@ -76,41 +109,35 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
         return currentPrice;
     }
 
+    public int countUnitCapacity() {
+        return calcCapacity(this.countUnitSpace(), this.countUnitAmount());
+    }
+
+    public int countUnitAmount() {
+        if (!this.shop.isChunkLoaded()) return this.cachedAmount;
+        if (this.shop.isAdminShop()) return StockValues.UNLIMITED;
+        if (ChestUtils.isInfiniteStorage()) this.countUnits((int) this.quantity);
+
+        Inventory inventory = this.shop.inventory();
+        if (inventory == null) return 0; // Shop container is not valid anymore.
+
+        return this.countUnits(inventory);
+    }
+
+    public int countUnitSpace() {
+        if (!this.shop.isChunkLoaded()) return this.cachedSpace;
+        if (this.shop.isAdminShop()) return StockValues.UNLIMITED;
+        if (ChestUtils.isInfiniteStorage()) return StockValues.UNLIMITED;
+
+        Inventory inventory = this.shop.inventory();
+        if (inventory == null) return 0; // Shop container is not valid anymore.
+
+        return this.countUnits(this.countSpace(inventory));
+    }
+
     @Override
     public int countStock(@NotNull TradeType type, @Nullable UUID playerId) {
-        if (this.shop.isInactive()) return 0;
-        if (this.shop.isAdminShop()) return StockValues.UNLIMITED;
-        if (!(this.getType() instanceof PhysicalTyping typing)) return StockValues.UNLIMITED;
-
-        double unitAmount = this.getUnitAmount();
-
-        if (ChestUtils.isInfiniteStorage()) {
-            return type == TradeType.SELL ? StockValues.UNLIMITED : (int) Math.floor(this.getQuantity() / unitAmount);
-        }
-
-        Inventory inventory = this.shop.getInventory();
-        ItemStack[] contents = inventory.getContents();
-        double totalAmount;
-
-        // For buying (from player's perspective) return product unit amount based on similar inventory slots only.
-        if (type == TradeType.BUY) {
-            totalAmount = Stream.of(contents).mapToInt(content -> content != null && typing.isItemMatches(content) ? content.getAmount() : 0).sum();
-        }
-        // For selling (from player's perspective) return product unit amount based on free or similar inventory slots.
-        else {
-            ItemStack item = typing.getItem();
-            totalAmount = Stream.of(contents).mapToInt(content -> {
-                if (content == null || content.getType().isAir()) return item.getMaxStackSize();
-                if (typing.isItemMatches(content)) return Math.max(0, content.getMaxStackSize() - content.getAmount());
-
-                return 0;
-            }).sum();
-        }
-
-        int result = (int) Math.floor(totalAmount / unitAmount);
-        this.setCachedStock(result);
-
-        return result;
+        return type == TradeType.BUY ? this.countUnitAmount() : this.countUnitSpace();
     }
 
     @Override
@@ -125,25 +152,29 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
             return true;
         }
 
-        Inventory inventory = this.shop.getInventory();
+        Inventory inventory = this.shop.inventory();
+        if (inventory == null) return false; // Shop container is not valid anymore.
+
         ShopUtils.takeItem(inventory, typing::isItemMatches, amount);
         this.updateStockCache();
         return true;
     }
 
     @Override
-    public boolean storeStock(@NotNull TradeType type, int amount, @Nullable UUID playerId) {
+    public boolean storeStock(@NotNull TradeType type, int units, @Nullable UUID playerId) {
         if (this.shop.isInactive()) return false;
         if (!(this.getType() instanceof PhysicalTyping typing)) return false;
 
-        amount = Math.abs(amount * this.getUnitAmount());
+        int amount = Math.abs(units * this.getUnitAmount());
 
         if (ChestUtils.isInfiniteStorage()) {
             this.setQuantity(this.getQuantity() + amount);
             return true;
         }
 
-        Inventory inventory = this.shop.getInventory();
+        Inventory inventory = this.shop.inventory();
+        if (inventory == null) return false; // Shop container is not valid anymore.
+
         if (ShopUtils.addItem(inventory, typing.getItem(), amount)) {
             this.updateStockCache();
             return true;
@@ -179,22 +210,41 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     }
 
     public void updateStockCache() {
-        this.setCachedStock(this.countStock(TradeType.BUY, null));
+        this.setCachedAmount(this.countUnitAmount());
+        this.setCachedSpace(this.countUnitSpace());
     }
 
     /**
      * Get cached product's stock value. Used in shop holograms to bypass async access of tile entities.
      * @return Product's stock value.
      */
-    public int getCachedStock() {
-        return this.cachedStock;
+    public int getCachedAmount() {
+        return this.cachedAmount;
     }
 
     /**
      * Set cached product's stock value. Used in shop holograms to bypass async access of tile entities.
-     * @param cachedStock Cached product's stock value.
+     * @param cachedAmount Cached product's stock value.
      */
-    public void setCachedStock(int cachedStock) {
-        this.cachedStock = cachedStock;
+    public void setCachedAmount(int cachedAmount) {
+        this.cachedAmount = cachedAmount;
+    }
+
+    public int getCachedSpace() {
+        return this.cachedSpace;
+    }
+
+    public void setCachedSpace(int cachedSpace) {
+        this.cachedSpace = cachedSpace;
+    }
+
+    public int getCachedCapacity() {
+        return calcCapacity(this.getCachedSpace(), this.getCachedAmount());
+    }
+
+    private static int calcCapacity(int space, int amount) {
+        if (space <= StockValues.UNLIMITED || amount <= StockValues.UNLIMITED) return StockValues.UNLIMITED;
+
+        return amount + space;
     }
 }

@@ -12,13 +12,13 @@ import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.ShopModule;
+import su.nightexpress.nexshop.api.module.ShopModule;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.shop.impl.AbstractModule;
+import su.nightexpress.nexshop.module.AbstractModule;
+import su.nightexpress.nexshop.module.ModuleConfig;
 import su.nightexpress.nexshop.shop.virtual.command.impl.VirtualCommands;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
@@ -26,7 +26,10 @@ import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.DiscountListEditor;
 import su.nightexpress.nexshop.shop.virtual.editor.DiscountMainEditor;
-import su.nightexpress.nexshop.shop.virtual.editor.product.*;
+import su.nightexpress.nexshop.shop.virtual.editor.product.PriceMenu;
+import su.nightexpress.nexshop.shop.virtual.editor.product.ProductCreationMenu;
+import su.nightexpress.nexshop.shop.virtual.editor.product.ProductOptionsMenu;
+import su.nightexpress.nexshop.shop.virtual.editor.product.ProductStocksMenu;
 import su.nightexpress.nexshop.shop.virtual.editor.rotation.*;
 import su.nightexpress.nexshop.shop.virtual.editor.shop.*;
 import su.nightexpress.nexshop.shop.virtual.impl.*;
@@ -52,7 +55,6 @@ import java.util.stream.IntStream;
 
 public class VirtualShopModule extends AbstractModule implements ShopModule {
 
-    public static final String ID                 = "virtual_shop";
     public static final String DIR_SHOPS          = "/shops/";
     public static final String DIR_LAYOUTS        = "/layouts/";
 
@@ -82,8 +84,10 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     private TransactionLogger logger;
 
-    public VirtualShopModule(@NotNull ShopPlugin plugin) {
-        super(plugin, ID, Config.getVirtualShopAliases());
+    // TODO Use enabled currencies
+
+    public VirtualShopModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleConfig config) {
+        super(plugin, id, config);
 
         this.layoutByIdMap = new HashMap<>();
         this.shopByIdMap = new HashMap<>();
@@ -319,12 +323,6 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 //            });
 //            this.info("=".repeat(30));
 //        });
-    }
-
-    @Override
-    @NotNull
-    public Currency getDefaultCurrency() {
-        return EconomyBridge.getCurrencyOrDummy(VirtualConfig.DEFAULT_CURRENCY.get());
     }
 
     @Override

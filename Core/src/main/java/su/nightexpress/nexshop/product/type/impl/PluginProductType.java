@@ -5,9 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.item.ItemHandler;
-import su.nightexpress.nexshop.api.shop.Module;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
+import su.nightexpress.nexshop.util.ErrorHandler;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.NumberUtil;
 
@@ -28,12 +28,12 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
     }
 
     @NotNull
-    public static PluginProductType read(@NotNull Module module, @NotNull FileConfig config, @NotNull String path) {
+    public static PluginProductType read(@NotNull FileConfig config, @NotNull String path) {
         String handlerId = config.getString(path + ".Handler", "dummy");
         ItemHandler handler = ItemBridge.getHandler(handlerId);
         if (handler == null) {
             handler = ItemBridge.getItemManager().getDummyHandler();
-            module.error("Invalid item handler '" + handlerId + "'. Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
+            ErrorHandler.configError("Invalid item handler '" + handlerId + "'.", config, path);
         }
 
         // ------- REVERT 4.13.3 CHANGES - START ------- //

@@ -4,28 +4,19 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.block.Container;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.EconomyBridge;
 import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
@@ -33,28 +24,26 @@ import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
-import su.nightexpress.nexshop.shop.chest.util.BlockPos;
-import su.nightexpress.nexshop.shop.chest.util.ShopType;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.LocationUtil;
-import su.nightexpress.nightcore.util.Pair;
 import su.nightexpress.nightcore.util.TimeUtil;
-import su.nightexpress.nightcore.util.random.Rnd;
+import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
+import su.nightexpress.nightcore.util.placeholder.Replacer;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 public class ChestShop extends AbstractShop<ChestProduct> {
 
     private final ChestShopModule module;
 
-    private boolean  active;
-    private World    world;
-    private String   worldName;
-    private BlockPos blockPos;
-    private Material blockType;
+    private String       worldName;
+    private BlockPos     blockPos;
+    private ShopLocation location;
+    private boolean      saveRequired;
 
     private UUID    ownerId;
     private String  ownerName;
@@ -63,16 +52,12 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     private boolean hologramEnabled;
     private boolean showcaseEnabled;
-    private String showcaseType;
+    private String  showcaseId;
 
     private RentSettings rentSettings;
-    private UUID renterId;
-    private String renterName;
-    private long rentedUntil;
-
-    private Location displayTextLocation;
-    private Location displayItemLocation;
-    private Location displayShowcaseLocation;
+    private UUID         renterId;
+    private String       renterName;
+    private long         rentedUntil;
 
     public ChestShop(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
@@ -92,7 +77,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             String raw = config.getString("Location", "");
             String[] split = raw.split(",");
             if (split.length != 6) {
-                this.plugin.error("Invalid shop location!");
                 return false;
             }
 
@@ -112,17 +96,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         this.worldName = config.getString("Placement.World");
         this.blockPos = BlockPos.read(config, "Placement.BlockPos");
-        if (this.worldName == null || this.blockPos.isEmpty()) {
-            this.module.error("Invalid shop location data!");
-            return false;
-        }
+        if (this.worldName == null || this.blockPos.isEmpty()) return false;
 
         try {
             this.ownerId = UUID.fromString(config.getString("Owner.Id", ""));
             this.ownerName = String.valueOf(this.getOwner().getName());
         }
         catch (IllegalArgumentException exception) {
-            this.plugin.error("Invalid UUID of the shop owner!");
             return false;
         }
 
@@ -146,7 +126,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
         this.setHologramEnabled(config.getBoolean("Display.Hologram.Enabled", true));
         this.setShowcaseEnabled(config.getBoolean("Display.Showcase.Enabled", true));
-        this.setShowcaseType(config.getString("Display.Showcase.Type"));
+        this.setShowcaseId(config.getString("Display.Showcase.Type"));
 
         this.loadProducts(config);
         return true;
@@ -154,51 +134,9 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     private void loadProducts(@NotNull FileConfig config) {
         config.getSection("Products").forEach(id -> {
-            ChestProduct product = this.loadProduct(config, id, "Products." + id);
-//            if (product == null) {
-//                this.plugin.warn("Product not loaded: '" + id + "' in '" + this.getId() + "' shop.");
-//                return;
-//            }
+            ChestProduct product = ChestProduct.load(config,"Products." + id, id, this);
             this.addProduct(product);
         });
-    }
-
-    @NotNull
-    private ChestProduct loadProduct(@NotNull FileConfig config, @NotNull String id, @NotNull String path) {
-        String currencyId = CurrencyId.reroute(config.getString(path + ".Currency", CurrencyId.VAULT));
-        Currency currency = EconomyBridge.getCurrency(currencyId);
-        if (currency == null || !this.module.isAllowedCurrency(currency)) {
-            currency = this.module.getDefaultCurrency();
-        }
-
-        String itemOld = config.getString(path + ".Reward.Item");
-        if (itemOld != null && !itemOld.isBlank()) {
-            config.remove(path + ".Reward.Item");
-            config.set(path + ".Content.Item", itemOld);
-        }
-
-        if (!config.contains(path + ".Type")) {
-            String handlerId = config.getString(path + ".Handler", "bukkit_item");
-            if (handlerId.equalsIgnoreCase("bukkit_command")) {
-                config.set(path + ".Type", ProductType.COMMAND.name());
-            }
-            else if (handlerId.equalsIgnoreCase("bukkit_item")) {
-                config.set(path + ".Type", ProductType.VANILLA.name());
-            }
-            else {
-                config.set(path + ".Type", ProductType.PLUGIN.name());
-            }
-        }
-
-        ProductType typed = config.getEnum(path + ".Type", ProductType.class, ProductType.VANILLA);
-        ProductTyping typing = ProductTypes.read(this.module, typed, config, path);
-
-        int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
-
-        ChestProduct product = new ChestProduct(this.plugin, id, this, currency, typing);
-        product.setPricer(AbstractProductPricer.read(config, path + ".Price"));
-        product.setQuantity(infQuantity);
-        return product;
     }
 
     @Override
@@ -235,19 +173,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
         config.set("Display.Hologram.Enabled", this.isHologramEnabled());
         config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
-        config.set("Display.Showcase.Type", this.getShowcaseType());
+        config.set("Display.Showcase.Type", this.getShowcaseId());
     }
 
     @Override
     public void saveProducts() {
         FileConfig config = this.getConfig();
         this.writeProducts(config);
-        config.saveChanges();
-    }
-
-    public void saveProductQuantity() {
-        FileConfig config = this.getConfig();
-        this.getValidProducts().forEach(product -> product.writeQuantity(config, "Products." + product.getId()));
         config.saveChanges();
     }
 
@@ -266,70 +198,45 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         config.saveChanges();
     }
 
+    @NotNull
+    public ShopLocation location() {
+        if (!this.isActive()) throw new IllegalStateException("Shop is not active! You must check ChestShop#isActive before access shop location.");
+
+        return this.location;
+    }
+
+    @Nullable
+    public Container container() {
+        if (!this.isActive()) return null;
+        if (!this.location().isValid()) return null;
+
+        return (Container) this.location().getBlock().getState();
+    }
+
+    @Nullable
+    public Inventory inventory() {
+        Container container = this.container();
+        return container == null ? null : container.getInventory();
+    }
+
     public boolean isActive() {
-        return this.active;
+        return this.location != null;
     }
 
     public boolean isInactive() {
         return !this.isActive();
     }
 
-    @NotNull
-    public String getWorldName() {
-        return worldName;
+    public boolean isChunkLoaded() {
+        return this.location != null && this.location.isChunkLoaded();
     }
 
-    @NotNull
-    public BlockPos getBlockPos() {
-        return blockPos;
+    public void setSaveRequired(boolean saveRequired) {
+        this.saveRequired = saveRequired;
     }
 
-    public World getWorld() {
-        return world;
-    }
-
-    public Location toLocation(@NotNull BlockPos blockPos) {
-        return blockPos.toLocation(this.world);
-    }
-
-    public Location getLocation() {
-        return this.toLocation(this.blockPos);
-    }
-
-    public Block getBlock() {
-        return this.blockPos.toBlock(this.world);
-    }
-
-    public Container getContainer() {
-        return (Container) this.getBlock().getState();
-    }
-
-    public Inventory getInventory() {
-        return this.getContainer().getInventory();
-    }
-
-    @NotNull
-    public Pair<Container, Container> getSides() {
-        Container container = this.getContainer();
-        Inventory inventory = container.getInventory();
-
-        if (inventory instanceof DoubleChestInventory chestInventory) {
-            Chest left = (Chest) chestInventory.getLeftSide().getHolder();
-            Chest right = (Chest) chestInventory.getRightSide().getHolder();
-            return Pair.of(left != null ? left : container, right != null ? right : container);
-        }
-        return Pair.of(container, container);
-    }
-
-    public void assignLocation(@NotNull World world, @NotNull Location location) {
-        this.worldName = world.getName();
-        this.blockPos = BlockPos.from(location);
-        this.updatePosition();
-    }
-
-    public void deactivate() {
-        this.world = null;
-        this.active = false;
+    public boolean isSaveRequired() {
+        return this.saveRequired;
     }
 
     @Override
@@ -337,77 +244,50 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         super.update();
 
         if (ChestConfig.isRentEnabled() && this.isRented() && this.isRentExpired()) {
-            // TODO Notify
             this.cancelRent();
         }
-
-        this.updateStockCache();
     }
 
-    public void updatePosition() {
-        this.deactivate();
+    public void setLocation(@NotNull World world, @NotNull Location location) {
+        this.worldName = world.getName();
+        this.blockPos = BlockPos.from(location);
+    }
 
-        World world = this.plugin.getServer().getWorld(this.worldName);
-        if (world == null) {
-            //module.warn("World is invalid [" + this.getId() + "]");
-            return;
+    public boolean activate(@NotNull World world) {
+        if (this.isActive()) return false;
+
+        this.location = new ShopLocation(world, this.blockPos);
+
+        if (this.location.isChunkLoaded()) {
+            this.updateStockCache();
         }
+        //this.plugin.debug("Shop activated: " + this.blockPos);
+        return true;
+    }
 
-        Block block = this.blockPos.toBlock(world);
-        if (!(block.getState() instanceof Container)) {
-            //module.warn("Shop block is not a container [" + this.getId() + "]");
-            return;
-        }
-
-        this.active = true;
-        this.world = world;
-        this.blockType = block.getType();
-        this.updateDisplayLocations();
-        this.updateStockCache();
-        this.module.getShopMap().updatePositionCache(this);
-
-        //this.module.info("Shop activated: " + this.getId());
+    public void deactivate() {
+        this.location = null;
+        //this.plugin.debug("Shop deactivated: " + this.blockPos);
     }
 
     public void updateStockCache() {
         this.getProducts().forEach(ChestProduct::updateStockCache);
     }
 
-    private void updateDisplayLocations() {
-        Inventory inventory = this.getInventory();
-
-        Location shopLocation;
-        Location invLocation = inventory.getLocation();
-        if (invLocation == null || !(inventory instanceof DoubleChestInventory)) {
-            shopLocation = LocationUtil.setCenter2D(this.getLocation());
-        }
-        else {
-            shopLocation = invLocation.clone().add(0.5, 0, 0.5);
-        }
-
-        double height = shopLocation.getBlock().getBoundingBox().getHeight();
-        double heightOff = 1D - height;
-
-        this.displayTextLocation = shopLocation.clone().add(0, 1.5D - heightOff, 0);
-        this.displayItemLocation = shopLocation.clone().add(0, height, 0);
-        this.displayShowcaseLocation = shopLocation.clone().add(0, -0.35D - heightOff, 0);
-
-        if (ChestUtils.canUseDisplayEntities()) {
-            this.displayTextLocation = this.displayTextLocation.add(0, 0.3, 0);
-            this.displayShowcaseLocation = this.displayShowcaseLocation.add(0, 1.7, 0);
-        }
+    @NotNull
+    public ChestShopModule getModule() {
+        return this.module;
     }
 
     @NotNull
-    public ChestShopModule getModule() {
-        return module;
+    public String getWorldName() {
+        return this.worldName;
     }
 
-//    @NotNull
-//    @Override
-//    public ChestStock getStock() {
-//        return stock;
-//    }
+    @NotNull
+    public BlockPos getBlockPos() {
+        return this.blockPos;
+    }
 
     @NotNull
     public ChestBank getOwnerBank() {
@@ -424,24 +304,36 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return true;
     }
 
-    public boolean canRename(@NotNull Player player) {
+    public boolean canManage(@NotNull Player player) {
         return this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+    }
+
+    public boolean canRename(@NotNull Player player) {
+        return this.canManage(player);
     }
 
     public boolean canManageProducts(@NotNull Player player) {
-        return this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+        return this.canManage(player);
     }
 
     public boolean canManageBank(@NotNull Player player) {
-        return this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.COMMAND_BANK_OTHERS);
+        return this.canManage(player);
     }
 
     public boolean canManageRent(@NotNull Player player) {
         return this.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
     }
 
+    public boolean canManageDisplay(@NotNull Player player) {
+        return (this.isOwnerOrRenter(player) || player.hasPermission(ChestPerms.EDIT_OTHERS)) && player.hasPermission(ChestPerms.DISPLAY_CUSTOMIZATION);
+    }
+
     public boolean canRemove(@NotNull Player player) {
         return this.isOwner(player) || player.hasPermission(ChestPerms.REMOVE_OTHERS);
+    }
+
+    public boolean canDecorate(@NotNull Player player) {
+        return this.canManage(player);
     }
 
     public boolean isOwner(@NotNull Player player) {
@@ -465,19 +357,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     @Nullable
-    public ChestProduct getRandomProduct() {
-        Set<ChestProduct> products = new HashSet<>(this.getValidProducts());
-        return products.isEmpty() ? null : Rnd.get(products);
-    }
-
-//    @Override
-//    public void addProduct(@NotNull Product product) {
-//        if (product instanceof ChestProduct chestProduct) {
-//            this.addProduct(chestProduct);
-//        }
-//    }
-
-    @Nullable
     public ChestProduct createProduct(@NotNull Player player, @NotNull ItemStack item, boolean bypassHandler) {
         if (item.getType().isAir() || this.isProduct(item)) {
             return null;
@@ -494,7 +373,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         String id = UUID.randomUUID().toString();
         ProductTyping typing = ProductTypes.fromItem(stack, bypassHandler);
         Currency currency = this.module.getDefaultCurrency();
-        ChestProduct product = new ChestProduct(this.plugin, id, this, currency, typing);
+        ChestProduct product = new ChestProduct(id, this, currency, typing);
 
         product.setPrice(TradeType.BUY, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
         product.setPrice(TradeType.SELL, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
@@ -512,41 +391,18 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     public boolean isProduct(@NotNull ItemStack item) {
         return this.getProduct(item) != null;
-//        return this.getValidProducts().stream().anyMatch(product -> {
-//            return product.getPacker() instanceof ItemPacker handler && handler.isItemMatches(item);
-//        });
+    }
+
+    public boolean hasProducts() {
+        return this.countProducts() > 0;
     }
 
     @Nullable
-    public ChestProduct getProductAtSlot(int slot) {
+    public ChestProduct getProductByIndex(int index) {
         List<ChestProduct> products = new ArrayList<>(this.getValidProducts());
-        if (products.size() <= slot) return null;
+        if (products.size() <= index) return null;
 
-        return products.get(slot);
-    }
-
-    public boolean teleport(@NotNull Player player) {
-        if (this.isInactive()) return false;
-
-        Location location = this.getLocation();
-
-        if (ChestConfig.CHECK_SAFE_LOCATION.get()) {
-            Block block = location.getBlock();
-            BlockData data = block.getBlockData();
-            if (data instanceof Directional directional) {
-                Block opposite = block.getRelative(directional.getFacing()).getLocation().clone().add(0, 0.5, 0).getBlock();
-                location = LocationUtil.setCenter3D(opposite.getLocation());
-                location.setDirection(directional.getFacing().getOppositeFace().getDirection());
-                location.setPitch(35F);
-            }
-        }
-
-        if (!this.isOwner(player) && !ChestUtils.isSafeLocation(location)) {
-            ChestLang.SHOP_TELEPORT_ERROR_UNSAFE.getMessage().send(player);
-            return false;
-        }
-
-        return player.teleport(location);
+        return products.get(index);
     }
 
     @NotNull
@@ -615,7 +471,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     public void extendRent() {
         if (!this.isRented()) return;
 
-        this.rentedUntil += this.rentSettings.getDurationMillis();
+        this.rentedUntil = Math.max(0L, this.rentedUntil) + this.rentSettings.getDurationMillis();
     }
 
     public boolean isItemCreated() {
@@ -624,11 +480,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     public void setItemCreated(boolean itemCreated) {
         this.itemCreated = itemCreated;
-    }
-
-    @NotNull
-    public Material getBlockType() {
-        return blockType;
     }
 
     @NotNull
@@ -652,7 +503,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public boolean isHologramEnabled() {
-        return hologramEnabled;
+        return this.hologramEnabled;
     }
 
     public void setHologramEnabled(boolean hologramEnabled) {
@@ -660,7 +511,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public boolean isShowcaseEnabled() {
-        return showcaseEnabled;
+        return this.showcaseEnabled;
     }
 
     public void setShowcaseEnabled(boolean showcaseEnabled) {
@@ -668,56 +519,71 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     @Nullable
-    public String getShowcaseType() {
-        return showcaseType;
+    public String getShowcaseId() {
+        return this.showcaseId;
     }
 
-    public void setShowcaseType(@Nullable String showcaseType) {
-        this.showcaseType = showcaseType;
+    public void setShowcaseId(@Nullable String showcaseId) {
+        this.showcaseId = showcaseId;
+    }
+
+    public boolean hasCustomShowcase() {
+        return this.showcaseId != null;
+    }
+
+    @Nullable
+    public Showcase getShowcase() {
+        if (!this.isChunkLoaded()) return null;
+        if (!this.isShowcaseEnabled()) return null;
+
+        Material blockType = this.location().getBlockType();
+        ShopBlock shopBlock = this.module.getShopBlock(blockType);
+        if (shopBlock == null) return null;
+
+        Showcase showcase = null;
+        if (this.showcaseId != null) {
+            showcase = ChestUtils.getShowcaseFromCatalog(this.showcaseId);
+        }
+        if (showcase == null) {
+            showcase = shopBlock.getShowcase();
+        }
+
+        return showcase;
     }
 
     @NotNull
     public List<String> getDisplayText() {
-        return new ArrayList<>((this.isAdminShop() ? ChestConfig.DISPLAY_HOLOGRAM_TEXT_ADMIN : ChestConfig.DISPLAY_HOLOGRAM_TEXT_NORMAL).get());
+        return new ArrayList<>((this.isAdminShop() ? ChestConfig.DISPLAY_HOLOGRAM_TEXT_ADMIN_SHOP : ChestConfig.DISPLAY_HOLOGRAM_TEXT_PLAYER_SHOP).get());
     }
 
-    @NotNull
-    public List<String> getHologramText(@Nullable ChestProduct product) {
-        if (this.isRentable() && !this.isRented()) {
-            return new ArrayList<>(ChestConfig.DISPLAY_HOLOGRAM_TEXT_RENT.get()).reversed();
+    @Nullable
+    public List<String> getDisplayText(@Nullable ChestProduct product) {
+        if (!ChestConfig.DISPLAY_HOLOGRAM_ENABLED.get()) return null;
+        if (!this.isHologramEnabled()) return null;
+
+        List<String> text;
+        Replacer replacer = Replacer.create().replace(this.replacePlaceholders());
+
+        if (!this.hasProducts()) {
+            text = ChestConfig.DISPLAY_HOLOGRAM_TEXT_ABSENT.get();
+        }
+        else if (this.isRentable() && !this.isRented()) {
+            text = ChestConfig.DISPLAY_HOLOGRAM_TEXT_RENT.get();
+        }
+        else {
+            text = this.getDisplayText();
+
+            if (product != null) {
+                replacer
+                    .replace(product.replacePlaceholders())
+                    .replace(Placeholders.GENERIC_BUY, product.isBuyable() ? ChestConfig.DISPLAY_HOLOGRAM_TEXT_BUY.get() : "")
+                    .replace(Placeholders.GENERIC_SELL, product.isSellable() ? ChestConfig.DISPLAY_HOLOGRAM_TEXT_SELL.get() : "");
+            }
         }
 
-        var buyTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_BUY.get();
-        var sellTextMap = ChestConfig.DISPLAY_HOLOGRAM_TEXT_SELL.get();
+        List<String> result = replacer.apply(text);
+        result.removeIf(String::isBlank);
 
-        boolean isBuyable = product != null && product.isBuyable();
-        boolean isSellable = product != null && product.isSellable();
-
-        List<String> text = new ArrayList<>();
-        for (String line : this.getDisplayText()) {
-            text.addFirst(line
-                .replace(Placeholders.GENERIC_BUY, !isBuyable ? "" : buyTextMap.getOrDefault(this.isAdminShop() ? ShopType.ADMIN : ShopType.PLAYER, ""))
-                .replace(Placeholders.GENERIC_SELL, !isSellable ? "" : sellTextMap.getOrDefault(this.isAdminShop() ? ShopType.ADMIN : ShopType.PLAYER, ""))
-                .trim()
-            );
-        }
-        text.removeIf(String::isBlank);
-
-        return text;
-    }
-
-    @NotNull
-    public Location getDisplayTextLocation() {
-        return this.displayTextLocation.clone();
-    }
-
-    @NotNull
-    public Location getDisplayShowcaseLocation() {
-        return this.displayShowcaseLocation.clone();
-    }
-
-    @NotNull
-    public Location getDisplayItemLocation() {
-        return this.displayItemLocation.clone();
+        return result.reversed();
     }
 }

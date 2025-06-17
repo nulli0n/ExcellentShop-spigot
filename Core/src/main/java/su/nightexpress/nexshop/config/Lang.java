@@ -114,6 +114,7 @@ public class Lang extends CoreLang {
 
 
     public static final LangString OTHER_PRICE_DISABLED = LangString.of("Other.PriceDisabled", "N/A");
+    public static final LangString OTHER_NO_RENT = LangString.of("Other.NoRent", "< Not Rented >");
 
     public static final LangString EDITOR_PRICE_FLOAT_NO_DAYS = LangString.of("Editor.Price.Float.NoDays",
         "No days set. Price won't refresh properly.");

@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
@@ -24,12 +23,7 @@ public class Transaction {
 
     // TODO Save currency field, bc product currency may be changed at any time after transaction.
 
-    public Transaction(@NotNull ShopPlugin plugin,
-                       @NotNull Product product,
-                       @NotNull TradeType tradeType,
-                       int units,
-                       double price,
-                       @NotNull Result result) {
+    public Transaction(@NotNull Product product, @NotNull TradeType tradeType, int units, double price, @NotNull Result result) {
         //this.plugin = plugin;
         this.product = product;
         this.tradeType = tradeType;
@@ -74,7 +68,6 @@ public class Transaction {
 
     public int getAmount() {
         return UnitUtils.unitsToAmount(this.product, this.units);
-        //return this.product.getUnitAmount() * this.getUnits();
     }
 
     public int getUnits() {

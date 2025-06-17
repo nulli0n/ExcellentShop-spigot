@@ -12,10 +12,7 @@ import su.nightexpress.nexshop.data.product.PriceData;
 import su.nightexpress.nightcore.manager.AbstractFileData;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop {
 
@@ -116,7 +113,6 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     @Override
     public void removeProduct(@NotNull String id) {
         this.products.remove(id);
-        // TODO Delete product datas?
     }
 
     @Override
@@ -127,8 +123,8 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     @Override
     @NotNull
-    public Collection<P> getProducts() {
-        return this.products.values();
+    public Set<P> getProducts() {
+        return new HashSet<>(this.products.values());
     }
 
     @Override

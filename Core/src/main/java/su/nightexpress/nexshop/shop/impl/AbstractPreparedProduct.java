@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
@@ -16,7 +15,6 @@ import java.util.function.UnaryOperator;
 
 public abstract class AbstractPreparedProduct<P extends Product> implements PreparedProduct {
 
-    protected final ShopPlugin     plugin;
     protected final Player         player;
     protected final P              product;
     protected final TradeType      tradeType;
@@ -26,8 +24,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
     private int units;
     private boolean silent;
 
-    public AbstractPreparedProduct(@NotNull ShopPlugin plugin, @NotNull Player player, @NotNull P product, @NotNull TradeType tradeType, boolean all) {
-        this.plugin = plugin;
+    public AbstractPreparedProduct(@NotNull Player player, @NotNull P product, @NotNull TradeType tradeType, boolean all) {
         this.player = player;
         this.product = product;
         this.tradeType = tradeType;
@@ -96,7 +93,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
     }
 
     public int getAmount() {
-        return UnitUtils.unitsToAmount(this.product, this.units);// this.getProduct().getUnitAmount() * this.getUnits();
+        return UnitUtils.unitsToAmount(this.product, this.units);
     }
 
     public double getPrice() {

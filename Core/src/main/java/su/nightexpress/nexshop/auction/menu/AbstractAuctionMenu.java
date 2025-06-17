@@ -5,11 +5,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.auction.AuctionUtils;
-import su.nightexpress.nexshop.auction.config.AuctionConfig;
-import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.auction.AuctionManager;
+import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
+import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuViewer;
@@ -20,10 +19,11 @@ import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
 import su.nightexpress.nightcore.util.ItemReplacer;
-import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Plugins;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 public abstract class AbstractAuctionMenu<A extends AbstractListing> extends ConfigMenu<ShopPlugin> implements AutoFilled<A>, Linked<UUID> {
 
@@ -99,16 +99,25 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
 
         autoFill.setSlots(this.itemSlots);
         autoFill.setItemCreator(aucItem -> {
-            ItemStack item = new ItemStack(aucItem.getItemStack());
+            //ItemStack item = new ItemStack(aucItem.getItemStack());
+
+            ItemStack item = NightItem.fromItemStack(aucItem.getItemStack())
+                .setDisplayName(this.itemName)
+                .setLore(this.itemLore)
+                .replacement(replacer -> replacer
+                    .replace(aucItem.replacePlaceholders())
+                    .replacePlaceholderAPI(player))
+                .getItemStack();
 
             AuctionUtils.hideListingAttributes(item);
 
-            ItemReplacer.create(item).trimmed()
-                .setDisplayName(this.itemName)
-                .setLore(this.itemLore)
-                .replace(aucItem.replacePlaceholders())
-                .replacePlaceholderAPI(player)
-                .writeMeta();
+//            ItemReplacer.create(item).trimmed()
+//                .setDisplayName(this.itemName)
+//                .setLore(this.itemLore)
+//                .replace(aucItem.replacePlaceholders())
+//                .replacePlaceholderAPI(player)
+//                .writeMeta();
+
             return item;
         });
     }

@@ -97,7 +97,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
                 return;
             }
 
-            List<Currency> currencies = new ArrayList<>(this.auctionManager.getAllowedCurrencies(viewer.getPlayer()));
+            List<Currency> currencies = new ArrayList<>(this.auctionManager.getAvailableCurrencies(viewer.getPlayer()));
             Currency current = this.getCurrency(viewer.getPlayer());
             Currency selected = Lists.shifted(currencies, currencies.indexOf(current), event.isLeftClick() ? 1 : -1);
             CURRENCY.put(viewer.getPlayer(), selected);
@@ -123,7 +123,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
                 menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
                     Player player = viewer.getPlayer();
                     Currency userCurrency = this.getCurrency(player);
-                    String list = this.auctionManager.getAllowedCurrencies(player).stream().map(currency -> {
+                    String list = this.auctionManager.getAvailableCurrencies(player).stream().map(currency -> {
                         String entry = userCurrency == currency ? this.loreListSelected : this.loreListUnselected;
                         return entry.replace(GENERIC_NAME, currency.getName());
                     }).collect(Collectors.joining("\n"));
@@ -302,8 +302,9 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
-        ItemStack backGround = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        list.add(new MenuItem(backGround).setSlots(IntStream.range(36, 54).toArray()).setPriority(0));
+        // TODO
+        //ItemStack backGround = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        //list.add(new MenuItem(backGround).setSlots(IntStream.range(36, 54).toArray()).setPriority(0));
         
         ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
         ItemUtil.editMeta(prevPage, meta -> {

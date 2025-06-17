@@ -1,99 +1,85 @@
 package su.nightexpress.nexshop.shop.chest.menu;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.Placeholders;
-import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.menu.MenuOptions;
-import su.nightexpress.nightcore.menu.MenuSize;
-import su.nightexpress.nightcore.menu.MenuViewer;
-import su.nightexpress.nightcore.menu.api.AutoFill;
-import su.nightexpress.nightcore.menu.api.AutoFilled;
-import su.nightexpress.nightcore.menu.item.ItemHandler;
-import su.nightexpress.nightcore.menu.item.MenuItem;
-import su.nightexpress.nightcore.menu.link.Linked;
-import su.nightexpress.nightcore.menu.link.ViewLink;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.ui.dialog.Dialog;
+import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.data.ConfigBased;
+import su.nightexpress.nightcore.ui.menu.data.Filled;
+import su.nightexpress.nightcore.ui.menu.data.MenuFiller;
+import su.nightexpress.nightcore.ui.menu.data.MenuLoader;
+import su.nightexpress.nightcore.ui.menu.item.ItemHandler;
+import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
+import su.nightexpress.nightcore.ui.menu.item.MenuItem;
+import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Linked<BankMenu.Info> {
+public class BankMenu extends LinkedMenu<ShopPlugin, BankMenu.Data> implements Filled<Currency>, ConfigBased {
 
-    public static final  String FILE_NAME                  = "shop_bank.yml";
-    private static final String PLACEHOLDER_BANK_BALANCE   = "%bank_balance%";
-    private static final String PLACEHOLDER_PLAYER_BALANCE = "%player_balance%";
+    private static final String BANK_BALANCE   = "%bank_balance%";
+    private static final String PLAYER_BALANCE = "%player_balance%";
 
     private final ChestShopModule module;
-    private final ItemHandler     returnHandler;
-    private final ViewLink<Info>  link;
 
-    private int[]        objectSlots;
-    private String       objectName;
-    private List<String> objectLore;
+    private int[] currencySlots;
+    private int[] highlightSlots;
 
-    public record Info(@Nullable ChestShop shop, @NotNull UUID playerId) {}
+    private NightItem highlightIcon;
+
+    private String       currencyName;
+    private List<String> currencyLore;
+
+    public record Data(@NotNull UUID bankHolder, @Nullable ChestShop shop, @Nullable Currency currency, int index) {}
 
     public BankMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, FileConfig.loadOrExtract(plugin, module.getMenusPath(), FILE_NAME));
+        super(plugin, MenuType.GENERIC_9X6, BLACK.wrap("Shop Bank"));
         this.module = module;
-        this.link = new ViewLink<>();
-
-        this.addHandler(this.returnHandler = ItemHandler.forReturn(this, (viewer, event) -> {
-            Info info = this.getLink(viewer);
-            if (info.shop != null && info.shop.isActive()) {
-                this.runNextTick(() -> module.openShopSettings(viewer.getPlayer(), info.shop));
-            }
-        }));
-
-        this.load();
-
-        this.getItems().forEach(menuItem -> {
-            if (menuItem.getHandler() == this.returnHandler) {
-                menuItem.getOptions().setVisibilityPolicy(viewer -> this.getLink(viewer).shop != null);
-            }
-            // Added for currency PAPI support.
-            menuItem.getOptions().addDisplayModifier((viewer, itemStack) -> {
-                ItemReplacer.replacePlaceholderAPI(itemStack, viewer.getPlayer());
-            });
-        });
-    }
-
-    @NotNull
-    @Override
-    public ViewLink<Info> getLink() {
-        return link;
     }
 
     public void open(@NotNull Player player, @NotNull ChestShop holder) {
-        Info info = new Info(holder, holder.getOwnerId());
-        this.open(player, info);
+        this.open(player, holder.getOwnerId(), holder, null, -1);
     }
 
     public void open(@NotNull Player player, @NotNull UUID holder) {
-        Info info = new Info(null, holder);
-        this.open(player, info);
+        this.open(player, holder, null, null, -1);
+    }
+
+    private void open(@NotNull Player player, @NotNull UUID holder, @Nullable ChestShop shop, @Nullable Currency currency, int index) {
+        this.open(player, new Data(holder, shop, currency, index));
     }
 
     @Override
-    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+    public void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
         this.autoFill(viewer);
+
+        Player player = viewer.getPlayer();
+        Data data = this.getLink(player);
+        int slotIndex = data.index;
+
+        if (slotIndex >= 0 && slotIndex < this.highlightSlots.length) {
+            int highlightSlot = this.highlightSlots[slotIndex];
+            this.addItem(viewer, this.highlightIcon.copy().toMenuItem().setSlots(highlightSlot).setPriority(10));
+        }
     }
 
     @Override
@@ -102,131 +88,212 @@ public class BankMenu extends ShopEditorMenu implements AutoFilled<Currency>, Li
     }
 
     @Override
-    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<Currency> autoFill) {
+    @NotNull
+    public MenuFiller<Currency> createFiller(@NotNull MenuViewer viewer) {
         Player player = viewer.getPlayer();
-        Info info = this.getLink(player);
+        Data data = this.getLink(player);
 
-        autoFill.setSlots(this.objectSlots);
-        autoFill.setItems(this.module.getAllowedCurrencies(player));
-        autoFill.setItemCreator(currency -> {
-            ItemStack icon = currency.getIcon();
-            ItemReplacer.create(icon).hideFlags().trimmed()
-                .setDisplayName(this.objectName)
-                .setLore(this.objectLore)
-                .replace(currency.replacePlaceholders())
-                .replace(PLACEHOLDER_PLAYER_BALANCE, currency.format(currency.getBalance(player)))
-                .replace(PLACEHOLDER_BANK_BALANCE, currency.format(module.getPlayerBank(info.playerId).getBalance(currency)))
-                .replacePlaceholderAPI(player)
-                .writeMeta();
-            return icon;
-        });
-        autoFill.setClickAction(currency -> (viewer1, event) -> {
-            UUID holder = info.playerId;
-            ChestBank bank = this.module.getPlayerBank(holder);
-
-            if (event.getClick() == ClickType.DROP) {
-                this.module.depositToBank(player, holder, currency, currency.getBalance(player));
-                this.module.savePlayerBank(bank);
-                this.runNextTick(() -> this.flush(viewer));
-                return;
-            }
-            if (event.getClick() == ClickType.SWAP_OFFHAND) {
-                this.module.withdrawFromBank(player, holder, currency, bank.getBalance(currency));
-                this.module.savePlayerBank(bank);
-                this.runNextTick(() -> this.flush(viewer));
-                return;
-            }
-
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, (dialog, input) -> {
-                String msg = input.getTextRaw();
-                Type type = Type.UNSPECIFIED;
-                if (!Players.isBedrock(player)) {
-                    if (event.isLeftClick()) type = Type.DEPOSIT;
-                    else if (event.isRightClick()) type = Type.WITHDRAW;
-                }
-
-                if (type == Type.UNSPECIFIED) {
-                    if (msg.startsWith("+")) type = Type.DEPOSIT;
-                    else if (msg.startsWith("-")) type = Type.WITHDRAW;
-                    else return false;
-
-                    msg = msg.substring(1);
-                }
-
-                double amount = NumberUtil.getDouble(msg, 0D);
-                if (amount == 0D) {
-                    dialog.error(Lang.EDITOR_INPUT_ERROR_GENERIC.getMessage());
-                    return false;
-                }
-
-                if (type == Type.DEPOSIT) {
-                    this.module.depositToBank(player, holder, currency, amount);
-                }
-                else {
-                    this.module.withdrawFromBank(player, holder, currency, amount);
-                }
-                return true;
-            });
-        });
-    }
-
-    private enum Type {
-        UNSPECIFIED,
-        DEPOSIT,
-        WITHDRAW,
+        return MenuFiller.builder(this)
+            .setSlots(this.currencySlots)
+            .setItems(this.module.getAvailableCurrencies(player))
+            .setItemCreator(currency -> {
+                return NightItem.fromItemStack(currency.getIcon())
+                    .hideAllComponents()
+                    .setDisplayName(this.currencyName)
+                    .setLore(this.currencyLore)
+                    .replacement(replacer -> replacer
+                        .replace(currency.replacePlaceholders())
+                        .replace(PLAYER_BALANCE, () -> currency.format(currency.getBalance(player)))
+                        .replace(BANK_BALANCE, () -> currency.format(this.module.getPlayerBank(data.bankHolder).getBalance(currency)))
+                    );
+            })
+            .setItemClick(currency -> (viewer1, event) -> {
+                int index = Lists.indexOf(this.currencySlots, event.getRawSlot());
+                this.runNextTick(() -> this.open(player, data.bankHolder, data.shop, currency, index));
+            })
+            .build();
     }
 
     @Override
-    @NotNull
-    protected MenuOptions createDefaultOptions() {
-        return new MenuOptions(BLACK.enclose("Shop Bank"), MenuSize.CHEST_18);
+    protected void onItemPrepare(@NotNull MenuViewer viewer, @NotNull MenuItem menuItem, @NotNull NightItem item) {
+        super.onItemPrepare(viewer, menuItem, item);
+
+        if (viewer.hasItem(menuItem)) return;
+
+        Player player = viewer.getPlayer();
+        Data data = this.getLink(player);
+        Currency currency = data.currency;
+        if (currency == null) return;
+
+        item.replacement(replacer -> replacer
+            .replace(PLAYER_BALANCE, () -> currency.format(currency.getBalance(player)))
+            .replace(BANK_BALANCE, () -> currency.format(this.module.getPlayerBank(data.bankHolder).getBalance(currency)))
+        );
+    }
+
+    private void handleReturn(@NotNull MenuViewer viewer) {
+        Data data = this.getLink(viewer);
+        if (data.shop != null && data.shop.isActive()) {
+            this.runNextTick(() -> module.openShopSettings(viewer.getPlayer(), data.shop));
+        }
+    }
+
+    private void handleDeposit(@NotNull MenuViewer viewer, boolean all) {
+        Player player = viewer.getPlayer();
+        Data data = this.getLink(player);
+        UUID holder = data.bankHolder;
+        ChestBank bank = this.module.getPlayerBank(holder);
+        Currency currency = data.currency;
+        if (currency == null) return;
+
+        if (all) {
+            this.module.depositToBank(player, holder, currency, currency.getBalance(player));
+            this.module.savePlayerBank(bank);
+            this.runNextTick(() -> this.flush(viewer));
+            return;
+        }
+
+        this.handleInput(Dialog.builder(player, input -> {
+            double amount = input.asDoubleAbs();
+            this.module.depositToBank(player, holder, currency, amount);
+            return true;
+        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT));
+    }
+
+    private void handleWithdraw(@NotNull MenuViewer viewer, boolean all) {
+        Player player = viewer.getPlayer();
+        Data data = this.getLink(player);
+        UUID holder = data.bankHolder;
+        ChestBank bank = this.module.getPlayerBank(holder);
+        Currency currency = data.currency;
+        if (currency == null) return;
+
+        if (all) {
+            this.module.withdrawFromBank(player, holder, currency, bank.getBalance(currency));
+            this.module.savePlayerBank(bank);
+            this.runNextTick(() -> this.flush(viewer));
+            return;
+        }
+
+        this.handleInput(Dialog.builder(player, input -> {
+            double amount = input.asDoubleAbs();
+            this.module.withdrawFromBank(player, holder, currency, amount);
+            return true;
+        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT));
     }
 
     @Override
-    @NotNull
-    protected List<MenuItem> createDefaultItems() {
-        List<MenuItem> list = new ArrayList<>();
+    public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
+        this.currencySlots = ConfigValue.create("Currency.ItemSlots", new int[]{0,9,18,27,36}).read(config);
+        this.highlightSlots = ConfigValue.create("Currency.HighlightSlots", new int[]{1,10,19,28,37}).read(config);
 
-        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
-        ItemUtil.editMeta(backItem, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
-        });
-        list.add(new MenuItem(backItem).setSlots(13).setPriority(10).setHandler(this.returnHandler));
+        this.highlightIcon = ConfigValue.create("Currency.Icon.Highlight", NightItem.fromType(Material.LIME_STAINED_GLASS_PANE)
+            .setDisplayName(GREEN.wrap("← " + BOLD.wrap("Selected Currency")))
+            .hideAllComponents()
+        ).read(config);
 
-        ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
-        ItemUtil.editMeta(prevPage, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
-        });
-        list.add(new MenuItem(prevPage).setSlots(9).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
+        this.currencyName = ConfigValue.create("Currency.Name",
+            Placeholders.CURRENCY_NAME
+        ).read(config);
 
-        ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
-        ItemUtil.editMeta(nextPage, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
-        });
-        list.add(new MenuItem(nextPage).setSlots(17).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        this.currencyLore = ConfigValue.create("Currency.Lore", Lists.newList(
+            LIGHT_YELLOW.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),
+            LIGHT_YELLOW.wrap("➥ " + GRAY.wrap("On Hand: ") + PLAYER_BALANCE)
+        )).read(config);
 
-        return list;
-    }
+        loader.addDefaultItem(MenuItem.buildExit(this, 49).setPriority(1));
 
-    // TODO Add extra menu for all 4 actions (bedrock players)
-    @Override
-    protected void loadAdditional() {
-        this.objectSlots = ConfigValue.create("Currency.Slots", IntStream.range(0, 9).toArray()).read(cfg);
+        loader.addDefaultItem(MenuItem.buildReturn(this, 49, (viewer, event) -> this.handleReturn(viewer),
+            ItemOptions.builder()
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).shop != null)
+                .build()
+        ).setPriority(10).build());
 
-        this.objectName = ConfigValue.create("Currency.Name",
-            LIGHT_YELLOW.enclose(BOLD.enclose(Placeholders.CURRENCY_NAME)) + " " + LIGHT_GRAY.enclose("(ID: " + WHITE.enclose(Placeholders.CURRENCY_ID) + ")")
-        ).read(cfg);
+        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(1,10,19,28,37,45,46,47,48,49,50,51,52,53));
+        loader.addDefaultItem(NightItem.fromType(Material.GRAY_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(0,9,18,27,36));
 
-        this.objectLore = ConfigValue.create("Currency.Lore", Lists.newList(
-            " ",
-            LIGHT_YELLOW.enclose(BOLD.enclose("Details:")),
-            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Bank Balance: ") + PLACEHOLDER_BANK_BALANCE),
-            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Your Balance: ") + PLACEHOLDER_PLAYER_BALANCE),
-            "",
-            LIGHT_GRAY.enclose(LIGHT_GREEN.enclose("[▶]") + " Left-Click to " + LIGHT_GREEN.enclose("deposit") + "."),
-            LIGHT_GRAY.enclose(LIGHT_GREEN.enclose("[▶]") + " Right-Click to " + LIGHT_GREEN.enclose("withdraw") + "."),
-            LIGHT_GRAY.enclose(LIGHT_RED.enclose("[▶]") + " [Q/Drop] Key to " + LIGHT_RED.enclose("deposit all") + "."),
-            LIGHT_GRAY.enclose(LIGHT_RED.enclose("[▶]") + " [F/Swap] Key to " + LIGHT_RED.enclose("withdraw all") + ".")
-        )).read(cfg);
+        loader.addDefaultItem(NightItem.fromType(Material.LIGHT_BLUE_BUNDLE)
+            .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Deposit")) + " " + GRAY.wrap("[" + WHITE.wrap("Custom Amount") + "]"))
+            .setLore(Lists.newList(
+                LIGHT_BLUE.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),
+                LIGHT_BLUE.wrap("➥ " + GRAY.wrap("On Hand: ") + PLAYER_BALANCE),
+                "",
+                GRAY.wrap("Deposit " + LIGHT_BLUE.wrap("desired amount")),
+                GRAY.wrap("to the shop bank."),
+                "",
+                LIGHT_BLUE.wrap("→ " + UNDERLINED.wrap("Click to deposit"))
+            ))
+            .hideAllComponents()
+            .toMenuItem()
+            .setPriority(10)
+            .setSlots(13)
+            .setHandler(new ItemHandler("deposit_custom", (viewer, event) -> this.handleDeposit(viewer, false),
+                ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> this.getLink(viewer).currency != null)
+                    .build()
+            )));
+
+        loader.addDefaultItem(NightItem.fromType(Material.WATER_BUCKET)
+            .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Deposit")) + " " + GRAY.wrap("[" + WHITE.wrap("All") + "]"))
+            .setLore(Lists.newList(
+                LIGHT_BLUE.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),
+                LIGHT_BLUE.wrap("➥ " + GRAY.wrap("On Hand: ") + PLAYER_BALANCE),
+                "",
+                GRAY.wrap("Deposit " + LIGHT_BLUE.wrap("all your") + " currency"),
+                GRAY.wrap("to the shop bank."),
+                "",
+                LIGHT_BLUE.wrap("→ " + UNDERLINED.wrap("Click to deposit"))
+            ))
+            .hideAllComponents()
+            .toMenuItem()
+            .setPriority(10)
+            .setSlots(14)
+            .setHandler(new ItemHandler("deposit_all", (viewer, event) -> this.handleDeposit(viewer, true),
+                ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> this.getLink(viewer).currency != null)
+                    .build()
+            )));
+
+        loader.addDefaultItem(NightItem.fromType(Material.ORANGE_BUNDLE)
+            .setDisplayName(LIGHT_ORANGE.wrap(BOLD.wrap("Withdraw")) + " " + GRAY.wrap("[" + WHITE.wrap("Custom Amount") + "]"))
+            .setLore(Lists.newList(
+                LIGHT_ORANGE.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),
+                LIGHT_ORANGE.wrap("➥ " + GRAY.wrap("On Hand: ") + PLAYER_BALANCE),
+                "",
+                GRAY.wrap("Withdraw " + LIGHT_ORANGE.wrap("desired amount") + " of the"),
+                GRAY.wrap("currency to your balance."),
+                "",
+                LIGHT_ORANGE.wrap("→ " + UNDERLINED.wrap("Click to withdraw"))
+            ))
+            .hideAllComponents()
+            .toMenuItem()
+            .setPriority(10)
+            .setSlots(31)
+            .setHandler(new ItemHandler("withdraw_custom", (viewer, event) -> this.handleWithdraw(viewer, false),
+                ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> this.getLink(viewer).currency != null)
+                    .build()
+            )));
+
+        loader.addDefaultItem(NightItem.fromType(Material.LAVA_BUCKET)
+            .setDisplayName(LIGHT_ORANGE.wrap(BOLD.wrap("Withdraw")) + " " + GRAY.wrap("[" + WHITE.wrap("All") + "]"))
+            .setLore(Lists.newList(
+                LIGHT_ORANGE.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),
+                LIGHT_ORANGE.wrap("➥ " + GRAY.wrap("On Hand: ") + PLAYER_BALANCE),
+                "",
+                GRAY.wrap("Withdraw " + LIGHT_ORANGE.wrap("all") + " currency"),
+                GRAY.wrap("from the bank."),
+                "",
+                LIGHT_ORANGE.wrap("→ " + UNDERLINED.wrap("Click to withdraw"))
+            ))
+            .hideAllComponents()
+            .toMenuItem()
+            .setPriority(10)
+            .setSlots(32)
+            .setHandler(new ItemHandler("withdraw_all", (viewer, event) -> this.handleWithdraw(viewer, true),
+                ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> this.getLink(viewer).currency != null)
+                    .build()
+            )));
     }
 }

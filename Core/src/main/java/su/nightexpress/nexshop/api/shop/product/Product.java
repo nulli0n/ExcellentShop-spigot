@@ -97,6 +97,10 @@ public interface Product {
 
     boolean isSellable();
 
+    boolean hasBuyPrice();
+
+    boolean hasSellPrice();
+
     @NotNull String getId();
 
     @NotNull Shop getShop();

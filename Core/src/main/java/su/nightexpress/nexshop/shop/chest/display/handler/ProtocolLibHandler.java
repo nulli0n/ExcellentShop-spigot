@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.chest.display;
+package su.nightexpress.nexshop.shop.chest.display.handler;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -14,8 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
-import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.shop.chest.ChestShopModule;
+import su.nightexpress.nexshop.shop.chest.display.impl.FakeEntity;
 import su.nightexpress.nightcore.util.text.NightMessage;
 
 import java.util.*;
@@ -25,8 +24,7 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     private final ProtocolManager protocolManager;
 
-    public ProtocolLibHandler(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, module);
+    public ProtocolLibHandler() {
         this.protocolManager = ProtocolLibrary.getProtocolManager();
     }
 
@@ -42,16 +40,16 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     @Override
     @NotNull
-    protected List<PacketContainer> getItemPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketContainer> getItemPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull ItemStack item) {
         List<PacketContainer> list = new ArrayList<>();
 
-        PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
-        PacketContainer dataPacket = this.createMetadataPacket(entityID, metadata -> {
+        PacketContainer spawnPacket = this.createSpawnPacket(this.itemType, entity);
+        PacketContainer dataPacket = this.createMetadataPacket(entity.getId(), metadata -> {
             metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
             metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(8, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item);
         });
 
-        if (create) list.add(spawnPacket);
+        if (needSpawn) list.add(spawnPacket);
         list.add(dataPacket);
 
         return list;
@@ -59,13 +57,13 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     @Override
     @NotNull
-    protected List<PacketContainer> getShowcasePackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull ItemStack item) {
+    protected List<PacketContainer> getShowcasePackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull ItemStack item) {
         List<PacketContainer> list = new ArrayList<>();
 
-        PacketContainer spawnPacket = this.createSpawnPacket(type, location, entityID);
+        PacketContainer spawnPacket = this.createSpawnPacket(this.showcaseType, entity);
 
-        PacketContainer dataPacket = this.createMetadataPacket(entityID, metadata -> {
-            if (type == EntityType.ARMOR_STAND) {
+        PacketContainer dataPacket = this.createMetadataPacket(entity.getId(), metadata -> {
+            if (this.showcaseType == EntityType.ARMOR_STAND) {
                 metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20); //invis
                 metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), false); //custom name visible
                 metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(Boolean.class)), true); //no gravity
@@ -79,15 +77,15 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
             }
         });
 
-        if (create) list.add(spawnPacket);
+        if (needSpawn) list.add(spawnPacket);
         list.add(dataPacket);
 
-        if (type == EntityType.ARMOR_STAND) {
+        if (this.showcaseType == EntityType.ARMOR_STAND) {
             PacketContainer armorPacket = new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT);
             List<com.comphenix.protocol.wrappers.Pair<EnumWrappers.ItemSlot, ItemStack>> list2 = new ArrayList<>();
             list2.add(new com.comphenix.protocol.wrappers.Pair<>(EnumWrappers.ItemSlot.HEAD, item));
 
-            armorPacket.getIntegers().write(0, entityID);
+            armorPacket.getIntegers().write(0, entity.getId());
             armorPacket.getSlotStackPairLists().writeSafely(0, list2);
 
             list.add(armorPacket);
@@ -98,15 +96,15 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
 
     @Override
     @NotNull
-    protected List<PacketContainer> getHologramPackets(int entityID, boolean create, @NotNull EntityType type, @NotNull Location location, @NotNull String textLine) {
+    protected List<PacketContainer> getHologramPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull String textLine) {
         List<PacketContainer> list = new ArrayList<>();
 
-        PacketContainer spawnPacket = createSpawnPacket(type, location, entityID);
+        PacketContainer spawnPacket = createSpawnPacket(this.hologramType, entity);
 
         Object component = WrappedChatComponent.fromJson(NightMessage.asJson(textLine)).getHandle();
-        PacketContainer dataPacket = this.createMetadataPacket(entityID, metadata -> {
+        PacketContainer dataPacket = this.createMetadataPacket(entity.getId(), metadata -> {
             // Armor Stands (legacy)
-            if (type == EntityType.ARMOR_STAND) {
+            if (this.hologramType == EntityType.ARMOR_STAND) {
                 metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), (byte) 0x20); //invis
                 metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(2, WrappedDataWatcher.Registry.getChatComponentSerializer(true)), Optional.of(component)); //display name
                 metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(3, WrappedDataWatcher.Registry.get(Boolean.class)), true); //custom name visible
@@ -121,16 +119,18 @@ public class ProtocolLibHandler extends DisplayHandler<PacketContainer> {
             }
         });
 
-        if (create) list.add(spawnPacket);
+        if (needSpawn) list.add(spawnPacket);
         list.add(dataPacket);
 
         return list;
     }
 
     @NotNull
-    protected PacketContainer createSpawnPacket(@NotNull EntityType entityType, @NotNull Location location, int entityID) {
+    protected PacketContainer createSpawnPacket(@NotNull EntityType entityType, @NotNull FakeEntity entity) {
+        Location location = entity.getLocation();
+
         PacketContainer spawnPacket = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
-        spawnPacket.getIntegers().write(0, entityID);
+        spawnPacket.getIntegers().write(0, entity.getId());
         spawnPacket.getUUIDs().write(0, UUID.randomUUID());
         spawnPacket.getEntityTypeModifier().write(0, entityType);
         spawnPacket.getDoubles().write(0, location.getX());

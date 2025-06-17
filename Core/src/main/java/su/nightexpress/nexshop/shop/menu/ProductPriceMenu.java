@@ -35,7 +35,6 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends LinkedMenu<ShopPlugin, T> {
 
     private static final String SKULL_BUY     = "33658f9ed2145ef8323ec8dc2688197c58964510f3d29939238ce1b6e45af0ff";

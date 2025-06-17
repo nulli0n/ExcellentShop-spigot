@@ -73,7 +73,7 @@ public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFi
         Player player = viewer.getPlayer();
 
         autoFill.setSlots(this.itemSlots);
-        autoFill.setItems(this.auctionManager.getAllowedCurrencies(player).stream().sorted(Comparator.comparing(Currency::getInternalId)).toList());
+        autoFill.setItems(this.auctionManager.getAvailableCurrencies(player).stream().sorted(Comparator.comparing(Currency::getInternalId)).toList());
         autoFill.setItemCreator(currency -> {
             ItemStack item = currency.getIcon();
             Pair<ItemStack, Double> prepared = this.getLink(player);

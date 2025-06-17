@@ -73,7 +73,7 @@ public class AuctionUtils {
             //ItemPacker packer = handler.createPacker(item);
             PhysicalTyping typing = ProductTypes.fromItem(item, false);
 
-            Currency currency = Rnd.get(auctionManager.getAllowedCurrencies());
+            Currency currency = Rnd.get(auctionManager.getEnabledCurrencies());
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
 
             LocalDateTime created = LocalDateTime.now().minusDays(Rnd.get(5)).minusHours(Rnd.get(6)).minusMinutes(Rnd.get(30));
