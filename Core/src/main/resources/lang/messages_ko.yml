@@ -1,0 +1,1282 @@
+Days:
+  MONDAY: 월요일
+  TUESDAY: 화요일
+  WEDNESDAY: 수요일
+  THURSDAY: 목요일
+  FRIDAY: 금요일
+  SATURDAY: 토요일
+  SUNDAY: 일요일
+TradeType:
+  BUY: 구매
+  SELL: 판매
+PriceType:
+  FLAT: 고정
+  FLOAT: 변동
+  DYNAMIC: 동적
+  PLAYER_AMOUNT: 플레이어 수
+ProductType:
+  VANILLA: 바닐라
+  COMMAND: 명령어
+  PLUGIN: 플러그인
+Command:
+  Argument:
+    Name:
+      Name: 이름
+      Currency: 화폐
+      Price: 가격
+  Currency:
+    Desc: 화폐 관리.
+    Give:
+      Desc: 플레이어에게 화폐를 지급합니다.
+      Done: <lgray><lyellow>%player_name%</lyellow>님에게 <lyellow>%amount% %currency_name%</lyellow>을(를) 지급했습니다.</lgray>
+    Take:
+      Desc: 플레이어에게서 화폐를 회수합니다.
+      Done: <lgray><lyellow>%player_name%</lyellow>님에게서 <lyellow>%amount% %currency_name%</lyellow>을(를) 회수했습니다.</lgray>
+    Create:
+      Desc: 아이템 화폐를 생성합니다.
+      Done:
+        New: <lgray>새로운 화폐 <lgreen>%name%</lgreen>을(를) <lgreen>%item%</lgreen>(으)로 생성했습니다.</lgray>
+      Error:
+        Exist: <lgray>화폐 <lred>%currency_id%</lred>이(가) 이미 존재하며 아이템 화폐가 아닙니다.</lgray>
+    Error:
+      NoItem: <lred>그것을 하려면 아이템을 들고 있어야 합니다!</lred>
+Module:
+  Command:
+    Reloaded: <lgray><lgreen>%name%</lgreen> 모듈이 재로드되었습니다!</lgray>
+    Reload:
+      Desc: 모듈을 재로드합니다.
+Error:
+  Currency:
+    Invalid: <lred>유효하지 않은 화폐입니다!</lred>
+Shop:
+  Product:
+    Error:
+      InvalidCartUI:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - '<lred>구매 메뉴를 열 수 없습니다: 카트 UI를 찾을 수 없습니다.</lred>'
+      Unbuyable:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>이 상품은 현재 구매할 수 없습니다!</lgray>
+      Unsellable:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>이 상품은 현재 판매할 수 없습니다!</lgray>
+      OutOfStock:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>이 상품은 품절입니다!</lgray>
+      OutOfSpace:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>상점에 공간이 부족합니다!</lgray>
+      OutOfFunds:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>상점에 돈이 부족합니다!</lgray>
+      FullStock:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>이 상품은 재고가 가득 찼습니다!</lgray>
+      FullInventory:
+      - <sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>죄송합니다! </b></lred><lgray>구매하기 전에 인벤토리를 정리해야 합니다!</lgray>
+      TooExpensive:
+      - <output:"titles:15:60:15"><sound:"block.anvil.place;0.6;1.0">
+      - <lred><b>너무 비쌉니다!</b></lred>
+      - <lgray><lred>%price%</lred>이(가) 필요합니다!</lgray>
+      NotEnoughItems:
+      - <output:"titles:15:60:15"><sound:"block.anvil.place;0.6;1.0">
+      - <lred><b>아이템이 부족합니다!</b></lred>
+      - <lgray>x<lred>%amount% %item%</lred>이(가) 필요합니다!</lgray>
+  Cart:
+    CustomAmount: <lgray>수량을 입력하세요...</lgray>
+Other:
+  PriceDisabled: N/A
+Editor:
+  Price:
+    Float:
+      NoDays: 설정된 요일이 없습니다. 가격이 올바르게 새로고침되지 않습니다.
+      NoTimes: 설정된 시간이 없습니다. 가격이 올바르게 새로고침되지 않습니다.
+  Generic:
+    BrokenItem:
+      Name: <lred><b>< 유효하지 않은 아이템> </b></lred>
+      Description:
+      - <lgray>아이템 태그/ID가 손상되었거나</lgray>
+      - <lgray>유효하지 않습니다.</lgray>
+      Formatted: true
+    Enter:
+      Name: <lgray><lgreen>[이름]</lgreen>을(를) 입력하세요</lgray>
+      Amount: <lgray><lgreen>[수량]</lgreen>을(를) 입력하세요</lgray>
+      Value: <lgray><lgreen>[값]</lgreen>을(를) 입력하세요</lgray>
+      Day: <lgray><lgreen>[요일 이름]</lgreen>을(를) 입력하세요</lgray>
+      Time: <lgray><lgreen>22:00</lgreen>과 같은 형식으로 <lgreen>[시간]</lgreen>을(를) 입력하세요</lgray>
+      Seconds: <lgray><lgreen>[초 단위 수량]</lgreen>을(를) 입력하세요</lgray>
+  Product:
+    Enter:
+      Price: <lgray><lgreen>[가격]</lgreen>을(를) 입력하세요</lgray>
+      UniPrice: <lgray><lgreen>[최소] [최대]</lgreen>를 입력하세요</lgray>
+      Currency: <lgray><lgreen>[화폐 식별자]</lgreen>를 입력하세요</lgray>
+    Price:
+      Reset:
+        Name: 초기화 및 업데이트
+        Description:
+        - 상품의 가격 데이터를 초기화하고
+        - 값을 새로고침합니다.
+        Formatted: true
+        CurrentInfo:
+          Buy Price: '%product_price_buy_formatted%'
+          Sell Price: '%product_price_sell_formatted%'
+        ClickActions:
+          LEFT: 초기화
+      Type:
+        Name: 가격 유형
+        Description: []
+        Formatted: true
+        CurrentInfo:
+          Current: '%product_price_type%'
+        ClickActions:
+          LEFT: 변경
+      Currency:
+        Name: 화폐
+        Description: []
+        Formatted: true
+        CurrentInfo:
+          Current: '%product_currency%'
+        ClickActions:
+          LEFT: 변경
+      Flat:
+        Buy:
+          Name: 구매 가격
+          Description: []
+          Formatted: true
+          CurrentInfo:
+            Current: '%product_price_buy%'
+          ClickActions:
+            DROP_KEY: 비활성화
+            LEFT: 변경
+        Sell:
+          Name: 판매 가격
+          Description: []
+          Formatted: true
+          CurrentInfo:
+            Current: '%product_price_sell%'
+          ClickActions:
+            DROP_KEY: 비활성화
+            LEFT: 변경
+      Float:
+        Buy:
+          Name: 구매 가격 범위
+          Description:
+          - 상품 구매 가격 범위를 설정합니다.
+          - 최종 가격은 이 값들 내에 있습니다.
+          Formatted: true
+          CurrentInfo:
+            Min: '%product_pricer_buy_min%'
+            Max: '%product_pricer_buy_max%'
+          ClickActions:
+            DROP_KEY: 비활성화
+            LEFT: 변경
+        Sell:
+          Name: 판매 가격 범위
+          Description:
+          - 상품 판매 가격 범위를 설정합니다.
+          - 최종 가격은 이 값들 내에 있습니다.
+          Formatted: true
+          CurrentInfo:
+            Min: '%product_pricer_sell_min%'
+            Max: '%product_pricer_sell_max%'
+          ClickActions:
+            DROP_KEY: 비활성화
+            LEFT: 변경
+        Decimals:
+          Name: 소수점 자르기
+          Description:
+          - 최종 가격이 정수여야 하는지
+          - 여부를 제어합니다.
+          Formatted: true
+          CurrentInfo:
+            Enabled: '%product_pricer_float_round_decimals%'
+          ClickActions:
+            LEFT: 토글
+        RefreshType:
+          Name: 새로고침 유형
+          Description:
+          - <lyellow><b>간격:</b></lyellow>
+          - X초마다 새로고침을 수행합니다.
+          - ''
+          - <lyellow><b>고정:</b></lyellow>
+          - 주어진 시간에 새로고침을 수행합니다.
+          Formatted: true
+          CurrentInfo:
+            Current: '%product_pricer_float_refresh_type%'
+          ClickActions:
+            LEFT: 토글
+        RefreshInterval:
+          Name: 새로고침 간격
+          Description:
+          - 새로고침 간격을 설정합니다 (초 단위).
+          Formatted: true
+          CurrentInfo:
+            Current: '%product_pricer_float_refresh_interval%'
+          ClickActions:
+            LEFT: 변경
+        RefreshDays:
+          Name: 새로고침 요일
+          Description:
+          - '%product_pricer_float_refresh_days%'
+          Formatted: true
+          ClickActions:
+            LEFT: 요일 추가
+            RIGHT: 모두 제거
+        RefreshTimes:
+          Name: 새로고침 시간
+          Description:
+          - '%product_pricer_float_refresh_times%'
+          Formatted: true
+          ClickActions:
+            LEFT: 시간 추가
+            RIGHT: 모두 제거
+      Dynamic:
+        Initial:
+          Name: 초기 값
+          Description:
+          - 초기 (시작) 상품 가격을 설정합니다.
+          Formatted: true
+          CurrentInfo:
+            Buy: '%product_pricer_dynamic_initial_buy%'
+            Sell: '%product_pricer_dynamic_initial_sell%'
+          ClickActions:
+            LEFT: 구매 변경
+            RIGHT: 판매 변경
+        Step:
+          Name: 가격 단계
+          Description:
+          - 각 구매/판매 시 지정된 값으로
+          - 가격을 조정합니다.
+          Formatted: true
+          CurrentInfo:
+            Buy: '%product_pricer_dynamic_step_buy%'
+            Sell: '%product_pricer_dynamic_step_sell%'
+          ClickActions:
+            LEFT: 구매 변경
+            RIGHT: 판매 변경
+      Players:
+        Initial:
+          Name: 초기 값
+          Description:
+          - 초기 (시작) 상품 가격을 설정합니다.
+          Formatted: true
+          CurrentInfo:
+            Buy: '%product_pricer_dynamic_initial_buy%'
+            Sell: '%product_pricer_dynamic_initial_sell%'
+          ClickActions:
+            LEFT: 구매 변경
+            RIGHT: 판매 변경
+        Adjust:
+          Name: 조정 수량
+          Description:
+          - 온라인 플레이어 수의 승수를 사용하여
+          - 지정된 값으로 가격을 조정합니다.
+          Formatted: true
+          CurrentInfo:
+            Buy: '%product_pricer_players_adjust_amount_buy%'
+            Sell: '%product_pricer_players_adjust_amount_sell%'
+          ClickActions:
+            LEFT: 구매 변경
+            RIGHT: 판매 변경
+        Step:
+          Name: 조정 단계
+          Description:
+          - 온라인 플레이어 %product_pricer_players_adjust_step%명마다
+          - 가격을 조정합니다.
+          Formatted: true
+          CurrentInfo:
+            Current: '%product_pricer_players_adjust_step%'
+          ClickActions:
+            LEFT: 변경
+  Title:
+    Shop:
+      List: <black>가상 상점 에디터</black>
+      Settings: <black>상점 설정</black>
+      Layouts: <black>상점 레이아웃</black>
+      Rotations: <black>상점 로테이션</black>
+      Rotation:
+        Options: <black>로테이션 옵션</black>
+        Times: <black>로테이션 시간</black>
+        Items: <black>로테이션 아이템</black>
+        ItemSelection: <black>상품 선택...</black>
+        SlotSelection: <black>슬롯 선택...</black>
+    Product:
+      Creation: <black>상품 생성</black>
+      Settings: <black>상품 옵션</black>
+      Stocks: <black>상품 재고 옵션</black>
+      Price: <black>상품 가격 옵션</black>
+    Products:
+      Normal: <black>상점 상품 (일반)</black>
+      Rotating: <black>상점 상품 (로테이션)</black>
+VirtualShop:
+  Command:
+    Argument:
+      Name:
+        Shop: 상점
+    Editor:
+      Desc: 가상 상점 에디터를 엽니다.
+    Rotate:
+      Desc: 상점을 강제로 로테이션합니다.
+      Done: <lgray><lyellow>%shop_name%</lyellow> 상점을 강제로 로테이션했습니다.</lgray>
+    Open:
+      Desc: 지정된 상점을 엽니다.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow>님을 위해 <lyellow>%shop_name%</lyellow> 상점을 열었습니다.</lgray>
+    Menu:
+      Desc: 메인 메뉴를 엽니다.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow>님을 위해 상점 메뉴를 열었습니다.</lgray>
+    Shop:
+      Desc: 지정된 상점 또는 메인 메뉴를 엽니다.
+    ShopAlias:
+      Desc: '%shop_name% 상점을 엽니다.'
+    SellMenu:
+      Desc: 판매 GUI를 엽니다.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow>님을 위해 판매 메뉴를 열었습니다.</lgray>
+    SellAll:
+      Desc: 인벤토리의 모든 아이템을 빠르게 판매합니다.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> 플레이어가 모든 아이템을 판매하도록 강제했습니다.</lgray>
+    SellHand:
+      Desc: 손에 든 아이템을 빠르게 판매합니다.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> 플레이어가 손에 든 아이템을 판매하도록 강제했습니다.</lgray>
+    SellHandAll:
+      Desc: 손에 든 비슷한 아이템을 빠르게 판매합니다.
+  Shop:
+    Rotation:
+      Update:
+      - <noprefix>
+      - ' '
+      - <lgray><lyellow>%shop_name%</lyellow> 상점에 새로운 아이템이 나타났습니다!</lgray>
+      - <lgray>상점을 열려면 <click:run_command:"/shop %shop_id%"><hover:show_text:"<lgray>클릭하여 상점을 엽니다!</lgray>"><lyellow><b>여기</b></lyellow></hover></click>를 클릭하세요!</lgray>
+      - ' '
+    Error:
+      BadWorld: <lred>이 세계에서는 상점을 사용할 수 없습니다!</lred>
+      BadGamemode: <lred>현재 게임 모드에서는 상점을 사용할 수 없습니다!</lred>
+      InvalidLayout: '<lgray>상점 <lred>%shop_name%</lred>을(를) 열 수 없습니다: 유효하지 않은 상점 레이아웃입니다!</lgray>'
+      Invalid: <lgray><lred>%value%</lred>은(는) 유효한 상점이 아닙니다!</lgray>
+    Create:
+      Error:
+        Exist: <lred>해당 이름의 상점이 이미 존재합니다!</lred>
+        BadName: <lred>라틴 문자와 숫자만 허용됩니다!</lred>
+  Product:
+    Purchase:
+      Sell:
+      - <output:"titles:15:60:15"><sound:"entity.experience_orb.pickup;0.6;1.0">
+      - <lgreen><b>판매 성공!</b></lgreen>
+      - <lgray><lgreen>x%amount% %item%</lgreen>을(를) <lgreen>%price%</lgreen>에 판매했습니다.</lgray>
+      Buy:
+      - <output:"titles:15:60:15"><sound:"entity.experience_orb.pickup;0.6;1.0">
+      - <lgreen><b>구매 성공!</b></lgreen>
+      - <lgray><lgreen>x%amount% %item%</lgreen>을(를) <lgreen>%price%</lgreen>에 구매했습니다.</lgray>
+  SellMenu:
+    SaleResult:
+    - <output:"titles:15:60:15"><sound:"entity.experience_orb.pickup;0.6;1.0">
+    - <lgreen><b>아이템 판매 완료!</b></lgreen>
+    - <lgray>+%total%</lgray>
+    SaleDetails:
+    - <noprefix>
+    - ' '
+    - <lgreen><b>판매 세부 정보:</b></lgreen>
+    - '%entry%'
+    - ' '
+    - '<lgray>총액: <lgreen>%total%</lgreen></lgray>'
+    - ' '
+    SaleEntry: '<lgray>x%amount% <white>%item%</white>: <lgreen>%price%</lgreen></lgray>'
+    NothingResult:
+    - <output:"titles:15:60:15"><sound:"block.anvil.place;0.6;1.0">
+    - <lred><b>판매할 아이템이 없습니다!</b></lred>
+    - <lgray>판매할 아이템이 없습니다.</lgray>
+    NothingDetails:
+    - <noprefix>
+    - ' '
+    - <lred><b>판매 세부 정보:</b></lred>
+    - <lgray>인벤토리에 판매할 수 있는 아이템이 없습니다.</lgray>
+    - ' '
+    - <lgray>아이템이 들어있는 셜커 상자 또는 상자가 쌓여 있다면,</lgray>
+    - <lgray>판매를 위해 개별 스택으로 분할하세요.</lgray>
+    - ' '
+  Price:
+    AverageDynamics:
+      Up: <green>↑ %value%%</green>
+      Down: <red>↓ %value%%</red>
+  Error:
+    Editor:
+      RotationExists: <lred>해당 이름의 로테이션이 이미 존재합니다!</lred>
+  Editor:
+    Product:
+      NoRankRequirements: 랭크 요구사항 없음!
+      NoPermissionRequirements: 권한 요구사항 없음!
+      NoForbiddenPerms: 금지된 권한 없음!
+      Object:
+        Static2:
+          Name: <lyellow><b>%product_preview_name%</b></lyellow>
+          Lore:
+          - '<lyellow>● <lgray>핸들러: </lgray>%product_handler%</lyellow>'
+          - '<lyellow>● <lgray>화폐: </lgray>%product_currency%</lyellow>'
+          - '<lyellow>● <lgray>가격 유형: </lgray>%product_price_type%</lyellow>'
+          - '<lyellow>● <lgray>구매: </lgray>%product_price_buy%</lyellow>'
+          - '<lyellow>● <lgray>판매: </lgray>%product_price_sell%</lyellow>'
+          - ''
+          - <lgray>이 상품은 슬롯, 페이지, 상점 간에</lgray>
+          - <lgray>자유롭게 이동할 수 있습니다!</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>편집</lyellow>합니다.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>선택</lyellow>합니다.</lgray>
+      Delete:
+        Name: <lyellow><b>상품 삭제</b></lyellow>
+        Lore:
+        - <lgray>모든 설정과 데이터와 함께</lgray>
+        - <lgray>상품을 영구적으로 삭제합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>삭제</lyellow>합니다.</lgray>
+      Rotating:
+        Object:
+          Name: <lyellow><b>%product_preview_name%</b></lyellow>
+          Lore:
+          - '<lyellow>● <lgray>핸들러: </lgray>%product_handler%</lyellow>'
+          - '<lyellow>● <lgray>화폐: </lgray>%product_currency%</lyellow>'
+          - '<lyellow>● <lgray>가격 유형: </lgray>%product_price_type%</lyellow>'
+          - '<lyellow>● <lgray>구매: </lgray>%product_price_buy%</lyellow>'
+          - '<lyellow>● <lgray>판매: </lgray>%product_price_sell%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>편집</lyellow>합니다.</lgray>
+        Create:
+          Name: <lyellow><b>새로운 상품</b></lyellow>
+          Lore:
+          - <lgray>로테이션에 사용할</lgray>
+          - <lgray>새로운 상품을 생성합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>생성</lyellow>합니다.</lgray>
+      FreeSlot:
+        Name: <lyellow><b><green><b>빈 슬롯</b></green></b></lyellow>
+        Lore:
+        - ''
+        - <lgray><lcyan><b>빠른 생성:</b></lcyan></lgray>
+        - <lgray>여기에 아이템을 드래그 앤 드롭하세요!</lgray>
+        - ''
+        - <lgray><lpurple><b>수동 생성:</b></lpurple></lgray>
+        - <lgray>빈 커서로 클릭하여</lgray>
+        - <lgray>생성 마법사를 엽니다!</lgray>
+      RotationSlot:
+        Name: <lyellow><b><red><b>로테이션 슬롯</b></red></b></lyellow>
+        Lore:
+        - <lgray>로테이션 상품을 위한</lgray>
+        - <lgray>예약된 슬롯입니다.</lgray>
+      ReservedSlot:
+        Name: <lyellow><b><red><b>예약된 슬롯</b></red></b></lyellow>
+        Lore:
+        - <lgray>이 슬롯은 상점 상품에 의해 점유되어 있습니다.</lgray>
+      Creation:
+        Info:
+          Name: <lyellow><b>생성 마법사</b></lyellow>
+          Lore:
+          - ''
+          - '<lgray><lyellow><b>단계 #1</b></lyellow></lgray>'
+          - <lgray>새 상품의 기반으로 사용할</lgray>
+          - <lgray>인벤토리의 아이템을 클릭하세요.</lgray>
+          - ''
+          - '<lgray><lyellow><b>단계 #2</b></lyellow></lgray>'
+          - <lgray>상품 유형 버튼을 선택하고 클릭하여</lgray>
+          - <lgray>새로운 상품을 생성합니다.</lgray>
+        Item:
+          Name: <lyellow><b>아이템 상품</b></lyellow>
+          Lore:
+          - <lgray>구매 시 플레이어의 인벤토리에</lgray>
+          - <lgray>아이템을 직접 지급합니다.</lgray>
+          - ''
+          - <lgray><green>✔</green> 사용자 지정 아이템</lgray>
+          - <lgray><green>✔</green> NBT 지원</lgray>
+          - <lgray><green>✔</green> 플레이스홀더</lgray>
+          - <lgray><green>✔</green> 판매 가능</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>생성</lyellow>합니다.</lgray>
+        Command:
+          Name: <lyellow><b>명령어 상품</b></lyellow>
+          Lore:
+          - <lgray>구매 시 플레이스홀더와 함께</lgray>
+          - <lgray>지정된 명령어를 실행합니다.</lgray>
+          - ''
+          - <lgray><green>✔</green> 사용자 지정 이름</lgray>
+          - <lgray><green>✔</green> 사용자 지정 로어</lgray>
+          - <lgray><green>✔</green> 플레이스홀더</lgray>
+          - <lgray><green>✔</green> 무제한 명령어</lgray>
+          - <lgray><red>✘</red> 판매 불가</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>생성</lyellow>합니다.</lgray>
+      Item:
+        Name: <lyellow><b>아이템</b></lyellow>
+        Lore:
+        - <lgray>상품의 아이템을 정의합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>드래그 앤 드롭하여 <lyellow>교체</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>사본을 얻습니다</lyellow>.</lgray>
+      Preview:
+        Name: <lyellow><b>아이콘</b></lyellow>
+        Lore:
+        - <lgray>상품의 아이콘을 정의합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>드래그 앤 드롭하여 <lyellow>교체</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>사본을 얻습니다</lyellow>.</lgray>
+      RespectItemMeta:
+        Name: <lyellow><b>NBT 일치</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>활성화됨: </lgray>%product_item_meta_enabled%</lyellow>'
+        - ''
+        - <lgray>이 상품을 판매하기 위해 전체 NBT가</lgray>
+        - <lgray>일치해야 하는지 여부를 제어합니다.</lgray>
+        - ''
+        - <lgray>그렇지 않으면 동일한 유형의</lgray>
+        - <lgray>모든 아이템이 허용됩니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>토글</lyellow>합니다.</lgray>
+      PriceManager:
+        Name: <lyellow><b>가격 관리자</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>유형: </lgray>%product_price_type%</lyellow>'
+        - '<lyellow>● <lgray>화폐: </lgray>%product_currency%</lyellow>'
+        - '<lyellow>● <lgray>구매: </lgray>%product_price_buy%</lyellow>'
+        - '<lyellow>● <lgray>판매: </lgray>%product_price_sell%</lyellow>'
+        - ''
+        - <lgray>상품 화폐와 가격을 설정합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      RanksRequired:
+        Name: <lyellow><b>필요한 랭크</b></lyellow>
+        Lore:
+        - '%product_allowed_ranks%'
+        - ''
+        - 나열된 랭크 중 하나라도 가진 플레이어만
+        - 이 상품에 접근할 수 있습니다.
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>랭크 추가</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>모두 제거 및 비활성화</lyellow>합니다.</lgray>
+      RequiredPerms:
+        Name: 필요한 권한
+        Description:
+        - '%product_required_permissions%'
+        - ''
+        - 나열된 권한 중 <green>하나라도</green> 가진 플레이어만
+        - 이 상품에 접근할 수 있습니다.
+        Formatted: true
+        ClickActions:
+          LEFT: 권한 추가
+          RIGHT: 모두 제거 및 비활성화
+      ForbiddenPerms:
+        Name: 금지된 권한
+        Description:
+        - '%product_forbidden_permissions%'
+        - ''
+        - 나열된 권한 중 <red>어떤 권한도</red> 가지지 않은 플레이어만
+        - 이 상품에 접근할 수 있습니다.
+        Formatted: true
+        ClickActions:
+          LEFT: 권한 추가
+          RIGHT: 모두 제거 및 비활성화
+      Commands:
+        Name: <lyellow><b>명령어</b></lyellow>
+        Lore:
+        - '%product_commands%'
+        - ''
+        - <lgray>플레이어가 이 아이템을 구매할 때</lgray>
+        - <lgray>나열된 명령어를 실행합니다.</lgray>
+        - ''
+        - <lyellow>● <lgray>플레이어 이름에는 <lyellow>%player_name%</lyellow>을(를) 사용합니다.</lgray></lyellow>
+        - <lyellow>● <lgray><lyellow>PlaceholderAPI</lyellow>가 지원됩니다.</lgray></lyellow>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>명령어 추가</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>모두 제거</lyellow>합니다.</lgray>
+      Stock:
+        Category:
+          Name: <lyellow><b>글로벌 & 플레이어 재고</b></lyellow>
+          Lore:
+          - <lgray><lyellow>서버별</lyellow> 및 <lyellow>플레이어별</lyellow></lgray>
+          - <lgray>상품 제한을 제어합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+        Global:
+          BuyInitial:
+            Name: <lyellow><b>구매 재고</b></lyellow>
+            Lore:
+            - '<lyellow>● <lgray>현재: </lgray>%product_stock_global_buy_amount_initial%</lyellow>'
+            - ''
+            - <lgray>글로벌 구매 재고를 설정합니다.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>무제한으로 설정</lyellow>합니다.</lgray>
+          SellInitial:
+            Name: <lyellow><b>판매 재고</b></lyellow>
+            Lore:
+            - '<lyellow>● <lgray>현재: </lgray>%product_stock_global_sell_amount_initial%</lyellow>'
+            - ''
+            - <lgray>글로벌 판매 재고를 설정합니다.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>무제한으로 설정</lyellow>합니다.</lgray>
+        Player:
+          BuyInitial:
+            Name: <lyellow><b>구매 제한</b></lyellow>
+            Lore:
+            - '<lyellow>● <lgray>현재: </lgray>%product_stock_player_buy_amount_initial%</lyellow>'
+            - ''
+            - <lgray>플레이어별 개별 구매 제한을</lgray>
+            - <lgray>설정합니다.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>무제한으로 설정</lyellow>합니다.</lgray>
+          SellInitial:
+            Name: <lyellow><b>판매 제한</b></lyellow>
+            Lore:
+            - '<lyellow>● <lgray>현재: </lgray>%product_stock_player_sell_amount_initial%</lyellow>'
+            - ''
+            - <lgray>플레이어별 개별 판매 제한을</lgray>
+            - <lgray>설정합니다.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>무제한으로 설정</lyellow>합니다.</lgray>
+      Stocks:
+        ResetData:
+          Name: <lyellow><b>초기화 및 업데이트</b></lyellow>
+          Lore:
+          - <lgray>재고 및 제한 데이터를 초기화하고</lgray>
+          - <lgray>값을 새로고침합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>초기화</lyellow>합니다.</lgray>
+        StockResetTime:
+          Name: <lyellow><b>재고 보충 시간</b></lyellow>
+          Lore:
+          - '<lyellow>● <lgray>현재: </lgray>%product_stocks_restock_time%</lyellow>'
+          - ''
+          - <lgray>재고가 기본값으로</lgray>
+          - <lgray>재설정되는 시간을 제어합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>비활성화</lyellow>합니다.</lgray>
+        LimitResetTime:
+          Name: <lyellow><b>초기화 시간</b></lyellow>
+          Lore:
+          - '<lyellow>● <lgray>현재: </lgray>%product_limits_restock_time%</lyellow>'
+          - ''
+          - <lgray>제한이 기본값으로</lgray>
+          - <lgray>재설정되는 시간을 제어합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>비활성화</lyellow>합니다.</lgray>
+      Price:
+        DiscountAllowed:
+          Name: <lyellow><b>할인 허용</b></lyellow>
+          Lore:
+          - '<lyellow>● <lgray>활성화됨: </lgray>%product_discount_allowed%</lyellow>'
+          - ''
+          - <lgray>상품이 상점 할인에 의해</lgray>
+          - <lgray>영향을 받을 수 있는지 여부를 설정합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>토글</lyellow>합니다.</lgray>
+    Enter:
+      Id: <lgray><lgreen>[상점 식별자]</lgreen>를 입력하세요</lgray>
+      Description: <lgray><lgreen>[설명]</lgreen>을(를) 입력하세요</lgray>
+      Title: <lgray><lgreen>[제목]</lgreen>을(를) 입력하세요</lgray>
+      Command: <lgray><lgreen>[명령어]</lgreen>를 입력하세요</lgray>
+      Alias: <lgray><lgreen>[명령어 별칭]</lgreen>을(를) 입력하세요</lgray>
+      Slots: <lgray><lgreen>[슬롯] -> [1,2,5,등]</lgreen>을(를) 입력하세요</lgray>
+      Rank: <lgray><lgreen>[랭크 이름]</lgreen>을(를) 입력하세요</lgray>
+      Permission: <lgray><lgreen>[권한 노드]</lgreen>를 입력하세요</lgray>
+      RotationId: <lgray><lgreen>[로테이션 이름]</lgreen>을(를) 입력하세요</lgray>
+      Weight: <lgray><lgreen>[가중치]</lgreen>를 입력하세요</lgray>
+    Shop:
+      Create:
+        Name: <lyellow><b>새로운 상점</b></lyellow>
+        Lore:
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>생성</lyellow>합니다.</lgray>
+      Delete:
+        Name: <lyellow><b>상점 삭제</b></lyellow>
+        Lore:
+        - <lgray>모든 설정과 아이템과 함께</lgray>
+        - <lgray>상점을 영구적으로 삭제합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>삭제</lyellow>합니다.</lgray>
+      Object:
+        Name: <lyellow><b>%shop_name%</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>아이템: </lgray>%shop_products%</lyellow>'
+        - '<lyellow>● <lgray>페이지: </lgray>%shop_pages%</lyellow>'
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      DisplayName:
+        Name: <lyellow><b>표시 이름</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>현재: </lgray>%shop_name%</lyellow>'
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+      Description:
+        Name: <lyellow><b>설명</b></lyellow>
+        Lore:
+        - '%shop_description%'
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>줄 추가</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>모두 제거</lyellow>합니다.</lgray>
+      Icon:
+        Name: <lyellow><b>아이콘</b></lyellow>
+        Lore:
+        - <lyellow>[▶]</lyellow> <lgray>드래그 앤 드롭하여 <lyellow>교체</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>사본을 얻습니다</lyellow>.</lgray>
+      MenuSlot:
+        Name: <lyellow><b>메뉴 슬롯</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>현재: </lgray>%shop_menu_slot%</lyellow>'
+        - ''
+        - <lgray><lyellow>/shop</lyellow> GUI에 대한 상점 위치를 설정합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>비활성화</lyellow>합니다.</lgray>
+      PermissionRequirement:
+        Name: <lyellow><b>권한 요구사항</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>활성화됨: </lgray>%shop_permission_required%</lyellow>'
+        - '<lyellow>● <lgray>노드: </lgray>%shop_permission_node%</lyellow>'
+        - ''
+        - 이 상점을 사용하기 위해 권한이 필요한지</lgray>
+        - <lgray>여부를 제어합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>토글</lyellow>합니다.</lgray>
+      Pages:
+        Name: <lyellow><b>페이지 수</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>현재: </lgray>%shop_pages%</lyellow>'
+        - ''
+        - <lgray>상점의 페이지 수입니다.</lgray>
+        - ''
+        - <lgray>상점 레이아웃 설정에</lgray>
+        - <lgray>페이지 버튼이 포함되어 있는지 확인하세요.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>+1 페이지</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>-1 페이지</lyellow>합니다.</lgray>
+      Buying:
+        Name: <lyellow><b>구매</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>상태: </lgray>%shop_buy_allowed%</lyellow>'
+        - ''
+        - <lgray>플레이어가 이 상점에서 아이템을</lgray>
+        - <lgray>구매할 수 있는지 여부를 제어합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>토글</lyellow>합니다.</lgray>
+      Selling:
+        Name: <lyellow><b>판매</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>상태: </lgray>%shop_sell_allowed%</lyellow>'
+        - ''
+        - <lgray>플레이어가 이 상점에 아이템을</lgray>
+        - <lgray>판매할 수 있는지 여부를 제어합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>토글</lyellow>합니다.</lgray>
+      Aliases:
+        Name: 명령어 별칭
+        Description:
+        - 나열된 명령어 별칭으로 직접 상점에
+        - 접근할 수 있습니다.
+        - ''
+        - <lred>모듈 재로드가 필요합니다.</lred>
+        Formatted: true
+        CurrentInfo:
+          Current: '%shop_aliases%'
+        ClickActions:
+          LEFT: 별칭 추가
+          RIGHT: 모두 제거
+      Layouts:
+        Info:
+          Name: <lyellow><b>레이아웃</b></lyellow>
+          Lore:
+          - <lgray>이 상점의 GUI 레이아웃을 설정합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+        ByDefault:
+          Name: <lyellow><b>기본 레이아웃</b></lyellow>
+          Lore:
+          - '<lyellow>● <lgray>현재: </lgray>%shop_layout%</lyellow>'
+          - ''
+          - <lgray>이 상점의 기본 (모든 페이지) GUI</lgray>
+          - <lgray>레이아웃을 설정합니다.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+        ByPage:
+          Name: '<lyellow><b>페이지 #%page% 레이아웃</b></lyellow>'
+          Lore:
+          - '<lyellow>● <lgray>현재: </lgray>%name%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>초기화</lyellow>합니다.</lgray>
+      Discounts:
+        Name: <lyellow><b>할인</b></lyellow>
+        Lore:
+        - <lgray>여기서 상점 할인을 생성하고 관리합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      Products:
+        Name: <lyellow><b>일반 상품</b></lyellow>
+        Lore:
+        - <lgray>일반적인 정적 상점 아이템.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      RotatingProducts:
+        Name: <lyellow><b>로테이션 상품</b></lyellow>
+        Lore:
+        - <lgray>상점 로테이션 중에만 나타나는 아이템입니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      Rotations:
+        Name: <lyellow><b>로테이션</b></lyellow>
+        Lore:
+        - <lgray>상품 로테이션으로 상점에</lgray>
+        - <lgray>역동성을 추가하세요.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      ResetPriceData:
+        Name: <lyellow><b>가격 초기화 및 업데이트</b></lyellow>
+        Lore:
+        - <lgray>모든 아이템의 가격 데이터를 초기화하고</lgray>
+        - <lgray>가격을 새로고침합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>초기화</lyellow>합니다.</lgray>
+      ResetStockData:
+        Name: <lyellow><b>재고 초기화 및 업데이트</b></lyellow>
+        Lore:
+        - <lgray>모든 아이템의 재고 데이터를 초기화하고</lgray>
+        - <lgray>재고를 새로고침합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>초기화</lyellow>합니다.</lgray>
+      ResetRotationData:
+        Name: <lyellow><b>로테이션 초기화 및 업데이트</b></lyellow>
+        Lore:
+        - <lgray>로테이션 데이터를 초기화하고</lgray>
+        - <lgray>새로운 로테이션을 수행합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>초기화</lyellow>합니다.</lgray>
+    Rotation:
+      Object:
+        Name: <lyellow><b>%rotation_id%</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>사용된 슬롯: </lgray>%rotation_slots_amount%</lyellow>'
+        - '<lyellow>● <lgray>아이템 수: </lgray>%rotation_items_amount%</lyellow>'
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      Create:
+        Name: <lyellow><b>새로운 로테이션</b></lyellow>
+        Lore:
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>생성</lyellow>합니다.</lgray>
+      Delete:
+        Name: <lyellow><b>로테이션 삭제</b></lyellow>
+        Lore:
+        - <lgray>모든 설정과 데이터와 함께</lgray>
+        - <lgray>로테이션을 삭제합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>삭제</lyellow>합니다.</lgray>
+      Reset:
+        Name: <lyellow><b>초기화 및 업데이트</b></lyellow>
+        Lore:
+        - <lgray>로테이션 데이터를 초기화하고</lgray>
+        - <lgray>새로운 로테이션을 수행합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>초기화</lyellow>합니다.</lgray>
+      Icon:
+        Name: <lyellow><b>아이콘</b></lyellow>
+        Lore:
+        - <lgray>로테이션 아이콘을 설정하여</lgray>
+        - <lgray>다른 로테이션과 구분할 수 있습니다 :)</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>드래그 앤 드롭하여 <lyellow>교체</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>사본을 얻습니다</lyellow>.</lgray>
+      Type:
+        Name: <lyellow><b>로테이션 유형</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>현재: </lgray>%rotation_type%</lyellow>'
+        - ''
+        - <lgray><lyellow><b>간격:</b></lyellow></lgray>
+        - <lgray>X초마다 로테이션을 수행합니다.</lgray>
+        - ''
+        - <lgray><lyellow><b>고정:</b></lyellow></lgray>
+        - <lgray>주어진 시간에 로테이션을 수행합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>토글</lyellow>합니다.</lgray>
+      Interval:
+        Name: <lyellow><b>로테이션 간격</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>현재: </lgray>%rotation_interval%</lyellow>'
+        - ''
+        - <lgray>로테이션 간격을 설정합니다 (초 단위).</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+      Times:
+        Name: <lyellow><b>로테이션 시간</b></lyellow>
+        Lore:
+        - <lgray>로테이션 시간을 설정합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      Slots:
+        Name: <lyellow><b>사용된 슬롯</b></lyellow>
+        Lore:
+        - <lgray>이 로테이션은 현재</lgray>
+        - <lgray><lyellow>%rotation_slots_amount%</lyellow>개의 슬롯을 사용합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      Items:
+        Name: <lyellow><b>상품</b></lyellow>
+        Lore:
+        - <lgray>이 로테이션은 현재</lgray>
+        - <lgray><lyellow>%rotation_items_amount%</lyellow>개의 아이템을 포함합니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>이동</lyellow>합니다.</lgray>
+      DayTimes:
+        Object:
+          Name: <lyellow><b>%name%</b></lyellow>
+          Lore:
+          - '%time%'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>추가</lyellow>합니다.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>모두 제거</lyellow>합니다.</lgray>
+      FreeSlot:
+        Name: <lyellow><b><green><b>빈 슬롯</b></green></b></lyellow>
+        Lore:
+        - <lgray>이 슬롯은</lgray>
+        - <lgray>로테이션에 사용할 수 있습니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>선택</lyellow>합니다.</lgray>
+      SelectedSlot:
+        Name: <lyellow><b><cyan><b>선택된 슬롯</b></cyan></b></lyellow>
+        Lore:
+        - <lgray>이 슬롯은</lgray>
+        - <lgray>로테이션에 사용됩니다.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>선택 해제</lyellow>합니다.</lgray>
+      OtherSlot:
+        Name: <lyellow><b><red><b>다른 로테이션의 슬롯</b></red></b></lyellow>
+        Lore:
+        - <lgray>이 슬롯은</lgray>
+        - <lgray>다른 로테이션에서 사용됩니다.</lgray>
+      Item:
+        Object:
+          Name: '<lyellow><b>%product_preview_name%<reset><gray> (ID: <white>%product_id%</white>)</gray></b></lyellow>'
+          Lore:
+          - '<lyellow>● <lgray>가중치: </lgray>%weight%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>가중치 설정</lyellow>합니다.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>[Q / 드롭] 키를 눌러 <lyellow>제거</lyellow>합니다.</lgray>
+        Create:
+          Name: <lyellow><b>새 아이템</b></lyellow>
+          Lore:
+          - <lyellow>[▶]</lyellow> <lgray>클릭하여 <lyellow>선택</lyellow>합니다.</lgray>
+    Discount:
+      Create:
+        Name: <lyellow><b>새로운 할인</b></lyellow>
+        Lore: []
+      Object:
+        Name: <lyellow><b>할인</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>수량: </lgray>%discount_amount%</lyellow>'
+        - '<lyellow>● <lgray>요일: </lgray>%discount_days%</lyellow>'
+        - '<lyellow>● <lgray>시간: </lgray>%discount_times%</lyellow>'
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>편집</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>Shift-우클릭하여 <lyellow>삭제 <lred>(실행 취소 불가)</lred></lyellow>합니다.</lgray>
+      Amount:
+        Name: <lyellow><b>수량</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>수량: </lgray>%discount_amount%%</lyellow>'
+        - ''
+        - <lgray>할인 금액을 설정합니다 (퍼센트 단위).</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+      Duration:
+        Name: <lyellow><b>기간</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>기간: </lgray>%discount_duration%</lyellow>'
+        - ''
+        - <lgray>이 할인이 활성 상태로 유지될</lgray>
+        - <lgray>기간을 설정합니다 (초 단위).</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>변경</lyellow>합니다.</lgray>
+      Days:
+        Name: <lyellow><b>활성 요일</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>요일: </lgray>%discount_days%</lyellow>'
+        - ''
+        - <lgray>이 할인이 적용될 요일 목록입니다.</lgray>
+        - ''
+        - <lgray>최소한 하나의 요일과 시간이 필요합니다!</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>요일 추가</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>모두 제거</lyellow>합니다.</lgray>
+      Times:
+        Name: <lyellow><b>활성 시간</b></lyellow>
+        Lore:
+        - '<lyellow>● <lgray>요일: </lgray>%discount_times%</lyellow>'
+        - ''
+        - <lgray>이 할인이 활성화될 시간 목록입니다.</lgray>
+        - ''
+        - <lgray>최소한 하나의 요일과 시간이 필요합니다!</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>좌클릭하여 <lyellow>시간 추가</lyellow>합니다.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>우클릭하여 <lyellow>모두 제거</lyellow>합니다.</lgray>
+ChestShop:
+  Command:
+    Argument:
+      Name:
+        BuyPrice: 구매가격
+        SellPrice: 판매가격
+    List:
+      Desc: "[플레이어] 상점 목록."
+    Bank:
+      Desc: "[플레이어] 은행을 엽니다."
+    Create:
+      Desc: 상점을 생성합니다.
+    Browse:
+      Desc: 플레이어 상점 GUI.
+    GiveItem:
+      Desc: 상점 생성 아이템을 지급합니다.
+      BadMaterial: <lred>유효하지 않은 상점 유형입니다!</lred>
+      Done: <lgray><lyellow>%player_display_name%</lyellow>님에게 <lyellow>%name%</lyellow>을(를) 지급했습니다.</lgray>
+    Remove:
+      Desc: 보고 있는 상자를 상점에서 제거합니다.
+    Open:
+      Desc: 대상 상점의 인벤토리를 엽니다.
+  Shop:
+    Error:
+      NotOwner: <lred>이 상점의 소유자가 아닙니다!</lred>
+      Inactive: 이 상점은 현재 사용할 수 없습니다.
+    Creation:
+      Info:
+        Done:
+        - <output:"titles:10:80:10"><sound:"block.note_block.bell;0.6;1.0">
+        - <lgreen><b>상점 생성 완료!</b></lgreen>
+        - <lgray>쉬프트 키를 누른 채 <lgreen>우클릭</lgreen>하여 설정을 엽니다.</lgray>
+      Error:
+        AlreadyShop: <lred>이 상자는 이미 상점입니다!</lred>
+        NotEmpty: <lred>먼저 상자에서 모든 아이템을 제거해주세요.</lred>
+        NotAChest: <lred>이 블록은 상자가 아닙니다!</lred>
+        BadLocation: <lred>여기에 상점을 생성할 수 없습니다!</lred>
+        LimitReached: <lred>상점 생성 한도에 도달했습니다! 더 이상 생성할 수 없습니다.</lred>
+        BadArea: <lred>자신의 소유지 내에서만 상점을 생성할 수 있습니다!</lred>
+        NotEnoughFunds: <lred>자금이 부족합니다!</lred>
+    Removal:
+      Error:
+        NotEmpty: <lred>상점을 제거하려면 상점 보관함에서 아이템을 인출해야 합니다.</lred>
+        NotAShop: <lred>이 블록은 상점이 아닙니다!</lred>
+      Info:
+        Done:
+        - <output:"titles:10:80:10"><sound:"entity.generic.explode;0.6;1.0">
+        - <lred><b>상점 제거 완료!</b></lred>
+    Rename:
+      Error:
+        TooLong: <lred>이름이 너무 깁니다! 최대 길이는 %amount%입니다.</lred>
+    Teleport:
+      Error:
+        Unsafe: <lred>안전하지 않은 상점 위치로 인해 순간이동이 취소되었습니다.</lred>
+    Trade:
+      Buy:
+        Info:
+          User:
+          - <noprefix>
+          - <lyellow><orange>%shop_name%</orange> 상점에서 <orange>x%amount% %item%</orange>을(를) <orange>%price%</orange>에 구매했습니다.</lyellow>
+          Owner:
+          - <noprefix>
+          - <lyellow><orange>%player_display_name%</orange>님께서 <orange>%shop_name%</orange> 상점에서 <orange>x%amount% %item%</orange>을(를) <orange>%price%</orange>에 구매했습니다.</lyellow>
+      Sell:
+        Info:
+          User:
+          - <noprefix>
+          - <lyellow><orange>%shop_name%</orange> 상점에 <orange>x%amount% %item%</orange>을(를) <orange>%price%</orange>에 판매했습니다.</lyellow>
+          Owner:
+          - <noprefix>
+          - <lyellow><orange>%player_display_name%</orange>님께서 <orange>%shop_name%</orange> 상점에 <orange>x%amount% %item%</orange>을(를) <orange>%price%</orange>에 판매했습니다.</lyellow>
+    Bank:
+      Error:
+        InvalidCurrency:
+        - <output:"titles:20:60:20">
+        - <lred><b>작업 실패!</b></lred>
+        - <lgray>화폐가 올바르지 않습니다!</lgray>
+      Deposit:
+        Success: <lgray>상점 은행에 <lgreen>%amount%</lgreen>을(를) 입금했습니다!</lgray>
+        Error:
+          NotEnough: <lgray>자금이 부족합니다!</lgray>
+      Withdraw:
+        Success: <lgray>상점 은행에서 <lgreen>%amount%</lgreen>을(를) 인출했습니다!</lgray>
+        NotEnough: <lgray>은행에 자금이 충분하지 않습니다!</lgray>
+    InfiniteStorage:
+      Deposit:
+        Success: <lgray>상점 보관함에 <lgreen>x%amount% %item%</lgreen>을(를) 입금했습니다!</lgray>
+        Error:
+          NotEnough: <lgray>아이템이 부족합니다!</lgray>
+      Withdraw:
+        Success: <lgray>상점 보관함에서 <lgreen>x%amount% %item%</lgreen>을(를) 인출했습니다!</lgray>
+        NotEnough: <lgray>보관함에 아이템이 충분하지 않습니다!</lgray>
+  Product:
+    Error:
+      BadItem: <lred>이 아이템은 상점에서 사용할 수 없습니다!</lred>
+  Editor:
+    Error:
+      ProductLeft: <lred>상자에서 이 상품을 모두 가져가야 합니다!</lred>
+    PriceMenu: <black>가격 설정</black>
+  Notification:
+    ShopEarnings:
+    - <noprefix>
+    - ' '
+    - <lgreen><b>상점 수입:</b></lgreen>
+    - '<lgray>오프라인 상태일 때 상점이 벌어들인 금액: <lgreen>%amount%</lgreen></lgray>'
+    - ' '
+  Search:
+    ItemPrompt:
+    - <output:"titles:20:-1:20"><sound:"block.lava.pop;0.6;1.0">
+    - <lyellow><b>상점 검색</b></lyellow>
+    - <lgray>검색할 아이템 <lyellow>이름</lyellow>을(를) 입력하세요.</lgray>
+  Rent:
+    Error:
+      AlreadyRented:
+      - <output:"titles:20:60:20"><sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>이미 임대됨!</b></lred>
+      - <lgray>이 상점은 이미 다른 사람에게 임대되었습니다.</lgray>
+      NotRented:
+      - <output:"titles:20:60:20"><sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>임대되지 않음!</b></lred>
+      - <lgray>이 상점을 임대하지 않았습니다.</lgray>
+      NotRentable:
+      - <output:"titles:20:60:20"><sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>임대 불가능!</b></lred>
+      - <lgray>이 상점은 임대할 수 없습니다.</lgray>
+      InsufficientFunds:
+      - <output:"titles:20:60:20"><sound:"entity.villager.no;0.6;1.0">
+      - <lred><b>자금 부족!</b></lred>
+      - <lgray>이 상점을 임대하려면 <lred>%price%</lred>이(가) 필요합니다.</lgray>
+    Prompt:
+      Duration: <gray><green>[일수]</green>를 입력하세요</gray>
+      Currency: <gray><green>[화폐]</green>를 입력하세요</gray>
+      Price: <gray><green>[임대 가격]</green>을(를) 입력하세요</gray>
+    Rent:
+      Success:
+      - <output:"titles:20:60:20"><sound:"block.iron_door.open;0.6;1.0">
+      - <lgreen><b>상점 임대 완료!</b></lgreen>
+      - <lgray>이 상점을 <lgreen>%time%</lgreen> 동안 임대했습니다.</lgray>
+    Extend:
+      Success:
+      - <output:"titles:20:60:20"><sound:"block.iron_door.open;0.6;1.0">
+      - <lgreen><b>임대 연장 완료!</b></lgreen>
+      - <lgray>이 상점 임대를 <lgreen>%time%</lgreen> 동안 연장했습니다.</lgray>
+Auction:
+  SortType:
+    NAME: 이름
+    MATERIAL: 재료
+    SELLER: 판매자
+    NEWEST: 최신
+    OLDEST: 오래된
+    MOST_EXPENSIVE: 가장 비싼
+    LEAST_EXPENSIVE: 가장 저렴한
+  Command:
+    Argument:
+      Name:
+        Price: 가격
+    Open:
+      Desc: 경매를 엽니다.
+    Sell:
+      Desc: 경매에 아이템을 추가합니다.
+      Error:
+        NoItem: <lred>그것을 하려면 아이템을 들고 있어야 합니다!</lred>
+    Expired:
+      Desc: 만료된 목록.
+    History:
+      Desc: 판매 내역.
+    Selling:
+      Desc: 현재 판매 목록.
+    Unclaimed:
+      Desc: 판매 목록에 대한 미수령 보상.
+  Listing:
+    Add:
+      Success:
+        Info:
+        - <noprefix><sound:"block.note_block.bell;0.6;1.0">
+        - ' '
+        - <lgreen><b>✔ 성공!</b></lgreen>
+        - ' '
+        - <lgray>경매에 <lgreen>x%listing_item_amount% %listing_item_name%</lgreen>을(를) <lgreen>%listing_price%</lgreen>에 추가했습니다!</lgray>
+        - '<lgray>세금 금액: <lred>%tax%</lred></lgray>'
+        - ' '
+        Broadcast:
+        - <noprefix>
+        - ' '
+        - <lyellow><b>경매:</b></lyellow>
+        - <lgray><lyellow>%player_display_name%</lyellow> 플레이어가 경매에 <lyellow>x%listing_item_amount%</lyellow> <hover:show_item:"%listing_item_value%"><lyellow>%listing_item_name%</lyellow></hover>을(를) <lyellow>%listing_price%</lyellow>에 추가했습니다.</lgray>
+        - ' '
+      Error:
+        BadItem:
+        - <sound:"entity.villager.no;0.6;1.0">
+        - <lgray><lred>✘ %item%</lred>은(는) 경매에 추가할 수 없습니다!</lgray>
+        Limit:
+        - <sound:"entity.villager.no;0.6;1.0">
+        - <lgray><lred>✘</lred> 경매에 <lred>%amount%</lred>개 이상의 활성 아이템을 가질 수 없습니다!</lgray>
+        Price:
+          Tax:
+          - <sound:"entity.villager.no;0.6;1.0">
+          - '<lgray><lred>✘</lred> <lred>%tax%</lred> 가격 세금 <lred>%amount%</lred>을(를) 감당할 수 없습니다!</lgray>'
+          Currency:
+            Min:
+            - <sound:"entity.villager.no;0.6;1.0">
+            - <lgray><lred>✘</lred> 최소 <lred>%currency_name%</lred> 가격은 <lred>%amount%</lred>입니다!</lgray>
+            Max:
+            - <sound:"entity.villager.no;0.6;1.0">
+            - <lgray><lred>✘</lred> 최대 <lred>%currency_name%</lred> 가격은 <lred>%amount%</lred>입니다!</lgray>
+          Negative:
+          - <sound:"entity.villager.no;0.6;1.0">
+          - <lgray><lred>✘</lred> 유효하지 않은 가격입니다!</lgray>
+          Material:
+            Min:
+            - <sound:"entity.villager.no;0.6;1.0">
+            - <lgray><lred>✘</lred> 최소 <lred>x1 %item%</lred> 가격은 <lred>%amount%</lred>입니다!</lgray>
+            Max:
+            - <sound:"entity.villager.no;0.6;1.0">
+            - <lgray><lred>✘</lred> 최대 <lred>x1 %item%</lred> 가격은 <lred>%amount%</lred>입니다!</lgray>
+        DisabledGamemode:
+        - <sound:"entity.villager.no;0.6;1.0">
+        - <lgray><lred>✘</lred> 현재 게임 모드에서는 아이템을 추가할 수 없습니다!</lgray>
+    Buy:
+      Success:
+        Info:
+        - <output:"titles:20:60:20"><sound:"entity.player.levelup;0.6;1.0">
+        - <lgreen><b>구매 성공!</b></lgreen>
+        - <lgray><lgreen>%listing_seller%</lgreen>님으로부터 <lgreen>x%listing_item_amount% %listing_item_name%</lgreen>을(를) <lgreen>%listing_price%</lgreen>에 구매했습니다!</lgray>
+      Error:
+        NotEnoughFunds:
+        - <output:"titles:20:60:20"><sound:"block.anvil.place;0.6;1.0">
+        - <lred><b>자금 부족!</b></lred>
+        - <lgray><lred>%listing_price%</lred>이(가) 필요합니다. 현재 <lred>%balance%</lred>이(가 있습니다.</lgray>
+  Notify:
+    Listing:
+      Claim: <lgray><lgreen>✔</lgreen> <lgreen>%listing_item_name%</lgreen>에 대한 <lgreen>%listing_price%</lgreen>을(를) 청구했습니다!</lgray>
+      Unclaimed:
+      - <noprefix>
+      - ' '
+      - <lyellow><b>경매:</b></lyellow>
+      - <lgray><lyellow>%amount%</lyellow>개의 미수령 판매 수입이 있습니다!</lgray>
+      - ''
+      - <lgray>지금 청구하려면 <click:run_command:"/ah unclaimed"><hover:show_text:"<lgray>클릭하여 수입을 청구하세요!</lgray>"><lyellow><b>여기</b></lyellow></hover></click>를 클릭하세요!</lgray>
+      - ' '
+      Expired:
+      - <noprefix>
+      - ' '
+      - <lorange><b>경매:</b></lorange>
+      - <lgray><lorange>%amount%</lorange>개의 만료된 판매 목록이 있습니다!</lgray>
+      - ''
+      - <lgray>아이템을 반환하려면 <click:run_command:"/ah expired"><hover:show_text:"<lgray>클릭하여 아이템을 반환합니다.</lgray>"><lorange><b>여기</b></lorange></hover></click>를 클릭하세요.</lgray>
+      - ' '
+  UI:
+    BuyConfirm:
+      Listing:
+        Name: '%listing_item_name%'
+        Description:
+        - '%listing_item_lore%'
+        - '%empty-if-above%'
+        - '<lgray>가격: </lgray><lyellow>%listing_price%</lyellow>'
+        - '<lgray>판매자: </lgray><white>%listing_seller%</white>'
+        Formatted: false
+  Error:
+    DisabledWorld: <lgray><lred>✘</lred> 이 세계에서는 경매가 비활성화되었습니다!</lgray>

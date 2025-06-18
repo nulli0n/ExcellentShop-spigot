@@ -114,9 +114,9 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     }
 
     public int countUnitAmount() {
-        if (!this.shop.isChunkLoaded()) return this.cachedAmount;
         if (this.shop.isAdminShop()) return StockValues.UNLIMITED;
-        if (ChestUtils.isInfiniteStorage()) this.countUnits((int) this.quantity);
+        if (ChestUtils.isInfiniteStorage()) return this.countUnits((int) this.quantity);
+        if (!this.shop.isChunkLoaded()) return this.cachedAmount;
 
         Inventory inventory = this.shop.inventory();
         if (inventory == null) return 0; // Shop container is not valid anymore.
@@ -125,9 +125,9 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     }
 
     public int countUnitSpace() {
-        if (!this.shop.isChunkLoaded()) return this.cachedSpace;
         if (this.shop.isAdminShop()) return StockValues.UNLIMITED;
         if (ChestUtils.isInfiniteStorage()) return StockValues.UNLIMITED;
+        if (!this.shop.isChunkLoaded()) return this.cachedSpace;
 
         Inventory inventory = this.shop.inventory();
         if (inventory == null) return 0; // Shop container is not valid anymore.
@@ -148,7 +148,8 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
         amount = Math.abs(amount * this.getUnitAmount());
 
         if (ChestUtils.isInfiniteStorage()) {
-            this.setQuantity(this.getQuantity() - amount);
+            this.setQuantity(this.quantity - amount);
+            this.updateStockCache();
             return true;
         }
 
@@ -168,7 +169,8 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
         int amount = Math.abs(units * this.getUnitAmount());
 
         if (ChestUtils.isInfiniteStorage()) {
-            this.setQuantity(this.getQuantity() + amount);
+            this.setQuantity(this.quantity + amount);
+            this.updateStockCache();
             return true;
         }
 

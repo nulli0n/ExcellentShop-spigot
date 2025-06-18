@@ -140,7 +140,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     private void loadCommands() {
         ChainedNode rootNode = this.getRootNode();
 
-        ReloadCommand.inject(this, rootNode, Perms.COMMAND_RELOAD);
+        rootNode.addChildren(ReloadCommand.builder(this, Perms.COMMAND_RELOAD));
     }
 
     @NotNull
@@ -180,7 +180,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
 
     @NotNull
     public <T extends Module> Optional<T> getModule(@NotNull Class<T> clazz) {
-        return Optional.of(this.modules.get(clazz)).map(clazz::cast);
+        return Optional.ofNullable(this.modules.get(clazz)).map(clazz::cast);
     }
 
     private void migrateModuleSettings(@NotNull FileConfig config) {
