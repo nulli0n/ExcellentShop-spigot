@@ -566,7 +566,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     public void interactShop(@NotNull PlayerInteractEvent event, @NotNull Player player, @NotNull ChestShop shop) {
-        if (event.useInteractedBlock() == Event.Result.DENY) return;
+        //if (event.useInteractedBlock() == Event.Result.DENY) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         if (player.isSneaking()) {
