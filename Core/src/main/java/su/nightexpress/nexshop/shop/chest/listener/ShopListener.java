@@ -158,6 +158,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
         for (BlockFace blockFace : lookup) {
             Block neighibor = block.getRelative(blockFace);
+            if (!this.module.isShop(neighibor)) continue;
             if (!(neighibor.getBlockData() instanceof Chest nearChest)) continue;
             if (nearChest.getFacing() != face) continue;
 
