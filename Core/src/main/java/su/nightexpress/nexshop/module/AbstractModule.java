@@ -143,7 +143,9 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     @Override
     public boolean isEnabledCurrency(@NotNull String id) {
-        return this.moduleConfig.getDefaultCurrency().equalsIgnoreCase(id) || this.moduleConfig.getEnabledCurrencies().contains(id);
+        return this.moduleConfig.getDefaultCurrency().equalsIgnoreCase(id) ||
+            this.moduleConfig.getEnabledCurrencies().contains(id) ||
+            this.moduleConfig.getEnabledCurrencies().contains(Placeholders.WILDCARD);
     }
 
     @Override
@@ -155,6 +157,8 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
     @Override
     @NotNull
     public Set<Currency> getEnabledCurrencies() {
+        if (this.moduleConfig.getEnabledCurrencies().contains(Placeholders.WILDCARD)) return EconomyBridge.getCurrencies();
+
         Set<Currency> currencies = this.moduleConfig.getEnabledCurrencies().stream()
             .map(EconomyBridge::getCurrency)
             .filter(Objects::nonNull)
@@ -168,7 +172,7 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     @Override
     public boolean isAvailableCurrency(@NotNull Player player, @NotNull Currency currency) {
-        if (!isEnabledCurrency(currency)) return false;
+        if (!this.isEnabledCurrency(currency)) return false;
         if (!Config.CURRENCY_NEED_PERMISSION.get()) return true;
 
         return this.canUseCurrency(player, currency);

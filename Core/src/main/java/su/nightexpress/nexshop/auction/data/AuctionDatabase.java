@@ -107,7 +107,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
                 Currency currency = currencyId == null ? this.manager.getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
-                if (currency == null || !this.manager.getEnabledCurrencies().contains(currency)) {
+                if (currency == null || !this.manager.isEnabledCurrency(currency)) {
                     this.manager.error("Invalid listing currency '" + currencyId + "'!");
                     return null;
                 }
@@ -171,7 +171,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
 
                 String currencyId = resultSet.getString(COLUMN_CURRENCY.getName());
                 Currency currency = currencyId == null ? this.manager.getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
-                if (currency == null || !this.manager.getEnabledCurrencies().contains(currency)) {
+                if (currency == null || !this.manager.isEnabledCurrency(currency)) {
                     this.manager.error("Invalid listing currency '" + currencyId + "'!");
                     return null;
                 }

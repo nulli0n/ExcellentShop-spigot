@@ -22,4 +22,5 @@ softdepend:
   - SCore
   - MMOItems
   - ExcellentCrates
+  - VotingPlugin
 api-version: 1.18
