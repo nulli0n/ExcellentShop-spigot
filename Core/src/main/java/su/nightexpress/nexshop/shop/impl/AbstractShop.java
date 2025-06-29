@@ -42,7 +42,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
             priceData.setExpired(); // To trigger isExpired in update.
         }
 
-        product.updatePrice();
+        product.updatePrice(false);
     }
 
     @Override
@@ -52,16 +52,6 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
                 this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.getFile().getPath() + "' shop.");
             }
         });
-    }
-
-    @Override
-    public void update() {
-        this.updatePrices();
-    }
-
-    @Override
-    public void updatePrices() {
-        this.updatePrices(false);
     }
 
     @Override

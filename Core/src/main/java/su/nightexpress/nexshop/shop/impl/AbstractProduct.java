@@ -68,11 +68,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     }
 
     @Override
-    public void updatePrice() {
-        this.updatePrice(false);
-    }
-
-    @Override
     public void updatePrice(boolean force) {
         if (this.pricer.getType() == PriceType.FLAT) return;
         if (this.pricer.getType() == PriceType.PLAYER_AMOUNT) return;

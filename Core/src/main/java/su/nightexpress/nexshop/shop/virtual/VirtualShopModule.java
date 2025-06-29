@@ -8,8 +8,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.module.ShopModule;
@@ -268,6 +266,10 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         if (!shop.load()) {
             this.error("Shop not loaded: '" + shop.getFile().getPath() + "'");
             return;
+        }
+
+        if (this.plugin.getDataManager().isLoaded()) {
+            shop.updatePrices(false);
         }
 
         this.shopByIdMap.put(shop.getId(), shop);

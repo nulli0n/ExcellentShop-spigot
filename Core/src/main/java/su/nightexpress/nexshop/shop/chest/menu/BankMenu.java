@@ -27,6 +27,7 @@ import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.Version;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.List;
@@ -212,7 +213,7 @@ public class BankMenu extends LinkedMenu<ShopPlugin, BankMenu.Data> implements F
         loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(1,10,19,28,37,45,46,47,48,49,50,51,52,53));
         loader.addDefaultItem(NightItem.fromType(Material.GRAY_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(0,9,18,27,36));
 
-        loader.addDefaultItem(NightItem.fromType(Material.LIGHT_BLUE_BUNDLE)
+        loader.addDefaultItem(NightItem.fromType(Version.isAtLeast(Version.MC_1_21_4) ? Material.LIGHT_BLUE_BUNDLE : Material.BUNDLE)
             .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Deposit")) + " " + GRAY.wrap("[" + WHITE.wrap("Custom Amount") + "]"))
             .setLore(Lists.newList(
                 LIGHT_BLUE.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),
@@ -254,7 +255,7 @@ public class BankMenu extends LinkedMenu<ShopPlugin, BankMenu.Data> implements F
                     .build()
             )));
 
-        loader.addDefaultItem(NightItem.fromType(Material.ORANGE_BUNDLE)
+        loader.addDefaultItem(NightItem.fromType(Version.isAtLeast(Version.MC_1_21_4) ? Material.ORANGE_BUNDLE : Material.BUNDLE)
             .setDisplayName(LIGHT_ORANGE.wrap(BOLD.wrap("Withdraw")) + " " + GRAY.wrap("[" + WHITE.wrap("Custom Amount") + "]"))
             .setLore(Lists.newList(
                 LIGHT_ORANGE.wrap("➥ " + GRAY.wrap("In Bank: ") + BANK_BALANCE),

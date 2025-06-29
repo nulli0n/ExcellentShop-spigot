@@ -83,4 +83,13 @@ public class ProductKey {
     public int hashCode() {
         return Objects.hash(shopId, productId, holderId);
     }
+
+    @Override
+    public String toString() {
+        return "ProductKey{" +
+            "shopId='" + shopId + '\'' +
+            ", productId='" + productId + '\'' +
+            ", holderId='" + holderId + '\'' +
+            '}';
+    }
 }

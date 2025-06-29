@@ -37,6 +37,7 @@ import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.Version;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.ArrayList;
@@ -458,7 +459,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
 
         // Stock buttons.
 
-        loader.addDefaultItem(NightItem.fromType(Material.LIGHT_BLUE_BUNDLE)
+        loader.addDefaultItem(NightItem.fromType(Version.isAtLeast(Version.MC_1_21_4) ? Material.LIGHT_BLUE_BUNDLE : Material.BUNDLE)
             .setDisplayName(LIGHT_BLUE.wrap(BOLD.wrap("Restock")) + " " + GRAY.wrap("[" + WHITE.wrap("Custom Amount") + "]"))
             .setLore(Lists.newList(
                 GRAY.wrap(LIGHT_BLUE.wrap("✔ ") + "Stock: " + LIGHT_BLUE.wrap(PRODUCT_AMOUNT) + "/" + LIGHT_BLUE.wrap(PRODUCT_CAPACITY)),
@@ -498,7 +499,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
                     .build()
             )));
 
-        loader.addDefaultItem(NightItem.fromType(Material.ORANGE_BUNDLE)
+        loader.addDefaultItem(NightItem.fromType(Version.isAtLeast(Version.MC_1_21_4) ? Material.ORANGE_BUNDLE : Material.BUNDLE)
             .setDisplayName(LIGHT_ORANGE.wrap(BOLD.wrap("Withdraw")) + " " + GRAY.wrap("[" + WHITE.wrap("Custom Amount") + "]"))
             .setLore(Lists.newList(
                 GRAY.wrap(LIGHT_ORANGE.wrap("✔ ") + "Stock: " + LIGHT_ORANGE.wrap(PRODUCT_AMOUNT) + "/" + LIGHT_ORANGE.wrap(PRODUCT_SPACE)),

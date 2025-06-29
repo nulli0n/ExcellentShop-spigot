@@ -35,8 +35,6 @@ public interface Shop {
 
     void update();
 
-    void updatePrices();
-
     void updatePrices(boolean force);
 
     default void open(@NotNull Player player) {

@@ -241,8 +241,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @Override
     public void update() {
-        super.update();
-
         if (ChestConfig.isRentEnabled() && this.isRented() && this.isRentExpired()) {
             this.cancelRent();
         }

@@ -183,7 +183,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
             if (product.countUnits(player) < 1) {
                 Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS.getMessage().send(player, replacer -> replacer
                     .replace(Placeholders.GENERIC_AMOUNT, product.getUnitAmount())
-                    .replace(Placeholders.GENERIC_ITEM, ItemUtil.getSerializedName(product.getPreview()))
+                    .replace(Placeholders.GENERIC_ITEM, ItemUtil.getNameSerialized(product.getPreview()))
                 );
                 return false;
             }

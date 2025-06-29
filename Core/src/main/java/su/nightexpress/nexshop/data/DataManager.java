@@ -46,8 +46,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     @Override
     protected void onLoad() {
         this.plugin.runTaskAsync(task -> {
-            this.loadAllData(); // Load all price & stock datas for all products.
-            this.plugin.getShopManager().updateShops(); // Update product prices according to loaded data.
+            this.loadAllData(); // Load all price & stock datas for all products, then update prices.
         });
 
         this.addAsyncTask(this::saveScheduledDatas, Config.DATA_SAVE_INTERVAL.get());
@@ -84,6 +83,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         this.loadStockDatas();
         this.loadRotationDatas();
         this.loaded = true;
+        this.plugin.getShopManager().getShops().forEach(shop -> shop.updatePrices(false)); // Update prices in the same thread to prevent data duplications.
     }
 
 
@@ -126,32 +126,14 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
     public void saveScheduledPriceDatas() {
-//        Set<PriceData> priceDatas = this.getPriceDatas().stream().filter(AbstractData::isSaveRequired).peek(data -> data.setSaveRequired(false)).collect(Collectors.toSet());
-//        if (priceDatas.isEmpty()) return;
-//
-//        this.plugin.getDataHandler().updatePriceDatas(priceDatas);
-//        this.plugin.debug("Saved " + priceDatas.size() + " price datas");
-
         this.saveScheduledDatas(this.getPriceDatas(), DataHandler::updatePriceDatas, "price");
     }
 
     public void saveScheduledStockDatas() {
-//        Set<StockData> stockDatas = this.getStockDatas().stream().filter(AbstractData::isSaveRequired).peek(data -> data.setSaveRequired(false)).collect(Collectors.toSet());
-//        if (stockDatas.isEmpty()) return;
-//
-//        this.plugin.getDataHandler().updateStockDatas(stockDatas);
-//        this.plugin.debug("Saved " + stockDatas.size() + " stock datas");
-
         this.saveScheduledDatas(this.getStockDatas(), DataHandler::updateStockDatas, "stock");
     }
 
     public void saveScheduledRotationDatas() {
-//        Set<RotationData> stockDatas = this.getRotationDatas().stream().filter(RotationData::isSaveRequired).peek(data -> data.setSaveRequired(false)).collect(Collectors.toSet());
-//        if (stockDatas.isEmpty()) return;
-//
-//        this.plugin.getDataHandler().updateRotationDatas(stockDatas);
-//        this.plugin.debug("Saved " + stockDatas.size() + " rotation datas");
-
         this.saveScheduledDatas(this.getRotationDatas(), DataHandler::updateRotationDatas, "rotation");
     }
 
@@ -242,6 +224,9 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public PriceData getPriceDataOrCreate(@NotNull Product product) {
         PriceData data = this.getPriceData(product);
         if (data != null) return data;
+
+        //System.out.println("product.getId() = " + product.getId());
+        //new Throwable().printStackTrace();
 
         PriceData fresh = PriceData.create(product);
         this.loadPriceData(fresh);

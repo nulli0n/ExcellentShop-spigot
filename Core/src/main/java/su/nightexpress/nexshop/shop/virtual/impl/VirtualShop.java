@@ -283,24 +283,6 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         });
 
         return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
-
-//        var stream = this.getValidProducts().stream().filter(product -> {
-//            if (!product.isTradeable(tradeType)) return false;
-//            if (!(product.getType() instanceof PhysicalTyping typing)) return false;
-//            if (!typing.isItemMatches(itemStack)) return false;
-//            if (stackSize < product.getUnitAmount()) return false;
-//            if (product.isRotating() && !product.isInRotation()) return false;
-//
-//            if (player != null) {
-//                return product.hasAccess(player) && product.getAvailableAmount(player, tradeType) != 0;
-//            }
-//
-//            return true;
-//        });
-//
-//        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
-//
-//        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
     }
 
     @Override
@@ -321,8 +303,6 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @Override
     public void update() {
         this.tryRotate();
-
-        super.update();
 
 //        this.getDiscountConfigs().forEach(discount -> {
 //            if (discount.isDiscountTime()) {

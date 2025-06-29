@@ -43,7 +43,6 @@ public interface Product {
     long getRestockDate(@Nullable UUID playerId);
 
 
-    void updatePrice();
 
     void updatePrice(boolean force);
 
