@@ -2,10 +2,12 @@ package su.nightexpress.nexshop.shop.chest.listener;
 
 import org.bukkit.Chunk;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.Hopper;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -206,17 +208,47 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
             ChestShop shop = this.module.getShop(container.getBlock());
             if (shop == null) return;
 
-            ItemStack item = event.getItem();
-            ChestProduct product = shop.getProduct(item);
+            ItemStack itemStack = new ItemStack(event.getItem());
+            ChestProduct product = shop.getProduct(itemStack);
             if (product == null) {
                 event.setCancelled(true);
                 return;
             }
 
             if (ChestUtils.isInfiniteStorage()) {
-                // Do not cancel, instead reduce item quantity.
-                item.setAmount(item.getAmount() - 1);
-                product.storeStock(TradeType.BUY, 1, null);
+                event.setCancelled(true);
+
+                Location location = from.getLocation();
+                if (location == null) return;
+
+                Block block = location.getBlock();
+
+                // What the hell is happenning in this event? The inventory is fucking broken with stack amounts of 1 every time.
+                // https://www.spigotmc.org/threads/581448/
+                // https://www.spigotmc.org/threads/534714/
+
+                this.plugin.runTask(task -> {
+                    if (!(block.getState() instanceof Hopper hopper)) return; // Obtain fresh Hopper instance, do not trust this damn event anymore.
+
+                    Inventory hopperInv = hopper.getInventory();
+
+                    for (int index = 0; index < hopperInv.getSize(); index++) {
+                        ItemStack originStack = hopperInv.getItem(index);
+                        if (originStack == null || !originStack.isSimilar(itemStack)) continue;
+
+                        int units = product.countUnits(originStack.getAmount());
+                        if (units <= 0) {
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        // Do not cancel, instead reduce item quantity.
+                        originStack.setAmount(originStack.getAmount() - product.getUnitAmount());
+                        product.storeStock(TradeType.BUY, 1, null);
+                        hopperInv.setItem(index, originStack);
+                        break;
+                    }
+                });
             }
         }
     }

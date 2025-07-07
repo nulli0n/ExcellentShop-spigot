@@ -115,4 +115,16 @@ public class PriceData extends AbstractData {
     public void setSales(int sales) {
         this.sales = Math.max(0, sales);
     }
+
+    @Override
+    public String toString() {
+        return "PriceData{" +
+            "latestBuyPrice=" + latestBuyPrice +
+            ", latestSellPrice=" + latestSellPrice +
+            ", latestUpdateDate=" + latestUpdateDate +
+            ", expireDate=" + expireDate +
+            ", purchases=" + purchases +
+            ", sales=" + sales +
+            '}';
+    }
 }

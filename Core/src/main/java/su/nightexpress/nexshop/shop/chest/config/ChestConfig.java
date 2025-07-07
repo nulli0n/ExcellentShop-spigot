@@ -288,6 +288,38 @@ public class ChestConfig {
         0.3D,
         "Sets distance between hologram lines.");
 
+    public static final ConfigValue<Integer> DISPLAY_HOLOGRAM_LINE_WIDTH = ConfigValue.create("Display.Hologram.LineWidth",
+        200,
+        "Maximum line width used to split lines.",
+        "[*] Lines split is not supported currently. Adjust the hologram format to avoid splitting.",
+        "[Default is 200]"
+    );
+
+    public static final ConfigValue<Integer> DISPLAY_HOLOGRAM_TEXT_OPACITY = ConfigValue.create("Display.Hologram.TextOpacity",
+        -1,
+        "Alpha value of rendered text. Value ranges from 0 to 255. Values up to 3 are treated as fully opaque (255).",
+        "The text rendering is discarded for values between 4 and 26. Defaults to -1, which represents 255 and is completely opaque.",
+        "[Default is -1]"
+    );
+
+    public static final ConfigValue<Boolean> DISPLAY_HOLOGRAM_SEE_THROUGH = ConfigValue.create("Display.Hologram.SeeThrough",
+        false,
+        "Whether the text be visible through blocks.",
+        "[Default is false]"
+    );
+
+    public static final ConfigValue<Boolean> DISPLAY_HOLOGRAM_SHADOW = ConfigValue.create("Display.Hologram.Shadow",
+        true,
+        "Whether the text is displayed with shadow.",
+        "[Default is true]"
+    );
+
+    public static final ConfigValue<int[]> DISPLAY_HOLOGRAM_BACKGROUND_COLOR = ConfigValue.create("Display.Hologram.BackgroundColor",
+        new int[]{64, 0, 0, 0},
+        "The background color, arranged by [A,R,G,B]. Where: A = Alpha (opacity), R = Red, G = Green, B = Blue.",
+        "[Default is 64,0,0,0]"
+    );
+
     public static final ConfigValue<List<String>> DISPLAY_HOLOGRAM_TEXT_ADMIN_SHOP = ConfigValue.create("Display.Hologram.Text.AdminShop",
         Lists.newList(
             LIGHT_YELLOW.wrap(BOLD.wrap(SHOP_NAME)),

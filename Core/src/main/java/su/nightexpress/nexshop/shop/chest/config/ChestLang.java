@@ -15,10 +15,12 @@ public class ChestLang extends CoreLang {
     public static final LangString COMMAND_ARGUMENT_NAME_BUY_PRICE  = LangString.of("ChestShop.Command.Argument.Name.BuyPrice", "buyPrice");
     public static final LangString COMMAND_ARGUMENT_NAME_SELL_PRICE = LangString.of("ChestShop.Command.Argument.Name.SellPrice", "sellPrice");
     public static final LangString COMMAND_ARGUMENT_NAME_SHOP_BLOCK = LangString.of("ChestShop.Command.Argument.Name.ShopBlock", "blockType");
+    public static final LangString COMMAND_ARGUMENT_NAME_ITEM_NAME = LangString.of("ChestShop.Command.Argument.Name.ItemName", "itemName");
 
     public static final LangString COMMAND_BROWSE_DESC    = LangString.of("ChestShop.Command.Browse.Desc", "Browse shop owners.");
     public static final LangString COMMAND_LIST_DESC      = LangString.of("ChestShop.Command.List.Desc", "Browse your shops.");
     public static final LangString COMMAND_LIST_ALL_DESC  = LangString.of("ChestShop.Command.List.Desc", "Browse all player shops.");
+    public static final LangString COMMAND_SEARCH_DESC    = LangString.of("ChestShop.Command.Search.Desc", "Search shops by item.");
     public static final LangString COMMAND_BANK_DESC      = LangString.of("ChestShop.Command.Bank.Desc", "Open [player's] bank.");
     public static final LangString COMMAND_CREATE_DESC    = LangString.of("ChestShop.Command.Create.Desc", "Create a shop.");
     public static final LangString COMMAND_GIVE_ITEM_DESC = LangString.of("ChestShop.Command.GiveItem.Desc", "Give shop creation item.");

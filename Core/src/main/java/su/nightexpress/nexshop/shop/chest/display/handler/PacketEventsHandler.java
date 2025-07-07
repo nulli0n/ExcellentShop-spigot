@@ -117,7 +117,10 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
             else {
                 dataList.add(new EntityData(15, EntityDataTypes.BYTE, (byte) 1)); // billboard
                 dataList.add(new EntityData(23, EntityDataTypes.ADV_COMPONENT, textComponent)); // text
-                dataList.add(new EntityData(27, EntityDataTypes.BYTE, (byte) 0x1)); // shadow
+                dataList.add(new EntityData(24, EntityDataTypes.INT, this.lineWidth));
+                dataList.add(new EntityData(25, EntityDataTypes.INT, this.backgroundColor));
+                dataList.add(new EntityData(26, EntityDataTypes.BYTE, (byte) this.textOpacity));
+                dataList.add(new EntityData(27, EntityDataTypes.BYTE, this.textBitmask));
             }
         });
 

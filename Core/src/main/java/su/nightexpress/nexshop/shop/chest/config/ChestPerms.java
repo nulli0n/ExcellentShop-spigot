@@ -39,6 +39,7 @@ public class ChestPerms {
 
     public static final UniPermission COMMAND_LIST        = new UniPermission(PREFIX_COMMAND + "list");
     public static final UniPermission COMMAND_BROWSE      = new UniPermission(PREFIX_COMMAND + "browse");
+    public static final UniPermission COMMAND_SEARCH  = new UniPermission(PREFIX_COMMAND + "search");
     public static final UniPermission COMMAND_GIVE_ITEM = new UniPermission(PREFIX_COMMAND + "giveitem");
     public static final UniPermission COMMAND_OPEN_INV  = new UniPermission(PREFIX_COMMAND + "open");
     public static final UniPermission COMMAND_BANK      = new UniPermission(PREFIX_COMMAND + "bank");
@@ -65,6 +66,7 @@ public class ChestPerms {
             COMMAND_OPEN_INV,
             COMMAND_LIST,
             COMMAND_BROWSE,
+            COMMAND_SEARCH,
             COMMAND_GIVE_ITEM,
             COMMAND_BANK, COMMAND_BANK_OTHERS
         );

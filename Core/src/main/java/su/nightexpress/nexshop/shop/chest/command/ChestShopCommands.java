@@ -1,5 +1,7 @@
 package su.nightexpress.nexshop.shop.chest.command;
 
+import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -17,13 +19,24 @@ import su.nightexpress.nightcore.command.experimental.CommandContext;
 import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
 import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Players;
+import su.nightexpress.nightcore.util.bridge.RegistryType;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 public class ChestShopCommands {
+
+    private static final Set<Material> TRANSPARENT = new HashSet<>();
+
+    static {
+        TRANSPARENT.addAll(Tag.AIR.getValues());
+        TRANSPARENT.addAll(Tag.SIGNS.getValues());
+    }
 
     public static void build(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull ChainedNodeBuilder root) {
         root.addDirect("browse", builder -> builder
@@ -45,6 +58,14 @@ public class ChestShopCommands {
             .permission(ChestPerms.COMMAND_LIST)
             .description(ChestLang.COMMAND_LIST_DESC)
             .executes((context, arguments) -> listAllShops(module, context, arguments))
+        );
+
+        root.addDirect("search", builder -> builder
+            .playerOnly()
+            .permission(ChestPerms.COMMAND_SEARCH)
+            .description(ChestLang.COMMAND_SEARCH_DESC)
+            .withArgument(ArgumentTypes.string(CommandArguments.ITEM_NAME).required().withSamples(context -> BukkitThing.getValues(RegistryType.MATERIAL)))
+            .executes((context, arguments) -> searchShops(module, context, arguments))
         );
 
         root.addDirect("create", builder -> builder
@@ -101,34 +122,33 @@ public class ChestShopCommands {
     }
 
     public static boolean browseShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
-
+        Player player = context.getPlayerOrThrow();
         module.browseShopOwners(player);
         return true;
     }
 
     public static boolean listShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
-
+        Player player = context.getPlayerOrThrow();
         module.browsePlayerShops(player, player.getName());
         return true;
     }
 
     public static boolean listAllShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
-
+        Player player = context.getPlayerOrThrow();
         module.browseAllShops(player);
         return true;
     }
 
-    public static boolean createShop(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
+    public static boolean searchShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getPlayerOrThrow();
+        String itemName = arguments.getStringArgument(CommandArguments.ITEM_NAME);
+        module.browseItemShops(player, itemName);
+        return true;
+    }
 
-        Block block = player.getTargetBlock(null, 100);
+    public static boolean createShop(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getPlayerOrThrow();
+        Block block = player.getTargetBlock(TRANSPARENT, 100);
 
         double buyPrice = arguments.getDoubleArgument(CommandArguments.BUY_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
         double sellPrice = arguments.getDoubleArgument(CommandArguments.SELL_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
@@ -137,17 +157,13 @@ public class ChestShopCommands {
     }
 
     public static boolean removeShop(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
-
+        Player player = context.getPlayerOrThrow();
         Block block = player.getTargetBlock(null, 100);
         return module.deleteShop(player, block);
     }
 
     public static boolean openShopInventory(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
-
+        Player player = context.getPlayerOrThrow();
         Block block = player.getTargetBlock(null, 10);
 
         ChestShop shop = module.getShop(block);
@@ -180,8 +196,7 @@ public class ChestShopCommands {
     }
 
     public static boolean openBank(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
+        Player player = context.getPlayerOrThrow();
 
         String userName = arguments.getStringArgument(CommandArguments.PLAYER, context.getSender().getName());
         plugin.getUserManager().getUserDataAsync(userName).thenAccept(user -> {

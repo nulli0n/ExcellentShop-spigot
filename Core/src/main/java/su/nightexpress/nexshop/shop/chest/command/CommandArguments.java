@@ -17,6 +17,7 @@ public class CommandArguments {
     public static final String SELL_PRICE = "sell";
     public static final String SHOP_BLOCK = "shopblock";
     public static final String AMOUNT     = "amount";
+    public static final String ITEM_NAME = "itemname";
 
     @NotNull
     public static ArgumentBuilder<ShopBlock> forShopBlock(@NotNull ChestShopModule module) {

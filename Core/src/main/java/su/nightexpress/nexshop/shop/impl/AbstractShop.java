@@ -56,7 +56,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
 
     @Override
     public void updatePrices(boolean force) {
-        this.getValidProducts().forEach(product -> product.updatePrice(force));
+        this.getProducts().forEach(product -> product.updatePrice(force));
     }
 
     @Override
