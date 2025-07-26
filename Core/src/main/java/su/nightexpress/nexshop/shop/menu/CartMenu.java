@@ -39,7 +39,6 @@ import java.util.stream.IntStream;
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>> implements ConfigBased {
 
     private int[]      productSlots;
@@ -77,7 +76,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
         int capacityInventory = Integer.MAX_VALUE;
         int capacityCart = this.getCartInventorySpace(prepared);
         int capacityProduct = product.getAvailableAmount(player, prepared.getTradeType());
-        double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getOwnerBank().getBalance(product.getCurrency()) : -1D;
+        double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getBalance(product.getCurrency()) : -1D;
         double userBalance = product.getCurrency().getBalance(player);
 
         if (product.getType() instanceof PhysicalTyping itemPacker) {

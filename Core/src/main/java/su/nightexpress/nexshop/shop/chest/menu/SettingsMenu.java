@@ -431,5 +431,9 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         loader.addHandler(new ItemHandler("shop_storage", (viewer, event) -> {
             this.runNextTick(() -> module.openProductsMenu(viewer.getPlayer(), this.getLink(viewer)));
         }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage() && !this.getLink(viewer).isAdminShop()).build()));
+
+        loader.addHandler(new ItemHandler("shop_bank", (viewer, event) -> {
+            this.runNextTick(() -> module.openBank(viewer.getPlayer(), this.getLink(viewer)));
+        }, ItemOptions.builder().setVisibilityPolicy(viewer -> !ChestConfig.isAutoBankEnabled()).build()));
     }
 }

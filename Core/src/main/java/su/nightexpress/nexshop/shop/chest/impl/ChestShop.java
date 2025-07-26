@@ -354,6 +354,12 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         this.adminShop = adminShop;
     }
 
+    public double getBalance(@NotNull Currency currency) {
+        if (this.isAdminShop()) return -1D;
+
+        return this.getOwnerBank().getBalance(currency);
+    }
+
     @Nullable
     public ChestProduct createProduct(@NotNull Player player, @NotNull ItemStack item, boolean bypassHandler) {
         if (item.getType().isAir() || this.isProduct(item)) {

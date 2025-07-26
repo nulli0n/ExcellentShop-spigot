@@ -22,9 +22,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.shop.chest.display.impl.FakeEntity;
-import su.nightexpress.nightcore.bridge.paper.PaperComponent;
+import su.nightexpress.nightcore.bridge.paper.PaperBridge;
 import su.nightexpress.nightcore.util.Lists;
-import su.nightexpress.nightcore.util.text.NightMessage;
+import su.nightexpress.nightcore.util.bridge.Software;
+import su.nightexpress.nightcore.util.bridge.wrapper.NightComponent;
+import su.nightexpress.nightcore.util.text.night.NightMessage;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -54,8 +56,8 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
         PacketWrapper<?> dataPacket = this.createMetadataPacket(entity.getId(), dataList -> {
-            dataList.add(new EntityData(5, EntityDataTypes.BOOLEAN, true)); // no gravity
-            dataList.add(new EntityData(8, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(item))); // item
+            dataList.add(new EntityData<>(5, EntityDataTypes.BOOLEAN, true)); // no gravity
+            dataList.add(new EntityData<>(8, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(item))); // item
         });
 
         if (needSpawn) list.add(this.createSpawnPacket(this.itemType, entity));
@@ -71,16 +73,16 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
 
         PacketWrapper<?> dataPacket = this.createMetadataPacket(entity.getId(), dataList -> {
             if (this.showcaseType == EntityType.ARMOR_STAND) {
-                dataList.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x20)); // invisible
-                dataList.add(new EntityData(3, EntityDataTypes.BOOLEAN, false)); // custom name visible
-                dataList.add(new EntityData(5, EntityDataTypes.BOOLEAN, true)); // no gravity
-                dataList.add(new EntityData(15, EntityDataTypes.BYTE, (byte) (0x08 | 0x10))); // isSmall noBasePlate
+                dataList.add(new EntityData<>(0, EntityDataTypes.BYTE, (byte) 0x20)); // invisible
+                dataList.add(new EntityData<>(3, EntityDataTypes.BOOLEAN, false)); // custom name visible
+                dataList.add(new EntityData<>(5, EntityDataTypes.BOOLEAN, true)); // no gravity
+                dataList.add(new EntityData<>(15, EntityDataTypes.BYTE, (byte) (0x08 | 0x10))); // isSmall noBasePlate
 
             }
             else {
-                dataList.add(new EntityData(12, EntityDataTypes.VECTOR3F, new Vector3f(0.7f, 0.7f, 0.7f))); // scale
-                dataList.add(new EntityData(23, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(item))); // slot
-                dataList.add(new EntityData(24, EntityDataTypes.BYTE, (byte) 5)); // mode HEAD
+                dataList.add(new EntityData<>(12, EntityDataTypes.VECTOR3F, new Vector3f(0.7f, 0.7f, 0.7f))); // scale
+                dataList.add(new EntityData<>(23, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(item))); // slot
+                dataList.add(new EntityData<>(24, EntityDataTypes.BYTE, (byte) 5)); // mode HEAD
             }
         });
 
@@ -101,26 +103,27 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
     protected List<PacketWrapper<?>> getHologramPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull String textLine) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
-        PaperComponent component = (PaperComponent) NightMessage.parse(textLine);
-        Component textComponent = component.getParent();
+        PaperBridge bridge = (PaperBridge) Software.instance();
+        NightComponent component = NightMessage.parse(textLine);
+        Component textComponent = bridge.getTextComponentAdapter().adaptComponent(component);
 
         PacketWrapper<?> dataPacket = this.createMetadataPacket(entity.getId(), dataList -> {
             // Armor Stands (legacy)
             if (this.hologramType == EntityType.ARMOR_STAND) {
-                dataList.add(new EntityData(0, EntityDataTypes.BYTE, (byte) 0x20)); // invisible
-                dataList.add(new EntityData(2, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(textComponent))); // display name
-                dataList.add(new EntityData(3, EntityDataTypes.BOOLEAN, true)); // custom name visible
-                dataList.add(new EntityData(5, EntityDataTypes.BOOLEAN, true)); // no gravity
-                dataList.add(new EntityData(15, EntityDataTypes.BYTE, (byte) (0x01 | 0x08 | 0x10))); // isSmall noBasePlate setMarker
+                dataList.add(new EntityData<>(0, EntityDataTypes.BYTE, (byte) 0x20)); // invisible
+                dataList.add(new EntityData<>(2, EntityDataTypes.OPTIONAL_ADV_COMPONENT, Optional.of(textComponent))); // display name
+                dataList.add(new EntityData<>(3, EntityDataTypes.BOOLEAN, true)); // custom name visible
+                dataList.add(new EntityData<>(5, EntityDataTypes.BOOLEAN, true)); // no gravity
+                dataList.add(new EntityData<>(15, EntityDataTypes.BYTE, (byte) (0x01 | 0x08 | 0x10))); // isSmall noBasePlate setMarker
             }
             // Displays (modern)
             else {
-                dataList.add(new EntityData(15, EntityDataTypes.BYTE, (byte) 1)); // billboard
-                dataList.add(new EntityData(23, EntityDataTypes.ADV_COMPONENT, textComponent)); // text
-                dataList.add(new EntityData(24, EntityDataTypes.INT, this.lineWidth));
-                dataList.add(new EntityData(25, EntityDataTypes.INT, this.backgroundColor));
-                dataList.add(new EntityData(26, EntityDataTypes.BYTE, (byte) this.textOpacity));
-                dataList.add(new EntityData(27, EntityDataTypes.BYTE, this.textBitmask));
+                dataList.add(new EntityData<>(15, EntityDataTypes.BYTE, (byte) 1)); // billboard
+                dataList.add(new EntityData<>(23, EntityDataTypes.ADV_COMPONENT, textComponent)); // text
+                dataList.add(new EntityData<>(24, EntityDataTypes.INT, this.lineWidth));
+                dataList.add(new EntityData<>(25, EntityDataTypes.INT, this.backgroundColor));
+                dataList.add(new EntityData<>(26, EntityDataTypes.BYTE, (byte) this.textOpacity));
+                dataList.add(new EntityData<>(27, EntityDataTypes.BYTE, this.textBitmask));
             }
         });
 
@@ -149,8 +152,8 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
     }
 
     @NotNull
-    private PacketWrapper<?> createMetadataPacket(int entityID, @NotNull Consumer<List<EntityData>> consumer) {
-        List<EntityData> dataList = new ArrayList<>();
+    private PacketWrapper<?> createMetadataPacket(int entityID, @NotNull Consumer<List<EntityData<?>>> consumer) {
+        List<EntityData<?>> dataList = new ArrayList<>();
 
         consumer.accept(dataList);
 
