@@ -12,7 +12,7 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
@@ -34,7 +34,7 @@ public class ProductCreationMenu extends LinkedMenu<ShopPlugin, ProductCreationM
     public record Data(VirtualShop shop, boolean rotating, int page, int slot) {}
 
     public ProductCreationMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_PRODUCT_CREATION.getString());
+        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_PRODUCT_CREATION.text());
         this.module = module;
 
         this.addItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).toMenuItem().setPriority(-1).setSlots(IntStream.range(0, 45).toArray()));

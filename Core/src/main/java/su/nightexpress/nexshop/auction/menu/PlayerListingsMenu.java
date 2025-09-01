@@ -39,7 +39,7 @@ public class PlayerListingsMenu extends AbstractAuctionMenu<ActiveListing>  {
     @Override
     public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ActiveListing> autoFill) {
         super.onAutoFill(viewer, autoFill);
-        autoFill.setItems(Listings.sorted(this.auctionManager.getListings().getActive(this.getLink(viewer))));
+        autoFill.setItems(Listings.sortAndValidate(this.auctionManager.getListings().getActive(this.getLinkedPlayerId(viewer))));
         autoFill.setClickAction(item -> (viewer1, event) -> {
             Player player = viewer.getPlayer();
             if (event.isRightClick() || Players.isBedrock(player)) {
@@ -62,7 +62,8 @@ public class PlayerListingsMenu extends AbstractAuctionMenu<ActiveListing>  {
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
-        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
+        // TODO
+        /*ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
         ItemUtil.editMeta(backItem, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
         });
@@ -78,7 +79,7 @@ public class PlayerListingsMenu extends AbstractAuctionMenu<ActiveListing>  {
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(nextPage).setSlots(53).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        list.add(new MenuItem(nextPage).setSlots(53).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
 
         return list;
     }

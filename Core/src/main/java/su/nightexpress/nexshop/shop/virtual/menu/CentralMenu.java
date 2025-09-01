@@ -28,7 +28,6 @@ import static su.nightexpress.nexshop.Placeholders.GENERIC_BALANCE;
 import static su.nightexpress.nexshop.Placeholders.GENERIC_SELL_MULTIPLIER;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class CentralMenu extends NormalMenu<ShopPlugin> implements ConfigBased {
 
     public static final String FILE_NAME = "main.menu.yml";
@@ -61,19 +60,16 @@ public class CentralMenu extends NormalMenu<ShopPlugin> implements ConfigBased {
 
     @Override
     protected void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
-        int size = view.getTopInventory().getSize();
-
         this.module.getShops().forEach(shop -> {
-            int slot = shop.getMainMenuSlot();
-            if (slot < 0 || slot >= size) return;
+            if (!shop.hasMenuSlots()) return;
 
             this.addItem(viewer, shop.getIcon()
                 .setDisplayName(VirtualConfig.SHOP_FORMAT_NAME.get())
                 .setLore(VirtualConfig.SHOP_FORMAT_LORE.get())
-                .setHideComponents(true)
+                .hideAllComponents()
                 .replacement(replacer -> replacer.replace(shop.replacePlaceholders()))
                 .toMenuItem()
-                .setSlots(slot)
+                .setSlots(shop.getMenuSlots().stream().mapToInt(i -> i).toArray())
                 .setPriority(Integer.MAX_VALUE)
                 .setHandler(ItemHandler.forClick((viewer1, event) -> {
                     this.runNextTick(() -> shop.open(viewer1.getPlayer()));
@@ -112,7 +108,6 @@ public class CentralMenu extends NormalMenu<ShopPlugin> implements ConfigBased {
                 "",
                 LIGHT_GRAY.wrap(HEX_COLOR.wrap("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.wrap("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
                 "",
-                //LIGHT_GRAY.wrap(HEX_COLOR.wrap("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.wrap("sell all", "#ebd12a") + ".")
                 HEX_COLOR.wrap("→ " + BOLD.wrap(UNDERLINED.wrap("CLICK")) + " to sell", "#ebd12a")
             ))
             .toMenuItem().setSlots(43).setPriority(10).setHandler(new ItemHandler("sell_all", (viewer, event) -> {

@@ -22,7 +22,7 @@ public class ExpiredCommand {
     public static void build(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull ChainedNodeBuilder nodeBuilder) {
         nodeBuilder.addDirect("expired", builder -> builder
             .permission(AuctionPerms.COMMAND_EXPIRED)
-            .description(AuctionLang.COMMAND_EXPIRED_DESC)
+            .description(AuctionLang.COMMAND_EXPIRED_DESC.text())
             .playerOnly()
             .withArgument(ArgumentTypes.playerName(ARG_TARGET).permission(AuctionPerms.COMMAND_EXPIRED_OTHERS))
             .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))

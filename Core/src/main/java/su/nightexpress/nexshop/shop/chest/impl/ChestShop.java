@@ -287,9 +287,16 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return this.blockPos;
     }
 
+    // TODO Update stock placeholders when closing chest
+
     @NotNull
     public ChestBank getOwnerBank() {
         return this.module.getPlayerBank(this);
+    }
+
+    @NotNull
+    public ChestBank getRentersOrOwnerBank() {
+        return this.module.getPlayerBank(this.renterId == null ? this.ownerId : this.renterId);
     }
 
     @Override
@@ -357,7 +364,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     public double getBalance(@NotNull Currency currency) {
         if (this.isAdminShop()) return -1D;
 
-        return this.getOwnerBank().getBalance(currency);
+        return this.getRentersOrOwnerBank().getBalance(currency);
     }
 
     @Nullable
@@ -366,7 +373,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             return null;
         }
         if (!ChestUtils.isAllowedItem(item)) {
-            ChestLang.SHOP_PRODUCT_ERROR_BAD_ITEM.getMessage().send(player);
+            ChestLang.SHOP_PRODUCT_ERROR_BAD_ITEM.message().send(player);
             return null;
         }
         ItemStack stack = new ItemStack(item);
@@ -473,9 +480,14 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public void extendRent() {
-        if (!this.isRented()) return;
+        if (this.renterId == null) return;
 
-        this.rentedUntil = Math.max(0L, this.rentedUntil) + this.rentSettings.getDurationMillis();
+        if (this.isRentExpired() || this.rentedUntil < 0) {
+            this.rentedUntil = System.currentTimeMillis() + this.rentSettings.getDurationMillis();
+        }
+        else {
+            this.rentedUntil += this.rentSettings.getDurationMillis();
+        }
     }
 
     public boolean isItemCreated() {

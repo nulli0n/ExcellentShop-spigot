@@ -204,7 +204,7 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
             return true;
         }));
 
-        ChestLang.SEARCH_PROMPT_ITEM_NAME.getMessage().send(player);
+        ChestLang.SEARCH_PROMPT_ITEM_NAME.message().send(player);
     }
 
     private void handleSorting(@NotNull MenuViewer viewer) {

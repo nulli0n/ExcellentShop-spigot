@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
 import su.nightexpress.nexshop.shop.virtual.impl.RotationItem;
@@ -33,7 +33,7 @@ public class RotationItemsListMenu extends LinkedMenu<ShopPlugin, Rotation> impl
     //private final VirtualShopModule module;
 
     public RotationItemsListMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_ITEMS.getString());
+        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_ITEMS.text());
         //this.module = module;
 
         this.addItem(MenuItem.buildReturn(this, 39, (viewer, event) -> {
@@ -72,7 +72,7 @@ public class RotationItemsListMenu extends LinkedMenu<ShopPlugin, Rotation> impl
             })
             .setItemClick(rotationItem -> (viewer1, event) -> {
                 if (event.isLeftClick()) {
-                    this.handleInput(Dialog.builder(viewer1, VirtualLang.EDITOR_ENTER_WEIGHT, input -> {
+                    this.handleInput(Dialog.builder(viewer1, VirtualLang.EDITOR_ENTER_WEIGHT.text(), input -> {
                         rotationItem.setWeight(input.asDouble(0));
                         this.save(viewer, rotation);
                         return true;

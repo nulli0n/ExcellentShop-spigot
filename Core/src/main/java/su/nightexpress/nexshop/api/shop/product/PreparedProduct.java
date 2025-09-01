@@ -37,6 +37,10 @@ public interface PreparedProduct {
 
     void setUnits(int units);
 
+    double getMultiplier();
+
+    void setMultiplier(double multiplier);
+
     int getAmount();
 
     double getPrice();

@@ -158,7 +158,7 @@ public class BankMenu extends LinkedMenu<ShopPlugin, BankMenu.Data> implements F
             double amount = input.asDoubleAbs();
             this.module.depositToBank(player, holder, currency, amount);
             return true;
-        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT));
+        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT.text()));
     }
 
     private void handleWithdraw(@NotNull MenuViewer viewer, boolean all) {
@@ -180,7 +180,7 @@ public class BankMenu extends LinkedMenu<ShopPlugin, BankMenu.Data> implements F
             double amount = input.asDoubleAbs();
             this.module.withdrawFromBank(player, holder, currency, amount);
             return true;
-        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT));
+        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT.text()));
     }
 
     @Override

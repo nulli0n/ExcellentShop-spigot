@@ -2,7 +2,6 @@ package su.nightexpress.nexshop.product.type.impl;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
@@ -10,69 +9,56 @@ import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.util.ErrorHandler;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.ItemNbt;
+import su.nightexpress.nightcore.util.ItemTag;
 import su.nightexpress.nightcore.util.PDCUtil;
+import su.nightexpress.nightcore.util.Version;
 
 import java.util.function.UnaryOperator;
 
 public class VanillaProductType extends PhysicalProductType implements VanillaTyping {
 
-    private ItemStack item;
-    private boolean   respectMeta;
+    private final ItemStack item;
+
+    private boolean respectMeta;
 
     public VanillaProductType(@NotNull ItemStack item, boolean respectMeta) {
-        this.setItem(item);
+        this.item = new ItemStack(item);
         this.setRespectMeta(respectMeta);
     }
 
     @NotNull
     public static VanillaProductType read(@NotNull FileConfig config, @NotNull String path) {
-        // ------- REVERT 4.13.3 CHANGES - START ------- //
-        String serialized = config.getString(path + ".Data");
-        if (serialized != null && !serialized.isBlank()) {
-            String delimiter = " \\| ";
-            String[] split = serialized.split(delimiter);
-            String tagString = split[0];
-            boolean respectMeta = split.length >= 2 && Boolean.parseBoolean(split[1]);
+        if (config.contains(path + ".Content.Item")) {
+            String tagString = String.valueOf(config.getString(path + ".Content.Item"));
 
-            config.set(path + ".Content.Item", tagString);
-            config.set(path + ".Item_Meta_Enabled", respectMeta);
-            config.remove(path + ".Data");
+            ItemTag tag = new ItemTag(tagString, -1);
+            ItemStack itemStack = ItemNbt.fromTag(tag);
+            if (itemStack == null) {
+                ErrorHandler.configError("Could not update itemstack '" + tagString + "'!", config, path);
+            }
+
+            config.remove(path + ".Content.Item");
+            config.set(path + ".ItemTag", new ItemTag(tagString, Version.getCurrent().getDataVersion()));
         }
-        // ------- REVERT 4.13.3 CHANGES - END ------- //
 
-        String tagString = config.getString(path + ".Content.Item", "null");
+        ItemTag tag = ItemTag.read(config, path + ".ItemTag");
         boolean respectMeta = config.getBoolean(path + ".Item_Meta_Enabled");
 
-        ItemStack itemStack = ShopUtils.readItemTag(tagString);
+        ItemStack itemStack = ItemNbt.fromTag(tag);
         if (itemStack == null || itemStack.getType().isAir()) {
             itemStack = getBrokenItem();
-            ErrorHandler.configError("Invalid item tag string '" + tagString + "'!", config, path);
+            ErrorHandler.configError("Invalid item tag string '" + tag.getTag() + "'!", config, path);
         }
 
         return new VanillaProductType(itemStack, respectMeta);
     }
 
-    @Nullable
-    public static VanillaProductType deserialize(@NotNull String serialized) {
-        ItemStack itemStack = ShopUtils.readItemTag(serialized);
-        if (itemStack == null) return null;
-
-        return new VanillaProductType(itemStack, true);
-    }
-
     @Override
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Content.Item", ShopUtils.getItemTag(this.item));
+        config.set(path + ".ItemTag", ItemNbt.getTag(this.item));
         config.set(path + ".Item_Meta_Enabled", this.respectMeta);
-        config.remove(path + ".Data"); // ------- REVERT 4.13.3 CHANGES ------- //
-    }
-
-    @Override
-    @NotNull
-    public String serialize() {
-        return String.valueOf(ShopUtils.getItemTag(this.item));
     }
 
     @Override
@@ -110,10 +96,6 @@ public class VanillaProductType extends PhysicalProductType implements VanillaTy
     @Override
     public ItemStack getItem() {
         return new ItemStack(this.item);
-    }
-
-    private void setItem(@NotNull ItemStack item) {
-        this.item = new ItemStack(item);
     }
 
     @Override

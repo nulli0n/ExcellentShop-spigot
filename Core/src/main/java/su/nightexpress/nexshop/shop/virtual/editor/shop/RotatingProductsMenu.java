@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
@@ -33,7 +33,7 @@ public class RotatingProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> im
     private final VirtualShopModule module;
 
     public RotatingProductsMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_PRODUCTS_ROTATING.getString());
+        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_PRODUCTS_ROTATING.text());
         this.module = module;
 
         this.addItem(MenuItem.buildReturn(this, 39, (viewer, event) -> {

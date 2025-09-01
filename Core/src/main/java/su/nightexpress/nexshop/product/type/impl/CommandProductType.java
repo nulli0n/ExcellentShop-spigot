@@ -9,12 +9,14 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.nexshop.util.ErrorHandler;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.util.ItemNbt;
+import su.nightexpress.nightcore.util.ItemTag;
 import su.nightexpress.nightcore.util.Players;
+import su.nightexpress.nightcore.util.Version;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -34,28 +36,23 @@ public class CommandProductType implements CommandTyping {
 
     @NotNull
     public static CommandProductType read(@NotNull FileConfig config, @NotNull String path) {
-        // ------- REVERT 4.13.3 CHANGES - START ------- //
-        String serialized = config.getString(path + ".Data");
-        if (serialized != null && !serialized.isBlank()) {
-            String delimiter = " \\| ";
-            String cmdDelimiter = " @ ";
+        if (config.contains(path + ".Content.Preview")) {
+            String tagString = String.valueOf(config.getString(path + ".Content.Preview"));
 
-            String[] split = serialized.split(delimiter);
+            ItemTag tag = new ItemTag(tagString, -1);
+            ItemStack itemStack = ItemNbt.fromTag(tag);
+            if (itemStack == null) {
+                ErrorHandler.configError("Could not update itemstack '" + tagString + "'!", config, path);
+            }
 
-            String previewTag = split[0];
-            String[] commandsSplit = split.length >= 2 ? split[1].split(cmdDelimiter) : new String[0];
-            List<String> commands = Arrays.asList(commandsSplit);
-
-            config.set(path + ".Content.Preview", previewTag);
-            config.set(path + ".Content.Commands", commands);
-            config.remove(path + ".Data");
+            config.remove(path + ".Content.Preview");
+            config.set(path + ".PreviewTag", new ItemTag(tagString, Version.getCurrent().getDataVersion()));
         }
-        // ------- REVERT 4.13.3 CHANGES - END ------- //
 
-        String previewTag = config.getString(path + ".Content.Preview", "null");
+        ItemTag tag = ItemTag.read(config, path + ".PreviewTag");
         List<String> commands = config.getStringList(path + ".Content.Commands");
 
-        ItemStack preview = ShopUtils.readItemTag(previewTag);
+        ItemStack preview = ItemNbt.fromTag(tag);
         if (preview == null) preview = new ItemStack(Material.COMMAND_BLOCK);
 
         return new CommandProductType(preview, commands);
@@ -63,9 +60,8 @@ public class CommandProductType implements CommandTyping {
 
     @Override
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Content.Preview", ShopUtils.getItemTag(this.preview));
+        config.set(path + ".PreviewTag", ItemNbt.getTag(this.preview));
         config.set(path + ".Content.Commands", this.commands);
-        config.remove(path + ".Data"); // ------- REVERT 4.13.3 CHANGES ------ //
     }
 
     @Override
@@ -128,11 +124,6 @@ public class CommandProductType implements CommandTyping {
                 }
             }
         });
-
-//        ConsoleCommandSender sender = Bukkit.getConsoleSender();
-//        for (int i = 0; i < count; i++) {
-//            this.getCommands().forEach(command -> Bukkit.dispatchCommand(sender, Placeholders.forPlayer(player).apply(command)));
-//        }
     }
 
     @Override

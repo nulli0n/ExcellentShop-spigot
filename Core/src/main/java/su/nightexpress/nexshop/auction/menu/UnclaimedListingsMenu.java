@@ -38,7 +38,7 @@ public class UnclaimedListingsMenu extends AbstractAuctionMenu<CompletedListing>
     @Override
     public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<CompletedListing> autoFill) {
         super.onAutoFill(viewer, autoFill);
-        autoFill.setItems(Listings.sorted(this.auctionManager.getListings().getUnclaimed(this.getLink(viewer))));
+        autoFill.setItems(Listings.sortAndValidate(this.auctionManager.getListings().getUnclaimed(this.getLinkedPlayerId(viewer))));
         autoFill.setClickAction(listing -> (viewer1, event) -> {
             Player player = viewer.getPlayer();
             this.auctionManager.claimRewards(player, Lists.newList(listing));
@@ -59,7 +59,8 @@ public class UnclaimedListingsMenu extends AbstractAuctionMenu<CompletedListing>
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
-        ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
+        // TODO
+        /*ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
         ItemUtil.editMeta(backItem, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
         });
@@ -75,7 +76,7 @@ public class UnclaimedListingsMenu extends AbstractAuctionMenu<CompletedListing>
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(nextPage).setSlots(53).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        list.add(new MenuItem(nextPage).setSlots(53).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
 
         return list;
     }

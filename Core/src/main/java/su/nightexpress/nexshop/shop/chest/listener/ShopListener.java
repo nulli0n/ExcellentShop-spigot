@@ -85,9 +85,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
                 })
                 .filter(Objects::nonNull).collect(Collectors.joining(", "));
 
-            this.module.getPrefixed(ChestLang.NOTIFICATION_SHOP_EARNINGS)
-                .replace(Placeholders.GENERIC_AMOUNT, balances)
-                .send(player);
+            this.module.getPrefixed(ChestLang.NOTIFICATION_SHOP_EARNINGS).send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, balances));
         }
 
         bank.getBalanceMap().clear();

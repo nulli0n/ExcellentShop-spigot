@@ -11,7 +11,7 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
@@ -32,7 +32,7 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
     private static final String SKULL_SELL_LIMIT = "b3a8fb20553e1e8db47f3883f7f491c1ee6bfd4d2ca97773a8db960eb543170e";
 
     public ProductStocksMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCT_STOCKS.getString());
+        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCT_STOCKS.text());
 
         this.addItem(MenuItem.buildReturn(this, 49, (viewer, event) -> {
             this.runNextTick(() -> module.openProductOptions(viewer.getPlayer(), this.getLink(viewer)));
@@ -85,7 +85,7 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
             return;
         }
 
-        this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_AMOUNT, input -> {
+        this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_AMOUNT.text(), input -> {
             values.setAmount(tradeType, input.asInt(0));
             product.save();
             return true;
@@ -99,7 +99,7 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
             return;
         }
 
-        this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_SECONDS, input -> {
+        this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
             values.setRestockTime(input.asInt(0));
             product.save();
             return true;

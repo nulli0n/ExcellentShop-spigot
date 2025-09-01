@@ -31,15 +31,6 @@ public class ProductTypes {
         };
     }
 
-    @Nullable
-    public static ProductTyping deserialize(@NotNull ProductType type, @NotNull String serialized) {
-        return switch (type) {
-            case VANILLA -> VanillaProductType.deserialize(serialized);
-            case COMMAND -> null;
-            case PLUGIN -> PluginProductType.deserialize(serialized);
-        };
-    }
-
     @NotNull
     public static PhysicalTyping fromItem(@NotNull ItemStack itemStack, boolean bypassHandler) {
         ItemHandler handler = ItemBridge.getHandler(itemStack);

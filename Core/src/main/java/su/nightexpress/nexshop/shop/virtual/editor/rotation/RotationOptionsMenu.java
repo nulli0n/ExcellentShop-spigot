@@ -11,7 +11,7 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
@@ -36,7 +36,7 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
     private static final String SKULL_RESET = "8069cc1666b4ed76587bb1a44fbb7a4375ea03c26d9a47e357b4139e3da28d";
 
     public RotationOptionsMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_OPTIONS.getString());
+        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_OPTIONS.text());
 
         this.addItem(MenuItem.buildReturn(this, 40, (viewer, event) -> {
             this.runNextTick(() -> module.openRotationsList(viewer.getPlayer(), this.getLink(viewer).getShop()));
@@ -92,7 +92,7 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
         });
 
         this.addItem(NightItem.asCustomHead(SKULL_CLOCK), VirtualLocales.ROTATION_EDIT_INTERVAL, 21, (viewer, event, rotation) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS, input -> {
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
                 rotation.setRotationInterval(input.asIntAbs(0));
                 this.save(viewer, rotation);
                 return true;

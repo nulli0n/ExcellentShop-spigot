@@ -42,6 +42,7 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static su.nightexpress.nexshop.Placeholders.*;
@@ -75,7 +76,16 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
     }
 
     public void open(@NotNull Player player, @NotNull ChestShop shop) {
-        this.open(player, shop, null, -1);
+        ChestProduct product = null;
+        int index = -1;
+
+        List<ChestProduct> products = new ArrayList<>(shop.getProducts());
+        if (!products.isEmpty()) {
+            product = products.getFirst();
+            index = 0;
+        }
+
+        this.open(player, shop, product, index);
     }
 
     private void open(@NotNull Player player, @NotNull ChestShop shop, @Nullable ChestProduct product, int index) {
@@ -186,7 +196,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         ChestShop shop = data.shop;
         ChestProduct product = data.product;
 
-        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, input -> {
+        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
             product.setPrice(tradeType, input.asDoubleAbs());
             shop.setSaveRequired(true);
             return true;
@@ -243,7 +253,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
             int amount = input.asIntAbs();
             this.module.depositToShop(player, product, amount);
             return true;
-        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT));
+        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT.text()));
     }
 
     private void handleWithdraw(@NotNull MenuViewer viewer, boolean all) {
@@ -262,7 +272,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
             int amount = input.asIntAbs();
             this.module.withdrawFromShop(player, product, amount);
             return true;
-        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT));
+        }).setPrompt(Lang.EDITOR_GENERIC_ENTER_AMOUNT.text()));
     }
 
     private void handleRemove(@NotNull MenuViewer viewer) {
@@ -273,7 +283,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         ChestProduct product = data.product;
 
         if (product.countStock(TradeType.BUY, null) > 0) {
-            ChestLang.EDITOR_ERROR_PRODUCT_LEFT.getMessage().send(player);
+            ChestLang.EDITOR_ERROR_PRODUCT_LEFT.message().send(player);
             return;
         }
 

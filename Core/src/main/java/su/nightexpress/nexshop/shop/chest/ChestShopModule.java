@@ -48,6 +48,7 @@ import su.nightexpress.nexshop.shop.chest.menu.*;
 import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.util.*;
@@ -83,6 +84,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     private ShopBrowserMenu   shopBrowserMenu;
     private ShopView          shopView;
 
+    private PlayerShopDialogs dialogs;
     private DisplayManager displayManager;
 
     private TransactionLogger logger;
@@ -109,13 +111,13 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     protected void loadModule(@NotNull FileConfig config) {
         ChestKeys.load(this.plugin);
         this.loadConfig(config);
-        this.plugin.getLangManager().loadEntries(ChestLang.class);
         this.plugin.registerPermissions(ChestPerms.class);
         this.logger = new TransactionLogger(this, config);
 
         this.loadDisplayManager();
         this.loadHooks();
         this.loadUI();
+        this.loadDialogs();
         this.loadShops();
 
         this.addListener(new ShopListener(this.plugin, this));
@@ -177,10 +179,18 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         }
     }
 
+    private void loadDialogs() {
+        if (Version.isBehind(Version.MC_1_21_7)) return;
+
+        this.dialogs = new PlayerShopDialogs(this.plugin, this);
+        this.dialogs.setup();
+    }
+
     @Override
     protected void disableModule() {
         this.saveShopsIfRequired();
 
+        if (this.dialogs != null) this.dialogs.shutdown();
         if (this.shopView != null) this.shopView.clear();
         if (this.bankMenu != null) this.bankMenu.clear();
         if (this.priceMenu != null) this.priceMenu.clear();
@@ -355,6 +365,16 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return this.displayManager;
     }
 
+    @Nullable
+    public PlayerShopDialogs getDialogs() {
+        return this.dialogs;
+    }
+
+    @NotNull
+    public Optional<PlayerShopDialogs> dialogs() {
+        return Optional.ofNullable(this.dialogs);
+    }
+
     @NotNull
     public Map<Material, ShopBlock> getShopBlockMap() {
         return this.blockMap;
@@ -524,6 +544,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return player.teleport(location);
     }
 
+    @Deprecated
     public boolean renameShop(@NotNull Player player, @NotNull ChestShop shop, @NotNull String name) {
         String rawName = NightMessage.stripTags(name);
         int maxLength = ChestConfig.SHOP_MAX_NAME_LENGTH.get();
@@ -813,7 +834,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
     public boolean canBreak(@NotNull Player player, @NotNull ChestShop shop) {
         if (!player.hasPermission(ChestPerms.REMOVE)) {
-            this.getPrefixed(ChestLang.ERROR_NO_PERMISSION).send(player);
+            this.getPrefixed(CoreLang.ERROR_NO_PERMISSION).send(player);
             return false;
         }
 

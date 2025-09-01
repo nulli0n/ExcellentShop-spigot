@@ -49,7 +49,7 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
     @Override
     public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ActiveListing> autoFill) {
         super.onAutoFill(viewer, autoFill);
-        autoFill.setItems(Listings.sorted(this.auctionManager.getListings().getExpired(this.getLink(viewer))));
+        autoFill.setItems(Listings.sortAndValidate(this.auctionManager.getListings().getExpired(this.getLinkedPlayerId(viewer))));
         autoFill.setClickAction(item -> (viewer1, event) -> {
             Player player = viewer1.getPlayer();
             this.auctionManager.takeListing(player, item);
@@ -70,7 +70,8 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
-        ItemStack takeAllItem = new ItemStack(Material.HOPPER);
+        // TODO
+        /*ItemStack takeAllItem = new ItemStack(Material.HOPPER);
         ItemUtil.editMeta(takeAllItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Take All")));
         });
@@ -92,7 +93,7 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(nextPage).setSlots(53).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        list.add(new MenuItem(nextPage).setSlots(53).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
 
         return list;
     }

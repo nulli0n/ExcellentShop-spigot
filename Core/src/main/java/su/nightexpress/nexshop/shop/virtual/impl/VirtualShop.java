@@ -17,16 +17,16 @@ import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.shop.RotationData;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.StringUtil;
@@ -37,8 +37,14 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class VirtualShop extends AbstractShop<VirtualProduct> {
+
+    private static final int DEFAULT_LAYOUT_PAGE = 0;
+    public static final int MAX_PAGES = 100;
+    public static final int MIN_PAGES = 1;
 
     public static final String FILE_NAME     = "config.yml";
     public static final String FILE_PRODUCTS = "products.yml";
@@ -53,13 +59,18 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     private List<String> description;
     private boolean      permissionRequired;
     private NightItem    icon;
-    private int          mainMenuSlot;
-    private String       layoutName;
-    private int          pages;
+    private Set<Integer> menuSlots;
+    private int     pages;
+    private boolean paginatedLayouts;
 
     public VirtualShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
         super(plugin, file, id);
         this.module = module;
+        this.configProducts = new FileConfig(this.getFile().getParentFile().getAbsolutePath(), FILE_PRODUCTS);
+        this.discounts = new HashSet<>();
+        this.pageLayouts = new HashMap<>();
+        this.rotationByIdMap = new HashMap<>();
+        this.menuSlots = new HashSet<>();
 
         this.setName(StringUtil.capitalizeUnderscored(id));
         this.setDescription(new ArrayList<>());
@@ -67,11 +78,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         this.setDefaultLayout(Placeholders.DEFAULT);
         this.setPages(1);
         this.setAliases(new HashSet<>());
-        this.configProducts = new FileConfig(this.getFile().getParentFile().getAbsolutePath(), FILE_PRODUCTS);
-        this.discounts = new HashSet<>();
-        this.pageLayouts = new HashMap<>();
-        this.rotationByIdMap = new HashMap<>();
-        this.mainMenuSlot = -1;
+        this.setPaginatedLayouts(false);
     }
 
     @Override
@@ -86,11 +93,17 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         this.setDescription(config.getStringList("Description"));
         this.setPermissionRequired(config.getBoolean("Permission_Required", false));
         this.setIcon(config.getCosmeticItem("Icon"));
-        this.setMainMenuSlot(config.getInt("MainMenu.Slot", -1));
+        this.setMenuSlots(IntStream.of(config.getIntArray("MainMenu.Slot")).boxed().collect(Collectors.toSet()));
         this.setPages(config.getInt("Pages", 1));
         this.setAliases(config.getStringSet("Aliases"));
 
-        this.setDefaultLayout(ConfigValue.create("Layout.Name", Placeholders.DEFAULT).read(config));
+        if (config.contains("Layout.Name")) {
+            String oldDefault = config.getString("Layout.Name", Placeholders.DEFAULT);
+            config.set("Layout.ByPage." + DEFAULT_LAYOUT_PAGE, oldDefault);
+            config.remove("Layout.Name");
+        }
+
+        this.setPaginatedLayouts(ConfigValue.create("Layout.Paginated", true).read(config));
         config.getSection("Layout.ByPage").forEach(sId -> {
             int page = NumberUtil.getIntegerAbs(sId, -1);
             if (page < 0) return;
@@ -131,7 +144,6 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     private void writeSettings(@NotNull FileConfig config) {
-
         config.set("Name", this.name);
         config.set("Description", this.description);
         config.set("Icon", this.icon);
@@ -139,9 +151,9 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         config.set("Permission_Required", this.permissionRequired);
         config.set("Transaction_Allowed.BUY", this.buyingAllowed);
         config.set("Transaction_Allowed.SELL", this.sellingAllowed);
-        config.set("MainMenu.Slot", this.mainMenuSlot);
+        config.setIntArray("MainMenu.Slot", this.menuSlots.stream().mapToInt(i -> i).toArray());
         config.set("Aliases", this.aliases);
-        config.set("Layout.Name", this.layoutName);
+        config.set("Layout.Paginated", this.paginatedLayouts);
         config.remove("Layout.ByPage");
         this.pageLayouts.forEach((page, lName) -> config.set("Layout.ByPage." + page, lName));
     }
@@ -367,7 +379,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         Players.getOnline().forEach(player -> {
             if (!this.canAccess(player, false)) return;
 
-            VirtualLang.SHOP_ROTATION_NOTIFY.getMessage().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, rotated.get()).replace(this.replacePlaceholders()));
+            VirtualLang.SHOP_ROTATION_NOTIFY.message().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, rotated.get()).replace(this.replacePlaceholders()));
         });
 
         return true;
@@ -381,15 +393,27 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @Override
     public boolean canAccess(@NotNull Player player, boolean notify) {
         if (!this.hasPermission(player)) {
-            if (notify) Lang.ERROR_NO_PERMISSION.getMessage(this.plugin).send(player);
+            if (notify) CoreLang.ERROR_NO_PERMISSION.withPrefix(this.plugin).send(player);
             return false;
         }
 
         return true;
     }
 
-    public boolean isMainMenuSlotDisabled() {
-        return this.mainMenuSlot < 0;
+    public boolean hasDescription() {
+        return !this.description.isEmpty();
+    }
+
+    public boolean hasAliases() {
+        return !this.aliases.isEmpty();
+    }
+
+    public boolean hasMenuSlots() {
+        return !this.menuSlots.isEmpty();
+    }
+
+    public boolean isMenuSlot(int slot) {
+        return this.menuSlots.contains(slot);
     }
 
     @NotNull
@@ -405,6 +429,11 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @NotNull
     public Set<String> getAliases() {
         return this.aliases;
+    }
+
+    @NotNull
+    public Set<String> getSlashedAliases() {
+        return this.aliases.stream().map(s -> "/" + s).collect(Collectors.toSet());
     }
 
     public void setAliases(@NotNull Set<String> aliases) {
@@ -443,12 +472,26 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         this.icon = icon.copy().setAmount(1);
     }
 
-    public int getMainMenuSlot() {
-        return this.mainMenuSlot;
+    @NotNull
+    public Set<Integer> getMenuSlots() {
+        return this.menuSlots;
     }
 
-    public void setMainMenuSlot(int mainMenuSlot) {
-        this.mainMenuSlot = mainMenuSlot;
+    public void addMenuSlot(int slot) {
+        this.menuSlots.add(slot);
+    }
+
+    public void removeMenuSlot(int slot) {
+        this.menuSlots.remove(slot);
+    }
+
+    public void clearMenuSlots() {
+        this.menuSlots.clear();
+    }
+
+    public void setMenuSlots(@NotNull Set<Integer> menuSlots) {
+        this.menuSlots = menuSlots;
+        this.menuSlots.removeIf(slot -> slot < 0);
     }
 
     public int getPages() {
@@ -456,28 +499,44 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     public void setPages(int pages) {
-        this.pages = Math.max(1, pages);
+        this.pages = Math.clamp(pages, MIN_PAGES, MAX_PAGES);
     }
 
-    @NotNull
+    public boolean isPaginatedLayouts() {
+        return this.paginatedLayouts;
+    }
+
+    public void setPaginatedLayouts(boolean paginatedLayouts) {
+        this.paginatedLayouts = paginatedLayouts;
+    }
+
+    @Nullable
+    @Deprecated
     public String getDefaultLayout() {
-        return this.layoutName;
+        return this.getLayout(DEFAULT_LAYOUT_PAGE);
     }
 
+    @Deprecated
     public void setDefaultLayout(@NotNull String layoutName) {
-        this.layoutName = layoutName.toLowerCase();
+        this.setPageLayout(DEFAULT_LAYOUT_PAGE, layoutName);
     }
 
     @NotNull
     public String getLayout(int page) {
-        return this.pageLayouts.getOrDefault(page, this.layoutName);
+        return this.paginatedLayouts && this.pageLayouts.containsKey(page) ? this.pageLayouts.get(page) : this.pageLayouts.computeIfAbsent(DEFAULT_LAYOUT_PAGE, k -> Placeholders.DEFAULT);
     }
 
-    public void setLayout(int page, @Nullable String layoutName) {
-        if (layoutName == null) {
+    public void setPageLayout(int page, @NotNull String layoutName) {
+        this.pageLayouts.put(page, layoutName.toLowerCase());
+    }
+
+    public void removePageLayout(int page) {
+        if (page == DEFAULT_LAYOUT_PAGE) {
+            this.setPageLayout(page, Placeholders.DEFAULT);
+        }
+        else {
             this.pageLayouts.remove(page);
         }
-        else this.pageLayouts.put(page, layoutName.toLowerCase());
     }
 
     public void addRotation(@NotNull Rotation rotation) {

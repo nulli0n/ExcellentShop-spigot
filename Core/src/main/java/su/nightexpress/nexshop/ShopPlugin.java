@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.api.module.Module;
 import su.nightexpress.nexshop.auction.AuctionManager;
+import su.nightexpress.nexshop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.config.Lang;
@@ -17,7 +18,10 @@ import su.nightexpress.nexshop.module.ModuleLoaders;
 import su.nightexpress.nexshop.shop.ShopManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
+import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualIconsLang;
 import su.nightexpress.nexshop.user.UserManager;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.command.experimental.ImprovedCommands;
@@ -47,7 +51,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     protected PluginDetails getDefaultDetails() {
         return PluginDetails.create("Shop", new String[]{"eshop", "excellentshop"})
             .setConfigClass(Config.class)
-            .setLangClass(Lang.class)
+            //.setLangClass(Lang.class)
             .setPermissionsClass(Perms.class);
     }
 
@@ -57,6 +61,16 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
         if (this.getServer().getPluginManager().getPlugin(HookId.WORLD_GUARD) != null) {
             WorldGuardFlags.setupFlag();
         }
+    }
+
+    @Override
+    protected void addRegistries() {
+        // After the config
+        this.registerLang(Lang.class);
+        this.registerLang(AuctionLang.class);
+        this.registerLang(ChestLang.class);
+        this.registerLang(VirtualLang.class);
+        this.registerLang(VirtualIconsLang.class);
     }
 
     @Override

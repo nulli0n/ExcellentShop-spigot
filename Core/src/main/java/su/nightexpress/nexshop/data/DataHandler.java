@@ -15,6 +15,7 @@ import su.nightexpress.nexshop.data.legacy.LegacyStockAmountSerializer;
 import su.nightexpress.nexshop.data.legacy.LegacyStockData;
 import su.nightexpress.nexshop.data.product.PriceData;
 import su.nightexpress.nexshop.data.product.StockData;
+import su.nightexpress.nexshop.data.serialize.ItemTagSerializer;
 import su.nightexpress.nexshop.data.shop.RotationData;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
@@ -44,6 +45,7 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
 
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting()
         .registerTypeAdapter(LegacyStockAmount.class, new LegacyStockAmountSerializer())
+        .registerTypeAdapter(ItemTagSerializer.class, new ItemTagSerializer())
         .create();
 
     public static final Column COLUMN_GEN_SHOP_ID    = Column.of("shopId", ColumnType.STRING);

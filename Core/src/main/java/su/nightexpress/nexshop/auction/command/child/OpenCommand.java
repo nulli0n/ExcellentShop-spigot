@@ -21,7 +21,7 @@ public class OpenCommand {
     public static void build(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull ChainedNodeBuilder nodeBuilder) {
         nodeBuilder.addDirect("open", builder -> builder
             .permission(AuctionPerms.COMMAND_OPEN)
-            .description(AuctionLang.COMMAND_OPEN_DESC)
+            .description(AuctionLang.COMMAND_OPEN_DESC.text())
             .withArgument(ArgumentTypes.player(ARG_PLAYER).permission(AuctionPerms.COMMAND_OPEN_OTHERS))
             .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))
             .executes((context, arguments) -> executes(plugin, auctionManager, context, arguments))

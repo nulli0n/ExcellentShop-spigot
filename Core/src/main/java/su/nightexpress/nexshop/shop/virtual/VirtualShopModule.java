@@ -19,8 +19,8 @@ import su.nightexpress.nexshop.module.AbstractModule;
 import su.nightexpress.nexshop.module.ModuleConfig;
 import su.nightexpress.nexshop.shop.virtual.command.impl.VirtualCommands;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
+import su.nightexpress.nexshop.shop.virtual.dialog.VirtualDialogs;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.editor.DiscountListEditor;
 import su.nightexpress.nexshop.shop.virtual.editor.DiscountMainEditor;
@@ -48,6 +48,7 @@ import java.io.File;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -60,7 +61,8 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     private final Map<String, VirtualShop> shopByIdMap;
 
     private CentralMenu centralMenu;
-    private SellMenu    sellMenu;
+    private SellMenu       sellMenu;
+    private VirtualDialogs dialogs;
 
     private DiscountListEditor     discountListEditor;
     private DiscountMainEditor     discountEditor;
@@ -96,10 +98,13 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         this.updateConfiguration(config);
         config.initializeOptions(VirtualConfig.class);
 
-        this.plugin.getLangManager().loadEntries(VirtualLang.class);
-        this.plugin.getLangManager().loadEntries(VirtualLocales.class);
         this.plugin.registerPermissions(VirtualPerms.class);
         this.logger = new TransactionLogger(this, config);
+
+        if (ShopUtils.canUseDialogs()) {
+            this.dialogs = new VirtualDialogs(this.plugin, this);
+            this.dialogs.setup();
+        }
 
         // Create default shops & layouts.
         new ShopCreator(this.plugin, this).createDefaults();
@@ -118,6 +123,12 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     @Override
     protected void disableModule() {
+        this.getShops().forEach(this::unloadShopAliases);
+
+        if (this.dialogs != null) {
+            this.dialogs.shutdown();
+            this.dialogs = null;
+        }
         if (this.discountListEditor != null) this.discountListEditor.clear();
         if (this.discountEditor != null) this.discountEditor.clear();
 
@@ -272,6 +283,8 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             shop.updatePrices(false);
         }
 
+        this.loadShopAliases(shop);
+
         this.shopByIdMap.put(shop.getId(), shop);
     }
 
@@ -286,6 +299,19 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     private void loadMainMenu() {
         this.centralMenu = new CentralMenu(this.plugin, this);
+    }
+
+    public void reloadShopAliases(@NotNull VirtualShop shop) {
+        this.unloadShopAliases(shop);
+        this.loadShopAliases(shop);
+    }
+
+    public void loadShopAliases(@NotNull VirtualShop shop) {
+        VirtualCommands.registerAliases(this.plugin, shop);
+    }
+
+    public void unloadShopAliases(@NotNull VirtualShop shop) {
+        VirtualCommands.unregisterAliases(shop);
     }
 
     private void printShops() {
@@ -327,6 +353,23 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 //        });
     }
 
+    @Nullable
+    public VirtualDialogs getDialogs() {
+        return this.dialogs;
+    }
+
+    @NotNull
+    public Optional<VirtualDialogs> dialogs() {
+        return Optional.ofNullable(this.dialogs);
+    }
+
+    public boolean handleDialogs(@NotNull Consumer<VirtualDialogs> consumer) {
+        if (this.dialogs == null) return false;
+
+        consumer.accept(this.dialogs);
+        return true;
+    }
+
     @Override
     @NotNull
     public String getDefaultCartUI() {
@@ -354,7 +397,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     @Nullable
     public CentralMenu getMainMenu() {
-        return centralMenu;
+        return this.centralMenu;
     }
 
     @NotNull
@@ -450,14 +493,14 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     }
 
     public boolean createShop(@NotNull Player player, @NotNull String name) {
-        String id = StringUtil.transformForID(name);
+        String id = Strings.filterForVariable(name);
         if (id.isBlank()) {
-            VirtualLang.SHOP_CREATE_ERROR_BAD_NAME.getMessage().send(player);
+            VirtualLang.SHOP_CREATE_ERROR_BAD_NAME.message().send(player);
             return false;
         }
 
         if (this.getShopById(id) != null) {
-            VirtualLang.SHOP_CREATE_ERROR_EXIST.getMessage().send(player);
+            VirtualLang.SHOP_CREATE_ERROR_EXIST.message().send(player);
             return false;
         }
 
@@ -487,14 +530,14 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     public boolean isAvailable(@NotNull Player player, boolean notify) {
         if (!player.hasPermission(VirtualPerms.BYPASS_WORLDS)) {
             if (VirtualConfig.DISABLED_WORLDS.get().contains(player.getWorld().getName())) {
-                if (notify) VirtualLang.SHOP_ERROR_BAD_WORLD.getMessage().send(player);
+                if (notify) VirtualLang.SHOP_ERROR_BAD_WORLD.message().send(player);
                 return false;
             }
         }
 
         if (!player.hasPermission(VirtualPerms.BYPASS_GAMEMODE)) {
             if (VirtualConfig.DISABLED_GAMEMODES.get().contains(player.getGameMode())) {
-                if (notify) VirtualLang.SHOP_ERROR_BAD_GAMEMODE.getMessage().send(player);
+                if (notify) VirtualLang.SHOP_ERROR_BAD_GAMEMODE.message().send(player);
                 return false;
             }
         }
@@ -602,7 +645,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         ShopLayout layout = this.getLayout(shop, normalPage);
         if (layout == null) layout = this.getLayout(VirtualConfig.DEFAULT_LAYOUT.get());
         if (layout == null) {
-            VirtualLang.SHOP_ERROR_INVALID_LAYOUT.getMessage().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
+            VirtualLang.SHOP_ERROR_INVALID_LAYOUT.message().send(player, replacer -> replacer.replace(shop.replacePlaceholders()));
             return false;
         }
 
@@ -689,16 +732,16 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
         if (!silent) {
             if (sellResult.isEmpty()) {
-                VirtualLang.SELL_MENU_NOTHING_RESULT.getMessage().send(player);
-                VirtualLang.SELL_MENU_NOTHING_DETAILS.getMessage().send(player);
+                VirtualLang.SELL_MENU_NOTHING_RESULT.message().send(player);
+                VirtualLang.SELL_MENU_NOTHING_DETAILS.message().send(player);
                 return;
             }
 
             String total = sellResult.getTotalIncome();
 
-            VirtualLang.SELL_MENU_SALE_RESULT.getMessage().send(player, replacer -> replacer.replace(Placeholders.GENERIC_TOTAL, total));
+            VirtualLang.SELL_MENU_SALE_RESULT.message().send(player, replacer -> replacer.replace(Placeholders.GENERIC_TOTAL, total));
 
-            VirtualLang.SELL_MENU_SALE_DETAILS.getMessage().send(player, replacer -> replacer
+            VirtualLang.SELL_MENU_SALE_DETAILS.message().send(player, replacer -> replacer
                 .replace(Placeholders.GENERIC_TOTAL, total)
                 .replace(Placeholders.GENERIC_ENTRY, list -> {
                     sellResult.getTransactions().forEach(transaction -> {
@@ -709,7 +752,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
                             .replace(Placeholders.GENERIC_AMOUNT, () -> NumberUtil.format(transaction.getAmount()))
                             .replace(Placeholders.GENERIC_PRICE, () -> transaction.getCurrency().format(transaction.getPrice()))
                             .replace(Placeholders.SHOP_NAME, () -> product.getShop().getName())
-                            .apply(VirtualLang.SELL_MENU_SALE_ENTRY.getString())
+                            .apply(VirtualLang.SELL_MENU_SALE_ENTRY.text())
                         );
                     });
                 })
@@ -719,6 +762,11 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     @NotNull
     public SellResult bulkSell(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop) {
+        return this.bulkSell(player, inventory, shop, null);
+    }
+
+    @NotNull
+    public SellResult bulkSell(@NotNull Player player, @NotNull Inventory inventory, @Nullable VirtualShop shop, @Nullable Double multiplier) {
         SellResult sellResult = new SellResult();
 
         Map<VirtualProduct, Integer> products = new HashMap<>();
@@ -765,19 +813,20 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             products.put(product, has + amount);
         });
 
-        sellResult.inherit(this.bulkSell(player, inventory, products));
+        sellResult.inherit(this.bulkSell(player, inventory, products, multiplier));
 
         return sellResult;
     }
 
     @NotNull
-    private SellResult bulkSell(@NotNull Player player, @NotNull Inventory inventory, @NotNull Map<VirtualProduct, Integer> products) {
+    private SellResult bulkSell(@NotNull Player player, @NotNull Inventory inventory, @NotNull Map<VirtualProduct, Integer> products, @Nullable Double multiplier) {
         SellResult result = new SellResult();
 
         products.forEach((product, amount) -> {
             int units = UnitUtils.amountToUnits(product, amount);
 
             VirtualPreparedProduct preparedProduct = product.getPrepared(player, TradeType.SELL, false);
+            if (multiplier != null) preparedProduct.setMultiplier(multiplier);
             preparedProduct.setUnits(units);
             preparedProduct.setInventory(inventory);
             preparedProduct.setSilent(true);

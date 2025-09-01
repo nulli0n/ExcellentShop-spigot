@@ -16,6 +16,7 @@ import su.nightexpress.nexshop.shop.impl.AbstractProduct;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.config.Writeable;
+import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Players;
 
@@ -155,7 +156,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
     @Override
     public boolean isAvailable(@NotNull Player player) {
         if (!this.hasAccess(player)) {
-            Lang.ERROR_NO_PERMISSION.getMessage(ShopAPI.getPlugin()).send(player); // TODO Move message out?
+            CoreLang.ERROR_NO_PERMISSION.withPrefix(ShopAPI.getPlugin()).send(player); // TODO Move message out?
             return false;
         }
 

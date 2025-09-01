@@ -8,10 +8,11 @@ import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.data.Filled;
@@ -22,18 +23,18 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.stream.IntStream;
 
-@SuppressWarnings("UnstableApiUsage")
+@Deprecated
 public class ShopLayoutsMenu extends LinkedMenu<ShopPlugin, VirtualShop> implements Filled<Integer> {
 
     private final VirtualShopModule module;
 
     public ShopLayoutsMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_SHOP_LAYOUTS.getString());
+        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_SHOP_LAYOUTS.text());
         this.module = module;
 
         this.addItem(Material.PAINTING, VirtualLocales.SHOP_EDIT_LAYOUT_BY_DEFAULT, 4, (viewer, event, shop) -> {
-            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_GENERIC_ENTER_NAME, input -> {
-                shop.setDefaultLayout(input.getTextRaw());
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
+                shop.setPageLayout(0, input.getTextRaw());
                 shop.saveSettings();
                 return true;
             }).setSuggestions(this.module.getLayoutNames(), true));
@@ -66,14 +67,14 @@ public class ShopLayoutsMenu extends LinkedMenu<ShopPlugin, VirtualShop> impleme
             })
             .setItemClick(page -> (viewer1, event) -> {
                 if (event.isRightClick()) {
-                    shop.setLayout(page, null);
+                    shop.removePageLayout(page);
                     shop.saveSettings();
                     this.runNextTick(() -> this.flush(viewer));
                     return;
                 }
 
-                this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_GENERIC_ENTER_NAME, input -> {
-                    shop.setLayout(page, input.getTextRaw());
+                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
+                    shop.setPageLayout(page, input.getTextRaw());
                     shop.saveSettings();
                     return true;
                 }).setSuggestions(this.module.getLayoutNames(), true));
@@ -87,7 +88,12 @@ public class ShopLayoutsMenu extends LinkedMenu<ShopPlugin, VirtualShop> impleme
 
         if (viewer.hasItem(menuItem)) return;
 
-        item.replacement(replacer -> replacer.replace(Placeholders.forVirtualShopEditor(this.getLink(viewer))));
+        VirtualShop shop = this.getLink(viewer);
+
+        item.replacement(replacer -> replacer
+            .replace(shop.replacePlaceholders())
+            .replace(Placeholders.VIRTUAL_SHOP_DEFAULT_LAYOUT, shop::getDefaultLayout)
+        );
     }
 
     @Override

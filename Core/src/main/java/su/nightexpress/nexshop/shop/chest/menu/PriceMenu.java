@@ -25,7 +25,7 @@ public class PriceMenu extends ProductPriceMenu<ChestProduct> {
     private final ChestShopModule module;
 
     public PriceMenu(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module) {
-        super(plugin, ChestLang.SHOP_PRICE_MENU_TITLE.getString());
+        super(plugin, ChestLang.SHOP_PRICE_MENU_TITLE.text());
         this.module = module;
     }
 

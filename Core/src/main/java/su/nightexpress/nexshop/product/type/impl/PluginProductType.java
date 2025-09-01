@@ -2,20 +2,16 @@ package su.nightexpress.nexshop.product.type.impl;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import su.nightexpress.economybridge.ItemBridge;
 import su.nightexpress.economybridge.api.item.ItemHandler;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
 import su.nightexpress.nexshop.util.ErrorHandler;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.util.NumberUtil;
 
 import java.util.function.UnaryOperator;
 
 public class PluginProductType extends PhysicalProductType implements PluginTyping {
-
-    public static final String DELIMITER = ":::";
 
     private final String handlerName;
     private final String itemId;
@@ -36,40 +32,10 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
             ErrorHandler.configError("Invalid item handler '" + handlerId + "'.", config, path);
         }
 
-        // ------- REVERT 4.13.3 CHANGES - START ------- //
-        String serialized = config.getString(path + ".Data");
-        if (serialized != null && !serialized.isBlank()) {
-            String delimiter = " \\| ";
-            String[] split = serialized.split(delimiter);
-            String itemId = split[0];
-            int amount = split.length >= 2 ? NumberUtil.getIntegerAbs(split[1]) : 1;
-
-            config.set(path + ".Content.ItemId", itemId);
-            config.set(path + ".Content.Amount", amount);
-            config.remove(path + ".Data");
-        }
-        // ------- REVERT 4.13.3 CHANGES - END ------- //
-
         String itemId = config.getString(path + ".Content.ItemId", "null");
         int amount = config.getInt(path + ".Content.Amount", 1);
 
-//        if (!handler.isDummy() && !handler.isValidId(itemId)) {
-//            module.error("Invalid item ID '" + itemId + "' for '" + handlerId + "' handler. Caused by '" + config.getFile().getAbsolutePath() + "' -> '" + path + "'.");
-//        }
-
         return new PluginProductType(handler.getName(), itemId, amount);
-    }
-
-    @Nullable
-    public static PluginProductType deserialize(@NotNull String serialized) {
-        String[] split = serialized.split(DELIMITER);
-        if (split.length < 2) return null;
-
-        String handlerName = split[0];
-        String itemId = split[1];
-        int amount = split.length >= 3 ? NumberUtil.getIntegerAbs(split[2]) : 1;
-
-        return new PluginProductType(handlerName, itemId, amount);
     }
 
     @Override
@@ -80,18 +46,11 @@ public class PluginProductType extends PhysicalProductType implements PluginTypi
         config.set(path + ".Handler", handler.getName());
         config.set(path + ".Content.ItemId", this.itemId);
         config.set(path + ".Content.Amount", this.amount);
-        config.remove(path + ".Data"); // ------- REVERT 4.13.3 CHANGES ------- //
     }
 
     @NotNull
     public ItemHandler getHandler() {
         return ItemBridge.getHandlerOrDummy(this.handlerName);
-    }
-
-    @Override
-    @NotNull
-    public String serialize() {
-        return this.handlerName + DELIMITER + this.itemId + DELIMITER + this.amount;
     }
 
     @Override

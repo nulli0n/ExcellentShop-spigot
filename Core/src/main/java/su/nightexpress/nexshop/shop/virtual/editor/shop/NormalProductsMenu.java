@@ -16,7 +16,7 @@ import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.config.Keys;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
@@ -43,7 +43,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
     private final Map<String, VirtualProduct> productCache;
 
     public NormalProductsMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCTS_NORMAL.getString());
+        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCTS_NORMAL.text());
         this.module = module;
         this.productCache = new HashMap<>();
     }
@@ -97,7 +97,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             for (MenuItem layoutItem : layout.getItems()) {
                 if (layoutItem.getPriority() < 0) continue;
 
-                MenuItem.Builder builder = MenuItem.builder(layoutItem.getItem())
+                MenuItem.Builder builder = MenuItem.builder(layoutItem.getItem().copy())
                     .setPriority(layoutItem.getPriority())
                     .setSlots(layoutItem.getSlots());
 

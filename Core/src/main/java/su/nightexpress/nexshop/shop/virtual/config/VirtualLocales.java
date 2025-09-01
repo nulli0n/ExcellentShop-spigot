@@ -10,60 +10,16 @@ import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
 import static su.nightexpress.nexshop.Placeholders.*;
 
+@Deprecated
 public class VirtualLocales {
 
     private static final String PREFIX = "VirtualShop.Editor.";
-
-    public static final LangItem SHOP_CREATE = LangItem.builder(PREFIX + "Shop.Create")
-        .name("New Shop")
-        .emptyLine()
-        .click("create")
-        .build();
 
     public static final LangItem SHOP_DELETE = LangItem.builder(PREFIX + "Shop.Delete")
         .name("Delete Shop")
         .text("Permanently deletes the shop", "with all settings and items.")
         .emptyLine()
         .click("delete")
-        .build();
-
-    public static final LangItem SHOP_OBJECT = LangItem.builder(PREFIX + "Shop.Object")
-        .name(SHOP_NAME)
-        .current("Items", SHOP_PRODUCTS)
-        .current("Pages", VIRTUAL_SHOP_PAGES)
-        .emptyLine()
-        .click("navigate")
-        .build();
-
-    public static final LangItem SHOP_EDIT_NAME = LangItem.builder(PREFIX + "Shop.DisplayName")
-        .name("Display Name")
-        .current("Current", SHOP_NAME)
-        .emptyLine()
-        .click("change")
-        .build();
-
-    public static final LangItem SHOP_EDIT_DESCRIPTION = LangItem.builder(PREFIX + "Shop.Description")
-        .name("Description")
-        .textRaw(VIRTUAL_SHOP_DESCRIPTION)
-        .emptyLine()
-        .leftClick("add line")
-        .rightClick("remove all")
-        .build();
-
-    public static final LangItem SHOP_EDIT_ICON = LangItem.builder(PREFIX + "Shop.Icon")
-        .name("Icon")
-        .dragAndDrop("replace")
-        .rightClick("get a copy")
-        .build();
-
-    public static final LangItem SHOP_EDIT_MENU_SLOT = LangItem.builder(PREFIX + "Shop.MenuSlot")
-        .name("Menu Slot")
-        .current("Current", VIRTUAL_SHOP_MENU_SLOT)
-        .emptyLine()
-        .text("Sets shop position for the " + LIGHT_YELLOW.wrap("/shop") + " GUI.")
-        .emptyLine()
-        .leftClick("change")
-        .rightClick("disable")
         .build();
 
     public static final LangItem SHOP_EDIT_PERMISSION = LangItem.builder(PREFIX + "Shop.PermissionRequirement")
@@ -74,19 +30,6 @@ public class VirtualLocales {
         .text("Controls whether permission is required", "to use this shop.")
         .emptyLine()
         .click("toggle")
-        .build();
-
-    public static final LangItem SHOP_EDIT_PAGES = LangItem.builder(PREFIX + "Shop.Pages")
-        .name("Pages Amount")
-        .current("Current", VIRTUAL_SHOP_PAGES)
-        .emptyLine()
-        .text("Amount of pages in the shop.")
-        .emptyLine()
-        .text("Make sure that shop layout config")
-        .text("contains page buttons.")
-        .emptyLine()
-        .leftClick("+1 page")
-        .rightClick("-1 page")
         .build();
 
     public static final LangItem SHOP_EDIT_BUYING = LangItem.builder(PREFIX + "Shop.Buying")
@@ -107,16 +50,9 @@ public class VirtualLocales {
         .click("toggle")
         .build();
 
-    public static final LangUIButton SHOP_EDIT_ALIASES = LangUIButton.builder(PREFIX + "Shop.Aliases", "Command Aliases")
-        .current(VIRTUAL_SHOP_ALIASES)
-        .description("Provides direct shop access with", "listed command aliases.", "", LIGHT_RED.wrap("Requires module reload."))
-        .leftClick("add alias")
-        .rightClick("remove all")
-        .build();
-
     public static final LangItem SHOP_EDIT_LAYOUTS = LangItem.builder(PREFIX + "Shop.Layouts.Info")
         .name("Layouts")
-        .text("Sets GUI layout for this shop.")
+        .text("Apply custom layout(s) across your shop.")
         .emptyLine()
         .click("navigate")
         .build();

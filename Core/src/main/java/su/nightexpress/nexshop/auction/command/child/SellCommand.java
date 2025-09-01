@@ -20,11 +20,11 @@ public class SellCommand {
     public static void build(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull ChainedNodeBuilder nodeBuilder) {
         nodeBuilder.addDirect("sell", builder -> builder
             .permission(AuctionPerms.COMMAND_SELL)
-            .description(AuctionLang.COMMAND_SELL_DESC)
+            .description(AuctionLang.COMMAND_SELL_DESC.text())
             .playerOnly()
             .withArgument(ArgumentTypes.decimalCompactAbs(ARG_PRICE)
                 .required()
-                .localized(AuctionLang.COMMAND_ARGUMENT_NAME_PRICE)
+                .localized(AuctionLang.COMMAND_ARGUMENT_NAME_PRICE.text())
                 .withSamples(tabContext -> Lists.newList("10", "500", "10000"))
             )
             .executes((context, arguments) -> executes(plugin, auctionManager, context, arguments))
@@ -37,7 +37,7 @@ public class SellCommand {
 
         ItemStack item = player.getInventory().getItemInMainHand();
         if (item.getType().isAir()) {
-            return context.sendFailure(AuctionLang.COMMAND_SELL_ERROR_NO_ITEM.getMessage());
+            // TODO return context.sendFailure(AuctionLang.COMMAND_SELL_ERROR_NO_ITEM.message());
         }
 
         double price = arguments.getDoubleArgument(ARG_PRICE);

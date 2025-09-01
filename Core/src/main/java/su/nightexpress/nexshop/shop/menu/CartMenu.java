@@ -281,7 +281,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
                     breadcumb.source().setUnits(input.asIntAbs(1));
                     this.open(player, breadcumb);
                     return true;
-                }).setPrompt(Lang.SHOP_CART_ENTER_AMOUNT).build().setLastMenu(null));
+                }).setPrompt(Lang.SHOP_CART_ENTER_AMOUNT.text()).build().setLastMenu(null));
 
                 this.runNextTick(player::closeInventory);
             }))

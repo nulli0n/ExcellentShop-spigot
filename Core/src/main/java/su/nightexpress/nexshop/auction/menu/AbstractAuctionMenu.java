@@ -72,6 +72,12 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
         return link;
     }
 
+    @NotNull
+    protected UUID getLinkedPlayerId(@NotNull MenuViewer viewer) {
+        UUID id = this.getLink(viewer);
+        return id == null ? viewer.getPlayer().getUniqueId() : id;
+    }
+
     @Override
     public void load() {
         super.load();

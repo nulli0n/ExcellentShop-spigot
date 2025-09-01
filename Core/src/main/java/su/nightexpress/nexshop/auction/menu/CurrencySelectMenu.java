@@ -123,7 +123,8 @@ public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFi
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
-        ItemStack backItem = ItemUtil.getSkinHead(SKIN_WRONG_MARK);
+        // TODO
+        /*ItemStack backItem = ItemUtil.getSkinHead(SKIN_WRONG_MARK);
         ItemUtil.editMeta(backItem, meta -> {
             meta.setDisplayName(LIGHT_RED.enclose(BOLD.enclose("Cancel")));
         });
@@ -139,7 +140,7 @@ public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFi
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(nextPage).setSlots(17).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        list.add(new MenuItem(nextPage).setSlots(17).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
 
         return list;
     }

@@ -22,12 +22,14 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
     private Inventory inventory;
     private int units;
+    private double multiplier;
     private boolean silent;
 
     public AbstractPreparedProduct(@NotNull Player player, @NotNull P product, @NotNull TradeType tradeType, boolean all) {
         this.player = player;
         this.product = product;
         this.tradeType = tradeType;
+        this.multiplier = 1D;
         this.all = all;
 
         this.setInventory(player.getInventory());
@@ -84,6 +86,14 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
         this.inventory = inventory;
     }
 
+    public double getMultiplier() {
+        return multiplier;
+    }
+
+    public void setMultiplier(double multiplier) {
+        this.multiplier = multiplier;
+    }
+
     public int getUnits() {
         return this.units;
     }
@@ -98,8 +108,8 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
     public double getPrice() {
         Product product = this.getProduct();
-        double price = product.getPrice(this.getTradeType(), this.getPlayer());
-        return price * this.getUnits();
+        double price = product.getPrice(this.tradeType, this.player) * this.multiplier;
+        return price * this.units;
     }
 
     @NotNull

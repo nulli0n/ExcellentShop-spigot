@@ -70,7 +70,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
 
     private void handleDuration(@NotNull MenuViewer viewer) {
         ChestShop shop = this.getLink(viewer);
-        this.handleInput(Dialog.builder(viewer, ChestLang.RENT_PROMPT_DURATION, input -> {
+        this.handleInput(Dialog.builder(viewer, ChestLang.RENT_PROMPT_DURATION.text(), input -> {
             int days = input.asInt(1);
             shop.getRentSettings().setDuration(days, true);
             shop.setSaveRequired(true);
@@ -80,7 +80,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
 
     private void handlePrice(@NotNull MenuViewer viewer) {
         ChestShop shop = this.getLink(viewer);
-        this.handleInput(Dialog.builder(viewer, ChestLang.RENT_PROMPT_PRICE, input -> {
+        this.handleInput(Dialog.builder(viewer, ChestLang.RENT_PROMPT_PRICE.text(), input -> {
             double price = input.asDoubleAbs(0D);
             shop.getRentSettings().setPrice(price, true);
             shop.setSaveRequired(true);

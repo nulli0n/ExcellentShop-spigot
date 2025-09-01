@@ -36,7 +36,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         });
 
         this.addItem(Material.GOLD_NUGGET, VirtualLocales.DISCOUNT_AMOUNT, 10, (viewer, event, discount)  -> {
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, (dialog, input) -> {
+            this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_AMOUNT.text(), (dialog, input) -> {
                 discount.setDiscount(input.asDouble());
                 discount.getShop().saveSettings();
                 return true;
@@ -44,7 +44,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         });
 
         this.addItem(Material.REPEATER, VirtualLocales.DISCOUNT_DURATION, 12, (viewer, event, discount) -> {
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS, (dialog, input) -> {
+            this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), (dialog, input) -> {
                 discount.setDuration(input.asInt());
                 discount.getShop().saveSettings();
                 return true;
@@ -58,7 +58,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
                 return;
             }
 
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_DAY, (dialog, input) -> {
+            this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_DAY.text(), (dialog, input) -> {
                 DayOfWeek day = StringUtil.getEnum(input.getTextRaw(), DayOfWeek.class).orElse(null);
                 if (day == null) return true;
 
@@ -75,7 +75,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
                 return;
             }
 
-            this.handleInput(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, (dialog, input) -> {
+            this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_TIME.text(), (dialog, input) -> {
                 try {
                     discount.getTimes().add(LocalTime.parse(input.getTextRaw(), ShopUtils.TIME_FORMATTER));
                     discount.getShop().saveSettings();

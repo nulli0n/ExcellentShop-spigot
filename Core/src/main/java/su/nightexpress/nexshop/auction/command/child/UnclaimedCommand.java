@@ -22,7 +22,7 @@ public class UnclaimedCommand {
     public static void build(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull ChainedNodeBuilder nodeBuilder) {
         nodeBuilder.addDirect("unclaimed", builder -> builder
             .permission(AuctionPerms.COMMAND_UNCLAIMED)
-            .description(AuctionLang.COMMAND_UNCLAIMED_DESC)
+            .description(AuctionLang.COMMAND_UNCLAIMED_DESC.text())
             .playerOnly()
             .withArgument(ArgumentTypes.playerName(ARG_TARGET).permission(AuctionPerms.COMMAND_UNCLAIMED_OTHERS))
             .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))

@@ -16,6 +16,7 @@ import su.nightexpress.nexshop.auction.SortType;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
+import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
@@ -240,6 +241,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         });
 
         autoFill.setItems(this.auctionManager.getListings().getActive().stream()
+            .filter(AbstractListing::isValid)
             .filter(listing -> category.isItemOfThis(listing.getItemStack()))
             .filter(listing -> currencies == null || currencies == listing.getCurrency())
             .sorted(getListingOrder(player).getComparator()).toList()
@@ -271,7 +273,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
             if (isOwner) return;
 
             if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && player.getInventory().firstEmpty() < 0) {
-                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.getMessage().send(player);
+                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.message().send(player);
                 return;
             }
 
@@ -305,8 +307,9 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         // TODO
         //ItemStack backGround = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         //list.add(new MenuItem(backGround).setSlots(IntStream.range(36, 54).toArray()).setPriority(0));
-        
-        ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
+
+        // TODO
+        /*ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
         ItemUtil.editMeta(prevPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
         });
@@ -316,7 +319,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
         });
-        list.add(new MenuItem(nextPage).setSlots(44).setPriority(10).setHandler(ItemHandler.forNextPage(this)));
+        list.add(new MenuItem(nextPage).setSlots(44).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
 
 
 

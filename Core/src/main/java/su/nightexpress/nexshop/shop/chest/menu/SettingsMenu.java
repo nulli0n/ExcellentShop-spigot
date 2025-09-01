@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.chest.menu;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.MenuType;
@@ -11,6 +12,7 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
+import su.nightexpress.nexshop.shop.chest.PlayerShopDialogs;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -73,10 +75,18 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
 
     }
 
-    private void handleName(@NotNull MenuViewer viewer) {
-        ChestShop shop = this.getLink(viewer);
-        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME, input -> {
-            return this.module.renameShop(viewer.getPlayer(), shop, input.getText());
+    private void handleName(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event) {
+        Player player = viewer.getPlayer();
+        ChestShop shop = this.getLink(player);
+
+        /*PlayerShopDialogs dialogs = this.module.getDialogs();
+        if (dialogs != null) {
+            dialogs.openShopNameDialog(player, shop);
+            return;
+        }*/
+
+        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
+            return this.module.renameShop(player, shop, input.getText());
         }));
     }
 
@@ -181,7 +191,7 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(10)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_change_name", (viewer, event) -> this.handleName(viewer),
+            .setHandler(new ItemHandler("shop_change_name", this::handleName,
                 ItemOptions.builder()
                     .setVisibilityPolicy(viewer -> this.getLink(viewer).canRename(viewer.getPlayer()))
                     .build()

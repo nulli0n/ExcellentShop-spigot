@@ -23,7 +23,7 @@ public class ListingsCommand {
         nodeBuilder.addDirect("listings", builder -> builder
             .aliases("selling")
             .permission(AuctionPerms.COMMAND_SELLING)
-            .description(AuctionLang.COMMAND_SELLING_DESC)
+            .description(AuctionLang.COMMAND_SELLING_DESC.text())
             .playerOnly()
             .withArgument(ArgumentTypes.playerName(ARG_TARGET).permission(AuctionPerms.COMMAND_SELLING_OTHERS))
             .withFlag(CommandFlags.force().permission(Perms.COMMAND_FLAGS))

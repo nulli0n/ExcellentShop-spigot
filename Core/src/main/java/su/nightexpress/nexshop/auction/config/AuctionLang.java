@@ -3,114 +3,113 @@ package su.nightexpress.nexshop.auction.config;
 import org.bukkit.Sound;
 import su.nightexpress.economybridge.Placeholders;
 import su.nightexpress.nexshop.auction.SortType;
-import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nightcore.language.entry.LangEnum;
-import su.nightexpress.nightcore.language.entry.LangString;
-import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.language.entry.LangUIButton;
-import su.nightexpress.nightcore.util.bridge.wrapper.HoverEventType;
+import su.nightexpress.nightcore.locale.LangContainer;
+import su.nightexpress.nightcore.locale.LangEntry;
+import su.nightexpress.nightcore.locale.entry.EnumLocale;
+import su.nightexpress.nightcore.locale.entry.MessageLocale;
+import su.nightexpress.nightcore.locale.entry.TextLocale;
+import su.nightexpress.nightcore.locale.message.MessageData;
 
 import static su.nightexpress.nexshop.Placeholders.*;
-import static su.nightexpress.nightcore.language.tag.MessageTags.OUTPUT;
-import static su.nightexpress.nightcore.language.tag.MessageTags.SOUND;
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+import static su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers.*;
 
-public class AuctionLang extends Lang {
+public class AuctionLang implements LangContainer {
 
-    public static final LangEnum<SortType> SORT_TYPE = LangEnum.of("Auction.SortType", SortType.class);
+    public static final EnumLocale<SortType> SORT_TYPE = LangEntry.builder("Auction.SortType").enumeration(SortType.class);
 
-    public static final LangString COMMAND_ARGUMENT_NAME_PRICE = LangString.of("Auction.Command.Argument.Name.Price", "price");
+    public static final TextLocale COMMAND_ARGUMENT_NAME_PRICE = LangEntry.builder("Auction.Command.Argument.Name.Price").text("price");
 
-    public static final LangString COMMAND_OPEN_DESC      = LangString.of("Auction.Command.Open.Desc", "Open auction.");
-    public static final LangString COMMAND_SELL_DESC      = LangString.of("Auction.Command.Sell.Desc", "Add item on auction.");
-    public static final LangString COMMAND_EXPIRED_DESC   = LangString.of("Auction.Command.Expired.Desc", "List of expired listings.");
-    public static final LangString COMMAND_HISTORY_DESC   = LangString.of("Auction.Command.History.Desc", "Your sales history.");
-    public static final LangString COMMAND_SELLING_DESC   = LangString.of("Auction.Command.Selling.Desc", "List of your current listings.");
-    public static final LangString COMMAND_UNCLAIMED_DESC = LangString.of("Auction.Command.Unclaimed.Desc", "List of unclaimed rewards for your listings.");
+    public static final TextLocale COMMAND_OPEN_DESC      = LangEntry.builder("Auction.Command.Open.Desc").text("Open auction.");
+    public static final TextLocale COMMAND_SELL_DESC      = LangEntry.builder("Auction.Command.Sell.Desc").text("Add item on auction.");
+    public static final TextLocale COMMAND_EXPIRED_DESC   = LangEntry.builder("Auction.Command.Expired.Desc").text("List of expired listings.");
+    public static final TextLocale COMMAND_HISTORY_DESC   = LangEntry.builder("Auction.Command.History.Desc").text("Your sales history.");
+    public static final TextLocale COMMAND_SELLING_DESC   = LangEntry.builder("Auction.Command.Selling.Desc").text("List of your current listings.");
+    public static final TextLocale COMMAND_UNCLAIMED_DESC = LangEntry.builder("Auction.Command.Unclaimed.Desc").text("List of unclaimed rewards for your listings.");
 
-    public static final LangText COMMAND_SELL_ERROR_NO_ITEM = LangText.of("Auction.Command.Sell.Error.NoItem",
-        LIGHT_RED.wrap("You must hold an item to do that!"));
+    public static final MessageLocale COMMAND_SELL_ERROR_NO_ITEM = LangEntry.builder("Auction.Command.Sell.Error.NoItem").chatMessage(
+        SOFT_RED.wrap("You must hold an item to do that!"));
 
 
-    public static final LangText LISTING_ADD_SUCCESS_INFO = LangText.of("Auction.Listing.Add.Success.Info",
-        TAG_NO_PREFIX + SOUND.wrap(Sound.BLOCK_NOTE_BLOCK_BELL),
+    public static final MessageLocale LISTING_ADD_SUCCESS_INFO = LangEntry.builder("Auction.Listing.Add.Success.Info").chatMessage(
+        Sound.BLOCK_NOTE_BLOCK_BELL,
         " ",
-        LIGHT_GREEN.wrap(BOLD.wrap("✔ Success!")),
+        SOFT_GREEN.wrap(BOLD.wrap("✔ Success!")),
         " ",
-        LIGHT_GRAY.wrap("You added " + LIGHT_GREEN.wrap("x" + LISTING_ITEM_AMOUNT + " " + LISTING_ITEM_NAME) + " on auction for " + LIGHT_GREEN.wrap(LISTING_PRICE) + "!"),
-        LIGHT_GRAY.wrap("Tax amount: " + LIGHT_RED.wrap(GENERIC_TAX)),
+        GRAY.wrap("You added " + SOFT_GREEN.wrap("x" + LISTING_ITEM_AMOUNT + " " + LISTING_ITEM_NAME) + " on auction for " + SOFT_GREEN.wrap(LISTING_PRICE) + "!"),
+        GRAY.wrap("Tax amount: " + SOFT_RED.wrap(GENERIC_TAX)),
         " "
     );
 
-    public static final LangText LISTING_ADD_SUCCESS_ANNOUNCE = LangText.of("Auction.Listing.Add.Success.Broadcast",
-        TAG_NO_PREFIX,
+    public static final MessageLocale LISTING_ADD_SUCCESS_ANNOUNCE = LangEntry.builder("Auction.Listing.Add.Success.Broadcast").message(
+        MessageData.CHAT_NO_PREFIX,
         " ",
-        LIGHT_YELLOW.wrap(BOLD.wrap("Auction:")),
-        LIGHT_GRAY.wrap("Player " + LIGHT_YELLOW.wrap(PLAYER_DISPLAY_NAME) + " added " + LIGHT_YELLOW.wrap("x" + LISTING_ITEM_AMOUNT) + " " +
-            HOVER.wrap(LIGHT_YELLOW.wrap(LISTING_ITEM_NAME), HoverEventType.SHOW_ITEM, LISTING_ITEM_VALUE) +
-            " on the auction for " + LIGHT_YELLOW.wrap(LISTING_PRICE) + "."),
+        SOFT_YELLOW.wrap(BOLD.wrap("Auction:")),
+        GRAY.wrap("Player " + SOFT_YELLOW.wrap(PLAYER_DISPLAY_NAME) + " added " + SOFT_YELLOW.wrap("x" + LISTING_ITEM_AMOUNT) + " " +
+            SHOW_ITEM.with(LISTING_ITEM_VALUE).wrap(SOFT_YELLOW.wrap(LISTING_ITEM_NAME)) +
+            " on the auction for " + SOFT_YELLOW.wrap(LISTING_PRICE) + "."),
         " "
     );
 
-    public static final LangText LISTING_ADD_ERROR_BAD_ITEM = LangText.of("Auction.Listing.Add.Error.BadItem",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘ " + GENERIC_ITEM) + " can not be added on the auction!")
+    public static final MessageLocale LISTING_ADD_ERROR_BAD_ITEM = LangEntry.builder("Auction.Listing.Add.Error.BadItem").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘ " + GENERIC_ITEM) + " can not be added on the auction!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_LIMIT = LangText.of("Auction.Listing.Add.Error.Limit",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " You can't have more than " + LIGHT_RED.wrap(GENERIC_AMOUNT) + " active items on the auction!")
+    public static final MessageLocale LISTING_ADD_ERROR_LIMIT = LangEntry.builder("Auction.Listing.Add.Error.Limit").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " You can't have more than " + SOFT_RED.wrap(GENERIC_AMOUNT) + " active items on the auction!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_PRICE_TAX = LangText.of("Auction.Listing.Add.Error.Price.Tax",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " You can't afford the " + LIGHT_RED.wrap(GENERIC_TAX) + " price tax: " + LIGHT_RED.wrap(GENERIC_AMOUNT) + "!")
+    public static final MessageLocale LISTING_ADD_ERROR_PRICE_TAX = LangEntry.builder("Auction.Listing.Add.Error.Price.Tax").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " You can't afford the " + SOFT_RED.wrap(GENERIC_TAX) + " price tax: " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_PRICE_CURRENCY_MIN = LangText.of("Auction.Listing.Add.Error.Price.Currency.Min",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " Minimal " + LIGHT_RED.wrap(Placeholders.CURRENCY_NAME) + " price is " + LIGHT_RED.wrap(GENERIC_AMOUNT) + "!")
+    public static final MessageLocale LISTING_ADD_ERROR_PRICE_CURRENCY_MIN = LangEntry.builder("Auction.Listing.Add.Error.Price.Currency.Min").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Minimal " + SOFT_RED.wrap(Placeholders.CURRENCY_NAME) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_PRICE_CURRENCY_MAX = LangText.of("Auction.Listing.Add.Error.Price.Currency.Max",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " Maximal " + LIGHT_RED.wrap(Placeholders.CURRENCY_NAME) + " price is " + LIGHT_RED.wrap(GENERIC_AMOUNT) + "!")
+    public static final MessageLocale LISTING_ADD_ERROR_PRICE_CURRENCY_MAX = LangEntry.builder("Auction.Listing.Add.Error.Price.Currency.Max").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Maximal " + SOFT_RED.wrap(Placeholders.CURRENCY_NAME) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_INVALID_PRICE = LangText.of("Auction.Listing.Add.Error.Price.Negative",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " Invalid price!")
+    public static final MessageLocale LISTING_ADD_ERROR_INVALID_PRICE = LangEntry.builder("Auction.Listing.Add.Error.Price.Negative").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Invalid price!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_PRICE_MATERIAL_MIN = LangText.of("Auction.Listing.Add.Error.Price.Material.Min",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " Minimal " + LIGHT_RED.wrap("x1 " + GENERIC_ITEM) + " price is " + LIGHT_RED.wrap(GENERIC_AMOUNT) + "!")
+    public static final MessageLocale LISTING_ADD_ERROR_PRICE_MATERIAL_MIN = LangEntry.builder("Auction.Listing.Add.Error.Price.Material.Min").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Minimal " + SOFT_RED.wrap("x1 " + GENERIC_ITEM) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_PRICE_MATERIAL_MAX = LangText.of("Auction.Listing.Add.Error.Price.Material.Max",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " Maximal " + LIGHT_RED.wrap("x1 " + GENERIC_ITEM) + " price is " + LIGHT_RED.wrap(GENERIC_AMOUNT) + "!")
+    public static final MessageLocale LISTING_ADD_ERROR_PRICE_MATERIAL_MAX = LangEntry.builder("Auction.Listing.Add.Error.Price.Material.Max").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Maximal " + SOFT_RED.wrap("x1 " + GENERIC_ITEM) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
-    public static final LangText LISTING_ADD_ERROR_DISABLED_GAMEMODE = LangText.of("Auction.Listing.Add.Error.DisabledGamemode",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " You can't add items in your current gamemode!")
+    public static final MessageLocale LISTING_ADD_ERROR_DISABLED_GAMEMODE = LangEntry.builder("Auction.Listing.Add.Error.DisabledGamemode").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        GRAY.wrap(SOFT_RED.wrap("✘") + " You can't add items in your current gamemode!")
     );
 
-    public static final LangText LISTING_BUY_SUCCESS_INFO = LangText.of("Auction.Listing.Buy.Success.Info",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_PLAYER_LEVELUP),
-        LIGHT_GREEN.wrap(BOLD.wrap("Successful Purchase!")),
-        LIGHT_GRAY.wrap("You bought " + LIGHT_GREEN.wrap("x" + LISTING_ITEM_AMOUNT + " " + LISTING_ITEM_NAME) + " from " + LIGHT_GREEN.wrap(LISTING_SELLER) + " for " + LIGHT_GREEN.wrap(LISTING_PRICE) + "!")
+    public static final MessageLocale LISTING_BUY_SUCCESS_INFO = LangEntry.builder("Auction.Listing.Buy.Success.Info").titleMessage(
+        SOFT_GREEN.wrap(BOLD.wrap("Successful Purchase!")),
+        GRAY.wrap("You bought " + SOFT_GREEN.wrap("x" + LISTING_ITEM_AMOUNT + " " + LISTING_ITEM_NAME) + " from " + SOFT_GREEN.wrap(LISTING_SELLER) + " for " + SOFT_GREEN.wrap(LISTING_PRICE) + "!"),
+        Sound.ENTITY_PLAYER_LEVELUP
     );
 
-    public static final LangText LISTING_BUY_ERROR_NOT_ENOUGH_FUNDS = LangText.of("Auction.Listing.Buy.Error.NotEnoughFunds",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.BLOCK_ANVIL_PLACE),
-        LIGHT_RED.wrap(BOLD.wrap("Not Enough Funds!")),
-        LIGHT_GRAY.wrap("You need " + LIGHT_RED.wrap(LISTING_PRICE) + ". You have " + LIGHT_RED.wrap(GENERIC_BALANCE) + ".")
+    public static final MessageLocale LISTING_BUY_ERROR_NOT_ENOUGH_FUNDS = LangEntry.builder("Auction.Listing.Buy.Error.NotEnoughFunds").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Not Enough Funds!")),
+        GRAY.wrap("You need " + SOFT_RED.wrap(LISTING_PRICE) + ". You have " + SOFT_RED.wrap(GENERIC_BALANCE) + "."),
+        Sound.BLOCK_ANVIL_PLACE
     );
 
-    public static final LangText LISTING_CLAIM_SUCCESS = LangText.of("Auction.Notify.Listing.Claim",
-        LIGHT_GRAY.wrap(LIGHT_GREEN.wrap("✔") + " You claimed " + LIGHT_GREEN.wrap(LISTING_PRICE) + " for " + LIGHT_GREEN.wrap(LISTING_ITEM_NAME) + "!")
+    public static final MessageLocale LISTING_CLAIM_SUCCESS = LangEntry.builder("Auction.Notify.Listing.Claim").chatMessage(
+        GRAY.wrap(SOFT_GREEN.wrap("✔") + " You claimed " + SOFT_GREEN.wrap(LISTING_PRICE) + " for " + SOFT_GREEN.wrap(LISTING_ITEM_NAME) + "!")
     );
 
 
@@ -118,38 +117,34 @@ public class AuctionLang extends Lang {
         .description(
             LISTING_ITEM_LORE,
             EMPTY_IF_ABOVE,
-            LIGHT_GRAY.wrap("Price: ") + LIGHT_YELLOW.wrap(LISTING_PRICE),
-            LIGHT_GRAY.wrap("Seller: ") + WHITE.wrap(LISTING_SELLER)
+            GRAY.wrap("Price: ") + SOFT_YELLOW.wrap(LISTING_PRICE),
+            GRAY.wrap("Seller: ") + WHITE.wrap(LISTING_SELLER)
         )
         .formatted(false)
         .build();
 
 
-    public static final LangText ERROR_DISABLED_WORLD = LangText.of("Auction.Error.DisabledWorld",
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap("✘") + " Auction is disabled in this world!")
+    public static final MessageLocale ERROR_DISABLED_WORLD = LangEntry.builder("Auction.Error.DisabledWorld").chatMessage(
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Auction is disabled in this world!")
     );
 
-    public static final LangText NOTIFY_UNCLAIMED_LISTINGS = LangText.of("Auction.Notify.Listing.Unclaimed",
-        TAG_NO_PREFIX,
+    public static final MessageLocale NOTIFY_UNCLAIMED_LISTINGS = LangEntry.builder("Auction.Notify.Listing.Unclaimed").message(
+        MessageData.CHAT_NO_PREFIX,
         " ",
-        LIGHT_YELLOW.wrap(BOLD.wrap("Auction:")),
-        LIGHT_GRAY.wrap("You have " + LIGHT_YELLOW.wrap(GENERIC_AMOUNT) + " unclaimed listing's incomes!"),
+        SOFT_YELLOW.wrap(BOLD.wrap("Auction:")),
+        GRAY.wrap("You have " + SOFT_YELLOW.wrap(GENERIC_AMOUNT) + " unclaimed listing's incomes!"),
         "",
-        LIGHT_GRAY.wrap("Click " + CLICK.wrapRunCommand(
-            HOVER.wrapShowText(LIGHT_YELLOW.wrap(BOLD.wrap("HERE")), LIGHT_GRAY.wrap("Click to claim your incomes!")), "/ah unclaimed"
-        ) + " to claim now!"),
+        GRAY.wrap("Click " + RUN_COMMAND.with("/ah unclaimed").and(SHOW_TEXT.with(GRAY.wrap("Click to claim your incomes!"))).wrap(SOFT_YELLOW.wrap(BOLD.wrap("HERE"))) + " to claim now!"),
         " "
     );
 
-    public static final LangText NOTIFY_EXPIRED_LISTINGS = LangText.of("Auction.Notify.Listing.Expired",
-        TAG_NO_PREFIX,
+    public static final MessageLocale NOTIFY_EXPIRED_LISTINGS = LangEntry.builder("Auction.Notify.Listing.Expired").message(
+        MessageData.CHAT_NO_PREFIX,
         " ",
-        LIGHT_ORANGE.wrap(BOLD.wrap("Auction:")),
-        LIGHT_GRAY.wrap("You have " + LIGHT_ORANGE.wrap(GENERIC_AMOUNT) + " expired listings!"),
+        SOFT_ORANGE.wrap(BOLD.wrap("Auction:")),
+        GRAY.wrap("You have " + SOFT_ORANGE.wrap(GENERIC_AMOUNT) + " expired listings!"),
         "",
-        LIGHT_GRAY.wrap("Click " + CLICK.wrapRunCommand(
-            HOVER.wrapShowText(LIGHT_ORANGE.wrap(BOLD.wrap("HERE")), LIGHT_GRAY.wrap("Click to return your items.")), "/ah expired"
-        ) + " to return them."),
+        GRAY.wrap("Click " + RUN_COMMAND.with("/ah expired").and(SHOW_TEXT.with(GRAY.wrap("Click to return your items."))).wrap(SOFT_ORANGE.wrap(BOLD.wrap("HERE"))) + " to return them."),
         " "
     );
 }

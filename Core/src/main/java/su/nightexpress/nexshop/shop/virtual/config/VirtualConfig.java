@@ -64,7 +64,7 @@ public class VirtualConfig {
     );
 
     public static final ConfigValue<String[]> SHOP_SHORTCUTS_COMMANDS = ConfigValue.create("General.Shop_Shortcut.Commands",
-        new String[]{"shop"},
+        new String[]{"shop"}, // TODO "merge" with central menu feature
         "Command aliases for quick main menu and shop access.", "Split with commas."
     );
 

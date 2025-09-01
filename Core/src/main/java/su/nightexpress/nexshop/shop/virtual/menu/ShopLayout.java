@@ -38,7 +38,6 @@ import java.util.stream.IntStream;
 import static su.nightexpress.nexshop.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements ConfigBased {
 
     private static final String TITLE_COLOR = "#3E3E3E";

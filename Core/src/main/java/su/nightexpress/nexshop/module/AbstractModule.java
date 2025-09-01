@@ -18,7 +18,8 @@ import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.language.entry.LangText;
-import su.nightexpress.nightcore.language.message.LangMessage;
+import su.nightexpress.nightcore.locale.entry.MessageLocale;
+import su.nightexpress.nightcore.locale.message.LangMessage;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.util.StringUtil;
 
@@ -67,7 +68,7 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
             builder.localized(this.getName());
             builder.addDirect("reload", child -> child
                 .permission(Perms.COMMAND_RELOAD)
-                .description(Lang.MODULE_COMMAND_RELOAD_DESC)
+                .description(Lang.MODULE_COMMAND_RELOAD_DESC.text())
                 .executes(this::executeReload)
             );
             this.loadCommands(builder);
@@ -92,13 +93,13 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     private boolean executeReload(@NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         this.reload();
-        context.send(this.getPrefixed(Lang.MODULE_COMMAND_RELOAD), replacer -> replacer.replace(Placeholders.GENERIC_NAME, this.name));
+        this.getPrefixed(Lang.MODULE_COMMAND_RELOAD).send(context.getSender(), replacer -> replacer.replace(Placeholders.GENERIC_NAME, this.name));
         return true;
     }
 
     @NotNull
-    public LangMessage getPrefixed(@NotNull LangText text) {
-        return text.getMessage().setPrefix(this.moduleConfig.getPrefix());
+    public LangMessage getPrefixed(@NotNull MessageLocale text) {
+        return text.withPrefix(this.moduleConfig.getPrefix());
     }
 
     @NotNull
@@ -123,7 +124,12 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     @NotNull
     public final String getLocalPath() {
-        return this.getId();
+        return this.id;
+    }
+
+    @NotNull
+    public final String getLocalPathTo(@NotNull String dir) {
+        return this.id + dir;
     }
 
     @NotNull

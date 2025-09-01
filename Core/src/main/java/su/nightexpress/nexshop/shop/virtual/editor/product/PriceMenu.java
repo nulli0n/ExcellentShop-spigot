@@ -12,7 +12,7 @@ import su.nightexpress.nexshop.product.price.AbstractProductPricer;
 import su.nightexpress.nexshop.product.price.impl.RangedPricer;
 import su.nightexpress.nexshop.shop.menu.ProductPriceMenu;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
@@ -24,7 +24,7 @@ public class PriceMenu extends ProductPriceMenu<VirtualProduct> {
     private final VirtualShopModule module;
 
     public PriceMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, VirtualLang.EDITOR_TITLE_PRODUCT_PRICE.getString());
+        super(plugin, VirtualLang.EDITOR_TITLE_PRODUCT_PRICE.text());
         this.module = module;
     }
 
@@ -45,7 +45,7 @@ public class PriceMenu extends ProductPriceMenu<VirtualProduct> {
 
     @Override
     protected void handleCurrency(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull VirtualProduct product) {
-        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_CURRENCY, input -> {
+        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_CURRENCY.text(), input -> {
             Currency currency = EconomyBridge.getCurrency(input.getTextRaw());
             if (currency != null) {
                 product.setCurrency(currency);

@@ -15,7 +15,7 @@ import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.product.type.ProductTypes;
 import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
@@ -39,7 +39,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
     private static final String SKULL_DELETE  = "b465f80bf02b408885987b00957ca5e9eb874c3fa88305099597a333a336ee15";
 
     public ProductOptionsMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCT_OPTIONS.getString());
+        super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCT_OPTIONS.text());
 
         this.addItem(MenuItem.buildReturn(this, 49, (viewer, event) -> {
             VirtualProduct product = this.getLink(viewer);
@@ -104,7 +104,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                 return;
             }
 
-            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_COMMAND, input -> {
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_COMMAND.text(), input -> {
                 type.getCommands().add(input.getText());
                 product.save();
                 return true;
@@ -159,7 +159,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                 return;
             }
 
-            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_RANK, input -> {
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_RANK.text(), input -> {
                 product.getAllowedRanks().add(input.getTextRaw().toLowerCase());
                 product.save();
                 return true;
@@ -177,7 +177,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                 return;
             }
 
-            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION, input -> {
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION.text(), input -> {
                 product.getRequiredPermissions().add(input.getTextRaw());
                 product.save();
                 return true;
@@ -191,7 +191,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                 return;
             }
 
-            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION, input -> {
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION.text(), input -> {
                 product.getForbiddenPermissions().add(input.getTextRaw());
                 product.save();
                 return true;

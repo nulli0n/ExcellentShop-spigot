@@ -8,10 +8,11 @@ import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
 import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.data.Filled;
@@ -44,7 +45,7 @@ public class RotationTimesMenu extends LinkedMenu<ShopPlugin, Rotation> implemen
     //private final VirtualShopModule module;
 
     public RotationTimesMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X4, VirtualLang.EDITOR_TITLE_ROTATION_TIMES.getString());
+        super(plugin, MenuType.GENERIC_9X4, VirtualLang.EDITOR_TITLE_ROTATION_TIMES.text());
         //this.module = module;
 
         this.addItem(MenuItem.buildReturn(this, 31, (viewer, event) -> {
@@ -67,12 +68,12 @@ public class RotationTimesMenu extends LinkedMenu<ShopPlugin, Rotation> implemen
                     .replacement(replacer -> replacer
                         .replace(Placeholders.GENERIC_NAME, () -> StringUtil.capitalizeFully(day.name()))
                         .replace(Placeholders.GENERIC_TIME, () -> rotation.getRotationTimes(day).stream()
-                            .map(time -> Lang.goodEntry(time.format(ShopUtils.TIME_FORMATTER))).collect(Collectors.joining("\n")))
+                            .map(time -> CoreLang.goodEntry(time.format(ShopUtils.TIME_FORMATTER))).collect(Collectors.joining("\n")))
                     );
             })
             .setItemClick(day -> (viewer1, event) -> {
                 if (event.isLeftClick()) {
-                    this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, input -> {
+                    this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_TIME.text(), input -> {
                         try {
                             rotation.getRotationTimes(day).add(LocalTime.parse(input.getTextRaw(), ShopUtils.TIME_FORMATTER));
                             rotation.getShop().saveRotations();

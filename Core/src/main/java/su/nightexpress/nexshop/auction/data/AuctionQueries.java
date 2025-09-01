@@ -1,5 +1,13 @@
 package su.nightexpress.nexshop.auction.data;
 
+import su.nightexpress.economybridge.EconomyBridge;
+import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.economybridge.currency.CurrencyId;
+import su.nightexpress.nexshop.ShopAPI;
+import su.nightexpress.nexshop.api.shop.product.ProductType;
+import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
+import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
@@ -7,8 +15,89 @@ import su.nightexpress.nightcore.db.sql.query.impl.DeleteQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.InsertQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.UpdateQuery;
 import su.nightexpress.nightcore.db.sql.util.WhereOperator;
+import su.nightexpress.nightcore.util.Enums;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.UUID;
+import java.util.function.Function;
 
 public class AuctionQueries {
+
+    public static final Function<ResultSet, ActiveListing> ACTIVE_LISTING_LOADER = resultSet -> {
+        try {
+            UUID id = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_ID.getName()));
+            UUID owner = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_OWNER.getName()));
+            String ownerName = resultSet.getString(AuctionDatabase.COLUMN_OWNER_NAME.getName());
+
+            /*String serialized = resultSet.getString(AuctionDatabase.COLUMN_ITEM.getName());
+            String handlerName = resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName());*/
+
+            ProductType type = Enums.get(resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName()), ProductType.class);
+            if (type == null) return null;
+
+            ProductTyping typing = AuctionDatabase.typingFromJson(type, resultSet.getString(AuctionDatabase.COLUMN_ITEM_DATA.getName()));
+            if (!(typing instanceof PhysicalTyping physicalTyping)) {
+                //ShopAPI.getPlugin().error("Invalid listing data: '" + serialized + "'. Handler: '" + handlerName + "'.");
+                return null;
+            }
+
+            String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
+            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
+            if (currency == null) return null;
+
+            double price = resultSet.getDouble(AuctionDatabase.COLUMN_PRICE.getName());
+            long expireDate = resultSet.getLong(AuctionDatabase.COLUMN_EXPIRE_DATE.getName());
+            long dateCreation = resultSet.getLong(AuctionDatabase.COLUMN_DATE_CREATION.getName());
+            long deletionDate = resultSet.getLong(AuctionDatabase.COLUMN_DELETE_DATE.getName());
+            if (deletionDate == 0L) {
+                deletionDate = AuctionUtils.generatePurgeDate(dateCreation);
+            }
+
+            return new ActiveListing(id, owner, ownerName, physicalTyping, currency, price, dateCreation, expireDate, deletionDate);
+        }
+        catch (SQLException exception) {
+            exception.printStackTrace();
+            return null;
+        }
+    };
+
+    public static final Function<ResultSet, CompletedListing> COMPLETED_LISTING_LOADER = resultSet -> {
+        try {
+            UUID id = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_ID.getName()));
+            UUID owner = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_OWNER.getName()));
+            String ownerName = resultSet.getString(AuctionDatabase.COLUMN_OWNER_NAME.getName());
+            String buyerName = resultSet.getString(AuctionDatabase.COLUMN_BUYER_NAME.getName());
+
+            ProductType type = Enums.get(resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName()), ProductType.class);
+            if (type == null) return null;
+
+            ProductTyping typing = AuctionDatabase.typingFromJson(type, resultSet.getString(AuctionDatabase.COLUMN_ITEM_DATA.getName()));
+            if (!(typing instanceof PhysicalTyping physicalTyping)) {
+                //ShopAPI.getPlugin().error("Invalid listing data: '" + serialized + "'. Handler: '" + handlerName + "'.");
+                return null;
+            }
+
+            String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
+            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
+            if (currency == null) return null;
+
+            double price = resultSet.getDouble(AuctionDatabase.COLUMN_PRICE.getName());
+            boolean isNotified = resultSet.getBoolean(AuctionDatabase.COLUMN_IS_PAID.getName());
+            long buyDate = resultSet.getLong(AuctionDatabase.COLUMN_BUY_DATE.getName());
+            long dateCreation = resultSet.getLong(AuctionDatabase.COLUMN_DATE_CREATION.getName());
+            long deletionDate = resultSet.getLong(AuctionDatabase.COLUMN_DELETE_DATE.getName());
+            if (deletionDate == 0L) {
+                deletionDate = AuctionUtils.generatePurgeDate(dateCreation);
+            }
+
+            return new CompletedListing(id, owner, ownerName, buyerName, physicalTyping, currency, price, dateCreation, buyDate, deletionDate, isNotified);
+        }
+        catch (SQLException exception) {
+            exception.printStackTrace();
+            return null;
+        }
+    };
 
     public static final DeleteQuery<AbstractListing> LISTING_DELETE_QUERY = new DeleteQuery<AbstractListing>()
         .whereIgnoreCase(AuctionDatabase.COLUMN_ID, WhereOperator.EQUAL, listing -> listing.getId().toString());
@@ -17,7 +106,7 @@ public class AuctionQueries {
         .setValue(AuctionDatabase.COLUMN_ID, listing -> listing.getId().toString())
         .setValue(AuctionDatabase.COLUMN_OWNER, listing -> listing.getOwner().toString())
         .setValue(AuctionDatabase.COLUMN_OWNER_NAME, AbstractListing::getOwnerName)
-        .setValue(AuctionDatabase.COLUMN_ITEM, listing -> listing.getTyping().serialize())
+        .setValue(AuctionDatabase.COLUMN_ITEM_DATA, listing -> AuctionDatabase.typingToJson(listing.getTyping()))
         .setValue(AuctionDatabase.COLUMN_HANDLER, listing -> listing.getTyping().type().name())
         .setValue(AuctionDatabase.COLUMN_CURRENCY, listing -> listing.getCurrency().getInternalId())
         .setValue(AuctionDatabase.COLUMN_PRICE, listing -> String.valueOf(listing.getPrice()))
@@ -30,7 +119,7 @@ public class AuctionQueries {
         .setValue(AuctionDatabase.COLUMN_OWNER, listing -> listing.getOwner().toString())
         .setValue(AuctionDatabase.COLUMN_OWNER_NAME, AbstractListing::getOwnerName)
         .setValue(AuctionDatabase.COLUMN_BUYER_NAME, CompletedListing::getBuyerName)
-        .setValue(AuctionDatabase.COLUMN_ITEM, listing -> listing.getTyping().serialize())
+        .setValue(AuctionDatabase.COLUMN_ITEM_DATA, listing -> AuctionDatabase.typingToJson(listing.getTyping()))
         .setValue(AuctionDatabase.COLUMN_HANDLER, listing -> listing.getTyping().type().name())
         .setValue(AuctionDatabase.COLUMN_CURRENCY, listing -> listing.getCurrency().getInternalId())
         .setValue(AuctionDatabase.COLUMN_PRICE, listing -> String.valueOf(listing.getPrice()))

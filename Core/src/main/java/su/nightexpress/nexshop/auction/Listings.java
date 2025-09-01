@@ -35,7 +35,8 @@ public class Listings {
     }
 
     @NotNull
-    public static <T extends AbstractListing> List<T> sorted(@NotNull List<T> listings) {
+    public static <T extends AbstractListing> List<T> sortAndValidate(@NotNull List<T> listings) {
+        listings.removeIf(Predicate.not(AbstractListing::isValid));
         listings.sort(SORT_BY_CREATION);
         return listings;
     }

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
 import su.nightexpress.nexshop.shop.virtual.impl.RotationItem;
@@ -32,7 +32,7 @@ public class RotationItemSelectMenu extends LinkedMenu<ShopPlugin, Rotation> imp
     private final VirtualShopModule module;
 
     public RotationItemSelectMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_ITEM_SELECTION.getString());
+        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_ITEM_SELECTION.text());
         this.module = module;
 
         this.addItem(MenuItem.buildReturn(this, 40, (viewer, event) -> {

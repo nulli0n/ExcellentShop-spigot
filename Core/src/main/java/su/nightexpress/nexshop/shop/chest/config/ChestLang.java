@@ -1,245 +1,227 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.nightcore.core.CoreLang;
-import su.nightexpress.nightcore.language.entry.LangString;
-import su.nightexpress.nightcore.language.entry.LangText;
+import su.nightexpress.nightcore.locale.LangContainer;
+import su.nightexpress.nightcore.locale.LangEntry;
+import su.nightexpress.nightcore.locale.entry.MessageLocale;
+import su.nightexpress.nightcore.locale.entry.TextLocale;
+import su.nightexpress.nightcore.locale.message.MessageData;
 
 import static su.nightexpress.nexshop.Placeholders.*;
-import static su.nightexpress.nightcore.language.tag.MessageTags.OUTPUT;
-import static su.nightexpress.nightcore.language.tag.MessageTags.SOUND;
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+import static su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers.*;
 
-public class ChestLang extends CoreLang {
+public class ChestLang implements LangContainer {
 
-    public static final LangString COMMAND_ARGUMENT_NAME_BUY_PRICE  = LangString.of("ChestShop.Command.Argument.Name.BuyPrice", "buyPrice");
-    public static final LangString COMMAND_ARGUMENT_NAME_SELL_PRICE = LangString.of("ChestShop.Command.Argument.Name.SellPrice", "sellPrice");
-    public static final LangString COMMAND_ARGUMENT_NAME_SHOP_BLOCK = LangString.of("ChestShop.Command.Argument.Name.ShopBlock", "blockType");
-    public static final LangString COMMAND_ARGUMENT_NAME_ITEM_NAME = LangString.of("ChestShop.Command.Argument.Name.ItemName", "itemName");
+    public static final TextLocale COMMAND_ARGUMENT_NAME_BUY_PRICE  = LangEntry.builder("ChestShop.Command.Argument.Name.BuyPrice").text("buyPrice");
+    public static final TextLocale COMMAND_ARGUMENT_NAME_SELL_PRICE = LangEntry.builder("ChestShop.Command.Argument.Name.SellPrice").text("sellPrice");
+    public static final TextLocale COMMAND_ARGUMENT_NAME_SHOP_BLOCK = LangEntry.builder("ChestShop.Command.Argument.Name.ShopBlock").text("blockType");
+    public static final TextLocale COMMAND_ARGUMENT_NAME_ITEM_NAME = LangEntry.builder("ChestShop.Command.Argument.Name.ItemName").text("itemName");
 
-    public static final LangString COMMAND_BROWSE_DESC    = LangString.of("ChestShop.Command.Browse.Desc", "Browse shop owners.");
-    public static final LangString COMMAND_LIST_DESC      = LangString.of("ChestShop.Command.List.Desc", "Browse your shops.");
-    public static final LangString COMMAND_LIST_ALL_DESC  = LangString.of("ChestShop.Command.List.Desc", "Browse all player shops.");
-    public static final LangString COMMAND_SEARCH_DESC    = LangString.of("ChestShop.Command.Search.Desc", "Search shops by item.");
-    public static final LangString COMMAND_BANK_DESC      = LangString.of("ChestShop.Command.Bank.Desc", "Open [player's] bank.");
-    public static final LangString COMMAND_CREATE_DESC    = LangString.of("ChestShop.Command.Create.Desc", "Create a shop.");
-    public static final LangString COMMAND_GIVE_ITEM_DESC = LangString.of("ChestShop.Command.GiveItem.Desc", "Give shop creation item.");
-    public static final LangString COMMAND_REMOVE_DESC    = LangString.of("ChestShop.Command.Remove.Desc", "Removes the shop from the chest that you're looking at.");
-    public static final LangString COMMAND_OPEN_INV_DESC  = LangString.of("ChestShop.Command.OpenInv.Desc", "Open shop's inventory.");
+    public static final TextLocale COMMAND_BROWSE_DESC    = LangEntry.builder("ChestShop.Command.Browse.Desc").text("Browse shop owners.");
+    public static final TextLocale COMMAND_LIST_DESC      = LangEntry.builder("ChestShop.Command.List.Desc").text("Browse your shops.");
+    public static final TextLocale COMMAND_LIST_ALL_DESC  = LangEntry.builder("ChestShop.Command.List.Desc").text("Browse all player shops.");
+    public static final TextLocale COMMAND_SEARCH_DESC    = LangEntry.builder("ChestShop.Command.Search.Desc").text("Search shops by item.");
+    public static final TextLocale COMMAND_BANK_DESC      = LangEntry.builder("ChestShop.Command.Bank.Desc").text("Open [player's] bank.");
+    public static final TextLocale COMMAND_CREATE_DESC    = LangEntry.builder("ChestShop.Command.Create.Desc").text("Create a shop.");
+    public static final TextLocale COMMAND_GIVE_ITEM_DESC = LangEntry.builder("ChestShop.Command.GiveItem.Desc").text("Give shop creation item.");
+    public static final TextLocale COMMAND_REMOVE_DESC    = LangEntry.builder("ChestShop.Command.Remove.Desc").text("Removes the shop from the chest that you're looking at.");
+    public static final TextLocale COMMAND_OPEN_INV_DESC  = LangEntry.builder("ChestShop.Command.OpenInv.Desc").text("Open shop's inventory.");
 
-    public static final LangText COMMAND_GIVE_ITEM_DONE = LangText.of("ChestShop.Command.GiveItem.Done",
-        LIGHT_GRAY.wrap("Given " + LIGHT_YELLOW.wrap(GENERIC_NAME) + " to " + LIGHT_YELLOW.wrap(PLAYER_DISPLAY_NAME) + "."));
+    public static final MessageLocale COMMAND_GIVE_ITEM_DONE = LangEntry.builder("ChestShop.Command.GiveItem.Done").chatMessage(
+        GRAY.wrap("Given " + SOFT_YELLOW.wrap(GENERIC_NAME) + " to " + SOFT_YELLOW.wrap(PLAYER_DISPLAY_NAME) + "."));
 
-    public static final LangText SHOP_ERROR_NOT_OWNER = LangText.of("ChestShop.Shop.Error.NotOwner",
-        LIGHT_RED.wrap("You don't own this shop!"));
+    public static final MessageLocale SHOP_ERROR_NOT_OWNER = LangEntry.builder("ChestShop.Shop.Error.NotOwner").chatMessage(
+        SOFT_RED.wrap("You don't own this shop!"));
 
-    public static final LangText SHOP_CREATION_INFO_DONE = LangText.of("ChestShop.Shop.Creation.Info.Done",
-        OUTPUT.wrap(10, 80) + SOUND.wrap(Sound.BLOCK_NOTE_BLOCK_BELL),
-        LIGHT_GREEN.wrap(BOLD.wrap("Shop Created!")),
-        LIGHT_GRAY.wrap(LIGHT_GREEN.wrap("Right-Click") + " while sneaking to open settings.")
+    public static final MessageLocale SHOP_CREATION_INFO_DONE = LangEntry.builder("ChestShop.Shop.Creation.Info.Done").titleMessage(
+        SOFT_GREEN.wrap(BOLD.wrap("Shop Created!")),
+        GRAY.wrap(SOFT_GREEN.wrap("Right-Click") + " while sneaking to open settings."),
+        Sound.BLOCK_NOTE_BLOCK_BELL
     );
 
-    public static final LangText SHOP_CREATION_ERROR_ALREADY_SHOP = LangText.of("ChestShop.Shop.Creation.Error.AlreadyShop",
-        LIGHT_RED.wrap("This chest is already shop!"));
+    public static final MessageLocale SHOP_CREATION_ERROR_ALREADY_SHOP = LangEntry.builder("ChestShop.Shop.Creation.Error.AlreadyShop").chatMessage(
+        SOFT_RED.wrap("This chest is already shop!"));
 
-    public static final LangText SHOP_CREATION_ERROR_NOT_EMPTY = LangText.of("ChestShop.Shop.Creation.Error.NotEmpty",
-        LIGHT_RED.wrap("Please remove all items from the chest first."));
+    public static final MessageLocale SHOP_CREATION_ERROR_NOT_EMPTY = LangEntry.builder("ChestShop.Shop.Creation.Error.NotEmpty").chatMessage(
+        SOFT_RED.wrap("Please remove all items from the chest first."));
 
-    public static final LangText SHOP_CREATION_ERROR_BAD_BLOCK = LangText.of("ChestShop.Shop.Creation.Error.NotAChest",
-        LIGHT_RED.wrap("This block can not be used for shops!"));
+    public static final MessageLocale SHOP_CREATION_ERROR_BAD_BLOCK = LangEntry.builder("ChestShop.Shop.Creation.Error.NotAChest").chatMessage(
+        SOFT_RED.wrap("This block can not be used for shops!"));
 
-    public static final LangText SHOP_CREATION_ERROR_BAD_LOCATION = LangText.of("ChestShop.Shop.Creation.Error.BadLocation",
-        LIGHT_RED.wrap("You can't create shop here!"));
+    public static final MessageLocale SHOP_CREATION_ERROR_BAD_LOCATION = LangEntry.builder("ChestShop.Shop.Creation.Error.BadLocation").chatMessage(
+        SOFT_RED.wrap("You can't create shop here!"));
 
-    public static final LangText SHOP_CREATION_ERROR_LIMIT_REACHED = LangText.of("ChestShop.Shop.Creation.Error.LimitReached",
-        LIGHT_RED.wrap("You have reached the limit of shops! You can't create more."));
+    public static final MessageLocale SHOP_CREATION_ERROR_LIMIT_REACHED = LangEntry.builder("ChestShop.Shop.Creation.Error.LimitReached").chatMessage(
+        SOFT_RED.wrap("You have reached the limit of shops! You can't create more."));
 
-    public static final LangText SHOP_CREATION_ERROR_BAD_AREA = LangText.of("ChestShop.Shop.Creation.Error.BadArea",
-        LIGHT_RED.wrap("You can create shops only inside your own claim!"));
+    public static final MessageLocale SHOP_CREATION_ERROR_BAD_AREA = LangEntry.builder("ChestShop.Shop.Creation.Error.BadArea").chatMessage(
+        SOFT_RED.wrap("You can create shops only inside your own claim!"));
 
-    public static final LangText SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS = LangText.of("ChestShop.Shop.Creation.Error.NotEnoughFunds",
-        LIGHT_RED.wrap("You don't have enough funds!"));
+    public static final MessageLocale SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS = LangEntry.builder("ChestShop.Shop.Creation.Error.NotEnoughFunds").chatMessage(
+        SOFT_RED.wrap("You don't have enough funds!"));
 
-    public static final LangText SHOP_REMOVAL_ERROR_NOT_EMPTY = LangText.of("ChestShop.Shop.Removal.Error.NotEmpty",
-        LIGHT_RED.wrap("Please withdraw items from shop storage to remove it."));
+    public static final MessageLocale SHOP_REMOVAL_ERROR_NOT_EMPTY = LangEntry.builder("ChestShop.Shop.Removal.Error.NotEmpty").chatMessage(
+        SOFT_RED.wrap("Please withdraw items from shop storage to remove it."));
 
-    public static final LangText SHOP_REMOVAL_INFO_DONE = LangText.of("ChestShop.Shop.Removal.Info.Done",
-        OUTPUT.wrap(10, 80) + SOUND.wrap(Sound.ENTITY_GENERIC_EXPLODE),
-        LIGHT_RED.wrap(BOLD.wrap("Shop Removed!"))
+    public static final MessageLocale SHOP_REMOVAL_INFO_DONE = LangEntry.builder("ChestShop.Shop.Removal.Info.Done").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Shop Removed!")), "",
+        Sound.ENTITY_GENERIC_EXPLODE
     );
 
-    public static final LangText SHOP_RENAME_ERROR_LONG_NAME = LangText.of("ChestShop.Shop.Rename.Error.TooLong",
-        LIGHT_RED.wrap("Name is too long! Max. length is " + GENERIC_AMOUNT));
+    @Deprecated
+    public static final MessageLocale SHOP_RENAME_ERROR_LONG_NAME = LangEntry.builder("ChestShop.Shop.Rename.Error.TooLong").chatMessage(
+        SOFT_RED.wrap("Name is too long! Max. length is " + GENERIC_AMOUNT));
 
-    public static final LangText SHOP_TELEPORT_ERROR_UNSAFE = LangText.of("ChestShop.Shop.Teleport.Error.Unsafe",
-        LIGHT_RED.wrap("Teleport cancelled due to unsafe shop location.")
+    public static final MessageLocale SHOP_TELEPORT_ERROR_UNSAFE = LangEntry.builder("ChestShop.Shop.Teleport.Error.Unsafe").chatMessage(
+        SOFT_RED.wrap("Teleport cancelled due to unsafe shop location.")
     );
 
-    public static final LangText ERROR_BLOCK_IS_NOT_SHOP = LangText.of("ChestShop.Shop.Removal.Error.NotAShop",
-        LIGHT_RED.wrap("This block is not a shop!"));
+    public static final MessageLocale ERROR_BLOCK_IS_NOT_SHOP = LangEntry.builder("ChestShop.Shop.Removal.Error.NotAShop").chatMessage(
+        SOFT_RED.wrap("This block is not a shop!"));
 
-    public static final LangText SHOP_PRODUCT_ERROR_BAD_ITEM = LangText.of("ChestShop.Product.Error.BadItem",
-        LIGHT_RED.wrap("This item can not be used in shop!"));
+    public static final MessageLocale SHOP_PRODUCT_ERROR_BAD_ITEM = LangEntry.builder("ChestShop.Product.Error.BadItem").chatMessage(
+        SOFT_RED.wrap("This item can not be used in shop!"));
 
-    public static final LangText EDITOR_ERROR_PRODUCT_LEFT = LangText.of("ChestShop.Editor.Error.ProductLeft",
-        LIGHT_RED.wrap("You must take all of this product from the chest!"));
+    public static final MessageLocale EDITOR_ERROR_PRODUCT_LEFT = LangEntry.builder("ChestShop.Editor.Error.ProductLeft").chatMessage(
+        SOFT_RED.wrap("You must take all of this product from the chest!"));
 
-    public static final LangText SHOP_TRADE_BUY_INFO_USER = LangText.of("ChestShop.Shop.Trade.Buy.Info.User",
-        TAG_NO_PREFIX,
-        LIGHT_YELLOW.wrap("You bought " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " from " + ORANGE.wrap(SHOP_NAME) + " shop.")
+    public static final MessageLocale SHOP_TRADE_BUY_INFO_USER = LangEntry.builder("ChestShop.Shop.Trade.Buy.Info.User").message(
+        MessageData.CHAT_NO_PREFIX,
+        SOFT_YELLOW.wrap("You bought " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " from " + ORANGE.wrap(SHOP_NAME) + " shop.")
     );
 
-    public static final LangText SHOP_TRADE_BUY_INFO_OWNER = LangText.of("ChestShop.Shop.Trade.Buy.Info.Owner",
-        TAG_NO_PREFIX,
-        LIGHT_YELLOW.wrap(ORANGE.wrap(PLAYER_DISPLAY_NAME) + " bought " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " from your " + ORANGE.wrap(SHOP_NAME) + " shop.")
+    public static final MessageLocale SHOP_TRADE_BUY_INFO_OWNER = LangEntry.builder("ChestShop.Shop.Trade.Buy.Info.Owner").message(
+        MessageData.CHAT_NO_PREFIX,
+        SOFT_YELLOW.wrap(ORANGE.wrap(PLAYER_DISPLAY_NAME) + " bought " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " from your " + ORANGE.wrap(SHOP_NAME) + " shop.")
     );
 
-    public static final LangText SHOP_TRADE_SELL_INFO_USER = LangText.of("ChestShop.Shop.Trade.Sell.Info.User",
-        TAG_NO_PREFIX,
-        LIGHT_YELLOW.wrap("You sold " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " to " + ORANGE.wrap(SHOP_NAME) + " shop.")
+    public static final MessageLocale SHOP_TRADE_SELL_INFO_USER = LangEntry.builder("ChestShop.Shop.Trade.Sell.Info.User").message(
+        MessageData.CHAT_NO_PREFIX,
+        SOFT_YELLOW.wrap("You sold " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " to " + ORANGE.wrap(SHOP_NAME) + " shop.")
     );
 
-    public static final LangText SHOP_TRADE_SELL_INFO_OWNER = LangText.of("ChestShop.Shop.Trade.Sell.Info.Owner",
-        TAG_NO_PREFIX,
-        LIGHT_YELLOW.wrap(ORANGE.wrap(PLAYER_DISPLAY_NAME) + " sold " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " to your " + ORANGE.wrap(SHOP_NAME) + " shop.")
+    public static final MessageLocale SHOP_TRADE_SELL_INFO_OWNER = LangEntry.builder("ChestShop.Shop.Trade.Sell.Info.Owner").message(
+        MessageData.CHAT_NO_PREFIX,
+        SOFT_YELLOW.wrap(ORANGE.wrap(PLAYER_DISPLAY_NAME) + " sold " + ORANGE.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " for " + ORANGE.wrap(GENERIC_PRICE) + " to your " + ORANGE.wrap(SHOP_NAME) + " shop.")
     );
 
-    public static final LangText NOTIFICATION_SHOP_EARNINGS = LangText.of("ChestShop.Notification.ShopEarnings",
-        TAG_NO_PREFIX,
+    public static final MessageLocale NOTIFICATION_SHOP_EARNINGS = LangEntry.builder("ChestShop.Notification.ShopEarnings").message(
+        MessageData.CHAT_NO_PREFIX,
         " ",
-        LIGHT_GREEN.wrap(BOLD.wrap("Shops Income:")),
-        LIGHT_GRAY.wrap("While you were offline your shops earned: " + LIGHT_GREEN.wrap(GENERIC_AMOUNT)),
+        SOFT_GREEN.wrap(BOLD.wrap("Shops Income:")),
+        GRAY.wrap("While you were offline your shops earned: " + SOFT_GREEN.wrap(GENERIC_AMOUNT)),
         " "
     );
 
-    public static final LangText SEARCH_PROMPT_ITEM_NAME = LangText.of("ChestShop.Search.ItemPrompt",
-        OUTPUT.wrap(20, -1) + SOUND.wrap(Sound.BLOCK_LAVA_POP),
-        LIGHT_YELLOW.wrap(BOLD.wrap("Shop Search")),
-        GRAY.wrap("Enter " + LIGHT_YELLOW.wrap("item name") + " to search.")
+    public static final MessageLocale SEARCH_PROMPT_ITEM_NAME = LangEntry.builder("ChestShop.Search.ItemPrompt").titleMessage(
+        SOFT_YELLOW.wrap(BOLD.wrap("Shop Search")),
+        GRAY.wrap("Enter " + SOFT_YELLOW.wrap("item name") + " to search."),
+        20, -1, Sound.BLOCK_LAVA_POP
     );
 
-    public static final LangText SEARCH_PROMPT_PLAYER_NAME = LangText.of("ChestShop.Search.PlayerPrompt",
-        OUTPUT.wrap(20, -1) + SOUND.wrap(Sound.BLOCK_LAVA_POP),
-        LIGHT_YELLOW.wrap(BOLD.wrap("Shop Search")),
-        GRAY.wrap("Enter " + LIGHT_YELLOW.wrap("player name") + " to search.")
+    public static final MessageLocale SEARCH_PROMPT_PLAYER_NAME = LangEntry.builder("ChestShop.Search.PlayerPrompt").titleMessage(
+        SOFT_YELLOW.wrap(BOLD.wrap("Shop Search")),
+        GRAY.wrap("Enter " + SOFT_YELLOW.wrap("player name") + " to search."),
+        20, -1, Sound.BLOCK_LAVA_POP
     );
 
-    public static final LangString SHOP_PRICE_MENU_TITLE = LangString.of("ChestShop.Editor.PriceMenu", BLACK.wrap("Price Settings"));
+    public static final TextLocale SHOP_PRICE_MENU_TITLE = LangEntry.builder("ChestShop.Editor.PriceMenu").text(BLACK.wrap("Price Settings"));
 
 
-    public static final LangText ERROR_SHOP_INACTIVE = LangText.of("ChestShop.Shop.Error.Inactive", "This shop is not available currently.");
+    public static final MessageLocale ERROR_SHOP_INACTIVE = LangEntry.builder("ChestShop.Shop.Error.Inactive").chatMessage("This shop is not available currently.");
 
-    public static final LangText RENT_ERROR_ALREADY_RENTED = LangText.of("ChestShop.Rent.Error.AlreadyRented",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Already Rented!")),
-        LIGHT_GRAY.wrap("This shop is already rented by someone.")
+    public static final MessageLocale RENT_ERROR_ALREADY_RENTED = LangEntry.builder("ChestShop.Rent.Error.AlreadyRented").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Already Rented!")),
+        GRAY.wrap("This shop is already rented by someone."),
+        Sound.ENTITY_VILLAGER_NO
     );
 
-    public static final LangText RENT_ERROR_NOT_RENTED = LangText.of("ChestShop.Rent.Error.NotRented",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Not Rented!")),
-        LIGHT_GRAY.wrap("You don't rent this shop.")
+    public static final MessageLocale RENT_ERROR_NOT_RENTED = LangEntry.builder("ChestShop.Rent.Error.NotRented").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Not Rented!")),
+        GRAY.wrap("You don't rent this shop."),
+        Sound.ENTITY_VILLAGER_NO
     );
 
-    public static final LangText RENT_ERROR_NOT_RENTABLE = LangText.of("ChestShop.Rent.Error.NotRentable",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Not Rentable!")),
-        LIGHT_GRAY.wrap("This shop is not available for rent.")
+    public static final MessageLocale RENT_ERROR_NOT_RENTABLE = LangEntry.builder("ChestShop.Rent.Error.NotRentable").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Not Rentable!")),
+        GRAY.wrap("This shop is not available for rent."),
+        Sound.ENTITY_VILLAGER_NO
     );
 
-    public static final LangText RENT_ERROR_INSUFFICIENT_FUNDS = LangText.of("ChestShop.Rent.Error.InsufficientFunds",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Insufficient Funds!")),
-        LIGHT_GRAY.wrap("You need " + LIGHT_RED.wrap(GENERIC_PRICE) + " to rent this shop.")
+    public static final MessageLocale RENT_ERROR_INSUFFICIENT_FUNDS = LangEntry.builder("ChestShop.Rent.Error.InsufficientFunds").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Insufficient Funds!")),
+        GRAY.wrap("You need " + SOFT_RED.wrap(GENERIC_PRICE) + " to rent this shop."),
+        Sound.ENTITY_VILLAGER_NO
     );
 
-    public static final LangString RENT_PROMPT_DURATION = LangString.of("ChestShop.Rent.Prompt.Duration",
-        GRAY.wrap("Enter " + GREEN.wrap("[Days Amount]")));
+    public static final TextLocale RENT_PROMPT_DURATION = LangEntry.builder("ChestShop.Rent.Prompt.Duration").text(GRAY.wrap("Enter " + GREEN.wrap("[Days Amount]")));
 
-//    public static final LangString RENT_PROMPT_CURRENCY = LangString.of("ChestShop.Rent.Prompt.Currency",
+//    public static final TextLocale RENT_PROMPT_CURRENCY = LangEntry.builder("ChestShop.Rent.Prompt.Currency",
 //        GRAY.wrap("Enter " + GREEN.wrap("[Currency]")));
 
-    public static final LangString RENT_PROMPT_PRICE = LangString.of("ChestShop.Rent.Prompt.Price",
-        GRAY.wrap("Enter " + GREEN.wrap("[Rent Price]")));
+    public static final TextLocale RENT_PROMPT_PRICE = LangEntry.builder("ChestShop.Rent.Prompt.Price").text(GRAY.wrap("Enter " + GREEN.wrap("[Rent Price]")));
 
-    public static final LangText RENT_RENT_SUCCESS = LangText.of("ChestShop.Rent.Rent.Success",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.BLOCK_IRON_DOOR_OPEN),
-        LIGHT_GREEN.wrap(BOLD.wrap("Shop Rented!")),
-        LIGHT_GRAY.wrap("You rented this shop for " + LIGHT_GREEN.wrap(GENERIC_TIME) + ".")
+    public static final MessageLocale RENT_RENT_SUCCESS = LangEntry.builder("ChestShop.Rent.Rent.Success").titleMessage(
+        SOFT_GREEN.wrap(BOLD.wrap("Shop Rented!")),
+        GRAY.wrap("You rented this shop for " + SOFT_GREEN.wrap(GENERIC_TIME) + "."),
+        Sound.BLOCK_IRON_DOOR_OPEN
     );
 
-    public static final LangText RENT_EXTEND_SUCCESS = LangText.of("ChestShop.Rent.Extend.Success",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.BLOCK_IRON_DOOR_OPEN),
-        LIGHT_GREEN.wrap(BOLD.wrap("Rent Extended!")),
-        LIGHT_GRAY.wrap("You extended shop rent for " + LIGHT_GREEN.wrap(GENERIC_TIME) + ".")
+    public static final MessageLocale RENT_EXTEND_SUCCESS = LangEntry.builder("ChestShop.Rent.Extend.Success").titleMessage(
+        SOFT_GREEN.wrap(BOLD.wrap("Rent Extended!")),
+        GRAY.wrap("You extended shop rent for " + SOFT_GREEN.wrap(GENERIC_TIME) + "."),
+        Sound.BLOCK_IRON_DOOR_OPEN
     );
 
-    public static final LangText RENT_CANCEL_BY_RENTER = LangText.of("ChestShop.Rent.Cancel.ByRenter",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR),
-        LIGHT_GREEN.wrap(BOLD.wrap("Rent Cancelled!")),
-        LIGHT_GRAY.wrap("You're no longer renting the " + LIGHT_GREEN.wrap(SHOP_NAME) + " shop.")
+    public static final MessageLocale RENT_CANCEL_BY_RENTER = LangEntry.builder("ChestShop.Rent.Cancel.ByRenter").titleMessage(
+        SOFT_GREEN.wrap(BOLD.wrap("Rent Cancelled!")),
+        GRAY.wrap("You're no longer renting the " + SOFT_GREEN.wrap(SHOP_NAME) + " shop."),
+        Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR
     );
 
-    public static final LangText RENT_CANCEL_BY_OWNER = LangText.of("ChestShop.Rent.Cancel.ByOwner",
-        OUTPUT.wrap(20, 60) + SOUND.wrap(Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR),
-        LIGHT_GREEN.wrap(BOLD.wrap("Rent Cancelled!")),
-        LIGHT_GRAY.wrap(LIGHT_GREEN.wrap(CHEST_SHOP_RENTER_NAME) + " is no longer renting the " + LIGHT_GREEN.wrap(SHOP_NAME) + " shop.")
+    public static final MessageLocale RENT_CANCEL_BY_OWNER = LangEntry.builder("ChestShop.Rent.Cancel.ByOwner").titleMessage(
+        SOFT_GREEN.wrap(BOLD.wrap("Rent Cancelled!")),
+        GRAY.wrap(SOFT_GREEN.wrap(CHEST_SHOP_RENTER_NAME) + " is no longer renting the " + SOFT_GREEN.wrap(SHOP_NAME) + " shop."),
+        Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR
     );
 
-    public static final LangText BANK_ERROR_INVALID_CURRENCY = LangText.of("ChestShop.Shop.Bank.Error.InvalidCurrency",
-        OUTPUT.wrap(20, 60),
-        LIGHT_RED.wrap(BOLD.wrap("Operation Failed!")),
-        LIGHT_GRAY.wrap("Incorrect currency!")
+    public static final MessageLocale BANK_ERROR_INVALID_CURRENCY = LangEntry.builder("ChestShop.Shop.Bank.Error.InvalidCurrency").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Operation Failed!")),
+        GRAY.wrap("Incorrect currency!")
     );
 
-    public static final LangText BANK_DEPOSIT_SUCCESS = LangText.of("ChestShop.Shop.Bank.Deposit.Success",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_GREEN.wrap(BOLD.wrap("Successful Deposit!")),
-        LIGHT_GRAY.wrap("You deposit " + LIGHT_GREEN.wrap(GENERIC_AMOUNT) + " to shop bank!")
+    public static final MessageLocale BANK_DEPOSIT_SUCCESS = LangEntry.builder("ChestShop.Shop.Bank.Deposit.Success").chatMessage(
+        GRAY.wrap("You deposit " + SOFT_GREEN.wrap(GENERIC_AMOUNT) + " to shop bank!")
     );
 
-    public static final LangText BANK_DEPOSIT_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.Bank.Deposit.Error.NotEnough",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_RED.wrap(BOLD.wrap("Unable to Deposit!")),
-        LIGHT_GRAY.wrap("You don't have enough funds!")
+    public static final MessageLocale BANK_DEPOSIT_ERROR_NOT_ENOUGH = LangEntry.builder("ChestShop.Shop.Bank.Deposit.Error.NotEnough").chatMessage(
+        GRAY.wrap("You don't have enough funds!")
     );
 
-    public static final LangText BANK_WITHDRAW_SUCCESS = LangText.of("ChestShop.Shop.Bank.Withdraw.Success",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_GREEN.wrap(BOLD.wrap("Successful Withdraw!")),
-        LIGHT_GRAY.wrap("You withdraw " + LIGHT_GREEN.wrap(GENERIC_AMOUNT) + " from shop bank!")
+    public static final MessageLocale BANK_WITHDRAW_SUCCESS = LangEntry.builder("ChestShop.Shop.Bank.Withdraw.Success").chatMessage(
+        GRAY.wrap("You withdraw " + SOFT_GREEN.wrap(GENERIC_AMOUNT) + " from shop bank!")
     );
 
-    public static final LangText BANK_WITHDRAW_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.Bank.Withdraw.NotEnough",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_RED.wrap(BOLD.wrap("Unable to Withdraw!")),
-        LIGHT_GRAY.wrap("There is not enough funds in bank!")
+    public static final MessageLocale BANK_WITHDRAW_ERROR_NOT_ENOUGH = LangEntry.builder("ChestShop.Shop.Bank.Withdraw.NotEnough").chatMessage(
+        GRAY.wrap("There is not enough funds in bank!")
     );
 
-    public static final LangText STORAGE_DEPOSIT_SUCCESS = LangText.of("ChestShop.Shop.InfiniteStorage.Deposit.Success",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_GREEN.wrap(BOLD.wrap("Successful Deposit!")),
-        LIGHT_GRAY.wrap("You deposit " + LIGHT_GREEN.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " to shop storage!")
+    public static final MessageLocale STORAGE_DEPOSIT_SUCCESS = LangEntry.builder("ChestShop.Shop.InfiniteStorage.Deposit.Success").chatMessage(
+        GRAY.wrap("You deposit " + SOFT_GREEN.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " to shop storage!")
     );
 
-    public static final LangText STORAGE_DEPOSIT_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.InfiniteStorage.Deposit.Error.NotEnough",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_RED.wrap(BOLD.wrap("Unable to Deposit!")),
-        LIGHT_GRAY.wrap("You don't have enough items!")
+    public static final MessageLocale STORAGE_DEPOSIT_ERROR_NOT_ENOUGH = LangEntry.builder("ChestShop.Shop.InfiniteStorage.Deposit.Error.NotEnough").chatMessage(
+        GRAY.wrap("You don't have enough items!")
     );
 
-    public static final LangText STORAGE_WITHDRAW_SUCCESS = LangText.of("ChestShop.Shop.InfiniteStorage.Withdraw.Success",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_GREEN.wrap(BOLD.wrap("Successful Withdraw!")),
-        LIGHT_GRAY.wrap("You withdraw " + LIGHT_GREEN.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " from shop storage!")
+    public static final MessageLocale STORAGE_WITHDRAW_SUCCESS = LangEntry.builder("ChestShop.Shop.InfiniteStorage.Withdraw.Success").chatMessage(
+        GRAY.wrap("You withdraw " + SOFT_GREEN.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + " from shop storage!")
     );
 
-    public static final LangText STORAGE_WITHDRAW_ERROR_NOT_ENOUGH = LangText.of("ChestShop.Shop.InfiniteStorage.Withdraw.NotEnough",
-        //OUTPUT.wrap(20, 60),
-        //LIGHT_RED.wrap(BOLD.wrap("Unable to Withdraw!")),
-        LIGHT_GRAY.wrap("There is not enough items in storage!")
+    public static final MessageLocale STORAGE_WITHDRAW_ERROR_NOT_ENOUGH = LangEntry.builder("ChestShop.Shop.InfiniteStorage.Withdraw.NotEnough").chatMessage(
+        GRAY.wrap("There is not enough items in storage!")
     );
 
-    public static final LangText ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT = LangText.of("Error.Command.Argument.InvalidShopBlock",
-        LIGHT_GRAY.wrap(LIGHT_RED.wrap(GENERIC_VALUE) + " is not a valid shop block!"));
+    public static final MessageLocale ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT = LangEntry.builder("Error.Command.Argument.InvalidShopBlock").chatMessage(
+        GRAY.wrap(SOFT_RED.wrap(GENERIC_VALUE) + " is not a valid shop block!"));
 }

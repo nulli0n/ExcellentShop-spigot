@@ -1,159 +1,102 @@
 package su.nightexpress.nexshop.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.economybridge.Placeholders;
 import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nightcore.core.CoreLang;
 import su.nightexpress.nightcore.language.entry.*;
+import su.nightexpress.nightcore.locale.LangContainer;
+import su.nightexpress.nightcore.locale.LangEntry;
+import su.nightexpress.nightcore.locale.entry.EnumLocale;
+import su.nightexpress.nightcore.locale.entry.IconLocale;
+import su.nightexpress.nightcore.locale.entry.MessageLocale;
+import su.nightexpress.nightcore.locale.entry.TextLocale;
 
 import java.time.DayOfWeek;
 
 import static su.nightexpress.nexshop.Placeholders.*;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
-import static su.nightexpress.nightcore.language.tag.MessageTags.OUTPUT;
-import static su.nightexpress.nightcore.language.tag.MessageTags.SOUND;
-import static su.nightexpress.nightcore.util.text.tag.Tags.*;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
+import static su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers.*;
 
-public class Lang extends CoreLang {
+public final class Lang implements LangContainer {
 
-    public static final LangEnum<DayOfWeek>   DAYS          = LangEnum.of("Days", DayOfWeek.class);
-    public static final LangEnum<TradeType>   TRADE_TYPES   = LangEnum.of("TradeType", TradeType.class);
-    public static final LangEnum<PriceType>   PRICE_TYPES   = LangEnum.of("PriceType", PriceType.class);
-    public static final LangEnum<ProductType> PRODUCT_TYPES = LangEnum.of("ProductType", ProductType.class);
+    public static final EnumLocale<DayOfWeek>   DAYS          = LangEntry.builder("Days").enumeration(DayOfWeek.class);
+    public static final EnumLocale<TradeType>   TRADE_TYPES   = LangEntry.builder("TradeType").enumeration(TradeType.class);
+    public static final EnumLocale<PriceType>   PRICE_TYPES   = LangEntry.builder("PriceType").enumeration(PriceType.class);
+    public static final EnumLocale<ProductType> PRODUCT_TYPES = LangEntry.builder("ProductType").enumeration(ProductType.class);
+    
+    public static final MessageLocale MODULE_COMMAND_RELOAD = LangEntry.builder("Module.Command.Reloaded").chatMessage(
+        GRAY.wrap(GREEN.wrap(GENERIC_NAME) + " reloaded!"));
 
-    public static final LangString COMMAND_ARGUMENT_NAME_NAME     = LangString.of("Command.Argument.Name.Name", "name");
-    public static final LangString COMMAND_ARGUMENT_NAME_CURRENCY = LangString.of("Command.Argument.Name.Currency", "currency");
-    public static final LangString COMMAND_ARGUMENT_NAME_PRICE    = LangString.of("Command.Argument.Name.Price", "price");
+    public static final TextLocale MODULE_COMMAND_RELOAD_DESC = LangEntry.builder("Module.Command.Reload.Desc").text("Reload the module.");
 
-    public static final LangString COMMAND_CURRENCY_DESC = LangString.of("Command.Currency.Desc", "Currency manager.");
+    public static final MessageLocale SHOP_PRODUCT_ERROR_INVALID_CART_UI = LangEntry.builder("Shop.Product.Error.InvalidCartUI").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap("Could not open purchase menu: Cart UI not found."));
 
-    public static final LangString COMMAND_CURRENCY_GIVE_DESC = LangString.of("Command.Currency.Give.Desc", "Give currency to a player.");
+    public static final MessageLocale SHOP_PRODUCT_ERROR_UNBUYABLE = LangEntry.builder("Shop.Product.Error.Unbuyable").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("This product can't be purchased currently!"));
 
-    public static final LangText COMMAND_CURRENCY_GIVE_DONE = LangText.of("Command.Currency.Give.Done",
-        LIGHT_GRAY.wrap("Given " + LIGHT_YELLOW.wrap(GENERIC_AMOUNT + " " + Placeholders.CURRENCY_NAME) + " to " + LIGHT_YELLOW.wrap(PLAYER_NAME) + "."));
+    public static final MessageLocale SHOP_PRODUCT_ERROR_UNSELLABLE = LangEntry.builder("Shop.Product.Error.Unsellable").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("This product can't be sold currently!"));
 
-    public static final LangString COMMAND_CURRENCY_TAKE_DESC = LangString.of("Command.Currency.Take.Desc", "Take currency from a player.");
+    public static final MessageLocale SHOP_PRODUCT_ERROR_OUT_OF_STOCK = LangEntry.builder("Shop.Product.Error.OutOfStock").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("This product is out of stock!"));
 
-    public static final LangText COMMAND_CURRENCY_TAKE_DONE = LangText.of("Command.Currency.Take.Done",
-        LIGHT_GRAY.wrap("Took " + LIGHT_YELLOW.wrap(GENERIC_AMOUNT + " " + Placeholders.CURRENCY_NAME) + " from " + LIGHT_YELLOW.wrap(PLAYER_NAME) + "."));
+    public static final MessageLocale SHOP_PRODUCT_ERROR_OUT_OF_SPACE = LangEntry.builder("Shop.Product.Error.OutOfSpace").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("The shop is out of space!"));
 
-    public static final LangString COMMAND_CURRENCY_CREATE_DESC = LangString.of("Command.Currency.Create.Desc", "Create an item currency.");
+    public static final MessageLocale SHOP_PRODUCT_ERROR_OUT_OF_FUNDS = LangEntry.builder("Shop.Product.Error.OutOfFunds").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("The shop is out of money!"));
 
-    public static final LangText COMMAND_CURRENCY_CREATE_DONE_NEW = LangText.of("Command.Currency.Create.Done.New",
-        LIGHT_GRAY.wrap("Created a new currency " + LIGHT_GREEN.wrap(GENERIC_NAME) + " as " + LIGHT_GREEN.wrap(GENERIC_ITEM) + "."));
+    public static final MessageLocale SHOP_PRODUCT_ERROR_FULL_STOCK = LangEntry.builder("Shop.Product.Error.FullStock").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("This product is full of stock!"));
 
-    public static final LangText COMMAND_CURRENCY_CREATE_ERROR_EXIST = LangText.of("Command.Currency.Create.Error.Exist",
-        LIGHT_GRAY.wrap("Currency " + LIGHT_RED.wrap(Placeholders.CURRENCY_ID) + " already exists and is not an item currency."));
+    public static final MessageLocale SHOP_PRODUCT_ERROR_FULL_INVENTORY = LangEntry.builder("Shop.Product.Error.FullInventory").chatMessage(
+        Sound.ENTITY_VILLAGER_NO,
+        SOFT_RED.wrap(BOLD.wrap("Sorry! ")) + GRAY.wrap("You have to clean up your inventory before purchase!"));
 
-    public static final LangText COMMAND_CURRENCY_ERROR_NO_ITEM = LangText.of("Command.Currency.Error.NoItem",
-        LIGHT_RED.wrap("You must hold an item to do that!"));
-
-
-    public static final LangText MODULE_COMMAND_RELOAD = LangText.of("Module.Command.Reloaded",
-        LIGHT_GRAY.wrap(LIGHT_GREEN.wrap(GENERIC_NAME) + " reloaded!"));
-
-    public static final LangString MODULE_COMMAND_RELOAD_DESC = LangString.of("Module.Command.Reload.Desc", "Reload the module.");
-
-
-    public static final LangText ERROR_INVALID_CURRENCY = LangText.of("Error.Currency.Invalid",
-        LIGHT_RED.wrap("Invalid currency!"));
-
-
-    public static final LangText SHOP_PRODUCT_ERROR_INVALID_CART_UI = LangText.of("Shop.Product.Error.InvalidCartUI",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap("Could not open purchase menu: Cart UI not found."));
-
-    public static final LangText SHOP_PRODUCT_ERROR_UNBUYABLE = LangText.of("Shop.Product.Error.Unbuyable",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("This product can't be purchased currently!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_UNSELLABLE = LangText.of("Shop.Product.Error.Unsellable",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("This product can't be sold currently!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_OUT_OF_STOCK = LangText.of("Shop.Product.Error.OutOfStock",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("This product is out of stock!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_OUT_OF_SPACE = LangText.of("Shop.Product.Error.OutOfSpace",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("The shop is out of space!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_OUT_OF_FUNDS = LangText.of("Shop.Product.Error.OutOfFunds",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("The shop is out of money!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_FULL_STOCK = LangText.of("Shop.Product.Error.FullStock",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("This product is full of stock!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_FULL_INVENTORY = LangText.of("Shop.Product.Error.FullInventory",
-        SOUND.wrap(Sound.ENTITY_VILLAGER_NO),
-        LIGHT_RED.wrap(BOLD.wrap("Sorry! ")) + LIGHT_GRAY.wrap("You have to clean up your inventory before purchase!"));
-
-    public static final LangText SHOP_PRODUCT_ERROR_TOO_EXPENSIVE = LangText.of("Shop.Product.Error.TooExpensive",
-        OUTPUT.wrap(15, 60) + SOUND.wrap(Sound.BLOCK_ANVIL_PLACE),
-        LIGHT_RED.wrap(BOLD.wrap("Too Expensive!")),
-        LIGHT_GRAY.wrap("You need " + LIGHT_RED.wrap(GENERIC_PRICE) + "!")
+    public static final MessageLocale SHOP_PRODUCT_ERROR_TOO_EXPENSIVE = LangEntry.builder("Shop.Product.Error.TooExpensive").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Too Expensive!")),
+        GRAY.wrap("You need " + SOFT_RED.wrap(GENERIC_PRICE) + "!"),
+        Sound.BLOCK_ANVIL_PLACE
     );
 
-    public static final LangText SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS = LangText.of("Shop.Product.Error.NotEnoughItems",
-        OUTPUT.wrap(15, 60) + SOUND.wrap(Sound.BLOCK_ANVIL_PLACE),
-        LIGHT_RED.wrap(BOLD.wrap("Not Enough Items!")),
-        LIGHT_GRAY.wrap("You need " + LIGHT_RED.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + "!")
+    public static final MessageLocale SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS = LangEntry.builder("Shop.Product.Error.NotEnoughItems").titleMessage(
+        SOFT_RED.wrap(BOLD.wrap("Not Enough Items!")),
+        GRAY.wrap("You need " + SOFT_RED.wrap("x" + GENERIC_AMOUNT + " " + GENERIC_ITEM) + "!"),
+        Sound.BLOCK_ANVIL_PLACE
     );
 
-    public static final LangString SHOP_CART_ENTER_AMOUNT = LangString.of("Shop.Cart.CustomAmount",
-        //OUTPUT.wrap(20, 1200),
-        //LIGHT_GREEN.wrap(BOLD.wrap("< Custom Amount >")),
-        LIGHT_GRAY.wrap("Enter your amount...")
-    );
+    public static final TextLocale SHOP_CART_ENTER_AMOUNT = LangEntry.builder("Shop.Cart.CustomAmount").text(GRAY.wrap("Enter your amount..."));
 
+    public static final TextLocale OTHER_PRICE_DISABLED = LangEntry.builder("Other.PriceDisabled").text("N/A");
+    public static final TextLocale OTHER_NO_RENT = LangEntry.builder("Other.NoRent").text("< Not Rented >");
+    public static final TextLocale OTHER_UNDEFINED = LangEntry.builder("Other.Undefined").text(SOFT_GRAY.wrap("« " + UNDERLINED.wrap("Undefined") + " »"));
 
-    public static final LangString OTHER_PRICE_DISABLED = LangString.of("Other.PriceDisabled", "N/A");
-    public static final LangString OTHER_NO_RENT = LangString.of("Other.NoRent", "< Not Rented >");
+    public static final TextLocale EDITOR_PRICE_FLOAT_NO_DAYS = LangEntry.builder("Editor.Price.Float.NoDays").text("No days set. Price won't refresh properly.");
+    public static final TextLocale EDITOR_PRICE_FLOAT_NO_TIMES = LangEntry.builder("Editor.Price.Float.NoTimes").text("No times set. Price won't refresh properly.");
 
-    public static final LangString EDITOR_PRICE_FLOAT_NO_DAYS = LangString.of("Editor.Price.Float.NoDays",
-        "No days set. Price won't refresh properly.");
+    public static final IconLocale EDITOR_GENERIC_BROKEN_ITEM = LangEntry.iconBuilder("Editor.Generic.BrokenItem")
+        .accentColor(SOFT_RED)
+        .name("< Invalid Item> ")
+        .appendInfo("Item tag/ID is broken", "or invalid.").build();
 
-    public static final LangString EDITOR_PRICE_FLOAT_NO_TIMES = LangString.of("Editor.Price.Float.NoTimes",
-        "No times set. Price won't refresh properly.");
-
-    public static final LangUIButton EDITOR_GENERIC_BROKEN_ITEM = LangUIButton.builder("Editor.Generic.BrokenItem", LIGHT_RED.wrap(BOLD.wrap("< Invalid Item> ")))
-        .description(
-            LIGHT_GRAY.wrap("Item tag/ID is broken"),
-            LIGHT_GRAY.wrap("or invalid.")
-        ).build();
-
-    public static final LangString EDITOR_GENERIC_ENTER_NAME = LangString.of("Editor.Generic.Enter.Name",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Name]")));
-
-    public static final LangString EDITOR_GENERIC_ENTER_AMOUNT = LangString.of("Editor.Generic.Enter.Amount",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Amount]")));
-
-    public static final LangString EDITOR_GENERIC_ENTER_VALUE = LangString.of("Editor.Generic.Enter.Value",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Value]")));
-
-    public static final LangString EDITOR_GENERIC_ENTER_DAY = LangString.of("Editor.Generic.Enter.Day",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Day Name]")));
-
-    public static final LangString EDITOR_GENERIC_ENTER_TIME = LangString.of("Editor.Generic.Enter.Time",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Time]") + " like " + LIGHT_GREEN.wrap("22:00")));
-
-    public static final LangString EDITOR_GENERIC_ENTER_SECONDS = LangString.of("Editor.Generic.Enter.Seconds",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Seconds Amount]")));
-
-    public static final LangString EDITOR_PRODUCT_ENTER_PRICE = LangString.of("Editor.Product.Enter.Price",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Price]")));
-
-    public static final LangString EDITOR_PRODUCT_ENTER_UNI_PRICE = LangString.of("Editor.Product.Enter.UniPrice",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Min] [Max]")));
-
-    public static final LangString EDITOR_PRODUCT_ENTER_CURRENCY = LangString.of("Editor.Product.Enter.Currency",
-        LIGHT_GRAY.wrap("Enter " + LIGHT_GREEN.wrap("[Currency Identifier]")));
+    @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_NAME = LangEntry.builder("Editor.Generic.Enter.Name").text(GRAY.wrap("Enter " + GREEN.wrap("[Name]")));
+    @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_AMOUNT = LangEntry.builder("Editor.Generic.Enter.Amount").text(GRAY.wrap("Enter " + GREEN.wrap("[Amount]")));
+    @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_VALUE = LangEntry.builder("Editor.Generic.Enter.Value").text(GRAY.wrap("Enter " + GREEN.wrap("[Value]")));
+    @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_DAY = LangEntry.builder("Editor.Generic.Enter.Day").text(GRAY.wrap("Enter " + GREEN.wrap("[Day Name]")));
+    @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_TIME = LangEntry.builder("Editor.Generic.Enter.Time").text(GRAY.wrap("Enter " + GREEN.wrap("[Time]") + " like " + GREEN.wrap("22:00")));
+    @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_SECONDS = LangEntry.builder("Editor.Generic.Enter.Seconds").text(GRAY.wrap("Enter " + GREEN.wrap("[Seconds Amount]")));
+    @Deprecated public static final TextLocale EDITOR_PRODUCT_ENTER_PRICE = LangEntry.builder("Editor.Product.Enter.Price").text(GRAY.wrap("Enter " + GREEN.wrap("[Price]")));
+    @Deprecated public static final TextLocale EDITOR_PRODUCT_ENTER_UNI_PRICE = LangEntry.builder("Editor.Product.Enter.UniPrice").text(GRAY.wrap("Enter " + GREEN.wrap("[Min] [Max]")));
+    @Deprecated  public static final TextLocale EDITOR_PRODUCT_ENTER_CURRENCY = LangEntry.builder("Editor.Product.Enter.Currency").text(GRAY.wrap("Enter " + GREEN.wrap("[Currency Identifier]")));
 
 
 
@@ -211,10 +154,10 @@ public class Lang extends CoreLang {
     public static final LangUIButton PRODUCT_EDIT_PRICE_FLOAT_REFRESH_TYPE = LangUIButton.builder("Editor.Product.Price.Float.RefreshType", "Refresh Type")
         .current(PRICER_FLOAT_REFRESH_TYPE)
         .description(
-            LIGHT_YELLOW.wrap(BOLD.wrap("Interval:")),
+            SOFT_YELLOW.wrap(BOLD.wrap("Interval:")),
             "Performs refresh every X seconds.",
             "",
-            LIGHT_YELLOW.wrap(BOLD.wrap("Fixed:")),
+            SOFT_YELLOW.wrap(BOLD.wrap("Fixed:")),
             "Performs refresh at given times."
         )
         .click("toggle")

@@ -8,7 +8,7 @@ import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
@@ -29,7 +29,7 @@ public class RotationListMenu extends LinkedMenu<ShopPlugin, VirtualShop> implem
     private final VirtualShopModule module;
 
     public RotationListMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_SHOP_ROTATIONS.getString());
+        super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_SHOP_ROTATIONS.text());
         this.module = module;
 
         this.addItem(MenuItem.buildReturn(this, 39, (viewer, event) -> {
@@ -40,13 +40,13 @@ public class RotationListMenu extends LinkedMenu<ShopPlugin, VirtualShop> implem
         this.addItem(MenuItem.buildPreviousPage(this, 36));
 
         this.addItem(Material.ANVIL, VirtualLocales.ROTATION_CREATE, 41, (viewer, event, shop) -> {
-            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_ROTATION_ID, input -> {
+            this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_ROTATION_ID.text(), input -> {
                 String id = StringUtil.transformForID(input.getTextRaw());
                 if (id.isBlank()) return false;
 
                 Rotation exist = shop.getRotationById(id);
                 if (exist != null) {
-                    VirtualLang.ERROR_EDITOR_ROTATION_EXISTS.getMessage().send(viewer.getPlayer());
+                    VirtualLang.ERROR_EDITOR_ROTATION_EXISTS.message().send(viewer.getPlayer());
                     return false;
                 }
 

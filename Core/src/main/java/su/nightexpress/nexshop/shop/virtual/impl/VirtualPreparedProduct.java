@@ -9,7 +9,7 @@ import su.nightexpress.nexshop.api.shop.Transaction.Result;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.impl.AbstractPreparedProduct;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 
 public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProduct> {
 
@@ -42,7 +42,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
 
         if (result == Transaction.Result.SUCCESS) {
             if (!this.isSilent()) {
-                VirtualLang.PRODUCT_PURCHASE_BUY.getMessage().replace(this.replacePlaceholders()).send(player);
+                VirtualLang.PRODUCT_PURCHASE_BUY.message().send(player, replacer -> replacer.replace(this.replacePlaceholders()));
             }
 
             shop.onTransaction(event);
@@ -92,7 +92,7 @@ public class VirtualPreparedProduct extends AbstractPreparedProduct<VirtualProdu
 
         if (result == Transaction.Result.SUCCESS) {
             if (!this.isSilent()) {
-                VirtualLang.PRODUCT_PURCHASE_SELL.getMessage().replace(this.replacePlaceholders()).send(player);
+                VirtualLang.PRODUCT_PURCHASE_SELL.message().send(player, replacer -> replacer.replace(this.replacePlaceholders()));
             }
 
             shop.onTransaction(event);

@@ -49,18 +49,18 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         if (result == Transaction.Result.SUCCESS) {
             // TODO Store price in prepared product?
             if (!this.isSilent()) {
-                ChestLang.SHOP_TRADE_BUY_INFO_USER.getMessage()
+                ChestLang.SHOP_TRADE_BUY_INFO_USER.message().send(player, replacer -> replacer
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
-                    .send(player);
+                );
 
                 Player owner = shop.getOwner().getPlayer();
                 if (owner != null && !shop.isAdminShop()) {
-                    ChestLang.SHOP_TRADE_BUY_INFO_OWNER.getMessage()
+                    ChestLang.SHOP_TRADE_BUY_INFO_OWNER.message().send(owner, replacer -> replacer
                         .replace(Placeholders.forPlayer(player))
                         .replace(this.replacePlaceholders())
                         .replace(shop.replacePlaceholders())
-                        .send(owner);
+                    );
                 }
             }
 
@@ -68,8 +68,8 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
 
             if (!shop.isAdminShop()) {
                 product.consumeStock(TradeType.BUY, transaction.getUnits(), null); // Take item from shop's inventory.
-                shop.getOwnerBank().deposit(product.getCurrency(), transaction.getPrice());
-                shop.getModule().savePlayerBank(shop.getOwnerBank());
+                shop.getRentersOrOwnerBank().deposit(product.getCurrency(), transaction.getPrice());
+                shop.getModule().savePlayerBank(shop.getRentersOrOwnerBank());
             }
 
             // Process transaction
@@ -110,7 +110,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         else if (shopSpace >= 0 && shopSpace < fined) {
             result = Transaction.Result.OUT_OF_SPACE;
         }
-        else if (!shop.isAdminShop() && !shop.getOwnerBank().hasEnough(product.getCurrency(), price)) {
+        else if (!shop.isAdminShop() && !shop.getRentersOrOwnerBank().hasEnough(product.getCurrency(), price)) {
             result = Transaction.Result.OUT_OF_MONEY;
         }
 
@@ -132,26 +132,26 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
 
             // Process transaction
             if (!shop.isAdminShop()) {
-                shop.getOwnerBank().withdraw(product.getCurrency(), transaction.getPrice());
-                shop.getModule().savePlayerBank(shop.getOwnerBank());
+                shop.getRentersOrOwnerBank().withdraw(product.getCurrency(), transaction.getPrice());
+                shop.getModule().savePlayerBank(shop.getRentersOrOwnerBank());
             }
             product.getCurrency().give(player, transaction.getPrice());
             product.take(inventory, transaction.getUnits());
             shop.getModule().getLogger().logTransaction(event);
 
             if (!this.isSilent()) {
-                ChestLang.SHOP_TRADE_SELL_INFO_USER.getMessage()
+                ChestLang.SHOP_TRADE_SELL_INFO_USER.message().send(player, replacer -> replacer
                     .replace(this.replacePlaceholders())
                     .replace(shop.replacePlaceholders())
-                    .send(player);
+                );
 
                 Player owner = shop.getOwner().getPlayer();
                 if (owner != null && !shop.isAdminShop()) {
-                    ChestLang.SHOP_TRADE_SELL_INFO_OWNER.getMessage()
+                    ChestLang.SHOP_TRADE_SELL_INFO_OWNER.message().send(owner, replacer -> replacer
                         .replace(Placeholders.forPlayer(player))
                         .replace(this.replacePlaceholders())
                         .replace(shop.replacePlaceholders())
-                        .send(owner);
+                    );
                 }
             }
         }

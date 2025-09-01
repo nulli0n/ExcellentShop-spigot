@@ -1134,61 +1134,6 @@ public class ShopCreator {
         this.addShopProduct(shop, Material.GREEN_SHULKER_BOX, 1_000, 150, 11, 33);
     }
 
-//    private void createTravellerShop() {
-//        String name = GREEN.enclose(BOLD.enclose("Traveller Shop"));
-//        List<String> desc = List.of(GRAY.enclose("Shop with items changing"), GRAY.enclose("every 24 hours."));
-//
-//        VirtualShop shop = this.createRotatingShop("traveller", name, desc, new ItemStack(Material.ENDER_EYE));
-//
-//        this.addShopProduct(shop, Material.EXPERIENCE_BOTTLE, 100, 25);
-//        this.addShopProduct(shop, Material.ENDER_EYE, 350, 15);
-//        this.addShopProduct(shop, Material.IRON_INGOT, 100, 25);
-//        this.addShopProduct(shop, Material.GOLD_INGOT, 100, 25);
-//        this.addShopProduct(shop, Material.LAPIS_LAZULI, 100, 25);
-//        this.addShopProduct(shop, Material.FLINT, 100, 25);
-//        this.addShopProduct(shop, Material.EGG, 25, 5);
-//        this.addShopProduct(shop, Material.TNT, 400, 35);
-//        this.addShopProduct(shop, Material.CARROT, 35, 5);
-//        this.addShopProduct(shop, Material.GOLD_NUGGET, 100, 25);
-//        this.addShopProduct(shop, Material.IRON_NUGGET, 100, 25);
-//        this.addShopProduct(shop, Material.WHEAT, 100, 25);
-//        this.addShopProduct(shop, Material.STICK, 100, 25);
-//        this.addShopProduct(shop, Material.LEATHER, 100, 25);
-//        this.addShopProduct(shop, Material.COPPER_INGOT, 100, 25);
-//        this.addShopProduct(shop, Material.GRAY_DYE, 15, 1);
-//        this.addShopProduct(shop, Material.BOOK, 10, 1);
-//        this.addShopProduct(shop, Material.GLASS_BOTTLE, 20, 2);
-//        this.addShopProduct(shop, Material.MELON_SLICE, 100, 25);
-//        this.addShopProduct(shop, Material.NAUTILUS_SHELL, 100, 25);
-//        this.addShopProduct(shop, Material.HEART_OF_THE_SEA, 100, 25);
-//        this.addShopProduct(shop, Material.FIRE_CHARGE, 100, 25);
-//        this.addShopProduct(shop, Material.NAME_TAG, 100, 25);
-//        this.addShopProduct(shop, Material.APPLE, 100, 25);
-//        this.addShopProduct(shop, Material.LEAD, 100, 25);
-//        this.addShopProduct(shop, Material.COOKED_COD, 100, 25);
-//        this.addShopProduct(shop, Material.SPIDER_EYE, 100, 25);
-//
-//        shop.save();
-//        shop.performRotation();
-//    }
-
-//    @NotNull
-//    private VirtualShop createRotatingShop(@NotNull String id, @NotNull String name, @NotNull List<String> description, @NotNull ItemStack icon) {
-//        File file = new File(this.module.getAbsolutePath() + VirtualShopModule.DIR_SHOPS + id, VirtualShop.FILE_NAME);
-//        FileUtil.create(file);
-//
-//        VirtualShop shop = new VirtualShop(this.plugin, this.module, file, id);
-////        shop.setDefaultLayout(Placeholders.DEFAULT);
-////        shop.setRotationType(RotationType.INTERVAL);
-////        shop.setRotationInterval(86400);
-////        shop.setProductMinAmount(15);
-////        shop.setProductMaxAmount(15);
-////        shop.setProductSlots(new int[]{10,11,12,13,14,15,16,20,21,22,23,24,30,31,32});
-////        this.setShopSettings(shop, name, description, icon);
-//
-//        return shop;
-//    }
-
     private void createShop(@NotNull String id,
                             @NotNull String hexColor,
                             @NotNull String name,
@@ -1211,7 +1156,7 @@ public class ShopCreator {
             shop.setBuyingAllowed(true);
             shop.setSellingAllowed(true);
             shop.setPages(pages);
-            shop.setMainMenuSlot(menuSlot);
+            shop.setMenuSlots(Lists.newSet(menuSlot));
             shop.setDefaultLayout(Placeholders.DEFAULT);
             consumer.accept(shop);
         });
@@ -1241,11 +1186,6 @@ public class ShopCreator {
         this.addShopProduct(shop, itemStack, buyPrice, sellPrice, page, slot);
     }
 
-//    @Deprecated
-//    private void addShopProduct(@NotNull VirtualShop shop, @NotNull Material material, double buyPrice, double sellPrice) {
-//        this.addShopProduct(shop, material, UniDouble.of(buyPrice, sellPrice));
-//    }
-
     private void addShopProduct(@NotNull VirtualShop shop, @NotNull ItemStack itemStack, double buyPrice, double sellPrice, int page, int slot) {
         this.addShopProduct(shop, itemStack, product -> {
             product.getPricer().setPrice(TradeType.BUY, buyPrice);
@@ -1265,24 +1205,4 @@ public class ShopCreator {
 
         shop.addProduct(product);
     }
-
-//    @Deprecated
-//    private void addShopProduct(@NotNull VirtualShop shop, @NotNull Material material, @NotNull UniDouble price) {
-//        ItemStack itemStack = new ItemStack(material);
-//
-//        //ItemHandler handler = ItemBridge.getItemManager().forBukkitItem();
-//        //ItemWrapper packer = handler.wrap(itemStack);
-//
-//        ProductTyping type = new VanillaProductType(itemStack, itemStack.hasItemMeta());
-//
-//        VirtualProduct product = ProductTypes.wizardCreation(plugin, shop, itemStack, ProductType.VANILLA, false);//shop.createProduct(this.currency, type);
-//        if (product == null) return;
-//
-//        product.setPricer(AbstractProductPricer.from(PriceType.FLAT));
-//        product.getPricer().setPrice(TradeType.BUY, price.getMinValue());
-//        product.getPricer().setPrice(TradeType.SELL, price.getMaxValue());
-//        product.setRotating(true);
-//
-//        shop.addProduct(product);
-//    }
 }

@@ -65,6 +65,10 @@ public abstract class AbstractListing {
         return ownerName;
     }
 
+    public boolean isValid() {
+        return this.typing.isValid();
+    }
+
     @NotNull
     public ItemStack getItemStack() {
         return this.typing.getItem();

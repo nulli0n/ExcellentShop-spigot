@@ -19,11 +19,11 @@ import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.text.NightMessage;
 
@@ -50,19 +50,13 @@ public class ShopUtils {
         return dateFormatter;
     }
 
+    public static boolean canUseDialogs() {
+        return Version.isAtLeast(Version.MC_1_21_7);
+    }
+
     @NotNull
     public static String formatOrInfinite(double value) {
-        return value < 0 ? Lang.OTHER_INFINITY.getString() : NumberUtil.format(value);
-    }
-
-    @Nullable
-    public static ItemStack readItemTag(@NotNull String serialized) {
-        return Version.isAtLeast(Version.MC_1_21) && serialized.contains("{") ? ItemNbt.fromTagString(serialized) : ItemNbt.decompress(serialized);
-    }
-
-    @Nullable
-    public static String getItemTag(@NotNull ItemStack itemStack) {
-        return Version.isAtLeast(Version.MC_1_21) ? ItemNbt.getTagString(itemStack) : ItemNbt.compress(itemStack);
+        return value < 0 ? CoreLang.OTHER_INFINITY.text() : NumberUtil.format(value);
     }
 
     public static boolean hasCurrencyPermission(@NotNull Player player, @NotNull Currency currency) {

@@ -100,7 +100,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
             return;
         }
 
-        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, input -> {
+        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
             product.setPrice(tradeType, input.asDouble(0));
             this.save(viewer, product);
             return true;
@@ -119,7 +119,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
             return;
         }
 
-        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE, input -> {
+        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE.text(), input -> {
             String[] split = input.getTextRaw().split(" ");
             double min = NumberUtil.getDoubleAbs(split[0]);
             double max = split.length >= 2 ? NumberUtil.getDoubleAbs(split[1]) : min;
@@ -218,7 +218,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
 
         if (pricer.getRefreshType() == RefreshType.INTERVAL) {
             this.addItem(menuViewer, NightItem.asCustomHead(SKULL_CLOCK), Lang.PRODUCT_EDIT_PRICE_FLOAT_REFRESH_INTERVAL, 33, (viewer, event, product) -> {
-                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS, input -> {
+                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
                     pricer.setRefreshInterval(input.asIntAbs(0));
                     this.save(viewer, product);
                     return true;
@@ -234,7 +234,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
                     return;
                 }
 
-                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_DAY, input -> {
+                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_DAY.text(), input -> {
                     DayOfWeek day = StringUtil.getEnum(input.getTextRaw(), DayOfWeek.class).orElse(null);
                     if (day == null) return true;
 
@@ -251,7 +251,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
                     return;
                 }
 
-                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_TIME, input -> {
+                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_TIME.text(), input -> {
                     try {
                         pricer.getTimes().add(LocalTime.parse(input.getTextRaw(), ShopUtils.TIME_FORMATTER));
                         this.save(viewer, product);
@@ -268,7 +268,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
 
     private void addDynamicButtons(@NotNull MenuViewer menuViewer, @NotNull DynamicPricer pricer) {
         this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_INITIAL, 31, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, input -> {
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
                 TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
                 pricer.setInitial(tradeType, input.asDouble(0));
@@ -278,7 +278,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         });
 
         this.addItem(menuViewer, NightItem.asCustomHead(SKULL_STEP), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_STEP, 33, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, input -> {
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
                 TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
                 pricer.setStep(tradeType, input.asDouble(0));
@@ -290,7 +290,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
 
     private void addPlayersButtons(@NotNull MenuViewer menuViewer, @NotNull PlayersPricer pricer) {
         this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_PLAYERS_INITIAL, 31, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, input -> {
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
                 TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
                 pricer.setInitial(tradeType, input.asDouble(0));
@@ -300,7 +300,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         });
 
         this.addItem(menuViewer, NightItem.asCustomHead(SKULL_STEP), Lang.PRODUCT_EDIT_PRICE_PLAYERS_ADJUST, 32, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE, input -> {
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
                 TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
                 pricer.setAdjustAmount(tradeType, input.asDouble(0));
@@ -310,7 +310,7 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         });
 
         this.addItem(menuViewer, NightItem.asCustomHead(SKULL_PLAYER), Lang.PRODUCT_EDIT_PRICE_PLAYERS_STEP, 33, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT, input -> {
+            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_AMOUNT.text(), input -> {
                 pricer.setAdjustStep(input.asInt(0));
                 this.save(viewer, product);
                 return true;

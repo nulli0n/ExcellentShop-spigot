@@ -22,8 +22,8 @@ public class CommandArguments {
     @NotNull
     public static ArgumentBuilder<ShopBlock> forShopBlock(@NotNull ChestShopModule module) {
         return CommandArgument.builder(SHOP_BLOCK, (string, context) -> Optional.ofNullable(BukkitThing.getMaterial(string)).map(module::getShopBlock).orElse(null))
-            .customFailure(ChestLang.ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT)
-            .localized(ChestLang.COMMAND_ARGUMENT_NAME_SHOP_BLOCK)
+            // TODO .customFailure(ChestLang.ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT)
+            .localized(ChestLang.COMMAND_ARGUMENT_NAME_SHOP_BLOCK.text())
             .withSamples(tabContext -> module.getShopBlockMap().keySet().stream().map(BukkitThing::getValue).toList());
     }
 }
