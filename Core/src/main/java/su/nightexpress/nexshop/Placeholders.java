@@ -301,7 +301,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
             if (icon.getDisplayName() != null) return icon.getDisplayName();
             return shop.getName();
         })
-        .add(VIRTUAL_SHOP_DESCRIPTION, shop -> !shop.hasDescription() ? Lang.OTHER_UNDEFINED.text() : String.join(TagWrappers.BR, shop.getDescription()))
+        .add(VIRTUAL_SHOP_DESCRIPTION, shop -> /*!shop.hasDescription() ? Lang.OTHER_UNDEFINED.text() : */String.join(TagWrappers.BR, shop.getDescription()))
         .add(VIRTUAL_SHOP_PAGES, shop -> String.valueOf(shop.getPages()))
         .add(VIRTUAL_SHOP_DISCOUNT_AMOUNT, shop -> NumberUtil.format(shop.getDiscountPlain()))
     );
