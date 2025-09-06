@@ -51,7 +51,6 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     protected PluginDetails getDefaultDetails() {
         return PluginDetails.create("Shop", new String[]{"eshop", "excellentshop"})
             .setConfigClass(Config.class)
-            //.setLangClass(Lang.class)
             .setPermissionsClass(Perms.class);
     }
 
