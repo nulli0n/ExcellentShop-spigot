@@ -104,7 +104,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
             EquipmentSlot slot = event.getHand();
             Block block = event.getBlockPlaced();
 
-            this.plugin.runTask(task -> {
+            this.plugin.runTask(() -> {
                 if (this.module.createShopFromItem(player, block, itemStack)) {
                     player.getInventory().setItem(slot, itemStack);
                 }
@@ -221,11 +221,11 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
                 Block block = location.getBlock();
 
-                // What the hell is happenning in this event? The inventory is fucking broken with stack amounts of 1 every time.
+                // What the hell is happening in this event? The inventory is fucking broken with stack amounts of 1 every time.
                 // https://www.spigotmc.org/threads/581448/
                 // https://www.spigotmc.org/threads/534714/
 
-                this.plugin.runTask(task -> {
+                this.plugin.runTask(location, () -> {
                     if (!(block.getState() instanceof Hopper hopper)) return; // Obtain fresh Hopper instance, do not trust this damn event anymore.
 
                     Inventory hopperInv = hopper.getInventory();
@@ -267,7 +267,7 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
         boolean isShopInv = event.getRawSlot() < inventory.getSize();
 
         ItemStack cursor = event.getCursor();
-        if (cursor != null && !cursor.getType().isAir() && isShopInv && !shop.isProduct(cursor)) {
+        if (!cursor.getType().isAir() && isShopInv && !shop.isProduct(cursor)) {
             event.setCancelled(true);
             return;
         }

@@ -60,8 +60,6 @@ public class ShopCreator {
 
         dir.mkdirs();
 
-        //this.createTravellerShop();
-
         this.createShop("building_blocks",
             "#15A2DD",
             "BUILDING BLOCKS",

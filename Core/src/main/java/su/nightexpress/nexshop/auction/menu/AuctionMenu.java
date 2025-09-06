@@ -223,21 +223,9 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
                 .setLore(this.itemLore)
                 .replacement(replacer -> replacer
                     .replace(PLACEHOLDER_LORE_FORMAT, Replacer.create().replace(PLACEHOLDER_ACTION_PREVIEW, previewLore).apply(this.getLoreFormat(player, listing)))
-                    //.replace(PLACEHOLDER_ACTION_PREVIEW, previewLore)
                     .replace(listing.replacePlaceholders())
                 )
                 .getItemStack();
-
-//            ItemReplacer.create(item).trimmed()
-//                .setDisplayName(this.itemName)
-//                .setLore(this.itemLore)
-//                .injectLore(PLACEHOLDER_LORE_FORMAT, this.getLoreFormat(player, listing))
-//                .replaceLoreExact(PLACEHOLDER_ACTION_PREVIEW, previewLore)
-//                .replace(listing.replacePlaceholders())
-//                .replacePlaceholderAPI(player)
-//                .writeMeta();
-//
-//            return item;
         });
 
         autoFill.setItems(this.auctionManager.getListings().getActive().stream()
@@ -321,8 +309,6 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         });
         list.add(new MenuItem(nextPage).setSlots(44).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
 
-
-
         ItemStack orderItem = new ItemStack(Material.NAME_TAG);
         ItemUtil.editMeta(orderItem, meta -> {
             meta.setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Items Order")));
@@ -405,8 +391,6 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         });
         list.add(new MenuItem(historyItem).setSlots(53).setPriority(10).setHandler(this.historyHandler));
 
-
-
         ItemStack infoItem = new ItemStack(Material.LECTERN);
         ItemUtil.editMeta(infoItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Info")));
@@ -441,8 +425,6 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         )).read(cfg);
 
         this.itemSlots = ConfigValue.create("Items.Slots", IntStream.range(0, 36).toArray()).read(cfg);
-
-
 
         this.lorePreview = ConfigValue.create("Lore_Format.Action_Preview", Lists.newList(
             LIGHT_GRAY.enclose(LIGHT_GREEN.enclose("[▶]") + " Right-Click to " + LIGHT_GREEN.enclose("preview") + ".")
@@ -490,8 +472,6 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
             PLACEHOLDER_ACTION_PREVIEW
         )).read(cfg);
 
-
-
         this.loreListSelected = ConfigValue.create("Lore_Format.List.Selected",
             LIGHT_GREEN.enclose("✔ " + GENERIC_NAME)
         ).read(cfg);
@@ -500,5 +480,4 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
             LIGHT_GRAY.enclose("   " + GENERIC_NAME)
         ).read(cfg);
     }
-
 }

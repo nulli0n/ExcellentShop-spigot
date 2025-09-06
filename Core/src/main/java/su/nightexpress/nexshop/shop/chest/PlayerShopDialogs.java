@@ -59,7 +59,7 @@ public class PlayerShopDialogs extends SimpleManager<ShopPlugin> {
 
                 shop.setName(name);
                 shop.setSaveRequired(true);
-                plugin.runTask(task -> module.openShopSettings(player, shop));
+                plugin.runTask(player, () -> module.openShopSettings(player, shop));
             })
         );
     }

@@ -58,8 +58,6 @@ public class PriceMenu extends ProductPriceMenu<ChestProduct> {
 
     @Override
     protected void handlePriceType(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull ChestProduct product) {
-        //Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PREFIX_PRICE_TYPE + priceType.name().toLowerCase());
-
         double sell = product.getPricer().getPrice(TradeType.SELL);
         double buy = product.getPricer().getPrice(TradeType.BUY);
 

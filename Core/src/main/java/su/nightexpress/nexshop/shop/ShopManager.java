@@ -54,7 +54,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
         this.addTask(this::updateShops, Config.SHOP_UPDATE_INTERVAL.get());
 
-        this.plugin.runTaskLater(task -> this.printBadProducts(), 100L);
+        this.plugin.runTaskLater(this::printBadProducts, 100L);
     }
 
     @Override

@@ -156,9 +156,6 @@ public class ChestLang implements LangContainer {
 
     public static final TextLocale RENT_PROMPT_DURATION = LangEntry.builder("ChestShop.Rent.Prompt.Duration").text(GRAY.wrap("Enter " + GREEN.wrap("[Days Amount]")));
 
-//    public static final TextLocale RENT_PROMPT_CURRENCY = LangEntry.builder("ChestShop.Rent.Prompt.Currency",
-//        GRAY.wrap("Enter " + GREEN.wrap("[Currency]")));
-
     public static final TextLocale RENT_PROMPT_PRICE = LangEntry.builder("ChestShop.Rent.Prompt.Price").text(GRAY.wrap("Enter " + GREEN.wrap("[Rent Price]")));
 
     public static final MessageLocale RENT_RENT_SUCCESS = LangEntry.builder("ChestShop.Rent.Rent.Success").titleMessage(

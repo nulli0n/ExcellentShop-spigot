@@ -76,7 +76,7 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
             }
 
             ItemStack cursor = event.getCursor();
-            if (cursor == null || cursor.getType().isAir()) return;
+            if (cursor.getType().isAir()) return;
 
             rotation.setIcon(NightItem.fromItemStack(cursor));
             event.getView().setCursor(null);

@@ -79,15 +79,7 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         Player player = viewer.getPlayer();
         ChestShop shop = this.getLink(player);
 
-        /*PlayerShopDialogs dialogs = this.module.getDialogs();
-        if (dialogs != null) {
-            dialogs.openShopNameDialog(player, shop);
-            return;
-        }*/
-
-        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
-            return this.module.renameShop(player, shop, input.getText());
-        }));
+        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> this.module.renameShop(player, shop, input.getText())));
     }
 
     private void handleProducts(@NotNull MenuViewer viewer) {
@@ -138,10 +130,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         UIUtils.openConfirmation(player, Confirmation.builder()
             .onAccept((viewer1, event) -> {
                 this.module.deleteShop(player, shop);
-                this.plugin.runTask(task -> player.closeInventory());
+                this.plugin.runTask(player, player::closeInventory);
             })
             .onReturn((viewer1, event) -> {
-                this.plugin.runTask(task -> this.module.openShopSettings(player, shop));
+                this.plugin.runTask(player, () -> this.module.openShopSettings(player, shop));
             })
             .returnOnAccept(false)
             .build());
@@ -154,11 +146,9 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         UIUtils.openConfirmation(player, Confirmation.builder()
             .onAccept((viewer1, event) -> {
                 this.module.cancelRent(player, shop);
-                this.plugin.runTask(task -> player.closeInventory());
+                this.plugin.runTask(player, player::closeInventory);
             })
-            .onReturn((viewer1, event) -> {
-                this.plugin.runTask(task -> this.module.openShopSettings(player, shop));
-            })
+            .onReturn((viewer1, event) -> this.plugin.runTask(player, () -> this.module.openShopSettings(player, shop)))
             .returnOnAccept(false)
             .build());
     }
@@ -344,8 +334,6 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
                     .build()
             )));
 
-
-
         loader.addDefaultItem(NightItem.fromType(Material.CAMPFIRE)
             .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Player Shop")))
             .setLore(Lists.newList(
@@ -423,7 +411,6 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
                     .setVisibilityPolicy(viewer -> this.getLink(viewer).isRenter(viewer.getPlayer()))
                     .build()
             )));
-
 
         loader.addDefaultItem(MenuItem.buildExit(this, 49).setPriority(10));
 

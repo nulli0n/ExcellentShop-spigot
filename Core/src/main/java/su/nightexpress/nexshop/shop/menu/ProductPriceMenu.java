@@ -264,8 +264,6 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         }
     }
 
-
-
     private void addDynamicButtons(@NotNull MenuViewer menuViewer, @NotNull DynamicPricer pricer) {
         this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_INITIAL, 31, (viewer, event, product) -> {
             this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {

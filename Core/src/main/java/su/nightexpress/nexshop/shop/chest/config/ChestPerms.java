@@ -10,7 +10,6 @@ public class ChestPerms {
     public static final String PREFIX               = Perms.PREFIX + "chestshop.";
     public static final String PREFIX_COMMAND       = PREFIX + "command.";
     public static final String PREFIX_BYPASS        = PREFIX + "bypass.";
-    //public static final String PREFIX_PRICE_TYPE    = PREFIX + "price.";
     public static final String PREFIX_PRODUCT_LIMIT = PREFIX + "products.amount.";
     public static final String PREFIX_SHOP_LIMIT    = PREFIX + "shops.amount.";
 
@@ -26,11 +25,6 @@ public class ChestPerms {
     public static final UniPermission DISABLE_SELLING = new UniPermission(PREFIX + "disable.selling", PermissionDefault.TRUE);
 
     public static final UniPermission DISPLAY_CUSTOMIZATION = new UniPermission(PREFIX + "display.customization");
-
-/*    @Deprecated
-    public static final UniPermission TELEPORT              = new UniPermission(PREFIX + "teleport");
-    @Deprecated
-    public static final UniPermission TELEPORT_OTHERS       = new UniPermission(PREFIX + "teleport.others");*/
 
     public static final UniPermission CREATE                = new UniPermission(PREFIX + "create");
     public static final UniPermission REMOVE                = new UniPermission(PREFIX + "remove");
@@ -58,7 +52,6 @@ public class ChestPerms {
             DISABLE_SELLING,
             DISPLAY_CUSTOMIZATION,
             REMOVE, REMOVE_OTHERS,
-            //TELEPORT, TELEPORT_OTHERS,
             EDIT_OTHERS
         );
 

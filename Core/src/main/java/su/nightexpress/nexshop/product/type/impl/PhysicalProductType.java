@@ -29,13 +29,11 @@ public abstract class PhysicalProductType implements PhysicalTyping {
 
     @Override
     public void delivery(@NotNull Inventory inventory, int count) {
-        //int amount = this.getUnitAmount() * count;
         ShopUtils.addItem(inventory, this.getItem(), UnitUtils.unitsToAmount(this.getUnitAmount(), count));
     }
 
     @Override
     public void take(@NotNull Inventory inventory, int count) {
-        //int amount = this.getUnitAmount() * count;
         ShopUtils.takeItem(inventory, this::isItemMatches, UnitUtils.unitsToAmount(this.getUnitAmount(), count));
     }
 
@@ -47,7 +45,6 @@ public abstract class PhysicalProductType implements PhysicalTyping {
     @Override
     public boolean hasSpace(@NotNull Inventory inventory) {
         return this.countSpace(inventory) > 0;
-        //return ShopUtils.countItemSpace(inventory, this.wrapper::isItemMatches, this.wrapper.createItem().getMaxStackSize()) > 0;
     }
 
     @Override

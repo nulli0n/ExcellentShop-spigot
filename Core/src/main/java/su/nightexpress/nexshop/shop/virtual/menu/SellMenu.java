@@ -203,9 +203,7 @@ public class SellMenu extends ConfigMenu<ShopPlugin> implements Linked<List<Item
         List<MenuItem> list = new ArrayList<>();
 
         ItemStack sellItem = ItemUtil.getSkinHead(SKIN_CHECK_MARK);
-        ItemUtil.editMeta(sellItem, meta -> {
-            meta.setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("SELL ALL!")));
-        });
+        ItemUtil.editMeta(sellItem, meta -> meta.setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("SELL ALL!"))));
         list.add(new MenuItem(sellItem).setPriority(10).setSlots(49).setHandler(this.sellHandler));
 
         return list;

@@ -129,22 +129,6 @@ public class RotationSlotsMenu extends LinkedMenu<ShopPlugin, Rotation> {
             });
         });
 
-//        rotation.getSlots(page).forEach(slot -> {
-//            this.addItem(viewer, NightItem.fromType(Material.CYAN_STAINED_GLASS_PANE)
-//                .setHideComponents(true)
-//                .localized(VirtualLocales.ROTATION_USED_SLOT)
-//                .toMenuItem()
-//                .setSlots(slot)
-//                .setPriority(MenuItem.HIGH_PRIORITY)
-//                .setHandler((viewer1, event) -> {
-//                    rotation.removeSlot(page, slot);
-//                    shop.saveRotations();
-//                    this.runNextTick(() -> this.flush(viewer));
-//                }));
-//
-//            freeSlots.remove(slot);
-//        });
-
         this.addItem(viewer, NightItem.fromType(Material.LIME_STAINED_GLASS_PANE)
             .setHideComponents(true)
             .localized(VirtualLocales.ROTATION_FREE_SLOT)

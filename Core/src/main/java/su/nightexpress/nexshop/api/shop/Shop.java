@@ -73,8 +73,6 @@ public interface Shop {
         else this.setSellingAllowed(enabled);
     }
 
-    //void addProduct(@NotNull Product product);
-
     void removeProduct(@NotNull Product product);
 
     void removeProduct(@NotNull String id);

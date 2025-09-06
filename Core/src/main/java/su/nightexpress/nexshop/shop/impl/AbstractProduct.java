@@ -149,7 +149,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         this.pricer.setPrice(tradeType, this.currency.fineValue(price));
     }
 
-
     @Override
     public boolean isTradeable(@NotNull TradeType tradeType) {
         return tradeType == TradeType.BUY ? this.isBuyable() : this.isSellable();
@@ -258,8 +257,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     public boolean hasSpace(@NotNull Inventory inventory) {
         return this.type.hasSpace(inventory);
     }
-
-
 
     @Override
     @NotNull

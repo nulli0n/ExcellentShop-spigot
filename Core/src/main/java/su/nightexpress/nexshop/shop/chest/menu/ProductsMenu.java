@@ -101,9 +101,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         return MenuFiller.builder(this)
             .setSlots(this.productSlots)
             .setItems(shop.getProducts())
-            .setItemCreator(product -> {
-                return NightItem.fromItemStack(product.getPreview());
-            })
+            .setItemCreator(product -> NightItem.fromItemStack(product.getPreview()))
             .setItemClick(product -> (viewer1, event) -> {
                 int index = Lists.indexOf(this.productSlots, event.getRawSlot());
                 this.runNextTick(() -> this.open(player, shop, product, index));

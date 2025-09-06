@@ -65,7 +65,6 @@ public class ListingCategory implements Placeholder {
 
     @NotNull
     public Set<String> getMaterials() {
-
         return this.materials;
     }
 

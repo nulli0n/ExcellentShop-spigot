@@ -50,7 +50,6 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
             )));
         });
 
-
         this.addItem(ItemUtil.getSkinHead(SKULL_BUY_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK_BUY, 11, (viewer, event, product) -> {
             this.onClickInitial(viewer, event, product, product.getStockValues(), TradeType.BUY);
         });
@@ -62,7 +61,6 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
         this.addItem(NightItem.asCustomHead(SKULL_CLOCK), VirtualLocales.PRODUCT_EDIT_STOCK_RESET_TIME, 15, (viewer, event, product) -> {
             this.onClickRestock(viewer, event, product, product.getStockValues());
         });
-
 
         this.addItem(ItemUtil.getSkinHead(SKULL_BUY_LIMIT), VirtualLocales.PRODUCT_EDIT_LIMIT_BUY, 29, (viewer, event, product) -> {
             this.onClickInitial(viewer, event, product, product.getLimitValues(), TradeType.BUY);

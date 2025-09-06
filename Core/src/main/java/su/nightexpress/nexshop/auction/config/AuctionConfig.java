@@ -19,17 +19,6 @@ import java.util.stream.IntStream;
 
 public class AuctionConfig {
 
-//    public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("Settings.Default_Currency",
-//        CurrencyId.VAULT,
-//        "Sets default Auction currency."
-//    ).onRead(CurrencyId::reroute);
-//
-//    public static final ConfigValue<Set<String>> ALLOWED_CURRENCIES = ConfigValue.create("Settings.Allowed_Currencies",
-//        Set.of(Placeholders.WILDCARD),
-//        "List of currencies available to use by players.",
-//        "You can use asterisk '" + Placeholders.WILDCARD + "' to allow all currencies."
-//    ).onRead(set -> Lists.modify(set, CurrencyId::reroute));
-
     public static final ConfigValue<Set<String>> DISABLED_ITEM_HANDLERS = ConfigValue.create("Settings.Disabled_Item_Handlers",
         Lists.newSet("mmoitems"),
         "List of custom item handler IDs that should be ignored for auction listings and added as normal items.",
@@ -202,5 +191,4 @@ public class AuctionConfig {
         "Preview",
         "Sets title for the Preview GUI."
     );
-
 }

@@ -315,42 +315,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     }
 
     private void printShops() {
-//        this.getShops().forEach(shop -> {
-//            this.info("=".repeat(30));
-//            this.info("Shop Id: " + shop.getId());
-//
-//            List<VirtualProduct> products = shop.getProducts().stream()
-//                .sorted(Comparator.comparing(VirtualProduct::getPage).thenComparing(VirtualProduct::getSlot))
-//                .toList();
-//
-//            products.forEach(product -> {
-//                if (product.getType() instanceof PhysicalTyping typing) {
-//                    AbstractProductPricer pricer = product.getPricer();
-//
-//                    String buy = NumberUtil.format(pricer.getBuyPrice()).replace(",", "_");
-//                    String sell = NumberUtil.format(pricer.getSellPrice()).replace(",", "_");
-//                    int page = product.getPage();
-//                    int slot = product.getSlot();
-//
-//                    ItemStack itemStack = typing.getItem();
-//                    String type = itemStack.getType().name();
-//                    String extra = "";
-//
-//                    if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
-//                        PotionType baseType = potionMeta.getBasePotionType();
-//                        if (baseType != null) {
-//                            extra = "PotionType." + baseType.name() + ", ";
-//                        }
-//                    }
-//
-//                    String text = "this.addShopProduct(shop, Material." + type + ", " + extra + buy + ", " + sell + ", " + page + ", " + slot + ");";
-//
-//                    info(text);
-//
-//                }
-//            });
-//            this.info("=".repeat(30));
-//        });
+
     }
 
     @Nullable
@@ -425,8 +390,6 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         return new ArrayList<>(this.layoutByIdMap.keySet());
     }
 
-
-
     @NotNull
     public Set<VirtualShop> getShops() {
         return new HashSet<>(this.shopByIdMap.values());
@@ -487,9 +450,6 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         });
 
         return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
-
-//        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
-//        return (tradeType == TradeType.BUY ? candidates.stream().min(comparator) : candidates.stream().max(comparator)).orElse(null);
     }
 
     public boolean createShop(@NotNull Player player, @NotNull String name) {

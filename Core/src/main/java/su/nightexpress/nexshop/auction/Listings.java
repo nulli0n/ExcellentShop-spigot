@@ -82,8 +82,6 @@ public class Listings {
         return this.activeById.getOrDefault(uuid, null);
     }
 
-
-
     @NotNull
     public List<ActiveListing> getAll() {
         this.removeInvalidActive();
@@ -102,8 +100,6 @@ public class Listings {
 
         return new ArrayList<>(this.activeByOwnerId.getOrDefault(id, Collections.emptySet()));
     }
-
-
 
     @NotNull
     public List<CompletedListing> getCompleted() {
@@ -124,8 +120,6 @@ public class Listings {
         return new ArrayList<>(this.completedByOwnerId.getOrDefault(id, Collections.emptySet()));
     }
 
-
-
     @NotNull
     public List<ActiveListing> getActive() {
         this.removeInvalidActive();
@@ -143,13 +137,6 @@ public class Listings {
         return new ArrayList<>(this.getAll(owner).stream().filter(Predicate.not(ActiveListing::isExpired)).toList());
     }
 
-
-
-    /*@NotNull
-    public List<ActiveListing> getExpired() {
-        return new ArrayList<>(this.listings.values());
-    }*/
-
     @NotNull
     public List<ActiveListing> getExpired(@NotNull Player player) {
         return this.getExpired(player.getUniqueId());
@@ -160,13 +147,6 @@ public class Listings {
         return new ArrayList<>(this.getAll(id).stream().filter(ActiveListing::isExpired).toList());
     }
 
-
-
-    /*@NotNull
-    public List<CompletedListing> getClaimed() {
-        return new ArrayList<>(this.completedListings.values());
-    }*/
-
     @NotNull
     public List<CompletedListing> getClaimed(@NotNull Player player) {
         return this.getClaimed(player.getUniqueId());
@@ -176,13 +156,6 @@ public class Listings {
     public List<CompletedListing> getClaimed(@NotNull UUID id) {
         return new ArrayList<>(this.getCompleted(id).stream().filter(CompletedListing::isClaimed).toList());
     }
-
-
-
-    /*@NotNull
-    public List<CompletedListing> getUnclaimed() {
-        return new ArrayList<>(this.completedListings.values());
-    }*/
 
     @NotNull
     public List<CompletedListing> getUnclaimed(@NotNull Player player) {

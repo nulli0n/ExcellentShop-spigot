@@ -40,7 +40,6 @@ import su.nightexpress.nexshop.shop.chest.compatibility.*;
 import su.nightexpress.nexshop.shop.chest.config.*;
 import su.nightexpress.nexshop.shop.chest.display.DisplayManager;
 import su.nightexpress.nexshop.shop.chest.impl.*;
-import su.nightexpress.nexshop.shop.chest.listener.RegionMarketListener;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
 import su.nightexpress.nexshop.shop.chest.listener.UpgradeHopperListener;
 import su.nightexpress.nexshop.shop.chest.lookup.ShopLookup;
@@ -124,8 +123,8 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         this.addAsyncTask(this::saveShopsIfRequired, ChestConfig.SAVE_INTERVAL.get());
 
-        this.plugin.runTaskAsync(task -> this.loadBanks());
-        this.plugin.runTask(task -> this.lookup().getAll().forEach(this::activateShop));
+        this.plugin.runTaskAsync(this::loadBanks);
+        this.plugin.runTask(() -> this.lookup().getAll().forEach(this::activateShop));
     }
 
     private void loadConfig(@NotNull FileConfig config) {
@@ -212,14 +211,9 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         if (ChestConfig.SHOP_CREATION_CLAIM_ONLY.get()) {
             this.loadClaimHook(HookId.LANDS, () -> new LandsHook(this.plugin));
             this.loadClaimHook(HookId.GRIEF_PREVENTION, GriefPreventionHook::new);
-            this.loadClaimHook(HookId.GRIEF_DEFENDER, GriefDefenderHook::new);
             this.loadClaimHook(HookId.WORLD_GUARD, WorldGuardHook::new);
             this.loadClaimHook(HookId.KINGDOMS, KingdomsHook::new);
             this.loadClaimHook(HookId.HUSK_CLAIMS, HuskClaimsHook::new);
-        }
-
-        if (Plugins.isInstalled(HookId.ADVANCED_REGION_MARKET)) {
-            this.addListener(new RegionMarketListener(this.plugin, this));
         }
 
         if (ChestUtils.isInfiniteStorage()) {
@@ -414,7 +408,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         ChestBank bank = this.getBankMap().get(uuid);
         if (bank == null) {
             ChestBank bank2 = new ChestBank(uuid, new HashMap<>());
-            this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().createChestBank(bank2));
+            this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().createChestBank(bank2));
             this.getBankMap().put(uuid, bank2);
             return bank2;
         }
@@ -429,7 +423,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     public void savePlayerBank(@NotNull ChestBank bank) {
-        this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().saveChestBank(bank));
+        this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().saveChestBank(bank));
     }
 
     @NotNull
@@ -622,7 +616,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             if (shop.isRentable() && !shop.isRented()) {
                 UIUtils.openConfirmation(player, Confirmation.builder()
                     .onAccept((viewer, event1) -> this.rentShopOrExtend(player, shop))
-                    .onReturn((viewer, event1) -> this.plugin.runTask(task -> player.closeInventory()))
+                    .onReturn((viewer, event1) -> this.plugin.runTask(player, player::closeInventory))
                     .returnOnAccept(true)
                     .build());
                 return;

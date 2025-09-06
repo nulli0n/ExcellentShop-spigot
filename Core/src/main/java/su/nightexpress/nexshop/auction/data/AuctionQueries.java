@@ -30,15 +30,11 @@ public class AuctionQueries {
             UUID owner = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_OWNER.getName()));
             String ownerName = resultSet.getString(AuctionDatabase.COLUMN_OWNER_NAME.getName());
 
-            /*String serialized = resultSet.getString(AuctionDatabase.COLUMN_ITEM.getName());
-            String handlerName = resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName());*/
-
             ProductType type = Enums.get(resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName()), ProductType.class);
             if (type == null) return null;
 
             ProductTyping typing = AuctionDatabase.typingFromJson(type, resultSet.getString(AuctionDatabase.COLUMN_ITEM_DATA.getName()));
             if (!(typing instanceof PhysicalTyping physicalTyping)) {
-                //ShopAPI.getPlugin().error("Invalid listing data: '" + serialized + "'. Handler: '" + handlerName + "'.");
                 return null;
             }
 
@@ -74,7 +70,6 @@ public class AuctionQueries {
 
             ProductTyping typing = AuctionDatabase.typingFromJson(type, resultSet.getString(AuctionDatabase.COLUMN_ITEM_DATA.getName()));
             if (!(typing instanceof PhysicalTyping physicalTyping)) {
-                //ShopAPI.getPlugin().error("Invalid listing data: '" + serialized + "'. Handler: '" + handlerName + "'.");
                 return null;
             }
 

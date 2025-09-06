@@ -88,8 +88,6 @@ public interface Product {
 
     @NotNull PreparedProduct getPrepared(@NotNull Player player, @NotNull TradeType buyType, boolean all);
 
-
-
     boolean isTradeable(@NotNull TradeType tradeType);
 
     boolean isBuyable();

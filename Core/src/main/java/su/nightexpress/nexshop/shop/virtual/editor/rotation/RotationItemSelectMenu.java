@@ -55,12 +55,10 @@ public class RotationItemSelectMenu extends LinkedMenu<ShopPlugin, Rotation> imp
             .setItems(shop.getProducts().stream().filter(VirtualProduct::isRotating)
                 .filter(product -> !rotation.hasProduct(product))
                 .sorted(Comparator.comparing(Product::getId)).collect(Collectors.toCollection(ArrayList::new)))
-            .setItemCreator(product -> {
-                return NightItem.fromItemStack(product.getPreview())
-                    .localized(VirtualLocales.PRODUCT_ROTATING_OBJECT)
-                    .setHideComponents(true)
-                    .replacement(replacer -> replacer.replace(product.replacePlaceholders()));
-            })
+            .setItemCreator(product -> NightItem.fromItemStack(product.getPreview())
+                .localized(VirtualLocales.PRODUCT_ROTATING_OBJECT)
+                .setHideComponents(true)
+                .replacement(replacer -> replacer.replace(product.replacePlaceholders())))
             .setItemClick(product -> (viewer1, event) -> {
                 rotation.addItem(new RotationItem(product.getId(), 5D));
                 shop.saveRotations();

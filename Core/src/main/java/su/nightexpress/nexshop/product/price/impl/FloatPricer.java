@@ -80,18 +80,6 @@ public class FloatPricer extends RangedPricer {
         return this.roundDecimals ? Math.floor(rolled) : NumberUtil.round(rolled);
     }
 
-    /*@Deprecated
-    public boolean isUpdateTime() {
-        if (this.getDays().isEmpty()) return false;
-        if (this.getTimes().isEmpty()) return false;
-        if (!this.getDays().contains(LocalDate.now().getDayOfWeek())) return false;
-
-        LocalTime roundNow = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-        return this.getTimes().stream().anyMatch(time -> {
-            return time.truncatedTo(ChronoUnit.MINUTES).equals(roundNow);
-        });
-    }*/
-
     @Nullable
     public LocalDateTime getClosest() {
         if (this.days.isEmpty() || this.times.isEmpty()) return null;

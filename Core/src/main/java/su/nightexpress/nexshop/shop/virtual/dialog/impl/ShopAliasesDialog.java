@@ -30,7 +30,6 @@ public class ShopAliasesDialog extends VirtualDialogProvider<VirtualShop> {
     private static final String JSON_RELOAD  = "reload";
     private static final String JSON_ALIASES = "aliases";
 
-
     public static final TextLocale          TITLE = VirtualLang.builder("Dialog.ShopAliases.Title").text(TITLE_PREFIX + "Shop Aliases");
     public static final DialogElementLocale BODY  = VirtualLang.builder("Dialog.ShopAliases.Body").dialogElement(
         400,

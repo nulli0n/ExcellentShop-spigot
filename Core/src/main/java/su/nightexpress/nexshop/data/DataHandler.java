@@ -243,8 +243,6 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         columns.add(COL_USER_SETTINGS);
     }
 
-
-
     @NotNull
     public List<StockData> loadStockDatas() {
         return this.select(this.tableStockData, DataQueries.STOCK_DATA_LOADER, SelectQuery::all);
@@ -309,8 +307,6 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         this.delete(this.tableStockData, query, products);
     }
 
-
-
     public void deletePriceData(@NotNull Shop shop) {
         this.deletePriceData(shop.getId());
     }
@@ -331,9 +327,6 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         query.whereIgnoreCase(DataHandler.COLUMN_GEN_PRODUCT_ID, WhereOperator.EQUAL, Product::getId);
         this.delete(this.tablePriceData, query, products);
     }
-
-
-
 
     @NotNull
     public List<ChestBank> loadChestBanks() {

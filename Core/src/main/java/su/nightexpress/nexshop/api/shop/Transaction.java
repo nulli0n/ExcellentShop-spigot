@@ -25,7 +25,6 @@ public class Transaction {
     // TODO Save currency field, bc product currency may be changed at any time after transaction.
 
     public Transaction(@NotNull Product product, @NotNull TradeType tradeType, int units, double price, @NotNull Result result) {
-        //this.plugin = plugin;
         this.product = product;
         this.tradeType = tradeType;
         this.units = units;

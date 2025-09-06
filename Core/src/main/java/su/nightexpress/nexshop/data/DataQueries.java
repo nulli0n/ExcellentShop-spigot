@@ -119,7 +119,6 @@ public class DataQueries {
         .whereIgnoreCase(DataHandler.COLUMN_GEN_SHOP_ID, WhereOperator.EQUAL, PriceData::getShopId)
         .whereIgnoreCase(DataHandler.COLUMN_GEN_PRODUCT_ID, WhereOperator.EQUAL, PriceData::getProductId);
 
-
     public static final Function<ResultSet, RotationData> ROTATION_DATA_LOADER = resultSet -> {
         try {
             String shopId = resultSet.getString(DataHandler.COLUMN_GEN_SHOP_ID.getName());
@@ -154,22 +153,12 @@ public class DataQueries {
     public static final DeleteQuery<VirtualShop> ROTATION_DATA_DELETE_BY_SHOP = new DeleteQuery<VirtualShop>()
         .whereIgnoreCase(DataHandler.COLUMN_GEN_SHOP_ID, WhereOperator.EQUAL, Shop::getId);
 
-
-
     public static final Function<ResultSet, ChestBank> CHEST_BANK_LOADER = resultSet -> {
         try {
             UUID holder = UUID.fromString(resultSet.getString(DataHandler.COLUMN_BANK_HOLDER.getName()));
 
             Map<String, Double> balanceRaw = DataHandler.GSON.fromJson(resultSet.getString(DataHandler.COLUMN_BANK_BALANCE.getName()), new TypeToken<Map<String, Double>>(){}.getType());
             if (balanceRaw == null) balanceRaw = new HashMap<>();
-
-//            Map<Currency, Double> balanceMap = new HashMap<>();
-//            balanceRaw.forEach((id, amount) -> {
-//                Currency currency = EconomyBridge.getCurrency(CurrencyId.reroute(id));
-//                if (currency == null) return;
-//
-//                balanceMap.put(currency, amount);
-//            });
 
             return new ChestBank(holder, balanceRaw);
         }

@@ -123,8 +123,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             itemStack.setMaterial(this.getLink(viewer).isPermissionRequired() ? Material.REDSTONE : Material.GUNPOWDER);
         }).build());
 
-
-
         this.addItem(NightItem.fromType(Material.GLOW_ITEM_FRAME), VirtualLocales.SHOP_EDIT_LAYOUTS, 28, (viewer, event, shop) -> {
             if (module.handleDialogs(dialogs -> dialogs.openShopLayoutsDialog(viewer.getPlayer(), shop))) return;
 
@@ -140,10 +138,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             shop.setSellingAllowed(!shop.isSellingAllowed());
             this.saveAndFlush(viewer, shop);
         }, ItemOptions.builder().setDisplayModifier((viewer, item) -> item.setMaterial(this.getLink(viewer).isSellingAllowed() ? Material.LIME_DYE : Material.GRAY_DYE)).build());
-
-
-
-
 
         this.addItem(NightItem.fromType(Material.CHEST), VirtualLocales.SHOP_EDIT_PRODUCTS_NORMAL, 32, (viewer, event, shop) -> {
             this.runNextTick(() -> module.openNormalProducts(viewer.getPlayer(), shop));
