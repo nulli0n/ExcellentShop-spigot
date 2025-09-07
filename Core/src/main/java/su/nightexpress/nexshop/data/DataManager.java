@@ -45,9 +45,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     @Override
     protected void onLoad() {
-        // Load all price & stock datas for all products, then update prices.
-        this.plugin.runTaskAsync(this::loadAllData);
-
+        // Initial load is triggered by ShopPlugin AFTER modules are loaded.
         this.addAsyncTask(this::saveScheduledDatas, Config.DATA_SAVE_INTERVAL.get());
     }
 
@@ -84,7 +82,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         this.loaded = true;
         this.plugin.getShopManager().getShops().forEach(shop -> shop.updatePrices(false)); // Update prices in the same thread to prevent data duplications.
     }
-
 
     private void loadPriceDatas() {
         this.plugin.getDataHandler().loadPriceDatas().forEach(this::loadPriceData);

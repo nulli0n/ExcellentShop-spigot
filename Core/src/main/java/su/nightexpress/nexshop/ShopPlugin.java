@@ -44,7 +44,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     private UserManager userManager;
     private ShopManager shopManager;
 
-    private Map<Class<? extends Module>, Module> modules;
+    private final Map<Class<? extends Module>, Module> modules = new HashMap<>();
 
     @Override
     @NotNull
@@ -100,6 +100,8 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
 
         this.loadModules();
 
+        this.runTaskAsync(this.dataManager::loadAllData);
+
         if (Plugins.hasPlaceholderAPI()) {
             PlaceholderHook.setup(this);
         }
@@ -133,7 +135,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     }
 
     private void loadModules() {
-        this.modules = new HashMap<>();
+        this.modules.clear();
         this.migrateModuleSettings(this.config);
 
         Config.MODULE_CONFIG.get().forEach((id, moduleConfig) -> {
