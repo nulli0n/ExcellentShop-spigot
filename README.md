@@ -12,7 +12,7 @@ It includes **GUI Shop** (with Rotations), **Chest Shop** and **Auction House**.
 
 </div>
 
-### Features
+## Features
 
 - **Database**. Works with SQLite and MySQL!
 - **Synchronization**. Sync your products data across multiple servers!
