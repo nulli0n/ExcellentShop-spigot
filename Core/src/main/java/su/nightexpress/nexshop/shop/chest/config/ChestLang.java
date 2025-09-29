@@ -17,15 +17,16 @@ public class ChestLang implements LangContainer {
     public static final TextLocale COMMAND_ARGUMENT_NAME_SHOP_BLOCK = LangEntry.builder("ChestShop.Command.Argument.Name.ShopBlock").text("blockType");
     public static final TextLocale COMMAND_ARGUMENT_NAME_ITEM_NAME = LangEntry.builder("ChestShop.Command.Argument.Name.ItemName").text("itemName");
 
-    public static final TextLocale COMMAND_BROWSE_DESC    = LangEntry.builder("ChestShop.Command.Browse.Desc").text("Browse shop owners.");
-    public static final TextLocale COMMAND_LIST_DESC      = LangEntry.builder("ChestShop.Command.List.Desc").text("Browse your shops.");
-    public static final TextLocale COMMAND_LIST_ALL_DESC  = LangEntry.builder("ChestShop.Command.List.Desc").text("Browse all player shops.");
-    public static final TextLocale COMMAND_SEARCH_DESC    = LangEntry.builder("ChestShop.Command.Search.Desc").text("Search shops by item.");
-    public static final TextLocale COMMAND_BANK_DESC      = LangEntry.builder("ChestShop.Command.Bank.Desc").text("Open [player's] bank.");
-    public static final TextLocale COMMAND_CREATE_DESC    = LangEntry.builder("ChestShop.Command.Create.Desc").text("Create a shop.");
-    public static final TextLocale COMMAND_GIVE_ITEM_DESC = LangEntry.builder("ChestShop.Command.GiveItem.Desc").text("Give shop creation item.");
-    public static final TextLocale COMMAND_REMOVE_DESC    = LangEntry.builder("ChestShop.Command.Remove.Desc").text("Removes the shop from the chest that you're looking at.");
-    public static final TextLocale COMMAND_OPEN_INV_DESC  = LangEntry.builder("ChestShop.Command.OpenInv.Desc").text("Open shop's inventory.");
+    public static final TextLocale COMMAND_BROWSE_DESC        = LangEntry.builder("ChestShop.Command.Browse.Desc").text("Browse shop owners.");
+    public static final TextLocale COMMAND_LIST_DESC          = LangEntry.builder("ChestShop.Command.List.Desc").text("Browse your shops.");
+    public static final TextLocale COMMAND_LIST_ALL_DESC      = LangEntry.builder("ChestShop.Command.List.Desc").text("Browse all player shops.");
+    public static final TextLocale COMMAND_SEARCH_DESC        = LangEntry.builder("ChestShop.Command.Search.Desc").text("Search shops by item.");
+    public static final TextLocale COMMAND_PLAYER_SEARCH_DESC = LangEntry.builder("ChestShop.Command.PlayerSearch.Desc").text("Search shops by player.");
+    public static final TextLocale COMMAND_BANK_DESC          = LangEntry.builder("ChestShop.Command.Bank.Desc").text("Open [player's] bank.");
+    public static final TextLocale COMMAND_CREATE_DESC        = LangEntry.builder("ChestShop.Command.Create.Desc").text("Create a shop.");
+    public static final TextLocale COMMAND_GIVE_ITEM_DESC     = LangEntry.builder("ChestShop.Command.GiveItem.Desc").text("Give shop creation item.");
+    public static final TextLocale COMMAND_REMOVE_DESC        = LangEntry.builder("ChestShop.Command.Remove.Desc").text("Removes the shop from the chest that you're looking at.");
+    public static final TextLocale COMMAND_OPEN_INV_DESC      = LangEntry.builder("ChestShop.Command.OpenInv.Desc").text("Open shop's inventory.");
 
     public static final MessageLocale COMMAND_GIVE_ITEM_DONE = LangEntry.builder("ChestShop.Command.GiveItem.Done").chatMessage(
         GRAY.wrap("Given " + SOFT_YELLOW.wrap(GENERIC_NAME) + " to " + SOFT_YELLOW.wrap(PLAYER_DISPLAY_NAME) + "."));

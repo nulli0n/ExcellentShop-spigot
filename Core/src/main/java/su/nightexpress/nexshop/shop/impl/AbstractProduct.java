@@ -5,37 +5,46 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.ShopAPI;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.data.product.PriceData;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
-import su.nightexpress.nexshop.product.price.impl.DynamicPricer;
-import su.nightexpress.nexshop.product.price.impl.FlatPricer;
-import su.nightexpress.nexshop.product.price.impl.FloatPricer;
+import su.nightexpress.nexshop.product.content.ProductContent;
+import su.nightexpress.nexshop.product.content.impl.EmptyContent;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nexshop.product.price.ProductPricing;
+import su.nightexpress.nexshop.product.price.impl.FlatPricing;
+import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.util.UnitUtils;
+import su.nightexpress.nightcore.bridge.currency.Currency;
+import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 
+import java.util.Optional;
 import java.util.function.UnaryOperator;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
 
-    protected final String     id;
+    protected final String id;
 
-    protected S                     shop;
-    protected ProductTyping         type;
-    protected Currency              currency;
-    protected AbstractProductPricer pricer;
+    protected S              shop;
+    protected ProductContent content;
+    protected String         currencyId;
+    protected ProductPricing pricing;
 
-    public AbstractProduct(@NotNull String id, @NotNull S shop, @NotNull Currency currency, @NotNull ProductTyping type) {
+    protected double buyPrice;
+    protected double sellPrice;
+
+    protected boolean saveRequired;
+
+    public AbstractProduct(@NotNull String id, @NotNull S shop) {
         this.id = id.toLowerCase();
         this.shop = shop;
-        this.setCurrency(currency);
-        this.setPricer(new FlatPricer());
-        this.setType(type);
+        this.setCurrencyId("null");
+        this.setPricing(new FlatPricing());
+        this.setContent(EmptyContent.VALUE);
+        this.setPrice(TradeType.BUY, -1D);
+        this.setPrice(TradeType.SELL, -1D);
     }
 
     @NotNull
@@ -50,104 +59,128 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     @Override
     @NotNull
     public UnaryOperator<String> replacePlaceholders(@Nullable Player player) {
-        var explicit = this.replaceExplicitPlaceholders(player);
-        var packer = this.type.replacePlaceholders();
-        var pricer = this.pricer.replacePlaceholders();
-
-        return str -> {
-            str = explicit.apply(str);
-            str = packer.apply(str);
-            str = pricer.apply(str);
-            return str;
-        };
+        return this.replaceExplicitPlaceholders(player);
     }
 
     @Override
     public boolean isValid() {
-        return this.type.isValid();
+        return this.content.isValid();
+    }
+
+    @Override
+    public boolean isSaveRequired() {
+        return this.saveRequired;
+    }
+
+    @Override
+    public void setSaveRequired(boolean saveRequired) {
+        this.saveRequired = saveRequired;
     }
 
     @Override
     public void updatePrice(boolean force) {
-        if (this.pricer.getType() == PriceType.FLAT) return;
-        if (this.pricer.getType() == PriceType.PLAYER_AMOUNT) return;
-
-        PriceData priceData = ShopAPI.getDataManager().getPriceDataOrCreate(this);
-
-        if (priceData.isExpired() || force) {
-            //plugin.debug("Flush prices for " + this.getId() + " product of " + shop.getId() + " shop.");
-            double buyPrice = priceData.getLatestBuyPrice();
-            double sellPrice = priceData.getLatestSellPrice();
-            long expireDate = priceData.getExpireDate();
-
-            if (this.pricer instanceof FloatPricer floatPricer) {
-                buyPrice = floatPricer.rollPrice(TradeType.BUY);
-                sellPrice = floatPricer.rollPrice(TradeType.SELL);
-                expireDate = floatPricer.getClosestTimestamp();
-            }
-            else if (this.pricer instanceof DynamicPricer dynamicPricer) {
-                double difference = priceData.getPurchases() - priceData.getSales();
-                buyPrice = dynamicPricer.getAdjustedPrice(TradeType.BUY, difference);
-                sellPrice = dynamicPricer.getAdjustedPrice(TradeType.SELL, difference);
-                expireDate = -1L;
+        ShopAPI.dataAccess(dataManager -> {
+            PriceData priceData = dataManager.getPriceDataOrCreate(this);
+            if (force) {
+                priceData.setExpired();
             }
 
-            if (sellPrice > buyPrice && buyPrice >= 0) {
-                sellPrice = buyPrice;
-            }
+            this.pricing.updatePrice(this, priceData);
+        });
+    }
 
-            priceData.setLatestBuyPrice(buyPrice);
-            priceData.setLatestSellPrice(sellPrice);
-            priceData.setLatestUpdateDate(System.currentTimeMillis());
-            priceData.setExpireDate(expireDate);
-            priceData.setSaveRequired(true);
+    @Override
+    public double getPrice(@NotNull TradeType type) {
+        return switch (type) {
+            case BUY -> this.getBuyPrice();
+            case SELL -> this.getSellPrice();
+        };
+    }
+
+    @Override
+    public void setPrice(@NotNull TradeType type, double price) {
+        double floored = this.currency().map(currency -> currency.floorIfNeeded(price)).orElse(price);
+        switch (type) {
+            case BUY -> this.setBuyPrice(floored);
+            case SELL -> this.setSellPrice(floored);
         }
-
-        this.setPrice(TradeType.BUY, priceData.getLatestBuyPrice());
-        this.setPrice(TradeType.SELL, priceData.getLatestSellPrice());
     }
 
     @Override
-    public double getPriceBuy(@NotNull Player player) {
-        return this.getPrice(TradeType.BUY, player);
+    public double getBuyPrice() {
+        return this.buyPrice;
     }
 
     @Override
-    public double getPriceSell(@NotNull Player player) {
-        return this.getPrice(TradeType.SELL, player);
+    public void setBuyPrice(double buyPrice) {
+        this.buyPrice = buyPrice;
     }
 
     @Override
-    public double getPriceSellAll(@NotNull Player player) {
+    public double getSellPrice() {
+        return this.sellPrice;
+    }
+
+    @Override
+    public void setSellPrice(double sellPrice) {
+        this.sellPrice = sellPrice;
+    }
+
+    @Override
+    public double getFinalBuyPrice(@NotNull Player player) {
+        return this.getFinalPrice(TradeType.BUY, player);
+    }
+
+    @Override
+    public double getFinalBuyPrice(@NotNull Player player, int amount) {
+        return this.getFinalPrice(TradeType.BUY, amount, player);
+    }
+
+    @Override
+    public double getFinalSellPrice(@NotNull Player player) {
+        return this.getFinalPrice(TradeType.SELL, player);
+    }
+
+    @Override
+    public double getFinalSellPrice(@NotNull Player player, int amount) {
+        return this.getFinalPrice(TradeType.SELL, amount, player);
+    }
+
+    @Override
+    public double getFinalSellAllPrice(@NotNull Player player) {
         int amountHas = this.countUnits(player);
         int amountCan = this.getAvailableAmount(player, TradeType.SELL);
 
         int balance = Math.min((amountCan < 0 ? amountHas : amountCan), amountHas);
-        double price = balance * this.getPriceSell(player);
+        double price = balance * this.getFinalSellPrice(player);
 
         return Math.max(price, 0);
     }
 
     @Override
-    public double getPrice(@NotNull TradeType tradeType) {
-        return this.getPrice(tradeType, null);
+    public double getFinalPrice(@NotNull TradeType tradeType) {
+        return this.getFinalPrice(tradeType, null);
     }
 
     @Override
-    public double getPrice(@NotNull TradeType tradeType, @Nullable Player player) {
-        double price = this.pricer.getPrice(tradeType);
+    public double getFinalPrice(@NotNull TradeType tradeType, int amount) {
+        return this.getFinalPrice(tradeType, amount, null);
+    }
 
-        price = this.applyPriceModifiers(tradeType, price, player);
+    @Override
+    public double getFinalPrice(@NotNull TradeType tradeType, @Nullable Player player) {
+        return this.getFinalPrice(tradeType, 1, player);
+    }
 
-        return this.currency.fineValue(price);
+    @Override
+    public double getFinalPrice(@NotNull TradeType tradeType, int amount, @Nullable Player player) {
+        double price = this.getPrice(tradeType);
+        double boostedPrice = this.applyPriceModifiers(tradeType, price, player);
+
+        return this.currency().map(currency -> currency.floorIfNeeded(boostedPrice)).orElse(boostedPrice) * amount;
     }
 
     protected abstract double applyPriceModifiers(@NotNull TradeType type, double currentPrice, @Nullable Player player);
-
-    @Override
-    public void setPrice(@NotNull TradeType tradeType, double price) {
-        this.pricer.setPrice(tradeType, this.currency.fineValue(price));
-    }
 
 
     @Override
@@ -162,13 +195,13 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean isSellable() {
-        if (!(this.type instanceof PhysicalTyping)) return false;
+        if (!(this.content instanceof ItemContent)) return false;
         if (!this.shop.isSellingAllowed()) return false;
         if (!this.hasSellPrice()) return false;
 
         // Don't allow to sell items with sell price greater than buy one.
         if (this.isBuyable()) {
-            return this.pricer.getSellPrice() <= this.pricer.getBuyPrice();
+            return this.getSellPrice() <= this.getBuyPrice();
         }
 
         return true;
@@ -176,22 +209,18 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean hasBuyPrice() {
-        return this.hasPrice(TradeType.BUY);
+        return this.getBuyPrice() > 0D;
     }
 
     @Override
     public boolean hasSellPrice() {
-        return this.hasPrice(TradeType.SELL);
-    }
-
-    private boolean hasPrice(@NotNull TradeType type) {
-        return this.pricer.getPrice(type) >= 0D;
+        return this.getSellPrice()> 0D;
     }
 
 
     @Override
     public int getUnitAmount() {
-        return this.type.getUnitAmount();
+        return this.content.getUnitAmount();
     }
 
     @Override
@@ -201,7 +230,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public void delivery(@NotNull Inventory inventory, int count) {
-        this.type.delivery(inventory, count);
+        this.content.delivery(inventory, count);
     }
 
     @Override
@@ -211,7 +240,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public void take(@NotNull Inventory inventory, int count) {
-        this.type.take(inventory, count);
+        this.content.take(inventory, count);
     }
 
     @Override
@@ -236,7 +265,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int count(@NotNull Inventory inventory) {
-        return this.type.count(inventory);
+        return this.content.count(inventory);
     }
 
     @Override
@@ -246,7 +275,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public int countSpace(@NotNull Inventory inventory) {
-        return this.type.countSpace(inventory);
+        return this.content.countSpace(inventory);
     }
 
     @Override
@@ -256,7 +285,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean hasSpace(@NotNull Inventory inventory) {
-        return this.type.hasSpace(inventory);
+        return this.content.hasSpace(inventory);
     }
 
 
@@ -275,40 +304,64 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @NotNull
     @Override
-    public ProductTyping getType() {
-        return this.type;
+    public ProductContent getContent() {
+        return this.content;
     }
 
     @Override
-    public void setType(@NotNull ProductTyping type) {
-        this.type = type;
+    public void setContent(@NotNull ProductContent content) {
+        this.content = content;
     }
 
     @Override
     @NotNull
     public ItemStack getPreview() {
-        return this.type.getPreview();
+        return this.content.getPreview();
     }
 
     @Override
     @NotNull
-    public AbstractProductPricer getPricer() {
-        return this.pricer;
+    public ItemStack getPreviewOrPlaceholder() {
+        return this.isValid() ? this.getPreview() : ShopUtils.getInvalidProductPlaceholder();
     }
 
     @Override
-    public void setPricer(@NotNull AbstractProductPricer pricer) {
-        this.pricer = pricer;
+    @NotNull
+    public ProductPricing getPricing() {
+        return this.pricing;
+    }
+
+    @Override
+    @NotNull
+    public PriceType getPricingType() {
+        return this.pricing.getType();
+    }
+
+    @Override
+    public void setPricing(@NotNull ProductPricing pricing) {
+        this.pricing = pricing;
+    }
+
+    @Override
+    @NotNull
+    public Optional<Currency> currency() {
+        return Optional.ofNullable(EconomyBridge.getCurrency(this.currencyId));
     }
 
     @Override
     @NotNull
     public Currency getCurrency() {
-        return this.currency;
+        return EconomyBridge.getCurrencyOrDummy(this.currencyId);
     }
 
     @Override
-    public void setCurrency(@NotNull Currency currency) {
-        this.currency = currency;
+    @NotNull
+    public String getCurrencyId() {
+        return this.currencyId;
+    }
+
+    @Override
+    public void setCurrencyId(@NotNull String currencyId) {
+        this.currencyId = currencyId;
     }
 }

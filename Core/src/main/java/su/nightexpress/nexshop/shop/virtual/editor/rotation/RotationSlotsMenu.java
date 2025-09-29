@@ -94,7 +94,7 @@ public class RotationSlotsMenu extends LinkedMenu<ShopPlugin, Rotation> {
 
             int slot = product.getSlot();
 
-            this.addItem(viewer, NightItem.fromItemStack(product.getPreview())
+            this.addItem(viewer, NightItem.fromItemStack(product.getPreviewOrPlaceholder())
                 .setHideComponents(true)
                 .setDisplayName(Placeholders.PRODUCT_PREVIEW_NAME)
                 .replacement(replacer -> replacer.replace(product.replacePlaceholders()))
@@ -121,7 +121,7 @@ public class RotationSlotsMenu extends LinkedMenu<ShopPlugin, Rotation> {
                         if (!isCurrent) return;
 
                         rotation.removeSlot(page, slot);
-                        shop.saveRotations();
+                        rotation.setSaveRequired(true);
                         this.runNextTick(() -> this.flush(viewer1));
                     }));
 
@@ -152,7 +152,7 @@ public class RotationSlotsMenu extends LinkedMenu<ShopPlugin, Rotation> {
             .setSlots(freeSlots.stream().mapToInt(Number::intValue).toArray())
             .setHandler((viewer1, event) -> {
                 rotation.addSlot(page, event.getRawSlot());
-                shop.saveRotations();
+                rotation.setSaveRequired(true);
                 this.runNextTick(() -> this.flush(viewer));
             }));
     }

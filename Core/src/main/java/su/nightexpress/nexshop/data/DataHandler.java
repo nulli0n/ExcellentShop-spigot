@@ -16,7 +16,9 @@ import su.nightexpress.nexshop.data.legacy.LegacyStockData;
 import su.nightexpress.nexshop.data.product.PriceData;
 import su.nightexpress.nexshop.data.product.StockData;
 import su.nightexpress.nexshop.data.serialize.ItemTagSerializer;
+import su.nightexpress.nexshop.data.serialize.ItemProductTypeSerializer;
 import su.nightexpress.nexshop.data.shop.RotationData;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestBank;
 import su.nightexpress.nexshop.shop.virtual.impl.Rotation;
@@ -46,6 +48,7 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting()
         .registerTypeAdapter(LegacyStockAmount.class, new LegacyStockAmountSerializer())
         .registerTypeAdapter(ItemTagSerializer.class, new ItemTagSerializer())
+        .registerTypeAdapter(ItemContent.class, new ItemProductTypeSerializer())
         .create();
 
     public static final Column COLUMN_GEN_SHOP_ID    = Column.of("shopId", ColumnType.STRING);
@@ -56,12 +59,11 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
     public static final Column COLUMN_STOCK_SELL_STOCK   = Column.of("sellStock", ColumnType.INTEGER);
     public static final Column COLUMN_STOCK_RESTOCK_DATE = Column.of("restockDate", ColumnType.LONG);
 
-    public static final Column COLUMN_PRICE_LAST_BUY     = Column.of("lastBuyPrice", ColumnType.DOUBLE);
-    public static final Column COLUMN_PRICE_LAST_SELL    = Column.of("lastSellPrice", ColumnType.DOUBLE);
-    public static final Column COLUMN_PRICE_LAST_UPDATED = Column.of("lastUpdated", ColumnType.LONG);
-    public static final Column COLUMN_PRICE_EXPIRE_DATE  = Column.of("expireDate", ColumnType.LONG);
-    public static final Column COLUMN_PRICE_PURCHASES    = Column.of("purchases", ColumnType.INTEGER);
-    public static final Column COLUMN_PRICE_SALES        = Column.of("sales", ColumnType.INTEGER);
+    public static final Column COLUMN_PRICE_BUY_OFFSET  = Column.of("buyOffset", ColumnType.DOUBLE);
+    public static final Column COLUMN_PRICE_SELL_OFFSET = Column.of("sellOffset", ColumnType.DOUBLE);
+    public static final Column COLUMN_PRICE_EXPIRE_DATE = Column.of("expireDate", ColumnType.LONG);
+    public static final Column COLUMN_PRICE_PURCHASES   = Column.of("purchases", ColumnType.INTEGER);
+    public static final Column COLUMN_PRICE_SALES       = Column.of("sales", ColumnType.INTEGER);
 
     public static final Column COLUMN_ROTATE_PRODUCTS      = Column.of("products", ColumnType.STRING);
     public static final Column COLUMN_ROTATE_NEXT_ROTATION = Column.of("nextRotation", ColumnType.LONG);
@@ -100,7 +102,7 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         // TODO ChestShop bank purge
 
         if (SQLQueries.hasTable(this.connector, this.tablePriceData)) {
-            DeleteQuery<Long> query = new DeleteQuery<Long>().where(DataHandler.COLUMN_PRICE_LAST_UPDATED, WhereOperator.SMALLER, String::valueOf);
+            DeleteQuery<Long> query = new DeleteQuery<Long>().where(DataHandler.COLUMN_PRICE_EXPIRE_DATE, WhereOperator.SMALLER, String::valueOf);
             this.delete(this.tablePriceData, query, deadlineMs);
         }
         if (SQLQueries.hasTable(this.connector, this.tableStockData)) {
@@ -129,9 +131,8 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         this.createTable(this.tablePriceData, Lists.newList(
             COLUMN_GEN_SHOP_ID,
             COLUMN_GEN_PRODUCT_ID,
-            COLUMN_PRICE_LAST_BUY,
-            COLUMN_PRICE_LAST_SELL,
-            COLUMN_PRICE_LAST_UPDATED,
+            COLUMN_PRICE_BUY_OFFSET,
+            COLUMN_PRICE_SELL_OFFSET,
             COLUMN_PRICE_EXPIRE_DATE,
             COLUMN_PRICE_PURCHASES,
             COLUMN_PRICE_SALES
@@ -148,11 +149,31 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
             COLUMN_BANK_HOLDER,
             COLUMN_BANK_BALANCE
         ));
+
+        this.dropColumn(this.tablePriceData, "lastBuyPrice", "lastSellPrice", "lastUpdated");
+        this.addColumn(this.tablePriceData, COLUMN_PRICE_BUY_OFFSET, "0");
+        this.addColumn(this.tablePriceData, COLUMN_PRICE_SELL_OFFSET, "0");
+
+        this.addTableSync(this.tablePriceData, resultSet -> {
+            PriceData data = DataQueries.PRICE_DATA_LOADER.apply(resultSet);
+            this.plugin.dataAccess(dataManager -> dataManager.loadPriceData(data));
+        });
+
+        this.addTableSync(this.tableStockData, resultSet -> {
+            StockData data = DataQueries.STOCK_DATA_LOADER.apply(resultSet);
+            this.plugin.dataAccess(dataManager -> dataManager.loadStockData(data));
+        });
+
+        this.addTableSync(this.tableRotationData, resultSet -> {
+            RotationData data = DataQueries.ROTATION_DATA_LOADER.apply(resultSet);
+            this.plugin.dataAccess(dataManager -> dataManager.loadRotationData(data));
+        });
     }
 
     @Override
     public void onSynchronize() {
-        this.plugin.getDataManager().handleSynchronization();
+        // Synchronize only if data manager is loaded.
+        this.plugin.dataAccess(dataManager -> this.synchronizer.syncAll());
 
         ChestShopModule module = this.plugin.getChestShop();
         if (module != null) {

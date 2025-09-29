@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.dialog.impl.*;
+import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nightcore.manager.SimpleManager;
 
@@ -22,6 +23,11 @@ public class VirtualDialogs extends SimpleManager<ShopPlugin> {
     private ShopPagesDialog       pagesDialog;
     private ShopLayoutsDialog     layoutsDialog;
 
+    private ProductPriceDialog productPriceDialog;
+    private ProductFloatPriceTimesDialog floatPriceTimesDialog;
+    private ProductCurrencyDialog productCurrencyDialog;
+    private ProductCommandsDialog productCommandsDialog;
+
     public VirtualDialogs(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         super(plugin);
         this.module = module;
@@ -36,6 +42,11 @@ public class VirtualDialogs extends SimpleManager<ShopPlugin> {
         this.menuSlotsDialog = this.registerProvider(ShopMenuSlotsDialog::new);
         this.pagesDialog = this.registerProvider(ShopPagesDialog::new);
         this.layoutsDialog = this.registerProvider(ShopLayoutsDialog::new);
+
+        this.productPriceDialog = this.registerProvider(ProductPriceDialog::new);
+        this.floatPriceTimesDialog = this.registerProvider(ProductFloatPriceTimesDialog::new);
+        this.productCurrencyDialog = this.registerProvider(ProductCurrencyDialog::new);
+        this.productCommandsDialog = this.registerProvider(ProductCommandsDialog::new);
     }
 
     @Override
@@ -49,8 +60,6 @@ public class VirtualDialogs extends SimpleManager<ShopPlugin> {
         this.plugin.injectLang(provider);
         return provider;
     }
-
-    // TODO shop setSaveRequired
 
     public void openShopCreationDialog(@NotNull Player player) {
         this.creationDialog.show(player, null);
@@ -78,5 +87,21 @@ public class VirtualDialogs extends SimpleManager<ShopPlugin> {
 
     public void openShopLayoutsDialog(@NotNull Player player, @NotNull VirtualShop shop) {
         this.layoutsDialog.show(player, shop);
+    }
+
+    public void openProductPrice(@NotNull Player player, @NotNull VirtualProduct product) {
+        this.productPriceDialog.show(player, product);
+    }
+
+    public void openFloatPricingTimes(@NotNull Player player, @NotNull VirtualProduct product) {
+        this.floatPriceTimesDialog.show(player, product);
+    }
+
+    public void openProductCurrency(@NotNull Player player, @NotNull VirtualProduct product) {
+        this.productCurrencyDialog.show(player, product);
+    }
+
+    public void openProductCommandsDialog(@NotNull Player player, @NotNull VirtualProduct product) {
+        this.productCommandsDialog.show(player, product);
     }
 }

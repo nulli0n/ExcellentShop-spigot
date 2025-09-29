@@ -8,6 +8,7 @@ import su.nightexpress.nexshop.api.data.Saveable;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.data.key.ProductKey;
 import su.nightexpress.nexshop.data.key.RotationKey;
@@ -45,10 +46,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     @Override
     protected void onLoad() {
-        this.plugin.runTaskAsync(task -> {
-            this.loadAllData(); // Load all price & stock datas for all products, then update prices.
-        });
-
         this.addAsyncTask(this::saveScheduledDatas, Config.DATA_SAVE_INTERVAL.get());
     }
 
@@ -69,15 +66,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         return this.loaded;
     }
 
-    public void handleSynchronization() {
-        if (!this.isLoaded()) return;
-
-        this.saveScheduledDatas();
-        this.clear();
-
-        this.loadAllData();
-    }
-
     public void loadAllData() {
         this.loadPriceDatas();
         this.loadStockDatas();
@@ -92,7 +80,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         //this.plugin.debug("Loaded " + priceDataMap.size() + " product price datas.");
     }
 
-    private void loadPriceData(@NotNull PriceData data) {
+    public void loadPriceData(@NotNull PriceData data) {
         ProductKey key = new ProductKey(data.getShopId(), data.getProductId(), data.getShopId());
         this.priceDataMap.put(key, data);
     }
@@ -103,7 +91,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         //this.plugin.debug("Loaded " + stockDataMap.size() + " product stock datas.");
     }
 
-    private void loadStockData(@NotNull StockData data) {
+    public void loadStockData(@NotNull StockData data) {
         ProductKey key = new ProductKey(data.getShopId(), data.getProductId(), data.getHolder());
         this.stockDataMap.put(key, data);
     }
@@ -114,7 +102,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         //this.plugin.debug("Loaded " + this.rotationDataMap.size() + " rotation datas.");
     }
 
-    private void loadRotationData(@NotNull RotationData data) {
+    public void loadRotationData(@NotNull RotationData data) {
         this.rotationDataMap.put(new RotationKey(data.getShopId(), data.getRotationId()), data);
     }
 
@@ -222,6 +210,11 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     @NotNull
     public PriceData getPriceDataOrCreate(@NotNull Product product) {
+        // Return fresh empty data for products with pricing that do not need a data.
+        if (product.getPricingType() == PriceType.FLAT || product.getPricingType() == PriceType.PLAYER_AMOUNT) {
+            return PriceData.create(product);
+        }
+
         PriceData data = this.getPriceData(product);
         if (data != null) return data;
 

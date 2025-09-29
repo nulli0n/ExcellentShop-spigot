@@ -7,6 +7,7 @@ import su.nightexpress.nexshop.api.module.ShopModule;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nightcore.config.FileConfig;
 
 import java.util.Collection;
 import java.util.Map;
@@ -18,16 +19,11 @@ public interface Shop {
 
     void save();
 
-    void saveSettings();
+    void save(boolean force);
 
-    void saveRotations();
-
-    void saveProducts();
+    void save(@NotNull FileConfig config, boolean force);
 
     void printBadProducts();
-
-    @Deprecated
-    void saveProduct(@NotNull Product product);
 
     boolean canAccess(@NotNull Player player, boolean notify);
 
@@ -37,13 +33,13 @@ public interface Shop {
 
     void updatePrices(boolean force);
 
-    default void open(@NotNull Player player) {
-        this.open(player, 1);
-    }
+    boolean isSaveRequired();
 
-    default void open(@NotNull Player player, int page) {
-        this.open(player, page, false);
-    }
+    void setSaveRequired(boolean saveRequired);
+
+    void open(@NotNull Player player);
+
+    void open(@NotNull Player player, int page);
 
     void open(@NotNull Player player, int page, boolean force);
 
@@ -63,17 +59,9 @@ public interface Shop {
 
     void setSellingAllowed(boolean sellingAllowed);
 
-    default boolean isTradeAllowed(@NotNull TradeType tradeType) {
-        return tradeType == TradeType.BUY ? this.isBuyingAllowed() : this.isSellingAllowed();
-    }
+    boolean isTradeAllowed(@NotNull TradeType tradeType);
 
-    @Deprecated
-    default void setTransactionEnabled(@NotNull TradeType tradeType, boolean enabled) {
-        if (tradeType == TradeType.BUY) this.setBuyingAllowed(enabled);
-        else this.setSellingAllowed(enabled);
-    }
-
-    //void addProduct(@NotNull Product product);
+    boolean hasProduct(@NotNull String id);
 
     void removeProduct(@NotNull Product product);
 
@@ -87,11 +75,7 @@ public interface Shop {
 
     @Nullable Product getProductById(@NotNull String id);
 
-    default int countProducts() {
-        return this.getProducts().size();
-    }
+    int countProducts();
 
-    default boolean isProduct(@NotNull Product product) {
-        return this.getProductMap().containsKey(product.getId());
-    }
+    boolean hasProduct(@NotNull Product product);
 }

@@ -21,7 +21,6 @@ import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
-import su.nightexpress.nightcore.language.entry.LangText;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.ui.menu.Menu;
@@ -120,9 +119,10 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
     }
 
     public void updateShops() {
-        if (!this.plugin.getDataManager().isLoaded()) return;
-
-        this.getShops().forEach(Shop::update);
+        this.getShops().forEach(shop -> {
+            shop.update();
+            shop.updatePrices(false);
+        });
     }
 
     private void printBadProducts() {
@@ -185,7 +185,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
             if (product.countUnits(player) < 1) {
                 Lang.SHOP_PRODUCT_ERROR_NOT_ENOUGH_ITEMS.message().send(player, replacer -> replacer
                     .replace(Placeholders.GENERIC_AMOUNT, product.getUnitAmount())
-                    .replace(Placeholders.GENERIC_ITEM, ItemUtil.getNameSerialized(product.getPreview()))
+                    .replace(Placeholders.GENERIC_ITEM, ItemUtil.getNameSerialized(product.getPreviewOrPlaceholder()))
                 );
                 return false;
             }
@@ -247,6 +247,7 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
         this.purchaseOptionMenu.open(player, new Breadcumb<>(product, page));
     }
 
+    @Deprecated
     public void openConfirmation(@NotNull Player player, @NotNull Confirmation confirmation) {
         this.confirmMenu.open(player, confirmation);
     }

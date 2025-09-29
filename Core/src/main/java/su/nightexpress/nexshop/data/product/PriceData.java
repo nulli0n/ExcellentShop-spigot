@@ -7,9 +7,8 @@ import su.nightexpress.nightcore.util.TimeUtil;
 
 public class PriceData extends AbstractData {
 
-    private double latestBuyPrice;
-    private double latestSellPrice;
-    private long   latestUpdateDate;
+    private double buyOffset;
+    private double sellOffset;
     private long   expireDate;
     private int    purchases;
     private int    sales;
@@ -18,28 +17,25 @@ public class PriceData extends AbstractData {
     public static PriceData create(@NotNull Product product) {
         String shopId = product.getShop().getId();
         String productId = product.getId();
-        double buyPrice = product.getPricer().getBuyPrice();
-        double sellPrice = product.getPricer().getSellPrice();
-        long latestUpdated = System.currentTimeMillis();
-        long expireDate = 0L; // Will trigger isExpired to update values.
+
         int purchases = 0;
         int sales = 0;
 
-        return new PriceData(shopId, productId, buyPrice, sellPrice, latestUpdated, expireDate, purchases, sales);
+        PriceData data = new PriceData(shopId, productId, 0D, 0D, 0L, purchases, sales);
+        data.setExpired();
+        return data;
     }
 
     public PriceData(@NotNull String shopId,
                      @NotNull String productId,
-                     double latestBuyPrice,
-                     double latestSellPrice,
-                     long latestUpdateDate,
+                     double buyOffset,
+                     double sellOffset,
                      long expireDate,
                      int purchases,
                      int sales) {
         super(shopId, productId);
-        this.setLatestBuyPrice(latestBuyPrice);
-        this.setLatestSellPrice(latestSellPrice);
-        this.setLatestUpdateDate(latestUpdateDate);
+        this.setBuyOffset(buyOffset);
+        this.setSellOffset(sellOffset);
         this.setExpireDate(expireDate);
         this.setPurchases(purchases);
         this.setSales(sales);
@@ -54,7 +50,23 @@ public class PriceData extends AbstractData {
         }
     }
 
+    public double getOffset(@NotNull TradeType type) {
+        return switch (type) {
+            case BUY -> this.buyOffset;
+            case SELL -> this.sellOffset;
+        };
+    }
+
+    public void setOffset(@NotNull TradeType type, double offset) {
+        switch (type) {
+            case BUY -> this.setBuyOffset(offset);
+            case SELL -> this.setSellOffset(offset);
+        }
+    }
+
     public void reset() {
+        this.setBuyOffset(0);
+        this.setSellOffset(0);
         this.setPurchases(0);
         this.setSales(0);
         this.setExpired();
@@ -65,31 +77,23 @@ public class PriceData extends AbstractData {
     }
 
     public void setExpired() {
-        this.setExpireDate(0L);
+        this.setExpireDate(System.currentTimeMillis() - 1000L);
     }
 
-    public double getLatestBuyPrice() {
-        return this.latestBuyPrice;
+    public double getBuyOffset() {
+        return this.buyOffset;
     }
 
-    public void setLatestBuyPrice(double latestBuyPrice) {
-        this.latestBuyPrice = latestBuyPrice;
+    public void setBuyOffset(double buyOffset) {
+        this.buyOffset = buyOffset;
     }
 
-    public double getLatestSellPrice() {
-        return this.latestSellPrice;
+    public double getSellOffset() {
+        return this.sellOffset;
     }
 
-    public void setLatestSellPrice(double latestSellPrice) {
-        this.latestSellPrice = latestSellPrice;
-    }
-
-    public long getLatestUpdateDate() {
-        return this.latestUpdateDate;
-    }
-
-    public void setLatestUpdateDate(long latestUpdateDate) {
-        this.latestUpdateDate = latestUpdateDate;
+    public void setSellOffset(double sellOffset) {
+        this.sellOffset = sellOffset;
     }
 
     public long getExpireDate() {
@@ -119,9 +123,8 @@ public class PriceData extends AbstractData {
     @Override
     public String toString() {
         return "PriceData{" +
-            "latestBuyPrice=" + latestBuyPrice +
-            ", latestSellPrice=" + latestSellPrice +
-            ", latestUpdateDate=" + latestUpdateDate +
+            "buyOffset=" + buyOffset +
+            ", sellOffset=" + sellOffset +
             ", expireDate=" + expireDate +
             ", purchases=" + purchases +
             ", sales=" + sales +

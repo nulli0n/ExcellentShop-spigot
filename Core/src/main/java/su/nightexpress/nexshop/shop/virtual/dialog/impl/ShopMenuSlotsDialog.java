@@ -101,7 +101,7 @@ public class ShopMenuSlotsDialog extends VirtualDialogProvider<VirtualShop> {
                     }
                 }
 
-                shop.saveSettings();
+                shop.setSaveRequired(true);
                 this.showNextTick(player, shop);
             })
         );

@@ -11,22 +11,25 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.data.DataHandler;
 import su.nightexpress.nexshop.data.DataManager;
-import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.exception.ModuleLoadException;
+import su.nightexpress.nexshop.hook.HookPlugin;
 import su.nightexpress.nexshop.hook.PlaceholderHook;
 import su.nightexpress.nexshop.module.ModuleId;
-import su.nightexpress.nexshop.module.ModuleLoaders;
+import su.nightexpress.nexshop.module.ModuleSettings;
+import su.nightexpress.nexshop.module.ModuleSupplier;
 import su.nightexpress.nexshop.shop.ShopManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualIconsLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.user.UserManager;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.command.experimental.ImprovedCommands;
 import su.nightexpress.nightcore.command.experimental.impl.ReloadCommand;
 import su.nightexpress.nightcore.command.experimental.node.ChainedNode;
+import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.util.Plugins;
@@ -36,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class ShopPlugin extends NightPlugin implements ImprovedCommands {
 
@@ -58,7 +62,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     @Override
     public void onLoad() {
         super.onLoad();
-        if (this.getServer().getPluginManager().getPlugin(HookId.WORLD_GUARD) != null) {
+        if (this.getServer().getPluginManager().getPlugin(HookPlugin.WORLD_GUARD) != null) {
             WorldGuardFlags.setupFlag();
         }
     }
@@ -75,14 +79,6 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
 
     @Override
     public void enable() {
-        if (!Plugins.hasEconomyBridge()) {
-            this.error(Plugins.ECONOMY_BRIDGE + " is not installed!");
-            this.error("Please install " + Plugins.ECONOMY_BRIDGE + " to run ExcellentShop.");
-            this.error("https://github.com/nulli0n/economy-bridge/releases");
-            this.getPluginManager().disablePlugin(this);
-            return;
-        }
-
         this.loadAPI();
         this.loadCommands();
 
@@ -104,6 +100,9 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
         if (Plugins.hasPlaceholderAPI()) {
             PlaceholderHook.setup(this);
         }
+
+        // Sync all price & stock datas for all products after everything is loaded.
+        this.runTaskAsync(task -> this.dataManager.loadAllData());
     }
 
     @Override
@@ -130,24 +129,26 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     private void loadAPI() {
         ShopAPI.load(this);
         Keys.load(this);
-        ModuleLoaders.load();
     }
 
     private void loadModules() {
         this.modules = new HashMap<>();
         this.migrateModuleSettings(this.config);
 
-        Config.MODULE_CONFIG.get().forEach((id, moduleConfig) -> {
-            Module module = ModuleLoaders.loadModule(this, id, moduleConfig);
-            if (module == null) return;
+        ModuleSupplier.create().forEach(supplier -> {
+            String id = supplier.getId();
+            ModuleSettings settings = ConfigValue.create("Module." + id, (cfg, path) -> ModuleSettings.read(cfg, path, id), supplier.getSettings()).read(this.config);
+            if (!settings.isEnabled()) return;
 
-            if (!module.validateConfig()) {
-                this.error("Module '" + id + "' can not be loaded due to fatal error(s).");
-                return;
+            Module module = supplier.init(this, settings);
+
+            try {
+                module.setup();
+                this.modules.put(module.getClass(), module);
             }
-
-            module.setup();
-            this.modules.put(module.getClass(), module);
+            catch (ModuleLoadException exception) {
+                this.error("Could not load module '" + id + "': " + exception.getMessage());
+            }
         });
     }
 
@@ -165,6 +166,12 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
     @NotNull
     public DataManager getDataManager() {
         return this.dataManager;
+    }
+
+    public void dataAccess(@NotNull Consumer<DataManager> consumer) {
+        if (this.dataManager.isLoaded()) {
+            consumer.accept(this.dataManager);
+        }
     }
 
     @NotNull
@@ -237,7 +244,6 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
             config.set(writePath + ".Currency.Enabled", enabledCur);
         }
 
-        Config.MODULE_CONFIG.read(config); // Re-read the updated config :D
         config.remove("Modules");
     }
 }

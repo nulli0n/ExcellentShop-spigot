@@ -10,14 +10,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
-import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.product.content.ContentTypes;
+import su.nightexpress.nexshop.product.content.ProductContent;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nexshop.product.price.impl.FlatPricing;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
@@ -25,6 +23,7 @@ import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
@@ -43,12 +42,15 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private String       worldName;
     private BlockPos     blockPos;
     private ShopLocation location;
-    private boolean      saveRequired;
 
     private UUID    ownerId;
     private String  ownerName;
     private boolean adminShop;
     private boolean itemCreated;
+
+    protected String  name;
+    protected boolean buyingAllowed;
+    protected boolean sellingAllowed;
 
     private boolean hologramEnabled;
     private boolean showcaseEnabled;
@@ -70,8 +72,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return Placeholders.forChestShop(this);
     }
 
-    @Override
-    protected boolean onLoad(@NotNull FileConfig config) {
+    public boolean load() {
+        FileConfig config = this.getConfig();
         // ============== LOCATION UPDATE START ==============
         if (config.contains("Location")) {
             String raw = config.getString("Location", "");
@@ -134,67 +136,56 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     private void loadProducts(@NotNull FileConfig config) {
         config.getSection("Products").forEach(id -> {
-            ChestProduct product = ChestProduct.load(config,"Products." + id, id, this);
-            this.addProduct(product);
+            try {
+                ChestProduct product = ChestProduct.load(config, "Products." + id, id, this);
+                this.addProduct(product);
+            }
+            catch (IllegalStateException exception) {
+                this.module.error("Product '" + id + "' not loaded: " + exception.getMessage());
+            }
         });
     }
 
     @Override
-    protected void onSave(@NotNull FileConfig config) {
-        this.writeSettings(config);
-        this.writeProducts(config);
+    public void save() {
+        this.save(true);
     }
 
     @Override
-    public void saveSettings() {
-        FileConfig config = this.getConfig();
-        this.writeSettings(config);
-        config.saveChanges();
+    public void save(boolean force) {
+        this.save(this.getConfig(), force);
     }
 
     @Override
-    public void saveRotations() {
+    public void save(@NotNull FileConfig config, boolean force) {
+        if (force || this.isSaveRequired()) {
+            this.blockPos.write(config, "Placement.BlockPos");
+            config.set("Placement.World", this.worldName);
+            config.set("Name", this.getName());
+            config.set("Owner.Id", this.getOwnerId().toString());
+            config.set("AdminShop", this.adminShop);
+            config.set("ItemCreated", this.isItemCreated());
+            config.set("Transaction_Allowed.BUY", this.buyingAllowed);
+            config.set("Transaction_Allowed.SELL", this.sellingAllowed);
+            if (ChestConfig.isRentEnabled()) {
+                config.set("Rent.Settings", this.rentSettings);
+                config.set("Rent.RenterId", this.renterId == null ? null : this.renterId.toString());
+                config.set("Rent.RentedUntil", this.renterId == null ? null : this.rentedUntil);
+            }
+            config.set("Display.Hologram.Enabled", this.isHologramEnabled());
+            config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
+            config.set("Display.Showcase.Type", this.getShowcaseId());
 
-    }
+            config.getSection("Products").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> config.remove("Products." + sId));
 
-    private void writeSettings(@NotNull FileConfig config) {
-        this.blockPos.write(config, "Placement.BlockPos");
-        config.set("Placement.World", this.worldName);
-        config.set("Name", this.getName());
-        config.set("Owner.Id", this.getOwnerId().toString());
-        config.set("AdminShop", this.adminShop);
-        config.set("ItemCreated", this.isItemCreated());
-        config.set("Transaction_Allowed.BUY", this.buyingAllowed);
-        config.set("Transaction_Allowed.SELL", this.sellingAllowed);
-        if (ChestConfig.isRentEnabled()) {
-            config.set("Rent.Settings", this.rentSettings);
-            config.set("Rent.RenterId", this.renterId == null ? null : this.renterId.toString());
-            config.set("Rent.RentedUntil", this.renterId == null ? null : this.rentedUntil);
+            this.setSaveRequired(false);
         }
-        config.set("Display.Hologram.Enabled", this.isHologramEnabled());
-        config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
-        config.set("Display.Showcase.Type", this.getShowcaseId());
-    }
 
-    @Override
-    public void saveProducts() {
-        FileConfig config = this.getConfig();
-        this.writeProducts(config);
-        config.saveChanges();
-    }
+        this.getProducts().stream()
+            //.filter(product -> force || product.isSaveRequired()) TODO Enable back when marked properly
+            .peek(product -> product.setSaveRequired(false))
+            .forEach(product -> product.write(config, "Products." + product.getId()));
 
-    private void writeProducts(@NotNull FileConfig config) {
-        config.remove("Products");
-        this.getValidProducts().forEach(product -> product.write(config, "Products." + product.getId()));
-    }
-
-    @Override
-    public void saveProduct(@NotNull Product product) {
-        ChestProduct chestProduct = this.getProductById(product.getId());
-        if (chestProduct == null) return;
-
-        FileConfig config = this.getConfig();
-        chestProduct.write(config, "Products." + product.getId());
         config.saveChanges();
     }
 
@@ -229,14 +220,6 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     public boolean isChunkLoaded() {
         return this.location != null && this.location.isChunkLoaded();
-    }
-
-    public void setSaveRequired(boolean saveRequired) {
-        this.saveRequired = saveRequired;
-    }
-
-    public boolean isSaveRequired() {
-        return this.saveRequired;
     }
 
     @Override
@@ -287,6 +270,37 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         return this.blockPos;
     }
 
+    @Override
+    @NotNull
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public void setName(@NotNull String name) {
+        this.name = name;
+    }
+
+    @Override
+    public boolean isBuyingAllowed() {
+        return this.buyingAllowed;
+    }
+
+    @Override
+    public void setBuyingAllowed(boolean buyingAllowed) {
+        this.buyingAllowed = buyingAllowed;
+    }
+
+    @Override
+    public boolean isSellingAllowed() {
+        return this.sellingAllowed;
+    }
+
+    @Override
+    public void setSellingAllowed(boolean sellingAllowed) {
+        this.sellingAllowed = sellingAllowed;
+    }
+
     // TODO Update stock placeholders when closing chest
 
     @NotNull
@@ -326,7 +340,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public boolean canManageRent(@NotNull Player player) {
-        return this.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+        return ChestUtils.hasRentPermission(player) && (this.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS));
     }
 
     public boolean canManageDisplay(@NotNull Player player) {
@@ -382,12 +396,13 @@ public class ChestShop extends AbstractShop<ChestProduct> {
         }
 
         String id = UUID.randomUUID().toString();
-        ProductTyping typing = ProductTypes.fromItem(stack, bypassHandler);
-        Currency currency = this.module.getDefaultCurrency();
-        ChestProduct product = new ChestProduct(id, this, currency, typing);
+        ProductContent content = ContentTypes.fromItem(stack, this.module::isItemProviderAllowed);
+        ChestProduct product = new ChestProduct(id, this);
 
-        product.setPrice(TradeType.BUY, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
-        product.setPrice(TradeType.SELL, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
+        product.setCurrencyId(this.module.getSettings().getDefaultCurrency());
+        product.setContent(content);
+        product.setPricing(FlatPricing.of(ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get(), ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get()));
+        product.updatePrice(false);
 
         this.addProduct(product);
         return product;
@@ -396,7 +411,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     @Nullable
     public ChestProduct getProduct(@NotNull ItemStack item) {
         return this.getValidProducts().stream()
-            .filter(product -> product.getType() instanceof PhysicalTyping typing && typing.isItemMatches(item))
+            .filter(product -> product.getContent() instanceof ItemContent typing && typing.isItemMatches(item))
             .findFirst().orElse(null);
     }
 

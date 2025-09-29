@@ -188,6 +188,7 @@ public class VirtualCommands {
     private static boolean sellAll(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
         if (player == null) return false;
+        if (!module.isAvailable(player, true)) return false;
 
         module.sellAll(player, arguments.hasFlag(CommandFlags.SILENT));
 
@@ -200,6 +201,7 @@ public class VirtualCommands {
     private static boolean sellHand(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
         if (player == null) return false;
+        if (!module.isAvailable(player, true)) return false;
 
         module.sellSlots(player, player.getInventory().getHeldItemSlot());
 
@@ -212,6 +214,7 @@ public class VirtualCommands {
     private static boolean sellHandAll(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
         if (player == null) return false;
+        if (!module.isAvailable(player, true)) return false;
 
         PlayerInventory inventory = player.getInventory();
 

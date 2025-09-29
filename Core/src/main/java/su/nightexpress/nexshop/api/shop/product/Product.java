@@ -5,12 +5,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
+import su.nightexpress.nexshop.product.content.ProductContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.product.price.ProductPricing;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
@@ -21,6 +23,10 @@ public interface Product {
     @NotNull UnaryOperator<String> replacePlaceholders(@Nullable Player player);
 
     boolean isValid();
+
+    boolean isSaveRequired();
+
+    void setSaveRequired(boolean saveRequired);
 
     /**
      * Performs a check to determine if product is available for buying/selling (e.g. present in the shop, is in rotation).
@@ -46,17 +52,37 @@ public interface Product {
 
     void updatePrice(boolean force);
 
-    double getPriceBuy(@NotNull Player player);
+    double getPrice(@NotNull TradeType type);
 
-    double getPriceSell(@NotNull Player player);
+    void setPrice(@NotNull TradeType type, double price);
 
-    double getPriceSellAll(@NotNull Player player);
+    double getBuyPrice();
 
-    double getPrice(@NotNull TradeType tradeType);
+    void setBuyPrice(double buyPrice);
 
-    double getPrice(@NotNull TradeType tradeType, @Nullable Player player);
+    double getSellPrice();
 
-    void setPrice(@NotNull TradeType tradeType, double price);
+    void setSellPrice(double sellPrice);
+
+    double getFinalBuyPrice(@NotNull Player player);
+
+    double getFinalBuyPrice(@NotNull Player player, int amount);
+
+    double getFinalSellPrice(@NotNull Player player);
+
+    double getFinalSellPrice(@NotNull Player player, int amount);
+
+    double getFinalSellAllPrice(@NotNull Player player);
+
+    double getFinalPrice(@NotNull TradeType tradeType);
+
+    double getFinalPrice(@NotNull TradeType tradeType, int amount);
+
+    double getFinalPrice(@NotNull TradeType tradeType, @Nullable Player player);
+
+    double getFinalPrice(@NotNull TradeType tradeType, int amount, @Nullable Player player);
+
+
 
     int getUnitAmount();
 
@@ -104,17 +130,25 @@ public interface Product {
 
     @NotNull Shop getShop();
 
-    @NotNull ProductTyping getType();
+    @NotNull ProductContent getContent();
 
-    void setType(@NotNull ProductTyping type);
+    void setContent(@NotNull ProductContent content);
 
     @NotNull ItemStack getPreview();
 
+    @NotNull ItemStack getPreviewOrPlaceholder();
+
     @NotNull Currency getCurrency();
 
-    void setCurrency(@NotNull Currency currency);
+    @NotNull Optional<Currency> currency();
 
-    @NotNull AbstractProductPricer getPricer();
+    @NotNull String getCurrencyId();
 
-    void setPricer(@NotNull AbstractProductPricer pricer);
+    void setCurrencyId(@NotNull String currencyId);
+
+    @NotNull ProductPricing getPricing();
+
+    @NotNull PriceType getPricingType();
+
+    void setPricing(@NotNull ProductPricing pricing);
 }

@@ -6,14 +6,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.ItemBridge;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.economybridge.api.item.ItemHandler;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.event.AuctionListingCreateEvent;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.command.child.*;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
@@ -24,12 +21,15 @@ import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.module.AbstractModule;
-import su.nightexpress.nexshop.module.ModuleConfig;
-import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.module.ModuleSettings;
+import su.nightexpress.nexshop.product.content.ContentTypes;
+import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.db.config.DatabaseType;
+import su.nightexpress.nightcore.integration.item.ItemBridge;
+import su.nightexpress.nightcore.integration.item.adapter.IdentifiableItemAdapter;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.UIUtils;
@@ -54,7 +54,7 @@ public class AuctionManager extends AbstractModule {
     private PlayerListingsMenu    sellingMenu;
     private CurrencySelectMenu    currencySelectMenu;
 
-    public AuctionManager(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleConfig config) {
+    public AuctionManager(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleSettings config) {
         super(plugin, id, config);
         this.listings = new Listings();
         this.categoryMap = new LinkedHashMap<>();
@@ -235,8 +235,10 @@ public class AuctionManager extends AbstractModule {
             return false;
         }
 
-        for (ItemHandler handler : ItemBridge.getHandlers()) {
-            String id = handler.getItemId(item);
+        for (ItemAdapter<?> handler : ItemBridge.getAdapters()) {
+            if (!(handler instanceof IdentifiableItemAdapter identifiableItemAdapter)) continue;
+
+            String id = identifiableItemAdapter.getItemId(item);
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }
@@ -384,15 +386,8 @@ public class AuctionManager extends AbstractModule {
             currency.take(player, taxPay);
         }
 
-        //ItemHandler handler = ProductHandlerRegistry.getHandler(item);
-        //ItemPacker packer = handler.createPacker(item);
-        PhysicalTyping typing = ProductTypes.fromItem(item, false);
-
-        if (AuctionConfig.DISABLED_ITEM_HANDLERS.get().contains(typing.getName().toLowerCase())) {
-            typing = ProductTypes.fromItem(item, true);
-        }
-
-        ActiveListing listing = ActiveListing.create(player, typing, currency, price);
+        ItemContent content = ContentTypes.fromItem(item, this::isItemProviderAllowed);
+        ActiveListing listing = ActiveListing.create(player, content, currency, price);
 
         AuctionListingCreateEvent event = new AuctionListingCreateEvent(player, currency, listing);
         plugin.getPluginManager().callEvent(event);
@@ -449,6 +444,7 @@ public class AuctionManager extends AbstractModule {
         Player seller = plugin.getServer().getPlayer(listing.getOwner());
         if (seller != null) {
             if (AuctionConfig.LISINGS_AUTO_CLAIM.get()) {
+                // FIXME Poorly works, not saved properly
                 this.claimRewards(seller, Lists.newList(completedListing));
             }
             else {

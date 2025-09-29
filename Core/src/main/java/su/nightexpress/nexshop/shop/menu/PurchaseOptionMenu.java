@@ -66,7 +66,7 @@ public class PurchaseOptionMenu extends LinkedMenu<ShopPlugin, Breadcumb<Product
         if (this.productSlot >= 0 && this.productSlot <= inventory.getSize()) {
             Product product = this.getLink(viewer).source();
 
-            this.addItem(viewer, NightItem.fromItemStack(product.getPreview()).toMenuItem().setSlots(this.productSlot));
+            this.addItem(viewer, NightItem.fromItemStack(product.getPreviewOrPlaceholder()).toMenuItem().setSlots(this.productSlot));
         }
     }
 

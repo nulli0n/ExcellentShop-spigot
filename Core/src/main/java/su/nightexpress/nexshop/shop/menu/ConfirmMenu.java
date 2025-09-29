@@ -17,7 +17,6 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 import static su.nightexpress.nightcore.util.Placeholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
-@SuppressWarnings("UnstableApiUsage")
 @Deprecated
 public class ConfirmMenu extends LinkedMenu<ShopPlugin, Confirmation> implements ConfigBased {
 

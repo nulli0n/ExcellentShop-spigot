@@ -2,8 +2,8 @@ package su.nightexpress.nexshop.auction.config;
 
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import su.nightexpress.economybridge.currency.CurrencyId;
-import su.nightexpress.economybridge.item.ItemPlugins;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
+import su.nightexpress.nightcore.integration.item.ItemPlugins;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.BukkitThing;
@@ -18,23 +18,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AuctionConfig {
-
-//    public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("Settings.Default_Currency",
-//        CurrencyId.VAULT,
-//        "Sets default Auction currency."
-//    ).onRead(CurrencyId::reroute);
-//
-//    public static final ConfigValue<Set<String>> ALLOWED_CURRENCIES = ConfigValue.create("Settings.Allowed_Currencies",
-//        Set.of(Placeholders.WILDCARD),
-//        "List of currencies available to use by players.",
-//        "You can use asterisk '" + Placeholders.WILDCARD + "' to allow all currencies."
-//    ).onRead(set -> Lists.modify(set, CurrencyId::reroute));
-
-    public static final ConfigValue<Set<String>> DISABLED_ITEM_HANDLERS = ConfigValue.create("Settings.Disabled_Item_Handlers",
-        Lists.newSet("mmoitems"),
-        "List of custom item handler IDs that should be ignored for auction listings and added as normal items.",
-        "https://nightexpressdev.com/economy-bridge/items/"
-    ).onRead(set -> Lists.modify(set, String::toLowerCase));
 
     public static final ConfigValue<Set<String>> DISABLED_WORLDS = ConfigValue.create("Settings.Disabled_Worlds",
         Lists.newSet("custom_world", "another_world"),

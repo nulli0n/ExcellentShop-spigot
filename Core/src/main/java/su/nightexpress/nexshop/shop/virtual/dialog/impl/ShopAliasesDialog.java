@@ -37,7 +37,7 @@ public class ShopAliasesDialog extends VirtualDialogProvider<VirtualShop> {
         "Here you can add custom aliases for the shop.",
         "These aliases will be registered as " + SOFT_YELLOW.wrap("server commands") + ", and running one of them will open this shop.",
         "",
-        ORANGE.wrap("⚠") + " Players must have the " + ORANGE.wrap(GENERIC_PERMISSION) + " permission to access these commands.",
+        SOFT_ORANGE.wrap("⚠") + " Players must have the " + SOFT_ORANGE.wrap(GENERIC_PERMISSION) + " permission to access these commands.",
         "",
         SOFT_RED.wrap("→") + " Enter " + SOFT_RED.wrap("one") + " alias " + SOFT_RED.wrap("per line") + "."
     );
@@ -93,6 +93,7 @@ public class ShopAliasesDialog extends VirtualDialogProvider<VirtualShop> {
 
     private void setShopAliases(@NotNull Player user, @NotNull VirtualShop shop, @NotNull String[] aliases, boolean reload) {
         shop.setAliases(Arrays.stream(aliases).map(s -> s.startsWith("/") && s.length() >= 2 ? s.substring(1) : s).collect(Collectors.toSet()));
+        shop.setSaveRequired(true);
 
         if (reload) {
             this.module.reloadShopAliases(shop);

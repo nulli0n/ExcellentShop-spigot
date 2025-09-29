@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
 import su.nightexpress.nightcore.locale.entry.ButtonLocale;
+import su.nightexpress.nightcore.locale.entry.IconLocale;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.locale.entry.TextLocale;
 import su.nightexpress.nightcore.locale.message.MessageData;
@@ -19,6 +20,11 @@ public class VirtualLang implements LangContainer {
     @NotNull
     public static LangEntry.Builder builder(@NotNull String key) {
         return LangEntry.builder(PREFIX + key);
+    }
+
+    @NotNull
+    public static IconLocale.Builder iconBuilder(@NotNull String key) {
+        return LangEntry.iconBuilder(PREFIX + key);
     }
 
     public static final TextLocale COMMAND_ARGUMENT_NAME_SHOP = LangEntry.builder("VirtualShop.Command.Argument.Name.Shop").text("shop");
@@ -128,8 +134,8 @@ public class VirtualLang implements LangContainer {
     public static final TextLocale SELL_MENU_SALE_ENTRY = LangEntry.builder("VirtualShop.SellMenu.SaleEntry").text(
         GRAY.wrap("x" + GENERIC_AMOUNT + " " + WHITE.wrap(GENERIC_ITEM) + ": " + SOFT_GREEN.wrap(GENERIC_PRICE) + " " + DARK_GRAY.wrap("(" + WHITE.wrap(SHOP_NAME) + ")")));
 
-    public static final TextLocale PRICE_AVG_DIFF_UP = LangEntry.builder("VirtualShop.Price.AverageDynamics.Up").text(GREEN.wrap("↑ " + GENERIC_VALUE + "%"));
-    public static final TextLocale PRICE_AVG_DIFF_DOWN = LangEntry.builder("VirtualShop.Price.AverageDynamics.Down").text(RED.wrap("↓ " + GENERIC_VALUE + "%"));
+    public static final TextLocale PRICE_TRENDING_UP   = LangEntry.builder("VirtualShop.Price.AverageDynamics.Up").text(GREEN.wrap("↑ " + GENERIC_VALUE + "%"));
+    public static final TextLocale PRICE_TRENDING_DOWN = LangEntry.builder("VirtualShop.Price.AverageDynamics.Down").text(RED.wrap("↓ " + GENERIC_VALUE + "%"));
 
     public static final MessageLocale ERROR_COMMAND_INVALID_SHOP_ARGUMENT = builder("Shop.Error.Invalid").chatMessage(
         GRAY.wrap(SOFT_RED.wrap(GENERIC_VALUE) + " is not a valid shop!")
@@ -177,4 +183,10 @@ public class VirtualLang implements LangContainer {
     @Deprecated public static final TextLocale EDITOR_ENTER_ROTATION_ID = LangEntry.builder("VirtualShop.Editor.Enter.RotationId").text(GRAY.wrap("Enter " + GREEN.wrap("[Rotation Name]")));
     @Deprecated public static final TextLocale EDITOR_ENTER_WEIGHT      = LangEntry.builder("VirtualShop.Editor.Enter.Weight").text(GRAY.wrap("Enter " + GREEN.wrap("[Weight]")));
 
+    public static final IconLocale EDITOR_PRODUCT_COMMANDS = iconBuilder("Editor.Product.Commands")
+        .name("Commands")
+        .rawLore(PRODUCT_COMMANDS).br()
+        .appendInfo("Commands to run when a player buys this item.").br()
+        .appendClick("Click to edit")
+        .build();
 }

@@ -1,11 +1,11 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import org.bukkit.Material;
-import su.nightexpress.economybridge.currency.CurrencyId;
-import su.nightexpress.economybridge.item.ItemPlugins;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
+import su.nightexpress.nightcore.integration.item.ItemPlugins;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.hook.HookPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.impl.Showcase;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -45,10 +45,10 @@ public class ChestConfig {
     );
 
     public static final ConfigValue<Integer> SAVE_INTERVAL = ConfigValue.create("Shops.Save_Interval",
-        30,
+        300,
         "Sets how often (in seconds) shop changes will be saved (written) to their configuration files.",
         "[Asynchronous]",
-        "[Default is 30]"
+        "[Default is 300]"
     );
 
     public static final ConfigValue<String> ADMIN_SHOP_NAME = ConfigValue.create("Shops.AdminShop_Name",
@@ -179,7 +179,7 @@ public class ChestConfig {
     public static final ConfigValue<Boolean> SHOP_CREATION_CLAIM_ONLY = ConfigValue.create("Shops.Creation.In_Player_Claims_Only.Enabled",
         false,
         "Sets whether or not players can create shops in their own claims only.",
-        "Supported Plugins: " + HookId.LANDS + ", " + HookId.GRIEF_PREVENTION + ", " + HookId.WORLD_GUARD + ", " + HookId.KINGDOMS);
+        "Supported Plugins: " + HookPlugin.LANDS + ", " + HookPlugin.GRIEF_PREVENTION + ", " + HookPlugin.WORLD_GUARD + ", " + HookPlugin.KINGDOMS);
 
     public final static ConfigValue<RankMap<Integer>> SHOP_PRODUCTS_MAX_PER_RANK = ConfigValue.create("Shops.Products.Max_Products_Per_Shop",
         (cfg, path, rank) -> RankMap.read(cfg, path, Integer.class, 3),

@@ -52,7 +52,7 @@ public class RotationListMenu extends LinkedMenu<ShopPlugin, VirtualShop> implem
 
                 Rotation rotation = new Rotation(id, shop);
                 shop.addRotation(rotation);
-                shop.saveRotations();
+                rotation.setSaveRequired(true);
                 return true;
             }));
         });

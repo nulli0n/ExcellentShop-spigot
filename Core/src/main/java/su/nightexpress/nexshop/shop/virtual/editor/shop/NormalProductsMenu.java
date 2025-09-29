@@ -12,14 +12,13 @@ import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
 import su.nightexpress.nexshop.config.Keys;
-import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.product.content.ContentType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.click.ClickResult;
@@ -36,7 +35,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@SuppressWarnings("UnstableApiUsage")
 public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
     private final VirtualShopModule           module;
@@ -53,7 +51,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
         String pId = UUID.randomUUID().toString();
         this.productCache.put(pId, product);
 
-        ItemStack stack = product.getPreview();
+        ItemStack stack = product.getPreviewOrPlaceholder();
         PDCUtil.set(stack, Keys.keyProductCache, pId);
         return stack;
     }
@@ -129,7 +127,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
             int slot = product.getSlot();
 
-            this.addItem(viewer, NightItem.fromItemStack(product.getPreview())
+            this.addItem(viewer, NightItem.fromItemStack(product.getPreviewOrPlaceholder())
                 .setHideComponents(true)
                 .localized(VirtualLocales.PRODUCT_OBJECT)
                 .replacement(replacer -> replacer.replace(product.replacePlaceholders()))
@@ -157,17 +155,19 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                     // Cache clicked product to item stack then remove it from the shop
                     ItemStack saved = this.cacheProduct(product);
                     shop.removeProduct(product);
+                    shop.setSaveRequired(true);
 
                     // Replace current product with the one from player's cursor.
                     ItemStack cursor = event.getCursor();
                     if (cursor != null && !cursor.getType().isAir()) {
                         VirtualProduct newProduct = this.getCachedProduct(cursor);
                         if (newProduct == null) {
-                            newProduct = ProductTypes.wizardCreation(plugin, shop, cursor, ProductType.VANILLA, false);
+                            newProduct = shop.createProduct(ContentType.ITEM, cursor);
                         }
                         if (newProduct != null) {
                             newProduct.setSlot(event.getRawSlot());
                             newProduct.setPage(page);
+                            newProduct.setSaveRequired(true);
                             shop.addProduct(newProduct);
                         }
                     }
@@ -176,7 +176,6 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                     event.getView().setCursor(null);
 
                     this.runNextTick(() -> {
-                        shop.saveProducts();
                         this.flush(viewer1);
                         viewer1.getPlayer().getOpenInventory().setCursor(saved);
                     });
@@ -215,15 +214,15 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
                 VirtualProduct product = this.getCachedProduct(cursor);
                 if (product == null) {
-                    product = ProductTypes.wizardCreation(plugin, shop, cursor, ProductType.VANILLA, false);
+                    product = shop.createProduct(ContentType.ITEM, cursor);
                 }
                 if (product == null) return;
 
                 product.setSlot(event.getRawSlot());
                 product.setPage(page);
+                product.setSaveRequired(true);
 
                 shop.addProduct(product);
-                shop.saveProduct(product);
                 event.getView().setCursor(null);
                 this.runNextTick(() -> this.flush(viewer));
             }));

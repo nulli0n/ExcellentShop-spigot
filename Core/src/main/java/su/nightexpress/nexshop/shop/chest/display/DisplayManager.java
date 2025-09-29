@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.hook.HookId;
+import su.nightexpress.nexshop.hook.HookPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
@@ -70,10 +70,10 @@ public class DisplayManager extends AbstractManager<ShopPlugin> {
 
     @Nullable
     private DisplayHandler<?> createHandler() {
-        if (Plugins.isInstalled(HookId.PACKET_EVENTS) && Version.isPaper()) {
+        if (Plugins.isInstalled(HookPlugin.PACKET_EVENTS) && Version.isPaper()) {
             return new PacketEventsHandler();
         }
-        else if (Plugins.isLoaded(HookId.PROTOCOL_LIB)) {
+        else if (Plugins.isLoaded(HookPlugin.PROTOCOL_LIB)) {
             return new ProtocolLibHandler();
         }
         return null;
@@ -126,9 +126,10 @@ public class DisplayManager extends AbstractManager<ShopPlugin> {
         Block block = shop.location().getBlock();
         double height = block.getBoundingBox().getHeight();
         double heightGap = 1D - height;
+        double textHeigh = shop.hasProducts() ? 1.5D : 1D;
 
         Location shopLocation = LocationUtil.setCenter2D(block.getLocation());
-        Location textLocation = shopLocation.clone().add(0, 1.5D - heightGap, 0);
+        Location textLocation = shopLocation.clone().add(0, textHeigh - heightGap, 0);
         Location itemLocation = shopLocation.clone().add(0, height, 0);
         Location showcaseLocation = shopLocation.clone().add(0, -0.35D - heightGap, 0);
 
@@ -184,10 +185,9 @@ public class DisplayManager extends AbstractManager<ShopPlugin> {
             if (text != null && !text.isEmpty()) {
                 List<String> hologramText = Replacer.create().replacePlaceholderAPI(player).apply(text);
                 List<FakeEntity> holograms = display.getFakeEntities(FakeType.TEXT);
-                for (int index = 0; index < hologramText.size(); index++) {
-                    if (index >= holograms.size()) break;
-
-                    String line = hologramText.get(index);
+                for (int index = 0; index < holograms.size(); index++) {
+                    // Fix for fake entity's text not being updated/replaced when text size is less than holograms amount, so force it to empty string.
+                    String line = index >= hologramText.size() ? "" : hologramText.get(index);
                     FakeEntity entity = holograms.get(index);
                     this.handler.createHologramPackets(player, entity, needSpawn, line);
                 }

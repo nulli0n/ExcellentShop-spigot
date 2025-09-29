@@ -61,12 +61,12 @@ public class ChestShopCommands {
             .executes((context, arguments) -> listAllShops(module, context, arguments))
         );
 
-        root.addDirect("search", builder -> builder
+        root.addDirect("playersearch", builder -> builder
             .playerOnly()
-            .permission(ChestPerms.COMMAND_SEARCH)
-            .description(ChestLang.COMMAND_SEARCH_DESC.text())
-            .withArgument(ArgumentTypes.string(CommandArguments.ITEM_NAME).required().withSamples(context -> BukkitThing.getValues(RegistryType.MATERIAL)))
-            .executes((context, arguments) -> searchShops(module, context, arguments))
+            .permission(ChestPerms.COMMAND_PLAYER_SEARCH)
+            .description(ChestLang.COMMAND_PLAYER_SEARCH_DESC.text())
+            .withArgument(ArgumentTypes.playerName(CommandArguments.PLAYER).required())
+            .executes((context, arguments) -> searchPlayerShops(module, context, arguments))
         );
 
         root.addDirect("create", builder -> builder
@@ -140,10 +140,17 @@ public class ChestShopCommands {
         return true;
     }
 
-    public static boolean searchShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean searchItemShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
         String itemName = arguments.getStringArgument(CommandArguments.ITEM_NAME);
         module.browseItemShops(player, itemName);
+        return true;
+    }
+
+    public static boolean searchPlayerShops(@NotNull ChestShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+        Player player = context.getPlayerOrThrow();
+        String search = arguments.getStringArgument(CommandArguments.PLAYER);
+        module.browseShopOwners(player, search);
         return true;
     }
 

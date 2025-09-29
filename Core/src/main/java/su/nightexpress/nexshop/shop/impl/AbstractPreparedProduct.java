@@ -108,7 +108,7 @@ public abstract class AbstractPreparedProduct<P extends Product> implements Prep
 
     public double getPrice() {
         Product product = this.getProduct();
-        double price = product.getPrice(this.tradeType, this.player) * this.multiplier;
+        double price = product.getFinalPrice(this.tradeType, this.player) * this.multiplier;
         return price * this.units;
     }
 

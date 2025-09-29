@@ -9,13 +9,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
-import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.product.content.ContentType;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.click.ClickResult;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
@@ -24,7 +23,6 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.stream.IntStream;
 
-@SuppressWarnings("UnstableApiUsage")
 public class ProductCreationMenu extends LinkedMenu<ShopPlugin, ProductCreationMenu.Data> {
 
     private static final int ITEM_SLOT = 22;
@@ -49,8 +47,8 @@ public class ProductCreationMenu extends LinkedMenu<ShopPlugin, ProductCreationM
 
         this.addItem(NightItem.fromType(Material.OAK_SIGN).localized(VirtualLocales.PRODUCT_CREATION_INFO).toMenuItem().setSlots(4));
 
-        this.addItem(Material.COMMAND_BLOCK, VirtualLocales.PRODUCT_CREATION_COMMAND, 24, (viewer, event, shop) -> this.tryCreate(viewer, ProductType.COMMAND));
-        this.addItem(Material.DIAMOND, VirtualLocales.PRODUCT_CREATION_ITEM, 20, (viewer, event, shop) -> this.tryCreate(viewer, ProductType.VANILLA));
+        this.addItem(Material.COMMAND_BLOCK, VirtualLocales.PRODUCT_CREATION_COMMAND, 24, (viewer, event, shop) -> this.tryCreate(viewer, ContentType.COMMAND));
+        this.addItem(Material.DIAMOND, VirtualLocales.PRODUCT_CREATION_ITEM, 20, (viewer, event, shop) -> this.tryCreate(viewer, ContentType.ITEM));
     }
 
     public void open(@NotNull Player player, @NotNull VirtualShop shop, boolean rotating, int page, int slot) {
@@ -71,7 +69,7 @@ public class ProductCreationMenu extends LinkedMenu<ShopPlugin, ProductCreationM
         });
     }
 
-    private void tryCreate(@NotNull MenuViewer viewer, @NotNull ProductType type) {
+    private void tryCreate(@NotNull MenuViewer viewer, @NotNull ContentType type) {
         Inventory inventory = viewer.getInventory();
         if (inventory == null) return;
 
@@ -82,15 +80,14 @@ public class ProductCreationMenu extends LinkedMenu<ShopPlugin, ProductCreationM
         Data data = this.getLink(player);
         VirtualShop shop = data.shop;
 
-        VirtualProduct product = ProductTypes.wizardCreation(this.plugin, shop, source, type, false); // TODO Bypass handler button
-        if (product == null) return;
+        VirtualProduct product = shop.createProduct(type, source);
 
         product.setRotating(this.getLink(viewer).rotating);
         product.setPage(data.page);
         product.setSlot(data.slot);
 
         shop.addProduct(product);
-        shop.saveProducts();
+        product.setSaveRequired(true);
 
         this.comeback(viewer);
     }

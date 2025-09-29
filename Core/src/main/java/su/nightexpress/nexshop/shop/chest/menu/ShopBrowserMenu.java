@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.MenuType;
+import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.Placeholders;
@@ -13,10 +14,12 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.language.entry.LangEnum;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
@@ -189,6 +192,12 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
                     );
             })
             .setItemClick(shop -> (viewer1, event) -> {
+                Permission permission = shop.isOwner(player) ? ChestPerms.TELEPORT : ChestPerms.TELEPORT_OTHERS;
+                if (!player.hasPermission(permission)) {
+                    CoreLang.ERROR_NO_PERMISSION.message().send(player);
+                    return;
+                }
+
                 this.module.teleportToShop(player, shop);
             })
             .build();
@@ -200,7 +209,10 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
 
         this.handleInput(Dialog.builder(player, input -> {
             // .runNextTick hack to override dialog GUI restoration.
-            this.runNextTick(() -> this.open(player, data.sortType, data.player, input.getTextRaw(), data.source));
+            this.runNextTick(() -> {
+                player.closeInventory();
+                this.open(player, data.sortType, data.player, input.getTextRaw(), data.source);
+            });
             return true;
         }));
 

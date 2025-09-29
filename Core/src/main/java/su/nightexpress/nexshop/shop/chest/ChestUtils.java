@@ -10,17 +10,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.ItemBridge;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.economybridge.api.item.ItemHandler;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestKeys;
+import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.chest.impl.Showcase;
+import su.nightexpress.nightcore.bridge.currency.Currency;
+import su.nightexpress.nightcore.bridge.item.AdaptedItem;
+import su.nightexpress.nightcore.bridge.item.ItemAdapter;
+import su.nightexpress.nightcore.integration.item.ItemBridge;
+import su.nightexpress.nightcore.integration.item.adapter.IdentifiableItemAdapter;
+import su.nightexpress.nightcore.integration.item.impl.AdaptedCustomStack;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.text.NightMessage;
@@ -45,6 +48,10 @@ public class ChestUtils {
 
     public static boolean canUseDisplayEntities() {
         return !ChestConfig.DISPLAY_USE_ARMOR_STANDS.get();
+    }
+
+    public static boolean hasRentPermission(@NotNull Player player) {
+        return player.hasPermission(ChestPerms.RENT);
     }
 
     @Nullable
@@ -78,9 +85,10 @@ public class ChestUtils {
     }
 
     public static boolean matchesItem(@NotNull ChestProduct product, @NotNull String searchFor) {
-        if (!(product.getType() instanceof PhysicalTyping typing)) return false;
+        if (!product.isValid()) return false;
+        if (!(product.getContent() instanceof ItemContent itemContent)) return false;
 
-        ItemStack item = typing.getItem();
+        ItemStack item = itemContent.getItem();
         String itemType = BukkitThing.getValue(item.getType()).toLowerCase();
         //String itemTypeLocalized = LangAssets.get(item.getType()).toLowerCase();
         String itemCustomName = NightMessage.stripTags(ItemUtil.getNameSerialized(item)).toLowerCase();
@@ -89,8 +97,10 @@ public class ChestUtils {
             return true;
         }
 
-        if (typing instanceof PluginTyping pluginPacker && pluginPacker.isValid()) {
-            String itemId = pluginPacker.getItemId();
+        AdaptedItem adaptedItem = itemContent.getAdaptedItem();
+
+        if (adaptedItem instanceof AdaptedCustomStack customStack) {
+            String itemId = customStack.getData().getItemId();
             return itemId.contains(searchFor);
         }
 
@@ -147,8 +157,10 @@ public class ChestUtils {
         String material = item.getType().getKey().getKey();
         if (bannedItems.contains(material)) return false;
 
-        for (ItemHandler handler : ItemBridge.getHandlers()) {
-            String id = handler.getItemId(item);
+        for (ItemAdapter<?> handler : ItemBridge.getAdapters()) {
+            if (!(handler instanceof IdentifiableItemAdapter identifiableAdapter)) continue;
+
+            String id = identifiableAdapter.getItemId(item);
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }

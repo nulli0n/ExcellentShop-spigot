@@ -8,14 +8,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
-import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.product.content.ContentTypes;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -43,12 +42,7 @@ public class AuctionUtils {
     }
 
     public static void fillDummy(@NotNull AuctionManager auctionManager) {
-        String[] randoms = {"AquaticFlamesIV", "_silent_bunny_", "DefectIV", "Dinara777", "metalblaster99", "poolpony142",
-            "OrganicPlasma", "sunfire81", "Cyan_Soul", "InvisibleShadow", "cutejune", "Ladykiller", "SHARkNESS", "HyBlox", "Radivil3",
-            "VitorKhr", "Samara", "Katushka", "Dark_Night", "DjR2", "Nuforen", "Noob_Perforator", "LaserDance"};
-
-        Map<UUID, String> owners = new HashMap<>();
-        Stream.of(randoms).forEach(name -> owners.put(UUID.randomUUID(), name));
+        Map<UUID, String> owners = new HashMap<>(); // TODO Real players
 
         Set<Material> materials = Stream.of(Material.values())
             .filter(Material::isItem).filter(Predicate.not(Material::isAir))
@@ -71,7 +65,7 @@ public class AuctionUtils {
 
             //ItemHandler handler = ProductHandlerRegistry.forBukkitItem();
             //ItemPacker packer = handler.createPacker(item);
-            PhysicalTyping typing = ProductTypes.fromItem(item, false);
+            ItemContent typing = ContentTypes.fromItem(item, adapter -> true);
 
             Currency currency = Rnd.get(auctionManager.getEnabledCurrencies());
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
@@ -85,15 +79,6 @@ public class AuctionUtils {
                 ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, typing, currency, price, dateCreation, dateExpired, deletionDate);
                 auctionManager.getListings().add(listing);
                 auctionManager.getDatabase().addListing(listing);
-            }
-            else {
-                LocalDateTime buyed = created.plusDays(Rnd.get(4)).plusHours(Rnd.get(4)).plusMinutes(Rnd.get(15));
-                long buyDate = TimeUtil.toEpochMillis(buyed);
-                long deletionDate = generatePurgeDate(buyDate);
-
-                CompletedListing listing = new CompletedListing(UUID.randomUUID(), ownerId, ownerName, Rnd.get(randoms), typing, currency, price, dateCreation, buyDate, deletionDate, Rnd.nextBoolean());
-                auctionManager.getListings().addCompleted(listing);
-                auctionManager.getDatabase().addCompletedListing(listing);
             }
         }
     }

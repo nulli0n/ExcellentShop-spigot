@@ -5,7 +5,7 @@
     <parent>
         <artifactId>ExcellentShop-spigot</artifactId>
         <groupId>su.nightexpress.excellentshop</groupId>
-        <version>4.19.0</version>
+        <version>4.20.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -34,11 +34,6 @@
         </repository>
 
         <repository>
-            <id>phoenix</id>
-            <url>https://nexus.phoenixdevt.fr/repository/maven-public/</url>
-        </repository>
-
-        <repository>
             <id>codemc-releases</id>
             <url>https://repo.codemc.io/repository/maven-releases/</url>
         </repository>
@@ -48,6 +43,15 @@
             <url>https://repo.william278.net/releases</url>
         </repository>
 
+        <repository>
+            <id>griefdefender</id>
+            <url>https://repo.glaremasters.me/repository/bloodshot</url>
+        </repository>
+
+        <repository>
+            <id>alex9849</id>
+            <url>https://nexus.alex9849.net/repository/maven-releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -59,10 +63,9 @@
         </dependency>
 
         <dependency>
-            <groupId>su.nightexpress.economybridge</groupId>
-            <artifactId>economy-bridge</artifactId>
-            <version>1.2.0</version>
-            <scope>provided</scope>
+            <groupId>su.nightexpress.excellentclaims</groupId>
+            <artifactId>ExcellentClaims</artifactId>
+            <version>1.5.2</version>
         </dependency>
 
         <dependency>
@@ -72,7 +75,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Local because kyori can not be fetched fuck this shit I tired -->
         <dependency>
             <groupId>com.griefdefender</groupId>
             <artifactId>api</artifactId>
@@ -88,8 +90,8 @@
         </dependency>
 
         <dependency>
-            <groupId>net.alex9849.arm</groupId>
-            <artifactId>AdvancedRegionMarket</artifactId>
+            <groupId>net.alex9849.advancedregionmarket</groupId>
+            <artifactId>advancedregionmarket</artifactId>
             <version>3.5.3</version>
             <scope>provided</scope>
         </dependency>
@@ -141,6 +143,12 @@
             <artifactId>kingdoms</artifactId>
             <version>1.16.8.1.1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.Xyness</groupId>
+            <artifactId>SimpleClaimSystem</artifactId>
+            <version>1.11</version>
         </dependency>
     </dependencies>
 

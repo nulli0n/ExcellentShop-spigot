@@ -3,7 +3,7 @@ main: su.nightexpress.nexshop.ShopPlugin
 version: '${project.version}'
 description: Advanced 4 in 1 shop plugin with a lot of cool features!
 author: NightExpress
-depend: [ nightcore, EconomyBridge ]
+depend: [ nightcore ]
 softdepend:
   - Citizens
   - WorldGuard
@@ -15,12 +15,12 @@ softdepend:
   - PlaceholderAPI
   - ProtocolLib
   - packetevents
-  - Oraxen
-  - ItemsAdder
-  - Nexo
-  - ExecutableItems
-  - SCore
-  - MMOItems
-  - ExcellentCrates
-  - VotingPlugin
+#  - Oraxen
+#  - ItemsAdder
+#  - Nexo
+#  - ExecutableItems
+#  - SCore
+#  - MMOItems
+#  - ExcellentCrates
+#  - VotingPlugin
 api-version: 1.18

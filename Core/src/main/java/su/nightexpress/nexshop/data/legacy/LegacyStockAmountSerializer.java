@@ -4,6 +4,7 @@ import com.google.gson.*;
 
 import java.lang.reflect.Type;
 
+@Deprecated
 public class LegacyStockAmountSerializer implements JsonSerializer<LegacyStockAmount>, JsonDeserializer<LegacyStockAmount> {
 
     @Override

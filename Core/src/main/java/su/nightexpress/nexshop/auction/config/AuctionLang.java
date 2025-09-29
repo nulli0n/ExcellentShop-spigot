@@ -1,12 +1,12 @@
 package su.nightexpress.nexshop.auction.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.economybridge.Placeholders;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.auction.SortType;
-import su.nightexpress.nightcore.language.entry.LangUIButton;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
 import su.nightexpress.nightcore.locale.entry.EnumLocale;
+import su.nightexpress.nightcore.locale.entry.IconLocale;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.locale.entry.TextLocale;
 import su.nightexpress.nightcore.locale.message.MessageData;
@@ -113,14 +113,14 @@ public class AuctionLang implements LangContainer {
     );
 
 
-    public static final LangUIButton UI_BUY_CONFIRM = LangUIButton.builder("Auction.UI.BuyConfirm.Listing", LISTING_ITEM_NAME)
-        .description(
+    public static final IconLocale UI_BUY_CONFIRM = LangEntry.iconBuilder("Auction.UI.BuyConfirm.Listing")
+        .rawName(LISTING_ITEM_NAME)
+        .rawLore(
             LISTING_ITEM_LORE,
             EMPTY_IF_ABOVE,
             GRAY.wrap("Price: ") + SOFT_YELLOW.wrap(LISTING_PRICE),
             GRAY.wrap("Seller: ") + WHITE.wrap(LISTING_SELLER)
         )
-        .formatted(false)
         .build();
 
 
