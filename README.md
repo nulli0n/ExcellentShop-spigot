@@ -17,7 +17,8 @@ It includes **GUI Shop** (with Rotations), **Chest Shop** and **Auction House**.
 - **Database**. Works with SQLite and MySQL!
 - **Synchronization**. Sync your products data across multiple servers!
 - **Modularized**. Fully disable any part of the plugin you don't like!
-- [**Multi-Currency**](https://nightexpressdev.com/excellentshop/features/multi-currency). Use different currencies in shop items and auction listings!
+- [**Multi-Currency**](https://nightexpressdev.com/excellentshop//features/multi-currency). Supports [CoinsEngine](https://spigotmc.org/resources/84121/), [PlayerPoints](https://www.spigotmc.org/resources/80745/), [BeastTokens](https://www.spigotmc.org/resources/20806/) and more!
+- [**Custom Item Support**](https://nightexpressdev.com/excellentshop/hooks/items). Supports [ItemsAdder](https://www.spigotmc.org/resources/73355/), [Nexo](https://mcmodels.net/products/13172/nexo), [Oraxen](https://www.spigotmc.org/resources/72448/), [ExecutableItems](https://www.spigotmc.org/resources/83070/), [MMOItems](https://www.spigotmc.org/resources/39267/) and more!
 - [**4 Price Types**](https://nightexpressdev.com/excellentshop/features/price-types). Use different price systems for in virtual and chest shops!
 - [**Purchase GUI**](https://nightexpressdev.com/excellentshop/features/purchase-gui). Simple, intuitive and fully customizable GUI for buying and selling items!
 - [**Virtual Shop**](https://nightexpressdev.com/excellentshop/virtual/overview). Create fully customizable admin GUI shops with a lot of options available!
