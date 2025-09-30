@@ -4,22 +4,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.economybridge.currency.CurrencyId;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
-import su.nightexpress.nexshop.product.type.ProductTypes;
+import su.nightexpress.nexshop.exception.ProductLoadException;
+import su.nightexpress.nexshop.product.content.ContentType;
+import su.nightexpress.nexshop.product.content.ContentTypes;
+import su.nightexpress.nexshop.product.content.ProductContent;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nexshop.product.price.ProductPricing;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
-import su.nightexpress.nexshop.util.ErrorHandler;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
 
 import java.util.UUID;
 import java.util.function.UnaryOperator;
@@ -30,17 +28,13 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     private int  cachedAmount;
     private int  cachedSpace;
 
-    public ChestProduct(@NotNull String id, @NotNull ChestShop shop, @NotNull Currency currency, @NotNull ProductTyping typing) {
-        super(id, shop, currency, typing);
+    public ChestProduct(@NotNull String id, @NotNull ChestShop shop) {
+        super(id, shop);
     }
 
     @NotNull
-    public static ChestProduct load(@NotNull FileConfig config, @NotNull String path, @NotNull String id, @NotNull ChestShop shop) {
+    public static ChestProduct load(@NotNull FileConfig config, @NotNull String path, @NotNull String id, @NotNull ChestShop shop) throws ProductLoadException {
         String currencyId = CurrencyId.reroute(config.getString(path + ".Currency", CurrencyId.VAULT));
-        Currency currency = EconomyBridge.getCurrencyOrDummy(currencyId);
-        if (currency.isDummy()) {
-            ErrorHandler.configError("Invalid/Unknown currency '" + currencyId + "'.", config, path);
-        }
 
         String itemOld = config.getString(path + ".Reward.Item");
         if (itemOld != null && !itemOld.isBlank()) {
@@ -51,23 +45,23 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
         if (!config.contains(path + ".Type")) {
             String handlerId = config.getString(path + ".Handler", "bukkit_item");
             if (handlerId.equalsIgnoreCase("bukkit_command")) {
-                config.set(path + ".Type", ProductType.COMMAND.name());
+                config.set(path + ".Type", ContentType.COMMAND.name());
             }
             else if (handlerId.equalsIgnoreCase("bukkit_item")) {
-                config.set(path + ".Type", ProductType.VANILLA.name());
-            }
-            else {
-                config.set(path + ".Type", ProductType.PLUGIN.name());
+                config.set(path + ".Type", ContentType.ITEM.name());
             }
         }
 
-        ProductType typed = config.getEnum(path + ".Type", ProductType.class, ProductType.VANILLA);
-        ProductTyping typing = ProductTypes.read(typed, config, path);
+        ContentType contentType = config.getEnum(path + ".Type", ContentType.class, ContentType.ITEM);
+        ProductContent content = ContentTypes.read(contentType, config, path);
+        if (content == null) throw new ProductLoadException("Invalid item data");
 
         int infQuantity = config.getInt(path + ".InfiniteStorage.Quantity");
 
-        ChestProduct product = new ChestProduct(id, shop, currency, typing);
-        product.setPricer(AbstractProductPricer.read(config, path + ".Price"));
+        ChestProduct product = new ChestProduct(id, shop);
+        product.setCurrencyId(currencyId);
+        product.setContent(content);
+        product.setPricing(ProductPricing.read(config, path + ".Price"));
         product.setQuantity(infQuantity);
         return product;
     }
@@ -75,11 +69,11 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     public void write(@NotNull FileConfig config, @NotNull String path) {
         config.set(path + ".InfiniteStorage.Quantity", this.quantity);
 
-        config.set(path + ".Type", this.type.type().name());
-        this.type.write(config, path);
+        config.set(path + ".Type", this.content.type().name());
+        this.content.write(config, path);
 
         config.set(path + ".Currency", this.getCurrency().getInternalId());
-        this.getPricer().write(config, path + ".Price");
+        this.getPricing().write(config, path + ".Price");
     }
 
     @Override
@@ -143,7 +137,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     @Override
     public boolean consumeStock(@NotNull TradeType type, int amount, @Nullable UUID playerId) {
         if (this.shop.isInactive()) return false;
-        if (!(this.getType() instanceof PhysicalTyping typing)) return false;
+        if (!(this.getContent() instanceof ItemContent typing)) return false;
 
         amount = Math.abs(amount * this.getUnitAmount());
 
@@ -164,7 +158,8 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
     @Override
     public boolean storeStock(@NotNull TradeType type, int units, @Nullable UUID playerId) {
         if (this.shop.isInactive()) return false;
-        if (!(this.getType() instanceof PhysicalTyping typing)) return false;
+        if (!this.isValid()) return false;
+        if (!(this.getContent() instanceof ItemContent itemContent)) return false;
 
         int amount = Math.abs(units * this.getUnitAmount());
 
@@ -177,7 +172,7 @@ public class ChestProduct extends AbstractProduct<ChestShop> {
         Inventory inventory = this.shop.inventory();
         if (inventory == null) return false; // Shop container is not valid anymore.
 
-        if (ShopUtils.addItem(inventory, typing.getItem(), amount)) {
+        if (ShopUtils.addItem(inventory, itemContent.getItem(), amount)) {
             this.updateStockCache();
             return true;
         }

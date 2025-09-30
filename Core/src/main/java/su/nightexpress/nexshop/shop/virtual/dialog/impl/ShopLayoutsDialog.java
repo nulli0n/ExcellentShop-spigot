@@ -95,7 +95,7 @@ public class ShopLayoutsDialog extends VirtualDialogProvider<VirtualShop> {
 
                     boolean value = nbtHolder.getBoolean(JSON_MODE, false);
                     shop.setPaginatedLayouts(value);
-                    shop.saveSettings();
+                    shop.setSaveRequired(true);
                     this.showNextTick(user, shop);
                 })
                 .handleResponse(ACTION_BACK, (user, identifier, nbtHolder) -> {
@@ -110,7 +110,7 @@ public class ShopLayoutsDialog extends VirtualDialogProvider<VirtualShop> {
 
                         shop.setPageLayout(page, layoutId);
                     }
-                    shop.saveSettings();
+                    shop.setSaveRequired(true);
                     this.closeAndThen(user, shop, this.module::openShopOptions);
                 })
             , replacer -> replacer.replace(Placeholders.GENERIC_PATH, () -> this.module.getLocalPathTo(VirtualShopModule.DIR_LAYOUTS)));

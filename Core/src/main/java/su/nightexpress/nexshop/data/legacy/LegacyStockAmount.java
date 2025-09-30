@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.data.legacy;
 
+@Deprecated
 public class LegacyStockAmount {
 
     private final int  itemsLeft;

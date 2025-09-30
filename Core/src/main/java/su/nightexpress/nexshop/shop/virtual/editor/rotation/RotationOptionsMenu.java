@@ -47,7 +47,7 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
                 (viewer1, event1) -> {
                     VirtualShop shop = rotation.getShop();
                     shop.removeRotation(rotation);
-                    shop.saveRotations();
+                    shop.setSaveRequired(true);
                     plugin.getDataManager().deleteRotationData(rotation);
                     module.openRotationsList(viewer1.getPlayer(), shop);
                 },
@@ -113,7 +113,7 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
     }
 
     private void save(@NotNull MenuViewer viewer, @NotNull Rotation rotation) {
-        rotation.getShop().saveRotations();
+        rotation.setSaveRequired(true);
         this.runNextTick(() -> this.flush(viewer));
     }
 

@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;

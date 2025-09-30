@@ -8,6 +8,7 @@ import su.nightexpress.nexshop.api.data.Saveable;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.data.key.ProductKey;
 import su.nightexpress.nexshop.data.key.RotationKey;
@@ -45,7 +46,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     @Override
     protected void onLoad() {
-        // Initial load is triggered by ShopPlugin AFTER modules are loaded.
         this.addAsyncTask(this::saveScheduledDatas, Config.DATA_SAVE_INTERVAL.get());
     }
 
@@ -66,15 +66,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         return this.loaded;
     }
 
-    public void handleSynchronization() {
-        if (!this.isLoaded()) return;
-
-        this.saveScheduledDatas();
-        this.clear();
-
-        this.loadAllData();
-    }
-
     public void loadAllData() {
         this.loadPriceDatas();
         this.loadStockDatas();
@@ -83,31 +74,38 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         this.plugin.getShopManager().getShops().forEach(shop -> shop.updatePrices(false)); // Update prices in the same thread to prevent data duplications.
     }
 
+
     private void loadPriceDatas() {
         this.plugin.getDataHandler().loadPriceDatas().forEach(this::loadPriceData);
+        //this.plugin.debug("Loaded " + priceDataMap.size() + " product price datas.");
     }
 
-    private void loadPriceData(@NotNull PriceData data) {
+    public void loadPriceData(@NotNull PriceData data) {
         ProductKey key = new ProductKey(data.getShopId(), data.getProductId(), data.getShopId());
         this.priceDataMap.put(key, data);
     }
 
+
     private void loadStockDatas() {
         this.plugin.getDataHandler().loadStockDatas().forEach(this::loadStockData);
+        //this.plugin.debug("Loaded " + stockDataMap.size() + " product stock datas.");
     }
 
-    private void loadStockData(@NotNull StockData data) {
+    public void loadStockData(@NotNull StockData data) {
         ProductKey key = new ProductKey(data.getShopId(), data.getProductId(), data.getHolder());
         this.stockDataMap.put(key, data);
     }
 
+
     private void loadRotationDatas() {
         this.plugin.getDataHandler().loadRotationDatas().forEach(this::loadRotationData);
+        //this.plugin.debug("Loaded " + this.rotationDataMap.size() + " rotation datas.");
     }
 
-    private void loadRotationData(@NotNull RotationData data) {
+    public void loadRotationData(@NotNull RotationData data) {
         this.rotationDataMap.put(new RotationKey(data.getShopId(), data.getRotationId()), data);
     }
+
 
     public void saveScheduledDatas() {
         this.saveScheduledPriceDatas();
@@ -132,10 +130,13 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         if (filteredDatas.isEmpty()) return;
 
         consumer.accept(this.plugin.getDataHandler(), filteredDatas);
+        //this.plugin.debug("Saved " + filteredDatas.size() + " " + name + " datas");
     }
 
+
+
     public void deleteAllData(@NotNull VirtualShop shop) {
-        this.plugin.runTaskAsync(() -> {
+        this.plugin.runTaskAsync(task -> {
             // First remove from the database.
             this.plugin.getDataHandler().deleteRotationData(shop);
             this.plugin.getDataHandler().deletePriceData(shop);
@@ -147,6 +148,8 @@ public class DataManager extends AbstractManager<ShopPlugin> {
             this.stockDataMap.keySet().removeIf(key -> key.isShop(shop));
         });
     }
+
+
 
     @NotNull
     public Map<RotationKey, RotationData> getRotationDataMap() {
@@ -170,16 +173,25 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
         RotationData data = new RotationData(rotation.getShop().getId(), rotation.getId());
         this.loadRotationData(data);
-        this.plugin.runTaskAsync(() -> plugin.getDataHandler().insertRotationData(data));
+        this.plugin.runTaskAsync(task -> plugin.getDataHandler().insertRotationData(data));
         return data;
     }
 
     public void deleteRotationData(@NotNull Rotation rotation) {
-        this.plugin.runTaskAsync(() -> {
+        this.plugin.runTaskAsync(task -> {
             this.plugin.getDataHandler().deleteRotationData(rotation); // First remove from the database.
             this.rotationDataMap.remove(RotationKey.from(rotation)); // Now clean up memory (so no duplicates can be created during the deletion process).
         });
     }
+
+//    public void deleteRotationData(@NotNull VirtualShop shop) {
+//        this.plugin.runTaskAsync(task -> {
+//            this.plugin.getDataHandler().deleteRotationData(shop); // First remove from the database.
+//            this.rotationDataMap.keySet().removeIf(key -> key.isShop(shop)); // Now clean up memory (so no duplicates can be created during the deletion process).
+//        });
+//    }
+
+
 
     @NotNull
     public Map<ProductKey, PriceData> getPriceDataMap() {
@@ -198,12 +210,20 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
     @NotNull
     public PriceData getPriceDataOrCreate(@NotNull Product product) {
+        // Return fresh empty data for products with pricing that do not need a data.
+        if (product.getPricingType() == PriceType.FLAT || product.getPricingType() == PriceType.PLAYER_AMOUNT) {
+            return PriceData.create(product);
+        }
+
         PriceData data = this.getPriceData(product);
         if (data != null) return data;
 
+        //System.out.println("product.getId() = " + product.getId());
+        //new Throwable().printStackTrace();
+
         PriceData fresh = PriceData.create(product);
         this.loadPriceData(fresh);
-        this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().insertPriceData(fresh));
+        this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().insertPriceData(fresh));
         return fresh;
     }
 
@@ -215,11 +235,26 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
     public void deletePriceData(@NotNull Product product) {
-        this.plugin.runTaskAsync(() -> {
+        this.plugin.runTaskAsync(task -> {
             this.plugin.getDataHandler().deletePriceData(product); // First remove from the database.
             this.priceDataMap.remove(ProductKey.global(product)); // Now clean up memory (so no duplicates can be created during the deletion process).
         });
     }
+
+//    public void deletePriceDatas(@NotNull Set<Product> products) {
+//        products.forEach(product -> this.priceDataMap.remove(ProductKey.global(product)));
+//
+//        this.plugin.runTaskAsync(task -> {
+//            this.plugin.getDataHandler().deletePriceDatas(products);
+//        });
+//    }
+
+//    public void deletePriceDatas(@NotNull Shop shop) {
+//        this.plugin.runTaskAsync(task -> {
+//            this.plugin.getDataHandler().deletePriceData(shop);  // First remove from the database.
+//            this.priceDataMap.keySet().removeIf(key -> key.isShop(shop)); // Now clean up memory (so no duplicates can be created during the deletion process).
+//        });
+//    }
 
     public void resetPriceDatas(@NotNull Shop shop) {
         this.resetPriceDatas(new HashSet<>(shop.getValidProducts()));
@@ -238,6 +273,8 @@ public class DataManager extends AbstractManager<ShopPlugin> {
             data.setSaveRequired(true);
         });
     }
+
+
 
     @NotNull
     public Map<ProductKey, StockData> getStockDataMap() {
@@ -284,16 +321,29 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
         StockData fresh = StockData.create(product, values, playerId);
         this.loadStockData(fresh);
-        this.plugin.runTaskAsync(() -> plugin.getDataHandler().insertStockData(fresh));
+        this.plugin.runTaskAsync(task -> plugin.getDataHandler().insertStockData(fresh));
         return fresh;
     }
 
     public void deleteStockData(@NotNull VirtualProduct product) {
-        this.plugin.runTaskAsync(() -> {
+        this.plugin.runTaskAsync(task -> {
             this.plugin.getDataHandler().deleteStockData(product);  // First remove from the database.
             this.stockDataMap.remove(ProductKey.global(product)); // Now clean up memory (so no duplicates can be created during the deletion process).
         });
     }
+
+//    public void deleteStockDatas(@NotNull Set<Product> products) {
+//        products.forEach(product -> this.stockDataMap.remove(ProductKey.global(product)));
+//
+//        this.plugin.runTaskAsync(task -> plugin.getDataHandler().deleteStockDatas(products));
+//    }
+
+//    public void deleteStockDatas(@NotNull VirtualShop shop) {
+//        this.plugin.runTaskAsync(task -> {
+//            this.plugin.getDataHandler().deleteStockData(shop);  // First remove from the database.
+//            this.stockDataMap.keySet().removeIf(key -> key.isShop(shop)); // Now clean up memory (so no duplicates can be created during the deletion process).
+//        });
+//    }
 
     public void resetStockDatas(@NotNull Product product) {
         this.resetStockDatas(Lists.newSet(product));
@@ -304,9 +354,11 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
     public void resetStockDatas(@NotNull Set<Product> products) {
-        products.forEach(product -> this.stockDataMap.entrySet().stream().filter(e -> e.getKey().isProduct(product)).map(Map.Entry::getValue).forEach(data -> {
-            data.setExpired();
-            data.setSaveRequired(true);
-        }));
+        products.forEach(product -> {
+            this.stockDataMap.entrySet().stream().filter(e -> e.getKey().isProduct(product)).map(Map.Entry::getValue).forEach(data -> {
+                data.setExpired();
+                data.setSaveRequired(true);
+            });
+        });
     }
 }

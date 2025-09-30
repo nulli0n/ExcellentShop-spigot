@@ -7,16 +7,16 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.data.shop.RotationData;
-import su.nightexpress.nexshop.product.price.impl.RangedPricer;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.data.ConfigBased;
@@ -84,6 +84,8 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
 
     @Override
     protected void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
+        if (!this.plugin.getDataManager().isLoaded()) return;
+
         VirtualShop shop = this.getLink(viewer);
         int page = viewer.getPage();
 
@@ -112,11 +114,8 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
 
             List<Integer> slots = new ArrayList<>(rotation.getSlots(page));
             int limit = slots.size();
-            //int skip = (page - 1) * limit;
 
-            //Map<Integer, List<String>> productsByPage = data.getProducts();
-
-            List<String> productIds = data.getProducts().getOrDefault(page, Collections.emptyList());//.stream()/*.skip(skip)*/.limit(limit).toList();
+            List<String> productIds = data.getProducts().getOrDefault(page, Collections.emptyList());
             if (productIds.isEmpty()) return;
 
             int count = 0;
@@ -167,7 +166,7 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
             if (!product.getLimitValues().isUnlimited(tradeType)) {
                 limitLore.addAll((tradeType == TradeType.BUY ? VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT_BUY : VirtualConfig.PRODUCT_FORMAT_LORE_LIMIT_SELL).get());
             }
-            if (product.getPricer() instanceof RangedPricer) {
+            if (product.getPricingType() != PriceType.FLAT) {
                 priceDynamicLore.addAll(VirtualConfig.PRODUCT_FORMAT_LORE_PRICE_DYNAMIC.get().getOrDefault(tradeType, Collections.emptyList()));
             }
 

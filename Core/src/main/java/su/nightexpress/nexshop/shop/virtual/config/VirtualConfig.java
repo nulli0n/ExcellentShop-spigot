@@ -20,6 +20,13 @@ import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class VirtualConfig {
 
+    public static final ConfigValue<Integer> SAVE_INTERVAL = ConfigValue.create("General.Save_Interval",
+        300,
+        "Sets how often (in seconds) shop changes will be saved (written) to their configuration files.",
+        "[Asynchronous]",
+        "[Default is 300]"
+    );
+
     public static final ConfigValue<String> DEFAULT_CART_UI = ConfigValue.create("General.Default_Cart_UI",
         DEFAULT,
         "Sets default product purchase menu config.",
@@ -230,10 +237,10 @@ public class VirtualConfig {
         () -> {
             return Map.of(
                 TradeType.BUY, Lists.newList(
-                    GREEN.wrap("[?]" + WHITE.wrap(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(BUY) + WHITE.wrap(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(BUY))
+                    GREEN.wrap("[?]" + WHITE.wrap(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(BUY) + WHITE.wrap(" | Dynamics: ") + PRODUCT_PRICE_TRENDING.apply(BUY))
                 ),
                 TradeType.SELL, Lists.newList(
-                    RED.wrap("[?]" + WHITE.wrap(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(SELL) + WHITE.wrap(" | Dynamics: ") + PRODUCT_PRICE_AVERAGE_DIFFERENCE.apply(SELL))
+                    RED.wrap("[?]" + WHITE.wrap(" Average: ") + PRODUCT_PRICE_AVERAGE.apply(SELL) + WHITE.wrap(" | Dynamics: ") + PRODUCT_PRICE_TRENDING.apply(SELL))
                 ));
         },
         "Text to appear when product has dynamic/float price.",

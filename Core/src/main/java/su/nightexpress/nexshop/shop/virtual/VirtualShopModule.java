@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual;
 
+import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -15,8 +16,9 @@ import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.TransactionLogger;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
+import su.nightexpress.nexshop.exception.ShopLoadException;
 import su.nightexpress.nexshop.module.AbstractModule;
-import su.nightexpress.nexshop.module.ModuleConfig;
+import su.nightexpress.nexshop.module.ModuleSettings;
 import su.nightexpress.nexshop.shop.virtual.command.impl.VirtualCommands;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.dialog.VirtualDialogs;
@@ -31,6 +33,7 @@ import su.nightexpress.nexshop.shop.virtual.editor.product.ProductStocksMenu;
 import su.nightexpress.nexshop.shop.virtual.editor.rotation.*;
 import su.nightexpress.nexshop.shop.virtual.editor.shop.*;
 import su.nightexpress.nexshop.shop.virtual.impl.*;
+import su.nightexpress.nexshop.shop.virtual.listener.VirtualShopListener;
 import su.nightexpress.nexshop.shop.virtual.menu.CentralMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.SellMenu;
 import su.nightexpress.nexshop.shop.virtual.menu.ShopLayout;
@@ -42,9 +45,12 @@ import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.Replacer;
-import su.nightexpress.nightcore.util.text.tag.Tags;
+import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.*;
@@ -86,7 +92,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     // TODO Use enabled currencies
 
-    public VirtualShopModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleConfig config) {
+    public VirtualShopModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleSettings config) {
         super(plugin, id, config);
 
         this.layoutByIdMap = new HashMap<>();
@@ -106,9 +112,6 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             this.dialogs.setup();
         }
 
-        // Create default shops & layouts.
-        new ShopCreator(this.plugin, this).createDefaults();
-
         this.loadEditors();
         this.loadLayouts();
         this.loadShops();
@@ -119,10 +122,16 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
             this.sellMenu = new SellMenu(this.plugin, this);
         }
+
+        this.addListener(new VirtualShopListener(this.plugin, this));
+
+        this.addAsyncTask(this::autoSave, VirtualConfig.SAVE_INTERVAL.get());
     }
 
     @Override
     protected void disableModule() {
+        this.autoSave();
+
         this.getShops().forEach(this::unloadShopAliases);
 
         if (this.dialogs != null) {
@@ -210,10 +219,10 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     private void updateRotatingShops() {
         for (File folder : FileUtil.getFolders(this.getAbsolutePath() + "/rotating_shops/")) {
             String id = folder.getName();
-            File file = new File(folder.getAbsolutePath(), VirtualShop.FILE_NAME);
+            File file = new File(folder.getAbsolutePath(), "config.yml");
             if (!file.exists()) continue;
 
-            File dir = new File(this.getAbsolutePath() + DIR_SHOPS + id);
+            File dir = new File(this.getShopsPath(), id);
             if (dir.exists()) {
                 this.error("Could not migrate rotating shop '" + id + "': Shop with such name already exists.");
                 continue;
@@ -222,10 +231,16 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             dir.mkdirs();
 
             VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
-            if (!shop.load()) return;
+            try {
+                shop.load();
+            }
+            catch (ShopLoadException e) {
+                e.printStackTrace();
+                return;
+            }
 
             FileConfig config = shop.getConfig();
-            FileConfig itemsConfig = shop.getConfigProducts();
+            FileConfig itemsConfig = new FileConfig(config.getFile().getParentFile().getAbsolutePath(), "products.yml");
             Set<Integer> slots = IntStream.of(config.getIntArray("Rotation.Products.Slots")).boxed().collect(Collectors.toSet());
 
             Rotation rotation = new Rotation(Placeholders.DEFAULT, shop);
@@ -234,7 +249,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             rotation.setSlots(slots, 1);
 
             for (String sDay : config.getSection("Rotation.Fixed")) {
-                DayOfWeek day = StringUtil.getEnum(sDay, DayOfWeek.class).orElse(null);
+                DayOfWeek day = Enums.get(sDay, DayOfWeek.class);
                 if (day == null) continue;
 
                 TreeSet<LocalTime> times = new TreeSet<>(ShopUtils.parseTimes(config.getStringList("Rotation.Fixed." + sDay)));
@@ -251,49 +266,100 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             shop.addRotation(rotation);
             shop.save();
 
-            config.getFile().renameTo(new File(dir.getAbsolutePath(), VirtualShop.FILE_NAME));
-            itemsConfig.getFile().renameTo(new File(dir.getAbsolutePath(), VirtualShop.FILE_PRODUCTS));
+            config.getFile().renameTo(new File(dir.getAbsolutePath(), "config.yml"));
+            itemsConfig.getFile().renameTo(new File(dir.getAbsolutePath(), "products.yml"));
 
             FileUtil.deleteRecursive(config.getFile().getParentFile());
         }
     }
 
-    private void loadShops() {
-        this.updateRotatingShops();
+    private void updateShopsFolder() {
+        String shopsPath = this.getShopsPath();
 
-        for (File folder : FileUtil.getFolders(this.getAbsolutePath() + DIR_SHOPS)) {
+        for (File folder : FileUtil.getFolders(shopsPath)) {
             String id = folder.getName();
-            File file = new File(folder.getAbsolutePath(), VirtualShop.FILE_NAME);
 
+            File newFile = new File(shopsPath, FileConfig.withExtension(id));
+            if (newFile.exists()) continue;
+
+            FileConfig newConfig = new FileConfig(newFile);
+            File configFile = new File(folder.getAbsolutePath(), "config.yml");
+            File productsFile = new File(folder.getAbsolutePath(), "products.yml");
+
+            Path configBackupPath = Path.of(shopsPath, id + "_config.backup");
+            Path productsBackupPath = Path.of(shopsPath, id + "_products.backup");
+
+            FileConfig config = new FileConfig(configFile);
+            FileConfig productsConfig = new FileConfig(productsFile);
+
+            VirtualShop shop = new VirtualShop(this.plugin, this, configFile, id);
+            shop.loadSettings(config, "");
+            shop.loadProducts(productsConfig, "List");
+            shop.loadRotations(config, "Rotations");
+            shop.save(newConfig, true);
+
+            try {
+                if (!Files.exists(configBackupPath)) {
+                    Files.move(configFile.toPath(), configBackupPath);
+                }
+                if (!Files.exists(productsBackupPath)) {
+                    Files.move(productsFile.toPath(), productsBackupPath);
+                }
+            }
+            catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+
+    private void loadShops() {
+        File dir = new File(this.getShopsPath());
+        if (!dir.exists() && dir.mkdirs()) {
+            ShopDefaults.createDefaultShops(this);
+        }
+
+        this.updateRotatingShops();
+        this.updateShopsFolder();
+
+        for (File file : FileUtil.getConfigFiles(this.getShopsPath())) {
+            String id = FileConfig.getName(file);
             VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
             this.loadShop(shop);
         }
+
         this.info("Loaded " + this.shopByIdMap.size() + " shops.");
 
         this.printShops();
     }
 
     private void loadShop(@NotNull VirtualShop shop) {
-        if (!shop.load()) {
-            this.error("Shop not loaded: '" + shop.getFile().getPath() + "'");
-            return;
+        try {
+            shop.load();
+            this.loadShopAliases(shop);
+            this.shopByIdMap.put(shop.getId(), shop);
         }
-
-        if (this.plugin.getDataManager().isLoaded()) {
-            shop.updatePrices(false);
+        catch (ShopLoadException exception) {
+            if (exception.isFatal()) exception.printStackTrace();
+            this.error("Shop not loaded: '" + shop.getFile().getPath() + "'.");
         }
-
-        this.loadShopAliases(shop);
-
-        this.shopByIdMap.put(shop.getId(), shop);
     }
 
     private void loadLayouts() {
-        for (FileConfig config : FileConfig.loadAll(this.getAbsolutePath() + DIR_LAYOUTS)) {
+        File dir = new File(this.getLayoutsPath());
+        if (!dir.exists() && dir.mkdirs()) {
+            File file = new File(this.getLayoutsPath(), FileConfig.withExtension(Placeholders.DEFAULT));
+            FileUtil.create(file);
+            FileConfig config = new FileConfig(file);
+
+            new ShopLayout(this.plugin, this, config);
+        }
+
+        for (FileConfig config : FileConfig.loadAll(this.getLayoutsPath())) {
             String id = FileConfig.getName(config.getFile());
             ShopLayout layout = new ShopLayout(this.plugin, this, config);
             this.layoutByIdMap.put(id, layout);
         }
+
         this.info("Loaded " + this.layoutByIdMap.size() + " shop layouts.");
     }
 
@@ -315,7 +381,101 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     }
 
     private void printShops() {
+//        this.getShops().forEach(shop -> {
+//            this.info("=".repeat(30));
+//            this.info("Shop Id: " + shop.getId());
+//
+//            List<VirtualProduct> products = shop.getProducts().stream()
+//                .sorted(Comparator.comparing(VirtualProduct::getPage).thenComparing(VirtualProduct::getSlot))
+//                .toList();
+//
+//            products.forEach(product -> {
+//                if (product.getType() instanceof PhysicalTyping typing) {
+//                    AbstractProductPricer pricer = product.getPricer();
+//
+//                    String buy = NumberUtil.format(pricer.getBuyPrice()).replace(",", "_");
+//                    String sell = NumberUtil.format(pricer.getSellPrice()).replace(",", "_");
+//                    int page = product.getPage();
+//                    int slot = product.getSlot();
+//
+//                    ItemStack itemStack = typing.getItem();
+//                    String type = itemStack.getType().name();
+//                    String extra = "";
+//
+//                    if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
+//                        PotionType baseType = potionMeta.getBasePotionType();
+//                        if (baseType != null) {
+//                            extra = "PotionType." + baseType.name() + ", ";
+//                        }
+//                    }
+//
+//                    String text = "this.addShopProduct(shop, Material." + type + ", " + extra + buy + ", " + sell + ", " + page + ", " + slot + ");";
+//
+//                    info(text);
+//
+//                }
+//            });
+//            this.info("=".repeat(30));
+//        });
+    }
 
+    public boolean createShop(@NotNull Player player, @NotNull String name) {
+        String id = Strings.filterForVariable(name);
+        if (id.isBlank()) {
+            VirtualLang.SHOP_CREATE_ERROR_BAD_NAME.message().send(player);
+            return false;
+        }
+
+        if (this.getShopById(id) != null) {
+            VirtualLang.SHOP_CREATE_ERROR_EXIST.message().send(player);
+            return false;
+        }
+
+        VirtualShop virtualShop = this.createShop(id, shop -> {
+            shop.setName(TagWrappers.SOFT_YELLOW.and(TagWrappers.BOLD).wrap(StringUtil.capitalizeUnderscored(id)));
+            shop.setDescription(new ArrayList<>());
+            shop.setIcon(NightItem.fromType(Material.CHEST));
+            shop.setBuyingAllowed(true);
+            shop.setSellingAllowed(true);
+            shop.setPages(1);
+            shop.setAliases(new HashSet<>());
+            shop.setPaginatedLayouts(false);
+        });
+
+        this.loadShop(virtualShop);
+        return true;
+    }
+
+    @NotNull
+    public VirtualShop createShop(@NotNull String id, @NotNull Consumer<VirtualShop> consumer) {
+        File file = new File(this.getShopsPath(), FileConfig.withExtension(id));
+        VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
+
+        consumer.accept(shop);
+        shop.save();
+        return shop;
+    }
+
+    public boolean delete(@NotNull VirtualShop shop) {
+        if (!FileUtil.deleteRecursive(this.getShopsPath() + shop.getId())) return false;
+
+        this.plugin.getDataManager().deleteAllData(shop);
+        this.shopByIdMap.remove(shop.getId());
+        return true;
+    }
+
+    public void autoSave() {
+        this.getShops().forEach(shop -> shop.save(false));
+    }
+
+    @NotNull
+    public String getShopsPath() {
+        return this.getAbsolutePath() + DIR_SHOPS;
+    }
+
+    @NotNull
+    public String getLayoutsPath() {
+        return this.getAbsolutePath() + DIR_LAYOUTS;
     }
 
     @Nullable
@@ -390,6 +550,8 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         return new ArrayList<>(this.layoutByIdMap.keySet());
     }
 
+
+
     @NotNull
     public Set<VirtualShop> getShops() {
         return new HashSet<>(this.shopByIdMap.values());
@@ -452,41 +614,6 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
     }
 
-    public boolean createShop(@NotNull Player player, @NotNull String name) {
-        String id = Strings.filterForVariable(name);
-        if (id.isBlank()) {
-            VirtualLang.SHOP_CREATE_ERROR_BAD_NAME.message().send(player);
-            return false;
-        }
-
-        if (this.getShopById(id) != null) {
-            VirtualLang.SHOP_CREATE_ERROR_EXIST.message().send(player);
-            return false;
-        }
-
-        File file = new File(this.getAbsolutePath() + DIR_SHOPS + id, VirtualShop.FILE_NAME);
-        VirtualShop shop = new VirtualShop(plugin, this, file, id);
-
-        shop.setName(Tags.LIGHT_YELLOW.wrap(Tags.BOLD.wrap(StringUtil.capitalizeUnderscored(id))));
-        shop.setDescription(new ArrayList<>());
-        shop.setIcon(NightItem.asCustomHead("34ccb52750e97e830aebfa8a21d5da0d364d0fdad9fb0cc220fe2ca8411842c3"));
-        shop.setDefaultLayout(Placeholders.DEFAULT);
-        shop.setBuyingAllowed(true);
-        shop.setSellingAllowed(true);
-        shop.save();
-        this.loadShop(shop);
-
-        return true;
-    }
-
-    public boolean delete(@NotNull VirtualShop shop) {
-        if (!FileUtil.deleteRecursive(this.getAbsolutePath() + DIR_SHOPS + shop.getId())) return false;
-
-        this.plugin.getDataManager().deleteAllData(shop);
-        this.shopByIdMap.remove(shop.getId());
-        return true;
-    }
-
     public boolean isAvailable(@NotNull Player player, boolean notify) {
         if (!player.hasPermission(VirtualPerms.BYPASS_WORLDS)) {
             if (VirtualConfig.DISABLED_WORLDS.get().contains(player.getWorld().getName())) {
@@ -537,6 +664,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         this.productOptionsMenu.open(player, product);
     }
 
+    @Deprecated
     public void openPriceOptions(@NotNull Player player, @NotNull VirtualProduct product) {
         this.productPriceMenu.open(player, product);
     }
@@ -636,11 +764,9 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             if (!this.isAvailable(player, true)) return false;
         }
 
-        this.sellMenu.open(player, new ArrayList<>());
+        this.sellMenu.open(player);
         return true;
     }
-
-    // TODO Check isAvailable for sell methods.
 
     public void sellWithReturn(@NotNull Player player, @NotNull Inventory inventory) {
         this.sellAll(player, inventory);
@@ -708,7 +834,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
                         Product product = transaction.getProduct();
 
                         list.add(Replacer.create()
-                            .replace(Placeholders.GENERIC_ITEM, () -> ItemUtil.getSerializedName(product.getPreview()))
+                            .replace(Placeholders.GENERIC_ITEM, () -> ItemUtil.getSerializedName(product.getPreviewOrPlaceholder()))
                             .replace(Placeholders.GENERIC_AMOUNT, () -> NumberUtil.format(transaction.getAmount()))
                             .replace(Placeholders.GENERIC_PRICE, () -> transaction.getCurrency().format(transaction.getPrice()))
                             .replace(Placeholders.SHOP_NAME, () -> product.getShop().getName())

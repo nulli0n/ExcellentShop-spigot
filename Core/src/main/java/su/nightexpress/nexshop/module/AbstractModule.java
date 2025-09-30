@@ -2,22 +2,19 @@ package su.nightexpress.nexshop.module;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.module.Module;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.config.Perms;
+import su.nightexpress.nexshop.exception.ModuleLoadException;
 import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nightcore.command.experimental.CommandContext;
+import su.nightexpress.nightcore.bridge.currency.Currency;
+import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.command.experimental.RootCommand;
 import su.nightexpress.nightcore.command.experimental.ServerCommand;
-import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
 import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.language.entry.LangText;
+import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.locale.message.LangMessage;
 import su.nightexpress.nightcore.manager.AbstractManager;
@@ -32,45 +29,35 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     public static final String CONFIG_NAME = "settings.yml";
 
-    private final String   id;
-    private final String   name;
-    private final ModuleConfig moduleConfig;
+    private final String         id;
+    private final String         name;
+    private final ModuleSettings settings;
 
     private ServerCommand moduleCommand;
 
-    public AbstractModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleConfig config) {
+    public AbstractModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleSettings config) {
         super(plugin);
         this.id = id;
         this.name = StringUtil.capitalizeUnderscored(id);
-        this.moduleConfig = config;
+        this.settings = config;
     }
 
     // TODO Prefix usage
 
     @Override
-    public boolean validateConfig() {
+    protected final void onLoad() throws ModuleLoadException {
         if (this.getDefaultCurrency().isDummy()) {
-            this.plugin.error("Invalid/Unknown default currency '" + this.moduleConfig.getDefaultCurrency() + "' set for the '" + this.id + "' module!");
-            return false;
+            throw new ModuleLoadException("Unknown default currency '" + this.settings.getDefaultCurrency() + "'!");
         }
 
         this.info("Enabled currencies: " + this.getEnabledCurrencies().stream().map(Currency::getInternalId).collect(Collectors.joining(", ")));
-        return true;
-    }
 
-    @Override
-    protected final void onLoad() {
         FileConfig config = this.getConfig();
 
         this.loadModule(config);
 
-        this.moduleCommand = RootCommand.chained(this.plugin, this.moduleConfig.getCommandAliases(), builder -> {
+        this.moduleCommand = RootCommand.chained(this.plugin, this.settings.getCommandAliases(), builder -> {
             builder.localized(this.getName());
-            builder.addDirect("reload", child -> child
-                .permission(Perms.COMMAND_RELOAD)
-                .description(Lang.MODULE_COMMAND_RELOAD_DESC.text())
-                .executes(this::executeReload)
-            );
             this.loadCommands(builder);
         });
         this.plugin.getCommandManager().registerCommand(this.moduleCommand);
@@ -91,15 +78,9 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     protected abstract void disableModule();
 
-    private boolean executeReload(@NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        this.reload();
-        this.getPrefixed(Lang.MODULE_COMMAND_RELOAD).send(context.getSender(), replacer -> replacer.replace(Placeholders.GENERIC_NAME, this.name));
-        return true;
-    }
-
     @NotNull
     public LangMessage getPrefixed(@NotNull MessageLocale text) {
-        return text.withPrefix(this.moduleConfig.getPrefix());
+        return text.withPrefix(this.settings.getPrefix());
     }
 
     @NotNull
@@ -113,8 +94,8 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
     }
 
     @NotNull
-    public ModuleConfig getModuleConfig() {
-        return this.moduleConfig;
+    public ModuleSettings getSettings() {
+        return this.settings;
     }
 
     @NotNull
@@ -149,23 +130,23 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     @Override
     public boolean isEnabledCurrency(@NotNull String id) {
-        return this.moduleConfig.getDefaultCurrency().equalsIgnoreCase(id) ||
-            this.moduleConfig.getEnabledCurrencies().contains(id) ||
-            this.moduleConfig.getEnabledCurrencies().contains(Placeholders.WILDCARD);
+        return this.settings.getDefaultCurrency().equalsIgnoreCase(id) ||
+            this.settings.getEnabledCurrencies().contains(id) ||
+            this.settings.getEnabledCurrencies().contains(Placeholders.WILDCARD);
     }
 
     @Override
     @NotNull
     public Currency getDefaultCurrency() {
-        return EconomyBridge.getCurrencyOrDummy(this.moduleConfig.getDefaultCurrency());
+        return EconomyBridge.getCurrencyOrDummy(this.settings.getDefaultCurrency());
     }
 
     @Override
     @NotNull
     public Set<Currency> getEnabledCurrencies() {
-        if (this.moduleConfig.getEnabledCurrencies().contains(Placeholders.WILDCARD)) return EconomyBridge.getCurrencies();
+        if (this.settings.getEnabledCurrencies().contains(Placeholders.WILDCARD)) return EconomyBridge.getCurrencies();
 
-        Set<Currency> currencies = this.moduleConfig.getEnabledCurrencies().stream()
+        Set<Currency> currencies = this.settings.getEnabledCurrencies().stream()
             .map(EconomyBridge::getCurrency)
             .filter(Objects::nonNull)
             .collect(Collectors.toCollection(HashSet::new));
@@ -204,7 +185,29 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
     @Override
     public boolean isDefaultCurrency(@NotNull String id) {
-        return this.moduleConfig.getDefaultCurrency().equalsIgnoreCase(id);
+        return this.settings.getDefaultCurrency().equalsIgnoreCase(id);
+    }
+
+    public boolean isItemProvidersDisabled() {
+        return this.isItemProviderDisabled(Placeholders.WILDCARD);
+    }
+
+    public boolean isItemProviderDisabled(@NotNull ItemAdapter<?> adapter) {
+        return this.isItemProviderDisabled(adapter.getName()) || this.isItemProvidersDisabled();
+    }
+
+    public boolean isItemProviderDisabled(@NotNull String id) {
+        return this.settings.getDisabledItemProviders().contains(id);
+    }
+
+    @Override
+    public boolean isItemProviderAllowed(@NotNull ItemAdapter<?> adapter) {
+        return !this.isItemProviderDisabled(adapter);
+    }
+
+    @Override
+    public boolean isItemProviderAllowed(@NotNull String id) {
+        return !this.isItemProviderDisabled(id);
     }
 
     @NotNull

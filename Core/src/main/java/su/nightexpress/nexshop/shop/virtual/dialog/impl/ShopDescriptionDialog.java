@@ -80,7 +80,7 @@ public class ShopDescriptionDialog extends VirtualDialogProvider<VirtualShop> {
 
     private void setDescription(@NotNull Player user, @NotNull VirtualShop shop, @Nullable String desc) {
         shop.setDescription(desc == null ? Collections.emptyList() : Lists.newList(desc.split("\n")));
-        shop.saveSettings();
+        shop.setSaveRequired(true);
         this.closeAndThen(user, shop, this.module::openShopOptions);
     }
 }

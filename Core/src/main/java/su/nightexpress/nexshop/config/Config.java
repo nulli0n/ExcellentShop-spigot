@@ -2,8 +2,6 @@ package su.nightexpress.nexshop.config;
 
 import org.bukkit.event.inventory.ClickType;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
-import su.nightexpress.nexshop.module.ModuleConfig;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.StringUtil;
@@ -15,10 +13,6 @@ public class Config {
 
     public static final String DIR_MENU = "/menu/";
     public static final String DIR_CARTS = "/menu/product_carts/";
-
-    public static final ConfigValue<String> DATE_FORMAT = ConfigValue.create("General.DateFormat",
-        "MM/dd/yyyy HH:mm"
-    ).whenRead(ShopUtils::setDateFormatter);
 
     public static final ConfigValue<Boolean> CURRENCY_NEED_PERMISSION = ConfigValue.create("General.Currency_Need_Permission",
         false,
@@ -96,11 +90,5 @@ public class Config {
 
     public static final ConfigValue<String> DATA_ROTATIONS_TABLE = ConfigValue.create("Data.RotationsTable",
         "rotations"
-    );
-
-    public static final ConfigValue<Map<String, ModuleConfig>> MODULE_CONFIG = ConfigValue.forMapById("Module",
-        ModuleConfig::read,
-        map -> map.putAll(ModuleConfig.getDefaultConfigs()),
-        "Module settings."
     );
 }

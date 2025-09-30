@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
+import su.nightexpress.nexshop.product.content.ContentType;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nightcore.language.entry.*;
@@ -23,12 +23,7 @@ public final class Lang implements LangContainer {
     public static final EnumLocale<DayOfWeek>   DAYS          = LangEntry.builder("Days").enumeration(DayOfWeek.class);
     public static final EnumLocale<TradeType>   TRADE_TYPES   = LangEntry.builder("TradeType").enumeration(TradeType.class);
     public static final EnumLocale<PriceType>   PRICE_TYPES   = LangEntry.builder("PriceType").enumeration(PriceType.class);
-    public static final EnumLocale<ProductType> PRODUCT_TYPES = LangEntry.builder("ProductType").enumeration(ProductType.class);
-    
-    public static final MessageLocale MODULE_COMMAND_RELOAD = LangEntry.builder("Module.Command.Reloaded").chatMessage(
-        GRAY.wrap(GREEN.wrap(GENERIC_NAME) + " reloaded!"));
-
-    public static final TextLocale MODULE_COMMAND_RELOAD_DESC = LangEntry.builder("Module.Command.Reload.Desc").text("Reload the module.");
+    public static final EnumLocale<ContentType> PRODUCT_TYPES = LangEntry.builder("ProductType").enumeration(ContentType.class);
 
     public static final MessageLocale SHOP_PRODUCT_ERROR_INVALID_CART_UI = LangEntry.builder("Shop.Product.Error.InvalidCartUI").chatMessage(
         Sound.ENTITY_VILLAGER_NO,
@@ -85,8 +80,9 @@ public final class Lang implements LangContainer {
 
     public static final IconLocale EDITOR_GENERIC_BROKEN_ITEM = LangEntry.iconBuilder("Editor.Generic.BrokenItem")
         .accentColor(SOFT_RED)
-        .name("< Invalid Item> ")
-        .appendInfo("Item tag/ID is broken", "or invalid.").build();
+        .rawName(SOFT_RED.wrap("< Invalid Item> "))
+        .rawLore(GRAY.wrap("Item tag/ID is broken or invalid."))
+        .build();
 
     @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_NAME = LangEntry.builder("Editor.Generic.Enter.Name").text(GRAY.wrap("Enter " + GREEN.wrap("[Name]")));
     @Deprecated public static final TextLocale EDITOR_GENERIC_ENTER_AMOUNT = LangEntry.builder("Editor.Generic.Enter.Amount").text(GRAY.wrap("Enter " + GREEN.wrap("[Amount]")));
@@ -97,6 +93,7 @@ public final class Lang implements LangContainer {
     @Deprecated public static final TextLocale EDITOR_PRODUCT_ENTER_PRICE = LangEntry.builder("Editor.Product.Enter.Price").text(GRAY.wrap("Enter " + GREEN.wrap("[Price]")));
     @Deprecated public static final TextLocale EDITOR_PRODUCT_ENTER_UNI_PRICE = LangEntry.builder("Editor.Product.Enter.UniPrice").text(GRAY.wrap("Enter " + GREEN.wrap("[Min] [Max]")));
     @Deprecated  public static final TextLocale EDITOR_PRODUCT_ENTER_CURRENCY = LangEntry.builder("Editor.Product.Enter.Currency").text(GRAY.wrap("Enter " + GREEN.wrap("[Currency Identifier]")));
+
 
 
 
@@ -211,11 +208,5 @@ public final class Lang implements LangContainer {
         .description("Adjusts prices by specified", "values with a multiplier of", "online players amount.")
         .leftClick("change buy")
         .rightClick("change sell")
-        .build();
-
-    public static final LangUIButton PRODUCT_EDIT_PRICE_PLAYERS_STEP = LangUIButton.builder("Editor.Product.Price.Players.Step", "Adjust Step")
-        .current(PRICER_PLAYERS_ADJUST_STEP)
-        .description("Adjusts prices for", "every " + PRICER_PLAYERS_ADJUST_STEP + " player(s) online.")
-        .click("change")
         .build();
 }

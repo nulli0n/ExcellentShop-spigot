@@ -21,8 +21,8 @@ public abstract class AbstractDialogProvider<T> implements DialogProvider<T>, La
         this.plugin = plugin;
     }
 
-    public void showNextTick(@NotNull Player user, @NotNull T shop) {
-        this.plugin.runTask(user, () -> this.show(user, shop));
+    public void showNextTick(@NotNull Player user, @NotNull T source) {
+        this.plugin.runTask(task -> this.show(user, source));
     }
 
     @Override

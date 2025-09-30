@@ -2,10 +2,10 @@ package su.nightexpress.nexshop.auction.listing;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.auction.AuctionUtils;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 
 import java.util.UUID;
 import java.util.function.UnaryOperator;
@@ -15,7 +15,7 @@ public class ActiveListing extends AbstractListing {
     private final long expireDate;
 
     public static ActiveListing create(@NotNull Player player,
-                                       @NotNull PhysicalTyping typing,
+                                       @NotNull ItemContent typing,
                                        @NotNull Currency currency,
                                        double price) {
         UUID id = UUID.randomUUID();
@@ -32,7 +32,7 @@ public class ActiveListing extends AbstractListing {
     public ActiveListing(@NotNull UUID id,
                          @NotNull UUID owner,
                          @NotNull String ownerName,
-                         @NotNull PhysicalTyping typing,
+                         @NotNull ItemContent typing,
                          @NotNull Currency currency,
                          double price,
                          long creationDate,

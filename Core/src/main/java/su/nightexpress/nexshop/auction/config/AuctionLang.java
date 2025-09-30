@@ -1,12 +1,12 @@
 package su.nightexpress.nexshop.auction.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.economybridge.Placeholders;
+import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.auction.SortType;
-import su.nightexpress.nightcore.language.entry.LangUIButton;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
 import su.nightexpress.nightcore.locale.entry.EnumLocale;
+import su.nightexpress.nightcore.locale.entry.IconLocale;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.locale.entry.TextLocale;
 import su.nightexpress.nightcore.locale.message.MessageData;
@@ -29,6 +29,7 @@ public class AuctionLang implements LangContainer {
 
     public static final MessageLocale COMMAND_SELL_ERROR_NO_ITEM = LangEntry.builder("Auction.Command.Sell.Error.NoItem").chatMessage(
         SOFT_RED.wrap("You must hold an item to do that!"));
+
 
     public static final MessageLocale LISTING_ADD_SUCCESS_INFO = LangEntry.builder("Auction.Listing.Add.Success.Info").chatMessage(
         Sound.BLOCK_NOTE_BLOCK_BELL,
@@ -111,14 +112,15 @@ public class AuctionLang implements LangContainer {
         GRAY.wrap(SOFT_GREEN.wrap("✔") + " You claimed " + SOFT_GREEN.wrap(LISTING_PRICE) + " for " + SOFT_GREEN.wrap(LISTING_ITEM_NAME) + "!")
     );
 
-    public static final LangUIButton UI_BUY_CONFIRM = LangUIButton.builder("Auction.UI.BuyConfirm.Listing", LISTING_ITEM_NAME)
-        .description(
+
+    public static final IconLocale UI_BUY_CONFIRM = LangEntry.iconBuilder("Auction.UI.BuyConfirm.Listing")
+        .rawName(LISTING_ITEM_NAME)
+        .rawLore(
             LISTING_ITEM_LORE,
             EMPTY_IF_ABOVE,
             GRAY.wrap("Price: ") + SOFT_YELLOW.wrap(LISTING_PRICE),
             GRAY.wrap("Seller: ") + WHITE.wrap(LISTING_SELLER)
         )
-        .formatted(false)
         .build();
 
 

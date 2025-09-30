@@ -5,7 +5,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 
 import java.util.Map;

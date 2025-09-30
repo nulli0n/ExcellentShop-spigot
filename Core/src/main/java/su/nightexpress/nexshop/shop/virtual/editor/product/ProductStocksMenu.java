@@ -85,7 +85,7 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
         this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_AMOUNT.text(), input -> {
             values.setAmount(tradeType, input.asInt(0));
-            product.save();
+            product.setSaveRequired(true);
             return true;
         }));
     }
@@ -99,13 +99,13 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
         this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
             values.setRestockTime(input.asInt(0));
-            product.save();
+            product.setSaveRequired(true);
             return true;
         }));
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualProduct product) {
-        product.save();
+        product.setSaveRequired(true);
         this.runNextTick(() -> this.flush(viewer));
     }
 

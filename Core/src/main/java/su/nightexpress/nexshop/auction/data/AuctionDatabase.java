@@ -1,19 +1,12 @@
 package su.nightexpress.nexshop.auction.data;
 
 import com.google.gson.GsonBuilder;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.data.DataHandler;
-import su.nightexpress.nexshop.product.type.impl.PluginProductType;
-import su.nightexpress.nexshop.product.type.impl.VanillaProductType;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.db.AbstractDataManager;
 import su.nightexpress.nightcore.db.config.DatabaseConfig;
@@ -24,9 +17,6 @@ import su.nightexpress.nightcore.db.sql.query.impl.DeleteQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.InsertQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.SelectQuery;
 import su.nightexpress.nightcore.db.sql.util.WhereOperator;
-import su.nightexpress.nightcore.util.ItemNbt;
-import su.nightexpress.nightcore.util.ItemTag;
-import su.nightexpress.nightcore.util.NumberUtil;
 
 import java.sql.ResultSet;
 import java.util.Arrays;
@@ -40,17 +30,14 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
     static final Column COLUMN_OWNER         = Column.of("owner", ColumnType.STRING);
     static final Column COLUMN_OWNER_NAME    = Column.of("ownerName", ColumnType.STRING);
     static final Column COLUMN_BUYER_NAME    = Column.of("buyerName", ColumnType.STRING);
-    static final Column COLUMN_ITEM_DATA          = Column.of("itemData", ColumnType.STRING);
-    static final Column COLUMN_HANDLER       = Column.of("itemHandler", ColumnType.STRING);
     static final Column COLUMN_CURRENCY      = Column.of("currency", ColumnType.STRING);
     static final Column COLUMN_PRICE         = Column.of("price", ColumnType.DOUBLE);
+    static final Column COLUMN_ITEM_NEW  = Column.of("item", ColumnType.STRING);
     static final Column COLUMN_EXPIRE_DATE   = Column.of("expireDate", ColumnType.LONG);
     static final Column COLUMN_DELETE_DATE   = Column.of("deleteDate", ColumnType.LONG);
     static final Column COLUMN_BUY_DATE      = Column.of("buyDate", ColumnType.LONG);
     static final Column COLUMN_DATE_CREATION = Column.of("dateCreation", ColumnType.LONG);
     static final Column COLUMN_IS_PAID       = Column.of("isPaid", ColumnType.BOOLEAN);
-
-    @Deprecated static final Column COLUMN_ITEM          = Column.of("itemStack", ColumnType.STRING);
 
     private final AuctionManager manager;
 
@@ -76,24 +63,25 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
         // Create auction items table
         this.createTable(this.tableListings, Arrays.asList(
             COLUMN_ID, COLUMN_OWNER, COLUMN_OWNER_NAME,
-            COLUMN_ITEM_DATA, COLUMN_HANDLER, COLUMN_CURRENCY, COLUMN_PRICE,
+            COLUMN_ITEM_NEW, COLUMN_CURRENCY, COLUMN_PRICE,
             COLUMN_EXPIRE_DATE, COLUMN_DELETE_DATE, COLUMN_DATE_CREATION
         ));
 
         // Create auction history table
         this.createTable(this.tableCompletedListings, Arrays.asList(
             COLUMN_ID, COLUMN_OWNER, COLUMN_OWNER_NAME, COLUMN_BUYER_NAME,
-            COLUMN_ITEM_DATA, COLUMN_HANDLER, COLUMN_CURRENCY, COLUMN_PRICE, COLUMN_IS_PAID,
+            COLUMN_ITEM_NEW, COLUMN_CURRENCY, COLUMN_PRICE, COLUMN_IS_PAID,
             COLUMN_BUY_DATE, COLUMN_DATE_CREATION, COLUMN_DELETE_DATE
         ));
 
-        this.addColumn(this.tableListings, COLUMN_HANDLER, ProductType.VANILLA.name());
         this.addColumn(this.tableListings, COLUMN_CURRENCY, this.manager.getDefaultCurrency().getInternalId());
         this.addColumn(this.tableListings, COLUMN_DATE_CREATION, String.valueOf(System.currentTimeMillis()));
 
-        this.addColumn(this.tableCompletedListings, COLUMN_HANDLER, ProductType.VANILLA.name());
         this.addColumn(this.tableCompletedListings, COLUMN_CURRENCY, this.manager.getDefaultCurrency().getInternalId());
         this.addColumn(this.tableCompletedListings, COLUMN_DATE_CREATION, String.valueOf(System.currentTimeMillis()));
+
+        this.updateListings(this.tableListings, AuctionLegacyQueries.ACTIVE_LISTING_LOADER, AuctionLegacyQueries.ACTIVE_LISTING_LOADER_2, AuctionQueries.ACTIVE_LISTING_INSERT_QUERY);
+        this.updateListings(this.tableCompletedListings, AuctionLegacyQueries.COMPLETED_LISTING_LOADER, AuctionLegacyQueries.COMPLETED_LISTING_LOADER_2, AuctionQueries.COMPLETED_LISTING_INSERT_QUERY);
 
         if (SQLQueries.hasTable(this.connector, this.tableCompletedListings)) {
             DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER, String::valueOf);
@@ -104,23 +92,27 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
             DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER, String::valueOf);
             this.delete(this.tableListings, query, System.currentTimeMillis());
         }
-
-        this.updateListings(this.tableListings, AuctionLegacyQueries.ACTIVE_LISTING_LOADER, AuctionQueries.ACTIVE_LISTING_INSERT_QUERY);
-        this.updateListings(this.tableCompletedListings, AuctionLegacyQueries.COMPLETED_LISTING_LOADER, AuctionQueries.COMPLETED_LISTING_INSERT_QUERY);
     }
 
-    private <T extends AbstractListing> void updateListings(@NotNull String table, @NotNull Function<ResultSet, T> function, @NotNull InsertQuery<T> insertQuery) {
-        if (SQLQueries.hasColumn(this.connector, table, COLUMN_ITEM_DATA)) return;
+    private <T extends AbstractListing> void updateListings(@NotNull String table,
+                                                            @NotNull Function<ResultSet, T> function1,
+                                                            @NotNull Function<ResultSet, T> function2,
+                                                            @NotNull InsertQuery<T> insertQuery) {
+        if (SQLQueries.hasColumn(this.connector, table, COLUMN_ITEM_NEW)) return;
 
-        this.addColumn(table, COLUMN_ITEM_DATA, "{}");
+        boolean isAlreadyUpdated = SQLQueries.hasColumn(this.connector, table, AuctionLegacyQueries.COLUMN_ITEM_DATA);
 
-        SelectQuery<T> query = new SelectQuery<>(function).all();
+        this.addColumn(table, COLUMN_ITEM_NEW, "{}");
+
+        SelectQuery<T> query = new SelectQuery<>(isAlreadyUpdated ? function2 : function1).all();
         List<T> listings = this.select(table, query);
 
         String deleteSql = "DELETE FROM " + table;
         SQLQueries.executeSimpleQuery(this.connector, deleteSql);
 
-        this.dropColumn(table, COLUMN_ITEM);
+        this.dropColumn(table, AuctionLegacyQueries.COLUMN_ITEM);
+        this.dropColumn(table, AuctionLegacyQueries.COLUMN_HANDLER);
+        this.dropColumn(table, AuctionLegacyQueries.COLUMN_ITEM_DATA);
 
         this.insert(table, insertQuery, listings);
     }
@@ -203,47 +195,5 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
             .whereIgnoreCase(COLUMN_ID, WhereOperator.EQUAL, id.toString())
             .where(COLUMN_IS_PAID, WhereOperator.EQUAL, "1")
         );
-    }
-
-    static final String PLUGIN_ITEM_DELIMITER = ":::";
-
-    @Nullable
-    public static String typingToJson(@NotNull ProductTyping typing) {
-        return switch (typing) {
-            case VanillaProductType type -> {
-                ItemTag tag = ItemNbt.getTag(type.getItem());
-                if (tag == null) yield null;
-
-                yield DataHandler.GSON.toJson(tag, ItemTag.class);
-            }
-            case PluginProductType type -> type.getHandler().getName() + PLUGIN_ITEM_DELIMITER + type.getItemId() + PLUGIN_ITEM_DELIMITER + type.getAmount();
-            default -> null;
-        };
-    }
-
-    @Nullable
-    public static ProductTyping typingFromJson(@NotNull ProductType type, @NotNull String serialized) {
-        return switch (type) {
-            case VANILLA -> {
-                ItemTag tag = DataHandler.GSON.fromJson(serialized, ItemTag.class);
-                if (tag == null) yield null;
-
-                ItemStack itemStack = ItemNbt.fromTag(tag);
-                if (itemStack == null) yield null;
-
-                yield new VanillaProductType(itemStack, true);
-            }
-            case PLUGIN -> {
-                String[] split = serialized.split(PLUGIN_ITEM_DELIMITER);
-                if (split.length < 2) yield null;
-
-                String handlerName = split[0];
-                String itemId = split[1];
-                int amount = split.length >= 3 ? NumberUtil.getIntegerAbs(split[2]) : 1;
-
-                yield new PluginProductType(handlerName, itemId, amount);
-            }
-            case COMMAND -> null;
-        };
     }
 }

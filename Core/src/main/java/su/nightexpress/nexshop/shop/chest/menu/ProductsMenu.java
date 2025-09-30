@@ -10,10 +10,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.product.price.ProductPricing;
+import su.nightexpress.nexshop.product.price.impl.FlatPricing;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
@@ -21,10 +22,13 @@ import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestProduct;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
+import su.nightexpress.nexshop.shop.menu.CartMenu;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
+import su.nightexpress.nightcore.ui.menu.MenuRegistry;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.click.ClickResult;
 import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
@@ -42,7 +46,6 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static su.nightexpress.nexshop.Placeholders.*;
@@ -101,7 +104,9 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         return MenuFiller.builder(this)
             .setSlots(this.productSlots)
             .setItems(shop.getProducts())
-            .setItemCreator(product -> NightItem.fromItemStack(product.getPreview()))
+            .setItemCreator(product -> {
+                return NightItem.fromItemStack(product.getPreviewOrPlaceholder());
+            })
             .setItemClick(product -> (viewer1, event) -> {
                 int index = Lists.indexOf(this.productSlots, event.getRawSlot());
                 this.runNextTick(() -> this.open(player, shop, product, index));
@@ -195,10 +200,23 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         ChestProduct product = data.product;
 
         this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
-            product.setPrice(tradeType, input.asDoubleAbs());
+            if (product.getPricing() instanceof FlatPricing pricing) {
+                pricing.setPrice(tradeType, input.asDoubleAbs());
+                product.updatePrice(false);
+            }
             shop.setSaveRequired(true);
+            this.updateCartGUI(product);
             return true;
         }));
+    }
+
+    // Force update cart GUI when there is price changes. (Added by request)
+    private void updateCartGUI(@NotNull ChestProduct product) {
+        MenuRegistry.getViewers().forEach(viewer -> {
+            if (viewer.getMenu() instanceof CartMenu cartMenu && cartMenu.getLink(viewer).source().getProduct() == product) {
+                cartMenu.flush(viewer);
+            }
+        });
     }
 
     private void handlePriceOff(@NotNull MenuViewer viewer, @NotNull TradeType tradeType) {
@@ -208,8 +226,12 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         ChestShop shop = data.shop;
         ChestProduct product = data.product;
 
-        product.setPrice(tradeType, -1D);
+        if (product.getPricing() instanceof FlatPricing pricing) {
+            pricing.setPrice(tradeType, ProductPricing.DISABLED);
+            product.updatePrice(false);
+        }
         shop.setSaveRequired(true);
+        this.module.getDisplayManager().remake(shop); // Remake due to hologram size changes.
 
         this.runNextTick(() -> this.flush(viewer));
     }
@@ -227,7 +249,7 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         int index = currencies.indexOf(product.getCurrency()) + 1;
         if (index >= currencies.size()) index = 0;
 
-        product.setCurrency(currencies.get(index));
+        product.setCurrencyId(currencies.get(index).getInternalId());
         shop.setSaveRequired(true);
 
         this.runNextTick(() -> this.flush(viewer));

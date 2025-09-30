@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.impl;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.ShopPlugin;
@@ -8,48 +9,62 @@ import su.nightexpress.nexshop.api.shop.Transaction;
 import su.nightexpress.nexshop.api.shop.event.ShopTransactionEvent;
 import su.nightexpress.nexshop.api.shop.product.Product;
 import su.nightexpress.nexshop.api.shop.type.PriceType;
+import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.data.product.PriceData;
-import su.nightexpress.nightcore.manager.AbstractFileData;
+import su.nightexpress.nexshop.product.price.ProductPricing;
+import su.nightexpress.nightcore.manager.ConfigBacked;
 
 import java.io.File;
 import java.util.*;
 
-public abstract class AbstractShop<P extends AbstractProduct<?>> extends AbstractFileData<ShopPlugin> implements Shop {
+public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop, ConfigBacked {
 
+    protected final ShopPlugin     plugin;
+    protected final File           file;
+    protected final String         id;
     protected final Map<String, P> products;
 
-    protected String  name;
-    protected boolean buyingAllowed;
-    protected boolean sellingAllowed;
+    protected boolean saveRequired;
 
     public AbstractShop(@NotNull ShopPlugin plugin, @NotNull File file, @NotNull String id) {
-        super(plugin, file, id);
+        this.plugin = plugin;
+        this.file = file;
+        this.id = id;
         this.products = new LinkedHashMap<>();
+    }
+
+    @Override
+    @NotNull
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    @NotNull
+    public File getFile() {
+        return this.file;
     }
 
     @Override
     public void onTransaction(@NotNull ShopTransactionEvent event) {
         Transaction result = event.getTransaction();
         Product product = result.getProduct();
-        if (product.getPricer().getType() == PriceType.FLAT) return;
-        if (product.getPricer().getType() == PriceType.PLAYER_AMOUNT) return;
+        ProductPricing pricing = product.getPricing();
+        if (pricing.getType() == PriceType.FLAT || pricing.getType() == PriceType.PLAYER_AMOUNT) return;
 
-        PriceData priceData = this.plugin.getDataManager().getPriceDataOrCreate(product);
-        priceData.countTransaction(result.getTradeType(), result.getUnits());
-        priceData.setSaveRequired(true);
-
-        if (product.getPricer().getType() == PriceType.DYNAMIC) {
-            priceData.setExpired(); // To trigger isExpired in update.
-        }
-
-        product.updatePrice(false);
+        this.plugin.dataAccess(dataManager -> {
+            PriceData priceData = dataManager.getPriceDataOrCreate(product);
+            pricing.onTransaction(event, product, priceData);
+            priceData.countTransaction(result.getTradeType(), result.getUnits());
+            priceData.setSaveRequired(true);
+        });
     }
 
     @Override
     public void printBadProducts() {
         this.getProducts().forEach(product -> {
-            if (!product.getType().isValid()) {
-                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.getFile().getPath() + "' shop.");
+            if (!product.getContent().isValid()) {
+                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.file.getPath() + "' shop.");
             }
         });
     }
@@ -60,34 +75,41 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> extends Abstrac
     }
 
     @Override
-    @NotNull
-    public String getName() {
-        return this.name;
+    public void open(@NotNull Player player) {
+        this.open(player, 1);
     }
 
     @Override
-    public void setName(@NotNull String name) {
-        this.name = name;
+    public void open(@NotNull Player player, int page) {
+        this.open(player, page, false);
     }
 
     @Override
-    public boolean isBuyingAllowed() {
-        return this.buyingAllowed;
+    public boolean isTradeAllowed(@NotNull TradeType tradeType) {
+        return tradeType == TradeType.BUY ? this.isBuyingAllowed() : this.isSellingAllowed();
+    }
+
+    public boolean isSaveRequired() {
+        return this.saveRequired;
+    }
+
+    public void setSaveRequired(boolean saveRequired) {
+        this.saveRequired = saveRequired;
     }
 
     @Override
-    public void setBuyingAllowed(boolean buyingAllowed) {
-        this.buyingAllowed = buyingAllowed;
+    public int countProducts() {
+        return this.products.size();
     }
 
     @Override
-    public boolean isSellingAllowed() {
-        return this.sellingAllowed;
+    public boolean hasProduct(@NotNull Product product) {
+        return this.hasProduct(product.getId());
     }
 
     @Override
-    public void setSellingAllowed(boolean sellingAllowed) {
-        this.sellingAllowed = sellingAllowed;
+    public boolean hasProduct(@NotNull String id) {
+        return this.products.containsKey(id);
     }
 
     public void addProduct(@NotNull P product) {

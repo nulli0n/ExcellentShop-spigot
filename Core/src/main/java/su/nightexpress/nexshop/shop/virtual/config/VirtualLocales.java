@@ -3,12 +3,12 @@ package su.nightexpress.nexshop.shop.virtual.config;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.language.entry.LangItem;
 import su.nightexpress.nightcore.language.entry.LangUIButton;
-import su.nightexpress.nightcore.util.Plugins;
 
+import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.BUY;
+import static su.nightexpress.nexshop.api.shop.type.TradeType.SELL;
 import static su.nightexpress.nightcore.language.entry.LangItem.builder;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
-import static su.nightexpress.nexshop.api.shop.type.TradeType.*;
-import static su.nightexpress.nexshop.Placeholders.*;
 
 @Deprecated
 public class VirtualLocales {
@@ -400,19 +400,6 @@ public class VirtualLocales {
         .description(PRODUCT_FORBIDDEN_PERMISSIONS, "", "Only players with " + RED.wrap("none") + " of listed permissions", "will have access to this product.")
         .leftClick("add permission")
         .rightClick("remove all & disable")
-        .build();
-
-    public static final LangItem PRODUCT_EDIT_COMMANDS = LangItem.builder(PREFIX + "Product.Commands")
-        .name("Commands")
-        .textRaw(PRODUCT_COMMANDS)
-        .emptyLine()
-        .text("Runs listed command when", "player purchases this item.")
-        .emptyLine()
-        .current("Use " + LIGHT_YELLOW.wrap(PLAYER_NAME) + " for player name.")
-        .current(LIGHT_YELLOW.wrap(Plugins.PLACEHOLDER_API) + " supported.")
-        .emptyLine()
-        .leftClick("add command")
-        .rightClick("remove all")
         .build();
 
     public static final LangItem PRODUCT_EDIT_STOCK = LangItem.builder(PREFIX + "Product.Stock.Category")

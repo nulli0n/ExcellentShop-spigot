@@ -3,20 +3,22 @@ package su.nightexpress.nexshop.shop.virtual.impl;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopAPI;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.data.product.StockData;
-import su.nightexpress.nexshop.product.price.AbstractProductPricer;
+import su.nightexpress.nexshop.exception.ProductLoadException;
+import su.nightexpress.nexshop.product.content.ContentType;
+import su.nightexpress.nexshop.product.content.ContentTypes;
+import su.nightexpress.nexshop.product.content.ProductContent;
+import su.nightexpress.nexshop.product.price.ProductPricing;
 import su.nightexpress.nexshop.shop.impl.AbstractProduct;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.config.Writeable;
 import su.nightexpress.nightcore.core.config.CoreLang;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Players;
 
@@ -39,8 +41,8 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
     private int     shopSlot;
     private int     shopPage;
 
-    public VirtualProduct(@NotNull String id, @NotNull VirtualShop shop, @NotNull Currency currency, @NotNull ProductTyping type) {
-        super(id, shop, currency, type);
+    public VirtualProduct(@NotNull String id, @NotNull VirtualShop shop) {
+        super(id, shop);
         this.allowedRanks = new HashSet<>();
         this.requiredPermissions = new HashSet<>();
         this.forbiddenPermissions = new HashSet<>();
@@ -48,12 +50,35 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         this.limitValues = StockValues.unlimited();
     }
 
-    public void load(@NotNull FileConfig config, @NotNull String path) {
+    public void load(@NotNull FileConfig config, @NotNull String path) throws ProductLoadException {
+        // Legacy stuff
+        if (!config.contains(path + ".Handler")) {
+            config.set(path + ".Handler", "bukkit_item");
+        }
+
+        if (!config.contains(path + ".Type")) {
+            String handlerId = config.getString(path + ".Handler", "bukkit_item");
+            if (handlerId.equalsIgnoreCase("bukkit_command")) {
+                config.set(path + ".Type", ContentType.COMMAND.name());
+            }
+            else if (handlerId.equalsIgnoreCase("bukkit_item")) {
+                config.set(path + ".Type", ContentType.ITEM.name());
+            }
+        }
+        // Legacy end
+
+        ContentType contentType = config.getEnum(path + ".Type", ContentType.class, ContentType.ITEM);
+        ProductContent content = ContentTypes.read(contentType, config, path);
+        if (content == null) throw new ProductLoadException("Invalid item data");
+
+        this.setCurrencyId(CurrencyId.reroute(config.getString(path + ".Currency", CurrencyId.VAULT)));
+        this.setContent(content);
+        this.setPricing(ProductPricing.read(config, path + ".Price"));
+
         this.setRotating(config.getBoolean(path + ".Rotating"));
         this.setAllowedRanks(config.getStringSet(path + ".Allowed_Ranks"));
         this.setRequiredPermissions(config.getStringSet(path + ".Required_Permissions"));
         this.setForbiddenPermissions(config.getStringSet(path + ".Forbidden_Permissions"));
-        this.setPricer(AbstractProductPricer.read(config, path + ".Price"));
         this.setStockValues(StockValues.read(config, path + ".Stock.GLOBAL"));
         this.setLimitValues(StockValues.read(config, path + ".Stock.PLAYER"));
         this.setSlot(config.getInt(path + ".Shop_View.Slot", -1));
@@ -62,25 +87,19 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     @Override
     public void write(@NotNull FileConfig config, @NotNull String path) {
-        config.set(path + ".Type", this.type.type().name());
-        config.set(path, this.type);
+        config.set(path + ".Type", this.content.type().name());
+        config.set(path, this.content);
 
         config.set(path + ".Rotating", this.rotating);
         config.set(path + ".Allowed_Ranks", this.allowedRanks);
         config.set(path + ".Required_Permissions", this.requiredPermissions);
         config.set(path + ".Forbidden_Permissions", this.forbiddenPermissions);
-        if (!this.currency.isDummy()) {
-            config.set(path + ".Currency", this.currency.getInternalId());
-        }
-        this.pricer.write(config, path + ".Price");
+        config.set(path + ".Currency", this.currencyId);
+        this.pricing.write(config, path + ".Price");
         this.stockValues.write(config, path + ".Stock.GLOBAL");
         this.limitValues.write(config, path + ".Stock.PLAYER");
         config.set(path + ".Shop_View.Slot", this.shopSlot);
         config.set(path + ".Shop_View.Page", this.shopPage);
-    }
-
-    public void save() {
-        this.shop.saveProduct(this);
     }
 
     @Override

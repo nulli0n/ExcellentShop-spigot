@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.dialog.VirtualDialogProvider;
+import su.nightexpress.nexshop.shop.virtual.impl.ShopSettings;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nightcore.locale.entry.DialogElementLocale;
@@ -38,7 +39,7 @@ public class ShopPagesDialog extends VirtualDialogProvider<VirtualShop> {
             .base(DialogBases.builder(TITLE)
                 .body(DialogBodies.plainMessage(BODY))
                 .inputs(
-                    DialogInputs.numberRange(JSON_PAGES, INPUT_PAGES, VirtualShop.MIN_PAGES, VirtualShop.MAX_PAGES)
+                    DialogInputs.numberRange(JSON_PAGES, INPUT_PAGES, ShopSettings.MIN_PAGES, ShopSettings.MAX_PAGES)
                         .initial((float) shop.getPages())
                         .step(1F)
                         .build()
@@ -58,7 +59,7 @@ public class ShopPagesDialog extends VirtualDialogProvider<VirtualShop> {
                 if (pages <= 0) return;
 
                 shop.setPages(pages);
-                shop.saveSettings();
+                shop.setSaveRequired(true);
                 this.closeAndThen(user, shop, this.module::openShopOptions);
             })
         );

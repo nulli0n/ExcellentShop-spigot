@@ -5,6 +5,7 @@ import su.nightexpress.nightcore.util.ItemTag;
 
 import java.lang.reflect.Type;
 
+@Deprecated
 public class ItemTagSerializer implements JsonSerializer<ItemTag>, JsonDeserializer<ItemTag> {
 
     @Override

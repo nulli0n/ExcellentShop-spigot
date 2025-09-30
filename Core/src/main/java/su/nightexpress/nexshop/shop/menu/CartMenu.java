@@ -8,17 +8,17 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.PreparedProduct;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
@@ -60,7 +60,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
     }
 
     private int getCartInventorySpace(@NotNull PreparedProduct prepared) {
-        ItemStack preview = prepared.getProduct().getPreview();
+        ItemStack preview = prepared.getProduct().getPreviewOrPlaceholder();
         int stackSize = preview.getType().getMaxStackSize();
         int fullSize = stackSize * this.productSlots.length;
 
@@ -79,7 +79,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
         double shopBalance = shop instanceof ChestShop chestShop ? chestShop.getBalance(product.getCurrency()) : -1D;
         double userBalance = product.getCurrency().getBalance(player);
 
-        if (product.getType() instanceof PhysicalTyping itemPacker) {
+        if (product.getContent() instanceof ItemContent itemPacker) {
             if (tradeType == TradeType.BUY) {
                 // Allow to buy no more than player can carry.
                 capacityInventory = itemPacker.countSpace(player.getInventory()) / product.getUnitAmount();
@@ -122,7 +122,7 @@ public class CartMenu extends LinkedMenu<ShopPlugin, Breadcumb<PreparedProduct>>
         Player player = viewer.getPlayer();
         this.validateAmount(player, prepared);
 
-        ItemStack preview = prepared.getProduct().getPreview();
+        ItemStack preview = prepared.getProduct().getPreviewOrPlaceholder();
         int stackSize = preview.getType().getMaxStackSize();
         int preparedAmount = prepared.getAmount();// prepared.getUnits() * prepared.getProduct().getUnitAmount();
         int count = 0;

@@ -9,27 +9,27 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.economybridge.api.Currency;
 import su.nightexpress.nexshop.api.shop.Shop;
 import su.nightexpress.nexshop.api.shop.product.Product;
-import su.nightexpress.nexshop.api.shop.product.typing.CommandTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.PluginTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.VanillaTyping;
 import su.nightexpress.nexshop.api.shop.type.ShopClickAction;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.config.Perms;
+import su.nightexpress.nexshop.product.content.ProductContent;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.*;
-import su.nightexpress.nightcore.util.text.NightMessage;
+import su.nightexpress.nightcore.util.bukkit.NightItem;
+import su.nightexpress.nightcore.util.text.night.NightMessage;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -38,20 +38,15 @@ import java.util.stream.Stream;
 public class ShopUtils {
 
     public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_TIME;
-
-    private static DateTimeFormatter dateFormatter;
-
-    public static void setDateFormatter(@NotNull String pattern) {
-        ShopUtils.dateFormatter = DateTimeFormatter.ofPattern(pattern);
-    }
-
-    @NotNull
-    public static DateTimeFormatter getDateFormatter() {
-        return dateFormatter;
-    }
+    public static final DateTimeFormatter HOURS_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     public static boolean canUseDialogs() {
         return Version.isAtLeast(Version.MC_1_21_7);
+    }
+
+    @NotNull
+    public static ItemStack getInvalidProductPlaceholder() {
+        return NightItem.fromType(Material.BARRIER).localized(Lang.EDITOR_GENERIC_BROKEN_ITEM).getItemStack();
     }
 
     @NotNull
@@ -66,18 +61,11 @@ public class ShopUtils {
     }
 
     @NotNull
-    public static String generateProductId(@NotNull VirtualShop shop, @NotNull ProductTyping typing) {
-        String id = switch (typing) {
-            case VanillaTyping vanilla -> {
-                ItemStack item = vanilla.getItem();
-                String name = StringUtil.transformForID(NightMessage.stripTags(ItemUtil.getNameSerialized(item)).toLowerCase()); // Remove all non-latins from item display name.
+    public static String generateProductId(@NotNull VirtualShop shop, @NotNull ProductContent content) {
+        ItemStack itemStack = content.getPreview();
 
-                yield name.isBlank() ? BukkitThing.getValue(item.getType()) : name;
-            }
-            case PluginTyping pluginTyping -> (pluginTyping.getHandler().getName() + "_" + pluginTyping.getItemId()).toLowerCase();
-            case CommandTyping ignored -> "command_item";
-            default -> UUID.randomUUID().toString().substring(0, 8);
-        };
+        String name = NightMessage.stripTags(ItemUtil.getNameSerialized(itemStack));
+        String id = Strings.filterForVariable(name.isBlank() ? BukkitThing.getValue(itemStack.getType()) : name);
 
         int count = 0;
         while (shop.getProductById(addCount(id, count)) != null) {
@@ -104,7 +92,7 @@ public class ShopUtils {
 
     @Nullable
     public static VirtualProduct getBestProduct(@NotNull Collection<VirtualProduct> products, @NotNull TradeType tradeType, int stackSize, @Nullable Player player) {
-        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
+        Comparator<VirtualProduct> comparator = Comparator.comparingDouble(product -> product.getFinalPrice(tradeType, player) * UnitUtils.amountToUnits(product, stackSize));
         Stream<VirtualProduct> stream = products.stream();
 
         return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
@@ -128,14 +116,26 @@ public class ShopUtils {
 
     @NotNull
     public static Set<LocalTime> parseTimes(@NotNull List<String> list) {
-        return list.stream().map(timeRaw -> LocalTime.parse(timeRaw, TIME_FORMATTER)).collect(Collectors.toSet());
+        Set<LocalTime> result = Lists.modify(new HashSet<>(list), str -> {
+            try {
+                return LocalTime.parse(str, TIME_FORMATTER);
+            }
+            catch (DateTimeParseException exception) {
+                return null;
+            }
+        });
+        result.removeIf(Objects::isNull);
+        return result;
+    }
+
+    @NotNull
+    public static Set<String> serializeTimes(@NotNull Set<LocalTime> times) {
+        return Lists.modify(times, HOURS_FORMATTER::format);
     }
 
     @NotNull
     public static Set<DayOfWeek> parseDays(@NotNull String str) {
-        return Stream.of(str.split(","))
-            .map(raw -> StringUtil.getEnum(raw.trim(), DayOfWeek.class).orElse(null))
-            .filter(Objects::nonNull).collect(Collectors.toSet());
+        return Stream.of(str.split(",")).map(raw -> Enums.get(raw.trim(), DayOfWeek.class)).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
     public static int countItemSpace(@NotNull Inventory inventory, @NotNull ItemStack item) {

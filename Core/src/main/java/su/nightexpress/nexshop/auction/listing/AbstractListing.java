@@ -3,20 +3,20 @@ package su.nightexpress.nexshop.auction.listing;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
 public abstract class AbstractListing {
 
-    protected final UUID           id;
-    protected final UUID           owner;
-    protected final String         ownerName;
-    protected final PhysicalTyping typing;
-    protected final Currency       currency;
-    protected final double         price;
+    protected final UUID        id;
+    protected final UUID        owner;
+    protected final String      ownerName;
+    protected final ItemContent typing;
+    protected final Currency    currency;
+    protected final double      price;
 
     protected final long creationDate;
     protected final long deletionDate;
@@ -24,7 +24,7 @@ public abstract class AbstractListing {
     public AbstractListing(@NotNull UUID id,
                            @NotNull UUID owner,
                            @NotNull String ownerName,
-                           @NotNull PhysicalTyping typing,
+                           @NotNull ItemContent typing,
                            Currency currency,
                            double price,
                            long creationDate,
@@ -75,7 +75,7 @@ public abstract class AbstractListing {
     }
 
     @NotNull
-    public PhysicalTyping getTyping() {
+    public ItemContent getTyping() {
         return this.typing;
     }
 

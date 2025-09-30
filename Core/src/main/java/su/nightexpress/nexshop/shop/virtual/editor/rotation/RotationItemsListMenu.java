@@ -59,7 +59,7 @@ public class RotationItemsListMenu extends LinkedMenu<ShopPlugin, Rotation> impl
                 VirtualProduct product = shop.getProductById(rotationItem.getProductId());
                 if (product == null) return NightItem.fromType(Material.BARRIER);
 
-                return NightItem.fromItemStack(product.getPreview())
+                return NightItem.fromItemStack(product.getPreviewOrPlaceholder())
                     .localized(VirtualLocales.ROTATION_ITEM_OBJECT)
                     .setHideComponents(true)
                     .replacement(replacer -> replacer
@@ -86,7 +86,7 @@ public class RotationItemsListMenu extends LinkedMenu<ShopPlugin, Rotation> impl
     }
 
     private void save(@NotNull MenuViewer viewer, @NotNull Rotation rotation) {
-        rotation.getShop().saveRotations();
+        rotation.setSaveRequired(true);
         this.runNextTick(() -> this.flush(viewer));
     }
 

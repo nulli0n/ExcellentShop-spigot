@@ -1,13 +1,13 @@
 package su.nightexpress.nexshop.shop.chest.rent;
 
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.economybridge.currency.CurrencyId;
+import su.nightexpress.nightcore.bridge.currency.Currency;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.config.Writeable;
+import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.UnaryOperator;
@@ -118,7 +118,7 @@ public class RentSettings implements Writeable {
             }
         }
 
-        price = currency.fineValue(price);
+        price = currency.floorIfNeeded(price);
 
         this.price = Math.max(0, price);
     }

@@ -7,7 +7,7 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.19.0</version>
+    <version>4.20.0</version>
     <modules>
         <module>Core</module>
     </modules>
@@ -58,8 +58,14 @@
         <dependency>
             <groupId>su.nightexpress.nightcore</groupId>
             <artifactId>main</artifactId>
-            <version>2.7.15</version>
-            <classifier>shaded</classifier>
+            <version>2.7.18</version>
+        </dependency>
+
+        <!-- I have no idea what's happening, but gson from paper can not resolved -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.13.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

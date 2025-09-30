@@ -49,14 +49,15 @@ public class DataQueries {
         try {
             String shopId = resultSet.getString(DataHandler.COLUMN_GEN_SHOP_ID.getName());
             String productId = resultSet.getString(DataHandler.COLUMN_GEN_PRODUCT_ID.getName());
-            double lastBuyPrice = resultSet.getDouble(DataHandler.COLUMN_PRICE_LAST_BUY.getName());
-            double lastSellPrice = resultSet.getDouble(DataHandler.COLUMN_PRICE_LAST_SELL.getName());
-            long lastUpdated = resultSet.getLong(DataHandler.COLUMN_PRICE_LAST_UPDATED.getName());
+
+            double buyOffset = resultSet.getDouble(DataHandler.COLUMN_PRICE_BUY_OFFSET.getName());
+            double sellOffset = resultSet.getDouble(DataHandler.COLUMN_PRICE_SELL_OFFSET.getName());
+
             long expireDate = resultSet.getLong(DataHandler.COLUMN_PRICE_EXPIRE_DATE.getName());
             int purchases = resultSet.getInt(DataHandler.COLUMN_PRICE_PURCHASES.getName());
             int sales = resultSet.getInt(DataHandler.COLUMN_PRICE_SALES.getName());
 
-            return new PriceData(shopId, productId, lastBuyPrice, lastSellPrice, lastUpdated, expireDate, purchases, sales);
+            return new PriceData(shopId, productId, buyOffset, sellOffset, expireDate, purchases, sales);
         }
         catch (SQLException exception) {
             exception.printStackTrace();
@@ -102,17 +103,15 @@ public class DataQueries {
     public static final InsertQuery<PriceData> PRICE_DATA_INSERT = new InsertQuery<PriceData>()
         .setValue(DataHandler.COLUMN_GEN_SHOP_ID, PriceData::getShopId)
         .setValue(DataHandler.COLUMN_GEN_PRODUCT_ID, PriceData::getProductId)
-        .setValue(DataHandler.COLUMN_PRICE_LAST_BUY, d -> String.valueOf(d.getLatestBuyPrice()))
-        .setValue(DataHandler.COLUMN_PRICE_LAST_SELL, d -> String.valueOf(d.getLatestSellPrice()))
-        .setValue(DataHandler.COLUMN_PRICE_LAST_UPDATED, d -> String.valueOf(d.getLatestUpdateDate()))
+        .setValue(DataHandler.COLUMN_PRICE_BUY_OFFSET, data -> String.valueOf(data.getBuyOffset()))
+        .setValue(DataHandler.COLUMN_PRICE_SELL_OFFSET, data -> String.valueOf(data.getSellOffset()))
         .setValue(DataHandler.COLUMN_PRICE_EXPIRE_DATE, d -> String.valueOf(d.getExpireDate()))
         .setValue(DataHandler.COLUMN_PRICE_PURCHASES, d -> String.valueOf(d.getPurchases()))
         .setValue(DataHandler.COLUMN_PRICE_SALES, d -> String.valueOf(d.getSales()));
 
     public static final UpdateQuery<PriceData> PRICE_DATA_UPDATE = new UpdateQuery<PriceData>()
-        .setValue(DataHandler.COLUMN_PRICE_LAST_BUY, d -> String.valueOf(d.getLatestBuyPrice()))
-        .setValue(DataHandler.COLUMN_PRICE_LAST_SELL, d -> String.valueOf(d.getLatestSellPrice()))
-        .setValue(DataHandler.COLUMN_PRICE_LAST_UPDATED, d -> String.valueOf(d.getLatestUpdateDate()))
+        .setValue(DataHandler.COLUMN_PRICE_BUY_OFFSET, data -> String.valueOf(data.getBuyOffset()))
+        .setValue(DataHandler.COLUMN_PRICE_SELL_OFFSET, data -> String.valueOf(data.getSellOffset()))
         .setValue(DataHandler.COLUMN_PRICE_EXPIRE_DATE, d -> String.valueOf(d.getExpireDate()))
         .setValue(DataHandler.COLUMN_PRICE_PURCHASES, d -> String.valueOf(d.getPurchases()))
         .setValue(DataHandler.COLUMN_PRICE_SALES, d -> String.valueOf(d.getSales()))

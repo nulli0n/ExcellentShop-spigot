@@ -59,7 +59,7 @@ public class RotatingProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> im
             .setItems(shop.getProducts().stream().filter(VirtualProduct::isRotating)
                 .sorted(Comparator.comparing(Product::getId)).collect(Collectors.toCollection(ArrayList::new)))
             .setItemCreator(product -> {
-                return NightItem.fromItemStack(product.getPreview())
+                return NightItem.fromItemStack(product.getPreviewOrPlaceholder())
                     .localized(VirtualLocales.PRODUCT_ROTATING_OBJECT)
                     .setHideComponents(true)
                     .replacement(replacer -> replacer.replace(product.replacePlaceholders()));

@@ -53,7 +53,7 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
             this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
                 shop.setName(input.getText());
-                shop.saveSettings();
+                shop.setSaveRequired(true);
                 return true;
             }));
         });
@@ -69,7 +69,7 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_DESCRIPTION.text(), input -> {
                 shop.getDescription().add(input.getText());
-                shop.saveSettings();
+                shop.setSaveRequired(true);
                 return true;
             }));
         });
@@ -87,7 +87,7 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_ALIAS.text(), input -> {
                 shop.getAliases().add(input.getTextRaw());
-                shop.saveSettings();
+                shop.setSaveRequired(true);
                 return true;
             }));
         }, ItemOptions.builder().setVisibilityPolicy(viewer -> VirtualConfig.SHOP_SHORTCUTS_ENABLED.get()).build());
@@ -103,7 +103,7 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
             this.handleInput(Dialog.builder(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_VALUE.text(), input -> {
                 shop.addMenuSlot(input.asInt(-1));
-                shop.saveSettings();
+                shop.setSaveRequired(true);
                 return true;
             }));
         }, ItemOptions.builder().setVisibilityPolicy(viewer -> VirtualConfig.isCentralMenuEnabled()).build());
@@ -207,7 +207,7 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualShop shop) {
-        shop.saveSettings();
+        shop.setSaveRequired(true);
         this.runNextTick(() -> this.flush(viewer));
     }
 

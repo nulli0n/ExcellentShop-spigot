@@ -1,21 +1,20 @@
 package su.nightexpress.nexshop.auction.data;
 
-import su.nightexpress.economybridge.EconomyBridge;
-import su.nightexpress.economybridge.api.Currency;
-import su.nightexpress.economybridge.currency.CurrencyId;
+import com.google.gson.reflect.TypeToken;
 import su.nightexpress.nexshop.ShopAPI;
-import su.nightexpress.nexshop.api.shop.product.ProductType;
-import su.nightexpress.nexshop.api.shop.product.typing.PhysicalTyping;
-import su.nightexpress.nexshop.api.shop.product.typing.ProductTyping;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
+import su.nightexpress.nexshop.data.DataHandler;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.db.sql.query.impl.DeleteQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.InsertQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.UpdateQuery;
 import su.nightexpress.nightcore.db.sql.util.WhereOperator;
-import su.nightexpress.nightcore.util.Enums;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
+import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,13 +29,7 @@ public class AuctionQueries {
             UUID owner = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_OWNER.getName()));
             String ownerName = resultSet.getString(AuctionDatabase.COLUMN_OWNER_NAME.getName());
 
-            ProductType type = Enums.get(resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName()), ProductType.class);
-            if (type == null) return null;
-
-            ProductTyping typing = AuctionDatabase.typingFromJson(type, resultSet.getString(AuctionDatabase.COLUMN_ITEM_DATA.getName()));
-            if (!(typing instanceof PhysicalTyping physicalTyping)) {
-                return null;
-            }
+            ItemContent type = DataHandler.GSON.fromJson(resultSet.getString(AuctionDatabase.COLUMN_ITEM_NEW.getName()), new TypeToken<ItemContent>(){}.getType());
 
             String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
             Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
@@ -50,7 +43,7 @@ public class AuctionQueries {
                 deletionDate = AuctionUtils.generatePurgeDate(dateCreation);
             }
 
-            return new ActiveListing(id, owner, ownerName, physicalTyping, currency, price, dateCreation, expireDate, deletionDate);
+            return new ActiveListing(id, owner, ownerName, type, currency, price, dateCreation, expireDate, deletionDate);
         }
         catch (SQLException exception) {
             exception.printStackTrace();
@@ -65,13 +58,7 @@ public class AuctionQueries {
             String ownerName = resultSet.getString(AuctionDatabase.COLUMN_OWNER_NAME.getName());
             String buyerName = resultSet.getString(AuctionDatabase.COLUMN_BUYER_NAME.getName());
 
-            ProductType type = Enums.get(resultSet.getString(AuctionDatabase.COLUMN_HANDLER.getName()), ProductType.class);
-            if (type == null) return null;
-
-            ProductTyping typing = AuctionDatabase.typingFromJson(type, resultSet.getString(AuctionDatabase.COLUMN_ITEM_DATA.getName()));
-            if (!(typing instanceof PhysicalTyping physicalTyping)) {
-                return null;
-            }
+            ItemContent type = DataHandler.GSON.fromJson(resultSet.getString(AuctionDatabase.COLUMN_ITEM_NEW.getName()), new TypeToken<ItemContent>(){}.getType());
 
             String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
             Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
@@ -86,7 +73,7 @@ public class AuctionQueries {
                 deletionDate = AuctionUtils.generatePurgeDate(dateCreation);
             }
 
-            return new CompletedListing(id, owner, ownerName, buyerName, physicalTyping, currency, price, dateCreation, buyDate, deletionDate, isNotified);
+            return new CompletedListing(id, owner, ownerName, buyerName, type, currency, price, dateCreation, buyDate, deletionDate, isNotified);
         }
         catch (SQLException exception) {
             exception.printStackTrace();
@@ -101,8 +88,7 @@ public class AuctionQueries {
         .setValue(AuctionDatabase.COLUMN_ID, listing -> listing.getId().toString())
         .setValue(AuctionDatabase.COLUMN_OWNER, listing -> listing.getOwner().toString())
         .setValue(AuctionDatabase.COLUMN_OWNER_NAME, AbstractListing::getOwnerName)
-        .setValue(AuctionDatabase.COLUMN_ITEM_DATA, listing -> AuctionDatabase.typingToJson(listing.getTyping()))
-        .setValue(AuctionDatabase.COLUMN_HANDLER, listing -> listing.getTyping().type().name())
+        .setValue(AuctionDatabase.COLUMN_ITEM_NEW, listing -> DataHandler.GSON.toJson(listing.getTyping()))
         .setValue(AuctionDatabase.COLUMN_CURRENCY, listing -> listing.getCurrency().getInternalId())
         .setValue(AuctionDatabase.COLUMN_PRICE, listing -> String.valueOf(listing.getPrice()))
         .setValue(AuctionDatabase.COLUMN_EXPIRE_DATE, listing -> String.valueOf(listing.getExpireDate()))
@@ -114,8 +100,7 @@ public class AuctionQueries {
         .setValue(AuctionDatabase.COLUMN_OWNER, listing -> listing.getOwner().toString())
         .setValue(AuctionDatabase.COLUMN_OWNER_NAME, AbstractListing::getOwnerName)
         .setValue(AuctionDatabase.COLUMN_BUYER_NAME, CompletedListing::getBuyerName)
-        .setValue(AuctionDatabase.COLUMN_ITEM_DATA, listing -> AuctionDatabase.typingToJson(listing.getTyping()))
-        .setValue(AuctionDatabase.COLUMN_HANDLER, listing -> listing.getTyping().type().name())
+        .setValue(AuctionDatabase.COLUMN_ITEM_NEW, listing -> DataHandler.GSON.toJson(listing.getTyping()))
         .setValue(AuctionDatabase.COLUMN_CURRENCY, listing -> listing.getCurrency().getInternalId())
         .setValue(AuctionDatabase.COLUMN_PRICE, listing -> String.valueOf(listing.getPrice()))
         .setValue(AuctionDatabase.COLUMN_IS_PAID, listing -> String.valueOf(listing.isClaimed() ? 1 : 0))
