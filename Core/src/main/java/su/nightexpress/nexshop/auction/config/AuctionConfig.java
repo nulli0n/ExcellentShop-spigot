@@ -185,5 +185,4 @@ public class AuctionConfig {
         "Preview",
         "Sets title for the Preview GUI."
     );
-
 }

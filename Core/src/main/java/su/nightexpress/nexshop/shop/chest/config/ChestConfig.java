@@ -66,12 +66,6 @@ public class ChestConfig {
         "Useful to prevent players from setting ridiculously long names for their shops."
     );
 
-//    public static final ConfigValue<String> DEFAULT_CURRENCY = ConfigValue.create("Shops.Default_Currency",
-//        CurrencyId.VAULT,
-//        "Sets the default ChestShop currency. It will be used for new products and when no other currencies are available.",
-//        "As well as for shop creation/deletion price."
-//    ).onRead(CurrencyId::reroute);
-
     public static final ConfigValue<String> DEFAULT_CART_UI = ConfigValue.create("Shops.Default_Cart_UI",
         DEFAULT,
         "Sets default product purchase menu config.",
@@ -82,17 +76,6 @@ public class ChestConfig {
         true,
         "Controls whether plugin should check shop's location safety before player teleports to it."
     );
-
-//    @Deprecated
-//    public static final ConfigValue<Boolean> CHECK_CURRENCY_PERMISSIONS = ConfigValue.create("Shops.Check_Currency_Permission",
-//        false,
-//        "Sets whether or not players must have '" + ChestPerms.PREFIX_CURRENCY + "[name]' permissions to use specific currencies from 'Allowed_Currencies' list."
-//    );
-
-//    public static final ConfigValue<Set<String>> ALLOWED_CURRENCIES = ConfigValue.create("Shops.Allowed_Currencies",
-//        Set.of(CurrencyId.VAULT),
-//        "A list of currencies that can be used for Chest Shop products."
-//    ).onRead(set -> Lists.modify(set, CurrencyId::reroute));
 
     public static final ConfigValue<Boolean> SHOP_AUTO_BANK = ConfigValue.create("Shops.Auto_Bank",
         true,
@@ -116,18 +99,6 @@ public class ChestConfig {
         "Sets whether or not infinite storage system is enabled.",
         "Infinite storage allows you to store as many items in your shops as you want/can,",
         "and don't uses block inventories.");
-
-//    @Deprecated
-//    public static final ConfigValue<Boolean> SHOP_PRODUCT_BYPASS_DETECTION_ENABLED = ConfigValue.create("Shop.Product.Bypass_Plugin_Detection.Enabled",
-//        false,
-//        "When enabled, allows players to bypass plugin detection of the item they want to put as a shop product."
-//    );
-//
-//    @Deprecated
-//    public static final ConfigValue<Boolean> SHOP_PRODUCT_BYPASS_DETECTION_HOLD_SHIFT = ConfigValue.create("Shop.Product.Bypass_Plugin_Detection.Hold_Shift",
-//        false,
-//        "When enabled, bypass plugin detection for a shop products will work only when player holds the Shift key (sneaking)."
-//    );
 
     public static final ConfigValue<Double> SHOP_PRODUCT_INITIAL_BUY_PRICE = ConfigValue.create("Shops.Product.InitialPrice.Buy",
         10D,
@@ -219,9 +190,6 @@ public class ChestConfig {
     public static final ConfigValue<Set<String>> SHOP_PRODUCT_DENIED_NAMES = ConfigValue.create("Shops.Products.Name_Blacklist",
         Set.of("shit", "sample text"),
         "Items containing the following words in their name will be disallowed from being used as shop products.");
-
-
-
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_GENERAL = ConfigValue.create("Shops.Products.Format.Main",
         Lists.newList(

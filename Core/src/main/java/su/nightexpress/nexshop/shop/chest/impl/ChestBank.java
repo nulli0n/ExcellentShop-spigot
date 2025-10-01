@@ -53,12 +53,6 @@ public class ChestBank {
         if (player == null && ChestConfig.SHOP_OFFLINE_TRANSACTIONS.get() && currency.canHandleOffline()) {
             currency.give(this.holder, amount);
             return true;
-
-//            CurrencyOfflineHandler offlineHandler = currency.getOfflineHandler();
-//            if (offlineHandler != null) {
-//                offlineHandler.give(this.getHolder(), amount);
-//                return true;
-//            }
         }
 
         double balance = this.getBalance(currency) + amount;
@@ -78,12 +72,6 @@ public class ChestBank {
         if (player == null && ChestConfig.SHOP_OFFLINE_TRANSACTIONS.get() && currency.canHandleOffline()) {
             currency.take(this.holder, amount);
             return true;
-
-//            CurrencyOfflineHandler offlineHandler = currency.getOfflineHandler();
-//            if (offlineHandler != null) {
-//                offlineHandler.take(this.getHolder(), amount);
-//                return true;
-//            }
         }
 
         double balance = this.getBalance(currency) - amount;
@@ -99,11 +87,6 @@ public class ChestBank {
 
         if (player == null && ChestConfig.SHOP_OFFLINE_TRANSACTIONS.get() && currency.canHandleOffline()) {
             return currency.getBalance(this.holder);
-
-//            CurrencyOfflineHandler offlineHandler = currency.getOfflineHandler();
-//            if (offlineHandler != null) {
-//                return offlineHandler.getBalance(this.getHolder());
-//            }
         }
 
         return this.balanceMap.getOrDefault(currency.getInternalId(), 0D);
@@ -117,10 +100,6 @@ public class ChestBank {
 
         if (player == null && ChestConfig.SHOP_OFFLINE_TRANSACTIONS.get() && currency.canHandleOffline()) {
             return currency.getBalance(this.holder) >= amount;
-//            CurrencyOfflineHandler offlineHandler = currency.getOfflineHandler();
-//            if (offlineHandler != null) {
-//                return offlineHandler.getBalance(this.getHolder()) >= amount;
-//            }
         }
 
         return this.getBalance(currency) >= amount;

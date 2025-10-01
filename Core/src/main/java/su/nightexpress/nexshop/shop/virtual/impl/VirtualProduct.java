@@ -205,7 +205,6 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         if (values.isUnlimited(type)) return -1;
 
         StockData data = this.getStockData(playerId);
-        //data.restockIfReady(values);
 
         return data.countStock(type);
     }
@@ -216,7 +215,6 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         if (values.isUnlimited(type)) return false;
 
         StockData data = this.getStockData(playerId);
-        //data.restockIfReady(values);
         data.consumeStock(type, amount);
         data.startRestockIfAbsent(values);
         data.setSaveRequired(true);
@@ -229,7 +227,6 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
         if (values.isUnlimited(type)) return false;
 
         StockData data = this.getStockData(playerId);
-        //data.restockIfReady(values);
         data.fillStock(type, amount);
         data.startRestockIfAbsent(values);
         data.setSaveRequired(true);

@@ -17,13 +17,11 @@ public class ShopLocation {
     private final World    world;
     private final BlockPos blockPos;
     private final ChunkPos chunkPos;
-    //private final Material blockType;
 
     public ShopLocation(@NotNull World world, @NotNull BlockPos blockPos) {
         this.world = world;
         this.blockPos = blockPos;
         this.chunkPos = ChunkPos.from(blockPos);
-        //this.blockType = this.getBlock().getType();
     }
 
     public boolean isValid() {

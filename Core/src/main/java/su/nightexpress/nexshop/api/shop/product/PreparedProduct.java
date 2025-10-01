@@ -45,5 +45,4 @@ public interface PreparedProduct {
 
     double getPrice();
 
-
 }
