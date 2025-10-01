@@ -103,7 +103,7 @@ public class ShopPlugin extends NightPlugin implements ImprovedCommands {
         }
 
         // Sync all price & stock datas for all products after everything is loaded.
-        this.runTaskAsync(task -> this.dataManager.loadAllData());
+        this.runTaskAsync(() -> this.dataManager.loadAllData());
     }
 
     @Override
