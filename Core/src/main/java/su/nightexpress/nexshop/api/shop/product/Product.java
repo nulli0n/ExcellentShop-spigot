@@ -37,7 +37,6 @@ public interface Product {
 
     int getAvailableAmount(@NotNull Player player, @NotNull TradeType tradeType);
 
-
     int countStock(@NotNull TradeType type, @Nullable UUID playerId);
 
     boolean consumeStock(@NotNull TradeType type, int amount, @Nullable UUID playerId);
@@ -47,8 +46,6 @@ public interface Product {
     boolean restock(@NotNull TradeType type, boolean force, @Nullable UUID playerId);
 
     long getRestockDate(@Nullable UUID playerId);
-
-
 
     void updatePrice(boolean force);
 
@@ -81,8 +78,6 @@ public interface Product {
     double getFinalPrice(@NotNull TradeType tradeType, @Nullable Player player);
 
     double getFinalPrice(@NotNull TradeType tradeType, int amount, @Nullable Player player);
-
-
 
     int getUnitAmount();
 

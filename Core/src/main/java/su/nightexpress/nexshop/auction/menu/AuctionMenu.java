@@ -292,23 +292,6 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
-        // TODO
-        //ItemStack backGround = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
-        //list.add(new MenuItem(backGround).setSlots(IntStream.range(36, 54).toArray()).setPriority(0));
-
-        // TODO
-        /*ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
-        ItemUtil.editMeta(prevPage, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
-        });
-        list.add(new MenuItem(prevPage).setSlots(36).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
-
-        ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
-        ItemUtil.editMeta(nextPage, meta -> {
-            meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
-        });
-        list.add(new MenuItem(nextPage).setSlots(44).setPriority(10).setHandler(ItemHandler.forNextPage(this)));*/
-
         ItemStack orderItem = new ItemStack(Material.NAME_TAG);
         ItemUtil.editMeta(orderItem, meta -> {
             meta.setDisplayName(LIGHT_BLUE.enclose(BOLD.enclose("Items Order")));

@@ -58,9 +58,8 @@ public class ShopListMenu extends NormalMenu<ShopPlugin> implements Filled<Virtu
                 .localized(VirtualIconsLang.ICON_SHOP)
                 .hideAllComponents()
                 .replacement(replacer -> replacer.replace(shop.replacePlaceholders())))
-            .setItemClick(shop -> (viewer1, event) -> {
-                this.runNextTick(() -> this.module.openShopOptions(viewer.getPlayer(), shop));
-            })
+            .setItemClick(shop -> (viewer1, event) -> this.runNextTick(() ->
+                    this.module.openShopOptions(viewer.getPlayer(), shop)))
             .build();
     }
 

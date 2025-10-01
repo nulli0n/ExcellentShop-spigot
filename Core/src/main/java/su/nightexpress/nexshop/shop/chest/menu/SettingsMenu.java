@@ -12,7 +12,6 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
-import su.nightexpress.nexshop.shop.chest.PlayerShopDialogs;
 import su.nightexpress.nexshop.shop.chest.config.ChestConfig;
 import su.nightexpress.nexshop.shop.chest.config.ChestPerms;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
@@ -132,9 +131,8 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
                 this.module.deleteShop(player, shop);
                 this.plugin.runTask(player, player::closeInventory);
             })
-            .onReturn((viewer1, event) -> {
-                this.plugin.runTask(player, () -> this.module.openShopSettings(player, shop));
-            })
+            .onReturn((viewer1, event) ->
+                    this.plugin.runTask(player, () -> this.module.openShopSettings(player, shop)))
             .returnOnAccept(false)
             .build());
     }
@@ -425,12 +423,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
                 .build()
         ));
 
-        loader.addHandler(new ItemHandler("shop_storage", (viewer, event) -> {
-            this.runNextTick(() -> module.openProductsMenu(viewer.getPlayer(), this.getLink(viewer)));
-        }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage() && !this.getLink(viewer).isAdminShop()).build()));
+        loader.addHandler(new ItemHandler("shop_storage", (viewer, event) ->
+                this.runNextTick(() -> module.openProductsMenu(viewer.getPlayer(), this.getLink(viewer))), ItemOptions.builder().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage() && !this.getLink(viewer).isAdminShop()).build()));
 
-        loader.addHandler(new ItemHandler("shop_bank", (viewer, event) -> {
-            this.runNextTick(() -> module.openBank(viewer.getPlayer(), this.getLink(viewer)));
-        }, ItemOptions.builder().setVisibilityPolicy(viewer -> !ChestConfig.isAutoBankEnabled()).build()));
+        loader.addHandler(new ItemHandler("shop_bank", (viewer, event) ->
+                this.runNextTick(() -> module.openBank(viewer.getPlayer(), this.getLink(viewer))), ItemOptions.builder().setVisibilityPolicy(viewer -> !ChestConfig.isAutoBankEnabled()).build()));
     }
 }

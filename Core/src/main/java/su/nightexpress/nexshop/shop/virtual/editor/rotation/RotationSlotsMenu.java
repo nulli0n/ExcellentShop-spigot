@@ -46,7 +46,6 @@ public class RotationSlotsMenu extends LinkedMenu<ShopPlugin, Rotation> {
 
     @Override
     public void onPrepare(@NotNull MenuViewer viewer, @NotNull InventoryView view) {
-        //Player player = viewer.getPlayer();
         Rotation rotation = this.getLink(viewer);
         VirtualShop shop = rotation.getShop();
 
@@ -70,9 +69,8 @@ public class RotationSlotsMenu extends LinkedMenu<ShopPlugin, Rotation> {
                 if (handler != null) {
                     String handlerName = handler.getName();
                     if (handlerName.equalsIgnoreCase(ItemHandler.RETURN)) {
-                        builder.setHandler((viewer1, event) -> {
-                            this.runNextTick(() -> this.module.openRotationOptions(viewer1.getPlayer(), rotation));
-                        });
+                        builder.setHandler((viewer1, event) ->
+                                this.runNextTick(() -> this.module.openRotationOptions(viewer1.getPlayer(), rotation)));
                     }
                     else if (handlerName.equalsIgnoreCase(ItemHandler.NEXT_PAGE)) {
                         builder.setHandler(ItemHandler.forNextPage(this));

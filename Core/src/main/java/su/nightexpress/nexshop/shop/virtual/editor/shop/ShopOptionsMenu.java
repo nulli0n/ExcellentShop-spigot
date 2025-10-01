@@ -151,20 +151,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             this.runNextTick(() -> module.openRotationsList(viewer.getPlayer(), shop));
         });
 
-        // TODO Dialog only
-        /*this.addItem(NightItem.fromType(Material.TNT), VirtualLocales.SHOP_RESET_PRICE_DATA, 45, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
-                    plugin.getDataManager().resetPriceDatas(shop); // Reset price data (mark all as 'expired').
-                    shop.updatePrices(true); // Refresh price values based on fresh, clean data.
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                },
-                (viewer1, event1) -> {
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
-        });*/
-
         this.addItem(NightItem.fromType(Material.BARRIER), VirtualLocales.SHOP_DELETE, 53, (viewer, event, shop) -> {
             this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
                 (viewer1, event1) -> {
@@ -176,34 +162,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 }
             )));
         });
-
-        /*this.addItem(ItemUtil.getSkinHead(SKULL_RESET_STOCKS), VirtualLocales.SHOP_RESET_STOCK_DATA, 2, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
-                    plugin.getDataManager().resetStockDatas(shop); // Reset stock data (mark all as 'expired').
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                },
-                (viewer1, event1) -> {
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
-        });
-
-        this.addItem(ItemUtil.getSkinHead(SKULL_RESET_ROTATIONS), VirtualLocales.SHOP_RESET_ROTATION_DATA, 6, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
-                    shop.performRotation();
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                },
-                (viewer1, event1) -> {
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
-        });*/
-
-//        this.addItem(Material.GOLD_NUGGET, VirtualLocales.SHOP_DISCOUNTS, 14, (viewer, event, shop) -> {
-//            // TODO this.runNextTick(() -> this.module.openDiscountsEditor(viewer.getPlayer(), shop));
-//        });
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualShop shop) {

@@ -191,15 +191,12 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         Map<ProductKey, StockData> dataMap = new HashMap<>();
 
         this.select(tableStockDataLegacy, DataQueries.LEGACY_STOCK_DATA_LOADER, SelectQuery::all).forEach(data -> {
-            data.getPlayerAmounts().forEach((tradeType, holderMap) -> {
-                holderMap.forEach((holderId, amounts) -> {
-                    updateStockData(dataMap, data, tradeType, amounts, holderId.toString());
-                });
-            });
+            data.getPlayerAmounts().forEach((tradeType, holderMap) ->
+                    holderMap.forEach((holderId, amounts) ->
+                            updateStockData(dataMap, data, tradeType, amounts, holderId.toString())));
 
-            data.getGlobalAmounts().forEach((tradeType, amounts) -> {
-                updateStockData(dataMap, data, tradeType, amounts, data.getShopId());
-            });
+            data.getGlobalAmounts().forEach((tradeType, amounts) ->
+                    updateStockData(dataMap, data, tradeType, amounts, data.getShopId()));
         });
 
         this.insert(this.tableStockData, DataQueries.STOCK_DATA_INSERT, dataMap.values());

@@ -42,15 +42,11 @@ public class RotationTimesMenu extends LinkedMenu<ShopPlugin, Rotation> implemen
         "90bba8d56bb6b906683b18fba481d58fa0bb7d3b3b18c6452e9257df542f53aa"
     };
 
-    //private final VirtualShopModule module;
-
     public RotationTimesMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         super(plugin, MenuType.GENERIC_9X4, VirtualLang.EDITOR_TITLE_ROTATION_TIMES.text());
-        //this.module = module;
 
-        this.addItem(MenuItem.buildReturn(this, 31, (viewer, event) -> {
-            this.runNextTick(() -> module.openRotationOptions(viewer.getPlayer(), this.getLink(viewer)));
-        }));
+        this.addItem(MenuItem.buildReturn(this, 31, (viewer, event) ->
+                this.runNextTick(() -> module.openRotationOptions(viewer.getPlayer(), this.getLink(viewer)))));
     }
 
     @Override

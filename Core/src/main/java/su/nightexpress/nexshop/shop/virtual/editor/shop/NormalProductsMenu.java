@@ -103,9 +103,8 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 if (handler != null) {
                     String handlerName = handler.getName();
                     if (handlerName.equalsIgnoreCase(ItemHandler.RETURN)) {
-                        builder.setHandler((viewer1, event) -> {
-                            this.runNextTick(() -> this.module.openShopOptions(viewer1.getPlayer(), shop));
-                        });
+                        builder.setHandler((viewer1, event) ->
+                                this.runNextTick(() -> this.module.openShopOptions(viewer1.getPlayer(), shop)));
                     }
                     else if (handlerName.equalsIgnoreCase(ItemHandler.NEXT_PAGE)) {
                         builder.setHandler(ItemHandler.forNextPage(this));
@@ -174,18 +173,16 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             freeSlots.remove(slot);
         }
 
-        shop.getRotations().forEach(other -> {
-            other.getSlots(page).forEach(slot -> {
-                this.addItem(viewer, NightItem.fromType(Material.RED_STAINED_GLASS_PANE)
-                    .setHideComponents(true)
-                    .localized(VirtualLocales.PRODUCT_ROTATION_SLOT)
-                    .toMenuItem()
-                    .setSlots(slot)
-                    .setPriority(MenuItem.HIGH_PRIORITY));
+        shop.getRotations().forEach(other -> other.getSlots(page).forEach(slot -> {
+            this.addItem(viewer, NightItem.fromType(Material.RED_STAINED_GLASS_PANE)
+                .setHideComponents(true)
+                .localized(VirtualLocales.PRODUCT_ROTATION_SLOT)
+                .toMenuItem()
+                .setSlots(slot)
+                .setPriority(MenuItem.HIGH_PRIORITY));
 
-                freeSlots.remove(slot);
-            });
-        });
+            freeSlots.remove(slot);
+        }));
 
         this.addItem(viewer, NightItem.fromType(Material.LIME_STAINED_GLASS_PANE)
             .setHideComponents(true)
@@ -206,7 +203,6 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 if (product == null) {
                     product = shop.createProduct(ContentType.ITEM, cursor);
                 }
-                if (product == null) return;
 
                 product.setSlot(event.getRawSlot());
                 product.setPage(page);

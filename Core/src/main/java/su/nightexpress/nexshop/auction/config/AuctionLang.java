@@ -123,7 +123,6 @@ public class AuctionLang implements LangContainer {
         )
         .build();
 
-
     public static final MessageLocale ERROR_DISABLED_WORLD = LangEntry.builder("Auction.Error.DisabledWorld").chatMessage(
         GRAY.wrap(SOFT_RED.wrap("✘") + " Auction is disabled in this world!")
     );

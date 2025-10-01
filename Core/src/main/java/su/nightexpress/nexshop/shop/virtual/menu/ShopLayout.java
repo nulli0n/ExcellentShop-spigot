@@ -216,7 +216,6 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
                 "",
                 LIGHT_GRAY.wrap(HEX_COLOR.wrap("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.wrap("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
                 "",
-                //LIGHT_GRAY.wrap(HEX_COLOR.wrap("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.wrap("sell all", "#ebd12a") + ".")
                 HEX_COLOR.wrap("→ " + BOLD.wrap(UNDERLINED.wrap("CLICK")) + " to sell", "#ebd12a")
             ))
             .toMenuItem()
