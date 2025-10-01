@@ -9,13 +9,13 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.ItemUtil;
@@ -39,15 +39,16 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
         }));
 
         this.addItem(ItemUtil.getSkinHead(SKULL_RESET), VirtualLocales.PRODUCT_EDIT_STOCK_RESET, 26, (viewer, event, product) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
+            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                .onAccept((viewer1, event1) -> {
                     plugin.getDataManager().resetStockDatas(product);
                     module.openStockOptions(viewer.getPlayer(), product);
-                },
-                (viewer1, event1) -> {
+                })
+                .onReturn((viewer1, event1) -> {
                     module.openStockOptions(viewer.getPlayer(), product);
-                }
-            )));
+                })
+                .build()
+            ));
         });
 
 

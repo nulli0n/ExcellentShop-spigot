@@ -1,5 +1,6 @@
 package su.nightexpress.nexshop.shop.virtual.impl;
 
+import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -33,7 +34,11 @@ public class ShopSettings implements Writeable {
     private boolean      paginatedLayouts;
 
     public ShopSettings() {
+        this.icon = NightItem.fromType(Material.CHEST);
         this.pageLayouts = new TreeMap<>();
+        this.aliases = new HashSet<>();
+        this.description = new ArrayList<>();
+        this.menuSlots = new HashSet<>();
     }
 
     @NotNull

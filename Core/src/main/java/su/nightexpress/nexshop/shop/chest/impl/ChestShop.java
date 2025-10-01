@@ -153,12 +153,15 @@ public class ChestShop extends AbstractShop<ChestProduct> {
 
     @Override
     public void save(boolean force) {
-        this.save(this.getConfig(), force);
+        if (!this.file.exists()) return;
+
+        if (force || this.isSaveRequired()) {
+            this.save(this.getConfig());
+        }
     }
 
     @Override
-    public void save(@NotNull FileConfig config, boolean force) {
-        if (force || this.isSaveRequired()) {
+    public void save(@NotNull FileConfig config) {
             this.blockPos.write(config, "Placement.BlockPos");
             config.set("Placement.World", this.worldName);
             config.set("Name", this.getName());
@@ -179,11 +182,9 @@ public class ChestShop extends AbstractShop<ChestProduct> {
             config.getSection("Products").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> config.remove("Products." + sId));
 
             this.setSaveRequired(false);
-        }
 
         this.getProducts().stream()
-            //.filter(product -> force || product.isSaveRequired()) TODO Enable back when marked properly
-            .peek(product -> product.setSaveRequired(false))
+            /*.peek(product -> product.setSaveRequired(false))*/
             .forEach(product -> product.write(config, "Products." + product.getId()));
 
         config.saveChanges();

@@ -21,7 +21,7 @@ public interface Shop {
 
     void save(boolean force);
 
-    void save(@NotNull FileConfig config, boolean force);
+    void save(@NotNull FileConfig config);
 
     void printBadProducts();
 

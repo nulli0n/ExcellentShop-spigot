@@ -73,32 +73,35 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
 
     @Override
     public void save(boolean force) {
-        this.save(this.getConfig(), force);
+        if (!this.file.exists()) return;
+
+        if (force || this.isSaveRequired()) {
+            this.save(this.getConfig());
+        }
     }
 
     @Override
-    public void save(@NotNull FileConfig config, boolean force) {
-        if (force || this.isSaveRequired()) {
-            config.set("Settings", this.settings);
+    public void save(@NotNull FileConfig config) {
+        config.set("Settings", this.settings);
 
-            // Clean up from removed products/rotations.
-            config.getSection("Items").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> {
-                config.remove("Items." + sId);
-            });
-            config.getSection("Rotations").stream().filter(sId -> !this.hasRotation(sId)).forEach(sId -> {
-                config.remove("Rotations." + sId);
-            });
+        // Clean up from removed products/rotations.
+        /*config.getSection("Items").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> {
+            config.remove("Items." + sId);
+        });
+        config.getSection("Rotations").stream().filter(sId -> !this.hasRotation(sId)).forEach(sId -> {
+            config.remove("Rotations." + sId);
+        });*/
 
-            this.setSaveRequired(false);
-        }
+        config.remove("Items");
+        config.remove("Rotations");
 
-        this.getProducts().stream().filter(product -> force || product.isSaveRequired())
+        this.getProducts().stream()/*.filter(product -> force || product.isSaveRequired())*/
             .sorted(Comparator.comparingInt(VirtualProduct::getPage).thenComparingInt(VirtualProduct::getSlot))
-            .peek(product -> product.setSaveRequired(false))
+            /*.peek(product -> product.setSaveRequired(false))*/
             .forEach(product -> config.set("Items." + product.getId(), product));
 
-        this.getRotations().stream().filter(rotation -> force || rotation.isSaveRequired())
-            .peek(rotation -> rotation.setSaveRequired(false))
+        this.getRotations().stream()/*.filter(rotation -> force || rotation.isSaveRequired())*/
+            /*.peek(rotation -> rotation.setSaveRequired(false))*/
             .forEach(rotation -> config.set("Rotations." + rotation.getId(), rotation));
 
         config.saveChanges();

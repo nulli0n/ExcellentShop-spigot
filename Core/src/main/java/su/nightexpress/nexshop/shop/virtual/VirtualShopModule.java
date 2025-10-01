@@ -296,7 +296,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             shop.loadSettings(config, "");
             shop.loadProducts(productsConfig, "List");
             shop.loadRotations(config, "Rotations");
-            shop.save(newConfig, true);
+            shop.save(newConfig);
 
             try {
                 if (!Files.exists(configBackupPath)) {
@@ -449,6 +449,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     @NotNull
     public VirtualShop createShop(@NotNull String id, @NotNull Consumer<VirtualShop> consumer) {
         File file = new File(this.getShopsPath(), FileConfig.withExtension(id));
+        FileUtil.create(file);
         VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
 
         consumer.accept(shop);
@@ -457,7 +458,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     }
 
     public boolean delete(@NotNull VirtualShop shop) {
-        if (!FileUtil.deleteRecursive(this.getShopsPath() + shop.getId())) return false;
+        if (!shop.getFile().delete()) return false;
 
         this.plugin.getDataManager().deleteAllData(shop);
         this.shopByIdMap.remove(shop.getId());

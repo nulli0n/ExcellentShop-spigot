@@ -10,25 +10,24 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Lang;
-import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
-import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
+import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualIconsLang;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.click.ClickResult;
+import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 
-import java.util.HashSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -172,15 +171,17 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
         });*/
 
         this.addItem(NightItem.fromType(Material.BARRIER), VirtualLocales.SHOP_DELETE, 53, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
+            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                .onAccept((viewer1, event1) -> {
                     module.delete(shop);
                     module.openShopsEditor(viewer1.getPlayer());
-                },
-                (viewer1, event1) -> {
+                })
+                .onReturn((viewer1, event1) -> {
                     module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
+                })
+                .returnOnAccept(false)
+                .build()
+            ));
         });
 
         /*this.addItem(ItemUtil.getSkinHead(SKULL_RESET_STOCKS), VirtualLocales.SHOP_RESET_STOCK_DATA, 2, (viewer, event, shop) -> {

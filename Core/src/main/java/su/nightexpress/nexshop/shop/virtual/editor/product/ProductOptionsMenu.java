@@ -14,7 +14,6 @@ import su.nightexpress.nexshop.product.content.ContentTypes;
 import su.nightexpress.nexshop.product.content.ProductContent;
 import su.nightexpress.nexshop.product.content.impl.CommandContent;
 import su.nightexpress.nexshop.product.content.impl.ItemContent;
-import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
@@ -24,6 +23,7 @@ import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.click.ClickResult;
+import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
@@ -59,8 +59,8 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
         }));
 
         this.addItem(NightItem.asCustomHead(SKULL_DELETE), VirtualLocales.PRODUCT_DELETE, 53, (viewer, event, product) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
+            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                .onAccept((viewer1, event1) -> {
                     int page = product.getPage();
                     boolean rotating = product.isRotating();
                     VirtualShop shop = product.getShop();
@@ -72,11 +72,13 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                         module.openRotatingsProducts(viewer.getPlayer(), shop);
                     }
                     else module.openNormalProducts(viewer.getPlayer(), shop, page);
-                },
-                (viewer1, event1) -> {
+                })
+                .onReturn((viewer1, event1) -> {
                     module.openProductOptions(viewer1.getPlayer(), product);
-                }
-            )));
+                })
+                .returnOnAccept(false)
+                .build()
+            ));
         });
 
         // =============================================

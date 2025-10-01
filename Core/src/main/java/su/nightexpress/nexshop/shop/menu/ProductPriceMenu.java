@@ -25,6 +25,7 @@ import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.language.entry.LangUIButton;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.data.LinkHandler;
 import su.nightexpress.nightcore.ui.menu.item.ItemHandler;
 import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
@@ -69,16 +70,17 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         }).build());
 
         this.addItem(NightItem.asCustomHead(SKULL_RESET), Lang.PRODUCT_PRICE_RESET, 28, (viewer, event, product) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
+            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                .onAccept((viewer1, event1) -> {
                     plugin.getDataManager().resetPriceData(product);
                     product.updatePrice(true);
                     this.open(viewer1.getPlayer(), product);
-                },
-                (viewer1, event1) -> {
+                })
+                .onReturn((viewer1, event1) -> {
                     this.open(viewer1.getPlayer(), product);
-                }
-            )));
+                })
+                .build()
+            ));
         }, ItemOptions.builder().setVisibilityPolicy(this::canResetPriceData).build());
     }
 
