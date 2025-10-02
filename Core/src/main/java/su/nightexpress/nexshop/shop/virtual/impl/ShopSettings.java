@@ -62,7 +62,7 @@ public class ShopSettings implements Writeable {
         this.setIcon(config.getCosmeticItem(path + ".Icon"));
         this.setPermissionRequired(config.getBoolean(path + ".Permission_Required", false));
         this.setBuyingAllowed(config.getBoolean(path + ".Buying", true));
-        this.setSellingAllowed(config.getBoolean(path + ".Buying", true));
+        this.setSellingAllowed(config.getBoolean(path + ".Selling", true));
         this.setPages(config.getInt(path + ".Pages", 1));
 
         this.setMenuSlots(IntStream.of(config.getIntArray(path + ".MainMenu.Slot")).boxed().collect(Collectors.toSet()));
