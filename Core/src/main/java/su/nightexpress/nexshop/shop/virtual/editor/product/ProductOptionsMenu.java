@@ -160,7 +160,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_RANK.text(), input -> {
                 product.getAllowedRanks().add(input.getTextRaw().toLowerCase());
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 return true;
             }));
         });
@@ -178,7 +178,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION.text(), input -> {
                 product.getRequiredPermissions().add(input.getTextRaw());
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 return true;
             }));
         });
@@ -192,14 +192,14 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION.text(), input -> {
                 product.getForbiddenPermissions().add(input.getTextRaw());
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 return true;
             }));
         });
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualProduct product) {
-        product.setSaveRequired(true);
+        product.getShop().setSaveRequired(true);
         this.runNextTick(() -> this.flush(viewer));
     }
 
@@ -238,7 +238,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
                 this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_COMMAND.text(), input -> {
                     content.getCommands().add(input.getText());
-                    product.setSaveRequired(true);
+                    product.getShop().setSaveRequired(true);
                     return true;
                 }));
             })

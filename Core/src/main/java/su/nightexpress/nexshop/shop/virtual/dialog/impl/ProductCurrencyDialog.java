@@ -65,7 +65,7 @@ public class ProductCurrencyDialog extends VirtualDialogProvider<VirtualProduct>
                 if (currency == null) return;
 
                 product.setCurrencyId(currency.getInternalId());
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 this.closeAndThen(user, product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user, product)));
             })
         );

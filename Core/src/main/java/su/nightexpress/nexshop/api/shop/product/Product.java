@@ -24,10 +24,6 @@ public interface Product {
 
     boolean isValid();
 
-    boolean isSaveRequired();
-
-    void setSaveRequired(boolean saveRequired);
-
     /**
      * Performs a check to determine if product is available for buying/selling (e.g. present in the shop, is in rotation).
      * @param player Player who about to buy/sell product.

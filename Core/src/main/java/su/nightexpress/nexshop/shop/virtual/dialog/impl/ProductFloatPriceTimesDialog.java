@@ -143,7 +143,7 @@ public class ProductFloatPriceTimesDialog extends VirtualDialogProvider<VirtualP
                     }
                 }
 
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 this.applyTimes(pricing, nbtHolder);
                 this.showNextTick(user, product);
             })
@@ -152,14 +152,14 @@ public class ProductFloatPriceTimesDialog extends VirtualDialogProvider<VirtualP
 
                 this.applyTimes(pricing, nbtHolder);
                 product.updatePrice(false);
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 this.closeAndThen(user, product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user, product)));
             })
             .handleResponse(ACTION_RESET, (user, identifier, nbtHolder) -> {
                 pricing.getDays().clear();
                 pricing.getTimes().clear();
                 pricing.setRefreshInterval(0L);
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
                 this.plugin.getDataManager().resetPriceData(product);
                 this.showNextTick(user, product);
             })
