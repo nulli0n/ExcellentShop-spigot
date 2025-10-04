@@ -28,7 +28,7 @@ public class PriceMenu extends ProductPriceMenu<VirtualProduct> {
 
     @Override
     protected void save(@NotNull MenuViewer viewer, @NotNull VirtualProduct product) {
-        product.setSaveRequired(true);
+        product.getShop().setSaveRequired(true);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class PriceMenu extends ProductPriceMenu<VirtualProduct> {
             Currency currency = EconomyBridge.getCurrency(input.getTextRaw());
             if (currency != null) {
                 product.setCurrencyId(currency.getInternalId());
-                product.setSaveRequired(true);
+                product.getShop().setSaveRequired(true);
             }
             return true;
         }).setSuggestions(EconomyBridge.getCurrencyIds(), true));

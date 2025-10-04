@@ -156,7 +156,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                         if (newProduct != null) {
                             newProduct.setSlot(event.getRawSlot());
                             newProduct.setPage(page);
-                            newProduct.setSaveRequired(true);
+                            shop.setSaveRequired(true);
                             shop.addProduct(newProduct);
                         }
                     }
@@ -206,7 +206,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
                 product.setSlot(event.getRawSlot());
                 product.setPage(page);
-                product.setSaveRequired(true);
+                shop.setSaveRequired(true);
 
                 shop.addProduct(product);
                 event.getView().setCursor(null);

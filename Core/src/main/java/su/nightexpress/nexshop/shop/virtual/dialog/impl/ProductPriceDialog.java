@@ -211,7 +211,7 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
             ProductPricing newPricing = ProductPricing.from(type);
             this.plugin.getDataManager().resetPriceData(product);
             product.setPricing(newPricing);
-            product.setSaveRequired(true);
+            product.getShop().setSaveRequired(true);
             this.showNextTick(user, product);
         });
 
@@ -399,6 +399,6 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
         }
 
         product.updatePrice(false);
-        product.setSaveRequired(true);
+        product.getShop().setSaveRequired(true);
     }
 }

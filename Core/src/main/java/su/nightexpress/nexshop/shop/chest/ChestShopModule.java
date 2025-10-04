@@ -746,6 +746,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     public ChestShop createShop(@NotNull Player player, @NotNull Block block, @NotNull Consumer<ChestShop> consumer) {
         String id = ChestUtils.generateShopId(player, block.getLocation());
         File file = new File(this.getAbsolutePath() + DIR_SHOPS, id + ".yml");
+        FileUtil.create(file);
         ChestShop shop = new ChestShop(this.plugin, this, file, id);
         World world = block.getWorld();
 

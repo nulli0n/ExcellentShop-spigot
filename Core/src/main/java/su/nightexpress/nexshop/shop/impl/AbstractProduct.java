@@ -35,8 +35,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     protected double buyPrice;
     protected double sellPrice;
 
-    protected boolean saveRequired;
-
     public AbstractProduct(@NotNull String id, @NotNull S shop) {
         this.id = id.toLowerCase();
         this.shop = shop;
@@ -65,16 +63,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     @Override
     public boolean isValid() {
         return this.content.isValid();
-    }
-
-    @Override
-    public boolean isSaveRequired() {
-        return this.saveRequired;
-    }
-
-    @Override
-    public void setSaveRequired(boolean saveRequired) {
-        this.saveRequired = saveRequired;
     }
 
     @Override
@@ -214,7 +202,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public boolean hasSellPrice() {
-        return this.getSellPrice()> 0D;
+        return this.getSellPrice() >= 0D;
     }
 
     @Override

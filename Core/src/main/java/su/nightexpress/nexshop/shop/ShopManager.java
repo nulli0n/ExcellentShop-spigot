@@ -16,16 +16,20 @@ import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nexshop.config.Perms;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
-import su.nightexpress.nexshop.shop.menu.*;
+import su.nightexpress.nexshop.shop.menu.Breadcumb;
+import su.nightexpress.nexshop.shop.menu.CartMenu;
+import su.nightexpress.nexshop.shop.menu.PurchaseOptionMenu;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.manager.AbstractManager;
+import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.menu.Menu;
 import su.nightexpress.nightcore.ui.menu.MenuRegistry;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
+import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.util.ItemUtil;
 
 import java.io.File;
@@ -38,7 +42,6 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
     private final Map<String, CartMenu> cartMenuMap;
 
-    private ConfirmMenu confirmMenu;
     private PurchaseOptionMenu purchaseOptionMenu;
 
     public ShopManager(@NotNull ShopPlugin plugin) {
@@ -65,7 +68,6 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
     }
 
     private void loadUI() {
-        this.confirmMenu = this.addMenu(new ConfirmMenu(this.plugin));
         this.purchaseOptionMenu = new PurchaseOptionMenu(this.plugin);
     }
 
@@ -249,6 +251,6 @@ public class ShopManager extends AbstractManager<ShopPlugin> {
 
     @Deprecated
     public void openConfirmation(@NotNull Player player, @NotNull Confirmation confirmation) {
-        this.confirmMenu.open(player, confirmation);
+        UIUtils.openConfirmation(player, confirmation);
     }
 }
