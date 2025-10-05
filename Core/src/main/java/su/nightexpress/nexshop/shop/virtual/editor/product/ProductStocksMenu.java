@@ -38,13 +38,13 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                 this.runNextTick(() -> module.openProductOptions(viewer.getPlayer(), this.getLink(viewer)))));
 
         this.addItem(ItemUtil.getSkinHead(SKULL_RESET), VirtualLocales.PRODUCT_EDIT_STOCK_RESET, 26, (viewer, event, product) ->
-                this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-            (viewer1, event1) -> {
-                plugin.getDataManager().resetStockDatas(product);
-                module.openStockOptions(viewer.getPlayer(), product);
-            },
-            (viewer1, event1) -> module.openStockOptions(viewer.getPlayer(), product)
-        ))));
+            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                    .onAccept((viewer1, event1) -> {
+                        plugin.getDataManager().resetStockDatas(product);
+                        module.openStockOptions(viewer.getPlayer(), product);
+                    })
+                    .onReturn((viewer1, event1) -> module.openStockOptions(viewer.getPlayer(), product))
+                    .build())));
 
         this.addItem(ItemUtil.getSkinHead(SKULL_BUY_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK_BUY, 11, (viewer, event, product) ->
                 this.onClickInitial(viewer, event, product, product.getStockValues(), TradeType.BUY));
@@ -75,7 +75,7 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
         this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_AMOUNT.text(), input -> {
             values.setAmount(tradeType, input.asInt(0));
-            product.setSaveRequired(true);
+            product.getShop().setSaveRequired(true);
             return true;
         }));
     }
@@ -89,13 +89,13 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
         this.handleInput(Dialog.builder(viewer,  Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
             values.setRestockTime(input.asInt(0));
-            product.setSaveRequired(true);
+            product.getShop().setSaveRequired(true);
             return true;
         }));
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualProduct product) {
-        product.setSaveRequired(true);
+        product.getShop().setSaveRequired(true);
         this.runNextTick(() -> this.flush(viewer));
     }
 

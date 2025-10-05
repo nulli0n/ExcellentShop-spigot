@@ -67,14 +67,14 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
             .setHideComponents(true)).build());
 
         this.addItem(NightItem.asCustomHead(SKULL_RESET), Lang.PRODUCT_PRICE_RESET, 28, (viewer, event, product) ->
-                this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-            (viewer1, event1) -> {
-                plugin.getDataManager().resetPriceData(product);
-                product.updatePrice(true);
-                this.open(viewer1.getPlayer(), product);
-            },
-            (viewer1, event1) -> this.open(viewer1.getPlayer(), product)
-        ))), ItemOptions.builder().setVisibilityPolicy(this::canResetPriceData).build());
+            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                    .onAccept((viewer1, event1) -> {
+                        plugin.getDataManager().resetPriceData(product);
+                        product.updatePrice(true);
+                        this.open(viewer1.getPlayer(), product);
+                    })
+                    .onReturn((viewer1, event1) -> this.open(viewer1.getPlayer(), product))
+                    .build())), ItemOptions.builder().setVisibilityPolicy(this::canResetPriceData).build());
     }
 
     protected void saveAndFlush(@NotNull MenuViewer viewer, @NotNull T product) {
