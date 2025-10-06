@@ -30,11 +30,8 @@ import java.util.stream.IntStream;
 @SuppressWarnings("UnstableApiUsage")
 public class RotationItemsListMenu extends LinkedMenu<ShopPlugin, Rotation> implements Filled<RotationItem> {
 
-    //private final VirtualShopModule module;
-
     public RotationItemsListMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_ITEMS.text());
-        //this.module = module;
 
         this.addItem(MenuItem.buildReturn(this, 39, (viewer, event) -> {
             this.runNextTick(() -> module.openRotationOptions(viewer.getPlayer(), this.getLink(viewer)));

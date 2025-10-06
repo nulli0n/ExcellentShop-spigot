@@ -35,9 +35,8 @@ public class RotationItemSelectMenu extends LinkedMenu<ShopPlugin, Rotation> imp
         super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_ITEM_SELECTION.text());
         this.module = module;
 
-        this.addItem(MenuItem.buildReturn(this, 40, (viewer, event) -> {
-            this.runNextTick(() -> module.openRotationItemsList(viewer.getPlayer(), this.getLink(viewer)));
-        }));
+        this.addItem(MenuItem.buildReturn(this, 40, (viewer, event) ->
+                this.runNextTick(() -> module.openRotationItemsList(viewer.getPlayer(), this.getLink(viewer)))));
 
         this.addItem(MenuItem.buildNextPage(this, 44));
         this.addItem(MenuItem.buildPreviousPage(this, 36));
@@ -56,12 +55,10 @@ public class RotationItemSelectMenu extends LinkedMenu<ShopPlugin, Rotation> imp
                 .filter(VirtualProduct::isRotating)
                 .filter(product -> !rotation.hasProduct(product))
                 .sorted(Comparator.comparing(Product::getId)).collect(Collectors.toCollection(ArrayList::new)))
-            .setItemCreator(product -> {
-                return NightItem.fromItemStack(product.getPreviewOrPlaceholder())
-                    .localized(VirtualLocales.PRODUCT_ROTATING_OBJECT)
-                    .setHideComponents(true)
-                    .replacement(replacer -> replacer.replace(product.replacePlaceholders()));
-            })
+            .setItemCreator(product -> NightItem.fromItemStack(product.getPreviewOrPlaceholder())
+                .localized(VirtualLocales.PRODUCT_ROTATING_OBJECT)
+                .setHideComponents(true)
+                .replacement(replacer -> replacer.replace(product.replacePlaceholders())))
             .setItemClick(product -> (viewer1, event) -> {
                 rotation.addItem(new RotationItem(product.getId(), 5D));
                 rotation.setSaveRequired(true);

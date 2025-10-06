@@ -200,7 +200,6 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
     @Override
     public void loadConfiguration(@NotNull FileConfig config, @NotNull MenuLoader loader) {
         loader.addDefaultItem(NightItem.fromType(Material.GRAY_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setPriority(-1).setSlots(IntStream.range(0, 54).toArray()));
-        //loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).toMenuItem().setSlots(IntStream.range(45, 54).toArray()));
 
         loader.addDefaultItem(MenuItem.buildReturn(this, 49, (viewer, event) -> {
             this.runNextTick(() -> this.module.openMainMenu(viewer.getPlayer()));
@@ -217,7 +216,6 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
                 "",
                 LIGHT_GRAY.wrap(HEX_COLOR.wrap("➥", "#ebd12a") + " Sell Multiplier: " + HEX_COLOR.wrap("x" + GENERIC_SELL_MULTIPLIER, "#ebd12a")),
                 "",
-                //LIGHT_GRAY.wrap(HEX_COLOR.wrap("[▶]", "#ebd12a") + " Click to " + HEX_COLOR.wrap("sell all", "#ebd12a") + ".")
                 HEX_COLOR.wrap("→ " + BOLD.wrap(UNDERLINED.wrap("CLICK")) + " to sell", "#ebd12a")
             ))
             .toMenuItem()
@@ -238,12 +236,5 @@ public class ShopLayout extends LinkedMenu<ShopPlugin, VirtualShop> implements C
             )
             .toMenuItem().setSlots(46).setPriority(10)
         );
-
-//        loader.addDefaultItem(NightItem.asCustomHead("5f96717bef61c37ce4dcd0b067da4b57c8a1b0f83c2926868b083444f7eade54")
-//            .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Wallet")))
-//            .setLore(Lists.newList(
-//                LIGHT_YELLOW.wrap("▪ " + LIGHT_GRAY.wrap("Balance: ") + GENERIC_BALANCE)
-//            ))
-//            .toMenuItem().setSlots(46).setPriority(10));
     }
 }
