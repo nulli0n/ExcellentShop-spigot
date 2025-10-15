@@ -63,7 +63,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
     private void handleToggle(@NotNull MenuViewer viewer, boolean state) {
         ChestShop shop = this.getLink(viewer);
         shop.getRentSettings().setEnabled(state);
-        shop.setSaveRequired(true);
+        shop.markDirty();
         this.module.getDisplayManager().remake(shop);
         this.runNextTick(() -> this.flush(viewer));
     }
@@ -73,7 +73,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
         this.handleInput(Dialog.builder(viewer, ChestLang.RENT_PROMPT_DURATION.text(), input -> {
             int days = input.asInt(1);
             shop.getRentSettings().setDuration(days, true);
-            shop.setSaveRequired(true);
+            shop.markDirty();
             return true;
         }));
     }
@@ -83,7 +83,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
         this.handleInput(Dialog.builder(viewer, ChestLang.RENT_PROMPT_PRICE.text(), input -> {
             double price = input.asDoubleAbs(0D);
             shop.getRentSettings().setPrice(price, true);
-            shop.setSaveRequired(true);
+            shop.markDirty();
             return true;
         }));
     }
@@ -99,7 +99,7 @@ public class RentMenu extends LinkedMenu<ShopPlugin, ChestShop> implements Confi
 
         shop.getRentSettings().setCurrencyId(currencies.get(index).getInternalId());
         shop.getRentSettings().setPrice(shop.getRentSettings().getPrice(), true); // Limit price when currency changed.
-        shop.setSaveRequired(true);
+        shop.markDirty();
 
         this.runNextTick(() -> this.flush(viewer));
     }

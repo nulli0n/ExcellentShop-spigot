@@ -38,7 +38,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         this.addItem(Material.GOLD_NUGGET, VirtualLocales.DISCOUNT_AMOUNT, 10, (viewer, event, discount)  -> {
             this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_AMOUNT.text(), (dialog, input) -> {
                 discount.setDiscount(input.asDouble());
-                discount.getShop().setSaveRequired(true);
+                discount.getShop().markDirty();
                 return true;
             });
         });
@@ -46,7 +46,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
         this.addItem(Material.REPEATER, VirtualLocales.DISCOUNT_DURATION, 12, (viewer, event, discount) -> {
             this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), (dialog, input) -> {
                 discount.setDuration(input.asInt());
-                discount.getShop().setSaveRequired(true);
+                discount.getShop().markDirty();
                 return true;
             });
         });
@@ -63,7 +63,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
                 if (day == null) return true;
 
                 discount.getDays().add(day);
-                discount.getShop().setSaveRequired(true);
+                discount.getShop().markDirty();
                 return true;
             }).setSuggestions(Lists.getEnums(DayOfWeek.class), true);
         });
@@ -78,7 +78,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
             this.handleInput(viewer.getPlayer(), Lang.EDITOR_GENERIC_ENTER_TIME.text(), (dialog, input) -> {
                 try {
                     discount.getTimes().add(LocalTime.parse(input.getTextRaw(), ShopUtils.TIME_FORMATTER));
-                    discount.getShop().setSaveRequired(true);
+                    discount.getShop().markDirty();
                 }
                 catch (DateTimeParseException ignored) {}
                 return true;
@@ -91,7 +91,7 @@ public class DiscountMainEditor extends EditorMenu<ShopPlugin, VirtualDiscount> 
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull Shop shop) {
-        shop.setSaveRequired(true);
+        shop.markDirty();
         this.runNextTick(() -> this.flush(viewer));
     }
 

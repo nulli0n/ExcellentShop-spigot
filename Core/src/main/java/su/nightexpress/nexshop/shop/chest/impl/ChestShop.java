@@ -29,7 +29,7 @@ import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
 import su.nightexpress.nightcore.util.placeholder.Replacer;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,8 +61,8 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     private String       renterName;
     private long         rentedUntil;
 
-    public ChestShop(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull File file, @NotNull String id) {
-        super(plugin, file, id);
+    public ChestShop(@NotNull ShopPlugin plugin, @NotNull ChestShopModule module, @NotNull Path path, @NotNull String id) {
+        super(plugin, path, id);
         this.module = module;
     }
 
@@ -73,7 +73,7 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     public boolean load() {
-        FileConfig config = this.getConfig();
+        FileConfig config = this.loadConfig();
         // ============== LOCATION UPDATE START ==============
         if (config.contains("Location")) {
             String raw = config.getString("Location", "");
@@ -147,47 +147,27 @@ public class ChestShop extends AbstractShop<ChestProduct> {
     }
 
     @Override
-    public void save() {
-        this.save(true);
-    }
-
-    @Override
-    public void save(boolean force) {
-        if (!this.file.exists()) return;
-
-        if (force || this.isSaveRequired()) {
-            this.save(this.getConfig());
+    public void write(@NotNull FileConfig config) {
+        this.blockPos.write(config, "Placement.BlockPos");
+        config.set("Placement.World", this.worldName);
+        config.set("Name", this.getName());
+        config.set("Owner.Id", this.getOwnerId().toString());
+        config.set("AdminShop", this.adminShop);
+        config.set("ItemCreated", this.isItemCreated());
+        config.set("Transaction_Allowed.BUY", this.buyingAllowed);
+        config.set("Transaction_Allowed.SELL", this.sellingAllowed);
+        if (ChestConfig.isRentEnabled()) {
+            config.set("Rent.Settings", this.rentSettings);
+            config.set("Rent.RenterId", this.renterId == null ? null : this.renterId.toString());
+            config.set("Rent.RentedUntil", this.renterId == null ? null : this.rentedUntil);
         }
-    }
+        config.set("Display.Hologram.Enabled", this.isHologramEnabled());
+        config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
+        config.set("Display.Showcase.Type", this.getShowcaseId());
 
-    @Override
-    public void save(@NotNull FileConfig config) {
-            this.blockPos.write(config, "Placement.BlockPos");
-            config.set("Placement.World", this.worldName);
-            config.set("Name", this.getName());
-            config.set("Owner.Id", this.getOwnerId().toString());
-            config.set("AdminShop", this.adminShop);
-            config.set("ItemCreated", this.isItemCreated());
-            config.set("Transaction_Allowed.BUY", this.buyingAllowed);
-            config.set("Transaction_Allowed.SELL", this.sellingAllowed);
-            if (ChestConfig.isRentEnabled()) {
-                config.set("Rent.Settings", this.rentSettings);
-                config.set("Rent.RenterId", this.renterId == null ? null : this.renterId.toString());
-                config.set("Rent.RentedUntil", this.renterId == null ? null : this.rentedUntil);
-            }
-            config.set("Display.Hologram.Enabled", this.isHologramEnabled());
-            config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
-            config.set("Display.Showcase.Type", this.getShowcaseId());
+        config.getSection("Products").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> config.remove("Products." + sId));
 
-            config.getSection("Products").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> config.remove("Products." + sId));
-
-            this.setSaveRequired(false);
-
-        this.getProducts().stream()
-            /*.peek(product -> product.setSaveRequired(false))*/
-            .forEach(product -> product.write(config, "Products." + product.getId()));
-
-        config.saveChanges();
+        this.getProducts().forEach(product -> product.write(config, "Products." + product.getId()));
     }
 
     @NotNull

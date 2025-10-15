@@ -124,11 +124,11 @@ public class ProductFloatPriceTimesDialog extends VirtualDialogProvider<VirtualP
                 .exitAction(DialogButtons.action(VirtualLang.DIALOG_BUTTON_BACK).action(DialogActions.customClick(ACTION_BACK)).build())
                 .build())
             .handleResponse(ACTION_BACK, (user, identifier, nbtHolder) -> {
-                this.closeAndThen(user, product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user, product)));
+                this.closeAndThen(user.getPlayer(), product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user.getPlayer(), product)));
             })
             .handleResponse(ACTION_MODE, (user, identifier, nbtHolder) -> {
                 pricing.setRefreshType(Lists.next(refreshType));
-                this.showNextTick(user, product);
+                this.showNextTick(user.getPlayer(), product);
             })
             .handleResponse(ACTION_DAY, (user, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
@@ -143,25 +143,25 @@ public class ProductFloatPriceTimesDialog extends VirtualDialogProvider<VirtualP
                     }
                 }
 
-                product.getShop().setSaveRequired(true);
+                product.getShop().markDirty();
                 this.applyTimes(pricing, nbtHolder);
-                this.showNextTick(user, product);
+                this.showNextTick(user.getPlayer(), product);
             })
             .handleResponse(ACTION_APPLY, (user, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
 
                 this.applyTimes(pricing, nbtHolder);
                 product.updatePrice(false);
-                product.getShop().setSaveRequired(true);
-                this.closeAndThen(user, product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user, product)));
+                product.getShop().markDirty();
+                this.closeAndThen(user.getPlayer(), product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user.getPlayer(), product)));
             })
             .handleResponse(ACTION_RESET, (user, identifier, nbtHolder) -> {
                 pricing.getDays().clear();
                 pricing.getTimes().clear();
                 pricing.setRefreshInterval(0L);
-                product.getShop().setSaveRequired(true);
+                product.getShop().markDirty();
                 this.plugin.getDataManager().resetPriceData(product);
-                this.showNextTick(user, product);
+                this.showNextTick(user.getPlayer(), product);
             })
         );
     }

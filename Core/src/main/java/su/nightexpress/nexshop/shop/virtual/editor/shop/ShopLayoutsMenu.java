@@ -35,7 +35,7 @@ public class ShopLayoutsMenu extends LinkedMenu<ShopPlugin, VirtualShop> impleme
         this.addItem(Material.PAINTING, VirtualLocales.SHOP_EDIT_LAYOUT_BY_DEFAULT, 4, (viewer, event, shop) -> {
             this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
                 shop.setPageLayout(0, input.getTextRaw());
-                shop.setSaveRequired(true);
+                shop.markDirty();
                 return true;
             }).setSuggestions(this.module.getLayoutNames(), true));
         });
@@ -68,14 +68,14 @@ public class ShopLayoutsMenu extends LinkedMenu<ShopPlugin, VirtualShop> impleme
             .setItemClick(page -> (viewer1, event) -> {
                 if (event.isRightClick()) {
                     shop.removePageLayout(page);
-                    shop.setSaveRequired(true);
+                    shop.markDirty();
                     this.runNextTick(() -> this.flush(viewer));
                     return;
                 }
 
                 this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_NAME.text(), input -> {
                     shop.setPageLayout(page, input.getTextRaw());
-                    shop.setSaveRequired(true);
+                    shop.markDirty();
                     return true;
                 }).setSuggestions(this.module.getLayoutNames(), true));
             })

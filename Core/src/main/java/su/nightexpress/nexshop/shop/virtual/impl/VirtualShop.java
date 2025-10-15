@@ -29,7 +29,7 @@ import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.UnaryOperator;
@@ -42,8 +42,8 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     private final Set<Discount>         discounts;
     private final Map<String, Rotation> rotationByIdMap;
 
-    public VirtualShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull File file, @NotNull String id) {
-        super(plugin, file, id);
+    public VirtualShop(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull Path path, @NotNull String id) {
+        super(plugin, path, id);
         this.module = module;
         this.settings = new ShopSettings();
         this.discounts = new HashSet<>();
@@ -57,7 +57,7 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     public void load() throws ShopLoadException {
-        FileConfig config = this.getConfig();
+        FileConfig config = this.loadConfig();
 
         this.loadSettings(config, "Settings");
         this.loadProducts(config, "Items");
@@ -67,42 +67,17 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     @Override
-    public void save() {
-        this.save(true);
-    }
-
-    @Override
-    public void save(boolean force) {
-        if (!this.file.exists()) return;
-
-        if (force || this.isSaveRequired()) {
-            this.save(this.getConfig());
-        }
-    }
-
-    @Override
-    public void save(@NotNull FileConfig config) {
+    public void write(@NotNull FileConfig config) {
         config.set("Settings", this.settings);
-
-        // Clean up from removed products/rotations.
-        /*config.getSection("Items").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> {
-            config.remove("Items." + sId);
-        });
-        config.getSection("Rotations").stream().filter(sId -> !this.hasRotation(sId)).forEach(sId -> {
-            config.remove("Rotations." + sId);
-        });*/
 
         config.remove("Items");
         config.remove("Rotations");
 
-        this.getProducts().stream()/*.filter(product -> force || product.isSaveRequired())*/
+        this.getProducts().stream()
             .sorted(Comparator.comparingInt(VirtualProduct::getPage).thenComparingInt(VirtualProduct::getSlot))
-            /*.peek(product -> product.setSaveRequired(false))*/
             .forEach(product -> config.set("Items." + product.getId(), product));
 
-        this.getRotations().stream()/*.filter(rotation -> force || rotation.isSaveRequired())*/
-            /*.peek(rotation -> rotation.setSaveRequired(false))*/
-            .forEach(rotation -> config.set("Rotations." + rotation.getId(), rotation));
+        this.getRotations().forEach(rotation -> config.set("Rotations." + rotation.getId(), rotation));
 
         config.saveChanges();
     }

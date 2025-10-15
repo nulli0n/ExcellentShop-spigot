@@ -19,6 +19,7 @@ import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.exception.ShopLoadException;
 import su.nightexpress.nexshop.module.AbstractModule;
 import su.nightexpress.nexshop.module.ModuleSettings;
+import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nexshop.shop.virtual.command.impl.VirtualCommands;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
 import su.nightexpress.nexshop.shop.virtual.dialog.VirtualDialogs;
@@ -125,12 +126,12 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
         this.addListener(new VirtualShopListener(this.plugin, this));
 
-        this.addAsyncTask(this::autoSave, VirtualConfig.SAVE_INTERVAL.get());
+        this.addAsyncTask(this::saveDirtyShops, VirtualConfig.SAVE_INTERVAL.get());
     }
 
     @Override
     protected void disableModule() {
-        this.autoSave();
+        this.saveDirtyShops();
 
         this.getShops().forEach(this::unloadShopAliases);
 
@@ -230,7 +231,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
             dir.mkdirs();
 
-            VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
+            VirtualShop shop = new VirtualShop(this.plugin, this, file.toPath(), id);
             try {
                 shop.load();
             }
@@ -264,7 +265,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             });
 
             shop.addRotation(rotation);
-            shop.save();
+            shop.saveForce();
 
             config.getFile().renameTo(new File(dir.getAbsolutePath(), "config.yml"));
             itemsConfig.getFile().renameTo(new File(dir.getAbsolutePath(), "products.yml"));
@@ -292,11 +293,11 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
             FileConfig config = new FileConfig(configFile);
             FileConfig productsConfig = new FileConfig(productsFile);
 
-            VirtualShop shop = new VirtualShop(this.plugin, this, configFile, id);
+            VirtualShop shop = new VirtualShop(this.plugin, this, configFile.toPath(), id);
             shop.loadSettings(config, "");
             shop.loadProducts(productsConfig, "List");
             shop.loadRotations(config, "Rotations");
-            shop.save(newConfig);
+            shop.write(newConfig);
 
             try {
                 if (!Files.exists(configBackupPath)) {
@@ -323,7 +324,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
         for (File file : FileUtil.getConfigFiles(this.getShopsPath())) {
             String id = FileConfig.getName(file);
-            VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
+            VirtualShop shop = new VirtualShop(this.plugin, this, file.toPath(), id);
             this.loadShop(shop);
         }
 
@@ -448,12 +449,12 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
     @NotNull
     public VirtualShop createShop(@NotNull String id, @NotNull Consumer<VirtualShop> consumer) {
-        File file = new File(this.getShopsPath(), FileConfig.withExtension(id));
-        FileUtil.create(file);
-        VirtualShop shop = new VirtualShop(this.plugin, this, file, id);
+        Path path = Path.of(this.getShopsPath(), FileConfig.withExtension(id));
+        FileUtil.createFileIfNotExists(path);
+        VirtualShop shop = new VirtualShop(this.plugin, this, path, id);
 
         consumer.accept(shop);
-        shop.save();
+        shop.saveForce();
         return shop;
     }
 
@@ -465,8 +466,8 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
         return true;
     }
 
-    public void autoSave() {
-        this.getShops().forEach(shop -> shop.save(false));
+    public void saveDirtyShops() {
+        this.getShops().forEach(AbstractShop::saveIfDirty);
     }
 
     @NotNull

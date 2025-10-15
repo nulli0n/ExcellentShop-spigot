@@ -65,7 +65,7 @@ public class ShopDescriptionDialog extends VirtualDialogProvider<VirtualShop> {
                 .build()
             )
             .handleResponse(ACTION_RESET, (user, identifier, nbtHolder) -> {
-                this.setDescription(user, shop, null);
+                this.setDescription(user.getPlayer(), shop, null);
             })
             .handleResponse(ACTION_APPLY, (user, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
@@ -73,14 +73,14 @@ public class ShopDescriptionDialog extends VirtualDialogProvider<VirtualShop> {
                 String description = nbtHolder.getText(JSON_DESCRIPTION).orElse(null);
                 if (description == null) return;
 
-                this.setDescription(user, shop, description);
+                this.setDescription(user.getPlayer(), shop, description);
             })
         );
     }
 
     private void setDescription(@NotNull Player user, @NotNull VirtualShop shop, @Nullable String desc) {
         shop.setDescription(desc == null ? Collections.emptyList() : Lists.newList(desc.split("\n")));
-        shop.setSaveRequired(true);
+        shop.markDirty();
         this.closeAndThen(user, shop, this.module::openShopOptions);
     }
 }

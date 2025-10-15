@@ -91,7 +91,7 @@ public class ProductCommandsDialog extends VirtualDialogProvider<VirtualProduct>
 
     private void setShopAliases(@NotNull Player user, @NotNull VirtualProduct product, @NotNull CommandContent content, @NotNull String[] aliases) {
         content.setCommands(Arrays.stream(aliases).map(s -> s.startsWith("/") && s.length() >= 2 ? s.substring(1) : s).toList());
-        product.getShop().setSaveRequired(true);
+        product.getShop().markDirty();
 
         this.closeAndThen(user, product, this.module::openProductOptions);
     }

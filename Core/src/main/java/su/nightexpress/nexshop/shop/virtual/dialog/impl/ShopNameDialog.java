@@ -56,8 +56,8 @@ public class ShopNameDialog extends VirtualDialogProvider<VirtualShop> {
                 if (name == null || name.isBlank()) return;
 
                 shop.setName(name);
-                shop.setSaveRequired(true);
-                this.closeAndThen(user, shop, this.module::openShopOptions);
+                shop.markDirty();
+                this.closeAndThen(user.getPlayer(), shop, this.module::openShopOptions);
             })
         );
     }

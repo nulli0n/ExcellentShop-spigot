@@ -64,7 +64,7 @@ public class RotationItemSelectMenu extends LinkedMenu<ShopPlugin, Rotation> imp
             })
             .setItemClick(product -> (viewer1, event) -> {
                 rotation.addItem(new RotationItem(product.getId(), 5D));
-                rotation.setSaveRequired(true);
+                rotation.getShop().markDirty();
                 this.runNextTick(() -> this.module.openRotationItemsList(player, rotation));
             })
             .build();

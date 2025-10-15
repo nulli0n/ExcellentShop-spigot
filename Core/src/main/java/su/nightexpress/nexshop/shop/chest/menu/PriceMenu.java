@@ -29,7 +29,7 @@ public class PriceMenu extends ProductPriceMenu<ChestProduct> {
 
     @Override
     protected void save(@NotNull MenuViewer viewer, @NotNull ChestProduct product) {
-        product.getShop().setSaveRequired(true);
+        product.getShop().markDirty();
     }
 
     @Override

@@ -45,7 +45,7 @@ public class ShopCreationDialog extends VirtualDialogProvider<Void> {
     public void show(@NotNull Player player, @Nullable Void unused) {
         Dialogs.createAndShow(player, builder -> builder
                 .base(DialogBases.builder(TITLE)
-                    .body(DialogBodies.plainMessage(BODY))
+                    .body(DialogBodies.plainMessage(BODY.replace(str -> str.replace(Placeholders.GENERIC_PATH, this.module.getLocalPathTo(VirtualShopModule.DIR_SHOPS)))))
                     .inputs(DialogInputs.text(JSON_ID, INPUT_SHOP_ID).initial("my_amazing_shop").build())
                     .build()
                 )
@@ -60,9 +60,9 @@ public class ShopCreationDialog extends VirtualDialogProvider<Void> {
                     String id = nbtHolder.getText(JSON_ID).orElse(null);
                     if (id == null || id.isBlank()) return;
 
-                    this.module.createShop(user, id);
-                    this.closeAndThen(user, unused, this.module::openShopsEditor);
+                    this.module.createShop(user.getPlayer(), id);
+                    this.closeAndThen(user.getPlayer(), unused, this.module::openShopsEditor);
                 })
-            , replacer -> replacer.replace(Placeholders.GENERIC_PATH, () -> this.module.getLocalPathTo(VirtualShopModule.DIR_SHOPS)));
+        );
     }
 }

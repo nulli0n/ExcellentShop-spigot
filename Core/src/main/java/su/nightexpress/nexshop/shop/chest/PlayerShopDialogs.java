@@ -49,7 +49,7 @@ public class PlayerShopDialogs extends SimpleManager<ShopPlugin> {
                 DialogButtons.action("Yes").action(DialogActions.customClick("confirm")).build(),
                 DialogButtons.action("No").build()
             ))
-            .handleResponse("confirm", (player, identifier, nbtHolder) -> {
+            .handleResponse("confirm", (user, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
 
                 String name = nbtHolder.getText("name").orElse(null);
@@ -58,8 +58,8 @@ public class PlayerShopDialogs extends SimpleManager<ShopPlugin> {
                 // TODO Colors permission?
 
                 shop.setName(name);
-                shop.setSaveRequired(true);
-                plugin.runTask(task -> module.openShopSettings(player, shop));
+                shop.markDirty();
+                plugin.runTask(task -> module.openShopSettings(user.getPlayer(), shop));
             })
         );
     }

@@ -17,11 +17,13 @@ public interface Shop {
 
     @NotNull UnaryOperator<String> replacePlaceholders();
 
-    void save();
+    void saveForce();
 
-    void save(boolean force);
+    void saveIfDirty();
 
-    void save(@NotNull FileConfig config);
+    void write(@NotNull FileConfig config);
+
+    void markDirty();
 
     void printBadProducts();
 
@@ -32,10 +34,6 @@ public interface Shop {
     void update();
 
     void updatePrices(boolean force);
-
-    boolean isSaveRequired();
-
-    void setSaveRequired(boolean saveRequired);
 
     void open(@NotNull Player player);
 

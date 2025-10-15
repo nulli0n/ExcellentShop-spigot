@@ -87,7 +87,7 @@ public class ProductCreationMenu extends LinkedMenu<ShopPlugin, ProductCreationM
         product.setSlot(data.slot);
 
         shop.addProduct(product);
-        shop.setSaveRequired(true);
+        shop.markDirty();
 
         this.comeback(viewer);
     }

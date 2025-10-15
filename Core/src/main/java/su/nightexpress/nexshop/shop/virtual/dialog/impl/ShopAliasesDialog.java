@@ -59,7 +59,7 @@ public class ShopAliasesDialog extends VirtualDialogProvider<VirtualShop> {
 
         Dialogs.createAndShow(player, builder -> builder
                 .base(DialogBases.builder(TITLE)
-                    .body(DialogBodies.plainMessage(BODY))
+                    .body(DialogBodies.plainMessage(BODY.replace(str -> str.replace(Placeholders.GENERIC_PERMISSION, VirtualPerms.COMMAND_SHOP.getName()))))
                     .inputs(
                         DialogInputs.text(JSON_ALIASES, INPUT_ALIASES)
                             .initial(String.join("\n", shop.getSlashedAliases()))
@@ -88,12 +88,12 @@ public class ShopAliasesDialog extends VirtualDialogProvider<VirtualShop> {
 
                     this.setShopAliases(player, shop, aliases.split("\n"), reload);
                 })
-            , replacer -> replacer.replace(Placeholders.GENERIC_PERMISSION, VirtualPerms.COMMAND_SHOP::getName));
+            );
     }
 
     private void setShopAliases(@NotNull Player user, @NotNull VirtualShop shop, @NotNull String[] aliases, boolean reload) {
         shop.setAliases(Arrays.stream(aliases).map(s -> s.startsWith("/") && s.length() >= 2 ? s.substring(1) : s).collect(Collectors.toSet()));
-        shop.setSaveRequired(true);
+        shop.markDirty();
 
         if (reload) {
             this.module.reloadShopAliases(shop);
