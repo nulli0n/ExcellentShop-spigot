@@ -56,7 +56,7 @@ public class ProductCurrencyDialog extends VirtualDialogProvider<VirtualProduct>
                 .build()
             )
             .handleResponse(ACTION_BACK, (user, identifier, nbtHolder) -> {
-                this.closeAndThen(user, product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user, product)));
+                this.closeAndThen(user.getPlayer(), product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user.getPlayer(), product)));
             })
             .handleResponse(ACTION_CURRENCY, (user, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
@@ -65,8 +65,8 @@ public class ProductCurrencyDialog extends VirtualDialogProvider<VirtualProduct>
                 if (currency == null) return;
 
                 product.setCurrencyId(currency.getInternalId());
-                product.getShop().setSaveRequired(true);
-                this.closeAndThen(user, product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user, product)));
+                product.getShop().markDirty();
+                this.closeAndThen(user.getPlayer(), product, () -> this.module.handleDialogs(dialogs -> dialogs.openProductPrice(user.getPlayer(), product)));
             })
         );
     }

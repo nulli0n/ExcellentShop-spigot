@@ -116,7 +116,7 @@ public class ShowcaseMenu extends LinkedMenu<ShopPlugin, ChestShop> implements F
         consumer.accept(shop);
         this.module.getDisplayManager().remake(shop);
 
-        shop.setSaveRequired(true);
+        shop.markDirty();
         this.runNextTick(() -> this.flush(viewer));
     }
 

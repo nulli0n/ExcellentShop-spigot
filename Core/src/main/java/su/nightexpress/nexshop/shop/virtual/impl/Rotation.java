@@ -38,8 +38,6 @@ public class Rotation implements Writeable {
     private RotationType rotationType;
     private int          rotationInterval;
 
-    private boolean saveRequired;
-
     public Rotation(@NotNull String id, @NotNull VirtualShop shop) {
         this.id = id;
         this.shop = shop;
@@ -220,14 +218,6 @@ public class Rotation implements Writeable {
 
     public boolean hasItem(@NotNull String productId) {
         return this.getItemById(productId.toLowerCase()) != null;
-    }
-
-    public boolean isSaveRequired() {
-        return this.saveRequired;
-    }
-
-    public void setSaveRequired(boolean saveRequired) {
-        this.saveRequired = saveRequired;
     }
 
     @NotNull

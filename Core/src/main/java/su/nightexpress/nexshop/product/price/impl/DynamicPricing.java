@@ -115,10 +115,12 @@ public class DynamicPricing extends ProductPricing {
         priceData.setExpireDate(TimeUtil.createFutureTimestamp(this.stabilizeInterval));
         priceData.setSaveRequired(true);
 
+        int units = event.getTransaction().getUnits();
+
         for (TradeType unitType : TradeType.values()) {
             PriceUnit unit = this.getPriceUnit(unitType);
 
-            double offset = unit.offset(currentType);
+            double offset = unit.offset(currentType) * units;
             double currentOffset = priceData.getOffset(unitType) * 100D;
             double clampedOffset = unit.clampOffset(currentOffset + offset);
             double finalOffset = clampedOffset / 100D;

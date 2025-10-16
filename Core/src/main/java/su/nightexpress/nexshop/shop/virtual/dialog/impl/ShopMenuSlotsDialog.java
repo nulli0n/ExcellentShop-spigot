@@ -86,7 +86,7 @@ public class ShopMenuSlotsDialog extends VirtualDialogProvider<VirtualShop> {
                 .build()
             )
             .handleResponse(ACTION_BACK, (user, identifier, nbtHolder) -> {
-                this.closeAndThen(user, shop, this.module::openShopOptions);
+                this.closeAndThen(user.getPlayer(), shop, this.module::openShopOptions);
             })
             .handleResponse(ACTION_SLOT, (user, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
@@ -101,7 +101,7 @@ public class ShopMenuSlotsDialog extends VirtualDialogProvider<VirtualShop> {
                     }
                 }
 
-                shop.setSaveRequired(true);
+                shop.markDirty();
                 this.showNextTick(player, shop);
             })
         );

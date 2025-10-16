@@ -117,7 +117,7 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         ChestShop shop = this.getLink(viewer);
         shop.setAdminShop(toAdmin);
         shop.updateStockCache();
-        shop.setSaveRequired(true);
+        shop.markDirty();
         this.module.getDisplayManager().remake(shop);
         this.runNextTick(() -> this.flush(viewer));
     }
@@ -159,7 +159,7 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         else {
             shop.setBuyingAllowed(!shop.isBuyingAllowed());
         }
-        shop.setSaveRequired(true);
+        shop.markDirty();
         this.runNextTick(() -> this.flush(viewer));
     }
 

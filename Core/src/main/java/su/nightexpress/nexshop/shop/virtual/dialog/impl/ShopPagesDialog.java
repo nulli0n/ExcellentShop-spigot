@@ -59,8 +59,8 @@ public class ShopPagesDialog extends VirtualDialogProvider<VirtualShop> {
                 if (pages <= 0) return;
 
                 shop.setPages(pages);
-                shop.setSaveRequired(true);
-                this.closeAndThen(user, shop, this.module::openShopOptions);
+                shop.markDirty();
+                this.closeAndThen(user.getPlayer(), shop, this.module::openShopOptions);
             })
         );
     }

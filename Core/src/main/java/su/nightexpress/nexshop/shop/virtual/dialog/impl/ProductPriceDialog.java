@@ -211,22 +211,22 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
             ProductPricing newPricing = ProductPricing.from(type);
             this.plugin.getDataManager().resetPriceData(product);
             product.setPricing(newPricing);
-            product.getShop().setSaveRequired(true);
-            this.showNextTick(user, product);
+            product.getShop().markDirty();
+            this.showNextTick(user.getPlayer(), product);
         });
 
         builder.handleResponse(ACTION_CURRENCY, (user, identifier, nbtHolder) -> {
             this.saveFields(product, pricing, nbtHolder);
-            this.module.handleDialogs(dialogs -> dialogs.openProductCurrency(user, product));
+            this.module.handleDialogs(dialogs -> dialogs.openProductCurrency(user.getPlayer(), product));
         });
 
         builder.handleResponse(ACTION_BACK, (user, identifier, nbtHolder) -> {
-            this.closeAndThen(user, product, this.module::openProductOptions);
+            this.closeAndThen(user.getPlayer(), product, this.module::openProductOptions);
         });
 
         builder.handleResponse(ACTION_APPLY, (user, identifier, nbtHolder) -> {
             this.saveFields(product, pricing, nbtHolder);
-            this.closeAndThen(user, product, this.module::openProductOptions);
+            this.closeAndThen(user.getPlayer(), product, this.module::openProductOptions);
         });
 
         switch (pricing) {
@@ -282,7 +282,7 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
                 if (nbtHolder == null) return;
 
                 this.saveFields(product, pricing, nbtHolder);
-                this.module.handleDialogs(dialogs -> dialogs.openFloatPricingTimes(user, product));
+                this.module.handleDialogs(dialogs -> dialogs.openFloatPricingTimes(user.getPlayer(), product));
             });
     }
 
@@ -399,6 +399,6 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
         }
 
         product.updatePrice(false);
-        product.getShop().setSaveRequired(true);
+        product.getShop().markDirty();
     }
 }

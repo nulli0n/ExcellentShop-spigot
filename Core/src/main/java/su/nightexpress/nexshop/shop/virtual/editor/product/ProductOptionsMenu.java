@@ -66,7 +66,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                     VirtualShop shop = product.getShop();
 
                     shop.removeProduct(product);
-                    shop.setSaveRequired(true);
+                    shop.markDirty();
 
                     if (rotating) {
                         module.openRotatingsProducts(viewer.getPlayer(), shop);
@@ -160,7 +160,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_RANK.text(), input -> {
                 product.getAllowedRanks().add(input.getTextRaw().toLowerCase());
-                product.getShop().setSaveRequired(true);
+                product.getShop().markDirty();
                 return true;
             }));
         });
@@ -178,7 +178,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION.text(), input -> {
                 product.getRequiredPermissions().add(input.getTextRaw());
-                product.getShop().setSaveRequired(true);
+                product.getShop().markDirty();
                 return true;
             }));
         });
@@ -192,14 +192,14 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
             this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_PERMISSION.text(), input -> {
                 product.getForbiddenPermissions().add(input.getTextRaw());
-                product.getShop().setSaveRequired(true);
+                product.getShop().markDirty();
                 return true;
             }));
         });
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualProduct product) {
-        product.getShop().setSaveRequired(true);
+        product.getShop().markDirty();
         this.runNextTick(() -> this.flush(viewer));
     }
 
@@ -238,7 +238,7 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
 
                 this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_COMMAND.text(), input -> {
                     content.getCommands().add(input.getText());
-                    product.getShop().setSaveRequired(true);
+                    product.getShop().markDirty();
                     return true;
                 }));
             })

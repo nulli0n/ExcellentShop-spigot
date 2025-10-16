@@ -14,21 +14,22 @@ import su.nightexpress.nexshop.data.product.PriceData;
 import su.nightexpress.nexshop.product.price.ProductPricing;
 import su.nightexpress.nightcore.manager.ConfigBacked;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop, ConfigBacked {
 
     protected final ShopPlugin     plugin;
-    protected final File           file;
+    protected final Path           path;
     protected final String         id;
     protected final Map<String, P> products;
 
-    protected boolean saveRequired;
+    protected boolean dirty;
 
-    public AbstractShop(@NotNull ShopPlugin plugin, @NotNull File file, @NotNull String id) {
+    public AbstractShop(@NotNull ShopPlugin plugin, @NotNull Path path, @NotNull String id) {
         this.plugin = plugin;
-        this.file = file;
+        this.path = path;
         this.id = id;
         this.products = new LinkedHashMap<>();
     }
@@ -41,8 +42,8 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
 
     @Override
     @NotNull
-    public File getFile() {
-        return this.file;
+    public Path getPath() {
+        return this.path;
     }
 
     @Override
@@ -64,9 +65,30 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
     public void printBadProducts() {
         this.getProducts().forEach(product -> {
             if (!product.getContent().isValid()) {
-                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.file.getPath() + "' shop.");
+                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.path + "' shop.");
             }
         });
+    }
+
+    @Override
+    public void markDirty() {
+        this.dirty = true;
+    }
+
+    @Override
+    public void saveForce() {
+        this.markDirty();
+        this.saveIfDirty();
+    }
+
+    @Override
+    public void saveIfDirty() {
+        if (!Files.exists(this.path)) return;
+        
+        if (this.dirty) {
+            this.loadConfig().edit(this::write);
+            this.dirty = false;
+        }
     }
 
     @Override
@@ -87,14 +109,6 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
     @Override
     public boolean isTradeAllowed(@NotNull TradeType tradeType) {
         return tradeType == TradeType.BUY ? this.isBuyingAllowed() : this.isSellingAllowed();
-    }
-
-    public boolean isSaveRequired() {
-        return this.saveRequired;
-    }
-
-    public void setSaveRequired(boolean saveRequired) {
-        this.saveRequired = saveRequired;
     }
 
     @Override

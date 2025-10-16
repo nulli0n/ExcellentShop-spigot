@@ -144,7 +144,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                     // Cache clicked product to item stack then remove it from the shop
                     ItemStack saved = this.cacheProduct(product);
                     shop.removeProduct(product);
-                    shop.setSaveRequired(true);
+                    shop.markDirty();
 
                     // Replace current product with the one from player's cursor.
                     ItemStack cursor = event.getCursor();
@@ -156,7 +156,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                         if (newProduct != null) {
                             newProduct.setSlot(event.getRawSlot());
                             newProduct.setPage(page);
-                            shop.setSaveRequired(true);
+                            shop.markDirty();
                             shop.addProduct(newProduct);
                         }
                     }
@@ -206,7 +206,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
                 product.setSlot(event.getRawSlot());
                 product.setPage(page);
-                shop.setSaveRequired(true);
+                shop.markDirty();
 
                 shop.addProduct(product);
                 event.getView().setCursor(null);

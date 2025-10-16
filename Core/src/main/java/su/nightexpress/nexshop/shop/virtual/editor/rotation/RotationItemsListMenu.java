@@ -86,7 +86,7 @@ public class RotationItemsListMenu extends LinkedMenu<ShopPlugin, Rotation> impl
     }
 
     private void save(@NotNull MenuViewer viewer, @NotNull Rotation rotation) {
-        rotation.setSaveRequired(true);
+        rotation.getShop().markDirty();
         this.runNextTick(() -> this.flush(viewer));
     }
 

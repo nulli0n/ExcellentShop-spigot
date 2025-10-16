@@ -76,7 +76,7 @@ public class ShopLayoutsDialog extends VirtualDialogProvider<VirtualShop> {
 
         Dialogs.createAndShow(player, builder -> builder
                 .base(DialogBases.builder(TITLE)
-                    .body(DialogBodies.plainMessage(BODY))
+                    .body(DialogBodies.plainMessage(BODY.replace(str -> str.replace(Placeholders.GENERIC_PATH, this.module.getLocalPathTo(VirtualShopModule.DIR_LAYOUTS)))))
                     .inputs(inputs)
                     .afterAction(WrappedDialogAfterAction.NONE)
                     .build()
@@ -95,11 +95,11 @@ public class ShopLayoutsDialog extends VirtualDialogProvider<VirtualShop> {
 
                     boolean value = nbtHolder.getBoolean(JSON_MODE, false);
                     shop.setPaginatedLayouts(value);
-                    shop.setSaveRequired(true);
-                    this.showNextTick(user, shop);
+                    shop.markDirty();
+                    this.showNextTick(user.getPlayer(), shop);
                 })
                 .handleResponse(ACTION_BACK, (user, identifier, nbtHolder) -> {
-                    this.close(user);
+                    this.close(user.getPlayer());
                 })
                 .handleResponse(ACTION_APPLY, (user, identifier, nbtHolder) -> {
                     if (nbtHolder == null) return;
@@ -110,9 +110,9 @@ public class ShopLayoutsDialog extends VirtualDialogProvider<VirtualShop> {
 
                         shop.setPageLayout(page, layoutId);
                     }
-                    shop.setSaveRequired(true);
-                    this.closeAndThen(user, shop, this.module::openShopOptions);
+                    shop.markDirty();
+                    this.closeAndThen(user.getPlayer(), shop, this.module::openShopOptions);
                 })
-            , replacer -> replacer.replace(Placeholders.GENERIC_PATH, () -> this.module.getLocalPathTo(VirtualShopModule.DIR_LAYOUTS)));
+        );
     }
 }
