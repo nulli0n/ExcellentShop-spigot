@@ -122,8 +122,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             itemStack.setMaterial(this.getLink(viewer).isPermissionRequired() ? Material.REDSTONE : Material.GUNPOWDER);
         }).build());
 
-
-
         this.addItem(NightItem.fromType(Material.GLOW_ITEM_FRAME), VirtualLocales.SHOP_EDIT_LAYOUTS, 28, (viewer, event, shop) -> {
             if (module.handleDialogs(dialogs -> dialogs.openShopLayoutsDialog(viewer.getPlayer(), shop))) return;
 
@@ -140,10 +138,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             this.saveAndFlush(viewer, shop);
         }, ItemOptions.builder().setDisplayModifier((viewer, item) -> item.setMaterial(this.getLink(viewer).isSellingAllowed() ? Material.LIME_DYE : Material.GRAY_DYE)).build());
 
-
-
-
-
         this.addItem(NightItem.fromType(Material.CHEST), VirtualLocales.SHOP_EDIT_PRODUCTS_NORMAL, 32, (viewer, event, shop) -> {
             this.runNextTick(() -> module.openNormalProducts(viewer.getPlayer(), shop));
         });
@@ -155,20 +149,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
         this.addItem(NightItem.fromType(Material.CLOCK), VirtualLocales.SHOP_EDIT_ROTATIONS, 34, (viewer, event, shop) -> {
             this.runNextTick(() -> module.openRotationsList(viewer.getPlayer(), shop));
         });
-
-        // TODO Dialog only
-        /*this.addItem(NightItem.fromType(Material.TNT), VirtualLocales.SHOP_RESET_PRICE_DATA, 45, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
-                    plugin.getDataManager().resetPriceDatas(shop); // Reset price data (mark all as 'expired').
-                    shop.updatePrices(true); // Refresh price values based on fresh, clean data.
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                },
-                (viewer1, event1) -> {
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
-        });*/
 
         this.addItem(NightItem.fromType(Material.BARRIER), VirtualLocales.SHOP_DELETE, 53, (viewer, event, shop) -> {
             this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
@@ -183,34 +163,6 @@ public class ShopOptionsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 .build()
             ));
         });
-
-        /*this.addItem(ItemUtil.getSkinHead(SKULL_RESET_STOCKS), VirtualLocales.SHOP_RESET_STOCK_DATA, 2, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
-                    plugin.getDataManager().resetStockDatas(shop); // Reset stock data (mark all as 'expired').
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                },
-                (viewer1, event1) -> {
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
-        });
-
-        this.addItem(ItemUtil.getSkinHead(SKULL_RESET_ROTATIONS), VirtualLocales.SHOP_RESET_ROTATION_DATA, 6, (viewer, event, shop) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.create(
-                (viewer1, event1) -> {
-                    shop.performRotation();
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                },
-                (viewer1, event1) -> {
-                    module.openShopOptions(viewer1.getPlayer(), shop);
-                }
-            )));
-        });*/
-
-//        this.addItem(Material.GOLD_NUGGET, VirtualLocales.SHOP_DISCOUNTS, 14, (viewer, event, shop) -> {
-//            // TODO this.runNextTick(() -> this.module.openDiscountsEditor(viewer.getPlayer(), shop));
-//        });
     }
 
     private void saveAndFlush(@NotNull MenuViewer viewer, @NotNull VirtualShop shop) {

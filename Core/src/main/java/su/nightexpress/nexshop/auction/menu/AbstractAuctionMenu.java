@@ -105,7 +105,6 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
 
         autoFill.setSlots(this.itemSlots);
         autoFill.setItemCreator(aucItem -> {
-            //ItemStack item = new ItemStack(aucItem.getItemStack());
 
             ItemStack item = NightItem.fromItemStack(aucItem.getItemStack())
                 .setDisplayName(this.itemName)
@@ -116,13 +115,6 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
                 .getItemStack();
 
             AuctionUtils.hideListingAttributes(item);
-
-//            ItemReplacer.create(item).trimmed()
-//                .setDisplayName(this.itemName)
-//                .setLore(this.itemLore)
-//                .replace(aucItem.replacePlaceholders())
-//                .replacePlaceholderAPI(player)
-//                .writeMeta();
 
             return item;
         });

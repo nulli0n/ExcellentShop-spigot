@@ -56,21 +56,9 @@ public class PriceMenu extends ProductPriceMenu<ChestProduct> {
 
     @Override
     protected void handlePriceType(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull ChestProduct product) {
-        //Predicate<PriceType> predicate = priceType -> viewer.getPlayer().hasPermission(ChestPerms.PREFIX_PRICE_TYPE + priceType.name().toLowerCase());
-
-        //double sell = product.getPricer().getPrice(TradeType.SELL);
-        //double buy = product.getPricer().getPrice(TradeType.BUY);
-
-        PriceType priceType = Lists.next(product.getPricingType()/*, predicate*/);
+        PriceType priceType = Lists.next(product.getPricingType());
         product.setPricing(ProductPricing.from(priceType));
         plugin.getDataManager().deletePriceData(product);
-
-        /*if (product.getPricer() instanceof RangedPricing pricer) {
-            pricer.setPriceRange(TradeType.BUY, UniDouble.of(buy, buy));
-            pricer.setPriceRange(TradeType.SELL, UniDouble.of(sell, sell));
-        }
-        product.setPrice(TradeType.BUY, buy);
-        product.setPrice(TradeType.SELL, sell);*/
 
         this.saveAndFlush(viewer, product);
     }

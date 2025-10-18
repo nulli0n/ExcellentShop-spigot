@@ -1,6 +1,8 @@
 name: ExcellentShop
 main: su.nightexpress.nexshop.ShopPlugin
 version: '${project.version}'
+api-version: 1.18
+folia-supported: true
 description: Advanced 4 in 1 shop plugin with a lot of cool features!
 author: NightExpress
 depend: [ nightcore ]
@@ -23,4 +25,3 @@ softdepend:
 #  - MMOItems
 #  - ExcellentCrates
 #  - VotingPlugin
-api-version: 1.18

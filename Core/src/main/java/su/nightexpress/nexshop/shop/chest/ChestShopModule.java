@@ -126,8 +126,8 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
 
         this.addAsyncTask(this::saveDirtyShops, ChestConfig.SAVE_INTERVAL.get());
 
-        this.plugin.runTaskAsync(task -> this.loadBanks());
-        this.plugin.runTask(task -> this.lookup().getAll().forEach(this::activateShop));
+        this.plugin.runTaskAsync(this::loadBanks);
+        this.plugin.runTask(() -> this.lookup().getAll().forEach(this::activateShop));
     }
 
     private void loadConfig(@NotNull FileConfig config) {
@@ -318,7 +318,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     public void onChunkLoad(@NotNull ChestShop shop) {
-        //this.plugin.debug("Handle chunk load for " + shop.getId());
         World world = shop.location().getWorld();
         BlockPos blockPos = shop.getBlockPos();
         Block block = blockPos.toBlock(world);
@@ -335,7 +334,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     public void onChunkUnload(@NotNull ChestShop shop) {
-        //this.plugin.debug("Handle chunk unload for " + shop.getId());
         shop.updateStockCache();
     }
 
@@ -418,7 +416,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         ChestBank bank = this.getBankMap().get(uuid);
         if (bank == null) {
             ChestBank bank2 = new ChestBank(uuid, new HashMap<>());
-            this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().createChestBank(bank2));
+            this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().createChestBank(bank2));
             this.getBankMap().put(uuid, bank2);
             return bank2;
         }
@@ -433,7 +431,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     public void savePlayerBank(@NotNull ChestBank bank) {
-        this.plugin.runTaskAsync(task -> this.plugin.getDataHandler().saveChestBank(bank));
+        this.plugin.runTaskAsync(() -> this.plugin.getDataHandler().saveChestBank(bank));
     }
 
     @NotNull
@@ -595,7 +593,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     public void interactShop(@NotNull PlayerInteractEvent event, @NotNull Player player, @NotNull ChestShop shop) {
-        //if (event.useInteractedBlock() == Event.Result.DENY) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         if (player.isSneaking()) {
@@ -630,7 +627,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             if (shop.isRentable() && !shop.isRented()) {
                 UIUtils.openConfirmation(player, Confirmation.builder()
                     .onAccept((viewer, event1) -> this.rentShopOrExtend(player, shop))
-                    .onReturn((viewer, event1) -> this.plugin.runTask(task -> player.closeInventory()))
+                    .onReturn((viewer, event1) -> this.plugin.runTask(player, player::closeInventory))
                     .returnOnAccept(true)
                     .build());
                 return;

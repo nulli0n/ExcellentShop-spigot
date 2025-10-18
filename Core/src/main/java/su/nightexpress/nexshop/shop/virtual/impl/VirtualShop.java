@@ -182,12 +182,6 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @Override
     public void update() {
         this.tryRotate();
-
-//        this.getDiscountConfigs().forEach(discount -> {
-//            if (discount.isDiscountTime()) {
-//                discount.update();
-//            }
-//        });
     }
 
     public void performRotation() {

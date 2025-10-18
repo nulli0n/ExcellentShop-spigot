@@ -9,6 +9,7 @@ import org.bukkit.inventory.MenuType;
 import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
@@ -18,7 +19,6 @@ import su.nightexpress.nexshop.shop.virtual.type.RotationType;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.menu.click.ClickResult;
-import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
@@ -38,38 +38,29 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
     public RotationOptionsMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         super(plugin, MenuType.GENERIC_9X5, VirtualLang.EDITOR_TITLE_ROTATION_OPTIONS.text());
 
-        this.addItem(MenuItem.buildReturn(this, 40, (viewer, event) -> {
-            this.runNextTick(() -> module.openRotationsList(viewer.getPlayer(), this.getLink(viewer).getShop()));
-        }));
+        this.addItem(MenuItem.buildReturn(this, 40, (viewer, event) ->
+                this.runNextTick(() -> module.openRotationsList(viewer.getPlayer(), this.getLink(viewer).getShop()))));
 
-        this.addItem(NightItem.asCustomHead(SKULL_DELETE), VirtualLocales.ROTATION_DELETE, 8, (viewer, event, rotation) -> {
-            this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
-                .onAccept((viewer1, event1) -> {
-                    VirtualShop shop = rotation.getShop();
-                    shop.removeRotation(rotation);
-                    shop.markDirty();
-                    plugin.getDataManager().deleteRotationData(rotation);
-                    module.openRotationsList(viewer1.getPlayer(), shop);
-                })
-                .onReturn((viewer1, event1) -> {
-                    module.openRotationOptions(viewer1.getPlayer(), rotation);
-                })
-                .build()
-            ));
-        });
+        this.addItem(NightItem.asCustomHead(SKULL_DELETE), VirtualLocales.ROTATION_DELETE, 8, (viewer, event, rotation) ->
+                this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
+                        .onAccept((viewer1, event1) -> {
+                            VirtualShop shop = rotation.getShop();
+                            shop.removeRotation(rotation);
+                            shop.markDirty();
+                            plugin.getDataManager().deleteRotationData(rotation);
+                            module.openRotationsList(viewer1.getPlayer(), shop);
+                        })
+                        .onReturn((viewer1, event1) -> module.openRotationOptions(viewer1.getPlayer(), rotation))
+                        .build())));
 
-        this.addItem(NightItem.asCustomHead(SKULL_RESET), VirtualLocales.ROTATION_RESET, 0, (viewer, event, rotation) -> {
+        this.addItem(NightItem.asCustomHead(SKULL_RESET), VirtualLocales.ROTATION_RESET, 0, (viewer, event, rotation) ->
             this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
-                .onAccept((viewer1, event1) -> {
-                    rotation.getShop().performRotation(rotation);
-                    module.openRotationOptions(viewer1.getPlayer(), rotation);
-                })
-                .onReturn((viewer1, event1) -> {
-                    module.openRotationOptions(viewer1.getPlayer(), rotation);
-                })
-                .build()
-            ));
-        });
+                    .onAccept((viewer1, event1) -> {
+                        rotation.getShop().performRotation(rotation);
+                        module.openRotationOptions(viewer1.getPlayer(), rotation);
+                    })
+                    .onReturn((viewer1, event1) -> module.openRotationOptions(viewer1.getPlayer(), rotation)
+                    .build()))));
 
         this.addItem(Material.ITEM_FRAME, VirtualLocales.ROTATION_EDIT_ICON, 4, (viewer, event, rotation) -> {
             if (event.isRightClick()) {
@@ -78,7 +69,7 @@ public class RotationOptionsMenu extends LinkedMenu<ShopPlugin, Rotation> {
             }
 
             ItemStack cursor = event.getCursor();
-            if (cursor == null || cursor.getType().isAir()) return;
+            if (cursor.getType().isAir()) return;
 
             rotation.setIcon(NightItem.fromItemStack(cursor));
             event.getView().setCursor(null);
