@@ -39,10 +39,9 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         this.id = id.toLowerCase();
         this.shop = shop;
         this.setCurrencyId("null");
-        this.setPricing(new FlatPricing());
+        this.setPricing(FlatPricing.of(-1D, -1D));
         this.setContent(EmptyContent.VALUE);
-        this.setPrice(TradeType.BUY, -1D);
-        this.setPrice(TradeType.SELL, -1D);
+        this.updatePrice(false);
     }
 
     @NotNull

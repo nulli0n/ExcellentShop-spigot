@@ -46,7 +46,7 @@ import su.nightexpress.nexshop.shop.chest.menu.*;
 import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
 import su.nightexpress.nexshop.shop.impl.AbstractShop;
 import su.nightexpress.nightcore.bridge.currency.Currency;
-import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.integration.currency.CurrencyId;
@@ -206,7 +206,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
     }
 
     @Override
-    protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
+    protected void loadCommands(@NotNull HubNodeBuilder builder) {
         ChestShopCommands.build(this.plugin, this, builder);
     }
 
@@ -514,9 +514,9 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         this.playerBrowserMenu.open(player);
     }
 
-    public void browseShopOwners(@NotNull Player player, @NotNull String search) {
+    /*public void browseShopOwners(@NotNull Player player, @NotNull String search) {
         this.playerBrowserMenu.open(player, search);
-    }
+    }*/
 
     public void browseAllShops(@NotNull Player player) {
         this.shopBrowserMenu.open(player);
@@ -975,12 +975,15 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             return false;
         }
 
-        product.storeStock(TradeType.BUY, units, null);
-        product.take(player, units);
+        int maxUnits = product.countUnitSpace();
+        int finalUnits = Math.min(maxUnits, units);
+
+        product.storeStock(TradeType.BUY, finalUnits, null);
+        product.take(player, finalUnits);
         shop.markDirty();
 
         this.getPrefixed(ChestLang.STORAGE_DEPOSIT_SUCCESS).send(player, replacer -> replacer
-            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(units))
+            .replace(Placeholders.GENERIC_AMOUNT, NumberUtil.format(finalUnits))
             .replace(Placeholders.GENERIC_ITEM, ItemUtil.getNameSerialized(product.getPreviewOrPlaceholder()))
         );
         return true;

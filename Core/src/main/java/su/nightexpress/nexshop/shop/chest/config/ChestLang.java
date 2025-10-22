@@ -224,5 +224,5 @@ public class ChestLang implements LangContainer {
     );
 
     public static final MessageLocale ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT = LangEntry.builder("Error.Command.Argument.InvalidShopBlock").chatMessage(
-        GRAY.wrap(SOFT_RED.wrap(GENERIC_VALUE) + " is not a valid shop block!"));
+        GRAY.wrap(SOFT_RED.wrap(GENERIC_INPUT) + " is not a valid shop block!"));
 }

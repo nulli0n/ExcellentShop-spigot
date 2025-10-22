@@ -1,4 +1,4 @@
-package su.nightexpress.nexshop.shop.virtual.command.impl;
+package su.nightexpress.nexshop.shop.virtual.command;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -7,128 +7,133 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
-import su.nightexpress.nexshop.shop.virtual.command.CommandArguments;
-import su.nightexpress.nexshop.shop.virtual.command.CommandFlags;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualConfig;
-import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualPerms;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualShop;
-import su.nightexpress.nightcore.command.experimental.CommandContext;
-import su.nightexpress.nightcore.command.experimental.RootCommand;
-import su.nightexpress.nightcore.command.experimental.ServerCommand;
-import su.nightexpress.nightcore.command.experimental.argument.ArgumentTypes;
-import su.nightexpress.nightcore.command.experimental.argument.ParsedArguments;
-import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
+import su.nightexpress.nightcore.commands.Arguments;
+import su.nightexpress.nightcore.commands.Commands;
+import su.nightexpress.nightcore.commands.builder.ArgumentNodeBuilder;
+import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.commands.command.NightCommand;
-import su.nightexpress.nightcore.util.CommandUtil;
+import su.nightexpress.nightcore.commands.context.CommandContext;
+import su.nightexpress.nightcore.commands.context.ParsedArguments;
+import su.nightexpress.nightcore.commands.exceptions.CommandSyntaxException;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class VirtualCommands {
 
-    private static Set<ServerCommand> commands;
+    public static final String DEF_SHOP = "shop";
+
+    public static final String ARG_PLAYER = "player";
+    public static final String ARG_SHOP   = "shop";
+
+    public static final String FLAG_FORCE  = "f";
+    public static final String FLAG_SILENT = "s";
+
+    private static      Set<NightCommand> commands;
 
     private static final Map<String, NightCommand> SHOP_ALIASES = new HashMap<>();
 
-    public static void load(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull ChainedNodeBuilder builder) {
+    public static void load(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module, @NotNull HubNodeBuilder builder) {
         commands = new HashSet<>();
 
-        builder.addDirect("editor", child -> child
+        builder.branch(Commands.literal("editor")
             .permission(VirtualPerms.COMMAND_EDITOR)
             .description(VirtualLang.COMMAND_EDITOR_DESC.text())
             .playerOnly()
             .executes((context, arguments) -> openEditor(module, context))
         );
 
-        builder.addDirect("open", child -> child
+        builder.branch(Commands.literal("open")
             .permission(VirtualPerms.COMMAND_OPEN)
             .description(VirtualLang.COMMAND_OPEN_DESC.text())
-            .withArgument(CommandArguments.forShop(module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.text()).required())
-            .withArgument(ArgumentTypes.player(CommandArguments.PLAYER).permission(VirtualPerms.COMMAND_OPEN_OTHERS))
-            .withFlag(CommandFlags.force().permission(VirtualPerms.COMMAND_OPEN_OTHERS))
-            .withFlag(CommandFlags.silent().permission(VirtualPerms.COMMAND_OPEN_OTHERS))
+            .withArguments(
+                shopArg(module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.text()),
+                Arguments.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_OPEN_OTHERS).optional()
+            )
+            .withFlags(FLAG_FORCE, FLAG_SILENT)
             .executes((context, arguments) -> openShop(module, context, arguments))
         );
 
-        builder.addDirect("rotate", child -> child
+        builder.branch(Commands.literal("rotate")
             .permission(VirtualPerms.COMMAND_ROTATE)
             .description(VirtualLang.COMMAND_ROTATE_DESC.text())
-            .withArgument(CommandArguments.forShop(module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.text()).required())
+            .withArguments(shopArg(module).localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.text()))
             .executes(VirtualCommands::rotateShop)
         );
 
         if (VirtualConfig.isCentralMenuEnabled()) {
-            builder.addDirect("menu", child -> child
+            builder.branch(Commands.literal("menu")
                 .permission(VirtualPerms.COMMAND_MENU)
                 .description(VirtualLang.COMMAND_MENU_DESC.text())
-                .withArgument(ArgumentTypes.player(CommandArguments.PLAYER).permission(VirtualPerms.COMMAND_MENU_OTHERS))
-                .withFlag(CommandFlags.force().permission(VirtualPerms.COMMAND_MENU_OTHERS))
+                .withArguments(Arguments.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_MENU_OTHERS).optional())
+                .withFlags(FLAG_FORCE)
                 .executes((context, arguments) -> openCentralGUI(module, context, arguments))
             );
         }
 
         if (VirtualConfig.SHOP_SHORTCUTS_ENABLED.get()) {
-            register(plugin, RootCommand.direct(plugin, VirtualConfig.SHOP_SHORTCUTS_COMMANDS.get(), child -> child
+            register(NightCommand.literal(plugin, VirtualConfig.SHOP_SHORTCUTS_COMMANDS.get(), child -> child
                 .playerOnly()
                 .permission(VirtualPerms.COMMAND_SHOP)
                 .description(VirtualLang.COMMAND_SHOP_DESC.text())
-                .withArgument(CommandArguments.forShop(module).required(!VirtualConfig.isCentralMenuEnabled()))
+                .withArguments(shopArg(module).optional(VirtualConfig.isCentralMenuEnabled()))
                 .executes((context, arguments) -> openDirectShop(module, context, arguments))
             ));
         }
 
         if (VirtualConfig.SELL_MENU_ENABLED.get()) {
-            register(plugin, RootCommand.direct(plugin, VirtualConfig.SELL_MENU_COMMANDS.get(), child -> child
+            register(NightCommand.literal(plugin, VirtualConfig.SELL_MENU_COMMANDS.get(), child -> child
                 .permission(VirtualPerms.COMMAND_SELL_MENU)
                 .description(VirtualLang.COMMAND_SELL_MENU_DESC.text())
-                .withArgument(ArgumentTypes.player(CommandArguments.PLAYER).permission(VirtualPerms.COMMAND_SELL_MENU_OTHERS))
+                .withArguments(Arguments.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_SELL_MENU_OTHERS).optional())
                 .executes((context, arguments) -> openSellMenu(module, context, arguments))
             ));
         }
 
         if (VirtualConfig.SELL_ALL_ENABLED.get()) {
-            register(plugin, RootCommand.direct(plugin, VirtualConfig.SELL_ALL_COMMANDS.get(), child -> child
+            register(NightCommand.literal(plugin, VirtualConfig.SELL_ALL_COMMANDS.get(), child -> child
                 .permission(VirtualPerms.COMMAND_SELL_ALL)
                 .description(VirtualLang.COMMAND_SELL_ALL_DESC.text())
-                .withArgument(ArgumentTypes.player(CommandArguments.PLAYER).permission(VirtualPerms.COMMAND_SELL_ALL_OTHERS))
-                .withFlag(CommandFlags.silent().permission(VirtualPerms.COMMAND_SELL_ALL_OTHERS))
+                .withArguments(Arguments.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_SELL_ALL_OTHERS).optional())
+                .withFlags(FLAG_SILENT)
                 .executes((context, arguments) -> sellAll(module, context, arguments))
             ));
         }
 
         if (VirtualConfig.SELL_HAND_ENABLED.get()) {
-            register(plugin, RootCommand.direct(plugin, VirtualConfig.SELL_HAND_COMMANDS.get(), child -> child
+            register(NightCommand.literal(plugin, VirtualConfig.SELL_HAND_COMMANDS.get(), child -> child
                 .permission(VirtualPerms.COMMAND_SELL_HAND)
                 .description(VirtualLang.COMMAND_SELL_HAND_DESC.text())
-                .withArgument(ArgumentTypes.player(CommandArguments.PLAYER).permission(VirtualPerms.COMMAND_SELL_HAND_OTHERS))
+                .withArguments(Arguments.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_SELL_HAND_OTHERS).optional())
                 .executes((context, arguments) -> sellHand(module, context, arguments))
             ));
         }
 
         if (VirtualConfig.SELL_HAND_ALL_ENABLED.get()) {
-            register(plugin, RootCommand.direct(plugin, VirtualConfig.SELL_HAND_ALL_COMMANDS.get(), child -> child
+            register(NightCommand.literal(plugin, VirtualConfig.SELL_HAND_ALL_COMMANDS.get(), child -> child
                 .permission(VirtualPerms.COMMAND_SELL_HAND_ALL)
                 .description(VirtualLang.COMMAND_SELL_HAND_ALL_DESC.text())
-                .withArgument(ArgumentTypes.player(CommandArguments.PLAYER).permission(VirtualPerms.COMMAND_SELL_HAND_ALL_OTHERS))
+                .withArguments(Arguments.player(ARG_PLAYER).permission(VirtualPerms.COMMAND_SELL_HAND_ALL_OTHERS).optional())
                 .executes((context, arguments) -> sellHandAll(module, context, arguments))
             ));
         }
     }
 
-    public static void unload(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
-        unregister(plugin);
+    public static void unload() {
+        unregister();
     }
 
-    private static void register(@NotNull ShopPlugin plugin, @NotNull ServerCommand command) {
-        plugin.getCommandManager().registerCommand(command);
-        commands.add(command);
+    private static void register(@NotNull NightCommand command) {
+        if (command.register()) {
+            commands.add(command);
+        }
     }
 
-    private static void unregister(@NotNull ShopPlugin plugin) {
-        commands.forEach(command -> plugin.getCommandManager().unregisterCommand(command));
+    private static void unregister() {
+        commands.forEach(NightCommand::unregister);
         commands.clear();
     }
 
@@ -154,11 +159,22 @@ public class VirtualCommands {
         command.unregister();
     }
 
+    @NotNull
+    private static ArgumentNodeBuilder<VirtualShop> shopArg(@NotNull VirtualShopModule module) {
+        return Commands.argument(ARG_SHOP, (context, string) -> Optional.ofNullable(module.getShopById(string))
+                .orElseThrow(() -> CommandSyntaxException.custom(VirtualLang.ERROR_COMMAND_INVALID_SHOP_ARGUMENT)))
+            .localized(VirtualLang.COMMAND_ARGUMENT_NAME_SHOP.text())
+            .suggestions((reader, context) -> {
+                Collection<VirtualShop> shops = !context.isPlayer() ? module.getShops() : module.getShops(context.getPlayerOrThrow());
+                return shops.stream().map(VirtualShop::getId).toList();
+            });
+    }
+
     private static boolean openDirectShop(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
 
-        if (arguments.hasArgument(CommandArguments.SHOP)) {
-            VirtualShop shop = arguments.getArgument(CommandArguments.SHOP, VirtualShop.class);
+        if (arguments.contains(ARG_SHOP)) {
+            VirtualShop shop = arguments.get(ARG_SHOP, VirtualShop.class);
             shop.open(player);
         }
         else {
@@ -174,8 +190,12 @@ public class VirtualCommands {
     }
 
     private static boolean openSellMenu(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
-        if (player == null) return false;
+        if (!arguments.contains(ARG_PLAYER) && !context.isPlayer()) {
+            context.printUsage();
+            return false;
+        }
+
+        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
 
         module.openSellMenu(player, false);
 
@@ -186,11 +206,16 @@ public class VirtualCommands {
     }
 
     private static boolean sellAll(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
-        if (player == null) return false;
+        if (!arguments.contains(ARG_PLAYER) && !context.isPlayer()) {
+            context.printUsage();
+            return false;
+        }
+
+        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+
         if (!module.isAvailable(player, true)) return false;
 
-        module.sellAll(player, arguments.hasFlag(CommandFlags.SILENT));
+        module.sellAll(player, context.hasFlag(FLAG_SILENT));
 
         if (player != context.getSender()) {
             VirtualLang.COMMAND_SELL_ALL_DONE_OTHERS.message().send(context.getSender(), replacer -> replacer.replace(Placeholders.forPlayer(player)));
@@ -199,8 +224,13 @@ public class VirtualCommands {
     }
 
     private static boolean sellHand(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
-        if (player == null) return false;
+        if (!arguments.contains(ARG_PLAYER) && !context.isPlayer()) {
+            context.printUsage();
+            return false;
+        }
+
+        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+
         if (!module.isAvailable(player, true)) return false;
 
         module.sellSlots(player, player.getInventory().getHeldItemSlot());
@@ -212,8 +242,13 @@ public class VirtualCommands {
     }
 
     private static boolean sellHandAll(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
-        if (player == null) return false;
+        if (!arguments.contains(ARG_PLAYER) && !context.isPlayer()) {
+            context.printUsage();
+            return false;
+        }
+
+        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+
         if (!module.isAvailable(player, true)) return false;
 
         PlayerInventory inventory = player.getInventory();
@@ -240,44 +275,50 @@ public class VirtualCommands {
     }
 
     private static boolean openCentralGUI(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
-        if (player == null) return false;
+        if (!arguments.contains(ARG_PLAYER) && !context.isPlayer()) {
+            context.printUsage();
+            return false;
+        }
 
+        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
         if (player != context.getSender()) {
             VirtualLang.COMMAND_MENU_DONE_OTHERS.message().send(context.getSender(), replacer -> replacer.replace(Placeholders.forPlayer(player)));
         }
 
-        boolean force = arguments.hasFlag(CommandFlags.FORCE);
+        boolean force = context.hasFlag(FLAG_FORCE);
 
         return module.openMainMenu(player, force);
     }
 
     private static boolean openEditor(@NotNull VirtualShopModule module, @NotNull CommandContext context) {
-        Player player = context.getExecutor();
-        if (player == null) return false;
-
+        Player player = context.getPlayerOrThrow();
         module.openShopsEditor(player);
         return true;
     }
 
     private static boolean openShop(@NotNull VirtualShopModule module, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        VirtualShop shop = arguments.getArgument(CommandArguments.SHOP, VirtualShop.class);
-        Player player = CommandUtil.getPlayerOrSender(context, arguments, CommandArguments.PLAYER);
-        if (player == null) return false;
+        if (!arguments.contains(ARG_PLAYER) && !context.isPlayer()) {
+            context.printUsage();
+            return false;
+        }
 
-        if (player != context.getSender() && !arguments.hasFlag(CommandFlags.SILENT)) {
+        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        VirtualShop shop = arguments.get(ARG_SHOP, VirtualShop.class);
+
+        boolean force = context.hasFlag(FLAG_FORCE);
+
+        if (player != context.getSender() && !context.hasFlag(FLAG_SILENT)) {
             VirtualLang.COMMAND_OPEN_DONE_OTHERS.message().send(context.getSender(), replacer -> replacer
                 .replace(Placeholders.forPlayer(player))
                 .replace(shop.replacePlaceholders())
             );
         }
 
-        boolean force = arguments.hasFlag(CommandFlags.FORCE);
         return module.openShop(player, shop, force);
     }
 
     private static boolean rotateShop(@NotNull CommandContext context, @NotNull ParsedArguments arguments) {
-        VirtualShop shop = arguments.getArgument(CommandArguments.SHOP, VirtualShop.class);
+        VirtualShop shop = arguments.get(ARG_SHOP, VirtualShop.class);
 
         shop.performRotation();
         VirtualLang.COMMAND_ROTATE_DONE.message().send(context.getSender(), replacer -> replacer.replace(shop.replacePlaceholders()));

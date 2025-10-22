@@ -4,6 +4,7 @@ import org.bukkit.GameMode;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
+import su.nightexpress.nexshop.shop.virtual.command.VirtualCommands;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.RankMap;
@@ -71,7 +72,7 @@ public class VirtualConfig {
     );
 
     public static final ConfigValue<String[]> SHOP_SHORTCUTS_COMMANDS = ConfigValue.create("General.Shop_Shortcut.Commands",
-        new String[]{"shop"}, // TODO "merge" with central menu feature
+        new String[]{VirtualCommands.DEF_SHOP}, // TODO "merge" with central menu feature
         "Command aliases for quick main menu and shop access.", "Split with commas."
     );
 

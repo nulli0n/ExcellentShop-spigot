@@ -2,6 +2,7 @@ package su.nightexpress.nexshop.shop.virtual.lang;
 
 import org.bukkit.Sound;
 import org.jetbrains.annotations.NotNull;
+import su.nightexpress.nexshop.shop.virtual.command.VirtualCommands;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
 import su.nightexpress.nightcore.locale.entry.ButtonLocale;
@@ -59,12 +60,11 @@ public class VirtualLang implements LangContainer {
         GRAY.wrap("Force rotated " + SOFT_YELLOW.wrap(SHOP_NAME) + " shop"));
 
 
-    // TODO Default command to const
     public static final MessageLocale SHOP_ROTATION_NOTIFY = LangEntry.builder("VirtualShop.Shop.Rotation.Update").message(
         MessageData.CHAT_NO_PREFIX,
         " ",
         GRAY.wrap("New items just appeared in the " + SOFT_YELLOW.wrap(SHOP_NAME) + " shop!"),
-        GRAY.wrap("Click " + RUN_COMMAND.with("/shop " + SHOP_ID).and(SHOW_TEXT.with(GRAY.wrap("Click to open shop!"))).wrap(SOFT_YELLOW.wrap(BOLD.wrap("HERE"))) + " to open the shop!"),
+        GRAY.wrap("Click " + RUN_COMMAND.with("/" + VirtualCommands.DEF_SHOP + " " + SHOP_ID).and(SHOW_TEXT.with(GRAY.wrap("Click to open shop!"))).wrap(SOFT_YELLOW.wrap(BOLD.wrap("HERE"))) + " to open the shop!"),
         " "
     );
 
@@ -138,7 +138,7 @@ public class VirtualLang implements LangContainer {
     public static final TextLocale PRICE_TRENDING_DOWN = LangEntry.builder("VirtualShop.Price.AverageDynamics.Down").text(RED.wrap("↓ " + GENERIC_VALUE + "%"));
 
     public static final MessageLocale ERROR_COMMAND_INVALID_SHOP_ARGUMENT = builder("Shop.Error.Invalid").chatMessage(
-        GRAY.wrap(SOFT_RED.wrap(GENERIC_VALUE) + " is not a valid shop!")
+        GRAY.wrap(SOFT_RED.wrap(GENERIC_INPUT) + " is not a valid shop!")
     );
 
     public static final MessageLocale ERROR_EDITOR_ROTATION_EXISTS = builder("Error.Editor.RotationExists").chatMessage(
@@ -171,13 +171,10 @@ public class VirtualLang implements LangContainer {
     public static final TextLocale EDITOR_PRODUCT_NO_PERM_REQUIREMENTS = LangEntry.builder("VirtualShop.Editor.Product.NoPermissionRequirements").text("No permission(s) required!");
     public static final TextLocale EDITOR_PRODUCT_NO_FORBIDDEN_PERMS   = LangEntry.builder("VirtualShop.Editor.Product.NoForbiddenPerms").text("No permission(s) forbidden!");
 
-
     @Deprecated public static final TextLocale EDITOR_ENTER_SHOP_ID     = LangEntry.builder("VirtualShop.Editor.Enter.Id").text(GRAY.wrap("Enter " + GREEN.wrap("[Shop Identifier]")));
     @Deprecated public static final TextLocale EDITOR_ENTER_DESCRIPTION = LangEntry.builder("VirtualShop.Editor.Enter.Description").text(GRAY.wrap("Enter " + GREEN.wrap("[Description]")));
-    @Deprecated public static final TextLocale EDITOR_ENTER_TITLE       = LangEntry.builder("VirtualShop.Editor.Enter.Title").text(GRAY.wrap("Enter " + GREEN.wrap("[Title]")));
     @Deprecated public static final TextLocale EDITOR_ENTER_COMMAND     = LangEntry.builder("VirtualShop.Editor.Enter.Command").text(GRAY.wrap("Enter " + GREEN.wrap("[Command]")));
     @Deprecated public static final TextLocale EDITOR_ENTER_ALIAS       = LangEntry.builder("VirtualShop.Editor.Enter.Alias").text(GRAY.wrap("Enter " + GREEN.wrap("[Command Alias]")));
-    @Deprecated public static final TextLocale EDITOR_ENTER_SLOTS       = LangEntry.builder("VirtualShop.Editor.Enter.Slots").text(GRAY.wrap("Enter " + GREEN.wrap("[Slots] -> [1,2,5,etc]")));
     @Deprecated  public static final TextLocale EDITOR_ENTER_RANK        = LangEntry.builder("VirtualShop.Editor.Enter.Rank").text(GRAY.wrap("Enter " + GREEN.wrap("[Rank Name]")));
     @Deprecated  public static final TextLocale EDITOR_ENTER_PERMISSION  = LangEntry.builder("VirtualShop.Editor.Enter.Permission").text(GRAY.wrap("Enter " + GREEN.wrap("[Permission Node]")));
     @Deprecated public static final TextLocale EDITOR_ENTER_ROTATION_ID = LangEntry.builder("VirtualShop.Editor.Enter.RotationId").text(GRAY.wrap("Enter " + GREEN.wrap("[Rotation Name]")));

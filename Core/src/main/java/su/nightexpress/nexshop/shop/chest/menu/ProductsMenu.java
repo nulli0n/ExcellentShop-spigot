@@ -165,11 +165,18 @@ public class ProductsMenu extends LinkedMenu<ShopPlugin, ProductsMenu.Data> impl
         ItemStack item = result.getItemStack();
         if (item == null || item.getType().isAir()) return;
 
-        shop.createProduct(player, item, event.isShiftClick());
+        ChestProduct product = shop.createProduct(player, item, event.isShiftClick());
+        if (product == null) return;
+
         shop.markDirty();
+        shop.updateStockCache();
         this.module.getDisplayManager().remake(shop);
 
-        this.runNextTick(() -> this.flush(viewer));
+        List<ChestProduct> products = new ArrayList<>(shop.getProducts());
+        int index = products.indexOf(product);
+        if (index < 0) return;
+
+        this.runNextTick(() -> this.open(player, shop, product, index));
     }
 
     @Override

@@ -10,9 +10,8 @@ import su.nightexpress.nexshop.exception.ModuleLoadException;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.bridge.item.ItemAdapter;
-import su.nightexpress.nightcore.command.experimental.RootCommand;
-import su.nightexpress.nightcore.command.experimental.ServerCommand;
-import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
+import su.nightexpress.nightcore.commands.command.NightCommand;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
@@ -33,7 +32,7 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
     private final String         name;
     private final ModuleSettings settings;
 
-    private ServerCommand moduleCommand;
+    private NightCommand moduleCommand;
 
     public AbstractModule(@NotNull ShopPlugin plugin, @NotNull String id, @NotNull ModuleSettings config) {
         super(plugin);
@@ -56,11 +55,11 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
 
         this.loadModule(config);
 
-        this.moduleCommand = RootCommand.chained(this.plugin, this.settings.getCommandAliases(), builder -> {
+        this.moduleCommand = NightCommand.hub(this.plugin, this.settings.getCommandAliases(), builder -> {
             builder.localized(this.getName());
             this.loadCommands(builder);
         });
-        this.plugin.getCommandManager().registerCommand(this.moduleCommand);
+        this.moduleCommand.register();
 
         config.saveChanges();
     }
@@ -69,12 +68,15 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
     protected final void onShutdown() {
         this.disableModule();
 
-        this.plugin.getCommandManager().unregisterCommand(this.moduleCommand);
+        if (this.moduleCommand != null) {
+            this.moduleCommand.unregister();
+            this.moduleCommand = null;
+        }
     }
 
     protected abstract void loadModule(@NotNull FileConfig config);
 
-    protected abstract void loadCommands(@NotNull ChainedNodeBuilder builder);
+    protected abstract void loadCommands(@NotNull HubNodeBuilder builder);
 
     protected abstract void disableModule();
 

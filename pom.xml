@@ -7,7 +7,7 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.20.2</version>
+    <version>4.21.0</version>
     <modules>
         <module>Core</module>
     </modules>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>su.nightexpress.nightcore</groupId>
             <artifactId>main</artifactId>
-            <version>2.9.0</version>
+            <version>2.9.3</version>
         </dependency>
 
         <!-- I have no idea what's happening, but gson from paper can not resolved -->

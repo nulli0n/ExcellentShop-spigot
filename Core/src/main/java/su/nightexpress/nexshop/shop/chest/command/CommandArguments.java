@@ -4,8 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.chest.impl.ShopBlock;
-import su.nightexpress.nightcore.command.experimental.argument.CommandArgument;
-import su.nightexpress.nightcore.command.experimental.builder.ArgumentBuilder;
+import su.nightexpress.nightcore.commands.Commands;
+import su.nightexpress.nightcore.commands.builder.ArgumentNodeBuilder;
+import su.nightexpress.nightcore.commands.exceptions.CommandSyntaxException;
 import su.nightexpress.nightcore.util.BukkitThing;
 
 import java.util.Optional;
@@ -20,10 +21,11 @@ public class CommandArguments {
     public static final String ITEM_NAME = "itemname";
 
     @NotNull
-    public static ArgumentBuilder<ShopBlock> forShopBlock(@NotNull ChestShopModule module) {
-        return CommandArgument.builder(SHOP_BLOCK, (string, context) -> Optional.ofNullable(BukkitThing.getMaterial(string)).map(module::getShopBlock).orElse(null))
-            // TODO .customFailure(ChestLang.ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT)
+    public static ArgumentNodeBuilder<ShopBlock> forShopBlock(@NotNull ChestShopModule module) {
+        return Commands.argument(SHOP_BLOCK, (context, string) -> Optional.ofNullable(BukkitThing.getMaterial(string))
+                .map(module::getShopBlock).
+                orElseThrow(() -> CommandSyntaxException.custom(ChestLang.ERROR_COMMAND_INVALID_SHOP_BLOCK_ARGUMENT)))
             .localized(ChestLang.COMMAND_ARGUMENT_NAME_SHOP_BLOCK.text())
-            .withSamples(tabContext -> module.getShopBlockMap().keySet().stream().map(BukkitThing::getValue).toList());
+            .suggestions((reader, context) -> module.getShopBlockMap().keySet().stream().map(BukkitThing::getValue).toList());
     }
 }
