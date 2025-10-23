@@ -137,7 +137,7 @@ public class VirtualLang implements LangContainer {
     public static final TextLocale PRICE_TRENDING_UP   = LangEntry.builder("VirtualShop.Price.AverageDynamics.Up").text(GREEN.wrap("↑ " + GENERIC_VALUE + "%"));
     public static final TextLocale PRICE_TRENDING_DOWN = LangEntry.builder("VirtualShop.Price.AverageDynamics.Down").text(RED.wrap("↓ " + GENERIC_VALUE + "%"));
 
-    public static final MessageLocale ERROR_COMMAND_INVALID_SHOP_ARGUMENT = builder("Shop.Error.Invalid").chatMessage(
+    public static final MessageLocale ERROR_COMMAND_INVALID_SHOP_ARGUMENT = builder("Command.Syntax.InvalidShop").chatMessage(
         GRAY.wrap(SOFT_RED.wrap(GENERIC_INPUT) + " is not a valid shop!")
     );
 
