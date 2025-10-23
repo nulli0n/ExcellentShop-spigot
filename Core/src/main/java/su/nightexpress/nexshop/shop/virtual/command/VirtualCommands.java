@@ -195,7 +195,7 @@ public class VirtualCommands {
             return false;
         }
 
-        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        Player player = arguments.contains(ARG_PLAYER) ? arguments.getPlayer(ARG_PLAYER) : context.getPlayerOrThrow();
 
         module.openSellMenu(player, false);
 
@@ -211,7 +211,7 @@ public class VirtualCommands {
             return false;
         }
 
-        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        Player player = arguments.contains(ARG_PLAYER) ? arguments.getPlayer(ARG_PLAYER) : context.getPlayerOrThrow();
 
         if (!module.isAvailable(player, true)) return false;
 
@@ -229,7 +229,7 @@ public class VirtualCommands {
             return false;
         }
 
-        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        Player player = arguments.contains(ARG_PLAYER) ? arguments.getPlayer(ARG_PLAYER) : context.getPlayerOrThrow();
 
         if (!module.isAvailable(player, true)) return false;
 
@@ -247,7 +247,7 @@ public class VirtualCommands {
             return false;
         }
 
-        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        Player player = arguments.contains(ARG_PLAYER) ? arguments.getPlayer(ARG_PLAYER) : context.getPlayerOrThrow();
 
         if (!module.isAvailable(player, true)) return false;
 
@@ -280,7 +280,7 @@ public class VirtualCommands {
             return false;
         }
 
-        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        Player player = arguments.contains(ARG_PLAYER) ? arguments.getPlayer(ARG_PLAYER) : context.getPlayerOrThrow();
         if (player != context.getSender()) {
             VirtualLang.COMMAND_MENU_DONE_OTHERS.message().send(context.getSender(), replacer -> replacer.replace(Placeholders.forPlayer(player)));
         }
@@ -302,7 +302,7 @@ public class VirtualCommands {
             return false;
         }
 
-        Player player = arguments.getOr(ARG_PLAYER, Player.class, context.getPlayerOrThrow());
+        Player player = arguments.contains(ARG_PLAYER) ? arguments.getPlayer(ARG_PLAYER) : context.getPlayerOrThrow();
         VirtualShop shop = arguments.get(ARG_SHOP, VirtualShop.class);
 
         boolean force = context.hasFlag(FLAG_FORCE);
