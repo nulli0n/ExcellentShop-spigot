@@ -976,10 +976,14 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         }
 
         int maxUnits = product.countUnitSpace();
-        int finalUnits = Math.min(maxUnits, units);
+        int finalUnits = maxUnits < 0 ? playerUnits : Math.min(maxUnits, playerUnits);
 
         product.storeStock(TradeType.BUY, finalUnits, null);
-        product.take(player, finalUnits);
+
+        if (finalUnits > 0) {
+            product.take(player, finalUnits);
+        }
+
         shop.markDirty();
 
         this.getPrefixed(ChestLang.STORAGE_DEPOSIT_SUCCESS).send(player, replacer -> replacer
