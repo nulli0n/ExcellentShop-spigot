@@ -29,10 +29,7 @@ public abstract class DisplayHandler<T> {
         int[] argb = ChestConfig.DISPLAY_HOLOGRAM_BACKGROUND_COLOR.get();
         this.backgroundColor = toARGB(argb[0], argb[1], argb[2], argb[3]);
 
-        this.textBitmask = (byte) (0
-            | (ChestConfig.DISPLAY_HOLOGRAM_SHADOW.get() ? 0x01 : 0)
-            | (ChestConfig.DISPLAY_HOLOGRAM_SEE_THROUGH.get() ? 0x02 : 0)
-        );
+        this.textBitmask = (byte) ((ChestConfig.DISPLAY_HOLOGRAM_SHADOW.get() ? 0x01 : 0) | (ChestConfig.DISPLAY_HOLOGRAM_SEE_THROUGH.get() ? 0x02 : 0));
 
         if (ChestUtils.canUseDisplayEntities()) {
             this.showcaseType = EntityType.ITEM_DISPLAY;

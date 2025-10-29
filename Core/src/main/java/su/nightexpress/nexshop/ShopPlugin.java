@@ -19,7 +19,7 @@ import su.nightexpress.nexshop.module.ModuleSettings;
 import su.nightexpress.nexshop.module.ModuleSupplier;
 import su.nightexpress.nexshop.shop.ShopManager;
 import su.nightexpress.nexshop.shop.chest.ChestShopModule;
-import su.nightexpress.nexshop.shop.chest.compatibility.WorldGuardFlags;
+import su.nightexpress.excellentshop.integration.claim.WorldGuardFlags;
 import su.nightexpress.nexshop.shop.chest.config.ChestLang;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualIconsLang;

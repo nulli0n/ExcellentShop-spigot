@@ -21,6 +21,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.excellentshop.api.claim.ClaimHook;
+import su.nightexpress.excellentshop.api.playershop.PlayerShop;
+import su.nightexpress.excellentshop.api.playershop.PlayerShopManager;
+import su.nightexpress.excellentshop.integration.claim.*;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.module.ShopModule;
@@ -34,13 +38,12 @@ import su.nightexpress.nexshop.module.AbstractModule;
 import su.nightexpress.nexshop.module.ModuleSettings;
 import su.nightexpress.nexshop.product.price.impl.FlatPricing;
 import su.nightexpress.nexshop.shop.chest.command.ChestShopCommands;
-import su.nightexpress.nexshop.shop.chest.compatibility.*;
 import su.nightexpress.nexshop.shop.chest.config.*;
 import su.nightexpress.nexshop.shop.chest.display.DisplayManager;
 import su.nightexpress.nexshop.shop.chest.impl.*;
-import su.nightexpress.nexshop.shop.chest.listener.RegionMarketListener;
+import su.nightexpress.excellentshop.integration.claim.RegionMarketListener;
 import su.nightexpress.nexshop.shop.chest.listener.ShopListener;
-import su.nightexpress.nexshop.shop.chest.listener.UpgradeHopperListener;
+import su.nightexpress.excellentshop.integration.shop.UpgradeHopperListener;
 import su.nightexpress.nexshop.shop.chest.lookup.ShopLookup;
 import su.nightexpress.nexshop.shop.chest.menu.*;
 import su.nightexpress.nexshop.shop.chest.rent.RentSettings;
@@ -55,6 +58,7 @@ import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
+import su.nightexpress.nightcore.util.geodata.Cuboid;
 import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
 import su.nightexpress.nightcore.util.text.NightMessage;
 import su.nightexpress.nightcore.util.time.TimeFormats;
@@ -66,15 +70,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class ChestShopModule extends AbstractModule implements ShopModule {
+public class ChestShopModule extends AbstractModule implements ShopModule, PlayerShopManager {
 
     public static final String DIR_SHOPS   = "/shops/";
     public static final String BLOCKS_FILE = "blocks.yml";
 
     private final Map<Material, ShopBlock> blockMap;
-    private final Map<UUID, ChestBank>     bankMap;
-    private final Set<ClaimHook>           claimHooks;
-    private final ShopLookup               lookup;
+    private final Map<UUID, ChestBank> bankMap;
+    private final Set<ClaimHook>       claimHooks;
+    private final ShopLookup           lookup;
 
     private SettingsMenu      settingsMenu;
     private ProductsMenu      productsMenu;
@@ -220,6 +224,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
             this.loadClaimHook(HookPlugin.HUSK_CLAIMS, HuskClaimsHook::new);
             this.loadClaimHook(HookPlugin.SIMPLE_CLAIM_SYSTEM, SimpleClaimHook::new);
             this.loadClaimHook(HookPlugin.EXCELLENT_CLAIMS, ExcellentClaimsHook::new);
+            this.loadClaimHook(HookPlugin.PLOT_SQUARED, () -> new PlotSquaredClaimHook(this));
         }
 
         if (Plugins.isInstalled(HookPlugin.ADVANCED_REGION_MARKET)) {
@@ -286,7 +291,9 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         this.lookup.remove(shop);
     }
 
-    public void removeShop(@NotNull ChestShop shop) {
+    @Override
+    public void removeShop(@NotNull PlayerShop playerShop) {
+        ChestShop shop = (ChestShop) playerShop;
         this.unloadShop(shop);
         shop.getFile().delete();
     }
@@ -1024,6 +1031,12 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return this.lookup.getOwnedBy(player.getUniqueId()).size();
     }
 
+    @Override
+    @NotNull
+    public Set<? extends PlayerShop> getShopsInArea(@NotNull World world, @NotNull Cuboid cuboid) {
+        return this.lookup.worldLookup(world).map(worldLookup -> worldLookup.getAllIn(cuboid)).orElse(Collections.emptySet());
+    }
+
     @Nullable
     public ChestShop getShop(@NotNull Block block) {
         return this.lookup.getAt(block);
@@ -1034,6 +1047,7 @@ public class ChestShopModule extends AbstractModule implements ShopModule {
         return this.lookup.getAt(location);
     }
 
+    @Override
     public boolean isShop(@NotNull Block block) {
         return this.isShop(block.getLocation());
     }

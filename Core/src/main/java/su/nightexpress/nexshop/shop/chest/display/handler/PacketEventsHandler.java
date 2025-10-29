@@ -103,7 +103,7 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
     protected List<PacketWrapper<?>> getHologramPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull String textLine) {
         List<PacketWrapper<?>> list = new ArrayList<>();
 
-        PaperBridge bridge = (PaperBridge) Software.instance();
+        PaperBridge bridge = (PaperBridge) Software.get();
         NightComponent component = NightMessage.parse(textLine);
         Component textComponent = bridge.getTextComponentAdapter().adaptComponent(component);
 

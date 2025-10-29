@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>su.nightexpress.excellentshop</groupId>
+        <artifactId>ExcellentShop-spigot</artifactId>
+        <version>4.22.0</version>
+    </parent>
+
+    <artifactId>integration-advanced-region-market</artifactId>
+
+    <properties>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>alex9849</id>
+            <url>https://nexus.alex9849.net/repository/maven-releases/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.alex9849.advancedregionmarket</groupId>
+            <artifactId>advancedregionmarket</artifactId>
+            <version>3.5.3</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>

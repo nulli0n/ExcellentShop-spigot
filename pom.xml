@@ -7,9 +7,21 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>4.21.2</version>
+    <version>4.22.0</version>
     <modules>
         <module>Core</module>
+        <module>api</module>
+        <module>integration-excellent-claims</module>
+        <module>integration-grief-defender</module>
+        <module>integration-grief-prevention</module>
+        <module>integration-husk-claims</module>
+        <module>integration-kingdoms</module>
+        <module>integration-lands</module>
+        <module>integration-simple-claim-system</module>
+        <module>integration-world-guard</module>
+        <module>integration-advanced-region-market</module>
+        <module>integration-upgradeable-hoppers</module>
+        <module>integration-plot-squared</module>
     </modules>
 
     <properties>
@@ -35,16 +47,6 @@
             <id>nightexpress-releases</id>
             <url>https://repo.nightexpressdev.com/releases</url>
         </repository>
-
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-
-        <repository>
-            <id>maven</id>
-            <url>https://repo1.maven.org/maven2/</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -58,15 +60,7 @@
         <dependency>
             <groupId>su.nightexpress.nightcore</groupId>
             <artifactId>main</artifactId>
-            <version>2.9.3</version>
-        </dependency>
-
-        <!-- I have no idea what's happening, but gson from paper can not resolved -->
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.13.1</version>
-            <scope>provided</scope>
+            <version>2.9.4</version>
         </dependency>
     </dependencies>
 
