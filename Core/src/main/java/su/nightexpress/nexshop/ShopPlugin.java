@@ -101,13 +101,11 @@ public class ShopPlugin extends NightPlugin {
 
         this.loadModules();
 
-        this.runTaskAsync(this.dataManager::loadAllData);
-
         if (Plugins.hasPlaceholderAPI()) {
             PlaceholderHook.setup(this);
         }
 
-        // Sync all price & stock datas for all products after everything is loaded.
+        // Sync all price & stock data for all products after everything is loaded.
         this.runTaskAsync(() -> this.dataManager.loadAllData());
     }
 

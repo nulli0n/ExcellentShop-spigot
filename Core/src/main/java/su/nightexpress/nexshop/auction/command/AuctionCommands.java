@@ -160,15 +160,6 @@ public class AuctionCommands {
         return auctionManager.openAuction(context.getPlayerOrThrow());
     }
 
-    /*public static boolean openAuction(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull CommandContext context) {
-        Player player = context.getExecutor();
-        if (player == null) {
-            context.errorPlayerOnly();
-            return false;
-        }
-        return auctionManager.openAuction(player);
-    }*/
-
     public static boolean sellItem(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
 

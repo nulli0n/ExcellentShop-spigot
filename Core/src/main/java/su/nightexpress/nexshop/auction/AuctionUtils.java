@@ -63,8 +63,6 @@ public class AuctionUtils {
                 }
             }
 
-            //ItemHandler handler = ProductHandlerRegistry.forBukkitItem();
-            //ItemPacker packer = handler.createPacker(item);
             ItemContent typing = ContentTypes.fromItem(item, adapter -> true);
 
             Currency currency = Rnd.get(auctionManager.getEnabledCurrencies());

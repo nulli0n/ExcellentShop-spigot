@@ -30,7 +30,6 @@ public class AuctionLang implements LangContainer {
     public static final MessageLocale COMMAND_SELL_ERROR_NO_ITEM = LangEntry.builder("Auction.Command.Sell.Error.NoItem").chatMessage(
         SOFT_RED.wrap("You must hold an item to do that!"));
 
-
     public static final MessageLocale LISTING_ADD_SUCCESS_INFO = LangEntry.builder("Auction.Listing.Add.Success.Info").chatMessage(
         Sound.BLOCK_NOTE_BLOCK_BELL,
         " ",
@@ -111,7 +110,6 @@ public class AuctionLang implements LangContainer {
     public static final MessageLocale LISTING_CLAIM_SUCCESS = LangEntry.builder("Auction.Notify.Listing.Claim").chatMessage(
         GRAY.wrap(SOFT_GREEN.wrap("✔") + " You claimed " + SOFT_GREEN.wrap(LISTING_PRICE) + " for " + SOFT_GREEN.wrap(LISTING_ITEM_NAME) + "!")
     );
-
 
     public static final IconLocale UI_BUY_CONFIRM = LangEntry.iconBuilder("Auction.UI.BuyConfirm.Listing")
         .rawName(LISTING_ITEM_NAME)

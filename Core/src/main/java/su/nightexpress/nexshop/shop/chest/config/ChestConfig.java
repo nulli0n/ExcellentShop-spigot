@@ -190,9 +190,6 @@ public class ChestConfig {
         Set.of("shit", "sample text"),
         "Items containing the following words in their name will be disallowed from being used as shop products.");
 
-
-
-
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_GENERAL = ConfigValue.create("Shops.Products.Format.Main",
         Lists.newList(
             GENERIC_LORE,

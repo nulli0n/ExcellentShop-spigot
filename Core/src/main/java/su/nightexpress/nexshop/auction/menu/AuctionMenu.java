@@ -326,8 +326,6 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         });
         list.add(new MenuItem(currencyItem).setSlots(47).setPriority(10).setHandler(this.currencyHandler));
 
-
-
         ItemStack listingsItem = new ItemStack(Material.BOOK);
         ItemUtil.editMeta(listingsItem, meta -> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("My Items")));

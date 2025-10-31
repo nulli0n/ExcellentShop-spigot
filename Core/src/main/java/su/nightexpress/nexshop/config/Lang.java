@@ -94,9 +94,6 @@ public final class Lang implements LangContainer {
     @Deprecated public static final TextLocale EDITOR_PRODUCT_ENTER_UNI_PRICE = LangEntry.builder("Editor.Product.Enter.UniPrice").text(GRAY.wrap("Enter " + GREEN.wrap("[Min] [Max]")));
     @Deprecated  public static final TextLocale EDITOR_PRODUCT_ENTER_CURRENCY = LangEntry.builder("Editor.Product.Enter.Currency").text(GRAY.wrap("Enter " + GREEN.wrap("[Currency Identifier]")));
 
-
-
-
     public static final LangUIButton PRODUCT_PRICE_RESET = LangUIButton.builder("Editor.Product.Price.Reset", "Reset & Update")
         .current("Buy Price", PRODUCT_PRICE_FORMATTED.apply(BUY))
         .current("Sell Price", PRODUCT_PRICE_FORMATTED.apply(SELL))

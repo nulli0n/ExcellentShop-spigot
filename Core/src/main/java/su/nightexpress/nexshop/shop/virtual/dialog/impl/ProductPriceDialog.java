@@ -111,14 +111,10 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
     private static final ButtonLocale BUTTON_FLOAT_TIMES = VirtualLang.builder("Dialog.ProductPrice.Float.Button.Times").button(
         SOFT_YELLOW.wrap("⌛") + " Refresh Times");
 
-
-
     private static final DialogElementLocale INPUT_FLAT_BUY = VirtualLang.builder("Dialog.ProductPrice.Flat.Input.Buy").dialogElement(200,
         SOFT_GREEN.wrap("[$]") + " Buy Price");
     private static final DialogElementLocale INPUT_FLAT_SELL = VirtualLang.builder("Dialog.ProductPrice.Flat.Input.Sell").dialogElement(200,
         SOFT_RED.wrap("[$]") + " Sell Price");
-
-
 
     private static final DialogElementLocale INPUT_FLOAT_BUY_MIN = VirtualLang.builder("Dialog.ProductPrice.Float.Input.BuyMin").dialogElement(
         200, SOFT_GREEN.wrap("[$]") + " Buy Price " + GRAY.wrap("(Min)"));
@@ -129,8 +125,6 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
     private static final DialogElementLocale INPUT_FLOAT_SELL_MAX = VirtualLang.builder("Dialog.ProductPrice.Float.Input.SellMax").dialogElement(
         200, SOFT_RED.wrap("[$]") + " Sell Price " + GRAY.wrap("(Max)"));
     private static final TextLocale INPUT_FLOAT_ROUNDING = VirtualLang.builder("Dialog.ProductPrice.Float.Input.Rounding").text("Round Prices");
-
-
 
     private static final DialogElementLocale INPUT_DYNAMIC_BUY_START = VirtualLang.builder("Dialog.ProductPrice.Dynamic.Input.Buy.Start").dialogElement(200,
         SOFT_GREEN.wrap("[$] Buy Price: ") + "Initial Value");
@@ -167,9 +161,6 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
 
     private static final DialogElementLocale INPUT_DYNAMIC_STABILIZE_AMOUNT = VirtualLang.builder("Dialog.ProductPrice.Dynamic.Input.Stabilize.Amount").dialogElement(200,
         SOFT_YELLOW.wrap("[⌛] Stabilization: ") + "Amount " + GRAY.wrap("(in %)"));
-
-
-
 
     private static final DialogElementLocale INPUT_PLAYERS_BUY_OFFSET = VirtualLang.builder("Dialog.ProductPrice.Players.Input.Buy.Offset").dialogElement(200,
         SOFT_GREEN.wrap("[$] Buy Price: ") + "Per Player Offset");
@@ -395,7 +386,9 @@ public class ProductPriceDialog extends VirtualDialogProvider<VirtualProduct> {
                     pricing.setPriceUnit(tradeType, start, offset, minOffset, maxOffset);
                 }
             }
-            default -> {return;}
+            default -> {
+                return;
+            }
         }
 
         product.updatePrice(false);

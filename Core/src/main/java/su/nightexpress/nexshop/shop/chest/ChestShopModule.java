@@ -519,10 +519,6 @@ public class ChestShopModule extends AbstractModule implements ShopModule, Playe
         this.playerBrowserMenu.open(player);
     }
 
-    /*public void browseShopOwners(@NotNull Player player, @NotNull String search) {
-        this.playerBrowserMenu.open(player, search);
-    }*/
-
     public void browseAllShops(@NotNull Player player) {
         this.shopBrowserMenu.open(player);
     }
@@ -552,6 +548,11 @@ public class ChestShopModule extends AbstractModule implements ShopModule, Playe
                 this.getPrefixed(ChestLang.SHOP_TELEPORT_ERROR_UNSAFE).send(player);
                 return false;
             }
+        }
+
+        if (Version.isPaper()) {
+            plugin.runTask(player, () -> player.teleportAsync(location));
+            return true;
         }
 
         return player.teleport(location);

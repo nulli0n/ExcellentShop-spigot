@@ -105,8 +105,6 @@ public class ProductOptionsMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
                 item.inherit(NightItem.fromItemStack(original)).localized(VirtualLocales.PRODUCT_EDIT_ICON).setHideComponents(true);
             }).build());
 
-
-
         // =============================================
         // Item Product stuff
         // =============================================

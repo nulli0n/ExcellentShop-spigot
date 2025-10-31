@@ -242,8 +242,6 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
                     .build()
             )));
 
-
-
         loader.addDefaultItem(NightItem.fromType(Material.EMERALD)
             .setDisplayName(LIGHT_GREEN.wrap(BOLD.wrap("Bank")))
             .setLore(Lists.newList(
@@ -266,7 +264,6 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
                 .setVisibilityPolicy(viewer -> !ChestConfig.isAutoBankEnabled() && this.getLink(viewer).canManageBank(viewer.getPlayer()))
                 .build()
             )));
-
 
         loader.addDefaultItem(NightItem.fromType(Material.BEACON)
             .setDisplayName(LIGHT_CYAN.wrap(BOLD.wrap("Shop Display")))
