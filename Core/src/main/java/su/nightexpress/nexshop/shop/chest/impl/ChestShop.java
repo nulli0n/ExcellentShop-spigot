@@ -10,6 +10,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import su.nightexpress.excellentshop.api.playershop.PlayerShop;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.product.content.ContentTypes;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
 
-public class ChestShop extends AbstractShop<ChestProduct> {
+public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop {
 
     private final ChestShopModule module;
 

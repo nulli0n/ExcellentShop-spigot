@@ -1,14 +1,14 @@
 package su.nightexpress.nexshop.shop.chest.config;
 
 import org.bukkit.Material;
-import su.nightexpress.nightcore.integration.currency.CurrencyId;
-import su.nightexpress.nightcore.integration.item.ItemPlugins;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nexshop.hook.HookPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.impl.Showcase;
 import su.nightexpress.nightcore.config.ConfigValue;
+import su.nightexpress.nightcore.integration.currency.CurrencyId;
+import su.nightexpress.nightcore.integration.item.ItemPlugins;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.Plugins;
@@ -100,6 +100,8 @@ public class ChestConfig {
         "Infinite storage allows you to store as many items in your shops as you want/can,",
         "and don't uses block inventories.");
 
+
+
     public static final ConfigValue<Double> SHOP_PRODUCT_INITIAL_BUY_PRICE = ConfigValue.create("Shops.Product.InitialPrice.Buy",
         10D,
         "Sets initial buy price for new products added in chest shops.");
@@ -150,7 +152,7 @@ public class ChestConfig {
     public static final ConfigValue<Boolean> SHOP_CREATION_CLAIM_ONLY = ConfigValue.create("Shops.Creation.In_Player_Claims_Only.Enabled",
         false,
         "Sets whether or not players can create shops in their own claims only.",
-        "Supported Plugins: " + HookPlugin.LANDS + ", " + HookPlugin.GRIEF_PREVENTION + ", " + HookPlugin.WORLD_GUARD + ", " + HookPlugin.KINGDOMS);
+        "Supported Plugins: https://nightexpressdev.com/excellentshop/chest/claim-integrations/");
 
     public final static ConfigValue<RankMap<Integer>> SHOP_PRODUCTS_MAX_PER_RANK = ConfigValue.create("Shops.Products.Max_Products_Per_Shop",
         (cfg, path, rank) -> RankMap.read(cfg, path, Integer.class, 3),
@@ -190,6 +192,9 @@ public class ChestConfig {
     public static final ConfigValue<Set<String>> SHOP_PRODUCT_DENIED_NAMES = ConfigValue.create("Shops.Products.Name_Blacklist",
         Set.of("shit", "sample text"),
         "Items containing the following words in their name will be disallowed from being used as shop products.");
+
+
+
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_GENERAL = ConfigValue.create("Shops.Products.Format.Main",
         Lists.newList(

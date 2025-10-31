@@ -3,10 +3,12 @@ package su.nightexpress.nexshop.shop.chest.lookup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import su.nightexpress.nexshop.shop.chest.impl.ChestShop;
+import su.nightexpress.nightcore.util.geodata.Cuboid;
 import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
 import su.nightexpress.nightcore.util.geodata.pos.ChunkPos;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WorldLookup {
 
@@ -26,6 +28,11 @@ public class WorldLookup {
     @NotNull
     public Set<ChestShop> getAll() {
         return new HashSet<>(this.byBlockPos.values());
+    }
+
+    @NotNull
+    public Set<ChestShop> getAllIn(@NotNull Cuboid cuboid) {
+        return this.byBlockPos.values().stream().filter(shop -> cuboid.contains(shop.getBlockPos())).collect(Collectors.toCollection(HashSet::new));
     }
 
     @Nullable

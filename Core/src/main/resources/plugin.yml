@@ -1,13 +1,10 @@
 name: ExcellentShop
 main: su.nightexpress.nexshop.ShopPlugin
 version: '${project.version}'
-api-version: 1.18
-folia-supported: true
 description: Advanced 4 in 1 shop plugin with a lot of cool features!
 author: NightExpress
 depend: [ nightcore ]
 softdepend:
-  - Citizens
   - WorldGuard
   - Lands
   - Kingdoms
@@ -17,11 +14,5 @@ softdepend:
   - PlaceholderAPI
   - ProtocolLib
   - packetevents
-#  - Oraxen
-#  - ItemsAdder
-#  - Nexo
-#  - ExecutableItems
-#  - SCore
-#  - MMOItems
-#  - ExcellentCrates
-#  - VotingPlugin
+  - PlotSquared
+api-version: 1.18

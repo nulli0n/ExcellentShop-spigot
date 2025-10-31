@@ -6,12 +6,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.product.content.impl.ItemContent;
-import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.Placeholders;
 import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.event.AuctionListingCreateEvent;
-import su.nightexpress.nexshop.auction.command.child.*;
+import su.nightexpress.nexshop.auction.command.AuctionCommands;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
@@ -23,8 +21,10 @@ import su.nightexpress.nexshop.auction.menu.*;
 import su.nightexpress.nexshop.module.AbstractModule;
 import su.nightexpress.nexshop.module.ModuleSettings;
 import su.nightexpress.nexshop.product.content.ContentTypes;
+import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.bridge.item.ItemAdapter;
-import su.nightexpress.nightcore.command.experimental.builder.ChainedNodeBuilder;
+import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.db.config.DatabaseType;
@@ -101,22 +101,8 @@ public class AuctionManager extends AbstractModule {
     }
 
     @Override
-    protected void loadCommands(@NotNull ChainedNodeBuilder builder) {
-        builder.fallback(context -> {
-            if (!context.checkPermission(AuctionPerms.COMMAND_OPEN)) {
-                context.errorPermission();
-                return false;
-            }
-            return OpenCommand.executes(this.plugin, this, context);
-        });
-
-        ExpiredCommand.build(this.plugin, this, builder);
-        HistoryCommand.build(this.plugin, this, builder);
-        ListingsCommand.build(this.plugin, this, builder);
-        OpenCommand.build(this.plugin, this, builder);
-        SellCommand.build(this.plugin, this, builder);
-        UnclaimedCommand.build(this.plugin, this, builder);
-        FillDummyCommand.build(this.plugin, this, builder);
+    protected void loadCommands(@NotNull HubNodeBuilder builder) {
+        AuctionCommands.build(this.plugin, this, builder);
     }
 
     private void loadCategories() {

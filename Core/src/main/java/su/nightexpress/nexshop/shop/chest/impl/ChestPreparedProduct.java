@@ -76,6 +76,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             product.delivery(this.getInventory(), transaction.getUnits());
             product.getCurrency().take(player, transaction.getPrice());
             shop.getModule().getLogger().logTransaction(event);
+            shop.markDirty();
         }
 
         return transaction;
@@ -138,6 +139,7 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
             product.getCurrency().give(player, transaction.getPrice());
             product.take(inventory, transaction.getUnits());
             shop.getModule().getLogger().logTransaction(event);
+            shop.markDirty();
 
             if (!this.isSilent()) {
                 ChestLang.SHOP_TRADE_SELL_INFO_USER.message().send(player, replacer -> replacer

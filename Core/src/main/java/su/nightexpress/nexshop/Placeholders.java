@@ -27,9 +27,7 @@ import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 import su.nightexpress.nightcore.language.LangAssets;
-import su.nightexpress.nightcore.util.ItemNbt;
-import su.nightexpress.nightcore.util.ItemUtil;
-import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.*;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderList;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
@@ -454,7 +452,7 @@ public class Placeholders extends su.nightexpress.nightcore.util.Placeholders {
         .add(LISTING_ITEM_AMOUNT, listing -> String.valueOf(listing.getItemStack().getAmount()))
         .add(LISTING_ITEM_NAME, listing -> ItemUtil.getSerializedName(listing.getItemStack()))
         .add(LISTING_ITEM_LORE, listing -> String.join("\n", ItemUtil.getSerializedLore(listing.getItemStack())))
-        .add(LISTING_ITEM_VALUE, listing -> String.valueOf(ItemNbt.compress(listing.getItemStack())))
+        .add(LISTING_ITEM_VALUE, listing -> ItemTag.getTagStringEncoded(listing.getItemStack()))
         .add(LISTING_DELETES_IN, listing -> TimeFormats.formatDuration(listing.getDeleteDate(), TimeFormatType.LITERAL))
         .add(LISTING_DELETE_DATE, listing -> TimeFormats.formatDateTime(listing.getDeleteDate()))
     );
