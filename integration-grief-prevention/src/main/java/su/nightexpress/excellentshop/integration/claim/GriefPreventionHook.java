@@ -23,5 +23,4 @@ public class GriefPreventionHook implements ClaimHook {
 
         return claim != null && claim.getOwnerID().equals(player.getUniqueId());
     }
-
 }

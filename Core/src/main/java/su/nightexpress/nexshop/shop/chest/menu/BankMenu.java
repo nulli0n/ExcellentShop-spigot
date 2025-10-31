@@ -97,17 +97,15 @@ public class BankMenu extends LinkedMenu<ShopPlugin, BankMenu.Data> implements F
         return MenuFiller.builder(this)
             .setSlots(this.currencySlots)
             .setItems(this.module.getAvailableCurrencies(player))
-            .setItemCreator(currency -> {
-                return NightItem.fromItemStack(currency.getIcon())
-                    .hideAllComponents()
-                    .setDisplayName(this.currencyName)
-                    .setLore(this.currencyLore)
-                    .replacement(replacer -> replacer
-                        .replace(currency.replacePlaceholders())
-                        .replace(PLAYER_BALANCE, () -> currency.format(currency.getBalance(player)))
-                        .replace(BANK_BALANCE, () -> currency.format(this.module.getPlayerBank(data.bankHolder).getBalance(currency)))
-                    );
-            })
+            .setItemCreator(currency -> NightItem.fromItemStack(currency.getIcon())
+                .hideAllComponents()
+                .setDisplayName(this.currencyName)
+                .setLore(this.currencyLore)
+                .replacement(replacer -> replacer
+                    .replace(currency.replacePlaceholders())
+                    .replace(PLAYER_BALANCE, () -> currency.format(currency.getBalance(player)))
+                    .replace(BANK_BALANCE, () -> currency.format(this.module.getPlayerBank(data.bankHolder).getBalance(currency)))
+                ))
             .setItemClick(currency -> (viewer1, event) -> {
                 int index = Lists.indexOf(this.currencySlots, event.getRawSlot());
                 this.runNextTick(() -> this.open(player, data.bankHolder, data.shop, currency, index));

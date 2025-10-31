@@ -204,7 +204,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         return this.getSellPrice() >= 0D;
     }
 
-
     @Override
     public int getUnitAmount() {
         return this.content.getUnitAmount();
@@ -274,8 +273,6 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     public boolean hasSpace(@NotNull Inventory inventory) {
         return this.content.hasSpace(inventory);
     }
-
-
 
     @Override
     @NotNull

@@ -90,10 +90,9 @@ public class ChestUtils {
 
         ItemStack item = itemContent.getItem();
         String itemType = BukkitThing.getValue(item.getType()).toLowerCase();
-        //String itemTypeLocalized = LangAssets.get(item.getType()).toLowerCase();
         String itemCustomName = NightMessage.stripTags(ItemUtil.getNameSerialized(item)).toLowerCase();
 
-        if (itemType.contains(searchFor) || /*itemTypeLocalized.contains(searchFor) ||*/ itemCustomName.contains(searchFor)) {
+        if (itemType.contains(searchFor) || itemCustomName.contains(searchFor)) {
             return true;
         }
 
@@ -106,14 +105,6 @@ public class ChestUtils {
 
         return false;
     }
-
-//    @Deprecated
-//    public static boolean bypassHandlerDetection(@NotNull InventoryClickEvent event) {
-//        if (!ChestConfig.SHOP_PRODUCT_BYPASS_DETECTION_ENABLED.get()) return false;
-//
-//        boolean needShift = ChestConfig.SHOP_PRODUCT_BYPASS_DETECTION_HOLD_SHIFT.get();
-//        return !needShift || event.isShiftClick();
-//    }
 
     public static boolean isDye(@NotNull Material material) {
         return BukkitThing.getValue(material).endsWith("_dye");

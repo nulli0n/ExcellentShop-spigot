@@ -141,8 +141,6 @@ public class AuctionLegacyQueries {
         }
     };
 
-
-
     public static final Function<ResultSet, ActiveListing> ACTIVE_LISTING_LOADER_2 = resultSet -> {
         try {
             UUID id = UUID.fromString(resultSet.getString(AuctionDatabase.COLUMN_ID.getName()));
@@ -210,8 +208,6 @@ public class AuctionLegacyQueries {
             return null;
         }
     };
-
-
 
     @Nullable
     private static ItemStack readItemTag(@NotNull String serialized) {

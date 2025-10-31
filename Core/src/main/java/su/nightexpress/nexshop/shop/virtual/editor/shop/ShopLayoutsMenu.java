@@ -57,14 +57,12 @@ public class ShopLayoutsMenu extends LinkedMenu<ShopPlugin, VirtualShop> impleme
         return MenuFiller.builder(this)
             .setSlots(IntStream.range(9, 36).toArray())
             .setItems(IntStream.range(1, shop.getPages() + 1).boxed().toList())
-            .setItemCreator(page -> {
-                return new NightItem(Material.MAP)
-                    .setAmount(page)
-                    .localized(VirtualLocales.SHOP_EDIT_LAYOUT_BY_PAGE)
-                    .replacement(replacer -> replacer
-                    .replace(Placeholders.GENERIC_PAGE, String.valueOf(page))
-                    .replace(Placeholders.GENERIC_NAME, shop.getLayout(page)));
-            })
+            .setItemCreator(page -> new NightItem(Material.MAP)
+                .setAmount(page)
+                .localized(VirtualLocales.SHOP_EDIT_LAYOUT_BY_PAGE)
+                .replacement(replacer -> replacer
+                .replace(Placeholders.GENERIC_PAGE, String.valueOf(page))
+                .replace(Placeholders.GENERIC_NAME, shop.getLayout(page))))
             .setItemClick(page -> (viewer1, event) -> {
                 if (event.isRightClick()) {
                     shop.removePageLayout(page);

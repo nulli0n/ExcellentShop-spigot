@@ -57,18 +57,8 @@ public class PriceMenu extends ProductPriceMenu<VirtualProduct> {
     protected void handlePriceType(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull VirtualProduct product) {
         PriceType priceType = Lists.next(product.getPricingType());
 
-        /*double sell = product.getPricer().getPrice(TradeType.SELL);
-        double buy = product.getPricer().getPrice(TradeType.BUY);*/
-
         product.setPricing(ProductPricing.from(priceType));
         plugin.getDataManager().resetPriceData(product);
-
-        /*if (product.getPricer() instanceof RangedPricing pricer) {
-            pricer.setPriceRange(TradeType.BUY, UniDouble.of(buy, buy));
-            pricer.setPriceRange(TradeType.SELL, UniDouble.of(sell, sell));
-        }
-        product.setPrice(TradeType.BUY, buy);
-        product.setPrice(TradeType.SELL, sell);*/
 
         this.saveAndFlush(viewer, product);
     }

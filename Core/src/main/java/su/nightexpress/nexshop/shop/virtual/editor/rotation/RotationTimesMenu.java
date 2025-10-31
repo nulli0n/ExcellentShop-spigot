@@ -42,15 +42,11 @@ public class RotationTimesMenu extends LinkedMenu<ShopPlugin, Rotation> implemen
         "90bba8d56bb6b906683b18fba481d58fa0bb7d3b3b18c6452e9257df542f53aa"
     };
 
-    //private final VirtualShopModule module;
-
     public RotationTimesMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         super(plugin, MenuType.GENERIC_9X4, VirtualLang.EDITOR_TITLE_ROTATION_TIMES.text());
-        //this.module = module;
 
-        this.addItem(MenuItem.buildReturn(this, 31, (viewer, event) -> {
-            this.runNextTick(() -> module.openRotationOptions(viewer.getPlayer(), this.getLink(viewer)));
-        }));
+        this.addItem(MenuItem.buildReturn(this, 31, (viewer, event) ->
+                this.runNextTick(() -> module.openRotationOptions(viewer.getPlayer(), this.getLink(viewer)))));
     }
 
     @Override
@@ -61,16 +57,14 @@ public class RotationTimesMenu extends LinkedMenu<ShopPlugin, Rotation> implemen
         return MenuFiller.builder(this)
             .setSlots(IntStream.range(10, 18).toArray())
             .setItems(Arrays.asList(DayOfWeek.values()))
-            .setItemCreator(day -> {
-                return NightItem.asCustomHead(SKULL_DAY[day.ordinal()])
-                    .localized(VirtualLocales.ROTATION_DAY_TIME_OBJECT)
-                    .setHideComponents(true)
-                    .replacement(replacer -> replacer
-                        .replace(Placeholders.GENERIC_NAME, () -> StringUtil.capitalizeFully(day.name()))
-                        .replace(Placeholders.GENERIC_TIME, () -> rotation.getRotationTimes(day).stream()
-                            .map(time -> CoreLang.goodEntry(time.format(ShopUtils.TIME_FORMATTER))).collect(Collectors.joining("\n")))
-                    );
-            })
+            .setItemCreator(day -> NightItem.asCustomHead(SKULL_DAY[day.ordinal()])
+                .localized(VirtualLocales.ROTATION_DAY_TIME_OBJECT)
+                .setHideComponents(true)
+                .replacement(replacer -> replacer
+                    .replace(Placeholders.GENERIC_NAME, () -> StringUtil.capitalizeFully(day.name()))
+                    .replace(Placeholders.GENERIC_TIME, () -> rotation.getRotationTimes(day).stream()
+                        .map(time -> CoreLang.goodEntry(time.format(ShopUtils.TIME_FORMATTER))).collect(Collectors.joining("\n")))
+                ))
             .setItemClick(day -> (viewer1, event) -> {
                 if (event.isLeftClick()) {
                     this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_TIME.text(), input -> {
@@ -82,7 +76,6 @@ public class RotationTimesMenu extends LinkedMenu<ShopPlugin, Rotation> implemen
                         catch (DateTimeParseException ignored) {}
                         return true;
                     }));
-
                 }
                 else if (event.isRightClick()) {
                     rotation.getRotationTimes(day).clear();

@@ -75,9 +75,7 @@ public class VirtualDiscount implements Placeholder {
         if (!this.getDays().contains(LocalDate.now().getDayOfWeek())) return false;
 
         LocalTime roundNow = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
-        return this.getTimes().stream().anyMatch(time -> {
-            return time.truncatedTo(ChronoUnit.MINUTES).equals(roundNow);
-        });
+        return this.getTimes().stream().anyMatch(time -> time.truncatedTo(ChronoUnit.MINUTES).equals(roundNow));
     }
 
     @NotNull

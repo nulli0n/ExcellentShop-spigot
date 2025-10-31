@@ -49,7 +49,6 @@ public class PacketEventsHandler extends DisplayHandler<PacketWrapper<?>> {
         Bukkit.getServer().getOnlinePlayers().forEach(player -> this.playerManager.sendPacket(player, packet));
     }
 
-
     @Override
     @NotNull
     protected List<PacketWrapper<?>> getItemPackets(@NotNull FakeEntity entity, boolean needSpawn, @NotNull ItemStack item) {

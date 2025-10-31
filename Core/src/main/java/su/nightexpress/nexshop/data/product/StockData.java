@@ -45,7 +45,6 @@ public class StockData extends AbstractData {
 
     public boolean isRestockTime() {
         return !this.isAwaiting() && TimeUtil.isPassed(this.restockDate);
-        //return this.restockDate > 0 && System.currentTimeMillis() >= this.restockDate;
     }
 
     public boolean isAwaiting() {
@@ -55,12 +54,6 @@ public class StockData extends AbstractData {
     public void setExpired() {
         this.setRestockDate(System.currentTimeMillis() - 1000L);
     }
-
-//    public void restockIfReady(@NotNull StockValues values) {
-//        if (this.isRestockTime()) {
-//            this.restock(values);
-//        }
-//    }
 
     public void restock(@NotNull StockValues values) {
         this.setBuyStock(values.getBuyAmount());

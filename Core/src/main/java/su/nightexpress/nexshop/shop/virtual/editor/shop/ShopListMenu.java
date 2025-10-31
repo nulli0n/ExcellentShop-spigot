@@ -44,9 +44,7 @@ public class ShopListMenu extends NormalMenu<ShopPlugin> implements Filled<Virtu
             .setHandler((viewer, event) -> {
                 if (this.module.handleDialogs(dialogs -> dialogs.openShopCreationDialog(viewer.getPlayer()))) return;
 
-                this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_SHOP_ID.text(), input -> {
-                    return module.createShop(viewer.getPlayer(), input.getTextRaw());
-                }));
+                this.handleInput(Dialog.builder(viewer, VirtualLang.EDITOR_ENTER_SHOP_ID.text(), input -> module.createShop(viewer.getPlayer(), input.getTextRaw())));
             }));
     }
 
@@ -56,15 +54,12 @@ public class ShopListMenu extends NormalMenu<ShopPlugin> implements Filled<Virtu
         return MenuFiller.builder(this)
             .setSlots(SHOP_SLOTS)
             .setItems(this.module.getShops().stream().sorted(Comparator.comparing(VirtualShop::getId)).toList())
-            .setItemCreator(shop -> {
-                return shop.getIcon()
-                    .localized(VirtualIconsLang.ICON_SHOP)
-                    .hideAllComponents()
-                    .replacement(replacer -> replacer.replace(shop.replacePlaceholders()));
-            })
-            .setItemClick(shop -> (viewer1, event) -> {
-                this.runNextTick(() -> this.module.openShopOptions(viewer.getPlayer(), shop));
-            })
+            .setItemCreator(shop -> shop.getIcon()
+                .localized(VirtualIconsLang.ICON_SHOP)
+                .hideAllComponents()
+                .replacement(replacer -> replacer.replace(shop.replacePlaceholders())))
+            .setItemClick(shop -> (viewer1, event) -> this.runNextTick(() ->
+                    this.module.openShopOptions(viewer.getPlayer(), shop)))
             .build();
     }
 

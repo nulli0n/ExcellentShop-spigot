@@ -123,8 +123,6 @@ public class VirtualLocales {
         .click("reset")
         .build();
 
-
-
     public static final LangItem ROTATION_OBJECT = LangItem.builder(PREFIX + "Rotation.Object")
         .name(ROTATION_ID)
         .current("Slots Used", ROTATION_SLOTS_AMOUNT)
@@ -242,8 +240,6 @@ public class VirtualLocales {
         .name("New Item")
         .click("select")
         .build();
-
-
 
     public static final LangItem PRODUCT_OBJECT = LangItem.builder(PREFIX + "Product.Object.Static2")
         .name(PRODUCT_PREVIEW_NAME)

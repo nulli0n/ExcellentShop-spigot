@@ -25,7 +25,6 @@ import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.language.entry.LangUIButton;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
-import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.data.LinkHandler;
 import su.nightexpress.nightcore.ui.menu.item.ItemHandler;
 import su.nightexpress.nightcore.ui.menu.item.ItemOptions;
@@ -57,31 +56,25 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
     public ProductPriceMenu(@NotNull ShopPlugin plugin, @NotNull String title) {
         super(plugin, MenuType.GENERIC_9X6, title);
 
-        this.addItem(MenuItem.buildReturn(this, 49, (viewer, event) -> {
-            this.handleReturn(viewer, event, this.getLink(viewer));
-        }));
+        this.addItem(MenuItem.buildReturn(this, 49, (viewer, event) ->
+                this.handleReturn(viewer, event, this.getLink(viewer))));
 
         this.addItem(Material.NAME_TAG, Lang.PRODUCT_EDIT_PRICE_TYPE, 10, this::handlePriceType);
 
-        this.addItem(Material.GOLD_NUGGET, Lang.PRODUCT_EDIT_PRICE_CURRENCY, 19, this::handleCurrency, ItemOptions.builder().setDisplayModifier((viewer, item) -> {
-            item.inherit(NightItem.fromItemStack(this.getLink(viewer).getCurrency().getIcon()))
-                .localized(Lang.PRODUCT_EDIT_PRICE_CURRENCY)
-                .setHideComponents(true);
-        }).build());
+        this.addItem(Material.GOLD_NUGGET, Lang.PRODUCT_EDIT_PRICE_CURRENCY, 19, this::handleCurrency, ItemOptions.builder().setDisplayModifier((viewer, item) ->
+                item.inherit(NightItem.fromItemStack(this.getLink(viewer).getCurrency().getIcon()))
+            .localized(Lang.PRODUCT_EDIT_PRICE_CURRENCY)
+            .setHideComponents(true)).build());
 
-        this.addItem(NightItem.asCustomHead(SKULL_RESET), Lang.PRODUCT_PRICE_RESET, 28, (viewer, event, product) -> {
+        this.addItem(NightItem.asCustomHead(SKULL_RESET), Lang.PRODUCT_PRICE_RESET, 28, (viewer, event, product) ->
             this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
-                .onAccept((viewer1, event1) -> {
-                    plugin.getDataManager().resetPriceData(product);
-                    product.updatePrice(true);
-                    this.open(viewer1.getPlayer(), product);
-                })
-                .onReturn((viewer1, event1) -> {
-                    this.open(viewer1.getPlayer(), product);
-                })
-                .build()
-            ));
-        }, ItemOptions.builder().setVisibilityPolicy(this::canResetPriceData).build());
+                    .onAccept((viewer1, event1) -> {
+                        plugin.getDataManager().resetPriceData(product);
+                        product.updatePrice(true);
+                        this.open(viewer1.getPlayer(), product);
+                    })
+                    .onReturn((viewer1, event1) -> this.open(viewer1.getPlayer(), product))
+                    .build())), ItemOptions.builder().setVisibilityPolicy(this::canResetPriceData).build());
     }
 
     protected void saveAndFlush(@NotNull MenuViewer viewer, @NotNull T product) {
@@ -211,12 +204,8 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
                 this.addRangedButtons(viewer, product, floatPricer);
                 this.addFloatButtons(viewer, floatPricer);
             }
-            case DynamicPricing dynamicPricer -> {
-                this.addDynamicButtons(viewer, dynamicPricer);
-            }
-            case PlayersPricing playersPricer -> {
-                this.addPlayersButtons(viewer, playersPricer);
-            }
+            case DynamicPricing dynamicPricer -> this.addDynamicButtons(viewer, dynamicPricer);
+            case PlayersPricing playersPricer -> this.addPlayersButtons(viewer, playersPricer);
             default -> {}
         }
     }
@@ -244,26 +233,22 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
     }
 
     private void addFlatButtons(@NotNull MenuViewer menuViewer, @NotNull T shopItem) {
-        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_BUY), Lang.PRODUCT_EDIT_PRICE_FLAT_BUY, 13, (viewer, event, product) -> {
-            this.handleFlatPrice(viewer, event, product, TradeType.BUY);
-        });
+        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_BUY), Lang.PRODUCT_EDIT_PRICE_FLAT_BUY, 13, (viewer, event, product) ->
+                this.handleFlatPrice(viewer, event, product, TradeType.BUY));
 
         if (shopItem.getContent() instanceof ItemContent) {
-            this.addItem(menuViewer, NightItem.asCustomHead(SKULL_SELL), Lang.PRODUCT_EDIT_PRICE_FLAT_SELL, 15, (viewer, event, product) -> {
-                this.handleFlatPrice(viewer, event, product, TradeType.SELL);
-            });
+            this.addItem(menuViewer, NightItem.asCustomHead(SKULL_SELL), Lang.PRODUCT_EDIT_PRICE_FLAT_SELL, 15, (viewer, event, product) ->
+                    this.handleFlatPrice(viewer, event, product, TradeType.SELL));
         }
     }
 
     private void addRangedButtons(@NotNull MenuViewer menuViewer, @NotNull T shopItem, @NotNull FloatPricing pricer) {
-        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_BUY), Lang.PRODUCT_EDIT_PRICE_BOUNDS_BUY, 13, (viewer, event, product) -> {
-            this.handleRangedPrice(viewer, event, product, pricer, TradeType.BUY);
-        });
+        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_BUY), Lang.PRODUCT_EDIT_PRICE_BOUNDS_BUY, 13, (viewer, event, product) ->
+                this.handleRangedPrice(viewer, event, product, pricer, TradeType.BUY));
 
         if (shopItem.getContent() instanceof ItemContent) {
-            this.addItem(menuViewer, NightItem.asCustomHead(SKULL_SELL), Lang.PRODUCT_EDIT_PRICE_BOUNDS_SELL, 15, (viewer, event, product) -> {
-                this.handleRangedPrice(viewer, event, product, pricer, TradeType.SELL);
-            });
+            this.addItem(menuViewer, NightItem.asCustomHead(SKULL_SELL), Lang.PRODUCT_EDIT_PRICE_BOUNDS_SELL, 15, (viewer, event, product) ->
+                    this.handleRangedPrice(viewer, event, product, pricer, TradeType.SELL));
         }
     }
 
@@ -279,13 +264,12 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         });
 
         if (pricer.getRefreshType() == RefreshType.INTERVAL) {
-            this.addItem(menuViewer, NightItem.asCustomHead(SKULL_CLOCK), Lang.PRODUCT_EDIT_PRICE_FLOAT_REFRESH_INTERVAL, 33, (viewer, event, product) -> {
-                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
-                    pricer.setRefreshInterval(input.asIntAbs(0));
-                    this.save(viewer, product);
-                    return true;
-                }));
-            });
+            this.addItem(menuViewer, NightItem.asCustomHead(SKULL_CLOCK), Lang.PRODUCT_EDIT_PRICE_FLOAT_REFRESH_INTERVAL, 33, (viewer, event, product) ->
+                    this.handleInput(Dialog.builder(viewer, Lang.EDITOR_GENERIC_ENTER_SECONDS.text(), input -> {
+                pricer.setRefreshInterval(input.asIntAbs(0));
+                this.save(viewer, product);
+                return true;
+            })));
         }
 
         if (pricer.getRefreshType() == RefreshType.FIXED) {
@@ -326,52 +310,46 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
         }
     }
 
-
-
     private void addDynamicButtons(@NotNull MenuViewer menuViewer, @NotNull DynamicPricing pricer) {
         for (TradeType tradeType : TradeType.values()) {
             String url = tradeType == TradeType.BUY ? SKULL_BUY : SKULL_SELL;
             int slot = tradeType == TradeType.BUY ? 13 : 14;
             LangUIButton button = tradeType == TradeType.BUY ? Lang.PRODUCT_EDIT_PRICE_BOUNDS_BUY : Lang.PRODUCT_EDIT_PRICE_BOUNDS_SELL;
 
-            this.addItem(menuViewer, NightItem.asCustomHead(url), button, slot, (viewer, event, product) -> {
-                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE.text(), input -> {
-                    String[] split = input.getTextRaw().split(" ");
-                    double min = NumberUtil.getDoubleAbs(split[0]);
-                    double max = split.length >= 2 ? NumberUtil.getDoubleAbs(split[1]) : min;
+            this.addItem(menuViewer, NightItem.asCustomHead(url), button, slot, (viewer, event, product) ->
+                    this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE.text(), input -> {
+                String[] split = input.getTextRaw().split(" ");
+                double min = NumberUtil.getDoubleAbs(split[0]);
+                double max = split.length >= 2 ? NumberUtil.getDoubleAbs(split[1]) : min;
 
-                    DynamicPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
+                DynamicPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
 
-                    pricer.setPriceUnit(tradeType, unit.start(), unit.buyOffset(), unit.sellOffset(), min, max);
-                    this.save(viewer, product);
-                    return true;
-                }));
-            });
+                pricer.setPriceUnit(tradeType, unit.start(), unit.buyOffset(), unit.sellOffset(), min, max);
+                this.save(viewer, product);
+                return true;
+            })));
         }
 
-        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_INITIAL, 31, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
-                TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
-                DynamicPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
+        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_INITIAL, 31, (viewer, event, product) -> this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
+            TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
+            DynamicPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
 
-                double start = input.asDouble(0);
-                pricer.setPriceUnit(tradeType, start, unit.buyOffset(), unit.sellOffset(), unit.minOffset(), unit.maxOffset());
-                this.save(viewer, product);
-                return true;
-            }));
-        });
+            double start = input.asDouble(0);
+            pricer.setPriceUnit(tradeType, start, unit.buyOffset(), unit.sellOffset(), unit.minOffset(), unit.maxOffset());
+            this.save(viewer, product);
+            return true;
+        })));
 
-        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_STEP), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_STEP, 33, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
-                TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
-                DynamicPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
+        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_STEP), Lang.PRODUCT_EDIT_PRICE_DYNAMIC_STEP, 33, (viewer, event, product) ->
+                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
+            TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
+            DynamicPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
 
-                double value = input.asDouble(0);
-                pricer.setPriceUnit(tradeType, unit.start(), value, value, unit.minOffset(), unit.maxOffset());
-                this.save(viewer, product);
-                return true;
-            }));
-        });
+            double value = input.asDouble(0);
+            pricer.setPriceUnit(tradeType, unit.start(), value, value, unit.minOffset(), unit.maxOffset());
+            this.save(viewer, product);
+            return true;
+        })));
     }
 
     private void addPlayersButtons(@NotNull MenuViewer menuViewer, @NotNull PlayersPricing pricer) {
@@ -380,44 +358,39 @@ public abstract class ProductPriceMenu<T extends AbstractProduct<?>> extends Lin
             int slot = tradeType == TradeType.BUY ? 13 : 14;
             LangUIButton button = tradeType == TradeType.BUY ? Lang.PRODUCT_EDIT_PRICE_BOUNDS_BUY : Lang.PRODUCT_EDIT_PRICE_BOUNDS_SELL;
 
-            this.addItem(menuViewer, NightItem.asCustomHead(url), button, slot, (viewer, event, product) -> {
-                this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE.text(), input -> {
-                    String[] split = input.getTextRaw().split(" ");
-                    double min = NumberUtil.getDoubleAbs(split[0]);
-                    double max = split.length >= 2 ? NumberUtil.getDoubleAbs(split[1]) : min;
+            this.addItem(menuViewer, NightItem.asCustomHead(url), button, slot, (viewer, event, product) ->
+                    this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE.text(), input -> {
+                String[] split = input.getTextRaw().split(" ");
+                double min = NumberUtil.getDoubleAbs(split[0]);
+                double max = split.length >= 2 ? NumberUtil.getDoubleAbs(split[1]) : min;
 
-                    PlayersPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
+                PlayersPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
 
-                    pricer.setPriceUnit(tradeType, unit.start(), unit.offset(), min, max);
-                    this.save(viewer, product);
-                    return true;
-                }));
-            });
+                pricer.setPriceUnit(tradeType, unit.start(), unit.offset(), min, max);
+                this.save(viewer, product);
+                return true;
+            })));
         }
 
-        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_PLAYERS_INITIAL, 31, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
-                TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
-                PlayersPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
+        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_INITIAL), Lang.PRODUCT_EDIT_PRICE_PLAYERS_INITIAL, 31, (viewer, event, product) -> this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
+            TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
+            PlayersPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
 
-                double value = input.asDouble(0);
-                pricer.setPriceUnit(tradeType, value, unit.offset(), unit.minOffset(), unit.maxOffset());
-                this.save(viewer, product);
-                return true;
-            }));
-        });
+            double value = input.asDouble(0);
+            pricer.setPriceUnit(tradeType, value, unit.offset(), unit.minOffset(), unit.maxOffset());
+            this.save(viewer, product);
+            return true;
+        })));
 
-        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_STEP), Lang.PRODUCT_EDIT_PRICE_PLAYERS_ADJUST, 32, (viewer, event, product) -> {
-            this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
-                TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
+        this.addItem(menuViewer, NightItem.asCustomHead(SKULL_STEP), Lang.PRODUCT_EDIT_PRICE_PLAYERS_ADJUST, 32, (viewer, event, product) -> this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_PRICE.text(), input -> {
+            TradeType tradeType = event.isLeftClick() ? TradeType.BUY : TradeType.SELL;
 
-                PlayersPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
+            PlayersPricing.PriceUnit unit = pricer.getPriceUnit(tradeType);
 
-                double value = input.asDouble(0);
-                pricer.setPriceUnit(tradeType, unit.start(), value, unit.minOffset(), unit.maxOffset());
-                this.save(viewer, product);
-                return true;
-            }));
-        });
+            double value = input.asDouble(0);
+            pricer.setPriceUnit(tradeType, unit.start(), value, unit.minOffset(), unit.maxOffset());
+            this.save(viewer, product);
+            return true;
+        })));
     }
 }

@@ -382,42 +382,7 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     }
 
     private void printShops() {
-//        this.getShops().forEach(shop -> {
-//            this.info("=".repeat(30));
-//            this.info("Shop Id: " + shop.getId());
-//
-//            List<VirtualProduct> products = shop.getProducts().stream()
-//                .sorted(Comparator.comparing(VirtualProduct::getPage).thenComparing(VirtualProduct::getSlot))
-//                .toList();
-//
-//            products.forEach(product -> {
-//                if (product.getType() instanceof PhysicalTyping typing) {
-//                    AbstractProductPricer pricer = product.getPricer();
-//
-//                    String buy = NumberUtil.format(pricer.getBuyPrice()).replace(",", "_");
-//                    String sell = NumberUtil.format(pricer.getSellPrice()).replace(",", "_");
-//                    int page = product.getPage();
-//                    int slot = product.getSlot();
-//
-//                    ItemStack itemStack = typing.getItem();
-//                    String type = itemStack.getType().name();
-//                    String extra = "";
-//
-//                    if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
-//                        PotionType baseType = potionMeta.getBasePotionType();
-//                        if (baseType != null) {
-//                            extra = "PotionType." + baseType.name() + ", ";
-//                        }
-//                    }
-//
-//                    String text = "this.addShopProduct(shop, Material." + type + ", " + extra + buy + ", " + sell + ", " + page + ", " + slot + ");";
-//
-//                    info(text);
-//
-//                }
-//            });
-//            this.info("=".repeat(30));
-//        });
+
     }
 
     public boolean createShop(@NotNull Player player, @NotNull String name) {
@@ -557,8 +522,6 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
     public List<String> getLayoutNames() {
         return new ArrayList<>(this.layoutByIdMap.keySet());
     }
-
-
 
     @NotNull
     public Set<VirtualShop> getShops() {
@@ -837,19 +800,17 @@ public class VirtualShopModule extends AbstractModule implements ShopModule {
 
             VirtualLang.SELL_MENU_SALE_DETAILS.message().send(player, replacer -> replacer
                 .replace(Placeholders.GENERIC_TOTAL, total)
-                .replace(Placeholders.GENERIC_ENTRY, list -> {
-                    sellResult.getTransactions().forEach(transaction -> {
-                        Product product = transaction.getProduct();
+                .replace(Placeholders.GENERIC_ENTRY, list -> sellResult.getTransactions().forEach(transaction -> {
+                    Product product = transaction.getProduct();
 
-                        list.add(Replacer.create()
-                            .replace(Placeholders.GENERIC_ITEM, () -> ItemUtil.getSerializedName(product.getPreviewOrPlaceholder()))
-                            .replace(Placeholders.GENERIC_AMOUNT, () -> NumberUtil.format(transaction.getAmount()))
-                            .replace(Placeholders.GENERIC_PRICE, () -> transaction.getCurrency().format(transaction.getPrice()))
-                            .replace(Placeholders.SHOP_NAME, () -> product.getShop().getName())
-                            .apply(VirtualLang.SELL_MENU_SALE_ENTRY.text())
-                        );
-                    });
-                })
+                    list.add(Replacer.create()
+                        .replace(Placeholders.GENERIC_ITEM, () -> ItemUtil.getSerializedName(product.getPreviewOrPlaceholder()))
+                        .replace(Placeholders.GENERIC_AMOUNT, () -> NumberUtil.format(transaction.getAmount()))
+                        .replace(Placeholders.GENERIC_PRICE, () -> transaction.getCurrency().format(transaction.getPrice()))
+                        .replace(Placeholders.SHOP_NAME, () -> product.getShop().getName())
+                        .apply(VirtualLang.SELL_MENU_SALE_ENTRY.text())
+                    );
+                }))
             );
         }
     }

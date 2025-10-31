@@ -194,15 +194,12 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         Map<ProductKey, StockData> dataMap = new HashMap<>();
 
         this.select(tableStockDataLegacy, DataQueries.LEGACY_STOCK_DATA_LOADER, SelectQuery::all).forEach(data -> {
-            data.getPlayerAmounts().forEach((tradeType, holderMap) -> {
-                holderMap.forEach((holderId, amounts) -> {
-                    updateStockData(dataMap, data, tradeType, amounts, holderId.toString());
-                });
-            });
+            data.getPlayerAmounts().forEach((tradeType, holderMap) ->
+                    holderMap.forEach((holderId, amounts) ->
+                            updateStockData(dataMap, data, tradeType, amounts, holderId.toString())));
 
-            data.getGlobalAmounts().forEach((tradeType, amounts) -> {
-                updateStockData(dataMap, data, tradeType, amounts, data.getShopId());
-            });
+            data.getGlobalAmounts().forEach((tradeType, amounts) ->
+                    updateStockData(dataMap, data, tradeType, amounts, data.getShopId()));
         });
 
         this.insert(this.tableStockData, DataQueries.STOCK_DATA_INSERT, dataMap.values());
@@ -266,8 +263,6 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
     protected void addTableColumns(@NotNull List<Column> columns) {
         columns.add(COL_USER_SETTINGS);
     }
-
-
 
     @NotNull
     public List<StockData> loadStockDatas() {
@@ -333,8 +328,6 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         this.delete(this.tableStockData, query, products);
     }
 
-
-
     public void deletePriceData(@NotNull Shop shop) {
         this.deletePriceData(shop.getId());
     }
@@ -355,9 +348,6 @@ public class DataHandler extends AbstractUserDataManager<ShopPlugin, ShopUser> {
         query.whereIgnoreCase(DataHandler.COLUMN_GEN_PRODUCT_ID, WhereOperator.EQUAL, Product::getId);
         this.delete(this.tablePriceData, query, products);
     }
-
-
-
 
     @NotNull
     public List<ChestBank> loadChestBanks() {

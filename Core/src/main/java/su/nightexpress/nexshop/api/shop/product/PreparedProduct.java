@@ -44,6 +44,4 @@ public interface PreparedProduct {
     int getAmount();
 
     double getPrice();
-
-
 }

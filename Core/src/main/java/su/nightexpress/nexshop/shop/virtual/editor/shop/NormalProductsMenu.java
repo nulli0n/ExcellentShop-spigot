@@ -103,9 +103,8 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 if (handler != null) {
                     String handlerName = handler.getName();
                     if (handlerName.equalsIgnoreCase(ItemHandler.RETURN)) {
-                        builder.setHandler((viewer1, event) -> {
-                            this.runNextTick(() -> this.module.openShopOptions(viewer1.getPlayer(), shop));
-                        });
+                        builder.setHandler((viewer1, event) ->
+                                this.runNextTick(() -> this.module.openShopOptions(viewer1.getPlayer(), shop)));
                     }
                     else if (handlerName.equalsIgnoreCase(ItemHandler.NEXT_PAGE)) {
                         builder.setHandler(ItemHandler.forNextPage(this));
@@ -136,16 +135,6 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 .setPriority(MenuItem.HIGH_PRIORITY)
                 .setHandler((viewer1, event) -> {
                     if (event.isLeftClick()) {
-//                        this.handleInput(Dialog.builder(viewer, Lang.EDITOR_PRODUCT_ENTER_UNI_PRICE, input -> {
-//                            String[] split = input.getTextRaw().split(" ");
-//                            double min = NumberUtil.getAnyDouble(split[0], -1);
-//                            double max = split.length >= 2 ? NumberUtil.getAnyDouble(split[1], -1) : min;
-//
-//                            product.getPricer().setPrice(TradeType.BUY, min);
-//                            product.getPricer().setPrice(TradeType.SELL, max);
-//                            product.save();
-//                            return true;
-//                        }));
                         this.runNextTick(() -> this.module.openProductOptions(viewer1.getPlayer(), product));
                         return;
                     }
@@ -159,7 +148,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
 
                     // Replace current product with the one from player's cursor.
                     ItemStack cursor = event.getCursor();
-                    if (cursor != null && !cursor.getType().isAir()) {
+                    if (!cursor.getType().isAir()) {
                         VirtualProduct newProduct = this.getCachedProduct(cursor);
                         if (newProduct == null) {
                             newProduct = shop.createProduct(ContentType.ITEM, cursor);
@@ -184,18 +173,16 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             freeSlots.remove(slot);
         }
 
-        shop.getRotations().forEach(other -> {
-            other.getSlots(page).forEach(slot -> {
-                this.addItem(viewer, NightItem.fromType(Material.RED_STAINED_GLASS_PANE)
-                    .setHideComponents(true)
-                    .localized(VirtualLocales.PRODUCT_ROTATION_SLOT)
-                    .toMenuItem()
-                    .setSlots(slot)
-                    .setPriority(MenuItem.HIGH_PRIORITY));
+        shop.getRotations().forEach(other -> other.getSlots(page).forEach(slot -> {
+            this.addItem(viewer, NightItem.fromType(Material.RED_STAINED_GLASS_PANE)
+                .setHideComponents(true)
+                .localized(VirtualLocales.PRODUCT_ROTATION_SLOT)
+                .toMenuItem()
+                .setSlots(slot)
+                .setPriority(MenuItem.HIGH_PRIORITY));
 
-                freeSlots.remove(slot);
-            });
-        });
+            freeSlots.remove(slot);
+        }));
 
         this.addItem(viewer, NightItem.fromType(Material.LIME_STAINED_GLASS_PANE)
             .setHideComponents(true)
@@ -204,7 +191,7 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
             .setSlots(freeSlots.stream().mapToInt(Number::intValue).toArray())
             .setHandler((viewer1, event) -> {
                 ItemStack cursor = event.getCursor();
-                boolean hasCursor = cursor != null && !cursor.getType().isAir();
+                boolean hasCursor = !cursor.getType().isAir();
                 int slot = event.getRawSlot();
 
                 if (!hasCursor) {
@@ -216,7 +203,6 @@ public class NormalProductsMenu extends LinkedMenu<ShopPlugin, VirtualShop> {
                 if (product == null) {
                     product = shop.createProduct(ContentType.ITEM, cursor);
                 }
-                if (product == null) return;
 
                 product.setSlot(event.getRawSlot());
                 product.setPage(page);

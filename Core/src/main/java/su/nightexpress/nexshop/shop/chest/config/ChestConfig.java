@@ -3,7 +3,6 @@ package su.nightexpress.nexshop.shop.chest.config;
 import org.bukkit.Material;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.hook.HookPlugin;
 import su.nightexpress.nexshop.shop.chest.ChestUtils;
 import su.nightexpress.nexshop.shop.chest.impl.Showcase;
 import su.nightexpress.nightcore.config.ConfigValue;
@@ -100,8 +99,6 @@ public class ChestConfig {
         "Infinite storage allows you to store as many items in your shops as you want/can,",
         "and don't uses block inventories.");
 
-
-
     public static final ConfigValue<Double> SHOP_PRODUCT_INITIAL_BUY_PRICE = ConfigValue.create("Shops.Product.InitialPrice.Buy",
         10D,
         "Sets initial buy price for new products added in chest shops.");
@@ -192,9 +189,6 @@ public class ChestConfig {
     public static final ConfigValue<Set<String>> SHOP_PRODUCT_DENIED_NAMES = ConfigValue.create("Shops.Products.Name_Blacklist",
         Set.of("shit", "sample text"),
         "Items containing the following words in their name will be disallowed from being used as shop products.");
-
-
-
 
     public static final ConfigValue<List<String>> PRODUCT_FORMAT_LORE_GENERAL = ConfigValue.create("Shops.Products.Format.Main",
         Lists.newList(

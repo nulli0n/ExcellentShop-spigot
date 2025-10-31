@@ -30,7 +30,6 @@ public class AuctionLang implements LangContainer {
     public static final MessageLocale COMMAND_SELL_ERROR_NO_ITEM = LangEntry.builder("Auction.Command.Sell.Error.NoItem").chatMessage(
         SOFT_RED.wrap("You must hold an item to do that!"));
 
-
     public static final MessageLocale LISTING_ADD_SUCCESS_INFO = LangEntry.builder("Auction.Listing.Add.Success.Info").chatMessage(
         Sound.BLOCK_NOTE_BLOCK_BELL,
         " ",
@@ -112,7 +111,6 @@ public class AuctionLang implements LangContainer {
         GRAY.wrap(SOFT_GREEN.wrap("✔") + " You claimed " + SOFT_GREEN.wrap(LISTING_PRICE) + " for " + SOFT_GREEN.wrap(LISTING_ITEM_NAME) + "!")
     );
 
-
     public static final IconLocale UI_BUY_CONFIRM = LangEntry.iconBuilder("Auction.UI.BuyConfirm.Listing")
         .rawName(LISTING_ITEM_NAME)
         .rawLore(
@@ -122,7 +120,6 @@ public class AuctionLang implements LangContainer {
             GRAY.wrap("Seller: ") + WHITE.wrap(LISTING_SELLER)
         )
         .build();
-
 
     public static final MessageLocale ERROR_DISABLED_WORLD = LangEntry.builder("Auction.Error.DisabledWorld").chatMessage(
         GRAY.wrap(SOFT_RED.wrap("✘") + " Auction is disabled in this world!")

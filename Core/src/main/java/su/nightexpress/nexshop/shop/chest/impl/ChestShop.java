@@ -224,13 +224,11 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         if (this.location.isChunkLoaded()) {
             this.updateStockCache();
         }
-        //this.plugin.debug("Shop activated: " + this.blockPos);
         return true;
     }
 
     public void deactivate() {
         this.location = null;
-        //this.plugin.debug("Shop deactivated: " + this.blockPos);
     }
 
     public void updateStockCache() {

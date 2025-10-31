@@ -9,13 +9,13 @@ import su.nightexpress.nexshop.ShopPlugin;
 import su.nightexpress.nexshop.api.shop.stock.StockValues;
 import su.nightexpress.nexshop.api.shop.type.TradeType;
 import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.nexshop.shop.menu.Confirmation;
 import su.nightexpress.nexshop.shop.virtual.VirtualShopModule;
 import su.nightexpress.nexshop.shop.virtual.lang.VirtualLang;
 import su.nightexpress.nexshop.shop.virtual.config.VirtualLocales;
 import su.nightexpress.nexshop.shop.virtual.impl.VirtualProduct;
 import su.nightexpress.nightcore.ui.dialog.Dialog;
 import su.nightexpress.nightcore.ui.menu.MenuViewer;
-import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.ui.menu.item.MenuItem;
 import su.nightexpress.nightcore.ui.menu.type.LinkedMenu;
 import su.nightexpress.nightcore.util.ItemUtil;
@@ -34,48 +34,35 @@ public class ProductStocksMenu extends LinkedMenu<ShopPlugin, VirtualProduct> {
     public ProductStocksMenu(@NotNull ShopPlugin plugin, @NotNull VirtualShopModule module) {
         super(plugin, MenuType.GENERIC_9X6, VirtualLang.EDITOR_TITLE_PRODUCT_STOCKS.text());
 
-        this.addItem(MenuItem.buildReturn(this, 49, (viewer, event) -> {
-            this.runNextTick(() -> module.openProductOptions(viewer.getPlayer(), this.getLink(viewer)));
-        }));
+        this.addItem(MenuItem.buildReturn(this, 49, (viewer, event) ->
+                this.runNextTick(() -> module.openProductOptions(viewer.getPlayer(), this.getLink(viewer)))));
 
-        this.addItem(ItemUtil.getSkinHead(SKULL_RESET), VirtualLocales.PRODUCT_EDIT_STOCK_RESET, 26, (viewer, event, product) -> {
+        this.addItem(ItemUtil.getSkinHead(SKULL_RESET), VirtualLocales.PRODUCT_EDIT_STOCK_RESET, 26, (viewer, event, product) ->
             this.runNextTick(() -> plugin.getShopManager().openConfirmation(viewer.getPlayer(), Confirmation.builder()
-                .onAccept((viewer1, event1) -> {
-                    plugin.getDataManager().resetStockDatas(product);
-                    module.openStockOptions(viewer.getPlayer(), product);
-                })
-                .onReturn((viewer1, event1) -> {
-                    module.openStockOptions(viewer.getPlayer(), product);
-                })
-                .build()
-            ));
-        });
+                    .onAccept((viewer1, event1) -> {
+                        plugin.getDataManager().resetStockDatas(product);
+                        module.openStockOptions(viewer.getPlayer(), product);
+                    })
+                    .onReturn((viewer1, event1) -> module.openStockOptions(viewer.getPlayer(), product))
+                    .build())));
 
+        this.addItem(ItemUtil.getSkinHead(SKULL_BUY_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK_BUY, 11, (viewer, event, product) ->
+                this.onClickInitial(viewer, event, product, product.getStockValues(), TradeType.BUY));
 
-        this.addItem(ItemUtil.getSkinHead(SKULL_BUY_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK_BUY, 11, (viewer, event, product) -> {
-            this.onClickInitial(viewer, event, product, product.getStockValues(), TradeType.BUY);
-        });
+        this.addItem(ItemUtil.getSkinHead(SKULL_SELL_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK_SELL, 13, (viewer, event, product) ->
+                this.onClickInitial(viewer, event, product, product.getStockValues(), TradeType.SELL));
 
-        this.addItem(ItemUtil.getSkinHead(SKULL_SELL_STOCK), VirtualLocales.PRODUCT_EDIT_STOCK_SELL, 13, (viewer, event, product) -> {
-            this.onClickInitial(viewer, event, product, product.getStockValues(), TradeType.SELL);
-        });
+        this.addItem(NightItem.asCustomHead(SKULL_CLOCK), VirtualLocales.PRODUCT_EDIT_STOCK_RESET_TIME, 15, (viewer, event, product) ->
+                this.onClickRestock(viewer, event, product, product.getStockValues()));
 
-        this.addItem(NightItem.asCustomHead(SKULL_CLOCK), VirtualLocales.PRODUCT_EDIT_STOCK_RESET_TIME, 15, (viewer, event, product) -> {
-            this.onClickRestock(viewer, event, product, product.getStockValues());
-        });
+        this.addItem(ItemUtil.getSkinHead(SKULL_BUY_LIMIT), VirtualLocales.PRODUCT_EDIT_LIMIT_BUY, 29, (viewer, event, product) ->
+                this.onClickInitial(viewer, event, product, product.getLimitValues(), TradeType.BUY));
 
+        this.addItem(ItemUtil.getSkinHead(SKULL_SELL_LIMIT), VirtualLocales.PRODUCT_EDIT_LIMIT_SELL, 31, (viewer, event, product) ->
+                this.onClickInitial(viewer, event, product, product.getLimitValues(), TradeType.SELL));
 
-        this.addItem(ItemUtil.getSkinHead(SKULL_BUY_LIMIT), VirtualLocales.PRODUCT_EDIT_LIMIT_BUY, 29, (viewer, event, product) -> {
-            this.onClickInitial(viewer, event, product, product.getLimitValues(), TradeType.BUY);
-        });
-
-        this.addItem(ItemUtil.getSkinHead(SKULL_SELL_LIMIT), VirtualLocales.PRODUCT_EDIT_LIMIT_SELL, 31, (viewer, event, product) -> {
-            this.onClickInitial(viewer, event, product, product.getLimitValues(), TradeType.SELL);
-        });
-
-        this.addItem(NightItem.asCustomHead(SKULL_CLOCK), VirtualLocales.PRODUCT_EDIT_LIMIT_RESET_TIME, 33, (viewer, event, product) -> {
-            this.onClickRestock(viewer, event, product, product.getLimitValues());
-        });
+        this.addItem(NightItem.asCustomHead(SKULL_CLOCK), VirtualLocales.PRODUCT_EDIT_LIMIT_RESET_TIME, 33, (viewer, event, product) ->
+                this.onClickRestock(viewer, event, product, product.getLimitValues()));
     }
 
     private void onClickInitial(@NotNull MenuViewer viewer, @NotNull InventoryClickEvent event, @NotNull VirtualProduct product,

@@ -59,7 +59,6 @@ public class VirtualLang implements LangContainer {
     public static final MessageLocale COMMAND_ROTATE_DONE = LangEntry.builder("VirtualShop.Command.Rotate.Done").chatMessage(
         GRAY.wrap("Force rotated " + SOFT_YELLOW.wrap(SHOP_NAME) + " shop"));
 
-
     public static final MessageLocale SHOP_ROTATION_NOTIFY = LangEntry.builder("VirtualShop.Shop.Rotation.Update").message(
         MessageData.CHAT_NO_PREFIX,
         " ",
@@ -82,9 +81,6 @@ public class VirtualLang implements LangContainer {
 
     public static final MessageLocale SHOP_CREATE_ERROR_BAD_NAME = LangEntry.builder("VirtualShop.Shop.Create.Error.BadName").chatMessage(
         SOFT_RED.wrap("Only latin letters and numbers are allowed!"));
-
-
-
 
     public static final MessageLocale PRODUCT_PURCHASE_SELL = LangEntry.builder("VirtualShop.Product.Purchase.Sell").titleMessage(
         SOFT_GREEN.wrap(BOLD.wrap("Successful Sale!")),
@@ -145,11 +141,9 @@ public class VirtualLang implements LangContainer {
         SOFT_RED.wrap("Rotation with that name already exists!")
     );
 
-
     public static final ButtonLocale DIALOG_BUTTON_APPLY = builder("Dialog.Generic.Button.Apply").button(GREEN.wrap("✔") + " " + WHITE.wrap("Apply"));
     public static final ButtonLocale DIALOG_BUTTON_RESET = builder("Dialog.Generic.Button.Reset").button(RED.wrap("✘") + " " + WHITE.wrap("Reset"));
     public static final ButtonLocale DIALOG_BUTTON_BACK  = builder("Dialog.Generic.Button.Back").button(SOFT_YELLOW.wrap("←") + " " + WHITE.wrap("Back"));
-
 
     public static final TextLocale EDITOR_TITLE_SHOP_LIST               = LangEntry.builder("Editor.Title.Shop.List").text(BLACK.wrap("Virtual Shop Editor"));
     public static final TextLocale EDITOR_TITLE_SHOP_SETTINGS           = LangEntry.builder("Editor.Title.Shop.Settings").text(BLACK.wrap("Shop Settings"));
