@@ -1,0 +1,1055 @@
+Command:
+  Argument:
+    Name:
+      Name: isim
+      Currency: para-birimi
+      Price: fiyat
+  Currency:
+    Desc: Para birimlerini yönet.
+    Give:
+      Desc: Bir oyuncuya belirli bir para birimi ver.
+      Done: <lgray><lyellow>%player_name%</lyellow> oyuncusuna <lyellow>%amount% %currency_name%</lyellow> verildi.</lgray>
+    Take:
+      Desc: Bir oyuncudan belirli bir para birimi al.
+      Done: <lgray><lyellow>%player_name%</lyellow> oyuncusundan <lyellow>%amount% %currency_name%</lyellow> alındı.</lgray>
+    Create:
+      Desc: Elindeki eşyayla bir para birimi oluştur.
+      Done:
+        New: <lgray><lgreen>%name%</lgreen> adlı yeni para birimi <lgreen>%item%</lgreen> ile oluşturuldu.</lgray>
+      Error:
+        Exist: <lgray><lred>%currency_id%</lred> para birimi zaten mevcut ve bir eşya para birimi değil.</lgray>
+    Error:
+      NoItem: <lred>Bunun için elinde bir eşya tutman gerekiyor!</lred>
+Module:
+  Command:
+    Reloaded: <lgray><lgreen>%name%</lgreen> yeniden yüklendi!</lgray>
+    Reload:
+      Desc: Modülü yeniden yükle.
+Error:
+  Currency:
+    Invalid: <lred>Geçersiz para birimi.</lred>
+Shop:
+  Product:
+    Error:
+      InvalidCartUI:
+        - <sound:"entity_villager_no">
+        - '<lred>Satın alma menüsü açılamadı: Sepet arayüzü bulunamadı.</lred>'
+      Unbuyable:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Bu ürün şu an satın alınamaz!</lgray>
+      Unsellable:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Bu ürün şu an satılamaz!</lgray>
+      OutOfStock:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Bu ürünün stoğu tükendi!</lgray>
+      OutOfSpace:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Dükkanın yeri doldu!</lgray>
+      OutOfFunds:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Dükkanın parası kalmadı!</lgray>
+      FullStock:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Bu ürünün stoğu dolu!</lgray>
+      FullInventory:
+        - <sound:"entity_villager_no">
+        - <lred><b>Üzgünüz! </b></lred><lgray>Satın alma öncesinde envanterini temizlemen gerekiyor!</lgray>
+      TooExpensive:
+        - <output:"titles:15:60:15"><sound:"block_anvil_place">
+        - <lred><b>Çok Pahalı!</b></lred>
+        - <lgray><lred>%price%</lred> paranın olması gerekiyor!</lgray>
+      NotEnoughItems:
+        - <output:"titles:15:60:15"><sound:"block_anvil_place">
+        - <lred><b>Yeterli Eşya Yok!</b></lred>
+        - <lgray><lred>x%amount% %item%</lred> eşyasına ihtiyacın var!</lgray>
+  Cart:
+    EnterAmount:
+      - <output:"titles:20:1200:20">
+      - <lgreen><b>< Özel Miktar ></b></lgreen>
+      - <lgray>Miktarı gir...</lgray>
+Other:
+  PriceDisabled: Yok
+  NoRent: < Kiralanmamış >
+  Undefined: <lgray>« Tanımsız »</lgray>
+Editor:
+  Price:
+    Float:
+      NoDays: Gün belirlenmemiş. Fiyat düzgün yenilenmeyecek.
+      NoTimes: Saat belirlenmemiş. Fiyat düzgün yenilenmeyecek.
+  Generic:
+    Enter:
+      Name: <lgray><lgreen>[İsim]</lgreen> gir</lgray>
+      Amount: <lgray><lgreen>[Miktar]</lgreen> gir</lgray>
+      Value: <lgray><lgreen>[Değer]</lgreen> gir</lgray>
+      Day: <lgray><lgreen>[Gün Adı]</lgreen> gir (İngilizce)</lgray>
+      Time: <lgray><lgreen>[Saat]</lgreen> gir, örn. <lgreen>22:00</lgreen></lgray>
+      Seconds: <lgray><lgreen>[Saniye Miktarı]</lgreen> gir</lgray>
+  Product:
+    Enter:
+      Price: <lgray><lgreen>[Fiyat]</lgreen> gir</lgray>
+      UniPrice: <lgray><lgreen>[Min] [Max]</lgreen> gir</lgray>
+      Currency: <lgray><lgreen>[Para Birimi ID]</lgreen> gir</lgray>
+Days:
+  MONDAY: Pazartesi
+  TUESDAY: Salı
+  WEDNESDAY: Çarşamba
+  THURSDAY: Perşembe
+  FRIDAY: Cuma
+  SATURDAY: Cumartesi
+  SUNDAY: Pazar
+TradeType:
+  BUY: Satın Al
+  SELL: Sat
+PriceType:
+  FLAT: Sabit
+  FLOAT: Aralıklı
+  DYNAMIC: Dinamik
+  PLAYER_AMOUNT: Oyuncu Sayısına Göre
+VirtualShop:
+  Command:
+    Argument:
+      Name:
+        Shop: dükkan
+    Editor:
+      Desc: Sanal dükkan editörünü aç.
+    Open:
+      Desc: Belirli bir dükkanı aç.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> için <lyellow>%shop_name%</lyellow> dükkanı açıldı.</lgray>
+    Menu:
+      Desc: Ana menüyü aç.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> için dükkan menüsü açıldı.</lgray>
+    Shop:
+      Desc: Belirli bir dükkanı veya ana menüyü aç.
+    SellMenu:
+      Desc: Satış arayüzünü aç.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> için satış menüsü açıldı.</lgray>
+    SellAll:
+      Desc: Envanterdeki tüm eşyaları hızlıca sat.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> oyuncusu tüm eşyalarını satmaya zorlandı.</lgray>
+    SellHand:
+      Desc: Elindeki eşyayı hızlıca sat.
+      Done:
+        Others: <lgray><lyellow>%player_name%</lyellow> oyuncusu elindeki eşyayı satmaya zorlandı.</lgray>
+  Shop:
+    Rotation:
+      Notify:
+        - <noprefix>
+        - ' '
+        - <lgray><lyellow>%shop_name%</lyellow> dükkanında <lyellow>%amount%</lyellow> yeni ürün çıktı!</lgray>
+        - <lgray>Dükkanı açmak için <click:run_command:"/shop %shop_id%"><hover:show_text:'<lgray>Dükkanı açmak için tıkla!</lgray>'><lyellow><b>BURAYA</b></lyellow></hover></click> tıkla!</lgray>
+        - ' '
+    Error:
+      BadWorld: <lred>Bu dünyada dükkan kullanılamaz.</lred>
+      BadGamemode: <lred>Bu oyun modunda dükkan kullanamazsın!</lred>
+      InvalidLayout: '<lgray><lred>%shop_name%</lred> dükkanı açılamadı: Geçersiz dükkan düzeni!</lgray>'
+      Invalid: <lred>Böyle bir dükkan yok.</lred>
+  Product:
+    Purchase:
+      Sell:
+        - <output:"titles:15:60:15"><sound:"entity_experience_orb_pickup">
+        - <lgreen><b>Satış Başarılı!</b></lgreen>
+        - <lgray><lgreen>x%amount% %item%</lgreen> eşyasını <lgreen>%price%</lgreen> karşılığında sattın.</lgray>
+      Buy:
+        - <output:"titles:15:60:15"><sound:"entity_experience_orb_pickup">
+        - <lgreen><b>Satın Alma Başarılı!</b></lgreen>
+        - <lgray><lgreen>x%amount% %item%</lgreen> eşyasını <lgreen>%price%</lgreen> karşılığında satın aldın.</lgray>
+  SellMenu:
+    SaleResult:
+      - <output:"titles:15:60:15"><sound:"entity_experience_orb_pickup">
+      - <lgreen><b>Eşyalar Satıldı!</b></lgreen>
+      - <lgray>+%total%</lgray>
+    SaleDetails:
+      - <noprefix>
+      - ' '
+      - <lgreen><b>Satış Detayları:</b></lgreen>
+      - '%entry%'
+      - ' '
+      - '<lgray>Toplam: <lgreen>%total%</lgreen></lgray>'
+      - ' '
+    SaleEntry: '<lgray>x%amount% <white>%item%</white>: <lgreen>%price%</lgreen></lgray>'
+  Price:
+    AverageDynamics:
+      Up: <green>↑ %value%%</green>
+      Down: <red>↓ %value%%</red>
+  Editor:
+    Product:
+      NoRankRequirements: Rank gereksinimi yok!
+      NoPermissionRequirements: İzin gereksinimi yok!
+      Object:
+        Static2:
+          Name: <lyellow><b>%product_preview_name%</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Handler: </lgray>%product_handler%</lyellow>'
+            - '<lyellow>● <lgray>Para Birimi: </lgray>%product_currency%</lyellow>'
+            - '<lyellow>● <lgray>Fiyat Türü: </lgray>%product_price_type%</lyellow>'
+            - '<lyellow>● <lgray>Satın Alma Fiyatı: </lgray>%product_price_buy%</lyellow>'
+            - '<lyellow>● <lgray>Satış Fiyatı: </lgray>%product_price_sell%</lyellow>'
+            - ''
+            - <lgray>Bu ürünü başka bir slota,</lgray>
+            - <lgray>sayfaya veya dükkana taşıyabilirsin.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>düzenle</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>al</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>sil <lred>(geri alınamaz)</lred></lyellow>.</lgray>
+        Rotating2:
+          Name: <lyellow><b>%product_preview_name%</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Rotasyon Şansı: </lgray>%product_rotation_chance%%</lyellow>'
+            - '<lyellow>● <lgray>Para Birimi: </lgray>%product_currency%</lyellow>'
+            - '<lyellow>● <lgray>Satın Alma Fiyatı: </lgray>%product_price_buy%</lyellow>'
+            - '<lyellow>● <lgray>Satış Fiyatı: </lgray>%product_price_sell%</lyellow>'
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>düzenle</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>al</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>sil <lred>(geri alınamaz)</lred></lyellow>.</lgray>
+        FreeSlot:
+          Name: <lyellow><b><green><b>Boş Slot</b></green></b></lyellow>
+          Lore:
+            - ''
+            - <lgray><green><b>EŞYA ÜRÜNÜ:</b></green></lgray>
+            - <lgray>Bir eşya ile tıklayarak</lgray>
+            - <lgray><green>eşya</green> ürünü oluştur.</lgray>
+            - ''
+            - <lgray>Özel eşya verilerini yok saymak için</lgray>
+            - <lgray><white>Shift</white> tuşunu basılı tut.</lgray>
+            - ''
+            - <lgray><lorange><b>KOMUT ÜRÜNÜ:</b></lorange></lgray>
+            - <lgray>Boş bir imleçle tıklayarak</lgray>
+            - <lgray><lorange>komut</lorange> ürünü oluştur.</lgray>
+        ReservedSlot:
+          Name: <lyellow><b><red><b>Rezerve Slot</b></red></b></lyellow>
+          Lore:
+            - <lgray>Bu slot bir dükkan ürünü tarafından kullanılıyor.</lgray>
+        Item:
+          Name: <lyellow><b>Mevcut Eşya</b></lyellow>
+          Lore:
+            - <lgray>Bu eşya şu işlevleri görür:</lgray>
+            - <lyellow>● <lgray>Oyuncuların <green>satın aldığında</green> aldığı eşya.</lgray></lyellow>
+            - <lyellow>● <lgray>Oyuncuların <red>satabilmek için</red> sahip olması gereken eşya.</lgray></lyellow>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sürükleyip bırak ile <lyellow>değiştir</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>bir kopyasını al</lyellow>.</lgray>
+            - ''
+            - <lgray>(Eşya verilerini yok saymak için <white>Shift</white> tut)</lgray>
+        Preview:
+          Name: <lyellow><b>Eşya Önizlemesi</b></lyellow>
+          Lore:
+            - <lgray>Bu eşya yalnızca ürünün görsel</lgray>
+            - <lgray>temsili olarak kullanılır.</lgray>
+            - ''
+            - <lgray>Yeniden adlandırabilir, <lyellow>lore</lyellow> ve büyü ekleyebilirsin.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sürükleyip bırak ile <lyellow>değiştir</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>bir kopyasını al</lyellow>.</lgray>
+        RespectItemMeta:
+          Name: <lyellow><b>Eşya Verilerini Dikkate Al</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Aktif: </lgray>%product_item_meta_enabled%</lyellow>'
+            - ''
+            - <lgray><green>Aktifken</green>, oyuncular yalnızca <white>mevcut eşyayla</white> birebir</lgray>
+            - <lgray>aynı eşyaları satabilir.</lgray>
+            - ''
+            - <lgray><red>Pasifken</red>, oyuncular aynı türdeki herhangi bir</lgray>
+            - <lgray>eşyayı satabilir.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>aç/kapat</lyellow>.</lgray>
+        PriceManager:
+          Name: <lyellow><b>Fiyat Yöneticisi</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Tür: </lgray>%product_price_type%</lyellow>'
+            - '<lyellow>● <lgray>Para Birimi: </lgray>%product_currency%</lyellow>'
+            - '<lyellow>● <lgray>Satın Al: </lgray>%product_price_buy%</lyellow>'
+            - '<lyellow>● <lgray>Sat: </lgray>%product_price_sell%</lyellow>'
+            - ''
+            - <lgray>Para birimi ve fiyatı yönet.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>düzenle</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>yenile</lyellow>.</lgray>
+        RanksRequired:
+          Name: <lyellow><b>Gerekli Ranklar</b></lyellow>
+          Lore:
+            - <lgray>%product_allowed_ranks%</lgray>
+            - ''
+            - <lgray>Yalnızca listede belirtilen ranklardaki</lgray>
+            - <lgray>oyuncular bu ürüne erişebilir.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>rank ekle</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil & devre dışı bırak</lyellow>.</lgray>
+        PermissionsRequired:
+          Name: <lyellow><b>Gerekli İzinler</b></lyellow>
+          Lore:
+            - <lgray>%product_required_permissions%</lgray>
+            - ''
+            - <lgray>Yalnızca listede belirtilen izinlere sahip</lgray>
+            - <lgray>oyuncular bu ürüne erişebilir.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Shift-Sol Tık ile <lyellow>izin ekle</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Shift-Sağ Tık ile <lyellow>tümünü sil & devre dışı bırak</lyellow>.</lgray>
+        Commands:
+          Name: <lyellow><b>Komutlar</b></lyellow>
+          Lore:
+            - <lgray>%product_commands%</lgray>
+            - ''
+            - <lgray>Ürün satın alındığında</lgray>
+            - <lgray>çalıştırılacak komutlar.</lgray>
+            - ''
+            - <lgray><lyellow><b>Placeholder'lar:</b></lyellow></lgray>
+            - '<lyellow>● <lgray>%player_name%: </lgray>Oyuncu adı (alıcı).</lyellow>'
+            - '<lyellow>● <lgray>PlaceholderAPI: </lgray>Tümü desteklenir.</lyellow>'
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>komut ekle</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+        Rotation:
+          Chance:
+            Name: <lyellow><b>Rotasyon Şansı</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Mevcut: </lgray>%product_rotation_chance%%</lyellow>'
+              - ''
+              - <lgray>Bu ürünün bir sonraki dükkan rotasyonunda</lgray>
+              - <lgray>çıkma olasılığı. Sayı yükseldikçe olasılık artar.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>değiştir</lyellow>.</lgray>
+          DayTimes:
+            Name: <lyellow><b>%name%</b></lyellow>
+            Lore:
+              - <lgray>%time%</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>ekle</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+        Stock:
+          Category:
+            Name: <lyellow><b>Stok</b></lyellow>
+            Lore:
+              - <lgray>Her ürün için satın alınabilir ve satılabilir</lgray>
+              - <lgray>miktarı; global ve oyuncuya özel olarak</lgray>
+              - <lgray>burada ayarlayabilirsin.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>görüntüle</lyellow>.</lgray>
+          Info:
+            Global:
+              Name: <lyellow><b>Global Stok</b></lyellow>
+              Lore:
+                - <lgray>Tüm oyuncular için her üründen</lgray>
+                - <lgray>satılabilir/satın alınabilir miktarı sınırlar.</lgray>
+                - ''
+                - <lgray><lyellow><b>Manuel Stok Yenileme:</b></lyellow></lgray>
+                - '<lyellow>● <lgray>Satın almada: <green>Satış stoku ↑</green> | <red>Alım stoku ↓</red></lgray></lyellow>'
+                - '<lyellow>● <lgray>Satışta: <red>Satış stoku ↓</red> | <green>Alım stoku ↑</green></lgray></lyellow>'
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>global limit verilerini sil</lyellow>.</lgray>
+            Player:
+              Name: <lyellow><b>Oyuncu Stok Limitleri</b></lyellow>
+              Lore:
+                - <lgray>Her oyuncu için her üründen</lgray>
+                - <lgray>satılabilir/satın alınabilir miktarı sınırlar.</lgray>
+                - ''
+                - <lgray><lyellow><b>Manuel Stok Yenileme:</b></lyellow></lgray>
+                - <lgray>Oyuncu limitlerinde manuel yenileme <red>mümkün değildir</red>.</lgray>
+                - <lgray>Oyuncuların yenileme süresini beklemesi gerekir.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>oyuncu limit verilerini sil</lyellow>.</lgray>
+          Global:
+            BuyInitial:
+              Name: <lyellow><b>Başlangıç Alım Stoğu</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_global_buy_amount_initial%</lyellow>'
+                - ''
+                - <lgray>Başlangıç alım limitini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>limiti kaldır</lyellow>.</lgray>
+            SellInitial:
+              Name: <lyellow><b>Başlangıç Satış Stoğu</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_global_sell_amount_initial%</lyellow>'
+                - ''
+                - <lgray>Başlangıç satış limitini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>limiti kaldır</lyellow>.</lgray>
+            BuyRestock:
+              Name: <lyellow><b>Alım Stoğu Yenileme</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_global_buy_restock_time%</lyellow>'
+                - ''
+                - <lgray>Alım limitlerinin ne sıklıkla</lgray>
+                - <lgray>varsayılan (başlangıç) değere</lgray>
+                - <lgray>döneceğini belirler.</lgray>
+                - ''
+                - <lgray>Devre dışıyken <dgray>(-1)</dgray>, limit</lgray>
+                - <lgray>hiçbir zaman otomatik yenilenmez!</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+            SellRestock:
+              Name: <lyellow><b>Satış Stoğu Yenileme</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_global_sell_restock_time%</lyellow>'
+                - ''
+                - <lgray>Satış limitlerinin ne sıklıkla</lgray>
+                - <lgray>varsayılan (başlangıç) değere</lgray>
+                - <lgray>döneceğini belirler.</lgray>
+                - ''
+                - <lgray>Devre dışıyken <dgray>(-1)</dgray>, limit</lgray>
+                - <lgray>hiçbir zaman otomatik yenilenmez!</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+          Player:
+            BuyInitial:
+              Name: <lyellow><b>Başlangıç Alım Limiti</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_player_buy_amount_initial%</lyellow>'
+                - ''
+                - <lgray>Başlangıç alım limitini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>limiti kaldır</lyellow>.</lgray>
+            SellInitial:
+              Name: <lyellow><b>Başlangıç Satış Limiti</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_player_sell_amount_initial%</lyellow>'
+                - ''
+                - <lgray>Başlangıç satış limitini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>limiti kaldır</lyellow>.</lgray>
+            BuyRestock:
+              Name: <lyellow><b>Alım Limiti Yenileme</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_player_buy_restock_time%</lyellow>'
+                - ''
+                - <lgray>Alım limitlerinin ne sıklıkla</lgray>
+                - <lgray>varsayılan (başlangıç) değere</lgray>
+                - <lgray>döneceğini belirler.</lgray>
+                - ''
+                - <lgray>Devre dışıyken <dgray>(-1)</dgray>, limit</lgray>
+                - <lgray>hiçbir zaman otomatik yenilenmez!</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+            SellRestock:
+              Name: <lyellow><b>Satış Limiti Yenileme</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_stock_player_sell_restock_time%</lyellow>'
+                - ''
+                - <lgray>Satış limitlerinin ne sıklıkla</lgray>
+                - <lgray>varsayılan (başlangıç) değere</lgray>
+                - <lgray>döneceğini belirler.</lgray>
+                - ''
+                - <lgray>Devre dışıyken <dgray>(-1)</dgray>, limit</lgray>
+                - <lgray>hiçbir zaman otomatik yenilenmez!</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+        Price:
+          Info:
+            Name: <lyellow><b>Fiyat Bilgisi</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Satın Al: </lgray>%product_price_buy_formatted%</lyellow>'
+              - '<lyellow>● <lgray>Sat: </lgray>%product_price_sell_formatted%</lyellow>'
+              - ''
+              - <lgray><lyellow><b>Yenile:</b></lyellow></lgray>
+              - <lgray>Veritabanındaki fiyatı alır ve uygular.</lgray>
+              - <lgray>Veri yoksa veya süresi dolmuşsa</lgray>
+              - <lgray>yeni bir fiyat oluşturur.</lgray>
+              - ''
+              - <lgray>Çoğu durumda silmeden önce</lgray>
+              - <lgray>herhangi bir değişiklik yapmaz.</lgray>
+              - ''
+              - <lgray><lyellow><b>Sil:</b></lyellow></lgray>
+              - <lgray>Ürünün fiyat verisini</lgray>
+              - <lgray>veritabanından kaldırır.</lgray>
+              - ''
+              - <lgray>Yeni fiyat oluşturmak için <lyellow>yenile</lyellow> seçeneğini kullan.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>yenile</lyellow>.</lgray>
+              - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>sil</lyellow>.</lgray>
+          Type:
+            Name: <lyellow><b>Fiyat Türü</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Mevcut: </lgray>%product_price_type%</lyellow>'
+              - ''
+              - <lgray>Ürünün fiyat türünü değiştirir.</lgray>
+              - <lgray>Her türün farklı ayarları vardır.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>değiştir</lyellow>.</lgray>
+          Currency:
+            Name: <lyellow><b>Para Birimi</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Mevcut: </lgray>%product_currency%</lyellow>'
+              - ''
+              - <lgray>Ürünün para birimini belirler.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>değiştir</lyellow>.</lgray>
+          DiscountAllowed:
+            Name: <lyellow><b>İndirim Aktif</b></lyellow>
+            Lore:
+              - '<lyellow>● <lgray>Aktif: </lgray>%product_discount_allowed%</lyellow>'
+              - ''
+              - <lgray>Bu ürünün dükkan indirimlerinden</lgray>
+              - <lgray>etkilenip etkilenmeyeceğini belirler.</lgray>
+              - ''
+              - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>aç/kapat</lyellow>.</lgray>
+          Flat:
+            Buy:
+              Name: <lyellow><b>Satın Alma Fiyatı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_price_buy%</lyellow>'
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+            Sell:
+              Name: <lyellow><b>Satış Fiyatı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_price_sell%</lyellow>'
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+          Float:
+            Buy:
+              Name: <lyellow><b>Satın Alma Fiyatı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Min: </lgray>%product_pricer_buy_min%</lyellow>'
+                - '<lyellow>● <lgray>Max: </lgray>%product_pricer_buy_max%</lyellow>'
+                - ''
+                - <lgray>Ürün için bir fiyat aralığı belirler.</lgray>
+                - <lgray>Nihai satın alma fiyatı bu değerler arasında olacak.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+            Sell:
+              Name: <lyellow><b>Satış Fiyatı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Min: </lgray>%product_pricer_sell_min%</lyellow>'
+                - '<lyellow>● <lgray>Max: </lgray>%product_pricer_sell_max%</lyellow>'
+                - ''
+                - <lgray>Ürün için bir fiyat aralığı belirler.</lgray>
+                - <lgray>Nihai satış fiyatı bu değerler arasında olacak.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>devre dışı bırak</lyellow>.</lgray>
+            Decimals:
+              Name: <lyellow><b>Ondalık Basamaklar</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Aktif: </lgray>%product_pricer_float_round_decimals%</lyellow>'
+                - ''
+                - <lgray>Fiyatların ondalıklı mı yoksa</lgray>
+                - <lgray>tam sayı mı olacağını belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>aç/kapat</lyellow>.</lgray>
+            RefreshDays:
+              Name: <lyellow><b>Yenileme Günleri</b></lyellow>
+              Lore:
+                - <lgray>%product_pricer_float_refresh_days%</lgray>
+                - ''
+                - <lgray>Fiyatın hangi günlerde yenileneceğini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>gün ekle</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+            RefreshTimes:
+              Name: <lyellow><b>Yenileme Saatleri</b></lyellow>
+              Lore:
+                - <lgray>%product_pricer_float_refresh_times%</lgray>
+                - ''
+                - <lgray>Fiyatın hangi saatlerde yenileneceğini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>saat ekle</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+          Dynamic:
+            Initial:
+              Name: <lyellow><b>Başlangıç Fiyatı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Satın Al: </lgray>%product_pricer_dynamic_initial_buy%</lyellow>'
+                - '<lyellow>● <lgray>Sat: </lgray>%product_pricer_dynamic_initial_sell%</lyellow>'
+                - ''
+                - <lgray>Ürünün başlangıç fiyatını belirler.</lgray>
+                - <lgray>Bunlar varsayılan değerler olacak.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>alım fiyatını değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>satış fiyatını değiştir</lyellow>.</lgray>
+            Step:
+              Name: <lyellow><b>Fiyat Adımı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Satın Al: </lgray>%product_pricer_dynamic_step_buy%</lyellow>'
+                - '<lyellow>● <lgray>Sat: </lgray>%product_pricer_dynamic_step_sell%</lyellow>'
+                - ''
+                - <lgray>Her alım/satım işleminde fiyatın</lgray>
+                - <lgray>ne kadar artıp azalacağını belirler.</lgray>
+                - ''
+                - <lgray>Satın alma = Fiyat artar, Satış = Fiyat düşer</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>alım adımını değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>satış adımını değiştir</lyellow>.</lgray>
+          Players:
+            Initial:
+              Name: <lyellow><b>Başlangıç Fiyatı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Satın Al: </lgray>%product_pricer_dynamic_initial_buy%</lyellow>'
+                - '<lyellow>● <lgray>Sat: </lgray>%product_pricer_dynamic_initial_sell%</lyellow>'
+                - ''
+                - <lgray>Ürünün başlangıç fiyatını belirler.</lgray>
+                - <lgray>Bunlar varsayılan değerler olacak.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>alım fiyatını değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>satış fiyatını değiştir</lyellow>.</lgray>
+            Adjust:
+              Name: <lyellow><b>Fiyat Ayarı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Satın Al: </lgray>%product_pricer_players_adjust_amount_buy%</lyellow>'
+                - '<lyellow>● <lgray>Sat: </lgray>%product_pricer_players_adjust_amount_sell%</lyellow>'
+                - ''
+                - <lgray>Online oyuncu sayısına göre</lgray>
+                - <lgray>fiyatın ne kadar değişeceğini belirler.</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>alım fiyatını değiştir</lyellow>.</lgray>
+                - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>satış fiyatını değiştir</lyellow>.</lgray>
+            Step:
+              Name: <lyellow><b>Fiyat Adımı</b></lyellow>
+              Lore:
+                - '<lyellow>● <lgray>Mevcut: </lgray>%product_pricer_players_adjust_step%</lyellow>'
+                - ''
+                - <lgray>Kaç oyuncuda bir fiyatın</lgray>
+                - <lgray>değişeceğini belirler.</lgray>
+                - ''
+                - <lgray><lyellow><b>Örnekler:</b></lyellow></lgray>
+                - <lgray><lyellow>1</lyellow> = <lyellow>her oyuncu</lyellow> için.</lgray>
+                - <lgray><lyellow>5</lyellow> = <lyellow>her 5 oyuncuda</lyellow> bir (5, 10, 15, vb.)</lgray>
+                - ''
+                - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>değiştir</lyellow>.</lgray>
+    Create:
+      Error:
+        Exist: <lred>Bu ID ile bir dükkan zaten mevcut.</lred>
+    Enter:
+      Id: <lgray><lgreen>[Dükkan ID]</lgreen> gir</lgray>
+      Description: <lgray><lgreen>[Açıklama]</lgreen> gir</lgray>
+      NpcId: <lgray><lgreen>[NPC ID]</lgreen> gir</lgray>
+      Title: <lgray><lgreen>[Başlık]</lgreen> gir</lgray>
+      Command: <lgray><lgreen>[Komut]</lgreen> gir</lgray>
+      Slots: <lgray><lgreen>[Slotlar]</lgreen> gir -> [1,2,5,vb]</lgray>
+      Rank: <lgray><lgreen>[Rank Adı]</lgreen> gir</lgray>
+      Permission: <lgray><lgreen>[İzin Düğümü]</lgreen> gir</lgray>
+    Shop:
+      Create:
+        Name: <lyellow><b>Yeni Dükkan</b></lyellow>
+        Lore:
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>statik dükkan oluştur</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>dönen dükkan oluştur</lyellow>.</lgray>
+      Object:
+        Name: <lyellow><b>%shop_name%</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Tür: </lgray>%shop_type%</lyellow>'
+          - '<lyellow>● <lgray>Sayfalar: </lgray>%shop_pages%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>düzenle</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>sil <red>(geri alınamaz)</red></lyellow>.</lgray>
+      DisplayName:
+        Name: <lyellow><b>İsim</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Mevcut: </lgray>%shop_name%</lyellow>'
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+      Description:
+        Name: <lyellow><b>Açıklama</b></lyellow>
+        Lore:
+          - <lgray>%shop_description%</lgray>
+          - ''
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>satır ekle</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+      Pages:
+        Name: <lyellow><b>Sayfa Sayısı</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Mevcut: </lgray>%shop_pages%</lyellow>'
+          - ''
+          - <lgray>Dükkanın sayfa sayısı.</lgray>
+          - ''
+          - <lgray><lred>[!]</lred> Sayfa düzenine buton eklediğinden</lgray>
+          - <lgray>emin ol.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>+1 sayfa</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>-1 sayfa</lyellow>.</lgray>
+      Icon:
+        Name: <lyellow><b>Dükkan İkonu</b></lyellow>
+        Lore:
+          - <lyellow>[▶]</lyellow> <lgray>Sürükleyip bırak ile <lyellow>değiştir</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>bir kopyasını al</lyellow>.</lgray>
+      PermissionRequirement:
+        Name: <lyellow><b>Gerekli İzin</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Aktif: </lgray>%shop_permission_required%</lyellow>'
+          - '<lyellow>● <lgray>İzin Düğümü: </lgray>%shop_permission_node%</lyellow>'
+          - ''
+          - <lgray>Bu dükkanı kullanmak için belirli bir</lgray>
+          - <lgray>iznin gerekip gerekmediğini belirler.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>aç/kapat</lyellow>.</lgray>
+      Transactions:
+        Name: <lyellow><b>İşlemler</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Satın alma aktif: </lgray>%shop_buy_allowed%</lyellow>'
+          - '<lyellow>● <lgray>Satış aktif: </lgray>%shop_sell_allowed%</lyellow>'
+          - ''
+          - <lgray>Bu dükkan için alış/satışa</lgray>
+          - <lgray>izin verilip verilmeyeceğini belirler.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>satın almayı aç/kapat</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>satışı aç/kapat</lyellow>.</lgray>
+      AttachedNPCs:
+        Name: <lyellow><b>Bağlı NPC'ler</b></lyellow>
+        Lore:
+          - <lgray>%shop_npc_ids%</lgray>
+          - ''
+          - <lgray>Bu dükkanı açan NPC'lerin (id) listesi.</lgray>
+          - <lgray>NPC ile etkileşime geçildiğinde dükkan açılır.</lgray>
+          - <lgray><lred>(Citizens eklentisi gereklidir)</lred></lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>NPC ekle</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+      Layout:
+        Name: <lyellow><b>Düzen Editörü</b></lyellow>
+        Lore:
+          - '<lyellow>● <lgray>Mevcut: </lgray>%shop_layout%</lyellow>'
+          - ''
+          - <lgray>Bu dükkan için arayüz düzenini</lgray>
+          - <lgray>belirler.</lgray>
+          - ''
+          - <lgray>Daha fazla layout <lyellow>/layouts/</lyellow> klasöründe oluşturulabilir.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>değiştir</lyellow>.</lgray>
+      Discounts:
+        Name: <lyellow><b>İndirimler</b></lyellow>
+        Lore:
+          - <lgray>Dükkan indirimlerini buradan oluştur ve yönet.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>görüntüle</lyellow>.</lgray>
+      Products:
+        Name: <lyellow><b>Ürünler</b></lyellow>
+        Lore:
+          - <lgray>Ürünleri buradan oluştur ve yönet.</lgray>
+          - ''
+          - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>görüntüle</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>tüm fiyatları sıfırla ve güncelle</lyellow>.</lgray>
+          - <lyellow>[▶]</lyellow> <lgray>[F / Değiştir] ile <lyellow>tüm stok limitlerini sıfırla</lyellow>.</lgray>
+      Rotation:
+        Type:
+          Name: <lyellow><b>Rotasyon Türü</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Mevcut: </lgray>%shop_rotation_type%</lyellow>'
+            - ''
+            - <lgray><lyellow><b>Türler:</b></lyellow></lgray>
+            - '<lyellow>● <lgray>INTERVAL: </lgray>Her X dakikada bir.</lyellow>'
+            - '<lyellow>● <lgray>FIXED: </lgray>Belirli saatlerde.</lyellow>'
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>değiştir</lyellow>.</lgray>
+        Interval:
+          Name: <lyellow><b>Rotasyon Aralığı</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Mevcut: </lgray>%shop_rotation_interval%</lyellow>'
+            - ''
+            - <lgray>Dükkan ürünlerinin ne sıklıkla (saniye)</lgray>
+            - <lgray>döneceğini belirler.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>rotasyonu zorla</lyellow>.</lgray>
+        Times:
+          Name: <lyellow><b>Rotasyon Saatleri</b></lyellow>
+          Lore:
+            - <lgray>Haftanın her günü için rotasyon</lgray>
+            - <lgray>saatlerini burada belirleyebilirsin.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Tık ile <lyellow>görüntüle</lyellow>.</lgray>
+        Products:
+          Name: <lyellow><b>Rotasyondaki Ürünler</b></lyellow>
+          Lore:
+            - '<lyellow>● <lgray>Min: </lgray>%shop_rotation_min_products%</lyellow>'
+            - '<lyellow>● <lgray>Max: </lgray>%shop_rotation_max_products%</lyellow>'
+            - '<lyellow>● <lgray>Slotlar: </lgray>%shop_rotation_product_slots%</lyellow>'
+            - ''
+            - <lgray>Rotasyonda kaç ürünün kullanılacağını</lgray>
+            - <lgray>ve hangi slotlarda görüneceğini belirler.</lgray>
+            - ''
+            - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>min değiştir</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>max değiştir</lyellow>.</lgray>
+            - <lyellow>[▶]</lyellow> <lgray>[Q / Bırak] ile <lyellow>slotları değiştir</lyellow>.</lgray>
+  Discount:
+    Create:
+      Name: <lyellow><b>İndirim Oluştur</b></lyellow>
+      Lore: []
+    Object:
+      Name: <lyellow><b>İndirim</b></lyellow>
+      Lore:
+        - '<lyellow>● <lgray>Miktar: </lgray>%discount_amount%</lyellow>'
+        - '<lyellow>● <lgray>Günler: </lgray>%discount_days%</lyellow>'
+        - '<lyellow>● <lgray>Saatler: </lgray>%discount_times%</lyellow>'
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>düzenle</lyellow>.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>sil <lred>(geri alınamaz)</lred></lyellow>.</lgray>
+    Amount:
+      Name: <lyellow><b>Miktar</b></lyellow>
+      Lore:
+        - '<lyellow>● <lgray>Miktar: </lgray>%discount_amount%%</lyellow>'
+        - ''
+        - <lgray>İndirim miktarını (yüzde olarak) belirler.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+    Duration:
+      Name: <lyellow><b>Süre</b></lyellow>
+      Lore:
+        - '<lyellow>● <lgray>Süre: </lgray>%discount_duration%</lyellow>'
+        - ''
+        - <lgray>İndirim ne kadar sürecek?</lgray>
+        - <lgray>Saniye cinsinden gir.</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>değiştir</lyellow>.</lgray>
+    Days:
+      Name: <lyellow><b>Aktif Günler</b></lyellow>
+      Lore:
+        - '<lyellow>● <lgray>Günler: </lgray>%discount_days%</lyellow>'
+        - ''
+        - <lgray>Bu indirim hangi günlerde</lgray>
+        - <lgray>aktif olacak?</lgray>
+        - ''
+        - <lgray>En az bir gün ve bir saat gereklidir!</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>gün ekle</lyellow>.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+    Times:
+      Name: <lyellow><b>Aktif Saatler</b></lyellow>
+      Lore:
+        - '<lyellow>● <lgray>Saatler: </lgray>%discount_times%</lyellow>'
+        - ''
+        - <lgray>Bu indirim hangi saatlerde</lgray>
+        - <lgray>aktif olacak?</lgray>
+        - ''
+        - <lgray>En az bir gün ve bir saat gereklidir!</lgray>
+        - ''
+        - <lyellow>[▶]</lyellow> <lgray>Sol Tık ile <lyellow>saat ekle</lyellow>.</lgray>
+        - <lyellow>[▶]</lyellow> <lgray>Sağ Tık ile <lyellow>tümünü sil</lyellow>.</lgray>
+  ShopType:
+    STATIC: Statik
+    ROTATING: Dönen
+ChestShop:
+  Command:
+    Argument:
+      Name:
+        BuyPrice: alimFiyati
+        SellPrice: satisFiyati
+    List:
+      Desc: Kendi veya başka bir oyuncunun dükkanlarını listele.
+    Bank:
+      Desc: '[Oyuncu] bankasını aç.'
+    Create:
+      Desc: Baktığın sandığa bir dükkan oluştur.
+    Browse:
+      Desc: Oyuncu dükkanlarına göz at.
+    GiveItem:
+      Desc: Dükkan oluşturma eşyasını ver.
+      BadMaterial: <lred>Geçersiz dükkan türü!</lred>
+      Done: <lgray><lyellow>%player_display_name%</lyellow> oyuncusuna <lyellow>%name%</lyellow> verildi.</lgray>
+    Remove:
+      Desc: Baktığın sandıktaki dükkanı kaldır.
+    Open:
+      Desc: Hedef dükkanın envanterini aç.
+  Shop:
+    Error:
+      NotOwner: <lred>Bu dükkanın sahibi değilsin!</lred>
+    Creation:
+      Info:
+        Done:
+          - <output:"titles:10:80:10"><sound:"block_note_block_bell">
+          - <lgreen><b>Dükkan Oluşturuldu!</b></lgreen>
+          - <lgray>Ayarları açmak için çömelirken <lgreen>Sağ Tık</lgreen> yap.</lgray>
+      Error:
+        AlreadyShop: <lred>Bu sandık zaten bir dükkan!</lred>
+        NotEmpty: <lred>Lütfen önce sandıktaki tüm eşyaları çıkar.</lred>
+        NotAChest: <lred>Bu blok dükkan için kullanılamaz!</lred>
+        BadLocation: <lred>Buraya dükkan kuramazsın!</lred>
+        LimitReached: <lred>Dükkan limitine ulaştın! Daha fazla oluşturamazsın.</lred>
+        BadArea: <lred>Dükkan yalnızca kendi arazinde kurulabilir!</lred>
+        NotEnoughFunds: <lred>Yeterli paran yok!</lred>
+        TypePermission: <lred>Bu dükkan türünü oluşturma iznin yok!</lred>
+    Removal:
+      Error:
+        NotEmpty: <lred>Dükkanı silmek için önce envanterindeki eşyaları geri al.</lred>
+        NotAShop: <lred>Bu blok bir dükkan değil!</lred>
+      Info:
+        Done:
+          - <output:"titles:10:80:10"><sound:"entity_generic_explode">
+          - <lred><b>Dükkan Silindi!</b></lred>
+    Trade:
+      Buy:
+        Info:
+          User:
+            - <noprefix>
+            - <lyellow><orange>%shop_name%</orange> dükkanından <orange>x%amount% %item%</orange> eşyasını <orange>%price%</orange> karşılığında satın aldın.</lyellow>
+          Owner:
+            - <noprefix>
+            - <lyellow><orange>%player_display_name%</orange>, <orange>%shop_name%</orange> dükkanından <orange>x%amount% %item%</orange> eşyasını <orange>%price%</orange> karşılığında satın aldı.</lyellow>
+      Sell:
+        Info:
+          User:
+            - <noprefix>
+            - <lyellow><orange>%shop_name%</orange> dükkanına <orange>x%amount% %item%</orange> eşyasını <orange>%price%</orange> karşılığında sattın.</lyellow>
+          Owner:
+            - <noprefix>
+            - <lyellow><orange>%player_display_name%</orange>, <orange>%shop_name%</orange> dükkanına <orange>x%amount% %item%</orange> eşyasını <orange>%price%</orange> karşılığında sattı.</lyellow>
+    Bank:
+      Error:
+        InvalidCurrency:
+          - <output:"titles:20:60:20">
+          - <lred><b>İşlem Başarısız.</b></lred>
+          - <lgray>Bu para birimi geçersiz veya izin verilmiyor!</lgray>
+      Deposit:
+        Success: <lgray>Dükkan bankasına <lgreen>%amount%</lgreen> yatırdın.</lgray>
+        Error:
+          NotEnough: <lgray>Yeterli paran yok.</lgray>
+      Withdraw:
+        Success: <lgray>Dükkan bankasından <lgreen>%amount%</lgreen> çektin.</lgray>
+        NotEnough: <lgray>Bankada yeterli para yok.</lgray>
+    InfiniteStorage:
+      Deposit:
+        Success: <lgray>Dükkan deposuna <lgreen>x%amount% %item%</lgreen> yatırdın!</lgray>
+        Error:
+          NotEnough: <lgray>Yeterli eşyan yok.</lgray>
+      Withdraw:
+        Success: <lgray>Dükkan deposundan <lgreen>x%amount% %item%</lgreen> çektin.</lgray>
+        NotEnough: <lgray>Depoda yeterli eşya yok.</lgray>
+  Product:
+    Error:
+      BadItem: <lred>Bu eşya dükkan için kullanılamaz!</lred>
+  Editor:
+    Error:
+      ProductLeft: <lred>Önce bu ürünün tüm eşyalarını sandıktan çıkarmalısın!</lred>
+  Notification:
+    ShopEarnings:
+      - <noprefix>
+      - ' '
+      - <lgreen><b>Dükkan Gelirlerin:</b></lgreen>
+      - '<lgray>Çevrimdışıyken dükkanların kazandı: <lgreen>%amount%</lgreen></lgray>'
+      - ' '
+  Search:
+    ItemPrompt:
+      - <output:"titles:20:-1:20"><sound:"block_lava_pop">
+      - <lyellow><b>Dükkan Arama</b></lyellow>
+      - <lgray>Aramak için <lyellow>eşya adı</lyellow> gir.</lgray>
+    PlayerPrompt:
+      - <output:"titles:20:-1:20"><sound:"block_lava_pop">
+      - <lyellow><b>Dükkan Arama</b></lyellow>
+      - <lgray>Aramak için <lyellow>oyuncu adı</lyellow> gir.</lgray>
+  ShopType:
+    PLAYER: Oyuncu
+    ADMIN: Admin
+Auction:
+  Command:
+    Argument:
+      Name:
+        Price: fiyat
+    Open:
+      Desc: Açık artırmayı aç.
+    Sell:
+      Desc: Açık artırmaya eşya ekle.
+      Error:
+        NoItem: <lred>Bunun için elinde bir eşya tutman gerekiyor!</lred>
+    Expired:
+      Desc: Süresi dolmuş ilanların listesi.
+    History:
+      Desc: Satış geçmişin.
+    Selling:
+      Desc: Mevcut ilanlarının listesi.
+    Unclaimed:
+      Desc: Talep edilmemiş ilan gelirlerinin listesi.
+  Listing:
+    Add:
+      Success:
+        Info:
+          - <noprefix><sound:"block_note_block_bell">
+          - ' '
+          - <lgreen><b>✔ Başarılı!</b></lgreen>
+          - ' '
+          - <lgray><lgreen>x%listing_item_amount% %listing_item_name%</lgreen> eşyasını <lgreen>%listing_price%</lgreen> karşılığında açık artırmaya ekledin.</lgray>
+          - '<lgray>Vergi tutarı: <lred>%tax%</lred></lgray>'
+          - ' '
+        Broadcast:
+          - <noprefix>
+          - ' '
+          - <lyellow><b>Açık Artırma:</b></lyellow>
+          - <lgray><lyellow>%player_display_name%</lyellow> oyuncusu <lyellow>x%listing_item_amount%</lyellow> <hover:show_item:'%listing_item_value%'><lyellow>%listing_item_name%</lyellow></hover> eşyasını <lyellow>%listing_price%</lyellow> karşılığında açık artırmaya ekledi.</lgray>
+          - ' '
+      Error:
+        BadItem:
+          - <sound:"entity_villager_no">
+          - <lgray>¡<lred>✘ %item%</lred> açık artırmaya eklenemez!</lgray>
+        Limit:
+          - <sound:"entity_villager_no">
+          - <lgray><lred>✘</lred> Açık artırmada en fazla <lred>%amount%</lred> eşyan olabilir!</lgray>
+        Price:
+          Tax:
+            - <sound:"entity_villager_no">
+            - '<lgray><lred>✘</lred> <lred>%tax%</lred> vergi tutarını karşılayamazsın: <lred>%amount%</lred>!</lgray>'
+          Currency:
+            Min:
+              - <sound:"entity_villager_no">
+              - <lgray><lred>✘</lred> <lred>%currency_name%</lred> para birimi için minimum fiyat <lred>%amount%</lred>!</lgray>
+            Max:
+              - <sound:"entity_villager_no">
+              - <lgray><lred>✘</lred> <lred>%currency_name%</lred> para birimi için maksimum fiyat <lred>%amount%</lred>!</lgray>
+          Negative:
+            - <sound:"entity_villager_no">
+            - <lgray><lred>✘</lred> Fiyat negatif olamaz!</lgray>
+          Material:
+            Min:
+              - <sound:"entity_villager_no">
+              - <lgray><lred>✘</lred> <lred>x1 %item%</lred> için minimum fiyat <lred>%amount%</lred>!</lgray>
+            Max:
+              - <sound:"entity_villager_no">
+              - <lgray><lred>✘</lred> <lred>x1 %item%</lred> için maksimum fiyat <lred>%amount%</lred>!</lgray>
+        DisabledGamemode:
+          - <sound:"entity_villager_no">
+          - <lgray><lred>✘</lred> Bu oyun modunda eşya ekleyemezsin!</lgray>
+    Buy:
+      Success:
+        Info:
+          - <output:"titles:20:60:20"><sound:"entity_player_levelup">
+          - <lgreen><b>Satın Alma Başarılı!</b></lgreen>
+          - <lgray><lgreen>%listing_seller%</lgreen> satıcısından <lgreen>x%listing_item_amount% %listing_item_name%</lgreen> eşyasını <lgreen>%listing_price%</lgreen> karşılığında satın aldın.</lgray>
+      Error:
+        NotEnoughFunds:
+          - <output:"titles:20:60:20"><sound:"block_anvil_place">
+          - <lred><b>Yeterli Paran Yok!</b></lred>
+          - <lgray><lred>%listing_price%</lred> paranın olması gerekiyor. Şu an <lred>%balance%</lred> paran var.</lgray>
+  Notify:
+    Listing:
+      Claim: <lgray><lgreen>✔</lgreen> <lgreen>%listing_item_name%</lgreen> için <lgreen>%listing_price%</lgreen> talep ettin!</lgray>
+      Unclaimed:
+        - <noprefix>
+        - ' '
+        - <lyellow><b>Açık Artırma:</b></lyellow>
+        - <lgray>Açık artırmalarından talep edilmemiş <lyellow>%amount%</lyellow> geliriniz var.</lgray>
+        - ''
+        - <lgray>Gelirlerini talep etmek için <click:run_command:"/ah unclaimed"><hover:show_text:'<lgray>Gelirlerini talep etmek için tıkla!</lgray>'><lyellow><b>BURAYA</b></lyellow></hover></click> tıkla!</lgray>
+        - ' '
+      Expired:
+        - <noprefix>
+        - ' '
+        - <lorange><b>Açık Artırma:</b></lorange>
+        - <lgray>Süresi dolmuş <lorange>%amount%</lorange> ilanın var.</lgray>
+        - ''
+        - <lgray>Eşyalarını geri almak için <click:run_command:"/ah expired"><hover:show_text:'<lgray>Eşyalarını geri almak için tıkla.</lgray>'><lorange><b>BURAYA</b></lorange></hover></click> tıkla.</lgray>
+        - ' '
+  Error:
+    DisabledWorld: <lgray><lred>✘</lred> Açık artırma bu dünyada devre dışı.</lgray>
+  SortType:
+    NAME: İsim
+    MATERIAL: Materyal
+    SELLER: Satıcı
+    NEWEST: En Yeni
+    OLDEST: En Eski
+    MOST_EXPENSIVE: En Pahalı
+    LEAST_EXPENSIVE: En Ucuz
