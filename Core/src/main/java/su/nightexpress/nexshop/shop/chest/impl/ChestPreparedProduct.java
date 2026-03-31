@@ -120,9 +120,19 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
         ShopTransactionEvent event = new ShopTransactionEvent(player, shop, transaction);
         Bukkit.getPluginManager().callEvent(event);
 
+        // Take items from player FIRST before adding to shop chest to prevent item duplication.
+        // Re-verify the player still has sufficient items after the event fired (units may have been modified).
         if (!shop.isAdminShop() && event.getTransactionResult() == Result.SUCCESS) {
-            if (!product.storeStock(TradeType.SELL, transaction.getUnits(), null)) {
-                transaction.setResult(Transaction.Result.OUT_OF_SPACE);
+            int requiredUnits = transaction.getUnits();
+            if (product.countUnits(inventory) < requiredUnits) {
+                transaction.setResult(Transaction.Result.NOT_ENOUGH_ITEMS);
+            } else {
+                product.take(inventory, requiredUnits);
+                if (!product.storeStock(TradeType.SELL, requiredUnits, null)) {
+                    // storeStock failed — roll back: return items to the player.
+                    product.delivery(inventory, requiredUnits);
+                    transaction.setResult(Transaction.Result.OUT_OF_SPACE);
+                }
             }
         }
 
@@ -137,7 +147,9 @@ public class ChestPreparedProduct extends AbstractPreparedProduct<ChestProduct> 
                 shop.getModule().savePlayerBank(shop.getRentersOrOwnerBank());
             }
             product.getCurrency().give(player, transaction.getPrice());
-            product.take(inventory, transaction.getUnits());
+            if (shop.isAdminShop()) {
+                product.take(inventory, transaction.getUnits());
+            }
             shop.getModule().getLogger().logTransaction(event);
             shop.markDirty();
 
