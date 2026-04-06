@@ -1,13 +1,13 @@
 package su.nightexpress.nexshop.auction.data;
 
 import com.google.gson.reflect.TypeToken;
-import su.nightexpress.nexshop.ShopAPI;
+import su.nightexpress.excellentshop.ShopAPI;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.data.DataHandler;
-import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.excellentshop.data.DataHandler;
+import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.db.sql.query.impl.DeleteQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.InsertQuery;

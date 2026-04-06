@@ -4,7 +4,7 @@ import org.bukkit.block.Container;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;

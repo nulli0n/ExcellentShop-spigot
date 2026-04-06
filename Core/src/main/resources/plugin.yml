@@ -1,7 +1,7 @@
 name: ExcellentShop
-main: su.nightexpress.nexshop.ShopPlugin
+main: su.nightexpress.excellentshop.ShopPlugin
 version: '${project.version}'
-description: Advanced 4 in 1 shop plugin with a lot of cool features!
+description: Advanced shop plugin with a lot of cool features!
 author: NightExpress
 depend: [ nightcore ]
 softdepend:
@@ -15,4 +15,4 @@ softdepend:
   - ProtocolLib
   - packetevents
   - PlotSquared
-api-version: 1.18
+api-version: 1.21

@@ -1,14 +1,11 @@
 package su.nightexpress.nexshop.auction.menu;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.Listings;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -16,14 +13,13 @@ import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.menu.api.AutoFill;
 import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.item.MenuItem;
-import su.nightexpress.nightcore.util.ItemUtil;
 import su.nightexpress.nightcore.util.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.excellentshop.ShopPlaceholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {

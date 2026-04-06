@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.auction;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.StringUtil;
 import su.nightexpress.nightcore.util.placeholder.Placeholder;
@@ -30,8 +30,8 @@ public class ListingCategory implements Placeholder {
         this.isDefault = isDefault;
         this.materials = materials.stream().map(String::toLowerCase).collect(Collectors.toSet());
         this.placeholderMap = new PlaceholderMap()
-            .add(Placeholders.CATEGORY_ID, this::getId)
-            .add(Placeholders.CATEGORY_NAME, this::getName);
+            .add(ShopPlaceholders.CATEGORY_ID, this::getId)
+            .add(ShopPlaceholders.CATEGORY_NAME, this::getName);
     }
 
     @NotNull
@@ -78,6 +78,6 @@ public class ListingCategory implements Placeholder {
     }
 
     public boolean isItemOfThis(@NotNull String name) {
-        return this.materials.contains(name.toLowerCase()) || this.materials.contains(Placeholders.WILDCARD);
+        return this.materials.contains(name.toLowerCase()) || this.materials.contains(ShopPlaceholders.WILDCARD);
     }
 }

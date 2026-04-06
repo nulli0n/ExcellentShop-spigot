@@ -4,7 +4,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import su.nightexpress.nightcore.integration.currency.CurrencyId;
 import su.nightexpress.nightcore.integration.item.ItemPlugins;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.Lists;
@@ -97,13 +97,13 @@ public class AuctionConfig {
         (cfg, path, id) -> UniDouble.read(cfg, path + "." + id),
         (cfg, path, map) -> map.forEach((id, range) -> range.write(cfg, path + "." + id)),
         () -> Map.of(
-            Placeholders.DEFAULT, UniDouble.of(-1, -1),
+            ShopPlaceholders.DEFAULT, UniDouble.of(-1, -1),
             CurrencyId.VAULT, UniDouble.of(1, 10_000_000)
         ),
         "Sets min. and max. possible listing price for specified currencies.",
         "Use '-1' for unlimited amount.",
-        "Use '" + Placeholders.DEFAULT + "' keyword to define price range for all unlisted currencies.",
-        "If listing's currency is not listed here and '" + Placeholders.DEFAULT + "' value is not defined, no limits will be used!"
+        "Use '" + ShopPlaceholders.DEFAULT + "' keyword to define price range for all unlisted currencies.",
+        "If listing's currency is not listed here and '" + ShopPlaceholders.DEFAULT + "' value is not defined, no limits will be used!"
     );
 
     public static final ConfigValue<Map<String, UniDouble>> LISTINGS_PRICE_PER_MATERIAL = ConfigValue.forMap("Settings.Listings.Price.Per_Material",

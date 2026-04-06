@@ -5,8 +5,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.excellentshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
@@ -35,11 +35,11 @@ public class AuctionListener extends AbstractListener<ShopPlugin> {
                 this.auctionManager.claimRewards(player, unclaimed);
             }
             else if (AuctionConfig.NOTIFY_UNCLAIMED_ON_JOIN.get()) {
-                AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.message().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, unclaimed.size()));
+                AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.message().send(player, replacer -> replacer.replace(ShopPlaceholders.GENERIC_AMOUNT, unclaimed.size()));
             }
         }
         if (expired > 0 && AuctionConfig.NOTIFY_EXPIRED_ON_JOIN.get()) {
-            AuctionLang.NOTIFY_EXPIRED_LISTINGS.message().send(player, replacer -> replacer.replace(Placeholders.GENERIC_AMOUNT, expired));
+            AuctionLang.NOTIFY_EXPIRED_LISTINGS.message().send(player, replacer -> replacer.replace(ShopPlaceholders.GENERIC_AMOUNT, expired));
         }
     }
 }

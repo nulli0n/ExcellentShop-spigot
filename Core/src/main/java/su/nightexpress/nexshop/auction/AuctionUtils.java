@@ -8,12 +8,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
-import su.nightexpress.nexshop.product.content.ContentTypes;
-import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.excellentshop.product.ContentTypes;
+import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.ItemUtil;
@@ -164,6 +164,6 @@ public class AuctionUtils {
     private static UniDouble getCurrencyPriceRange(@NotNull Currency currency) {
         var map = AuctionConfig.LISTINGS_PRICE_PER_CURRENCY.get();
 
-        return map.getOrDefault(currency.getInternalId(), map.getOrDefault(Placeholders.DEFAULT, UniDouble.of(-1, -1)));
+        return map.getOrDefault(currency.getInternalId(), map.getOrDefault(ShopPlaceholders.DEFAULT, UniDouble.of(-1, -1)));
     }
 }

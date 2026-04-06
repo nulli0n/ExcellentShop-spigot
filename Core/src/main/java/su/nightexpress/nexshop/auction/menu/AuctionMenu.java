@@ -5,10 +5,10 @@ import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import su.nightexpress.nightcore.bridge.currency.Currency;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.ListingCategory;
@@ -18,8 +18,8 @@ import su.nightexpress.nexshop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
-import su.nightexpress.nexshop.config.Config;
-import su.nightexpress.nexshop.config.Lang;
+import su.nightexpress.excellentshop.core.Config;
+import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuSize;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.excellentshop.ShopPlaceholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
@@ -73,7 +73,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
     private String loreListUnselected;
     private String loreListSelected;
 
-    public AuctionMenu(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager) {
+    public AuctionMenu(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager) {
         super(plugin, auctionManager, FILE_NAME);
 
         this.addHandler(this.orderHandler = new ItemHandler("listing_order", (viewer, event) -> {
@@ -172,7 +172,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         });
     }
 
-    public boolean isContainer(@NotNull ActiveListing listing) {
+    public boolean isContainer(@NonNull ActiveListing listing) {
         ItemStack item = listing.getItemStack();
         if (item.getItemMeta() instanceof BlockStateMeta meta) {
             return meta.getBlockState() instanceof Container;
@@ -180,27 +180,27 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         return false;
     }
 
-    @NotNull
-    public static SortType getListingOrder(@NotNull Player player) {
+    @NonNull
+    public static SortType getListingOrder(@NonNull Player player) {
         return LISTING_ORDER.computeIfAbsent(player, type -> SortType.NEWEST);
     }
 
-    public static void setListingOrder(@NotNull Player player, @NotNull SortType sortType) {
+    public static void setListingOrder(@NonNull Player player, @NonNull SortType sortType) {
         LISTING_ORDER.put(player, sortType);
     }
 
     @Nullable
-    public Currency getCurrency(@NotNull Player player) {
+    public Currency getCurrency(@NonNull Player player) {
         return CURRENCY.get(player);
     }
 
-    @NotNull
-    public ListingCategory getCategory(@NotNull Player player) {
+    @NonNull
+    public ListingCategory getCategory(@NonNull Player player) {
         return CATEGORY.getOrDefault(player, this.auctionManager.getDefaultCategory());
     }
 
     @Override
-    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ActiveListing> autoFill) {
+    public void onAutoFill(@NonNull MenuViewer viewer, @NonNull AutoFill<ActiveListing> autoFill) {
         super.onAutoFill(viewer, autoFill);
 
         Player player = viewer.getPlayer();
@@ -273,7 +273,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
             if (isOwner) return;
 
             if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && player.getInventory().firstEmpty() < 0) {
-                Lang.SHOP_PRODUCT_ERROR_FULL_INVENTORY.message().send(player);
+                Lang.SHOP_TRADE_PLAYER_FULL_INVENTORY.message().send(player);
                 return;
             }
 
@@ -281,8 +281,8 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
         });
     }
 
-    @NotNull
-    protected List<String> getLoreFormat(@NotNull Player player, @NotNull ActiveListing aucItem) {
+    @NonNull
+    protected List<String> getLoreFormat(@NonNull Player player, @NonNull ActiveListing aucItem) {
         List<String> format = this.itemLorePlayer;
 
         if (player.hasPermission(AuctionPerms.LISTING_REMOVE_OTHERS)) format = this.itemLoreAdmin;
@@ -292,7 +292,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
     }
 
     @Override
-    @NotNull
+    @NonNull
     protected MenuOptions createDefaultOptions() {
         MenuOptions options = new MenuOptions(BLACK.enclose("Auction House"), MenuSize.CHEST_54);
         options.setAutoRefresh(1);
@@ -300,7 +300,7 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
     }
 
     @Override
-    @NotNull
+    @NonNull
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 

@@ -2,7 +2,7 @@ package su.nightexpress.nexshop.auction.data;
 
 import com.google.gson.GsonBuilder;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;

@@ -1,15 +1,15 @@
 package su.nightexpress.nexshop.auction.data;
 
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import su.nightexpress.nexshop.ShopAPI;
-import su.nightexpress.nexshop.product.content.ContentType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import su.nightexpress.excellentshop.ShopAPI;
+import su.nightexpress.excellentshop.product.ContentType;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.data.DataHandler;
-import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.excellentshop.data.DataHandler;
+import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.db.sql.column.Column;
@@ -69,7 +69,7 @@ public class AuctionLegacyQueries {
             if (typing == null) return null;
 
             String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
-            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
+            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.api().getCurrency(CurrencyId.reroute(currencyId));
             if (currency == null) return null;
 
             double price = resultSet.getDouble(AuctionDatabase.COLUMN_PRICE.getName());
@@ -121,7 +121,7 @@ public class AuctionLegacyQueries {
             if (typing == null) return null;
 
             String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
-            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
+            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.api().getCurrency(CurrencyId.reroute(currencyId));
             if (currency == null) return null;
 
             double price = resultSet.getDouble(AuctionDatabase.COLUMN_PRICE.getName());
@@ -157,7 +157,7 @@ public class AuctionLegacyQueries {
             if (typing == null) return null;
 
             String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
-            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
+            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.api().getCurrency(CurrencyId.reroute(currencyId));
             if (currency == null) return null;
 
             double price = resultSet.getDouble(AuctionDatabase.COLUMN_PRICE.getName());
@@ -191,7 +191,7 @@ public class AuctionLegacyQueries {
             if (typing == null) return null;
 
             String currencyId = resultSet.getString(AuctionDatabase.COLUMN_CURRENCY.getName());
-            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.getCurrency(CurrencyId.reroute(currencyId));
+            Currency currency = currencyId == null ? ShopAPI.getAuctionManager().getDefaultCurrency() : EconomyBridge.api().getCurrency(CurrencyId.reroute(currencyId));
             if (currency == null) return null;
 
             double price = resultSet.getDouble(AuctionDatabase.COLUMN_PRICE.getName());
@@ -214,12 +214,12 @@ public class AuctionLegacyQueries {
 
 
     @Nullable
-    private static ItemStack readItemTag(@NotNull String serialized) {
+    private static ItemStack readItemTag(@NonNull String serialized) {
         return Version.isAtLeast(Version.MC_1_21) && serialized.contains("{") ? ItemNbt.fromTagString(serialized) : ItemNbt.decompress(serialized);
     }
 
     @Nullable
-    public static ItemContent vanillaTypeFromJson(@NotNull String serialized) {
+    public static ItemContent vanillaTypeFromJson(@NonNull String serialized) {
         ItemTag tag = DataHandler.GSON.fromJson(serialized, ItemTag.class);
         if (tag == null) return null;
 
@@ -230,7 +230,7 @@ public class AuctionLegacyQueries {
     }
 
     @Nullable
-    public static ItemContent customTypeFromJson(@NotNull String serialized) {
+    public static ItemContent customTypeFromJson(@NonNull String serialized) {
         String[] split = serialized.split(PLUGIN_ITEM_DELIMITER);
         if (split.length < 2) return null;
 

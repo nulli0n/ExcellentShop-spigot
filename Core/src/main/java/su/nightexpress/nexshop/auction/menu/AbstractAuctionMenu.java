@@ -4,11 +4,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
-import su.nightexpress.nexshop.config.Config;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
 import su.nightexpress.nightcore.menu.MenuViewer;
@@ -83,7 +82,7 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
         super.load();
 
         this.getItems().forEach(menuItem -> menuItem.getOptions().addDisplayModifier((viewer, item) -> {
-            if (Config.GUI_PLACEHOLDER_API.get() && Plugins.hasPlaceholderAPI()) {
+            if (Plugins.hasPlaceholderAPI()) {
                 ItemReplacer.create(item).readMeta().replacePlaceholderAPI(viewer.getPlayer()).writeMeta();
             }
         }));

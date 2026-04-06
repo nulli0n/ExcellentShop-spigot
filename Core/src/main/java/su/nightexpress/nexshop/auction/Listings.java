@@ -1,8 +1,8 @@
 package su.nightexpress.nexshop.auction;
 
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
@@ -34,29 +34,29 @@ public class Listings {
         this.completedByOwnerId.clear();
     }
 
-    @NotNull
-    public static <T extends AbstractListing> List<T> sortAndValidate(@NotNull List<T> listings) {
+    @NonNull
+    public static <T extends AbstractListing> List<T> sortAndValidate(@NonNull List<T> listings) {
         listings.removeIf(Predicate.not(AbstractListing::isValid));
         listings.sort(SORT_BY_CREATION);
         return listings;
     }
 
-    public void add(@NotNull ActiveListing listing) {
+    public void add(@NonNull ActiveListing listing) {
         this.activeById.put(listing.getId(), listing);
         this.activeByOwnerId.computeIfAbsent(listing.getOwner(), k -> new HashSet<>()).add(listing);
     }
 
-    public void remove(@NotNull ActiveListing listing) {
+    public void remove(@NonNull ActiveListing listing) {
         this.activeById.remove(listing.getId());
         this.activeByOwnerId.getOrDefault(listing.getOwner(), Collections.emptySet()).remove(listing);
     }
 
-    public void addCompleted(@NotNull CompletedListing listing) {
+    public void addCompleted(@NonNull CompletedListing listing) {
         this.completedById.put(listing.getId(), listing);
         this.completedByOwnerId.computeIfAbsent(listing.getOwner(), k -> new HashSet<>()).add(listing);
     }
 
-    public void removeCompleted(@NotNull CompletedListing listing) {
+    public void removeCompleted(@NonNull CompletedListing listing) {
         this.completedById.remove(listing.getId());
         this.completedByOwnerId.getOrDefault(listing.getOwner(), Collections.emptySet()).remove(listing);
     }
@@ -71,12 +71,12 @@ public class Listings {
         this.completedByOwnerId.values().forEach(set -> set.removeIf(AbstractListing::isDeletionTime));
     }
 
-    public boolean hasListing(@NotNull UUID uuid) {
+    public boolean hasListing(@NonNull UUID uuid) {
         return this.getById(uuid) != null;
     }
 
     @Nullable
-    public ActiveListing getById(@NotNull UUID uuid) {
+    public ActiveListing getById(@NonNull UUID uuid) {
         this.removeInvalidActive();
 
         return this.activeById.getOrDefault(uuid, null);
@@ -84,20 +84,20 @@ public class Listings {
 
 
 
-    @NotNull
+    @NonNull
     public List<ActiveListing> getAll() {
         this.removeInvalidActive();
 
         return new ArrayList<>(this.activeById.values());
     }
 
-    @NotNull
-    public List<ActiveListing> getAll(@NotNull Player player) {
+    @NonNull
+    public List<ActiveListing> getAll(@NonNull Player player) {
         return this.getAll(player.getUniqueId());
     }
 
-    @NotNull
-    public List<ActiveListing> getAll(@NotNull UUID id) {
+    @NonNull
+    public List<ActiveListing> getAll(@NonNull UUID id) {
         this.removeInvalidActive();
 
         return new ArrayList<>(this.activeByOwnerId.getOrDefault(id, Collections.emptySet()));
@@ -105,20 +105,20 @@ public class Listings {
 
 
 
-    @NotNull
+    @NonNull
     public List<CompletedListing> getCompleted() {
         this.removeInvalidCompleted();
 
         return new ArrayList<>(this.completedById.values());
     }
 
-    @NotNull
-    public List<CompletedListing> getCompleted(@NotNull Player player) {
+    @NonNull
+    public List<CompletedListing> getCompleted(@NonNull Player player) {
         return this.getCompleted(player.getUniqueId());
     }
 
-    @NotNull
-    public List<CompletedListing> getCompleted(@NotNull UUID id) {
+    @NonNull
+    public List<CompletedListing> getCompleted(@NonNull UUID id) {
         this.removeInvalidCompleted();
 
         return new ArrayList<>(this.completedByOwnerId.getOrDefault(id, Collections.emptySet()));
@@ -126,71 +126,71 @@ public class Listings {
 
 
 
-    @NotNull
+    @NonNull
     public List<ActiveListing> getActive() {
         this.removeInvalidActive();
 
         return new ArrayList<>(this.activeById.values().stream().filter(Predicate.not(ActiveListing::isExpired)).toList());
     }
 
-    @NotNull
-    public List<ActiveListing> getActive(@NotNull Player owner) {
+    @NonNull
+    public List<ActiveListing> getActive(@NonNull Player owner) {
         return this.getActive(owner.getUniqueId());
     }
 
-    @NotNull
-    public List<ActiveListing> getActive(@NotNull UUID owner) {
+    @NonNull
+    public List<ActiveListing> getActive(@NonNull UUID owner) {
         return new ArrayList<>(this.getAll(owner).stream().filter(Predicate.not(ActiveListing::isExpired)).toList());
     }
 
 
 
-    /*@NotNull
+    /*@NonNull
     public List<ActiveListing> getExpired() {
         return new ArrayList<>(this.listings.values());
     }*/
 
-    @NotNull
-    public List<ActiveListing> getExpired(@NotNull Player player) {
+    @NonNull
+    public List<ActiveListing> getExpired(@NonNull Player player) {
         return this.getExpired(player.getUniqueId());
     }
 
-    @NotNull
-    public List<ActiveListing> getExpired(@NotNull UUID id) {
+    @NonNull
+    public List<ActiveListing> getExpired(@NonNull UUID id) {
         return new ArrayList<>(this.getAll(id).stream().filter(ActiveListing::isExpired).toList());
     }
 
 
 
-    /*@NotNull
+    /*@NonNull
     public List<CompletedListing> getClaimed() {
         return new ArrayList<>(this.completedListings.values());
     }*/
 
-    @NotNull
-    public List<CompletedListing> getClaimed(@NotNull Player player) {
+    @NonNull
+    public List<CompletedListing> getClaimed(@NonNull Player player) {
         return this.getClaimed(player.getUniqueId());
     }
 
-    @NotNull
-    public List<CompletedListing> getClaimed(@NotNull UUID id) {
+    @NonNull
+    public List<CompletedListing> getClaimed(@NonNull UUID id) {
         return new ArrayList<>(this.getCompleted(id).stream().filter(CompletedListing::isClaimed).toList());
     }
 
 
 
-    /*@NotNull
+    /*@NonNull
     public List<CompletedListing> getUnclaimed() {
         return new ArrayList<>(this.completedListings.values());
     }*/
 
-    @NotNull
-    public List<CompletedListing> getUnclaimed(@NotNull Player player) {
+    @NonNull
+    public List<CompletedListing> getUnclaimed(@NonNull Player player) {
         return this.getUnclaimed(player.getUniqueId());
     }
 
-    @NotNull
-    public List<CompletedListing> getUnclaimed(@NotNull UUID id) {
+    @NonNull
+    public List<CompletedListing> getUnclaimed(@NonNull UUID id) {
         return new ArrayList<>(this.getCompleted(id).stream().filter(Predicate.not(CompletedListing::isClaimed)).toList());
     }
 }

@@ -2,9 +2,9 @@ package su.nightexpress.nexshop.auction.listing;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.AuctionUtils;
-import su.nightexpress.nexshop.product.content.impl.ItemContent;
+import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 
 import java.util.UUID;
@@ -45,7 +45,7 @@ public class ActiveListing extends AbstractListing {
     @Override
     @NotNull
     public UnaryOperator<String> replacePlaceholders() {
-        return Placeholders.forActiveListing(this);
+        return ShopPlaceholders.forActiveListing(this);
     }
 
     public long getExpireDate() {

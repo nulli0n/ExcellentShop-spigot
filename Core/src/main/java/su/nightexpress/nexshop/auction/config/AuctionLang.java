@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.auction.config;
 
 import org.bukkit.Sound;
-import su.nightexpress.nexshop.Placeholders;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.SortType;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
@@ -11,7 +11,7 @@ import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.locale.entry.TextLocale;
 import su.nightexpress.nightcore.locale.message.MessageData;
 
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.excellentshop.ShopPlaceholders.*;
 import static su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers.*;
 
 public class AuctionLang implements LangContainer {
@@ -68,12 +68,12 @@ public class AuctionLang implements LangContainer {
 
     public static final MessageLocale LISTING_ADD_ERROR_PRICE_CURRENCY_MIN = LangEntry.builder("Auction.Listing.Add.Error.Price.Currency.Min").chatMessage(
         Sound.ENTITY_VILLAGER_NO,
-        GRAY.wrap(SOFT_RED.wrap("✘") + " Minimal " + SOFT_RED.wrap(Placeholders.CURRENCY_NAME) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Minimal " + SOFT_RED.wrap(ShopPlaceholders.CURRENCY_NAME) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
     public static final MessageLocale LISTING_ADD_ERROR_PRICE_CURRENCY_MAX = LangEntry.builder("Auction.Listing.Add.Error.Price.Currency.Max").chatMessage(
         Sound.ENTITY_VILLAGER_NO,
-        GRAY.wrap(SOFT_RED.wrap("✘") + " Maximal " + SOFT_RED.wrap(Placeholders.CURRENCY_NAME) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
+        GRAY.wrap(SOFT_RED.wrap("✘") + " Maximal " + SOFT_RED.wrap(ShopPlaceholders.CURRENCY_NAME) + " price is " + SOFT_RED.wrap(GENERIC_AMOUNT) + "!")
     );
 
     public static final MessageLocale LISTING_ADD_ERROR_INVALID_PRICE = LangEntry.builder("Auction.Listing.Add.Error.Price.Negative").chatMessage(

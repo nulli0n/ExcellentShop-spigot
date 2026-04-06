@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.auction.config;
 
-import su.nightexpress.nexshop.Placeholders;
-import su.nightexpress.nexshop.config.Perms;
+import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.core.Perms;
 import su.nightexpress.nightcore.util.wrapper.UniPermission;
 
 public class AuctionPerms {
@@ -11,10 +11,10 @@ public class AuctionPerms {
     public static final String PREFIX_BYPASS   = PREFIX + "bypass.";
     public static final String PREFIX_CURRENCY = PREFIX + "currency.";
 
-    public static final UniPermission AUCTION  = new UniPermission(PREFIX + Placeholders.WILDCARD);
-    public static final UniPermission COMMAND  = new UniPermission(PREFIX_COMMAND + Placeholders.WILDCARD);
-    public static final UniPermission BYPASS   = new UniPermission(PREFIX_BYPASS + Placeholders.WILDCARD);
-    public static final UniPermission CURRENCY = new UniPermission(PREFIX_CURRENCY + Placeholders.WILDCARD);
+    public static final UniPermission AUCTION  = new UniPermission(PREFIX + ShopPlaceholders.WILDCARD);
+    public static final UniPermission COMMAND  = new UniPermission(PREFIX_COMMAND + ShopPlaceholders.WILDCARD);
+    public static final UniPermission BYPASS   = new UniPermission(PREFIX_BYPASS + ShopPlaceholders.WILDCARD);
+    public static final UniPermission CURRENCY = new UniPermission(PREFIX_CURRENCY + ShopPlaceholders.WILDCARD);
 
     public static final UniPermission LISTING_REMOVE_OTHERS = new UniPermission(PREFIX + "listing.remove.others");
 

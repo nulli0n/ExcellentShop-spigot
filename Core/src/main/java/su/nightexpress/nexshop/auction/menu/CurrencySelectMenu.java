@@ -5,11 +5,10 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
-import su.nightexpress.nexshop.config.Lang;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.menu.MenuOptions;
@@ -18,7 +17,6 @@ import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.menu.api.AutoFill;
 import su.nightexpress.nightcore.menu.api.AutoFilled;
 import su.nightexpress.nightcore.menu.impl.ConfigMenu;
-import su.nightexpress.nightcore.menu.item.ItemHandler;
 import su.nightexpress.nightcore.menu.item.MenuItem;
 import su.nightexpress.nightcore.menu.link.Linked;
 import su.nightexpress.nightcore.menu.link.ViewLink;
@@ -29,7 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static su.nightexpress.nexshop.Placeholders.*;
+import static su.nightexpress.excellentshop.ShopPlaceholders.*;
 import static su.nightexpress.nightcore.util.text.tag.Tags.*;
 
 public class CurrencySelectMenu extends ConfigMenu<ShopPlugin> implements AutoFilled<Currency>, Linked<Pair<ItemStack, Double>> {

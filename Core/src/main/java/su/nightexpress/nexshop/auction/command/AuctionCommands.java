@@ -3,12 +3,11 @@ package su.nightexpress.nexshop.auction.command;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import su.nightexpress.nexshop.ShopPlugin;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.nexshop.auction.config.AuctionLang;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
-import su.nightexpress.nexshop.shop.virtual.command.VirtualCommands;
 import su.nightexpress.nightcore.commands.Arguments;
 import su.nightexpress.nightcore.commands.Commands;
 import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
@@ -96,15 +95,16 @@ public class AuctionCommands {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
-        plugin.getUserManager().manageUser(userName, user -> {
-            if (user == null) {
+        plugin.getUserManager().loadByNameAsync(userName).thenAcceptAsync(userOptional -> {
+            if (userOptional.isEmpty()) {
                 context.errorBadPlayer();
                 return;
             }
-            UUID targetId = user.getId();
-            boolean force = context.hasFlag(VirtualCommands.FLAG_FORCE);
+
+            UUID targetId = userOptional.get().getId();
+            boolean force = context.hasFlag(FORCE);
             manager.openExpiedListings(player, targetId, force);
-        });
+        }, plugin::runTask);
         return true;
     }
 
@@ -117,15 +117,17 @@ public class AuctionCommands {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
-        plugin.getUserManager().manageUser(userName, user -> {
-            if (user == null) {
+        plugin.getUserManager().loadByNameAsync(userName).thenAcceptAsync(userOptional -> {
+            if (userOptional.isEmpty()) {
                 context.errorBadPlayer();
                 return;
             }
-            UUID targetId = user.getId();
-            boolean force = context.hasFlag(VirtualCommands.FLAG_FORCE);
+
+            UUID targetId = userOptional.get().getId();
+            boolean force = context.hasFlag(FORCE);
             auctionManager.openSalesHistory(player, targetId, force);
-        });
+        }, plugin::runTask);
+
         return true;
     }
 
@@ -133,22 +135,24 @@ public class AuctionCommands {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
-        plugin.getUserManager().manageUser(userName, user -> {
-            if (user == null) {
+        plugin.getUserManager().loadByNameAsync(userName).thenAcceptAsync(userOptional -> {
+            if (userOptional.isEmpty()) {
                 context.errorBadPlayer();
                 return;
             }
-            UUID targetId = user.getId();
-            boolean force = context.hasFlag(VirtualCommands.FLAG_FORCE);
+
+            UUID targetId = userOptional.get().getId();
+            boolean force = context.hasFlag(FORCE);
             auctionManager.openPlayerListings(player, targetId, force);
-        });
+        }, plugin::runTask);
+
         return true;
     }
 
     public static boolean openAuction(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
         if (arguments.contains(ARG_PLAYER)) {
             Player target = arguments.getPlayer(ARG_PLAYER);
-            boolean force = context.hasFlag(VirtualCommands.FLAG_FORCE);
+            boolean force = context.hasFlag(FORCE);
             return auctionManager.openAuction(target, force);
         }
 
@@ -187,15 +191,17 @@ public class AuctionCommands {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
-        plugin.getUserManager().manageUser(userName, user -> {
-            if (user == null) {
+        plugin.getUserManager().loadByNameAsync(userName).thenAcceptAsync(userOptional -> {
+            if (userOptional.isEmpty()) {
                 context.errorBadPlayer();
                 return;
             }
-            UUID targetId = user.getId();
-            boolean force = context.hasFlag(VirtualCommands.FLAG_FORCE);
+
+            UUID targetId = userOptional.get().getId();
+            boolean force = context.hasFlag(FORCE);
             auctionManager.openUnclaimedListings(player, targetId, force);
-        });
+        }, plugin::runTask);
+
         return true;
     }
 }
