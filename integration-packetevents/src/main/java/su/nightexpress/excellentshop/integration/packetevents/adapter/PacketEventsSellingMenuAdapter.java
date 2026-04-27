@@ -32,12 +32,13 @@ public class PacketEventsSellingMenuAdapter extends PacketEventsPacketReceiver i
 
     @Override
     public void callPlayerInventoryPacket(@NonNull Player player, int slot, @NonNull ItemStack itemStack) {
-        WrapperPlayServerSetPlayerInventory setPlayerInventory = new WrapperPlayServerSetPlayerInventory(slot, this.fromBukkit(itemStack));
+        WrapperPlayServerSetPlayerInventory setPlayerInventory = new WrapperPlayServerSetPlayerInventory(slot, this
+            .fromBukkit(itemStack));
         PacketEvents.getAPI().getPlayerManager().sendPacket(player, setPlayerInventory);
     }
 
     @Override
-    public void onPacketSend(@NonNull PacketSendEvent event) {
+    public void onPacketSend(PacketSendEvent event) {
         PacketTypeCommon type = event.getPacketType();
         Player player = event.getPlayer();
         if (player == null || player.getGameMode() == GameMode.CREATIVE || !this.provider.isViewer(player)) return;
@@ -78,7 +79,8 @@ public class PacketEventsSellingMenuAdapter extends PacketEventsPacketReceiver i
         event.markForReEncode(true);
     }
 
-    private com.github.retrooper.packetevents.protocol.item.@NonNull ItemStack render(@NonNull Player player, com.github.retrooper.packetevents.protocol.item.ItemStack stack) {
+    private com.github.retrooper.packetevents.protocol.item.@NonNull ItemStack render(@NonNull Player player,
+                                                                                      com.github.retrooper.packetevents.protocol.item.ItemStack stack) {
         return this.asBukkit(stack).map(itemStack -> {
             ItemStack result = this.provider.onSlotRender(player, itemStack);
             return this.fromBukkit(result == null ? new ItemStack(Material.AIR) : result);

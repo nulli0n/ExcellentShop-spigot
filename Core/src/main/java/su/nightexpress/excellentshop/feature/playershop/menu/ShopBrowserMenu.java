@@ -49,7 +49,7 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
 
     private static final LangEnum<SortType> SORT_LOCALE = LangEnum.of("Shop.SortLocale", SortType.class);
 
-    private final ChestShopModule  module;
+    private final ChestShopModule module;
 
     private String titleOwn;
     private String titlePlayer;
@@ -64,7 +64,8 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
     private int          productLimit;
     private List<String> productEntry;
 
-    public record Data(@NonNull SortType sortType, String player, String itemSearch, @Nullable ChestShop source){}
+    public record Data(@NonNull SortType sortType, String player, String itemSearch, @Nullable ChestShop source) {
+    }
 
     private enum SortType {
 
@@ -99,11 +100,13 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
         this.open(player, shop.getOwnerName(), null, shop);
     }
 
-    private void open(@NonNull Player player, @Nullable String ownerName, @Nullable String itemSearch, @Nullable ChestShop source) {
+    private void open(@NonNull Player player, @Nullable String ownerName, @Nullable String itemSearch,
+                      @Nullable ChestShop source) {
         this.open(player, SortType.SHOP_NAME, ownerName, itemSearch, source);
     }
 
-    private void open(@NonNull Player player, @NonNull SortType sortType, @Nullable String ownerName, @Nullable String itemSearch, @Nullable ChestShop source) {
+    private void open(@NonNull Player player, @NonNull SortType sortType, @Nullable String ownerName,
+                      @Nullable String itemSearch, @Nullable ChestShop source) {
         this.open(player, new Data(sortType, ownerName, itemSearch, source));
     }
 
@@ -113,7 +116,8 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
         Player player = viewer.getPlayer();
         Data data = this.getLink(player);
 
-        if (data.player != null) return data.player.equalsIgnoreCase(player.getName()) ? this.titleOwn : this.titlePlayer.replace(PLAYER_NAME, data.player);
+        if (data.player != null) return data.player.equalsIgnoreCase(player
+            .getName()) ? this.titleOwn : this.titlePlayer.replace(PLAYER_NAME, data.player);
         if (data.itemSearch != null) return this.titleItem.replace(GENERIC_ITEM, data.itemSearch);
 
         return super.getTitle(viewer);
@@ -138,7 +142,8 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
         Player player = viewer.getPlayer();
         Data data = this.getLink(player);
 
-        item.replacement(replacer -> replacer.replace(ShopPlaceholders.GENERIC_TYPE, SORT_LOCALE.getLocalized(data.sortType)));
+        item.replacement(replacer -> replacer.replace(ShopPlaceholders.GENERIC_TYPE, SORT_LOCALE.getLocalized(
+            data.sortType)));
     }
 
     @Override
@@ -195,10 +200,7 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
             })
             .setItemClick(shop -> (viewer1, event) -> {
                 Permission permission = shop.isOwner(player) ? ChestPerms.TELEPORT : ChestPerms.TELEPORT_OTHERS;
-                if (!player.hasPermission(permission)) {
-                    CoreLang.ERROR_NO_PERMISSION.message().send(player);
-                    return;
-                }
+                if (!player.hasPermission(permission)) return;
 
                 this.module.teleportToShop(player, shop);
             })
@@ -246,19 +248,24 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
 
         this.titleOwn = ConfigValue.create("Title.Own", BLACK.wrap("My Shops")).read(config);
         this.titlePlayer = ConfigValue.create("Title.Player", BLACK.wrap(PLAYER_NAME + "'s Shops")).read(config);
-        this.titleItem = ConfigValue.create("Title.ItemSearch", BLACK.wrap("Shops found with '" + GENERIC_ITEM + "'")).read(config);
+        this.titleItem = ConfigValue.create("Title.ItemSearch", BLACK.wrap("Shops found with '" + GENERIC_ITEM + "'"))
+            .read(config);
 
         this.shopUseProductIcon = ConfigValue.create("Shop.UseProductIcon", true).read(config);
 
-        this.shopSlots = ConfigValue.create("Shop.Slots", new int[]{10,11,12,13,14,15,16, 19,20,21,22,23,24,25, 28,29,30,31,32,33,34}).read(config);
+        this.shopSlots = ConfigValue.create("Shop.Slots",
+            new int[]{10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34}).read(config);
 
         this.shopName = ConfigValue.create("Shop.Name",
             SHOP_NAME
         ).read(config);
 
         this.shopLoreOwn = ConfigValue.create("Shop.Lore.Own", Lists.newList(
-            GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Location: " + LIGHT_YELLOW.wrap(CHEST_SHOP_X) + ", " + LIGHT_YELLOW.wrap(CHEST_SHOP_Y) + ", " + LIGHT_YELLOW.wrap(CHEST_SHOP_Z) + " in " + LIGHT_YELLOW.wrap(CHEST_SHOP_WORLD)),
-            GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Owner: " + LIGHT_YELLOW.wrap(CHEST_SHOP_OWNER)) + " " + LIGHT_GREEN.wrap("(You)"),
+            GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Location: " + LIGHT_YELLOW.wrap(CHEST_SHOP_X) + ", " + LIGHT_YELLOW
+                .wrap(CHEST_SHOP_Y) + ", " + LIGHT_YELLOW.wrap(CHEST_SHOP_Z) + " in " + LIGHT_YELLOW.wrap(
+                    CHEST_SHOP_WORLD)),
+            GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Owner: " + LIGHT_YELLOW.wrap(CHEST_SHOP_OWNER)) + " " + LIGHT_GREEN
+                .wrap("(You)"),
             EMPTY_IF_BELOW,
             GENERIC_PRODUCTS,
             EMPTY_IF_ABOVE,
@@ -266,7 +273,9 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
         )).read(config);
 
         this.shopLoreOthers = ConfigValue.create("Shop.Lore.Others", Lists.newList(
-            GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Location: " + LIGHT_YELLOW.wrap(CHEST_SHOP_X) + ", " + LIGHT_YELLOW.wrap(CHEST_SHOP_Y) + ", " + LIGHT_YELLOW.wrap(CHEST_SHOP_Z) + " in " + LIGHT_YELLOW.wrap(CHEST_SHOP_WORLD)),
+            GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Location: " + LIGHT_YELLOW.wrap(CHEST_SHOP_X) + ", " + LIGHT_YELLOW
+                .wrap(CHEST_SHOP_Y) + ", " + LIGHT_YELLOW.wrap(CHEST_SHOP_Z) + " in " + LIGHT_YELLOW.wrap(
+                    CHEST_SHOP_WORLD)),
             GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "Owner: " + LIGHT_YELLOW.wrap(CHEST_SHOP_OWNER)),
             EMPTY_IF_BELOW,
             GENERIC_PRODUCTS,
@@ -277,7 +286,9 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
         this.productLimit = ConfigValue.create("Shop.ProductInfo.DisplayLimit", 3).read(config);
 
         this.productEntry = ConfigValue.create("Shop.ProductInfo.Entry", Lists.newList(
-            GRAY.wrap(WHITE.wrap(PRODUCT_UNIT_AMOUNT + "x " + PRODUCT_PREVIEW_NAME) + " (" + GREEN.wrap(PRODUCT_PRICE_FORMATTED.apply(TradeType.BUY)) + " : " + RED.wrap(PRODUCT_PRICE_FORMATTED.apply(TradeType.SELL)) + ")")
+            GRAY.wrap(WHITE.wrap(PRODUCT_UNIT_AMOUNT + "x " + PRODUCT_PREVIEW_NAME) + " (" + GREEN.wrap(
+                PRODUCT_PRICE_FORMATTED.apply(TradeType.BUY)) + " : " + RED.wrap(PRODUCT_PRICE_FORMATTED.apply(
+                    TradeType.SELL)) + ")")
         )).read(config);
 
         loader.addDefaultItem(NightItem.fromType(Material.COMPASS)
@@ -311,11 +322,13 @@ public class ShopBrowserMenu extends LinkedMenu<ShopPlugin, ShopBrowserMenu.Data
             .setHandler(new ItemHandler("sorting", (viewer, event) -> this.handleSorting(viewer)))
         );
 
-        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(IntStream.range(45, 54).toArray()));
+        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem()
+            .setSlots(IntStream.range(45, 54).toArray()));
 
         loader.addDefaultItem(MenuItem.buildReturn(this, 49, (viewer, event) -> this.handleReturn(viewer),
             ItemOptions.builder()
-                .setVisibilityPolicy(viewer -> this.getLink(viewer).source != null || this.getLink(viewer).player != null)
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).source != null || this.getLink(
+                    viewer).player != null)
                 .build()
         ).setPriority(10));
 
