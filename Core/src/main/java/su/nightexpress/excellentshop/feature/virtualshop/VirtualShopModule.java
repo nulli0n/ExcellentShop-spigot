@@ -98,7 +98,8 @@ public class VirtualShopModule extends AbstractShopModule {
 
     private TransactionLogger logger;
 
-    public VirtualShopModule(@NonNull ModuleContext context, @NonNull ShopManager shopManager, @NonNull TransactionProcessor transactionProcessor) {
+    public VirtualShopModule(@NonNull ModuleContext context, @NonNull ShopManager shopManager,
+                             @NonNull TransactionProcessor transactionProcessor) {
         super(context, shopManager);
         this.transactionProcessor = transactionProcessor;
         this.productFormatter = new ProductFormatter<>();
@@ -164,34 +165,54 @@ public class VirtualShopModule extends AbstractShopModule {
     private void loadFormatter() {
         this.productFormatter.registerCondition("buyable", (product, player) -> product.isBuyable());
         this.productFormatter.registerCondition("sellable", (product, player) -> product.isSellable());
-        this.productFormatter.registerCondition("dynamic_price", (product, player) -> product.getPricingType() != PriceType.FLAT);
-        this.productFormatter.registerCondition("has_stock", (product, player) -> product.getStockOptions().isEnabled());
-        this.productFormatter.registerCondition("stock_resettable", (product, player) -> product.getStockOptions().isEnabled() && product.getStockOptions().hasRestockTime());
-        this.productFormatter.registerCondition("has_limits", (product, player) -> product.getLimitOptions().isEnabled() && product.getLimitOptions().hasLimits());
-        this.productFormatter.registerCondition("has_buy_limit", (product, player) -> product.getLimitOptions().isEnabled() && product.getLimitOptions().hasBuyLimit());
-        this.productFormatter.registerCondition("has_sell_limit", (product, player) -> product.getLimitOptions().isEnabled() && product.getLimitOptions().hasSellLimit());
-        this.productFormatter.registerCondition("limit_resettable", (product, player) -> product.getLimitOptions().isEnabled() && product.getLimitOptions().hasResetTime());
+        this.productFormatter.registerCondition("dynamic_price", (product, player) -> product
+            .getPricingType() != PriceType.FLAT);
+        this.productFormatter.registerCondition("has_stock", (product, player) -> product.getStockOptions()
+            .isEnabled());
+        this.productFormatter.registerCondition("stock_resettable", (product, player) -> product.getStockOptions()
+            .isEnabled() && product.getStockOptions().hasRestockTime());
+        this.productFormatter.registerCondition("has_limits", (product, player) -> product.getLimitOptions()
+            .isEnabled() && product.getLimitOptions().hasLimits());
+        this.productFormatter.registerCondition("has_buy_limit", (product, player) -> product.getLimitOptions()
+            .isEnabled() && product.getLimitOptions().hasBuyLimit());
+        this.productFormatter.registerCondition("has_sell_limit", (product, player) -> product.getLimitOptions()
+            .isEnabled() && product.getLimitOptions().hasSellLimit());
+        this.productFormatter.registerCondition("limit_resettable", (product, player) -> product.getLimitOptions()
+            .isEnabled() && product.getLimitOptions().hasResetTime());
 
         this.productFormatter.registerVariable("stock_reset_time", (product, player) -> {
             StockData data = product.getStockData();
             long resetDate = data.getRestockDate();
 
-            return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatDuration(resetDate, TimeFormatType.LITERAL);
+            return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatDuration(resetDate,
+                TimeFormatType.LITERAL);
         });
 
         this.productFormatter.registerVariable("limit_reset_time", (product, player) -> {
             LimitData data = product.getLimitData(player);
             if (!data.isActive()) {
                 long resetDate = TimeUnit.SECONDS.toMillis(product.getLimitOptions().getRestockTime());
-                return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatAmount(resetDate, TimeFormatType.LITERAL);
+                return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatAmount(resetDate,
+                    TimeFormatType.LITERAL);
             }
 
             long resetDate = data.getRestockDate();
-            return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatDuration(resetDate, TimeFormatType.LITERAL);
+            return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatDuration(resetDate,
+                TimeFormatType.LITERAL);
         });
 
         this.productFormatter.registerVariable("sell_all_price", (product, player) -> {
             return product.getCurrency().format(product.getFinalSellAllPrice(player));
+        });
+
+        this.productFormatter.registerVariable("max_units_to_buy", (product, player) -> {
+            int amount = product.getMaxBuyableUnitAmount(player, player.getInventory());
+            return amount < 0 ? CoreLang.OTHER_INFINITY.text() : NumberUtil.format(amount);
+        });
+
+        this.productFormatter.registerVariable("max_units_to_sell", (product, player) -> {
+            int amount = product.getMaxSellableUnitAmount(player, player.getInventory());
+            return amount < 0 ? CoreLang.OTHER_INFINITY.text() : NumberUtil.format(amount);
         });
 
         for (TradeType tradeType : TradeType.values()) {
@@ -267,7 +288,8 @@ public class VirtualShopModule extends AbstractShopModule {
 
             FileConfig config = shop.loadConfig();
             FileConfig itemsConfig = new FileConfig(config.getFile().getParentFile().getAbsolutePath(), "products.yml");
-            Set<Integer> slots = IntStream.of(config.getIntArray("Rotation.Products.Slots")).boxed().collect(Collectors.toSet());
+            Set<Integer> slots = IntStream.of(config.getIntArray("Rotation.Products.Slots")).boxed().collect(Collectors
+                .toSet());
 
             Rotation rotation = new Rotation(UUID.randomUUID(), ShopPlaceholders.DEFAULT, shop);
             rotation.setRotationType(config.getEnum("Rotation.Type", RotationType.class, RotationType.INTERVAL));
@@ -278,7 +300,8 @@ public class VirtualShopModule extends AbstractShopModule {
                 DayOfWeek day = Enums.get(sDay, DayOfWeek.class);
                 if (day == null) continue;
 
-                TreeSet<LocalTime> times = new TreeSet<>(ShopUtils.parseTimes(config.getStringList("Rotation.Fixed." + sDay)));
+                TreeSet<LocalTime> times = new TreeSet<>(ShopUtils.parseTimes(config.getStringList("Rotation.Fixed." +
+                    sDay)));
                 rotation.getRotationTimes().put(day, times);
             }
 
@@ -382,7 +405,8 @@ public class VirtualShopModule extends AbstractShopModule {
         this.dialogRegistry.register(VSDialogKeys.SHOP_DESCRIPTION, ShopDescriptionDialog::new);
         this.dialogRegistry.register(VSDialogKeys.SHOP_PAGE_LAYOUTS, () -> new ShopLayoutsDialog(this));
         if (this.centralMenu != null) {
-            this.dialogRegistry.register(VSDialogKeys.SHOP_MENU_SLOTS, () -> new ShopMenuSlotsDialog(this, this.centralMenu));
+            this.dialogRegistry.register(VSDialogKeys.SHOP_MENU_SLOTS,
+                () -> new ShopMenuSlotsDialog(this, this.centralMenu));
         }
         this.dialogRegistry.register(VSDialogKeys.SHOP_NAME, ShopNameDialog::new);
         this.dialogRegistry.register(VSDialogKeys.SHOP_PAGES, ShopPagesDialog::new);
@@ -391,7 +415,8 @@ public class VirtualShopModule extends AbstractShopModule {
         this.dialogRegistry.register(VSDialogKeys.PRODUCT_COMMANDS, ProductCommandsDialog::new);
         this.dialogRegistry.register(VSDialogKeys.PRODUCT_PRICE, () -> new ProductPriceDialog(this));
         this.dialogRegistry.register(VSDialogKeys.PRODUCT_CURRENCY, () -> new ProductCurrencyDialog(this));
-        this.dialogRegistry.register(VSDialogKeys.PRODUCT_FLOAT_PRICE_TIMINGS, () -> new ProductFloatPriceTimesDialog(this));
+        this.dialogRegistry.register(VSDialogKeys.PRODUCT_FLOAT_PRICE_TIMINGS,
+            () -> new ProductFloatPriceTimesDialog(this));
         this.dialogRegistry.register(VSDialogKeys.PRODUCT_STOCKS, ProductStocksDialog::new);
         this.dialogRegistry.register(VSDialogKeys.PRODUCT_LIMITS, ProductLimitsDialog::new);
         this.dialogRegistry.register(VSDialogKeys.PRODUCT_RANK_REQUIREMENTS, ProductRanksDialog::new);
@@ -446,42 +471,42 @@ public class VirtualShopModule extends AbstractShopModule {
     }
 
     private void printShops() {
-//        this.getShops().forEach(shop -> {
-//            this.info("=".repeat(30));
-//            this.info("Shop Id: " + shop.getId());
-//
-//            List<VirtualProduct> products = shop.getProducts().stream()
-//                .sorted(Comparator.comparing(VirtualProduct::getPage).thenComparing(VirtualProduct::getSlot))
-//                .toList();
-//
-//            products.forEach(product -> {
-//                if (product.getType() instanceof PhysicalTyping typing) {
-//                    AbstractProductPricer pricer = product.getPricer();
-//
-//                    String buy = NumberUtil.format(pricer.getBuyPrice()).replace(",", "_");
-//                    String sell = NumberUtil.format(pricer.getSellPrice()).replace(",", "_");
-//                    int page = product.getPage();
-//                    int slot = product.getSlot();
-//
-//                    ItemStack itemStack = typing.getItem();
-//                    String type = itemStack.getType().name();
-//                    String extra = "";
-//
-//                    if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
-//                        PotionType baseType = potionMeta.getBasePotionType();
-//                        if (baseType != null) {
-//                            extra = "PotionType." + baseType.name() + ", ";
-//                        }
-//                    }
-//
-//                    String text = "this.addShopProduct(shop, Material." + type + ", " + extra + buy + ", " + sell + ", " + page + ", " + slot + ");";
-//
-//                    info(text);
-//
-//                }
-//            });
-//            this.info("=".repeat(30));
-//        });
+        //        this.getShops().forEach(shop -> {
+        //            this.info("=".repeat(30));
+        //            this.info("Shop Id: " + shop.getId());
+        //
+        //            List<VirtualProduct> products = shop.getProducts().stream()
+        //                .sorted(Comparator.comparing(VirtualProduct::getPage).thenComparing(VirtualProduct::getSlot))
+        //                .toList();
+        //
+        //            products.forEach(product -> {
+        //                if (product.getType() instanceof PhysicalTyping typing) {
+        //                    AbstractProductPricer pricer = product.getPricer();
+        //
+        //                    String buy = NumberUtil.format(pricer.getBuyPrice()).replace(",", "_");
+        //                    String sell = NumberUtil.format(pricer.getSellPrice()).replace(",", "_");
+        //                    int page = product.getPage();
+        //                    int slot = product.getSlot();
+        //
+        //                    ItemStack itemStack = typing.getItem();
+        //                    String type = itemStack.getType().name();
+        //                    String extra = "";
+        //
+        //                    if (itemStack.getItemMeta() instanceof PotionMeta potionMeta) {
+        //                        PotionType baseType = potionMeta.getBasePotionType();
+        //                        if (baseType != null) {
+        //                            extra = "PotionType." + baseType.name() + ", ";
+        //                        }
+        //                    }
+        //
+        //                    String text = "this.addShopProduct(shop, Material." + type + ", " + extra + buy + ", " + sell + ", " + page + ", " + slot + ");";
+        //
+        //                    info(text);
+        //
+        //                }
+        //            });
+        //            this.info("=".repeat(30));
+        //        });
     }
 
     @NonNull
@@ -628,7 +653,6 @@ public class VirtualShopModule extends AbstractShopModule {
     }
 
 
-
     @NonNull
     public Set<VirtualShop> getShops() {
         return new HashSet<>(this.shopByIdMap.values());
@@ -651,7 +675,8 @@ public class VirtualShopModule extends AbstractShopModule {
 
     @NonNull
     private Set<VirtualShop> getShops(@NonNull Player player, @NonNull Collection<VirtualShop> shops) {
-        return shops.stream().filter(shop -> this.isAvailable(player, false) && shop.canAccess(player, false)).collect(Collectors.toSet());
+        return shops.stream().filter(shop -> this.isAvailable(player, false) && shop.canAccess(player, false)).collect(
+            Collectors.toSet());
     }
 
     @Nullable
@@ -660,17 +685,20 @@ public class VirtualShopModule extends AbstractShopModule {
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType type, @Nullable VirtualShop shop) {
+    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType type,
+                                            @Nullable VirtualShop shop) {
         return this.getBestProductFor(itemStack, type, shop, null);
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType, @Nullable Player player) {
+    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
+                                            @Nullable Player player) {
         return this.getBestProductFor(itemStack, tradeType, null, player);
     }
 
     @Nullable
-    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType, @Nullable VirtualShop shop, @Nullable Player player) {
+    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
+                                            @Nullable VirtualShop shop, @Nullable Player player) {
         // No product if player is in bad world/gamemode.
         if (player != null && !this.isAvailable(player, false)) return null;
 
@@ -757,11 +785,13 @@ public class VirtualShopModule extends AbstractShopModule {
         this.dialogRegistry.show(player, VSDialogKeys.SHOP_DESCRIPTION, shop, callback);
     }
 
-    public void openShopPageLayoutsDialog(@NonNull Player player, @NonNull VirtualShop shop, @Nullable Runnable callback) {
+    public void openShopPageLayoutsDialog(@NonNull Player player, @NonNull VirtualShop shop,
+                                          @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.SHOP_PAGE_LAYOUTS, shop, callback);
     }
 
-    public void openShopMenuSlotsDialog(@NonNull Player player, @NonNull VirtualShop shop, @Nullable Runnable callback) {
+    public void openShopMenuSlotsDialog(@NonNull Player player, @NonNull VirtualShop shop,
+                                        @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.SHOP_MENU_SLOTS, shop, callback);
     }
 
@@ -778,40 +808,48 @@ public class VirtualShopModule extends AbstractShopModule {
     }
 
 
-
-    public void openProductTypeDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductTypeDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                      @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_CONTENT_TYPE, product, callback);
     }
 
-    public void openProductCommandsDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductCommandsDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                          @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_COMMANDS, product, callback);
     }
 
-    public void openProductPriceDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductPriceDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                       @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_PRICE, product, callback);
     }
 
-    public void openProductCurrencyDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductCurrencyDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                          @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_CURRENCY, product, callback);
     }
 
-    public void openProductFloatPriceTimingsDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductFloatPriceTimingsDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                                   @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_FLOAT_PRICE_TIMINGS, product, callback);
     }
 
-    public void openProductStocksDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductStocksDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                        @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_STOCKS, product, callback);
     }
 
-    public void openProductLimitsDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductLimitsDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                        @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_LIMITS, product, callback);
     }
 
-    public void openProductRanksDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductRanksDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                       @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_RANK_REQUIREMENTS, product, callback);
     }
 
-    public void openProductPermsDialog(@NonNull Player player, @NonNull VirtualProduct product, @Nullable Runnable callback) {
+    public void openProductPermsDialog(@NonNull Player player, @NonNull VirtualProduct product,
+                                       @Nullable Runnable callback) {
         this.dialogRegistry.show(player, VSDialogKeys.PRODUCT_PERMISSION_REQUIREMENTS, product, callback);
     }
 
@@ -863,7 +901,8 @@ public class VirtualShopModule extends AbstractShopModule {
         return this.openShop(player, shop, page, force, ViewMode.NORMAL, null);
     }
 
-    public boolean openShop(@NonNull Player player, @NonNull VirtualShop shop, int page, boolean force, @NonNull ViewMode viewMode, @Nullable Rotation rotation) {
+    public boolean openShop(@NonNull Player player, @NonNull VirtualShop shop, int page, boolean force,
+                            @NonNull ViewMode viewMode, @Nullable Rotation rotation) {
         if (!this.plugin.getDataManager().isLoaded()) return false;
         if (!force) {
             if (!this.isAvailable(player, true)) return false;
@@ -875,7 +914,8 @@ public class VirtualShopModule extends AbstractShopModule {
         ShopMenu layout = this.getLayout(shop, normalPage);
         if (layout == null) layout = this.getLayout(VirtualConfig.DEFAULT_LAYOUT.get());
         if (layout == null) {
-            this.sendPrefixed(VirtualLang.SHOP_ERROR_INVALID_LAYOUT, player, builder -> builder.with(shop.placeholders()));
+            this.sendPrefixed(VirtualLang.SHOP_ERROR_INVALID_LAYOUT, player, builder -> builder.with(shop
+                .placeholders()));
             return false;
         }
 
@@ -937,10 +977,12 @@ public class VirtualShopModule extends AbstractShopModule {
             MessageLocale locale;
 
             if (type == TradeType.BUY) {
-                locale = transaction.isSingleItem() ? VirtualLang.PRODUCT_PURCHASE_BUY_SINGLE : VirtualLang.PRODUCT_PURCHASE_BUY_MULTIPLE;
+                locale = transaction
+                    .isSingleItem() ? VirtualLang.PRODUCT_PURCHASE_BUY_SINGLE : VirtualLang.PRODUCT_PURCHASE_BUY_MULTIPLE;
             }
             else {
-                locale = transaction.isSingleItem() ? VirtualLang.PRODUCT_PURCHASE_SELL_SINGLE : VirtualLang.PRODUCT_PURCHASE_SELL_MULTIPLE;
+                locale = transaction
+                    .isSingleItem() ? VirtualLang.PRODUCT_PURCHASE_SELL_SINGLE : VirtualLang.PRODUCT_PURCHASE_SELL_MULTIPLE;
             }
 
             this.sendPrefixed(locale, player, builder -> this.addTransactionPlaceholderContext(builder, transaction));
@@ -963,18 +1005,21 @@ public class VirtualShopModule extends AbstractShopModule {
             builder.addItem(itemStack);
         }
 
-        this.proceedTransaction(builder.build(), completed -> {});
+        this.proceedTransaction(builder.build(), completed -> {
+        });
     }
 
     public void sellAll(@NonNull Player player, @NonNull Consumer<ECompletedTransaction> callback) {
         this.sellAll(player, player.getInventory(), callback);
     }
 
-    public void sellAll(@NonNull Player player, @NonNull Inventory inventory, @NonNull Consumer<ECompletedTransaction> callback) {
+    public void sellAll(@NonNull Player player, @NonNull Inventory inventory,
+                        @NonNull Consumer<ECompletedTransaction> callback) {
         this.sellAll(player, inventory, false, callback);
     }
 
-    public void sellAll(@NonNull Player player, @NonNull Inventory inventory, boolean silent, @NonNull Consumer<ECompletedTransaction> callback) {
+    public void sellAll(@NonNull Player player, @NonNull Inventory inventory, boolean silent,
+                        @NonNull Consumer<ECompletedTransaction> callback) {
         ERawTransaction raw = ERawTransaction.builder(player, TradeType.SELL)
             .addItems(inventory)
             .setUserInventory(inventory)

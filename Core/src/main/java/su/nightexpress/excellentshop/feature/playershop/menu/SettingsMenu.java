@@ -61,7 +61,8 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
 
         item.replace(replacer -> replacer
             .with(this.getLink(viewer).placeholders())
-            .with("%shop_bank_balance%", () -> Optional.ofNullable(this.module.getEffectiveBank(this.getLink(viewer))).map(b -> b.getAccount().format(",")).orElse(Lang.OTHER_N_A.text()))
+            .with("%shop_bank_balance%", () -> Optional.ofNullable(this.module.getEffectiveBank(this.getLink(viewer)))
+                .map(b -> b.getAccount().format(",")).orElse(Lang.OTHER_N_A.text()))
             .with(GENERIC_MAX_PRODUCTS, () -> ShopUtils.formatOrInfinite(ChestUtils.getProductLimit(player)))
             .with(GENERIC_MAX_SHOPS, () -> ShopUtils.formatOrInfinite(ChestUtils.getShopLimit(player)))
             .with(GENERIC_SHOPS_AMOUNT, () -> ShopUtils.formatOrInfinite(this.module.countShops(player)))
@@ -110,6 +111,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
 
     private void handleRentSettings(@NotNull MenuViewer viewer) {
         this.runNextTick(() -> this.module.openRentSettings(viewer.getPlayer(), this.getLink(viewer)));
+    }
+
+    private void handleTrustedPlayers(@NotNull MenuViewer viewer) {
+        this.runNextTick(() -> this.module.openTrustedPlayers(viewer.getPlayer(), this.getLink(viewer)));
     }
 
     private void handleRentExtend(@NotNull MenuViewer viewer) {
@@ -193,16 +198,16 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(10)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_change_name", this::handleName,
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> this.getLink(viewer).canRename(viewer.getPlayer()))
-                    .build()
+            .setHandler(new ItemHandler("shop_change_name", this::handleName, ItemOptions.builder()
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).canRename(viewer.getPlayer()))
+                .build()
             )));
 
         loader.addDefaultItem(NightItem.fromType(Material.ITEM_FRAME)
             .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Products")))
             .setLore(Lists.newList(
-                GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "You have " + LIGHT_YELLOW.wrap(SHOP_PRODUCTS) + "/" + LIGHT_YELLOW.wrap(GENERIC_MAX_PRODUCTS) + " products."),
+                GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "You have " + LIGHT_YELLOW.wrap(SHOP_PRODUCTS) + "/" + LIGHT_YELLOW
+                    .wrap(GENERIC_MAX_PRODUCTS) + " products."),
                 "",
                 GRAY.wrap("Edit prices, add items and"),
                 GRAY.wrap("restock them here."),
@@ -211,10 +216,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             ))
             .hideAllComponents()
             .toMenuItem()
-            .setSlots(13)
+            .setSlots(12)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_change_products", (viewer, event) -> this.handleProducts(viewer),
-                ItemOptions.builder()
+            .setHandler(new ItemHandler("shop_change_products", (viewer, event) -> this.handleProducts(
+                viewer), ItemOptions.builder()
                     .setVisibilityPolicy(viewer -> this.getLink(viewer).canManageProducts(viewer.getPlayer()))
                     .build()
             )));
@@ -222,7 +227,8 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
         loader.addDefaultItem(NightItem.fromType(Material.CHEST)
             .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("My Shops")))
             .setLore(Lists.newList(
-                GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "You own " + LIGHT_YELLOW.wrap(GENERIC_SHOPS_AMOUNT) + "/" + LIGHT_YELLOW.wrap(GENERIC_MAX_SHOPS) + " shops."),
+                GRAY.wrap(LIGHT_YELLOW.wrap("➥ ") + "You own " + LIGHT_YELLOW.wrap(GENERIC_SHOPS_AMOUNT) + "/" +
+                    LIGHT_YELLOW.wrap(GENERIC_MAX_SHOPS) + " shops."),
                 "",
                 GRAY.wrap("View all shops you rented/created."),
                 "",
@@ -230,12 +236,11 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             ))
             .hideAllComponents()
             .toMenuItem()
-            .setSlots(16)
+            .setSlots(14)
             .setPriority(10)
-            .setHandler(new ItemHandler("list_shops", (viewer, event) -> this.handleShops(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> this.getLink(viewer).isOwner(viewer.getPlayer()))
-                    .build()
+            .setHandler(new ItemHandler("list_shops", (viewer, event) -> this.handleShops(viewer), ItemOptions.builder()
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).isOwner(viewer.getPlayer()))
+                .build()
             )));
 
         loader.addDefaultItem(NightItem.fromType(Material.CHEST)
@@ -248,14 +253,13 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             ))
             .hideAllComponents()
             .toMenuItem()
-            .setSlots(16)
+            .setSlots(14)
             .setPriority(10)
-            .setHandler(new ItemHandler("list_owner_shops", (viewer, event) -> this.handleShops(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> !this.getLink(viewer).isOwner(viewer.getPlayer()))
-                    .build()
+            .setHandler(new ItemHandler("list_owner_shops", (viewer, event) -> this.handleShops(viewer), ItemOptions
+                .builder()
+                .setVisibilityPolicy(viewer -> !this.getLink(viewer).isOwner(viewer.getPlayer()))
+                .build()
             )));
-
 
 
         loader.addDefaultItem(NightItem.fromType(Material.EMERALD)
@@ -273,8 +277,7 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(28)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_bank", (viewer, event) -> this.handleBank(viewer),
-                ItemOptions.builder()
+            .setHandler(new ItemHandler("shop_bank", (viewer, event) -> this.handleBank(viewer), ItemOptions.builder()
                 //.setVisibilityPolicy(viewer -> this.module.getSettings().isBankMandatory() && this.getLink(viewer).canManageBank(viewer.getPlayer()))
                 .build()
             )));
@@ -293,12 +296,12 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             ))
             .hideAllComponents()
             .toMenuItem()
-            .setSlots(31)
+            .setSlots(30)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_display", (viewer, event) -> this.handleDisplay(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> this.getLink(viewer).canManageDisplay(viewer.getPlayer()))
-                    .build()
+            .setHandler(new ItemHandler("shop_display", (viewer, event) -> this.handleDisplay(viewer), ItemOptions
+                .builder()
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).canManageDisplay(viewer.getPlayer()))
+                .build()
             )));
 
         loader.addDefaultItem(NightItem.fromType(Material.JUNGLE_SIGN)
@@ -314,11 +317,12 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             ))
             .hideAllComponents()
             .toMenuItem()
-            .setSlots(34)
+            .setSlots(32)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_rent_settings", (viewer, event) -> this.handleRentSettings(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> ChestConfig.isRentEnabled() && this.getLink(viewer).canManageRent(viewer.getPlayer()))
+            .setHandler(new ItemHandler("shop_rent_settings", (viewer, event) -> this.handleRentSettings(
+                viewer), ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> ChestConfig.isRentEnabled() && this.getLink(viewer).canManageRent(
+                        viewer.getPlayer()))
                     .build()
             )));
 
@@ -336,15 +340,49 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             ))
             .hideAllComponents()
             .toMenuItem()
-            .setSlots(34)
+            .setSlots(32)
             .setPriority(15)
-            .setHandler(new ItemHandler("shop_rent_extend", (viewer, event) -> this.handleRentExtend(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> ChestConfig.isRentEnabled() && this.getLink(viewer).isRenter(viewer.getPlayer()))
+            .setHandler(new ItemHandler("shop_rent_extend", (viewer, event) -> this.handleRentExtend(
+                viewer), ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> ChestConfig.isRentEnabled() && this.getLink(viewer).isRenter(viewer
+                        .getPlayer()))
                     .build()
             )));
 
+        // Trusted Players
 
+        loader.addDefaultItem(NightItem.fromType(Material.PLAYER_HEAD)
+            .setDisplayName(LIGHT_ORANGE.wrap(BOLD.wrap("Trusted Players")))
+            .setLore(Lists.newList(
+                GRAY.wrap("Trust your friends, so they"),
+                GRAY.wrap("can restock and manage your shop!"),
+                "",
+                LIGHT_ORANGE.wrap("→ " + UNDERLINED.wrap("Click to open"))
+            ))
+            .setProfileBySkinURL("65e5223317a890a30351f6f78d0abf8dd76cbd08df6f918883934564d28e58e")
+            .hideAllComponents()
+            .toMenuItem()
+            .setSlots(34)
+            .setPriority(10)
+            .setHandler(new ItemHandler("shop_trusted_players", (viewer, event) -> this.handleTrustedPlayers(
+                viewer), ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> this.getLink(viewer).hasOwnerRights(viewer.getPlayer()))
+                    .build()
+            )));
+
+        loader.addDefaultItem(NightItem.fromType(Material.RED_STAINED_GLASS_PANE)
+            .setDisplayName(RED.wrap(BOLD.wrap("Trusted Players")))
+            .setLore(Lists.newList(
+                GRAY.wrap("You don't have access to this menu.")
+            ))
+            .hideAllComponents()
+            .toMenuItem()
+            .setSlots(34)
+            .setPriority(1)
+            .build()
+        );
+
+        //
 
         loader.addDefaultItem(NightItem.fromType(Material.CAMPFIRE)
             .setDisplayName(LIGHT_YELLOW.wrap(BOLD.wrap("Player Shop")))
@@ -361,9 +399,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(45)
             .setPriority(10)
-            .setHandler(new ItemHandler("set_admin_shop", (viewer, event) -> this.handleAdminShop(viewer, true),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.ADMIN_SHOP) && !this.getLink(viewer).isAdminShop())
+            .setHandler(new ItemHandler("set_admin_shop", (viewer, event) -> this.handleAdminShop(viewer,
+                true), ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.ADMIN_SHOP) && !this
+                        .getLink(viewer).isAdminShop())
                     .build()
             )));
 
@@ -382,9 +421,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(45)
             .setPriority(10)
-            .setHandler(new ItemHandler("set_player_shop", (viewer, event) -> this.handleAdminShop(viewer, false),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.ADMIN_SHOP) && this.getLink(viewer).isAdminShop())
+            .setHandler(new ItemHandler("set_player_shop", (viewer, event) -> this.handleAdminShop(viewer,
+                false), ItemOptions.builder()
+                    .setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.ADMIN_SHOP) && this
+                        .getLink(viewer).isAdminShop())
                     .build()
             )));
 
@@ -399,10 +439,10 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(53)
             .setPriority(10)
-            .setHandler(new ItemHandler("shop_delete", (viewer, event) -> this.handleRemove(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> this.getLink(viewer).canRemove(viewer.getPlayer()))
-                    .build()
+            .setHandler(new ItemHandler("shop_delete", (viewer, event) -> this.handleRemove(viewer), ItemOptions
+                .builder()
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).canRemove(viewer.getPlayer()))
+                .build()
             )));
 
         loader.addDefaultItem(NightItem.fromType(Material.BARRIER)
@@ -418,29 +458,33 @@ public class SettingsMenu extends LinkedMenu<ShopPlugin, ChestShop> implements C
             .toMenuItem()
             .setSlots(53)
             .setPriority(15)
-            .setHandler(new ItemHandler("rent_cancel", (viewer, event) -> this.handleRentCancel(viewer),
-                ItemOptions.builder()
-                    .setVisibilityPolicy(viewer -> this.getLink(viewer).isRenter(viewer.getPlayer()))
-                    .build()
+            .setHandler(new ItemHandler("rent_cancel", (viewer, event) -> this.handleRentCancel(viewer), ItemOptions
+                .builder()
+                .setVisibilityPolicy(viewer -> this.getLink(viewer).isRenter(viewer.getPlayer()))
+                .build()
             )));
 
 
         loader.addDefaultItem(MenuItem.buildExit(this, 49).setPriority(10));
 
-        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem().setSlots(IntStream.range(45, 54).toArray()));
+        loader.addDefaultItem(NightItem.fromType(Material.BLACK_STAINED_GLASS_PANE).setHideTooltip(true).toMenuItem()
+            .setSlots(IntStream.range(45, 54).toArray()));
 
         // Compatibility for previous version configs.
-        loader.addHandler(new ItemHandler("shop_buying", (viewer, event) -> this.handleBuyingMode(viewer, TradeType.BUY)));
-        loader.addHandler(new ItemHandler("shop_selling", (viewer, event) -> this.handleBuyingMode(viewer, TradeType.SELL)));
-        loader.addHandler(new ItemHandler("shop_change_type", (viewer, event) -> this.handleAdminShop(viewer, !this.getLink(viewer).isAdminShop()),
-            ItemOptions.builder()
+        loader.addHandler(new ItemHandler("shop_buying", (viewer, event) -> this.handleBuyingMode(viewer,
+            TradeType.BUY)));
+        loader.addHandler(new ItemHandler("shop_selling", (viewer, event) -> this.handleBuyingMode(viewer,
+            TradeType.SELL)));
+        loader.addHandler(new ItemHandler("shop_change_type", (viewer, event) -> this.handleAdminShop(viewer, !this
+            .getLink(viewer).isAdminShop()), ItemOptions.builder()
                 .setVisibilityPolicy(viewer -> viewer.getPlayer().hasPermission(ChestPerms.ADMIN_SHOP))
                 .build()
         ));
 
         loader.addHandler(new ItemHandler("shop_storage", (viewer, event) -> {
             this.runNextTick(() -> module.openProductsMenu(viewer.getPlayer(), this.getLink(viewer)));
-        }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage() && !this.getLink(viewer).isAdminShop()).build()));
+        }, ItemOptions.builder().setVisibilityPolicy(viewer -> ChestUtils.isInfiniteStorage() && !this.getLink(viewer)
+            .isAdminShop()).build()));
 
         loader.addHandler(new ItemHandler("shop_bank", (viewer, event) -> {
             this.runNextTick(() -> {

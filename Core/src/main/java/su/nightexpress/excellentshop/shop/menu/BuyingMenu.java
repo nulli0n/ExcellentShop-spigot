@@ -44,15 +44,15 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
     private static final String DEF_TITLE = (TagWrappers.BLACK.wrap("[%s]") + " Buying %s")
         .formatted(ShopPlaceholders.SHOP_NAME, ShopPlaceholders.PRODUCT_PREVIEW_NAME);
 
-    private int[] productSlots;
+    private int[]     productSlots;
     private NightItem productLockedSlotIcon;
-    private boolean amountButtonsUseStackSize;
+    private boolean   amountButtonsUseStackSize;
 
     public static class Data {
 
         final AbstractShopModule module;
-        final Product product;
-        final int shopPage;
+        final Product            product;
+        final int                shopPage;
 
         int selectedUnits;
 
@@ -106,7 +106,8 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
             .apply(super.getRawTitle(context));
     }
 
-    public boolean show(@NonNull Player player, @NonNull AbstractShopModule module, @NonNull Product product, int shopPage, int units) {
+    public boolean show(@NonNull Player player, @NonNull AbstractShopModule module, @NonNull Product product,
+                        int shopPage, int units) {
         return this.show(player, new Data(module, product, shopPage, units));
     }
 
@@ -124,7 +125,7 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
     public void defineDefaultLayout() {
         this.addBackgroundItem(Material.BLACK_STAINED_GLASS_PANE, IntStream.range(45, 54).toArray());
         this.addBackgroundItem(Material.GRAY_STAINED_GLASS_PANE, IntStream.range(36, 45).toArray());
-        this.addBackgroundItem(Material.GRAY_STAINED_GLASS_PANE, 1,10,19,28,7,16,25,34);
+        this.addBackgroundItem(Material.GRAY_STAINED_GLASS_PANE, 1, 10, 19, 28, 7, 16, 25, 34);
 
         this.addDefaultButton("checkout", MenuItem.button()
             .defaultState(ItemState.builder()
@@ -138,7 +139,8 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
                     .hideAllComponents()
                 )
                 .displayModifier((context, item) -> item.replace(builder -> builder
-                    .with(ShopPlaceholders.GENERIC_PRICE, () -> this.getObject(context).worth(context.getPlayer()).format(Lang.OTHER_PRICE_DELIMITER.text()))
+                    .with(ShopPlaceholders.GENERIC_PRICE, () -> this.getObject(context).worth(context.getPlayer())
+                        .format(Lang.OTHER_PRICE_DELIMITER.text()))
                 ))
                 .action(this::handleCheckout)
                 .build()
@@ -163,6 +165,32 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
             .build()
         );
 
+        this.addDefaultButton("reset", MenuItem.button()
+            .defaultState(ItemState.builder()
+                .icon(NightItem.fromType(Material.BUCKET)
+                    .setDisplayName(TagWrappers.RED.and(TagWrappers.BOLD).wrap("Reset to 1"))
+                    .hideAllComponents()
+                )
+                .action(this::handleReset)
+                .build()
+            )
+            .slots(47)
+            .build()
+        );
+
+        this.addDefaultButton("maximize", MenuItem.button()
+            .defaultState(ItemState.builder()
+                .icon(NightItem.fromType(Material.LAVA_BUCKET)
+                    .setDisplayName(TagWrappers.YELLOW.and(TagWrappers.BOLD).wrap("Set to Maximum"))
+                    .hideAllComponents()
+                )
+                .action(this::handleMaximize)
+                .build()
+            )
+            .slots(51)
+            .build()
+        );
+
         this.addPlusButton(8, AmountPercent.SINGLE);
         this.addPlusButton(17, AmountPercent.QUARTER);
         this.addPlusButton(26, AmountPercent.HALF);
@@ -176,9 +204,11 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
 
     @Override
     protected void onLoad(@NonNull FileConfig config) {
-        this.productSlots = config.get(ConfigTypes.INT_ARRAY, "Product.Slots", new int[]{2,3,4,5,6, 11,12,13,14,15, 20,21,22,23,24, 29,30,31,32,33});
+        this.productSlots = config.get(ConfigTypes.INT_ARRAY, "Product.Slots",
+            new int[]{2, 3, 4, 5, 6, 11, 12, 13, 14, 15, 20, 21, 22, 23, 24, 29, 30, 31, 32, 33});
 
-        this.productLockedSlotIcon = config.get(ConfigTypes.NIGHT_ITEM, "Product.Locked-Slot.Icon", NightItem.fromType(Material.BARRIER)
+        this.productLockedSlotIcon = config.get(ConfigTypes.NIGHT_ITEM, "Product.Locked-Slot.Icon", NightItem.fromType(
+            Material.BARRIER)
             .setDisplayName(TagWrappers.RED.and(TagWrappers.BOLD).wrap("Locked"))
             .setLore(Lists.newList(
                 TagWrappers.GRAY.wrap("We can't offer more of this"),
@@ -188,7 +218,8 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
             .hideAllComponents()
         );
 
-        this.amountButtonsUseStackSize = config.get(ConfigTypes.BOOLEAN, "Settings.Set-Stack-Size-For-Amount-Buttons", true);
+        this.amountButtonsUseStackSize = config.get(ConfigTypes.BOOLEAN, "Settings.Set-Stack-Size-For-Amount-Buttons",
+            true);
     }
 
     @Override
@@ -207,7 +238,8 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
     }
 
     @Override
-    public void onPrepare(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory, @NonNull List<MenuItem> items) {
+    public void onPrepare(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory,
+                          @NonNull List<MenuItem> items) {
         this.validateQuantity(context, items);
     }
 
@@ -331,7 +363,8 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
         int units = data.selectedUnits;
         int shopPage = data.shopPage;
 
-        EPreparedTransaction transaction = EPreparedTransaction.builder(player, TradeType.BUY).addProduct(product, units).build();
+        EPreparedTransaction transaction = EPreparedTransaction.builder(player, TradeType.BUY).addProduct(product,
+            units).build();
 
         data.module.proceedTransaction(transaction, completed -> {
             if (data.module.getSettings().isBuyingMenuCloseAfterPurchase()) {
@@ -372,5 +405,21 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
             data.selectedUnits += percent.exactAmount(product);
             context.getViewer().refresh();
         });
+    }
+
+    private void handleReset(@NonNull ActionContext context) {
+        this.getObject(context).selectedUnits = 1;
+        context.getViewer().refresh();
+    }
+
+    private void handleMaximize(@NonNull ActionContext context) {
+        Player player = context.getPlayer();
+        Data data = this.getObject(context);
+        Product product = data.product;
+        int max = product.getMaxBuyableUnitAmount(player, player.getInventory());
+        if (max < 0) max = Integer.MAX_VALUE;
+
+        data.selectedUnits = max;
+        context.getViewer().refresh();
     }
 }

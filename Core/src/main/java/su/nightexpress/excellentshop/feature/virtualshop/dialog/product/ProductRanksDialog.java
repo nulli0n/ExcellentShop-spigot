@@ -19,22 +19,29 @@ import java.util.HashSet;
 
 public class ProductRanksDialog extends Dialog<VirtualProduct> {
 
-    private static final TextLocale          TITLE = VirtualLang.builder("Dialog.Product.RankRequirements.Title").text(title("Product", "Rank Requirements"));
-    private static final DialogElementLocale BODY  = VirtualLang.builder("Dialog.Product.RankRequirements.Body").dialogElement(
-        400,
-        "Configure product accessibility based on player groups (ranks).",
-        "Each group in the list must be entered on a " + TagWrappers.SOFT_YELLOW.wrap("separate line") + ".",
-        "",
-        TagWrappers.GREEN.wrap("✔ Allowed Ranks:") + " Grants access to players who belong to any of the listed groups.",
-        TagWrappers.RED.wrap("✘ Forbidden Ranks:") + " Denies access to players who belong to any of the listed groups.",
-        "",
-        TagWrappers.SOFT_YELLOW.wrap("→ Note:") + " Forbidden Ranks takes priority. If a player matches both lists, they will be denied access."
-    );
+    private static final TextLocale          TITLE = VirtualLang.builder("Dialog.Product.RankRequirements.Title").text(
+        title("Product", "Rank Requirements"));
+    private static final DialogElementLocale BODY  = VirtualLang.builder("Dialog.Product.RankRequirements.Body")
+        .dialogElement(
+            400,
+            "Configure product accessibility based on player groups (ranks).",
+            "Each group in the list must be entered on a " + TagWrappers.SOFT_YELLOW.wrap("separate line") + ".",
+            "",
+            TagWrappers.GREEN.wrap("✔ Allowed Ranks:") +
+                " Grants access to players who belong to any of the listed groups.",
+            TagWrappers.RED.wrap("✘ Forbidden Ranks:") +
+                " Denies access to players who belong to any of the listed groups.",
+            "",
+            TagWrappers.SOFT_YELLOW.wrap("→ Note:") +
+                " Forbidden Ranks takes priority. If a player matches both lists, they will be denied access."
+        );
 
-    private static final DialogElementLocale INPUT_ALLOWED_RANKS = VirtualLang.builder("Dialog.Product.RankRequirements.Input.AllowedRanks")
+    private static final DialogElementLocale INPUT_ALLOWED_RANKS = VirtualLang.builder(
+        "Dialog.Product.RankRequirements.Input.AllowedRanks")
         .dialogElement(200, TagWrappers.GREEN.wrap("✔") + " Allowed Ranks");
 
-    private static final DialogElementLocale INPUT_FORBIDDEN_RANKS = VirtualLang.builder("Dialog.Product.RankRequirements.Input.ForbiddenRanks")
+    private static final DialogElementLocale INPUT_FORBIDDEN_RANKS = VirtualLang.builder(
+        "Dialog.Product.RankRequirements.Input.ForbiddenRanks")
         .dialogElement(200, TagWrappers.RED.wrap("✘") + " Forbidden Ranks");
 
     private static final String JSON_ALLOWED_RANKS   = "allowed_ranks";
@@ -71,11 +78,14 @@ public class ProductRanksDialog extends Dialog<VirtualProduct> {
                 product.getShop().markDirty();
                 this.show(player, product, viewer.getCallback());
             })
-            .handleResponse(DialogActions.OK, (viewer, identifier, nbtHolder) -> {
+            .handleResponse(DialogActions.APPLY, (viewer, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
 
-                nbtHolder.getText(JSON_ALLOWED_RANKS).ifPresent(allowedRanks -> product.setAllowedRanks(Arrays.asList(allowedRanks.split("\n"))));
-                nbtHolder.getText(JSON_FORBIDDEN_RANKS).ifPresent(forbiddenRanks -> product.setForbiddenRanks(Arrays.asList(forbiddenRanks.split("\n"))));
+                nbtHolder.getText(JSON_ALLOWED_RANKS)
+                    .ifPresent(allowedRanks -> product.setAllowedRanks(Arrays.asList(allowedRanks.split("\n"))));
+
+                nbtHolder.getText(JSON_FORBIDDEN_RANKS)
+                    .ifPresent(forbiddenRanks -> product.setForbiddenRanks(Arrays.asList(forbiddenRanks.split("\n"))));
 
                 product.getShop().markDirty();
                 viewer.callback();

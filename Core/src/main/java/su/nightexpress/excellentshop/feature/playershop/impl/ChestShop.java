@@ -41,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop {
 
-    private final ChestShopModule module;
+    private final ChestShopModule     module;
     private final Map<UUID, UserInfo> trustedPlayers;
 
     private String   worldName;
@@ -66,7 +66,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
 
     private Block block;
 
-    public ChestShop(@NonNull ShopPlugin plugin, @NonNull ChestShopModule module, @NonNull Path path, @NonNull String id) {
+    public ChestShop(@NonNull ShopPlugin plugin, @NonNull ChestShopModule module, @NonNull Path path,
+                     @NonNull String id) {
         super(plugin, path, id);
         this.module = module;
         this.trustedPlayers = new HashMap<>();
@@ -79,7 +80,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
             String raw = config.getString("Location", "");
             String[] split = raw.split(",");
             if (split.length != 6) {
-                throw new PlayerShopLoadException("Invalid shop location data. Expected 6 params, but found %s".formatted(split.length));
+                throw new PlayerShopLoadException("Invalid shop location data. Expected 6 params, but found %s"
+                    .formatted(split.length));
             }
 
             String worldName = split[5];
@@ -134,7 +136,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
                 String renterName = String.valueOf(config.getString("Rent.RenterName"));
                 this.renterInfo = new UserInfo(renterId, renterName);
             }
-            catch (IllegalArgumentException ignored) {}
+            catch (IllegalArgumentException ignored) {
+            }
 
             this.rentedUntil = config.getLong("Rent.RentedUntil", -1);
         }
@@ -150,7 +153,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
 
                 this.trustedPlayers.put(trustedId, new UserInfo(trustedId, trustedName));
             }
-            catch (IllegalArgumentException ignored) {}
+            catch (IllegalArgumentException ignored) {
+            }
         });
 
         this.loadProducts(config);
@@ -191,7 +195,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         config.set("Display.Showcase.Enabled", this.isShowcaseEnabled());
         config.set("Display.Showcase.Type", this.getShowcaseId());
 
-        config.getSection("Products").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> config.remove("Products." + sId));
+        config.getSection("Products").stream().filter(sId -> !this.hasProduct(sId)).forEach(sId -> config.remove(
+            "Products." + sId));
 
         config.remove("TrustedPlayers");
         this.trustedPlayers.forEach((id, profile) -> {
@@ -265,7 +270,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         BlockData data = this.block.getBlockData();
 
         if (data instanceof Directional directional) {
-            Block opposite = this.block.getRelative(directional.getFacing()).getLocation().clone().add(0, 0.5, 0).getBlock();
+            Block opposite = this.block.getRelative(directional.getFacing()).getLocation().clone().add(0, 0.5, 0)
+                .getBlock();
             location = LocationUtil.setCenter3D(opposite.getLocation());
             location.setDirection(directional.getFacing().getOppositeFace().getDirection());
             location.setPitch(35F);
@@ -374,6 +380,10 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         return true;
     }
 
+    public boolean hasOwnerRights(@NonNull Player player) {
+        return this.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+    }
+
     public boolean canManage(@NonNull Player player) {
         return this.isOwnerOrRenter(player) || this.isTrusted(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
     }
@@ -386,13 +396,9 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         return this.canManage(player);
     }
 
-    @Deprecated
-    public boolean canManageBank(@NonNull Player player) {
-        return this.canManage(player);
-    }
-
     public boolean canManageRent(@NonNull Player player) {
-        return ChestUtils.hasRentPermission(player) && (this.isOwner(player) || player.hasPermission(ChestPerms.EDIT_OTHERS));
+        return ChestUtils.hasRentPermission(player) && (this.isOwner(player) || player.hasPermission(
+            ChestPerms.EDIT_OTHERS));
     }
 
     public boolean canManageDisplay(@NonNull Player player) {
@@ -411,6 +417,10 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         return this.ownerInfo.isUser(player);
     }
 
+    public boolean isOwner(@NonNull UUID playerId) {
+        return this.ownerInfo.id().equals(playerId);
+    }
+
     public boolean isRenter(@NonNull Player player) {
         return this.renterInfo != null && this.renterInfo.isUser(player);
     }
@@ -427,6 +437,22 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         return this.trustedPlayers.containsKey(playerId);
     }
 
+    public void addTrustedPlayer(@NonNull Player player) {
+        this.addTrustedPlayer(UserInfo.of(player));
+    }
+
+    public void addTrustedPlayer(@NonNull UserInfo profile) {
+        this.trustedPlayers.put(profile.id(), profile);
+    }
+
+    public void removeTrustedPlayer(@NonNull Player player) {
+        this.removeTrustedPlayer(player.getUniqueId());
+    }
+
+    public void removeTrustedPlayer(@NonNull UUID playerId) {
+        this.trustedPlayers.remove(playerId);
+    }
+
     @Override
     public boolean isAdminShop() {
         return this.adminShop;
@@ -437,7 +463,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
     }
 
     @NonNull
-    public ChestProduct createProduct(@NonNull Player player, @NonNull ItemStack item, boolean bypassHandler) throws IllegalArgumentException {
+    public ChestProduct createProduct(@NonNull Player player, @NonNull ItemStack item,
+                                      boolean bypassHandler) throws IllegalArgumentException {
         if (item.getType().isAir()) throw new IllegalArgumentException("Item must not be air");
         if (this.isProduct(item)) throw new IllegalArgumentException("Item is already a shop product");
 
@@ -453,7 +480,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
         content.setCompareNbt(true); // Explicit enable NBT comparasion for ChestShop items.
         product.setCurrencyId(this.module.getDefinition().getDefaultCurrency());
         product.setContent(content);
-        product.setPricing(FlatPricing.of(ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get(), ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get()));
+        product.setPricing(FlatPricing.of(ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get(),
+            ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get()));
         product.updatePrice(false);
 
         this.addProduct(product);
@@ -473,7 +501,8 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
     }
 
     @Nullable
-    public ChestProduct getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType, @Nullable Player player) {
+    public ChestProduct getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
+                                       @Nullable Player player) {
         if (!this.isTradeAllowed(tradeType)) return null;
 
         int stackSize = itemStack.getAmount();
@@ -541,12 +570,6 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
     @NonNull
     public Optional<Player> getRenter() {
         return Optional.ofNullable(this.renterInfo).map(profile -> Players.getPlayer(profile.id()));
-    }
-
-    @NonNull
-    @Deprecated
-    public Optional<Player> getRenterOrOwner() {
-        return this.renterInfo == null ? this.getOwner() : this.getRenter();
     }
 
     @Nullable

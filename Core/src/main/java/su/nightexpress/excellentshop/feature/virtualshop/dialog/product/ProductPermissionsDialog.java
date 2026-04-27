@@ -19,22 +19,30 @@ import java.util.HashSet;
 
 public class ProductPermissionsDialog extends Dialog<VirtualProduct> {
 
-    private static final TextLocale          TITLE = VirtualLang.builder("Dialog.Product.PermissionRequirements.Title").text(title("Product", "Permission Requirements"));
-    private static final DialogElementLocale BODY  = VirtualLang.builder("Dialog.Product.PermissionRequirements.Body").dialogElement(
-        400,
-        "Configure product accessibility based on player permissions.",
-        "Each permission in the list must be entered on a " + TagWrappers.SOFT_YELLOW.wrap("separate line") + ".",
-        "",
-        TagWrappers.GREEN.wrap("✔ Allowed Perms:") + " Grants access to players who has any of the listed permissions.",
-        TagWrappers.RED.wrap("✘ Forbidden Perms:") + " Denies access to players who has any of the listed permissions.",
-        "",
-        TagWrappers.SOFT_YELLOW.wrap("→ Note:") + " Forbidden Perms takes priority. If a player matches both lists, they will be denied access."
-    );
+    private static final TextLocale TITLE = VirtualLang.builder("Dialog.Product.PermissionRequirements.Title")
+        .text(title("Product", "Permission Requirements"));
 
-    private static final DialogElementLocale INPUT_ALLOWED_PERMS = VirtualLang.builder("Dialog.Product.PermissionRequirements.Input.AllowedPerms")
+    private static final DialogElementLocale BODY = VirtualLang.builder("Dialog.Product.PermissionRequirements.Body")
+        .dialogElement(
+            400,
+            "Configure product accessibility based on player permissions.",
+            "Each permission in the list must be entered on a " + TagWrappers.SOFT_YELLOW.wrap("separate line") + ".",
+            "",
+            TagWrappers.GREEN.wrap("✔ Allowed Perms:") +
+                " Grants access to players who has any of the listed permissions.",
+            TagWrappers.RED.wrap("✘ Forbidden Perms:") +
+                " Denies access to players who has any of the listed permissions.",
+            "",
+            TagWrappers.SOFT_YELLOW.wrap("→ Note:") +
+                " Forbidden Perms takes priority. If a player matches both lists, they will be denied access."
+        );
+
+    private static final DialogElementLocale INPUT_ALLOWED_PERMS = VirtualLang.builder(
+        "Dialog.Product.PermissionRequirements.Input.AllowedPerms")
         .dialogElement(200, TagWrappers.GREEN.wrap("✔") + " Allowed Perms");
 
-    private static final DialogElementLocale INPUT_FORBIDDEN_PERMS = VirtualLang.builder("Dialog.Product.PermissionRequirements.Input.ForbiddenPerms")
+    private static final DialogElementLocale INPUT_FORBIDDEN_PERMS = VirtualLang.builder(
+        "Dialog.Product.PermissionRequirements.Input.ForbiddenPerms")
         .dialogElement(200, TagWrappers.RED.wrap("✘") + " Forbidden Perms");
 
     private static final String JSON_ALLOWED_PERMS   = "allowed_perms";
@@ -71,11 +79,15 @@ public class ProductPermissionsDialog extends Dialog<VirtualProduct> {
                 product.getShop().markDirty();
                 this.show(player, product, viewer.getCallback());
             })
-            .handleResponse(DialogActions.OK, (viewer, identifier, nbtHolder) -> {
+            .handleResponse(DialogActions.APPLY, (viewer, identifier, nbtHolder) -> {
                 if (nbtHolder == null) return;
 
-                nbtHolder.getText(JSON_ALLOWED_PERMS).ifPresent(allowedRanks -> product.setRequiredPermissions(Arrays.asList(allowedRanks.split("\n"))));
-                nbtHolder.getText(JSON_FORBIDDEN_PERMS).ifPresent(forbiddenRanks -> product.setForbiddenPermissions(Arrays.asList(forbiddenRanks.split("\n"))));
+                nbtHolder.getText(JSON_ALLOWED_PERMS)
+                    .ifPresent(allowedRanks -> product.setRequiredPermissions(Arrays.asList(allowedRanks.split("\n"))));
+
+                nbtHolder.getText(JSON_FORBIDDEN_PERMS)
+                    .ifPresent(forbiddenRanks -> product.setForbiddenPermissions(Arrays.asList(forbiddenRanks.split(
+                        "\n"))));
 
                 product.getShop().markDirty();
                 viewer.callback();

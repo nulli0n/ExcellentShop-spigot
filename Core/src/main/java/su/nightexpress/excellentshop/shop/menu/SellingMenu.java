@@ -53,7 +53,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
                        @NonNull Map<ItemStack, ProductData> products,
                        @Nullable Shop targetShop,
                        @Nullable Product targetProduct,
-                       int shopPage){
+                       int shopPage) {
 
         @NonNull
         public BalanceHolder worth(@NonNull Player player) {
@@ -69,7 +69,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         }
     }
 
-    private record ProductData(@NonNull Product product, int units){}
+    private record ProductData(@NonNull Product product, int units) {
+    }
 
     private SellingMenuAdapter adapter;
     private int[]              productSlots;
@@ -100,7 +101,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         }
     }
 
-    public boolean show(@NonNull Player player, @NonNull AbstractShopModule module, @Nullable Shop targetShop, @Nullable Product targetProduct, int shopPage) {
+    public boolean show(@NonNull Player player, @NonNull AbstractShopModule module, @Nullable Shop targetShop,
+                        @Nullable Product targetProduct, int shopPage) {
         return this.show(player, new Data(module, new LinkedHashMap<>(), targetShop, targetProduct, shopPage));
     }
 
@@ -132,7 +134,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
                 )
                 .condition(context -> !this.getObject(context).products.isEmpty())
                 .displayModifier((context, item) -> item.replace(builder -> builder
-                    .with(ShopPlaceholders.GENERIC_PRICE, () -> this.getObject(context).worth(context.getPlayer()).format(Lang.OTHER_PRICE_DELIMITER.text()))
+                    .with(ShopPlaceholders.GENERIC_PRICE, () -> this.getObject(context).worth(context.getPlayer())
+                        .format(Lang.OTHER_PRICE_DELIMITER.text()))
                 ))
                 .action(this::handleSellOut)
                 .build()
@@ -180,8 +183,10 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
             ))
         );
 
-        this.worthText = config.get(ConfigTypes.STRING, "Item.Info.Worth", TagWrappers.GREEN.wrap("Worth: " + ShopPlaceholders.GENERIC_WORTH));
-        this.amountText = config.get(ConfigTypes.STRING, "Item.Info.Amount", TagWrappers.RED.wrap("Min. amount to sell: " + ShopPlaceholders.GENERIC_AMOUNT));
+        this.worthText = config.get(ConfigTypes.STRING, "Item.Info.Worth", TagWrappers.GREEN.wrap("Worth: " +
+            ShopPlaceholders.GENERIC_WORTH));
+        this.amountText = config.get(ConfigTypes.STRING, "Item.Info.Amount", TagWrappers.RED.wrap(
+            "Min. amount to sell: " + ShopPlaceholders.GENERIC_AMOUNT));
     }
 
     @Override
@@ -214,12 +219,15 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
 
                 if (event.isShiftClick()) {
                     this.plugin.runTask(() -> {
-                        this.addItem(context, clickedItem, false, leftover -> player.getInventory().setItem(realSlot, leftover));
+                        this.addItem(context, clickedItem, false, leftover -> player.getInventory().setItem(realSlot,
+                            leftover));
                     });
                     return;
                 }
             }
 
+            // Force trigger packet to add item worth lore.
+            this.plugin.runTask(() -> this.triggerSlotUpdate(player, realSlot));
             event.setCancelled(false);
             return;
         }
@@ -256,8 +264,15 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         Set<Integer> slots = event.getRawSlots();
 
         if (slots.stream().allMatch(slot -> slot >= inventory.getSize())) {
+            Player player = context.getPlayer();
+
             event.setCancelled(false);
             context.getViewer().setNextClickIn(0L);
+
+            // Force trigger packet to add item worth lore.
+            this.plugin.runTask(() -> {
+                event.getInventorySlots().forEach(slot -> this.triggerSlotUpdate(player, slot));
+            });
         }
     }
 
@@ -276,13 +291,15 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    public void handleClose(@NonNull Player player, @NonNull InventoryCloseEvent event, @NonNull MenuRegistry menuRegistry) {
+    public void handleClose(@NonNull Player player, @NonNull InventoryCloseEvent event,
+                            @NonNull MenuRegistry menuRegistry) {
         super.handleClose(player, event, menuRegistry);
         this.triggerSlotUpdates(player); // A small workaround to not use #runTask in #onClose due to possible exception on server shutdown.
     }
 
     @Override
-    public void onPrepare(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory, @NonNull List<MenuItem> items) {
+    public void onPrepare(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory,
+                          @NonNull List<MenuItem> items) {
 
     }
 
@@ -340,7 +357,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         return Lists.contains(this.productSlots, slot);
     }
 
-    private void addItem(@NonNull ViewerContext context, @NonNull ItemStack clickedItem, boolean resetCursor, @NonNull Consumer<@Nullable ItemStack> consumer) {
+    private void addItem(@NonNull ViewerContext context, @NonNull ItemStack clickedItem, boolean resetCursor,
+                         @NonNull Consumer<@Nullable ItemStack> consumer) {
         //Player player = context.getPlayer();
         Product product = this.findProduct(context, clickedItem);
         if (product == null) return;
@@ -400,7 +418,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         consumer.accept(left);
     }
 
-    private void removeItem(@NonNull ViewerContext context, @NonNull ItemStack clickedItem, @NonNull Consumer<@NonNull ItemStack> consumer) {
+    private void removeItem(@NonNull ViewerContext context, @NonNull ItemStack clickedItem,
+                            @NonNull Consumer<@NonNull ItemStack> consumer) {
         Data data = this.getObject(context);
 
         ItemStack keyStack = new ItemStack(clickedItem);

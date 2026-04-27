@@ -36,6 +36,9 @@ import java.util.Set;
 
 public class ChestUtils {
 
+    private ChestUtils() {
+    }
+
     @NonNull
     public static String generateShopId(@NonNull Player player, @NonNull Location location) {
         return generateShopId(player.getName(), location);
@@ -43,12 +46,8 @@ public class ChestUtils {
 
     @NonNull
     public static String generateShopId(@NonNull String playerName, @NonNull Location location) {
-        return (playerName + "_" + LocationUtil.getWorldName(location) + "_" + location.getBlockX() + "_" + location.getBlockY() + "_" + location.getBlockZ()).toLowerCase();
-    }
-
-    @Deprecated
-    public static boolean canUseDisplayEntities() {
-        return true;
+        return (playerName + "_" + LocationUtil.getWorldName(location) + "_" + location.getBlockX() + "_" + location
+            .getBlockY() + "_" + location.getBlockZ()).toLowerCase();
     }
 
     public static boolean hasRentPermission(@NonNull Player player) {
@@ -131,7 +130,8 @@ public class ChestUtils {
     }
 
     public static boolean isShopDecor(@NonNull Material material) {
-        return Tag.SIGNS.isTagged(material) || material == Material.ITEM_FRAME || material == Material.GLOW_ITEM_FRAME || material == Material.HOPPER;
+        return Tag.SIGNS.isTagged(
+            material) || material == Material.ITEM_FRAME || material == Material.GLOW_ITEM_FRAME || material == Material.HOPPER;
     }
 
     public static int getShopLimit(@NonNull Player player) {
@@ -171,11 +171,13 @@ public class ChestUtils {
         }
 
         List<String> lore = Lists.modify(ItemUtil.getLoreSerialized(item), NightMessage::stripTags);
-        return lore.stream().noneMatch(line -> ChestConfig.SHOP_PRODUCT_DENIED_LORES.get().stream().anyMatch(line::contains));
+        return lore.stream().noneMatch(line -> ChestConfig.SHOP_PRODUCT_DENIED_LORES.get().stream().anyMatch(
+            line::contains));
     }
 
     public static boolean isContainer(@NonNull Material material) {
-        return material != Material.ENDER_CHEST && material.createBlockData().createBlockState() instanceof BlockInventoryHolder;
+        return material != Material.ENDER_CHEST && material.createBlockData()
+            .createBlockState() instanceof BlockInventoryHolder;
     }
 
     public static boolean isContainer(@NonNull Block block) {
@@ -207,6 +209,7 @@ public class ChestUtils {
             Material.TRAPPED_CHEST,
             Material.BARREL
         );
+        materials.addAll(Tag.ITEMS_COPPER_CHESTS.getValues());
         materials.addAll(Tag.SHULKER_BOXES.getValues());
         return materials;
     }
@@ -215,7 +218,12 @@ public class ChestUtils {
     public static NightItem getDefaultShopItem(@NonNull Material material) {
         String texture = switch (material) {
             case CHEST -> "edc36c9cb50a527aa55607a0df7185ad20aabaa903e8d9abfc78260705540def";
+            case TRAPPED_CHEST -> "275bcff2e74deed37a319a1f404e70d06a5f360cacee99c71346f38560cbd72a";
             case BARREL -> "5193c89d1df679854f33c2215247b676a159d5395392d0c61b8476f813d9edb0";
+            case COPPER_CHEST -> "2a7848dfe597995d04e822ac53878a29ed81e1f152848f1823cb3529c47e1cef";
+            case EXPOSED_COPPER_CHEST -> "5c092ddd68df26a30afbab8247a581cb981fb3ec8114ab95519e15083c480139";
+            case WEATHERED_COPPER_CHEST -> "7b4b972335ae434b004ec7ad2e3706c757c14f210b2b1132d08e384ea722e45b";
+            case OXIDIZED_COPPER_CHEST -> "33af3bfdf486eeff78c49da400907b45a4c4db4d6fb159909a3217e069c640b1";
             case WHITE_SHULKER_BOX -> "7e066c569d4b94e49b23770e46c9a0e1d736711becb702809375e2d5a32f2a99";
             case LIGHT_GRAY_SHULKER_BOX -> "56a48c4037343731bd5fd1510ca15c573788389f258677a17f014e08aeaa9560";
             case GRAY_SHULKER_BOX -> "a95bde13c45754468cfc8c3a00133d997362fa7e302b0b0fbc4bd0fca6890059";
@@ -236,7 +244,8 @@ public class ChestUtils {
         };
 
         NightItem item = NightItem.fromType(texture == null ? material : Material.PLAYER_HEAD)
-            .setDisplayName(TagWrappers.GOLD.wrap(TagWrappers.BOLD.wrap("Shop Block")) + " " + TagWrappers.GRAY.wrap("(" + TagWrappers.WHITE.wrap(ShopPlaceholders.GENERIC_TYPE) + ")"))
+            .setDisplayName(TagWrappers.GOLD.wrap(TagWrappers.BOLD.wrap("Shop Block")) + " " + TagWrappers.GRAY.wrap(
+                "(" + TagWrappers.WHITE.wrap(ShopPlaceholders.GENERIC_TYPE) + ")"))
             .setLore(Lists.newList(
                 TagWrappers.GRAY.wrap("Place down to create a shop!")
             ))

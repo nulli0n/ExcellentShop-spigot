@@ -1,28 +1,41 @@
 package su.nightexpress.nexshop.module;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.api.transaction.ETransactionItem;
+
+import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.api.ShopModule;
+import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.TradeStatus;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.product.click.ProductClickAction;
+import su.nightexpress.excellentshop.api.shop.Shop;
 import su.nightexpress.excellentshop.api.transaction.ECompletedTransaction;
 import su.nightexpress.excellentshop.api.transaction.EPreparedTransaction;
 import su.nightexpress.excellentshop.api.transaction.ERawTransaction;
+import su.nightexpress.excellentshop.api.transaction.ETransactionItem;
 import su.nightexpress.excellentshop.api.transaction.ETransactionResult;
-import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
-import su.nightexpress.excellentshop.ShopPlaceholders;
-import su.nightexpress.excellentshop.api.ShopModule;
-import su.nightexpress.excellentshop.api.shop.Shop;
-import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.excellentshop.core.Perms;
-import su.nightexpress.excellentshop.shop.ShopManager;
 import su.nightexpress.excellentshop.product.click.ProductClickContext;
+import su.nightexpress.excellentshop.shop.ShopManager;
+import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
 import su.nightexpress.nexshop.util.BalanceHolder;
 import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nexshop.util.UnitUtils;
@@ -32,12 +45,6 @@ import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.ui.inventory.Menu;
 import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
-
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public abstract class AbstractShopModule extends AbstractModule implements ShopModule {
 
@@ -445,7 +452,7 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
                 int maxAffordable = product.getMaxAffordableUnitAmount(player);
                 if (maxAffordable >= 0 && maxAffordable < units) {
                     result = ETransactionResult.TOO_EXPENSIVE;
-                    errorLocale = Lang.SHOP_TRADE_PLAYER_OUT_OF_MONEY;
+                    errorLocale = Lang.SHOP_PURCHASE_PLAYER_OUT_OF_MONEY;
                     break;
                 }
             }
@@ -484,7 +491,7 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
             failed = null;
         }
 
-        if (result != ETransactionResult.SUCCESS) {
+        if (result != ETransactionResult.SUCCESS && errorLocale != null && failed != null) {
             ECompletedTransaction completedTransaction = transaction.complete(result);
             ETransactionItem reason = failed;
 

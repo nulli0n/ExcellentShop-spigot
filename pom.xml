@@ -7,7 +7,7 @@
     <groupId>su.nightexpress.excellentshop</groupId>
     <artifactId>ExcellentShop-spigot</artifactId>
     <packaging>pom</packaging>
-    <version>5.0.0-beta</version>
+    <version>5.0.1</version>
     <modules>
         <module>Core</module>
         <module>api</module>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>su.nightexpress.nightcore</groupId>
             <artifactId>main</artifactId>
-            <version>2.14.1</version>
+            <version>2.15.2</version>
         </dependency>
     </dependencies>
 

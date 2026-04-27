@@ -1,26 +1,27 @@
 package su.nightexpress.excellentshop.integration.packetevents.adapter;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.event.PacketSendEvent;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetCursorItem;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPlayerInventory;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems;
-import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import java.util.List;
+import java.util.Optional;
+
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPlayerInventory;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetSlot;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerWindowItems;
+
+import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import su.nightexpress.excellentshop.api.menu.SellingMenuAdapter;
 import su.nightexpress.excellentshop.api.menu.SellingMenuProvider;
 import su.nightexpress.excellentshop.integration.packetevents.PacketEventsPacketReceiver;
-
-import java.util.List;
-import java.util.Optional;
 
 public class PacketEventsSellingMenuAdapter extends PacketEventsPacketReceiver implements SellingMenuAdapter {
 
@@ -66,11 +67,12 @@ public class PacketEventsSellingMenuAdapter extends PacketEventsPacketReceiver i
 
                 setPlayerInventory.setStack(this.render(player, setPlayerInventory.getStack()));
             }
-            case PacketType.Play.Server.SET_CURSOR_ITEM -> {
+            // This packet causes visual glitch when dragging items onto the same slot.
+            /* case PacketType.Play.Server.SET_CURSOR_ITEM -> {
                 WrapperPlayServerSetCursorItem setCursorItem = new WrapperPlayServerSetCursorItem(event);
-
+            
                 setCursorItem.setStack(this.render(player, setCursorItem.getStack()));
-            }
+            } */
             default -> {
                 return;
             }
