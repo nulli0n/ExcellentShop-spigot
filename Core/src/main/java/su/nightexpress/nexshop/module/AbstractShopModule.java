@@ -415,7 +415,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
                     break;
                 }
 
-                if (product.countSpace(inventory) < UnitUtils.unitsToAmount(product, units)) {
+                int inventorySpace = product.countSpace(inventory);
+                if (inventorySpace >= 0 && inventorySpace < UnitUtils.unitsToAmount(product, units)) {
                     result = ETransactionResult.OUT_OF_INVENTORY_SPACE;
                     errorLocale = Lang.SHOP_TRADE_PLAYER_FULL_INVENTORY;
                     break;
@@ -469,6 +470,7 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
 
             if (!transaction.isSilent()) {
                 this.sendPrefixed(errorLocale, player, builder -> this.addTransactionPlaceholderContext(builder, completedTransaction)
+                    .with(ShopPlaceholders.GENERIC_PRICE, () -> reason.price().format(Lang.OTHER_PRICE_DELIMITER.text()))
                     .with(reason.product().placeholders())
                 );
             }
