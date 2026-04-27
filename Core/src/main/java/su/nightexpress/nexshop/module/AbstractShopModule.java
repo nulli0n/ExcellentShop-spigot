@@ -74,7 +74,9 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
     }
 
     @NonNull
-    protected <P extends Product> List<String> formatProductInfo(@NonNull P product, @NonNull ProductFormatter<P> formatter, @NonNull Player player) {
+    protected <P extends Product> List<String> formatProductInfo(@NonNull P product,
+                                                                 @NonNull ProductFormatter<P> formatter,
+                                                                 @NonNull Player player) {
         TradeStatus status = product.getTradeStatus();
         List<String> masterLore = this.getSettings().getProductDisplayMasterInfo(status);
 
@@ -104,7 +106,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         return finalLore;
     }
 
-    public void handleProductClick(@NonNull Player player, @NonNull Product product, int shopPage, @NonNull InventoryClickEvent event) {
+    public void handleProductClick(@NonNull Player player, @NonNull Product product, int shopPage,
+                                   @NonNull InventoryClickEvent event) {
         TradeStatus status = product.getTradeStatus();
         if (status == TradeStatus.UNAVAILABLE) return;
 
@@ -140,7 +143,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
             boolean allowMenu = type == TradeType.BUY ? product.isBuyMenuAllowed() : product.isSellMenuAllowed();
 
             if (allowMenu) {
-                EPreparedTransaction transaction = EPreparedTransaction.builder(player, type).addProduct(product, 1).setPreview(true).build();
+                EPreparedTransaction transaction = EPreparedTransaction.builder(player, type).addProduct(product, 1)
+                    .setPreview(true).build();
                 this.previewTransaction(transaction, result -> {
                     if (result != ETransactionResult.SUCCESS) return;
 
@@ -157,7 +161,7 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
 
         TradeType type = switch (action) {
             case BUY_ALL, BUY_ONE -> TradeType.BUY;
-            case SELL_ALL, SELL_ONE ->  TradeType.SELL;
+            case SELL_ALL, SELL_ONE -> TradeType.SELL;
             default -> null;
         };
         if (type == null) return;
@@ -165,18 +169,22 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         int units = 1;
 
         InventoryClickEvent event = context.event();
-        if (event != null && event.getClick() == ClickType.NUMBER_KEY && (action == ProductClickAction.BUY_ONE || action == ProductClickAction.SELL_ONE)) {
+        if (event != null && event
+            .getClick() == ClickType.NUMBER_KEY && (action == ProductClickAction.BUY_ONE || action == ProductClickAction.SELL_ONE)) {
             int hotbarButton = event.getHotbarButton();
             if (hotbarButton >= 0) units = hotbarButton + 1;
         }
         else {
-            if (action == ProductClickAction.SELL_ALL) units = product.getMaxSellableUnitAmount(player, player.getInventory());
-            if (action == ProductClickAction.BUY_ALL) units = product.getMaxBuyableUnitAmount(player, player.getInventory());
+            if (action == ProductClickAction.SELL_ALL) units = product.getMaxSellableUnitAmount(player, player
+                .getInventory());
+            if (action == ProductClickAction.BUY_ALL) units = product.getMaxBuyableUnitAmount(player, player
+                .getInventory());
         }
 
         int totalUnits = Math.max(1, units); // Prevent zero values.
 
-        EPreparedTransaction transaction = EPreparedTransaction.builder(player, type).addProduct(product, totalUnits).build();
+        EPreparedTransaction transaction = EPreparedTransaction.builder(player, type).addProduct(product, totalUnits)
+            .build();
 
         this.proceedTransaction(transaction, completed -> {
             Menu menu = this.plugin.getMenuRegistry().getActiveMenu(player);
@@ -191,9 +199,11 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         Player player = raw.getPlayer();
         TradeType type = raw.getType();
 
-        EPreparedTransaction.Builder transaction = EPreparedTransaction.builder(player, type).setOptions(raw.getOptions());
+        EPreparedTransaction.Builder transaction = EPreparedTransaction.builder(player, type).setOptions(raw
+            .getOptions());
 
-        Set<? extends Shop> targetShops = new HashSet<>(raw.hasTargetShops() ? raw.getTargetShops() : this.getShops(player));
+        Set<? extends Shop> targetShops = new HashSet<>(raw.hasTargetShops() ? raw.getTargetShops() : this.getShops(
+            player));
         targetShops.removeIf(shop -> !shop.canAccess(player, false));
         if (targetShops.isEmpty()) {
             return transaction.build();
@@ -241,25 +251,29 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         return transaction.build();
     }
 
-    public void previewTransaction(@NonNull ERawTransaction transaction, @NonNull Consumer<ETransactionResult> callback) {
+    public void previewTransaction(@NonNull ERawTransaction transaction,
+                                   @NonNull Consumer<ETransactionResult> callback) {
         if (!transaction.isPreview()) throw new IllegalArgumentException("Transaction is not preview!");
 
         this.processTransaction(this.prepareTransaction(transaction), completed -> callback.accept(completed.result()));
     }
 
-    public void proceedTransaction(@NonNull ERawTransaction transaction, @NonNull Consumer<ECompletedTransaction> callback) {
+    public void proceedTransaction(@NonNull ERawTransaction transaction,
+                                   @NonNull Consumer<ECompletedTransaction> callback) {
         if (transaction.isPreview()) throw new IllegalArgumentException("Transaction is preview!");
 
         this.processTransaction(this.prepareTransaction(transaction), callback);
     }
 
-    public void previewTransaction(@NonNull EPreparedTransaction transaction, @NonNull Consumer<ETransactionResult> callback) {
+    public void previewTransaction(@NonNull EPreparedTransaction transaction,
+                                   @NonNull Consumer<ETransactionResult> callback) {
         if (!transaction.isPreview()) throw new IllegalArgumentException("Transaction is not preview!");
 
         this.processTransaction(transaction, completed -> callback.accept(completed.result()));
     }
 
-    public void proceedTransaction(@NonNull EPreparedTransaction transaction, @NonNull Consumer<ECompletedTransaction> callback) {
+    public void proceedTransaction(@NonNull EPreparedTransaction transaction,
+                                   @NonNull Consumer<ECompletedTransaction> callback) {
         if (transaction.isPreview()) throw new IllegalArgumentException("Transaction is preview!");
 
         this.processTransaction(transaction, callback);
@@ -270,7 +284,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
 
     protected abstract void finishSuccessfulTransaction(@NonNull ECompletedTransaction transaction);
 
-    private void processTransaction(@NonNull EPreparedTransaction transaction, @NonNull Consumer<ECompletedTransaction> callback) {
+    private void processTransaction(@NonNull EPreparedTransaction transaction,
+                                    @NonNull Consumer<ECompletedTransaction> callback) {
         Player player = transaction.getPlayer();
 
         // TODO Custom transaction event
@@ -288,7 +303,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
                 ECompletedTransaction completedTransaction = transaction.complete(ETransactionResult.OUT_OF_MONEY);
 
                 if (!transaction.isSilent()) {
-                    this.sendPrefixed(Lang.SHOP_TRADE_SHOP_OUT_OF_FUNDS, player, builder -> this.addTransactionPlaceholderContext(builder, completedTransaction));
+                    this.sendPrefixed(Lang.SHOP_TRADE_SHOP_OUT_OF_FUNDS, player, builder -> this
+                        .addTransactionPlaceholderContext(builder, completedTransaction));
                 }
 
                 callback.accept(completedTransaction);
@@ -317,7 +333,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
 
                     List<ETransactionItem> looseItems = completedTransaction.looseItems();
                     if (!looseItems.isEmpty()) {
-                        this.sendPrefixed(Lang.SHOP_TRADE_FEEDBACK_LOOSE_ITEMS, player, builder -> this.addTransactionPlaceholderContext(builder, completedTransaction));
+                        this.sendPrefixed(Lang.SHOP_TRADE_FEEDBACK_LOOSE_ITEMS, player, builder -> this
+                            .addTransactionPlaceholderContext(builder, completedTransaction));
                     }
                 }
                 else {
@@ -330,7 +347,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         }, this.plugin::runTask);
     }
 
-    protected boolean checkTransactionBasics(@NonNull EPreparedTransaction transaction, @NonNull Consumer<ECompletedTransaction> callback) {
+    protected boolean checkTransactionBasics(@NonNull EPreparedTransaction transaction,
+                                             @NonNull Consumer<ECompletedTransaction> callback) {
         Player player = transaction.getPlayer();
         TradeType tradeType = transaction.getType();
         Inventory inventory = transaction.getUserInventory();
@@ -340,7 +358,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
             ECompletedTransaction completedTransaction = transaction.complete(ETransactionResult.FAILURE);
 
             if (!transaction.isSilent()) {
-                this.sendPrefixed(Lang.SHOP_TRADE_FEEDBACK_EMPTY, player, builder -> this.addTransactionPlaceholderContext(builder, completedTransaction));
+                this.sendPrefixed(Lang.SHOP_TRADE_FEEDBACK_EMPTY, player, builder -> this
+                    .addTransactionPlaceholderContext(builder, completedTransaction));
             }
 
             callback.accept(completedTransaction);
@@ -382,7 +401,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
                 ECompletedTransaction completedTransaction = transaction.complete(ETransactionResult.FAILURE);
 
                 if (!transaction.isSilent()) {
-                    this.sendPrefixed(Lang.SHOP_TRADE_FEEDBACK_LOOSE_ITEMS, player, builder -> this.addTransactionPlaceholderContext(builder, completedTransaction));
+                    this.sendPrefixed(Lang.SHOP_TRADE_FEEDBACK_LOOSE_ITEMS, player, builder -> this
+                        .addTransactionPlaceholderContext(builder, completedTransaction));
                 }
 
                 callback.accept(completedTransaction);
@@ -469,8 +489,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
             ETransactionItem reason = failed;
 
             if (!transaction.isSilent()) {
-                this.sendPrefixed(errorLocale, player, builder -> this.addTransactionPlaceholderContext(builder, completedTransaction)
-                    .with(ShopPlaceholders.GENERIC_PRICE, () -> reason.price().format(Lang.OTHER_PRICE_DELIMITER.text()))
+                this.sendPrefixed(errorLocale, player, builder -> this.addTransactionPlaceholderContext(builder,
+                    completedTransaction)
                     .with(reason.product().placeholders())
                 );
             }
@@ -488,10 +508,11 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
 
         List<CompletableFuture<Void>> shopBalanceFutures = new ArrayList<>();
 
-        Map<Shop, Set<ETransactionItem>> shopsWithProducts = transaction.getItemsList().stream().collect(Collectors.groupingBy(
-            qp -> qp.product().getShop(),
-            Collectors.mapping(qp -> qp, Collectors.toSet())
-        ));
+        Map<Shop, Set<ETransactionItem>> shopsWithProducts = transaction.getItemsList().stream().collect(Collectors
+            .groupingBy(
+                qp -> qp.product().getShop(),
+                Collectors.mapping(qp -> qp, Collectors.toSet())
+            ));
 
         Map<String, BalanceHolder> shopBalanceMap = new ConcurrentHashMap<>();
 
@@ -547,7 +568,8 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         });
     }
 
-    protected PlaceholderContext.@NonNull Builder addTransactionPlaceholderContext(PlaceholderContext.@NonNull Builder builder, @NonNull ECompletedTransaction transaction) {
+    protected PlaceholderContext.@NonNull Builder addTransactionPlaceholderContext(PlaceholderContext.@NonNull Builder builder,
+                                                                                   @NonNull ECompletedTransaction transaction) {
         return builder
             .with(ShopPlaceholders.GENERIC_WORTH, () -> transaction.worth().format(Lang.OTHER_PRICE_DELIMITER.text()))
             .with(ShopPlaceholders.GENERIC_TOTAL_AMOUNT, () -> String.valueOf(transaction.countTotalAmount()))
@@ -560,11 +582,13 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
 
     @NonNull
     protected static String formatTransactionProducts(@NonNull Collection<ETransactionItem> items) {
-        String entry = (items.size() > 1 ? Lang.SHOP_TRADE_PRODUCT_ENTRY_MANY : Lang.SHOP_TRADE_PRODUCT_ENTRY_ONE).text();
+        String entry = (items.size() > 1 ? Lang.SHOP_TRADE_PRODUCT_ENTRY_MANY : Lang.SHOP_TRADE_PRODUCT_ENTRY_ONE)
+            .text();
 
         return items.stream()
             .map(item -> PlaceholderContext.builder()
-                .with(ShopPlaceholders.GENERIC_AMOUNT, () -> String.valueOf(UnitUtils.unitsToAmount(item.product(), item.units())))
+                .with(ShopPlaceholders.GENERIC_AMOUNT, () -> String.valueOf(UnitUtils.unitsToAmount(item.product(), item
+                    .units())))
                 .with(ShopPlaceholders.GENERIC_UNITS, () -> String.valueOf(item.units()))
                 .with(ShopPlaceholders.GENERIC_PRICE, () -> item.price().format(Lang.OTHER_PRICE_DELIMITER.text()))
                 .with(item.product().placeholders())
