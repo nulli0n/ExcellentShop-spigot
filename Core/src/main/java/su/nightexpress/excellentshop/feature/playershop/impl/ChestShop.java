@@ -18,6 +18,7 @@ import su.nightexpress.excellentshop.feature.playershop.ChestShopModule;
 import su.nightexpress.excellentshop.feature.playershop.ChestUtils;
 import su.nightexpress.excellentshop.feature.playershop.core.ChestConfig;
 import su.nightexpress.excellentshop.feature.playershop.core.ChestPerms;
+import su.nightexpress.excellentshop.feature.playershop.event.ChestShopCanManageEvent;
 import su.nightexpress.excellentshop.feature.playershop.exception.PlayerShopLoadException;
 import su.nightexpress.excellentshop.feature.playershop.rent.RentSettings;
 import su.nightexpress.excellentshop.product.ContentTypes;
@@ -385,7 +386,12 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
     }
 
     public boolean canManage(@NonNull Player player) {
-        return this.isOwnerOrRenter(player) || this.isTrusted(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+        boolean canManage = this.isOwnerOrRenter(player) || this.isTrusted(player) || player.hasPermission(ChestPerms.EDIT_OTHERS);
+
+        ChestShopCanManageEvent event = new ChestShopCanManageEvent(player, this, canManage);
+        plugin.getPluginManager().callEvent(event);
+
+        return event.canManage();
     }
 
     public boolean canRename(@NonNull Player player) {
