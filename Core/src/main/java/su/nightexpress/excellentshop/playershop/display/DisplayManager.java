@@ -1,39 +1,50 @@
 package su.nightexpress.excellentshop.playershop.display;
 
 
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.jspecify.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.api.packet.display.*;
-import su.nightexpress.excellentshop.playershop.ChestShopModule;
-import su.nightexpress.excellentshop.playershop.impl.ChestProduct;
-import su.nightexpress.excellentshop.playershop.impl.ChestShop;
-import su.nightexpress.excellentshop.playershop.impl.Showcase;
-import su.nightexpress.nightcore.util.LocationUtil;
-import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
-import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
-import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+import su.nightexpress.excellentshop.api.packet.display.DisplayAdapter;
+import su.nightexpress.excellentshop.api.packet.display.DisplaySettings;
+import su.nightexpress.excellentshop.api.packet.display.FakeDisplay;
+import su.nightexpress.excellentshop.api.packet.display.FakeType;
+import su.nightexpress.excellentshop.playershop.ChestShopModule;
+import su.nightexpress.excellentshop.playershop.impl.ChestProduct;
+import su.nightexpress.excellentshop.playershop.impl.ChestShop;
+import su.nightexpress.excellentshop.playershop.impl.Showcase;
+import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
+import su.nightexpress.nightcore.util.LocationUtil;
+import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
+import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
+import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
+
 public class DisplayManager {
 
-    private final ChestShopModule          module;
-    private final DisplayAdapter           adapter;
+    private final ChestShopModule                module;
+    private final DisplayAdapter                 adapter;
+    private final ProductFormatter<ChestProduct> formatter;
+
     private final Map<String, FakeDisplay> displayMap;
 
     private final double viewRange;
     private final int    itemChangeInterval;
 
-    public DisplayManager(@NonNull ChestShopModule module, @NonNull DisplayAdapter adapter) {
+    public DisplayManager(@NonNull ChestShopModule module,
+                          @NonNull DisplayAdapter adapter,
+                          @NonNull ProductFormatter<ChestProduct> formatter) {
         this.module = module;
         this.adapter = adapter;
+        this.formatter = formatter;
+
         this.displayMap = new ConcurrentHashMap<>();
 
         this.viewRange = adapter.getSettings().getVisibleDistance();
@@ -173,7 +184,7 @@ public class DisplayManager {
 
         if (product != null) {
             builder.with(product.placeholders());
-            text = this.module.formatProductLore(product, text, player);
+            text = this.formatter.format(product, text, player);
         }
 
         return builder.build().apply(String.join(TagWrappers.BR, text));

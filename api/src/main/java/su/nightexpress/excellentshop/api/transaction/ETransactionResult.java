@@ -1,5 +1,8 @@
 package su.nightexpress.excellentshop.api.transaction;
 
+/**
+ * Represents the final outcome or reason for failure of a transaction.
+ */
 public enum ETransactionResult {
     TOO_EXPENSIVE,
     NOT_AVAILABLE,

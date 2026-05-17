@@ -110,10 +110,12 @@ public class ProductPurchaseOptionsDialog extends Dialog<ProductClickContext> {
                     })
                     .build();
 
-                buttons.add(DialogButtons.action(locale.replace(placeholderContext)).action(DialogActions.customClick(
-                    jsonKey)).build());
+                buttons.add(DialogButtons.action(locale.replace(placeholderContext))
+                    .action(DialogActions.customClick(jsonKey))
+                    .build());
+
                 builder.handleResponse(jsonKey, (viewer, identifier, nbtHolder) -> {
-                    this.module.handleProductClickAction(context, action);
+                    this.module.handleProductClick(action, context);
                 });
             }
 

@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -46,9 +45,9 @@ import su.nightexpress.excellentshop.product.click.ProductClickContext;
 import su.nightexpress.excellentshop.shop.AbstractShop;
 import su.nightexpress.excellentshop.shop.AbstractShopModule;
 import su.nightexpress.excellentshop.shop.ShopManager;
-import su.nightexpress.excellentshop.shop.TransactionProcessor;
 import su.nightexpress.excellentshop.shop.dialog.impl.ProductPurchaseOptionsDialog;
 import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
+import su.nightexpress.excellentshop.shop.transaction.TransactionCallback;
 import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.excellentshop.virtualshop.command.VirtualCommands;
 import su.nightexpress.excellentshop.virtualshop.core.VirtualConfig;
@@ -92,15 +91,12 @@ import su.nightexpress.excellentshop.virtualshop.shop.editor.ShopOptionsMenu;
 import su.nightexpress.excellentshop.virtualshop.shop.menu.CentralMenu;
 import su.nightexpress.excellentshop.virtualshop.shop.menu.ShopMenu;
 import su.nightexpress.excellentshop.virtualshop.shop.menu.ViewMode;
-import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
-import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.util.Enums;
 import su.nightexpress.nightcore.util.FileUtil;
-import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.LowerCase;
 import su.nightexpress.nightcore.util.NumberUtil;
 import su.nightexpress.nightcore.util.PDCUtil;
@@ -118,7 +114,6 @@ public class VirtualShopModule extends AbstractShopModule {
     private final VirtualSettings settings;
     private final VirtualCommands commands;
 
-    private final TransactionProcessor             transactionProcessor;
     private final ProductFormatter<VirtualProduct> productFormatter;
 
     private final Map<String, ShopMenu>     layoutByIdMap;
@@ -139,10 +134,8 @@ public class VirtualShopModule extends AbstractShopModule {
 
     private TransactionLogger logger;
 
-    public VirtualShopModule(@NonNull ModuleContext context, @NonNull ShopManager shopManager,
-                             @NonNull TransactionProcessor transactionProcessor) {
+    public VirtualShopModule(@NonNull ModuleContext context, @NonNull ShopManager shopManager) {
         super(context, shopManager);
-        this.transactionProcessor = transactionProcessor;
         this.productFormatter = new ProductFormatter<>();
 
         this.settings = new VirtualSettings();
@@ -470,12 +463,12 @@ public class VirtualShopModule extends AbstractShopModule {
             Path file = dir.resolve(FileConfig.withExtension(ShopPlaceholders.DEFAULT));
             FileConfig config = FileConfig.load(file);
 
-            new ShopMenu(this.plugin, this).load(config); // Write defaults
+            new ShopMenu(this.plugin, this, this.productFormatter).load(config); // Write defaults
         }
 
         FileUtil.findYamlFiles(dir).forEach(file -> {
             String id = FileUtil.getNameWithoutExtension(file);
-            ShopMenu layout = this.initMenu(new ShopMenu(this.plugin, this), file);
+            ShopMenu layout = this.initMenu(new ShopMenu(this.plugin, this, this.productFormatter), file);
             this.layoutByIdMap.put(id, layout);
         });
 
@@ -548,11 +541,6 @@ public class VirtualShopModule extends AbstractShopModule {
         //            });
         //            this.info("=".repeat(30));
         //        });
-    }
-
-    @NonNull
-    public List<String> formatProductLore(@NonNull VirtualProduct product, @NonNull Player player) {
-        return this.formatProductInfo(product, this.productFormatter, player);
     }
 
     public boolean createShop(@NonNull Player player, @NonNull String name) {
@@ -722,42 +710,7 @@ public class VirtualShopModule extends AbstractShopModule {
 
     @Nullable
     public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType) {
-        return this.getBestProductFor(itemStack, tradeType, null, null);
-    }
-
-    @Nullable
-    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType type,
-                                            @Nullable VirtualShop shop) {
-        return this.getBestProductFor(itemStack, type, shop, null);
-    }
-
-    @Nullable
-    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
-                                            @Nullable Player player) {
-        return this.getBestProductFor(itemStack, tradeType, null, player);
-    }
-
-    @Nullable
-    public VirtualProduct getBestProductFor(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
-                                            @Nullable VirtualShop shop, @Nullable Player player) {
-        // No product if player is in bad world/gamemode.
-        if (player != null && !this.isAvailable(player, false)) return null;
-
-        Set<VirtualShop> shopsLookup = shop == null ? this.getShops() : Lists.newSet(shop);
-        Set<VirtualProduct> candidates = new HashSet<>();
-        int stackSize = itemStack.getAmount();
-
-        shopsLookup.forEach(shopLookup -> {
-            // No product if player can't access a shop.
-            if (player != null && !shopLookup.canAccess(player, false)) return;
-
-            VirtualProduct best = shopLookup.getBestProduct(itemStack, tradeType, player);
-            if (best != null) {
-                candidates.add(best);
-            }
-        });
-
-        return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
+        return (VirtualProduct) ShopUtils.findBestProduct(itemStack, tradeType, this.getShops());
     }
 
     @NonNull
@@ -986,29 +939,9 @@ public class VirtualShopModule extends AbstractShopModule {
     }
 
     @Override
-    @NonNull
-    protected CompletableFuture<Boolean> handleSuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
-        return this.transactionProcessor.queueTransaction(() -> {
-            return true;
-        });
-    }
-
-    @Override
-    protected void finishSuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
+    public void notifySuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
         Player player = transaction.player();
         TradeType type = transaction.type();
-
-        transaction.worth().getBalanceMap().forEach((currencyId, amount) -> {
-            Currency currency = EconomyBridge.api().getCurrency(currencyId);
-            if (currency == null) return;
-
-            if (type == TradeType.BUY) {
-                currency.withdraw(player, amount);
-            }
-            else {
-                currency.deposit(player, amount);
-            }
-        });
 
         transaction.items().forEach(quantified -> {
             quantified.product().onSuccessfulTransaction(transaction, quantified.units());
@@ -1026,7 +959,9 @@ public class VirtualShopModule extends AbstractShopModule {
                     .isSingleItem() ? VirtualLang.PRODUCT_PURCHASE_SELL_SINGLE : VirtualLang.PRODUCT_PURCHASE_SELL_MULTIPLE;
             }
 
-            this.sendPrefixed(locale, player, builder -> this.addTransactionPlaceholderContext(builder, transaction));
+            this.sendPrefixed(locale, player, builder -> this.transactionEngine
+                .addTransactionPlaceholders(builder, transaction)
+            );
         }
 
         this.logger.logTransaction(transaction);
@@ -1036,6 +971,7 @@ public class VirtualShopModule extends AbstractShopModule {
         PlayerInventory inventory = player.getInventory();
 
         ERawTransaction.Builder builder = ERawTransaction.builder(player, TradeType.SELL)
+            .targetShops(this.getShops(player)) // Only shops that player can access
             .setPreview(false)
             .setStrict(false);
 
@@ -1050,19 +986,20 @@ public class VirtualShopModule extends AbstractShopModule {
         });
     }
 
-    public void sellAll(@NonNull Player player, @NonNull Consumer<ECompletedTransaction> callback) {
+    public void sellAll(@NonNull Player player, @NonNull TransactionCallback callback) {
         this.sellAll(player, player.getInventory(), callback);
     }
 
     public void sellAll(@NonNull Player player, @NonNull Inventory inventory,
-                        @NonNull Consumer<ECompletedTransaction> callback) {
+                        @NonNull TransactionCallback callback) {
         this.sellAll(player, inventory, false, callback);
     }
 
     public void sellAll(@NonNull Player player, @NonNull Inventory inventory, boolean silent,
-                        @NonNull Consumer<ECompletedTransaction> callback) {
+                        @NonNull TransactionCallback callback) {
         ERawTransaction raw = ERawTransaction.builder(player, TradeType.SELL)
             .addItems(inventory)
+            .targetShops(this.getShops(player)) // Only shops that player can access
             .setUserInventory(inventory)
             .setPreview(false)
             .setStrict(false)

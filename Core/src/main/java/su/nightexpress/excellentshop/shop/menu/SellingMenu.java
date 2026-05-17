@@ -3,11 +3,9 @@ package su.nightexpress.excellentshop.shop.menu;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.bukkit.Material;
@@ -511,19 +509,15 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         if (targetProduct != null) return targetProduct.getContent().isItemMatches(itemStack) ? targetProduct : null;
 
         Shop targetShop = data.targetShop;
-        if (targetShop != null) return targetShop.getBestProduct(itemStack, TradeType.SELL, player);
+        if (targetShop != null) return targetShop.getBestProduct(itemStack, TradeType.SELL);
 
-        AbstractShopModule module = data.module;
-        Set<Product> best = module.getShops(player).stream()
-            .map(shop -> shop.getBestProduct(itemStack, TradeType.SELL, player))
-            .filter(Objects::nonNull)
-            .collect(Collectors.toSet());
-
-        return ShopUtils.getBestProduct(best, TradeType.SELL, player);
+        Set<? extends Shop> shops = data.module.getShops(player);
+        return ShopUtils.findBestProduct(itemStack, TradeType.SELL, shops);
     }
 
     private boolean isSellable(@NonNull ViewerContext context, @NonNull ItemStack itemStack) {
-        return this.findProduct(context, itemStack) != null;
+        Product product = this.findProduct(context, itemStack);
+        return product != null && product.canTrade(context.getPlayer());
     }
 
     private void handleSellOut(@NonNull ActionContext context) {

@@ -1,5 +1,21 @@
 package su.nightexpress.excellentshop.playershop;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,27 +31,50 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.*;
-import org.jspecify.annotations.Nullable;
+import org.bukkit.inventory.BlockInventoryHolder;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import su.nightexpress.excellentshop.api.BalanceHolder;
+import su.nightexpress.excellentshop.ShopFiles;
+import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.api.TransactionLogger;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 import su.nightexpress.excellentshop.api.packet.PacketLibrary;
 import su.nightexpress.excellentshop.api.packet.display.DisplayAdapter;
 import su.nightexpress.excellentshop.api.playershop.PlayerShop;
 import su.nightexpress.excellentshop.api.playershop.PlayerShopManager;
-import su.nightexpress.excellentshop.api.transaction.ETransactionItem;
+import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.TradeType;
+import su.nightexpress.excellentshop.api.shop.Shop;
 import su.nightexpress.excellentshop.api.transaction.ECompletedTransaction;
-import su.nightexpress.excellentshop.integration.claim.*;
+import su.nightexpress.excellentshop.api.transaction.ETransactionItem;
+import su.nightexpress.excellentshop.core.Lang;
+import su.nightexpress.excellentshop.integration.claim.ExcellentClaimsHook;
+import su.nightexpress.excellentshop.integration.claim.GriefDefenderHook;
+import su.nightexpress.excellentshop.integration.claim.GriefPreventionHook;
+import su.nightexpress.excellentshop.integration.claim.HuskClaimsHook;
+import su.nightexpress.excellentshop.integration.claim.KingdomsHook;
+import su.nightexpress.excellentshop.integration.claim.LandsHook;
+import su.nightexpress.excellentshop.integration.claim.PlotSquaredClaimHook;
+import su.nightexpress.excellentshop.integration.claim.RegionMarketListener;
+import su.nightexpress.excellentshop.integration.claim.SimpleClaimHook;
+import su.nightexpress.excellentshop.integration.claim.WorldGuardFlags;
+import su.nightexpress.excellentshop.integration.claim.WorldGuardHook;
 import su.nightexpress.excellentshop.integration.shop.UpgradeHopperListener;
 import su.nightexpress.excellentshop.module.ModuleContext;
 import su.nightexpress.excellentshop.playershop.bank.Bank;
 import su.nightexpress.excellentshop.playershop.bank.BankManager;
 import su.nightexpress.excellentshop.playershop.command.ChestShopCommands;
-import su.nightexpress.excellentshop.playershop.core.*;
+import su.nightexpress.excellentshop.playershop.core.ChestConfig;
+import su.nightexpress.excellentshop.playershop.core.ChestKeys;
+import su.nightexpress.excellentshop.playershop.core.ChestLang;
+import su.nightexpress.excellentshop.playershop.core.ChestPerms;
+import su.nightexpress.excellentshop.playershop.core.ConfigMigration;
+import su.nightexpress.excellentshop.playershop.core.PlayerShopSettings;
 import su.nightexpress.excellentshop.playershop.dialog.PSDialogKeys;
 import su.nightexpress.excellentshop.playershop.dialog.impl.AddTrustedPlayerDialog;
 import su.nightexpress.excellentshop.playershop.dialog.impl.BankManagementDialog;
@@ -49,25 +88,26 @@ import su.nightexpress.excellentshop.playershop.impl.ChestShop;
 import su.nightexpress.excellentshop.playershop.impl.ShopBlock;
 import su.nightexpress.excellentshop.playershop.impl.Showcase;
 import su.nightexpress.excellentshop.playershop.listener.ShopListener;
-import su.nightexpress.excellentshop.playershop.menu.*;
+import su.nightexpress.excellentshop.playershop.menu.PlayerBrowserMenu;
+import su.nightexpress.excellentshop.playershop.menu.ProductsMenu;
+import su.nightexpress.excellentshop.playershop.menu.RentMenu;
+import su.nightexpress.excellentshop.playershop.menu.SettingsMenu;
+import su.nightexpress.excellentshop.playershop.menu.ShopBrowserMenu;
+import su.nightexpress.excellentshop.playershop.menu.ShopView;
+import su.nightexpress.excellentshop.playershop.menu.ShowcaseMenu;
+import su.nightexpress.excellentshop.playershop.menu.TrustedPlayersMenu;
 import su.nightexpress.excellentshop.playershop.rent.RentSettings;
 import su.nightexpress.excellentshop.playershop.repository.ShopLookup;
+import su.nightexpress.excellentshop.product.click.ProductClickContext;
+import su.nightexpress.excellentshop.product.price.FlatPricing;
+import su.nightexpress.excellentshop.shop.AbstractShop;
+import su.nightexpress.excellentshop.shop.AbstractShopModule;
+import su.nightexpress.excellentshop.shop.ShopManager;
 import su.nightexpress.excellentshop.shop.dialog.impl.ProductPurchaseOptionsDialog;
 import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
 import su.nightexpress.excellentshop.user.ShopUser;
 import su.nightexpress.excellentshop.util.PacketUtils;
-import su.nightexpress.excellentshop.ShopFiles;
-import su.nightexpress.excellentshop.ShopPlaceholders;
-import su.nightexpress.excellentshop.api.shop.Shop;
-import su.nightexpress.excellentshop.api.product.Product;
-import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.nexshop.hook.HookPlugin;
-import su.nightexpress.excellentshop.product.price.FlatPricing;
-import su.nightexpress.excellentshop.shop.ShopManager;
-import su.nightexpress.excellentshop.shop.TransactionProcessor;
-import su.nightexpress.excellentshop.product.click.ProductClickContext;
-import su.nightexpress.excellentshop.shop.AbstractShop;
-import su.nightexpress.excellentshop.shop.AbstractShopModule;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -77,7 +117,15 @@ import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
 import su.nightexpress.nightcore.user.UserInfo;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.BukkitThing;
+import su.nightexpress.nightcore.util.EntityUtil;
+import su.nightexpress.nightcore.util.FileUtil;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.LocationUtil;
+import su.nightexpress.nightcore.util.LowerCase;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.Players;
+import su.nightexpress.nightcore.util.Plugins;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.geodata.Cuboid;
 import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
@@ -85,19 +133,8 @@ import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 import su.nightexpress.nightcore.util.text.NightMessage;
 import su.nightexpress.nightcore.util.time.TimeFormats;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public class ChestShopModule extends AbstractShopModule implements PlayerShopManager {
 
-    private final TransactionProcessor           transactionProcessor;
     private final PlayerShopSettings             settings;
     private final ProductFormatter<ChestProduct> productFormatter;
 
@@ -119,10 +156,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
 
     private TransactionLogger logger;
 
-    public ChestShopModule(@NonNull ModuleContext context, @NonNull ShopManager shopManager,
-                           @NonNull TransactionProcessor transactionProcessor) {
+    public ChestShopModule(@NonNull ModuleContext context, @NonNull ShopManager shopManager) {
         super(context, shopManager);
-        this.transactionProcessor = transactionProcessor;
         this.settings = new PlayerShopSettings();
         this.productFormatter = new ProductFormatter<>();
 
@@ -201,6 +236,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return amount < 0 ? CoreLang.OTHER_INFINITY.text() : NumberUtil.format(amount);
         });
 
+        // TODO merchant Online/oFfline placeholders
+
         for (TradeType tradeType : TradeType.values()) {
             String name = LowerCase.INTERNAL.apply(tradeType.name());
 
@@ -235,7 +272,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     }
 
     private void loadUI() {
-        this.shopView = this.initMenu(new ShopView(this.plugin, this), this.getPath().resolve(CSFiles.FILE_SHOP_VIEW));
+        this.shopView = this.initMenu(new ShopView(this.plugin, this, this.productFormatter), this.getPath().resolve(
+            CSFiles.FILE_SHOP_VIEW));
 
         this.trustedPlayersMenu = this.initMenu(
             new TrustedPlayersMenu(this.plugin, this),
@@ -328,7 +366,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
 
         DisplayAdapter adapter = library.createDisplayAdapter(displaySettings);
 
-        this.displayManager = new DisplayManager(this, adapter);
+        this.displayManager = new DisplayManager(this, adapter, this.productFormatter);
         this.addTask(this::updateShopDisplays, displaySettings.getUpdateInterval());
     }
 
@@ -549,17 +587,6 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         this.shopBrowserMenu.openFromShop(player, source);
     }
 
-    @NonNull
-    public List<String> formatProductLore(@NonNull ChestProduct product, @NonNull Player player) {
-        return this.formatProductInfo(product, this.productFormatter, player);
-    }
-
-    @NonNull
-    public List<String> formatProductLore(@NonNull ChestProduct product, @NonNull List<String> masterLore,
-                                          @NonNull Player player) {
-        return this.formatProductInfo(product, this.productFormatter, masterLore, player);
-    }
-
     public boolean teleportToShop(@NonNull Player player, @NonNull ChestShop shop) {
         if (!shop.isAccessible()) {
             this.sendPrefixed(ChestLang.ERROR_SHOP_INACTIVE, player);
@@ -664,62 +691,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     }
 
     @Override
-    @NonNull
-    protected CompletableFuture<Boolean> handleSuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
-        return this.transactionProcessor.queueTransaction(() -> {
-            Player player = transaction.player();
-            TradeType type = transaction.type();
-
-            List<ETransactionItem> products = transaction.items();
-            List<CompletableFuture<Boolean>> shopFutures = new ArrayList<>();
-            List<Runnable> playerBalanceUpdates = new ArrayList<>();
-
-            products.forEach(quantified -> {
-                Product product = quantified.product();
-                Shop shop = product.getShop();
-                BalanceHolder price = quantified.price();
-
-                price.getBalanceMap().forEach((currencyId, amount) -> {
-                    Currency currency = EconomyBridge.api().getCurrency(currencyId);
-                    if (currency == null) return;
-
-                    if (!shop.isAdminShop()) {
-                        CompletableFuture<Boolean> shopFuture = switch (type) {
-                            case BUY -> shop.depositBalance(currency, amount);
-                            case SELL -> shop.withdrawBalance(currency, amount);
-                        };
-
-                        shopFutures.add(shopFuture.exceptionally(throwable -> {
-                            throwable.printStackTrace();
-                            return false;
-                        }));
-                    }
-
-                    Runnable runnable = switch (type) {
-                        case BUY -> () -> currency.withdraw(player, amount);
-                        case SELL -> () -> currency.deposit(player, amount);
-                    };
-                    playerBalanceUpdates.add(runnable);
-                });
-            });
-
-            // Wait for all database tasks to finish
-            CompletableFuture.allOf(shopFutures.toArray(new CompletableFuture[0])).join();
-
-            // All data comitted successfully
-            boolean allGood = shopFutures.stream().map(CompletableFuture::join).allMatch(Boolean.TRUE::equals);
-
-            if (allGood) {
-                playerBalanceUpdates.forEach(Runnable::run);
-                return true;
-            }
-
-            return false;
-        });
-    }
-
-    @Override
-    protected void finishSuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
+    public void notifySuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
         Player player = transaction.player();
         TradeType type = transaction.type();
         List<ETransactionItem> products = transaction.items();
@@ -742,8 +714,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
                 notifyLocale = ChestLang.PURCHASE_NOTIFY_SELL_SINGLE;
             }
 
-            this.sendPrefixed(feedbackLocale, player, builder -> this.addTransactionPlaceholderContext(builder,
-                transaction));
+            this.sendPrefixed(feedbackLocale, player, builder -> this.transactionEngine
+                .addTransactionPlaceholders(builder, transaction));
 
             products.forEach(transactionItem -> {
                 Product product = transactionItem.product();
@@ -752,8 +724,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
                 if (shop.isAdminShop()) return; // No notifications for admin shops.
 
                 chestShop.getEffectiveMerchant().ifPresent(merchant -> {
-                    this.sendPrefixed(notifyLocale, merchant, builder -> this.addTransactionPlaceholderContext(builder,
-                        transaction)
+                    this.sendPrefixed(notifyLocale, merchant, builder -> this.transactionEngine
+                        .addTransactionPlaceholders(builder, transaction)
                         .with(CommonPlaceholders.PLAYER.resolver(player))
                         .with(shop.placeholders())
                     );
@@ -861,7 +833,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return;
         }
 
-        if (shop.canManage(player)) {
+        if (shop.isEffectiveMerchant(player) || shop.isTrusted(player)) {
             event.setUseInteractedBlock(Event.Result.DENY);
             if (shop.isAdminShop() || ChestUtils.isInfiniteStorage()) {
                 this.openShopSettings(player, shop);
@@ -872,22 +844,20 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return;
         }
 
-        if (shop.isAdminShop() || !shop.canManage(player)) {
-            event.setUseInteractedBlock(Event.Result.DENY);
+        event.setUseInteractedBlock(Event.Result.DENY);
 
-            if (shop.isRentable() && !shop.isRented()) {
-                // TODO Dialog
-                UIUtils.openConfirmation(player, Confirmation.builder()
-                    .onAccept((viewer, event1) -> this.rentShopOrExtend(player, shop))
-                    .onReturn((viewer, event1) -> this.plugin.runTask(task -> player.closeInventory()))
-                    .returnOnAccept(true)
-                    .build());
-                return;
-            }
+        if (shop.isRentable() && !shop.isRented()) {
+            // TODO Dialog
+            UIUtils.openConfirmation(player, Confirmation.builder()
+                .onAccept((viewer, event1) -> this.rentShopOrExtend(player, shop))
+                .onReturn((viewer, event1) -> this.plugin.runTask(task -> player.closeInventory()))
+                .returnOnAccept(true)
+                .build());
+            return;
+        }
 
-            if (shop.canAccess(player, true)) {
-                shop.open(player);
-            }
+        if (shop.canAccess(player, true)) {
+            shop.open(player);
         }
     }
 
@@ -1158,68 +1128,65 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         return true;
     }
 
-    @NonNull
-    public CompletableFuture<Double> queryShopBalance(@NonNull ChestShop shop, @NonNull Currency currency) {
+    public @NonNull Optional<Double> queryShopBalance(@NonNull ChestShop shop, @NonNull Currency currency) {
         UserInfo profile = shop.getEffectiveMerchantProfile();
         Player player = Players.getPlayer(profile.id());
 
         Bank bank = this.getEffectiveBank(shop);
-        if (bank == null && this.settings.isBankMandatory()) return CompletableFuture.completedFuture(-1D);
+        if (bank == null && this.settings.isBankMandatory()) return Optional.empty();
         if (bank != null) {
-            return CompletableFuture.completedFuture(bank.getAccount().query(currency));
+            return Optional.of(bank.getAccount().query(currency));
         }
 
         if (player != null) {
-            return CompletableFuture.completedFuture(currency.queryBalance(player));
+            return Optional.of(currency.queryBalance(player));
         }
 
-        if (!currency.canHandleOffline()) {
-            return CompletableFuture.completedFuture(-1D);
-        }
-
-        return currency.queryBalanceAsync(profile.id());
+        return Optional.empty();
     }
 
-    @NonNull
-    public CompletableFuture<Boolean> depositShopBalance(@NonNull ChestShop shop, @NonNull Currency currency,
-                                                         double amount) {
+    public boolean depositShopBalance(@NonNull ChestShop shop, @NonNull Currency currency, double amount) {
         UserInfo profile = shop.getEffectiveMerchantProfile();
         Player player = Players.getPlayer(profile.id());
 
         Bank bank = this.getEffectiveBank(shop);
-        if (bank == null && this.settings.isBankMandatory()) return CompletableFuture.completedFuture(false);
+        if (bank == null && this.settings.isBankMandatory()) return false;
         if (bank != null) {
             bank.getAccount().store(currency, amount);
             bank.markDirty();
-            return CompletableFuture.completedFuture(true);
+            return true;
         }
 
         if (player != null) {
-            return currency.depositAsync(player, amount);
+            currency.deposit(player, amount);
+            return true;
         }
 
-        return currency.depositAsync(profile.id(), amount);
+        return false;
     }
 
-    @NonNull
-    public CompletableFuture<Boolean> withdrawShopBalance(@NonNull ChestShop shop, @NonNull Currency currency,
-                                                          double amount) {
+    public boolean withdrawShopBalance(@NonNull ChestShop shop, @NonNull Currency currency, double amount) {
         UserInfo profile = shop.getEffectiveMerchantProfile();
         Player player = Players.getPlayer(profile.id());
 
         Bank bank = this.getEffectiveBank(shop);
-        if (bank == null && this.settings.isBankMandatory()) return CompletableFuture.completedFuture(false);
+        if (bank == null && this.settings.isBankMandatory()) return false;
         if (bank != null) {
+            if (!bank.getAccount().has(currency, amount)) return false;
+
             bank.getAccount().remove(currency, amount);
             bank.markDirty();
-            return CompletableFuture.completedFuture(true);
+            return true;
         }
 
         if (player != null) {
-            return currency.withdrawAsync(player, amount);
+            if (!currency.canAfford(player, amount)) return false;
+
+            currency.withdraw(player, amount);
+            return true;
         }
 
-        return currency.withdrawAsync(profile.id(), amount);
+        return false;
     }
 
     @Nullable

@@ -29,7 +29,6 @@ import su.nightexpress.excellentshop.module.ModuleRegistry;
 import su.nightexpress.excellentshop.playershop.ChestShopModule;
 import su.nightexpress.excellentshop.playershop.core.ChestLang;
 import su.nightexpress.excellentshop.shop.ShopManager;
-import su.nightexpress.excellentshop.shop.TransactionProcessor;
 import su.nightexpress.excellentshop.user.UserManager;
 import su.nightexpress.excellentshop.util.PacketUtils;
 import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
@@ -49,8 +48,6 @@ import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
 
     private final ModuleRegistry moduleRegistry = new ModuleRegistry();
-
-    private final TransactionProcessor transactionProcessor = new TransactionProcessor();
 
     private DataHandler dataHandler;
     private DataManager dataManager;
@@ -149,8 +146,6 @@ public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
     protected void onShutdown() {
         super.onShutdown();
 
-        this.transactionProcessor.shutdown();
-
         PacketUtils.clear();
     }
 
@@ -198,12 +193,12 @@ public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
 
         loader.register(ModuleId.CHEST_SHOP,
             ModuleDefinition.createNoItemHandlers(psPrefix, "chestshop", "cshop", "playershop", "pshop"),
-            context -> new ChestShopModule(context, this.shopManager, this.transactionProcessor)
+            context -> new ChestShopModule(context, this.shopManager)
         );
 
         loader.register(ModuleId.VIRTUAL_SHOP,
             ModuleDefinition.createDefault(vsPrefix, "virtualshop", "vshop"),
-            context -> new VirtualShopModule(context, this.shopManager, this.transactionProcessor)
+            context -> new VirtualShopModule(context, this.shopManager)
         );
 
         loader.loadAll();

@@ -13,12 +13,23 @@ import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 
+/**
+ * A prepared transaction that has been validated and is ready to be processed by a TransactionEngine.
+ */
 @NullMarked
 public class EPreparedTransaction extends ETransaction {
 
     private final Map<Product, ETransactionItem> items;
     private final List<ETransactionItem>         looseItems;
 
+    /**
+     * Constructs a prepared transaction.
+     *
+     * @param player  The player involved.
+     * @param type    The trade type.
+     * @param options The transaction options.
+     * @param items   The mapped items ready to be processed.
+     */
     public EPreparedTransaction(Player player,
                                 TradeType type,
                                 ETransactionOptions options,
@@ -32,10 +43,20 @@ public class EPreparedTransaction extends ETransaction {
         return new Builder(player, type);
     }
 
-    public ECompletedTransaction complete(ETransactionResult result) {
-        return ECompletedTransaction.create(this, result, this.calculateWorth());
+    /**
+     * Checks whether the transaction has any items to proceed with.
+     *
+     * @return True if the item map is not empty, false otherwise.
+     */
+    public boolean hasItems() {
+        return !this.items.isEmpty();
     }
 
+    /**
+     * Calculates the total worth (price) of all items in this transaction.
+     *
+     * @return A BalanceHolder containing the total worth.
+     */
     public BalanceHolder calculateWorth() {
         BalanceHolder holder = new BalanceHolder();
 
@@ -44,18 +65,38 @@ public class EPreparedTransaction extends ETransaction {
         return holder;
     }
 
+    /**
+     * Gets a newly created list containing all prepared items.
+     *
+     * @return A list copy of the items.
+     */
     public List<ETransactionItem> getItemsList() {
         return new ArrayList<>(this.items.values());
     }
 
+    /**
+     * Gets the items that were processed successfully and are ready for the transaction.
+     * This map is modifiable.
+     *
+     * @return A map of products to their transaction items.
+     */
     public Map<Product, ETransactionItem> getItems() {
         return this.items;
     }
 
+    /**
+     * Gets the items that cannot be processed for whatever reason.
+     * This list is modifiable.
+     *
+     * @return A list of loose transaction items.
+     */
     public List<ETransactionItem> getLooseItems() {
         return this.looseItems;
     }
 
+    /**
+     * Builder class for prepared transactions.
+     */
     @NullMarked
     public static class Builder extends ETransaction.Builder<Builder, EPreparedTransaction> {
 
@@ -76,6 +117,14 @@ public class EPreparedTransaction extends ETransaction {
             return this;
         }
 
+        /**
+         * Adds a product to the transaction. If the product already exists,
+         * the units are added to the existing amount.
+         *
+         * @param product The product to add.
+         * @param units   The amount of units.
+         * @return This builder instance.
+         */
         public Builder addProduct(Product product, int units) {
             Currency currency = product.getCurrency();
             ETransactionItem previous = this.products.get(product);

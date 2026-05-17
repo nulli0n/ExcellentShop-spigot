@@ -1,33 +1,48 @@
 package su.nightexpress.excellentshop.util;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import su.nightexpress.excellentshop.api.product.TradeType;
+
 import su.nightexpress.excellentshop.api.UnitUtils;
 import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.ProductContent;
+import su.nightexpress.excellentshop.api.product.TradeType;
+import su.nightexpress.excellentshop.api.shop.Shop;
 import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.excellentshop.core.Perms;
-import su.nightexpress.excellentshop.virtualshop.shop.VirtualShop;
 import su.nightexpress.excellentshop.playershop.core.ChestPerms;
+import su.nightexpress.excellentshop.virtualshop.shop.VirtualShop;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.core.config.CoreLang;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.BukkitThing;
+import su.nightexpress.nightcore.util.Enums;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.StringUtil;
+import su.nightexpress.nightcore.util.Strings;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.text.night.NightMessage;
-
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ShopUtils {
 
@@ -81,23 +96,43 @@ public class ShopUtils {
         return count == 0 ? id : id + "_" + count;
     }
 
-    @Nullable
-    public static <T extends Product> T getBestProduct(@NonNull Collection<T> products, @NonNull TradeType tradeType,
-                                                       int stackSize, @Nullable Player player) {
-        Comparator<T> comparator = Comparator.comparingDouble(product -> product.getFinalPrice(tradeType,
-            player) * UnitUtils.amountToUnits(product, stackSize));
-        Stream<T> stream = products.stream();
+    public static <T extends Shop> @Nullable Product findBestProduct(@NonNull ItemStack itemStack,
+                                                                     @NonNull TradeType tradeType,
+                                                                     @NonNull Collection<T> shops) {
+        Set<Product> products = shops.stream()
+            .map(T::getValidProducts)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
 
-        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
+        return selectBestProduct(itemStack, tradeType, products);
     }
 
-    @Nullable
-    public static <T extends Product> T getBestProduct(@NonNull Collection<T> products, @NonNull TradeType tradeType,
-                                                       @Nullable Player player) {
-        Comparator<T> comparator = Comparator.comparingDouble(product -> product.getFinalPrice(tradeType, player));
-        Stream<T> stream = products.stream();
+    public static <T extends Product> @Nullable T selectBestProduct(@NonNull ItemStack itemStack,
+                                                                    @NonNull TradeType tradeType,
+                                                                    @NonNull Collection<T> products) {
+        T best = null;
 
-        return (tradeType == TradeType.BUY ? stream.min(comparator) : stream.max(comparator)).orElse(null);
+        for (T product : products) {
+            if (!isGoodItem(product, itemStack, tradeType)) continue;
+
+            if (best == null || product.isMoreProfitable(tradeType, best)) {
+                best = product;
+            }
+        }
+
+        return best;
+    }
+
+    private static <T extends Product> boolean isGoodItem(@NonNull T product,
+                                                          @NonNull ItemStack itemStack,
+                                                          @NonNull TradeType tradeType) {
+        int itemAmount = itemStack.getAmount();
+        int itemUnits = UnitUtils.amountToUnits(product, itemAmount);
+
+        if (itemUnits <= 0) return false;
+        if (!product.isTradeable(tradeType)) return false;
+
+        return product.getContent().isItemMatches(itemStack);
     }
 
     @NonNull

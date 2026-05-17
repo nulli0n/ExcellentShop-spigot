@@ -1,21 +1,31 @@
 package su.nightexpress.excellentshop.virtualshop.shop;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.product.ContentType;
 import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.ProductContent;
 import su.nightexpress.excellentshop.api.product.TradeType;
-import su.nightexpress.excellentshop.product.ContentTypes;
-import su.nightexpress.excellentshop.product.content.ItemContent;
-import su.nightexpress.excellentshop.ShopPlaceholders;
-import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.data.DataManager;
 import su.nightexpress.excellentshop.exception.ProductLoadException;
 import su.nightexpress.excellentshop.exception.ShopLoadException;
+import su.nightexpress.excellentshop.product.ContentTypes;
 import su.nightexpress.excellentshop.shop.AbstractShop;
 import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
@@ -29,11 +39,6 @@ import su.nightexpress.nightcore.configuration.ConfigTypes;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderResolver;
-
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class VirtualShop extends AbstractShop<VirtualProduct> {
 
@@ -127,11 +132,6 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     @NonNull
     public VirtualProduct createProduct(@NonNull ContentType type, @NonNull ItemStack itemStack) {
         ProductContent content = ContentTypes.create(type, itemStack, this.module::isItemProviderAllowed);
-        /*ProductContent content = switch (type) {
-            case ITEM -> ContentTypes.fromItem(itemStack, this.module::isItemProviderAllowed);
-            case COMMAND -> new CommandContent(itemStack, new ArrayList<>());
-            case EMPTY -> EmptyContent.VALUE;
-        };*/
 
         UUID globalId = UUID.randomUUID();
         String id = ShopUtils.generateProductId(this, content);
@@ -142,35 +142,10 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
         return product;
     }
 
-    @Nullable
-    public VirtualProduct getBestProduct(@NonNull ItemStack item, @NonNull TradeType tradeType) {
-        return this.getBestProduct(item, tradeType, null);
-    }
-
-    @Nullable
-    public VirtualProduct getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
-                                         @Nullable Player player) {
+    public @Nullable VirtualProduct getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType) {
         if (!this.isTradeAllowed(tradeType)) return null;
 
-        int stackSize = itemStack.getAmount();
-        Set<VirtualProduct> candidates = new HashSet<>();
-
-        this.getValidProducts().forEach(product -> {
-            if (!product.isTradeable(tradeType)) return;
-            if (!(product.getContent() instanceof ItemContent typing)) return;
-            if (!typing.isItemMatches(itemStack)) return;
-            if (stackSize < product.getUnitSize()) return;
-            if (product.isRotating() && !product.isInRotation()) return;
-
-            if (player != null) {
-                if (!product.canTrade(player)) return;
-                //if (product.getStockAmount(player, tradeType) == 0) return;
-            }
-
-            candidates.add(product);
-        });
-
-        return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
+        return ShopUtils.selectBestProduct(itemStack, tradeType, this.getValidProducts());
     }
 
     public void invalidateData() {
@@ -234,21 +209,18 @@ public class VirtualShop extends AbstractShop<VirtualProduct> {
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Double> queryBalance(@NonNull Currency currency) {
-        return CompletableFuture.completedFuture(-1D);
+    public @NonNull Optional<Double> queryBalance(@NonNull Currency currency) {
+        return Optional.empty();
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Boolean> depositBalance(@NonNull Currency currency, double amount) {
-        return CompletableFuture.completedFuture(false);
+    public boolean depositBalance(@NonNull Currency currency, double amount) {
+        return false;
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Boolean> withdrawBalance(@NonNull Currency currency, double amount) {
-        return CompletableFuture.completedFuture(false);
+    public boolean withdrawBalance(@NonNull Currency currency, double amount) {
+        return false;
     }
 
     public boolean hasDescription() {

@@ -50,6 +50,26 @@ public class ProductFormatter<P extends Product> {
     }
 
     @NonNull
+    public List<String> format(@NonNull P product, @NonNull List<String> masterLore, @NonNull Player player) {
+        List<String> finalLore = new ArrayList<>();
+
+        for (String masterLine : masterLore) {
+            if (masterLine.isBlank()) {
+                finalLore.add(masterLine);
+                continue;
+            }
+
+            String formatted = this.formatLine(masterLine, product, player);
+
+            if (!formatted.isEmpty()) {
+                finalLore.add(formatted);
+            }
+        }
+
+        return finalLore;
+    }
+
+    @NonNull
     public String formatLine(@NonNull String line, @NonNull P product, @NonNull Player player) {
         if (line.isEmpty()) return line;
 

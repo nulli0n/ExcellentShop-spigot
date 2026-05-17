@@ -1,6 +1,19 @@
 package su.nightexpress.excellentshop.playershop.impl;
 
-import org.bukkit.*;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
@@ -8,8 +21,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.playershop.PlayerShop;
@@ -34,10 +48,6 @@ import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.geodata.pos.BlockPos;
 import su.nightexpress.nightcore.util.geodata.pos.ChunkPos;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderResolver;
-
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop {
 
@@ -353,20 +363,17 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Double> queryBalance(@NonNull Currency currency) {
+    public @NonNull Optional<Double> queryBalance(@NonNull Currency currency) {
         return this.module.queryShopBalance(this, currency);
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Boolean> depositBalance(@NonNull Currency currency, double amount) {
+    public boolean depositBalance(@NonNull Currency currency, double amount) {
         return this.module.depositShopBalance(this, currency, amount);
     }
 
     @Override
-    @NonNull
-    public CompletableFuture<Boolean> withdrawBalance(@NonNull Currency currency, double amount) {
+    public boolean withdrawBalance(@NonNull Currency currency, double amount) {
         return this.module.withdrawShopBalance(this, currency, amount);
     }
 
@@ -495,29 +502,11 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
             .findFirst().orElse(null);
     }
 
-    @Nullable
-    public ChestProduct getBestProduct(@NonNull ItemStack item, @NonNull TradeType tradeType) {
-        return this.getBestProduct(item, tradeType, null);
-    }
-
-    @Nullable
-    public ChestProduct getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType,
-                                       @Nullable Player player) {
+    @Override
+    public @Nullable ChestProduct getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType) {
         if (!this.isTradeAllowed(tradeType)) return null;
 
-        int stackSize = itemStack.getAmount();
-        Set<ChestProduct> candidates = new HashSet<>();
-
-        this.getValidProducts().forEach(product -> {
-            if (!product.isTradeable(tradeType)) return;
-            if (!product.getContent().isItemMatches(itemStack)) return;
-            if (stackSize < product.getUnitSize()) return;
-            if (product.getStock() == 0) return;
-
-            candidates.add(product);
-        });
-
-        return ShopUtils.getBestProduct(candidates, tradeType, stackSize, player);
+        return ShopUtils.selectBestProduct(itemStack, tradeType, this.getValidProducts());
     }
 
     public boolean isProduct(@NonNull ItemStack item) {
@@ -526,6 +515,10 @@ public class ChestShop extends AbstractShop<ChestProduct> implements PlayerShop 
 
     public boolean hasProducts() {
         return this.countProducts() > 0;
+    }
+
+    public boolean isEffectiveMerchant(@NonNull Player player) {
+        return this.getEffectiveMerchantProfile().isUser(player);
     }
 
     @Nullable

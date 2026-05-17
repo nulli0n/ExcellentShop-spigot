@@ -93,12 +93,12 @@ public final class Lang implements LangContainer {
             GRAY.wrap("No items were proceeded.")
         );
 
-    public static final MessageLocale SHOP_TRADE_FEEDBACK_UNEXPECTED_ERROR = LangEntry
+    /* public static final MessageLocale SHOP_TRADE_FEEDBACK_UNEXPECTED_ERROR = LangEntry
         .builder("Shop.Trade.Feedback.UnexpectedError")
         .chatMessage(
             Sound.ENTITY_VILLAGER_NO,
             GRAY.wrap("An unexpected error occured during the transaction. Please try again.")
-        );
+        ); */
 
     public static final MessageLocale SHOP_TRADE_FEEDBACK_LOOSE_ITEMS = LangEntry
         .builder("Shop.Trade.Feedback.FailedItems")

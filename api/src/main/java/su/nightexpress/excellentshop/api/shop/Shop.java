@@ -1,9 +1,15 @@
 package su.nightexpress.excellentshop.api.shop;
 
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import su.nightexpress.excellentshop.api.ShopModule;
 import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.TradeType;
@@ -11,16 +17,13 @@ import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderResolvable;
 
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-
 public interface Shop extends PlaceholderResolvable {
 
-    @NonNull Path getPath();
+    @NonNull
+    Path getPath();
 
-    @NonNull FileConfig loadConfig();
+    @NonNull
+    FileConfig loadConfig();
 
     void saveForce();
 
@@ -46,17 +49,21 @@ public interface Shop extends PlaceholderResolvable {
 
     void open(@NonNull Player player, int page, boolean force);
 
-    @NonNull CompletableFuture<Double> queryBalance(@NonNull Currency currency);
+    @NonNull
+    Optional<Double> queryBalance(@NonNull Currency currency);
 
-    @NonNull CompletableFuture<Boolean> depositBalance(@NonNull Currency currency, double amount);
+    boolean depositBalance(@NonNull Currency currency, double amount);
 
-    @NonNull CompletableFuture<Boolean> withdrawBalance(@NonNull Currency currency, double amount);
+    boolean withdrawBalance(@NonNull Currency currency, double amount);
 
-    @NonNull ShopModule getModule();
+    @NonNull
+    ShopModule getModule();
 
-    @NonNull String getId();
+    @NonNull
+    String getId();
 
-    @NonNull String getName();
+    @NonNull
+    String getName();
 
     void setName(@NonNull String name);
 
@@ -76,17 +83,20 @@ public interface Shop extends PlaceholderResolvable {
 
     void removeProduct(@NonNull String id);
 
-    @NonNull Map<String, ? extends Product> getProductMap();
+    @NonNull
+    Map<String, ? extends Product> getProductMap();
 
-    @NonNull Collection<? extends Product> getProducts();
+    @NonNull
+    Collection<? extends Product> getProducts();
 
-    @NonNull Collection<? extends Product> getValidProducts();
+    @NonNull
+    Collection<@NonNull ? extends Product> getValidProducts();
 
-    @Nullable Product getProductById(@NonNull String id);
+    @Nullable
+    Product getProductById(@NonNull String id);
 
-    @Nullable Product getBestProduct(@NonNull ItemStack item, @NonNull TradeType tradeType);
-
-    @Nullable Product getBestProduct(@NonNull ItemStack itemStack, @NonNull TradeType tradeType, @Nullable Player player);
+    @Nullable
+    Product getBestProduct(@NonNull ItemStack item, @NonNull TradeType tradeType);
 
     int countProducts();
 

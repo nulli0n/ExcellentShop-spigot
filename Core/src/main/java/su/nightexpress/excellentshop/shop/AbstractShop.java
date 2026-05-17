@@ -25,7 +25,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
 
     protected boolean dirty;
 
-    public AbstractShop(@NonNull ShopPlugin plugin, @NonNull Path path, @NonNull String id) {
+    protected AbstractShop(@NonNull ShopPlugin plugin, @NonNull Path path, @NonNull String id) {
         this.plugin = plugin;
         this.path = path;
         this.id = id;
@@ -54,7 +54,8 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
     public void printBadProducts() {
         this.getProducts().forEach(product -> {
             if (!product.getContent().isValid()) {
-                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.path + "' shop.");
+                this.plugin.error("Invalid item data of '" + product.getId() + "' product. Found in '" + this.path +
+                    "' shop.");
             }
         });
     }
@@ -78,7 +79,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
     @Override
     public void saveIfDirty() {
         if (!Files.exists(this.path)) return;
-        
+
         if (this.dirty) {
             this.loadConfig().edit(this::write);
             this.dirty = false;
@@ -154,7 +155,7 @@ public abstract class AbstractShop<P extends AbstractProduct<?>> implements Shop
 
     @Override
     @NonNull
-    public List<P> getValidProducts() {
+    public List<@NonNull P> getValidProducts() {
         return this.products.values().stream().filter(Product::isValid).toList();
     }
 

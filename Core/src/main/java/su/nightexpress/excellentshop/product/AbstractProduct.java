@@ -40,7 +40,7 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     protected boolean buyMenuAllowed;
     protected boolean sellMenuAllowed;
 
-    public AbstractProduct(@NonNull UUID globalId, @NonNull String id, @NonNull S shop) {
+    protected AbstractProduct(@NonNull UUID globalId, @NonNull String id, @NonNull S shop) {
         this.globalId = globalId;
         this.id = id.toLowerCase();
         this.shop = shop;
@@ -54,6 +54,22 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
     @Override
     public boolean isValid() {
         return this.content.isValid();
+    }
+
+    @Override
+    public boolean isMoreProfitable(@NonNull TradeType tradeType, @NonNull Product than) {
+        double thisPrice = this.getFinalPrice(tradeType) / this.getUnitSize();
+        double otherPrice = than.getFinalPrice(tradeType) / than.getUnitSize();
+        boolean isTradeable = this.isTradeable(tradeType);
+        boolean otherTradable = than.isTradeable(tradeType);
+
+        if (isTradeable && !otherTradable) return true;
+        if (!isTradeable && otherTradable) return false;
+
+        return switch (tradeType) {
+            case BUY -> thisPrice < otherPrice;
+            case SELL -> thisPrice > otherPrice;
+        };
     }
 
     @Override

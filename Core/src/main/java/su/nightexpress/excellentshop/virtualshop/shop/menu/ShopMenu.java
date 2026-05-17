@@ -13,8 +13,10 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import su.nightexpress.excellentshop.api.product.ContentType;
+import su.nightexpress.excellentshop.api.product.TradeStatus;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.transaction.ERawTransaction;
+import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
@@ -56,14 +58,18 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
     public record Data(@NonNull VirtualShop shop, @NonNull ViewMode viewMode, @Nullable Rotation rotation) {
     }
 
-    private final VirtualShopModule module;
+    private final VirtualShopModule                module;
+    private final ProductFormatter<VirtualProduct> productFormatter;
 
     private final NamedAction nextShopPageAction;
     private final NamedAction previousShopPageAction;
 
-    public ShopMenu(@NonNull ShopPlugin plugin, @NonNull VirtualShopModule module) {
+    public ShopMenu(@NonNull ShopPlugin plugin,
+                    @NonNull VirtualShopModule module,
+                    @NonNull ProductFormatter<VirtualProduct> productFormatter) {
         super(plugin, MenuType.GENERIC_9X6, DEF_TITLE, Data.class);
         this.module = module;
+        this.productFormatter = productFormatter;
 
         this.nextShopPageAction = new NamedAction("next_page", this.createObjectAction(this::handleNextPage));
         this.previousShopPageAction = new NamedAction("previous_page", this.createObjectAction(
@@ -178,7 +184,10 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         NightItem icon = NightItem.fromItemStack(preview);
 
         if (data.viewMode != ViewMode.EDIT_PRODUCTS) {
-            icon.setLore(this.module.formatProductLore(product, player));
+            TradeStatus status = product.getTradeStatus();
+            List<String> masterLore = this.module.getSettings().getProductDisplayMasterInfo(status);
+
+            icon.setLore(this.productFormatter.format(product, masterLore, player));
         }
         else {
             icon.localized(VirtualLang.UI_EDITOR_SHOP_PRODUCTS_OBJECT);

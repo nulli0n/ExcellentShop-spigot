@@ -1,88 +1,116 @@
 package su.nightexpress.excellentshop.api.transaction;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
+
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.shop.Shop;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
+/**
+ * A raw transaction containing unvalidated items and candidate shops.
+ */
+@NullMarked
 public class ERawTransaction extends ETransaction {
 
     private final List<ItemStack> items;
-    private final List<Shop>      targetShops;
+    private final Set<Shop>       targetShops;
 
-    public ERawTransaction(@NonNull Player player,
-                           @NonNull TradeType type,
-                           @NonNull ETransactionOptions options,
-                           @NonNull List<ItemStack> items,
-                           @NonNull List<Shop> targetShops) {
+    /**
+     * Constructs a new raw transaction.
+     *
+     * @param player      The player initiating the transaction.
+     * @param type        The trade type.
+     * @param options     The transaction options.
+     * @param items       The raw list of item stacks to process.
+     * @param targetShops The set of candidate shops.
+     */
+    public ERawTransaction(Player player,
+                           TradeType type,
+                           ETransactionOptions options,
+                           List<ItemStack> items,
+                           Set<Shop> targetShops) {
         super(player, type, options);
         this.items = items;
         this.targetShops = targetShops;
     }
 
-    @NonNull
-    public static Builder builder(@NonNull Player player, @NonNull TradeType type) {
+
+    public static Builder builder(Player player, TradeType type) {
         return new Builder(player, type);
     }
 
+    /**
+     * Checks whether there are any candidate shops targeted for this transaction.
+     *
+     * @return True if target shops are present, false otherwise.
+     */
     public boolean hasTargetShops() {
         return !this.targetShops.isEmpty();
     }
 
-    @NonNull
+    /**
+     * Gets the raw list of item stacks in this transaction.
+     *
+     * @return The list of items.
+     */
     public List<ItemStack> getItems() {
         return this.items;
     }
 
-    @NonNull
-    public List<Shop> getTargetShops() {
+    /**
+     * Gets the set of targeted candidate shops.
+     *
+     * @return The set of target shops.
+     */
+    public Set<Shop> getTargetShops() {
         return this.targetShops;
     }
 
+    /**
+     * Builder class for raw transactions.
+     */
+    @NullMarked
     public static class Builder extends ETransaction.Builder<Builder, ERawTransaction> {
 
         private final List<ItemStack> items;
-        private final List<Shop> targetShops;
+        private final Set<Shop>       targetShops;
 
-        public Builder(@NonNull Player player, @NonNull TradeType type) {
+        Builder(Player player, TradeType type) {
             super(player, type);
             this.items = new ArrayList<>();
-            this.targetShops = new ArrayList<>();
+            this.targetShops = new HashSet<>();
         }
 
         @Override
-        @NonNull
-        protected ERawTransaction build(@NonNull ETransactionOptions options) {
+        protected ERawTransaction build(ETransactionOptions options) {
             return new ERawTransaction(this.player, this.type, options, this.items, this.targetShops);
         }
 
         @Override
-        @NonNull
         protected Builder getThis() {
             return this;
         }
 
-        @NonNull
-        public Builder addItem(@NonNull ItemStack itemStack) {
+        public Builder addItem(ItemStack itemStack) {
             this.items.add(new ItemStack(itemStack));
             return this;
         }
 
-        @NonNull
-        public Builder addItems(@NonNull Collection<ItemStack> items) {
+        public Builder addItems(Collection<ItemStack> items) {
             items.forEach(this::addItem);
             return this;
         }
 
-        @NonNull
-        public Builder addItems(@Nullable ItemStack @NonNull [] items) {
+        public Builder addItems(@Nullable ItemStack[] items) {
             for (ItemStack itemStack : items) {
                 if (itemStack != null) {
                     this.addItem(itemStack);
@@ -91,19 +119,16 @@ public class ERawTransaction extends ETransaction {
             return this;
         }
 
-        @NonNull
-        public Builder addItems(@NonNull Inventory inventory) {
+        public Builder addItems(Inventory inventory) {
             return this.addItems(inventory.getContents());
         }
 
-        @NonNull
-        public Builder targetShop(@NonNull Shop shop) {
+        public Builder targetShop(Shop shop) {
             this.targetShops.add(shop);
             return this;
         }
 
-        @NonNull
-        public Builder targetShops(@NonNull Collection<Shop> shops) {
+        public Builder targetShops(Collection<? extends Shop> shops) {
             this.targetShops.addAll(shops);
             return this;
         }

@@ -29,6 +29,8 @@ public interface Product extends PlaceholderResolvable {
      */
     boolean canTrade(@NonNull Player player);
 
+    boolean isMoreProfitable(@NonNull TradeType tradeType, @NonNull Product than);
+
     int getMaxBuyableUnitAmount(@NonNull Player player, @NonNull Inventory inventory);
 
     int getMaxAffordableUnitAmount(@NonNull Player player);

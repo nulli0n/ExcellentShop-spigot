@@ -11,9 +11,11 @@ import org.bukkit.inventory.MenuType;
 import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
+import su.nightexpress.excellentshop.api.product.TradeStatus;
 import su.nightexpress.excellentshop.playershop.ChestShopModule;
 import su.nightexpress.excellentshop.playershop.impl.ChestProduct;
 import su.nightexpress.excellentshop.playershop.impl.ChestShop;
+import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.configuration.ConfigTypes;
 import su.nightexpress.nightcore.ui.inventory.action.ActionContext;
@@ -32,13 +34,17 @@ import java.util.stream.IntStream;
 
 public class ShopView extends AbstractObjectMenu<ChestShop> {
 
-    private final ChestShopModule module;
+    private final ChestShopModule                module;
+    private final ProductFormatter<ChestProduct> formatter;
 
     private TreeMap<Integer, int[]> productSlotsByCount;
 
-    public ShopView(@NonNull ShopPlugin plugin, @NonNull ChestShopModule module) {
+    public ShopView(@NonNull ShopPlugin plugin,
+                    @NonNull ChestShopModule module,
+                    @NonNull ProductFormatter<ChestProduct> formatter) {
         super(plugin, MenuType.HOPPER, ShopPlaceholders.SHOP_NAME, ChestShop.class);
         this.module = module;
+        this.formatter = formatter;
     }
 
     @Override
@@ -110,10 +116,13 @@ public class ShopView extends AbstractObjectMenu<ChestShop> {
             ChestProduct product = products.get(index);
             int slot = slots[index];
 
+            TradeStatus status = product.getTradeStatus();
+            List<String> masterLore = this.module.getSettings().getProductDisplayMasterInfo(status);
+
             items.add(MenuItem.custom()
                 .defaultState(ItemState.builder()
                     .icon(NightItem.fromItemStack(product.getEffectivePreview())
-                        .setLore(this.module.formatProductLore(product, player))
+                        .setLore(this.formatter.format(product, masterLore, player))
                         .replace(builder -> builder
                             .with(product.placeholders())
                             .with(shop.placeholders())
