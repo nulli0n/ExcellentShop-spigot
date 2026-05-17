@@ -5,7 +5,7 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 
 public class GriefPreventionHook implements ClaimHook {
@@ -17,7 +17,7 @@ public class GriefPreventionHook implements ClaimHook {
     }
 
     @Override
-    public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
+    public boolean isInOwnClaim(@NonNull Player player, @NonNull Block block) {
         PlayerData playerData = this.griefPrevention.dataStore.getPlayerData(player.getUniqueId());
         Claim claim = this.griefPrevention.dataStore.getClaimAt(block.getLocation(), true, playerData.lastClaim);
 

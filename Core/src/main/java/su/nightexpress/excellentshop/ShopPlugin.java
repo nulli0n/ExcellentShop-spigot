@@ -1,30 +1,42 @@
 package su.nightexpress.excellentshop;
 
-import org.jspecify.annotations.Nullable;
+import java.io.File;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import su.nightexpress.excellentshop.api.Module;
+import su.nightexpress.excellentshop.api.ModuleDefinition;
 import su.nightexpress.excellentshop.api.packet.PacketLibrary;
-import su.nightexpress.excellentshop.feature.playershop.ChestShopModule;
-import su.nightexpress.excellentshop.feature.playershop.core.ChestLang;
-import su.nightexpress.excellentshop.feature.virtualshop.VirtualShopModule;
-import su.nightexpress.excellentshop.integration.claim.WorldGuardFlags;
-import su.nightexpress.excellentshop.integration.packetevents.PacketEventsHook;
-import su.nightexpress.excellentshop.integration.protocollib.ProtocolLibHook;
-import su.nightexpress.nexshop.auction.AuctionManager;
-import su.nightexpress.nexshop.auction.config.AuctionLang;
 import su.nightexpress.excellentshop.core.Config;
 import su.nightexpress.excellentshop.core.Keys;
 import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.excellentshop.core.Perms;
 import su.nightexpress.excellentshop.data.DataHandler;
 import su.nightexpress.excellentshop.data.DataManager;
-import su.nightexpress.nexshop.hook.HookPlugin;
-import su.nightexpress.nexshop.hook.PlaceholderHook;
-import su.nightexpress.nexshop.module.*;
+import su.nightexpress.excellentshop.integration.claim.WorldGuardFlags;
+import su.nightexpress.excellentshop.integration.packetevents.PacketEventsHook;
+import su.nightexpress.excellentshop.integration.protocollib.ProtocolLibHook;
+import su.nightexpress.excellentshop.module.ModuleContext;
+import su.nightexpress.excellentshop.module.ModuleContextProvider;
+import su.nightexpress.excellentshop.module.ModuleId;
+import su.nightexpress.excellentshop.module.ModuleLoader;
+import su.nightexpress.excellentshop.module.ModuleRegistry;
+import su.nightexpress.excellentshop.playershop.ChestShopModule;
+import su.nightexpress.excellentshop.playershop.core.ChestLang;
 import su.nightexpress.excellentshop.shop.ShopManager;
 import su.nightexpress.excellentshop.shop.TransactionProcessor;
-import su.nightexpress.nexshop.user.UserManager;
-import su.nightexpress.nexshop.util.PacketUtils;
+import su.nightexpress.excellentshop.user.UserManager;
+import su.nightexpress.excellentshop.util.PacketUtils;
+import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
+import su.nightexpress.nexshop.auction.AuctionManager;
+import su.nightexpress.nexshop.auction.config.AuctionLang;
+import su.nightexpress.nexshop.hook.HookPlugin;
+import su.nightexpress.nexshop.hook.PlaceholderHook;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.commands.Commands;
 import su.nightexpress.nightcore.commands.command.NightCommand;
@@ -33,12 +45,6 @@ import su.nightexpress.nightcore.config.PluginDetails;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.util.Plugins;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
 
@@ -178,9 +184,12 @@ public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
 
         var gradient = TagWrappers.GRADIENT;
 
-        String aucPrefix = gradient.with("#f77062", "#fe5196").wrap(TagWrappers.BOLD.wrap("AUCTION")) + " " + TagWrappers.DARK_GRAY.wrap("»") + " ";
-        String psPrefix = gradient.with("#ff4e50", "#f9d423").wrap(TagWrappers.BOLD.wrap("PLAYER SHOP")) + " " + TagWrappers.DARK_GRAY.wrap("»") + " ";
-        String vsPrefix = gradient.with("#0083b0", "#00b4db").wrap(TagWrappers.BOLD.wrap("SERVER SHOP")) + " " + TagWrappers.DARK_GRAY.wrap("»") + " ";
+        String aucPrefix = gradient.with("#f77062", "#fe5196").wrap(TagWrappers.BOLD.wrap("AUCTION")) + " " +
+            TagWrappers.DARK_GRAY.wrap("»") + " ";
+        String psPrefix = gradient.with("#ff4e50", "#f9d423").wrap(TagWrappers.BOLD.wrap("PLAYER SHOP")) + " " +
+            TagWrappers.DARK_GRAY.wrap("»") + " ";
+        String vsPrefix = gradient.with("#0083b0", "#00b4db").wrap(TagWrappers.BOLD.wrap("SERVER SHOP")) + " " +
+            TagWrappers.DARK_GRAY.wrap("»") + " ";
 
         loader.register(ModuleId.AUCTION,
             ModuleDefinition.createNoItemHandlers(aucPrefix, "auction", "auc", "ah"),
@@ -215,7 +224,8 @@ public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
 
     @Override
     @NonNull
-    public ModuleContext createModuleContext(@NonNull String id, @NonNull Path path, @NonNull ModuleDefinition definition) {
+    public ModuleContext createModuleContext(@NonNull String id, @NonNull Path path,
+                                             @NonNull ModuleDefinition definition) {
         return new ModuleContext(this, this.dataHandler, this.dataManager, this.userManager, this.dialogRegistry, id, path, definition);
     }
 

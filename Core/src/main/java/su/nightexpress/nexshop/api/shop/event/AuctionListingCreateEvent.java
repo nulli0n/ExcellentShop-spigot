@@ -7,7 +7,7 @@ import org.bukkit.event.HandlerList;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class AuctionListingCreateEvent extends Event implements Cancellable {
 
@@ -17,19 +17,20 @@ public class AuctionListingCreateEvent extends Event implements Cancellable {
         return handlerList;
     }
 
-    @NotNull
+    @NonNull
     @Override
     public HandlerList getHandlers() {
         return handlerList;
     }
 
-    private final Player player;
-    private final Currency currency;
+    private final Player        player;
+    private final Currency      currency;
     private final ActiveListing listing;
 
     private boolean cancelled;
 
-    public AuctionListingCreateEvent(@NotNull Player player, @NotNull Currency currency, @NotNull ActiveListing listing) {
+    public AuctionListingCreateEvent(@NonNull Player player, @NonNull Currency currency,
+                                     @NonNull ActiveListing listing) {
         this.player = player;
         this.currency = currency;
         this.listing = listing;
@@ -45,7 +46,7 @@ public class AuctionListingCreateEvent extends Event implements Cancellable {
         this.cancelled = cancelled;
     }
 
-    @NotNull
+    @NonNull
     public Player getPlayer() {
         return player;
     }
@@ -53,7 +54,7 @@ public class AuctionListingCreateEvent extends Event implements Cancellable {
     /**
      * @return Currency that was used for this listing.
      */
-    @NotNull
+    @NonNull
     public Currency getCurrency() {
         return currency;
     }
@@ -61,7 +62,7 @@ public class AuctionListingCreateEvent extends Event implements Cancellable {
     /**
      * @return Listing that is about to be created.
      */
-    @NotNull
+    @NonNull
     public ActiveListing getListing() {
         return listing;
     }

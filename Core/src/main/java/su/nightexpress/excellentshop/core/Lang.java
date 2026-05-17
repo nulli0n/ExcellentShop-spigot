@@ -1,10 +1,11 @@
 package su.nightexpress.excellentshop.core;
 
 import org.bukkit.Sound;
+
+import su.nightexpress.excellentshop.api.product.ContentType;
+import su.nightexpress.excellentshop.api.product.PriceType;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.product.click.ProductClickAction;
-import su.nightexpress.excellentshop.product.PriceType;
-import su.nightexpress.excellentshop.product.ContentType;
 import su.nightexpress.nightcore.locale.LangContainer;
 import su.nightexpress.nightcore.locale.LangEntry;
 import su.nightexpress.nightcore.locale.entry.EnumLocale;

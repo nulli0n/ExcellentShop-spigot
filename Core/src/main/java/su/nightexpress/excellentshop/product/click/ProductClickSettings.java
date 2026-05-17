@@ -1,7 +1,7 @@
 package su.nightexpress.excellentshop.product.click;
 
 import org.bukkit.event.inventory.ClickType;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.product.TradeStatus;
 import su.nightexpress.excellentshop.api.product.click.ProductClickAction;
@@ -16,7 +16,8 @@ import java.util.Map;
 
 public class ProductClickSettings implements Writeable {
 
-    public static final ConfigType<ProductClickSettings> CONFIG_TYPE = ConfigType.of(ProductClickSettings::read, FileConfig::set);
+    public static final ConfigType<ProductClickSettings> CONFIG_TYPE = ConfigType.of(ProductClickSettings::read,
+        FileConfig::set);
 
     private final Map<TradeStatus, Map<ClickType, ProductClickAction>> keyMappings;
 
@@ -40,7 +41,8 @@ public class ProductClickSettings implements Writeable {
                 ClickType clickType = Enums.get(clickName, ClickType.class);
                 if (clickType == null) return;
 
-                ProductClickAction action = config.getEnum(statusPath + "." + clickName, ProductClickAction.class, ProductClickAction.NONE);
+                ProductClickAction action = config.getEnum(statusPath + "." + clickName, ProductClickAction.class,
+                    ProductClickAction.NONE);
                 clicksMap.put(clickType, action);
             });
 
@@ -51,7 +53,7 @@ public class ProductClickSettings implements Writeable {
     }
 
     @Override
-    public void write(@NotNull FileConfig config, @NotNull String path) {
+    public void write(@NonNull FileConfig config, @NonNull String path) {
         config.remove(path + ".Key-Mappings");
 
         this.keyMappings.forEach((status, clicksMap) -> {
@@ -63,6 +65,7 @@ public class ProductClickSettings implements Writeable {
 
     @NonNull
     public ProductClickAction getClickAction(@NonNull TradeStatus status, @NonNull ClickType clickType) {
-        return this.keyMappings.getOrDefault(status, Collections.emptyMap()).getOrDefault(clickType, ProductClickAction.NONE);
+        return this.keyMappings.getOrDefault(status, Collections.emptyMap()).getOrDefault(clickType,
+            ProductClickAction.NONE);
     }
 }

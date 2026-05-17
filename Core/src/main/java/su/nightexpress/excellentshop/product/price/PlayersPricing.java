@@ -5,9 +5,9 @@ import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.product.price.PriceData;
 import su.nightexpress.excellentshop.api.transaction.ECompletedTransaction;
+import su.nightexpress.excellentshop.api.product.PriceType;
 import su.nightexpress.excellentshop.api.product.Product;
-import su.nightexpress.excellentshop.product.PriceType;
-import su.nightexpress.excellentshop.product.ProductPricing;
+import su.nightexpress.excellentshop.api.product.ProductPricing;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.config.Writeable;
 import su.nightexpress.nightcore.util.wrapper.UniDouble;
@@ -96,7 +96,8 @@ public class PlayersPricing extends ProductPricing {
     }
 
     @Override
-    public void handleTransaction(@NonNull ECompletedTransaction transaction, @NonNull Product product, int units, @NonNull PriceData priceData) {
+    public void handleTransaction(@NonNull ECompletedTransaction transaction, @NonNull Product product, int units,
+                                  @NonNull PriceData priceData) {
 
     }
 

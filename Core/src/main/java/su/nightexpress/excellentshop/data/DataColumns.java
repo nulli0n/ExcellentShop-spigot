@@ -1,7 +1,7 @@
 package su.nightexpress.excellentshop.data;
 
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.data.RotationItemData;
-import su.nightexpress.nexshop.user.UserSettings;
+import su.nightexpress.excellentshop.user.UserSettings;
+import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationItemData;
 import su.nightexpress.nightcore.db.column.Column;
 import su.nightexpress.nightcore.db.column.ColumnDataReader;
 
@@ -38,11 +38,14 @@ public class DataColumns {
     public static final Column<Integer> PRICE_PURCHASES   = Column.intType("purchases").build();
     public static final Column<Integer> PRICE_SALES       = Column.intType("sales").build();
 
-    public static final Column<UUID>                   ROTATION_ID            = Column.uuidType("rotationId").primaryKey().build();
-    public static final Column<List<RotationItemData>> ROTATION_PRODUCTS      = Column.jsonList("items", DataHandler.GSON, RotationItemData.class).defaultValue("[]").build();
+    public static final Column<UUID>                   ROTATION_ID            = Column.uuidType("rotationId")
+        .primaryKey().build();
+    public static final Column<List<RotationItemData>> ROTATION_PRODUCTS      = Column.jsonList("items",
+        DataHandler.GSON, RotationItemData.class).defaultValue("[]").build();
     public static final Column<Long>                   ROTATION_NEXT_ROTATION = Column.longType("nextRotation").build();
 
     public static final Column<UUID>         USER_ID       = Column.uuidType("uuid").build();
     public static final Column<String>       USER_NAME     = Column.stringType("name", 32).build();
-    public static final Column<UserSettings> USER_SETTINGS = Column.json("settings", ColumnDataReader.jsonObject(DataHandler.GSON, UserSettings.class)).build();
+    public static final Column<UserSettings> USER_SETTINGS = Column.json("settings", ColumnDataReader.jsonObject(
+        DataHandler.GSON, UserSettings.class)).build();
 }

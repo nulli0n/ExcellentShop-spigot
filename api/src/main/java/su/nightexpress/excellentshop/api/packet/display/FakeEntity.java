@@ -1,21 +1,21 @@
 package su.nightexpress.excellentshop.api.packet.display;
 
 import org.bukkit.Location;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.nightcore.util.EntityUtil;
 
 public class FakeEntity {
 
-    private final     int  id;
+    private final int      id;
     private final Location location;
 
-    public FakeEntity(int id, @NotNull Location location) {
+    public FakeEntity(int id, @NonNull Location location) {
         this.id = id;
         this.location = location;
     }
 
-    @NotNull
-    public static FakeEntity create(@NotNull Location location) {
+    @NonNull
+    public static FakeEntity create(@NonNull Location location) {
         return new FakeEntity(EntityUtil.nextEntityId(), location);
     }
 
@@ -23,7 +23,7 @@ public class FakeEntity {
         return this.id;
     }
 
-    @NotNull
+    @NonNull
     public Location getLocation() {
         return this.location.clone();
     }

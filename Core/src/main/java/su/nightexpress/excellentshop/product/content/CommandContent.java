@@ -4,13 +4,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.api.product.ContentType;
+import su.nightexpress.excellentshop.api.product.ProductContent;
 import su.nightexpress.excellentshop.core.Lang;
-import su.nightexpress.excellentshop.product.ContentType;
-import su.nightexpress.excellentshop.product.ProductContent;
-import su.nightexpress.nexshop.util.ErrorHandler;
+import su.nightexpress.excellentshop.util.ErrorHandler;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.ItemTag;
 import su.nightexpress.nightcore.util.Players;
@@ -28,14 +28,14 @@ public class CommandContent extends ProductContent {
         this(new ItemStack(Material.COMMAND_BLOCK), new ArrayList<>());
     }
 
-    public CommandContent(@NotNull ItemStack preview, @NotNull List<String> commands) {
+    public CommandContent(@NonNull ItemStack preview, @NonNull List<String> commands) {
         super(ContentType.COMMAND);
         this.setCommands(commands);
         this.setPreview(preview);
     }
 
-    @NotNull
-    public static CommandContent read(@NotNull FileConfig config, @NotNull String path) {
+    @NonNull
+    public static CommandContent read(@NonNull FileConfig config, @NonNull String path) {
         if (config.contains(path + ".Content.Preview")) {
             String tagString = String.valueOf(config.getString(path + ".Content.Preview"));
 
@@ -59,13 +59,13 @@ public class CommandContent extends ProductContent {
     }
 
     @Override
-    public void write(@NotNull FileConfig config, @NotNull String path) {
+    public void write(@NonNull FileConfig config, @NonNull String path) {
         config.set(path + ".PreviewTag", ItemTag.of(this.preview));
         config.set(path + ".Content.Commands", this.commands);
     }
 
     @Override
-    @NotNull
+    @NonNull
     public String getName() {
         return Lang.CONTENT_TYPE.getLocalized(this.type());
     }
@@ -86,12 +86,12 @@ public class CommandContent extends ProductContent {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public ItemStack getPreview() {
         return new ItemStack(this.preview);
     }
 
-    public void setPreview(@NotNull ItemStack preview) {
+    public void setPreview(@NonNull ItemStack preview) {
         this.preview = new ItemStack(preview);
     }
 
@@ -99,17 +99,17 @@ public class CommandContent extends ProductContent {
         return !this.commands.isEmpty();
     }
 
-    @NotNull
+    @NonNull
     public List<String> getCommands() {
         return this.commands;
     }
 
-    public void setCommands(@NotNull List<String> commands) {
+    public void setCommands(@NonNull List<String> commands) {
         this.commands = commands;
     }
 
     @Override
-    public void delivery(@NotNull Inventory inventory, int count) {
+    public void delivery(@NonNull Inventory inventory, int count) {
         if (!(inventory.getHolder() instanceof Player player)) return;
 
         this.getCommands().forEach(command -> {
@@ -126,12 +126,12 @@ public class CommandContent extends ProductContent {
     }
 
     @Override
-    public void take(@NotNull Inventory inventory, int count) {
+    public void take(@NonNull Inventory inventory, int count) {
 
     }
 
     @Override
-    public int count(@NotNull Inventory inventory) {
+    public int count(@NonNull Inventory inventory) {
         return 0;
     }
 
@@ -146,12 +146,12 @@ public class CommandContent extends ProductContent {
     }
 
     @Override
-    public int countSpace(@NotNull Inventory inventory) {
+    public int countSpace(@NonNull Inventory inventory) {
         return -1;
     }
 
     @Override
-    public boolean hasSpace(@NotNull Inventory inventory) {
+    public boolean hasSpace(@NonNull Inventory inventory) {
         return true;
     }
 }

@@ -1,13 +1,13 @@
 package su.nightexpress.excellentshop.data;
 
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.data.RotationData;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.data.RotationItemData;
 import su.nightexpress.excellentshop.shop.data.*;
+import su.nightexpress.excellentshop.user.ShopUser;
+import su.nightexpress.excellentshop.user.UserSettings;
+import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationData;
+import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationItemData;
 import su.nightexpress.excellentshop.data.legacy.LegacyPriceData;
 import su.nightexpress.excellentshop.data.legacy.LegacyStockData;
 import su.nightexpress.excellentshop.data.legacy.LegacyRotationData;
-import su.nightexpress.nexshop.user.ShopUser;
-import su.nightexpress.nexshop.user.UserSettings;
 import su.nightexpress.nightcore.db.statement.RowMapper;
 import su.nightexpress.nightcore.db.statement.template.InsertStatement;
 import su.nightexpress.nightcore.db.statement.template.UpdateStatement;
@@ -103,7 +103,6 @@ public class DataQueries {
     };
 
 
-
     public static final InsertStatement<ShopUser> USER_INSERT = InsertStatement.builder(ShopUser.class)
         .ignoreDuplications()
         .setUUID(DataColumns.USER_ID, ShopUser::getId)
@@ -121,8 +120,8 @@ public class DataQueries {
         .build();
 
 
-
-    public static final InsertStatement<ProductStockData> STOCK_DATA_INSERT = InsertStatement.builder(ProductStockData.class)
+    public static final InsertStatement<ProductStockData> STOCK_DATA_INSERT = InsertStatement.builder(
+        ProductStockData.class)
         .updateOnConflict()
         .setUUID(DataColumns.STOCK_PRODUCT_ID, ProductStockData::getProductId)
         .setInt(DataColumns.STOCK_UNITS, ProductStockData::getStock)
@@ -135,8 +134,8 @@ public class DataQueries {
         .build();*/
 
 
-
-    public static final InsertStatement<ProductLimitData> LIMIT_DATA_INSERT = InsertStatement.builder(ProductLimitData.class)
+    public static final InsertStatement<ProductLimitData> LIMIT_DATA_INSERT = InsertStatement.builder(
+        ProductLimitData.class)
         .updateOnConflict()
         .setUUID(DataColumns.LIMIT_PLAYER_ID, ProductLimitData::getPlayerId)
         .setUUID(DataColumns.LIMIT_PRODUCT_ID, ProductLimitData::getProductId)
@@ -152,8 +151,8 @@ public class DataQueries {
         .build();*/
 
 
-
-    public static final InsertStatement<ProductPriceData> PRICE_DATA_INSERT = InsertStatement.builder(ProductPriceData.class)
+    public static final InsertStatement<ProductPriceData> PRICE_DATA_INSERT = InsertStatement.builder(
+        ProductPriceData.class)
         .updateOnConflict()
         .setUUID(DataColumns.PRICE_PRODUCT_ID, ProductPriceData::getProductId)
         .setDouble(DataColumns.PRICE_BUY_OFFSET, ProductPriceData::getBuyOffset)
@@ -170,7 +169,6 @@ public class DataQueries {
         .setInt(DataColumns.PRICE_PURCHASES, ProductPriceData::getPurchases)
         .setInt(DataColumns.PRICE_SALES, ProductPriceData::getSales)
         .build();*/
-
 
 
     public static final InsertStatement<RotationData> ROTATION_DATA_INSERT = InsertStatement.builder(RotationData.class)

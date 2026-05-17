@@ -7,6 +7,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.module.AbstractModule;
+import su.nightexpress.excellentshop.module.ModuleContext;
 import su.nightexpress.nexshop.api.shop.event.AuctionListingCreateEvent;
 import su.nightexpress.nexshop.auction.command.AuctionCommands;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
@@ -17,8 +19,6 @@ import su.nightexpress.nexshop.auction.listener.AuctionListener;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nexshop.auction.menu.*;
-import su.nightexpress.nexshop.module.AbstractModule;
-import su.nightexpress.nexshop.module.ModuleContext;
 import su.nightexpress.excellentshop.product.ContentTypes;
 import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
@@ -134,7 +134,8 @@ public class AuctionManager extends AbstractModule {
 
     @NonNull
     public ListingCategory getDefaultCategory() {
-        ListingCategory category = this.getCategories().stream().filter(ListingCategory::isDefault).findFirst().orElse(null);
+        ListingCategory category = this.getCategories().stream().filter(ListingCategory::isDefault).findFirst().orElse(
+            null);
         if (category == null) category = this.getCategories().stream().findFirst().orElseThrow();
 
         return category;
@@ -206,12 +207,14 @@ public class AuctionManager extends AbstractModule {
             .onReturn((viewer, event) -> {
                 this.plugin.runTask(task -> this.openAuction(viewer.getPlayer()));
             })
-            .setIcon(NightItem.fromItemStack(listing.getItemStack()).localized(AuctionLang.UI_BUY_CONFIRM).replacement(replacer -> replacer.replace(listing.replacePlaceholders())))
+            .setIcon(NightItem.fromItemStack(listing.getItemStack()).localized(AuctionLang.UI_BUY_CONFIRM).replacement(
+                replacer -> replacer.replace(listing.replacePlaceholders())))
             .returnOnAccept(AuctionConfig.MENU_REOPEN_ON_PURCHASE.get())
             .build());
     }
 
-    private boolean openAuctionMenu(@NonNull Player player, @NonNull UUID target, @NonNull AbstractAuctionMenu<?> menu, boolean force) {
+    private boolean openAuctionMenu(@NonNull Player player, @NonNull UUID target, @NonNull AbstractAuctionMenu<?> menu,
+                                    boolean force) {
         if (!force) {
             if (!this.canBeUsedHere(player)) return false;
         }
@@ -220,7 +223,8 @@ public class AuctionManager extends AbstractModule {
     }
 
     public boolean isAllowedItem(@NonNull ItemStack item) {
-        Set<String> bannedItems = AuctionConfig.LISTINGS_DISABLED_ITEMS.get().stream().map(String::toLowerCase).collect(Collectors.toSet());
+        Set<String> bannedItems = AuctionConfig.LISTINGS_DISABLED_ITEMS.get().stream().map(String::toLowerCase).collect(
+            Collectors.toSet());
         if (bannedItems.contains(BukkitThing.toString(item.getType()))) {
             return false;
         }
@@ -247,7 +251,8 @@ public class AuctionManager extends AbstractModule {
 
         List<String> itemLore = meta.getLore();
         if (itemLore != null) {
-            Set<String> badLores = AuctionConfig.LISTINGS_DISABLED_LORES.get().stream().map(String::toLowerCase).collect(Collectors.toSet());
+            Set<String> badLores = AuctionConfig.LISTINGS_DISABLED_LORES.get().stream().map(String::toLowerCase)
+                .collect(Collectors.toSet());
             if (itemLore.stream().anyMatch(loreLine -> badLores.stream().anyMatch(loreLine::contains))) {
                 return false;
             }
@@ -262,7 +267,8 @@ public class AuctionManager extends AbstractModule {
 
         int model = meta.getCustomModelData();
 
-        Set<Integer> banned = AuctionConfig.LISTINGS_DISABLED_MODELS.get().getOrDefault(item.getType(), Collections.emptySet());
+        Set<Integer> banned = AuctionConfig.LISTINGS_DISABLED_MODELS.get().getOrDefault(item.getType(), Collections
+            .emptySet());
         return !banned.contains(model);
     }
 
@@ -318,7 +324,8 @@ public class AuctionManager extends AbstractModule {
         int listingsHas = this.listings.getActive(player).size();
         int listingsMax = this.getListingsMaximum(player);
         if (listingsMax >= 0 && listingsHas >= listingsMax) {
-            AuctionLang.LISTING_ADD_ERROR_LIMIT.message().send(player, replacer -> replacer.replace(ShopPlaceholders.GENERIC_AMOUNT, listingsMax));
+            AuctionLang.LISTING_ADD_ERROR_LIMIT.message().send(player, replacer -> replacer.replace(
+                ShopPlaceholders.GENERIC_AMOUNT, listingsMax));
             return false;
         }
 
@@ -341,7 +348,8 @@ public class AuctionManager extends AbstractModule {
     }
 
     @Nullable
-    public ActiveListing add(@NonNull Player player, @NonNull ItemStack item, @NonNull Currency currency, double price) {
+    public ActiveListing add(@NonNull Player player, @NonNull ItemStack item, @NonNull Currency currency,
+                             double price) {
         if (!player.hasPermission(AuctionPerms.BYPASS_LISTING_PRICE)) {
             double curPriceMin = AuctionUtils.getCurrencyPriceMin(currency);
             double curPriceMax = AuctionUtils.getCurrencyPriceMax(currency);
@@ -428,7 +436,8 @@ public class AuctionManager extends AbstractModule {
             this.database.addCompletedListing(completedListing);
             this.database.deleteListing(listing);
         });
-        AuctionLang.LISTING_BUY_SUCCESS_INFO.message().send(buyer, replacer -> replacer.replace(listing.replacePlaceholders()));
+        AuctionLang.LISTING_BUY_SUCCESS_INFO.message().send(buyer, replacer -> replacer.replace(listing
+            .replacePlaceholders()));
 
         // Notify the seller about the purchase.
         Player seller = plugin.getServer().getPlayer(listing.getOwner());
@@ -472,7 +481,8 @@ public class AuctionManager extends AbstractModule {
             listing.getCurrency().deposit(player, listing.getPrice());
             listing.setClaimed(true);
 
-            AuctionLang.LISTING_CLAIM_SUCCESS.message().send(player, replacer -> replacer.replace(listing.replacePlaceholders()));
+            AuctionLang.LISTING_CLAIM_SUCCESS.message().send(player, replacer -> replacer.replace(listing
+                .replacePlaceholders()));
         }
 
         this.plugin.runTaskAsync(task -> this.database.saveCompletedListings(listings));

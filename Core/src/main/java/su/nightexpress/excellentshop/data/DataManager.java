@@ -9,12 +9,12 @@ import su.nightexpress.excellentshop.data.legacy.*;
 import su.nightexpress.excellentshop.shop.data.ProductLimitData;
 import su.nightexpress.excellentshop.shop.data.ProductPriceData;
 import su.nightexpress.excellentshop.shop.data.ProductStockData;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.data.RotationData;
+import su.nightexpress.excellentshop.virtualshop.rotation.Rotation;
+import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationData;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.shop.Shop;
 import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.core.Config;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.Rotation;
 import su.nightexpress.nightcore.manager.AbstractManager;
 
 import java.util.*;
@@ -92,13 +92,15 @@ public class DataManager extends AbstractManager<ShopPlugin> {
             // LEGACY - START
             if (this.dataHandler.hasLegacyStocks()) {
                 this.dataHandler.loadLegacyStockDatas().forEach(data -> {
-                    LegacyProductKey key = new LegacyProductKey(data.getShopId(), data.getProductId(), data.getHolder());
+                    LegacyProductKey key = new LegacyProductKey(data.getShopId(), data.getProductId(), data
+                        .getHolder());
                     this.legacyStockDataMap.put(key, data);
                 });
             }
             if (this.dataHandler.hasLegacyPrices()) {
                 this.dataHandler.loadLegacyPriceDatas().forEach(data -> {
-                    LegacyProductKey key = new LegacyProductKey(data.getShopId(), data.getProductId(), data.getShopId());
+                    LegacyProductKey key = new LegacyProductKey(data.getShopId(), data.getProductId(), data
+                        .getShopId());
                     this.legacyPriceDataMap.put(key, data);
                 });
             }
@@ -125,7 +127,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
 
-
     private void loadPriceDatas() {
         this.dataHandler.loadPriceDatas().forEach(this::loadPriceData);
     }
@@ -133,7 +134,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public void loadPriceData(@NonNull ProductPriceData data) {
         this.priceDataById.put(data.getProductId(), data);
     }
-
 
 
     private void loadStockDatas() {
@@ -145,15 +145,14 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
 
-
     private void loadLimitDatas() {
         this.dataHandler.loadLimitDatas().forEach(this::loadLimitData);
     }
 
     public void loadLimitData(@NonNull ProductLimitData data) {
-        this.limitDataById.computeIfAbsent(data.getProductId(), k -> new ConcurrentHashMap<>()).put(data.getPlayerId(), data);
+        this.limitDataById.computeIfAbsent(data.getProductId(), k -> new ConcurrentHashMap<>()).put(data.getPlayerId(),
+            data);
     }
-
 
 
     private void loadRotationDatas() {
@@ -170,7 +169,8 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         this.saveDataOrRemove(this.getPriceDatas(), DataHandler::upsertPriceData, DataHandler::deletePriceData);
         this.saveDataOrRemove(this.getStockDatas(), DataHandler::upsertStockData, DataHandler::deleteStockData);
         this.saveDataOrRemove(this.getLimitDatas(), DataHandler::upsertLimitData, DataHandler::deleteLimitData);
-        this.saveDataOrRemove(this.getRotationDatas(), DataHandler::upsertRotationData, DataHandler::deleteRotationData);
+        this.saveDataOrRemove(this.getRotationDatas(), DataHandler::upsertRotationData,
+            DataHandler::deleteRotationData);
 
         // Clean up from "removed" datas.
         this.priceDataById.values().removeIf(StatefulData::isRemoved);
@@ -182,19 +182,22 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         });
 
         // LEGACY - START
-        Set<LegacyStockData> oldStocks = this.legacyStockDataMap.values().stream().filter(LegacyStockData::isRemoved).collect(Collectors.toSet());
+        Set<LegacyStockData> oldStocks = this.legacyStockDataMap.values().stream().filter(LegacyStockData::isRemoved)
+            .collect(Collectors.toSet());
         if (!oldStocks.isEmpty()) {
             this.dataHandler.deleteLegacyStockData(oldStocks);
             this.legacyStockDataMap.values().removeAll(oldStocks);
         }
 
-        Set<LegacyPriceData> oldPrices = this.legacyPriceDataMap.values().stream().filter(LegacyPriceData::isRemoved).collect(Collectors.toSet());
+        Set<LegacyPriceData> oldPrices = this.legacyPriceDataMap.values().stream().filter(LegacyPriceData::isRemoved)
+            .collect(Collectors.toSet());
         if (!oldPrices.isEmpty()) {
             this.dataHandler.deleteLegacyPriceData(oldPrices);
             this.legacyPriceDataMap.values().removeAll(oldPrices);
         }
 
-        Set<LegacyRotationData> oldRotations = this.legacyRotationDataMap.values().stream().filter(LegacyRotationData::isRemoved).collect(Collectors.toSet());
+        Set<LegacyRotationData> oldRotations = this.legacyRotationDataMap.values().stream().filter(
+            LegacyRotationData::isRemoved).collect(Collectors.toSet());
         if (!oldRotations.isEmpty()) {
             this.dataHandler.deleteLegacyRotationData(oldRotations);
             this.legacyRotationDataMap.values().removeAll(oldRotations);
@@ -228,7 +231,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
 
-
     @NonNull
     public Set<RotationData> getRotationDatas() {
         return Set.copyOf(this.rotationDataById.values());
@@ -245,9 +247,11 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         if (oldData != null && !oldData.isRemoved()) {
             oldData.setRemoved(true);
 
-            RotationData newData = new RotationData(rotation.getGlobalId(), oldData.getNextRotationDate(), oldData.getProducts());
+            RotationData newData = new RotationData(rotation.getGlobalId(), oldData.getNextRotationDate(), oldData
+                .getProducts());
             this.loadRotationData(newData);
-            this.plugin.debug("Replaced old rotation data for shop rotation: %s [%s]".formatted(shop.getId(), rotation.getGlobalId()));
+            this.plugin.debug("Replaced old rotation data for shop rotation: %s [%s]".formatted(shop.getId(), rotation
+                .getGlobalId()));
             return newData;
         }
         // LEGACY - END
@@ -259,7 +263,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public RotationData getRotationData(@NonNull UUID rotationId) {
         return this.rotationDataById.get(rotationId);
     }
-
 
 
     @NonNull
@@ -278,9 +281,11 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         if (oldData != null && !oldData.isRemoved()) {
             oldData.setRemoved(true);
 
-            ProductPriceData newData = new ProductPriceData(product.getGlobalId(), oldData.getBuyOffset(), oldData.getSellOffset(), oldData.getExpireDate(), oldData.getPurchases(), oldData.getSales());
+            ProductPriceData newData = new ProductPriceData(product.getGlobalId(), oldData.getBuyOffset(), oldData
+                .getSellOffset(), oldData.getExpireDate(), oldData.getPurchases(), oldData.getSales());
             this.loadPriceData(newData);
-            this.plugin.debug("Replaced old price data for product: %s [%s]".formatted(product.getId(), product.getGlobalId()));
+            this.plugin.debug("Replaced old price data for product: %s [%s]".formatted(product.getId(), product
+                .getGlobalId()));
             return newData;
         }
         // LEGACY - END
@@ -292,7 +297,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public ProductPriceData getPriceData(@NonNull UUID productId) {
         return this.priceDataById.get(productId);
     }
-
 
 
     @NonNull
@@ -311,9 +315,11 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         if (oldData != null && !oldData.isRemoved()) {
             oldData.setRemoved(true);
 
-            ProductStockData newData = new ProductStockData(product.getGlobalId(), oldData.getBuyStock(), oldData.getRestockDate());
+            ProductStockData newData = new ProductStockData(product.getGlobalId(), oldData.getBuyStock(), oldData
+                .getRestockDate());
             this.loadStockData(newData);
-            this.plugin.debug("Replaced old stock data for product: %s [%s]".formatted(product.getId(), product.getGlobalId()));
+            this.plugin.debug("Replaced old stock data for product: %s [%s]".formatted(product.getId(), product
+                .getGlobalId()));
             return newData;
         }
         // LEGACY - END
@@ -325,7 +331,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public ProductStockData getStockData(@NonNull UUID productId) {
         return this.stockDataById.get(productId);
     }
-
 
 
     @NonNull
@@ -364,9 +369,11 @@ public class DataManager extends AbstractManager<ShopPlugin> {
             int purchases = initialBuy - oldBuyLeft;
             int sales = initialSell - oldSellLeft;
 
-            ProductLimitData newData = new ProductLimitData(playerId, globalId, purchases, sales, oldData.getRestockDate());
+            ProductLimitData newData = new ProductLimitData(playerId, globalId, purchases, sales, oldData
+                .getRestockDate());
             this.loadLimitData(newData);
-            this.plugin.debug("Replaced old %s player limit data for product: %s [%s]".formatted(playerId, product.getId(), product.getGlobalId()));
+            this.plugin.debug("Replaced old %s player limit data for product: %s [%s]".formatted(playerId, product
+                .getId(), product.getGlobalId()));
             return newData;
         }
         // LEGACY - END

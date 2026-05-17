@@ -11,7 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 import su.nightexpress.excellentshop.api.playershop.PlayerShopManager;
 import su.nightexpress.nightcore.util.geodata.Cuboid;
@@ -22,15 +22,15 @@ import java.util.Optional;
 public class PlotSquaredClaimHook implements ClaimHook {
 
     private final PlayerShopManager manager;
-    private final PlotAPI api;
+    private final PlotAPI           api;
 
-    public PlotSquaredClaimHook(@NotNull PlayerShopManager manager) {
+    public PlotSquaredClaimHook(@NonNull PlayerShopManager manager) {
         this.manager = manager;
         this.api = new PlotAPI();
     }
 
     @Override
-    public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
+    public boolean isInOwnClaim(@NonNull Player player, @NonNull Block block) {
         Location location = Location.at(block.getWorld().getName(), block.getX(), block.getY(), block.getZ());
         PlotArea area = this.api.getPlotSquared().getPlotAreaManager().getPlotArea(location);
         if (area == null) return false;
@@ -49,7 +49,7 @@ public class PlotSquaredClaimHook implements ClaimHook {
         this.clearPlotShops(event.getPlot());
     }
 
-    private void clearPlotShops(@NotNull Plot plot) {
+    private void clearPlotShops(@NonNull Plot plot) {
         World world = Optional.ofNullable(plot.getWorldName()).map(Bukkit::getWorld).orElse(null);
         if (world == null) return;
 

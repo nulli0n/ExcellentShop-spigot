@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.auction.data;
 
 import com.google.gson.GsonBuilder;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
@@ -32,7 +32,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
     static final Column COLUMN_BUYER_NAME    = Column.of("buyerName", ColumnType.STRING);
     static final Column COLUMN_CURRENCY      = Column.of("currency", ColumnType.STRING);
     static final Column COLUMN_PRICE         = Column.of("price", ColumnType.DOUBLE);
-    static final Column COLUMN_ITEM_NEW  = Column.of("item", ColumnType.STRING);
+    static final Column COLUMN_ITEM_NEW      = Column.of("item", ColumnType.STRING);
     static final Column COLUMN_EXPIRE_DATE   = Column.of("expireDate", ColumnType.LONG);
     static final Column COLUMN_DELETE_DATE   = Column.of("deleteDate", ColumnType.LONG);
     static final Column COLUMN_BUY_DATE      = Column.of("buyDate", ColumnType.LONG);
@@ -44,7 +44,7 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
     private final String tableListings;
     private final String tableCompletedListings;
 
-    public AuctionDatabase(@NotNull ShopPlugin plugin, @NotNull AuctionManager manager, @NotNull FileConfig config) {
+    public AuctionDatabase(@NonNull ShopPlugin plugin, @NonNull AuctionManager manager, @NonNull FileConfig config) {
         super(plugin, DatabaseConfig.read(config, "excellentshop_auction"));
         this.manager = manager;
 
@@ -53,8 +53,8 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
     }
 
     @Override
-    @NotNull
-    protected GsonBuilder registerAdapters(@NotNull GsonBuilder builder) {
+    @NonNull
+    protected GsonBuilder registerAdapters(@NonNull GsonBuilder builder) {
         return builder;
     }
 
@@ -80,24 +80,28 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
         this.addColumn(this.tableCompletedListings, COLUMN_CURRENCY, this.manager.getDefaultCurrency().getInternalId());
         this.addColumn(this.tableCompletedListings, COLUMN_DATE_CREATION, String.valueOf(System.currentTimeMillis()));
 
-        this.updateListings(this.tableListings, AuctionLegacyQueries.ACTIVE_LISTING_LOADER, AuctionLegacyQueries.ACTIVE_LISTING_LOADER_2, AuctionQueries.ACTIVE_LISTING_INSERT_QUERY);
-        this.updateListings(this.tableCompletedListings, AuctionLegacyQueries.COMPLETED_LISTING_LOADER, AuctionLegacyQueries.COMPLETED_LISTING_LOADER_2, AuctionQueries.COMPLETED_LISTING_INSERT_QUERY);
+        this.updateListings(this.tableListings, AuctionLegacyQueries.ACTIVE_LISTING_LOADER,
+            AuctionLegacyQueries.ACTIVE_LISTING_LOADER_2, AuctionQueries.ACTIVE_LISTING_INSERT_QUERY);
+        this.updateListings(this.tableCompletedListings, AuctionLegacyQueries.COMPLETED_LISTING_LOADER,
+            AuctionLegacyQueries.COMPLETED_LISTING_LOADER_2, AuctionQueries.COMPLETED_LISTING_INSERT_QUERY);
 
         if (SQLQueries.hasTable(this.connector, this.tableCompletedListings)) {
-            DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER, String::valueOf);
+            DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER,
+                String::valueOf);
             this.delete(this.tableCompletedListings, query, System.currentTimeMillis());
         }
 
         if (SQLQueries.hasTable(this.connector, this.tableListings)) {
-            DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER, String::valueOf);
+            DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER,
+                String::valueOf);
             this.delete(this.tableListings, query, System.currentTimeMillis());
         }
     }
 
-    private <T extends AbstractListing> void updateListings(@NotNull String table,
-                                                            @NotNull Function<ResultSet, T> function1,
-                                                            @NotNull Function<ResultSet, T> function2,
-                                                            @NotNull InsertQuery<T> insertQuery) {
+    private <T extends AbstractListing> void updateListings(@NonNull String table,
+                                                            @NonNull Function<ResultSet, T> function1,
+                                                            @NonNull Function<ResultSet, T> function2,
+                                                            @NonNull InsertQuery<T> insertQuery) {
         if (SQLQueries.hasColumn(this.connector, table, COLUMN_ITEM_NEW)) return;
 
         boolean isAlreadyUpdated = SQLQueries.hasColumn(this.connector, table, AuctionLegacyQueries.COLUMN_ITEM_DATA);
@@ -138,57 +142,57 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
         completedListings.forEach(listing -> this.manager.getListings().addCompleted(listing));
     }
 
-    @NotNull
+    @NonNull
     public List<ActiveListing> getListings() {
         SelectQuery<ActiveListing> query = new SelectQuery<>(AuctionQueries.ACTIVE_LISTING_LOADER).all();
         return this.select(this.tableListings, query);
     }
 
-    @NotNull
+    @NonNull
     public List<CompletedListing> getCompletedListings() {
         SelectQuery<CompletedListing> query = new SelectQuery<>(AuctionQueries.COMPLETED_LISTING_LOADER).all();
         return this.select(this.tableCompletedListings, query);
     }
 
-    public void addListing(@NotNull ActiveListing listing) {
+    public void addListing(@NonNull ActiveListing listing) {
         this.insert(this.tableListings, AuctionQueries.ACTIVE_LISTING_INSERT_QUERY, listing);
     }
 
-    public void deleteListing(@NotNull ActiveListing listing) {
+    public void deleteListing(@NonNull ActiveListing listing) {
         this.delete(this.tableListings, AuctionQueries.LISTING_DELETE_QUERY, listing);
     }
 
-    public void addCompletedListing(@NotNull CompletedListing listing) {
+    public void addCompletedListing(@NonNull CompletedListing listing) {
         this.insert(this.tableCompletedListings, AuctionQueries.COMPLETED_LISTING_INSERT_QUERY, listing);
     }
 
-    public void saveCompletedListings(@NotNull List<CompletedListing> listings) {
+    public void saveCompletedListings(@NonNull List<CompletedListing> listings) {
         this.update(this.tableCompletedListings, AuctionQueries.COMPLETED_LISTING_UPDATE_QUERY, listings);
     }
 
-    public void saveCompletedListing(@NotNull CompletedListing listing) {
+    public void saveCompletedListing(@NonNull CompletedListing listing) {
         this.update(this.tableCompletedListings, AuctionQueries.COMPLETED_LISTING_UPDATE_QUERY, listing);
     }
 
-    public void deleteCompletedListing(@NotNull CompletedListing listing) {
+    public void deleteCompletedListing(@NonNull CompletedListing listing) {
         this.delete(this.tableCompletedListings, AuctionQueries.LISTING_DELETE_QUERY, listing);
     }
 
-    public boolean isListingExist(@NotNull UUID id) {
+    public boolean isListingExist(@NonNull UUID id) {
         return this.contains(this.tableListings, query -> query
             .column(COLUMN_ID)
             .whereIgnoreCase(COLUMN_ID, WhereOperator.EQUAL, id.toString())
         );
     }
 
-    public boolean isCompletedListingExist(@NotNull UUID id) {
+    public boolean isCompletedListingExist(@NonNull UUID id) {
         return this.contains(this.tableCompletedListings, query -> query
             .column(COLUMN_ID)
             .whereIgnoreCase(COLUMN_ID, WhereOperator.EQUAL, id.toString())
         );
     }
 
-    public boolean isCompletedListingClaimed(@NotNull UUID id) {
+    public boolean isCompletedListingClaimed(@NonNull UUID id) {
         return this.contains(this.tableCompletedListings, query -> query
             .column(COLUMN_ID)
             .column(COLUMN_IS_PAID)

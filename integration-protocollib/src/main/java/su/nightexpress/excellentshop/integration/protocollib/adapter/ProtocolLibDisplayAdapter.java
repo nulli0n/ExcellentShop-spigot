@@ -9,7 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.packet.display.DisplayAdapter;
@@ -40,7 +40,8 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
         int[] argb = settings.getHologramBackgroundColor();
         this.backgroundColor = toARGB(argb[0], argb[1], argb[2], argb[3]);
 
-        this.textBitmask = (byte) ((settings.isHologramShadow() ? 0x01 : 0) | (settings.isHologramSeeThrough() ? 0x02 : 0));
+        this.textBitmask = (byte) ((settings.isHologramShadow() ? 0x01 : 0) | (settings
+            .isHologramSeeThrough() ? 0x02 : 0));
         this.hologramScale = (float) settings.getHologramScale();
 
         this.itemType = EntityType.ITEM;
@@ -69,10 +70,13 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
     }
 
     @Override
-    public void sendItemPackets(@NonNull Player player, @NonNull FakeEntity entity, boolean needSpawn, @NonNull ItemStack item) {
+    public void sendItemPackets(@NonNull Player player, @NonNull FakeEntity entity, boolean needSpawn,
+                                @NonNull ItemStack item) {
         PacketContainer dataPacket = this.createMetadataPacket(entity.getId(), metadata -> {
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get((Type) Boolean.class)), true); //no gravity
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(8, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item);
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(5, WrappedDataWatcher.Registry.get(
+                (Type) Boolean.class)), true); //no gravity
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(8, WrappedDataWatcher.Registry
+                .getItemStackSerializer(false)), item);
         });
 
         if (needSpawn) {
@@ -82,11 +86,15 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
     }
 
     @Override
-    public void sendShowcasePackets(@NonNull Player player, @NonNull FakeEntity entity, boolean needSpawn, @NonNull ItemStack item) {
+    public void sendShowcasePackets(@NonNull Player player, @NonNull FakeEntity entity, boolean needSpawn,
+                                    @NonNull ItemStack item) {
         PacketContainer dataPacket = this.createMetadataPacket(entity.getId(), metadata -> {
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(12, WrappedDataWatcher.Registry.get((Type) Vector3f.class)), new Vector3f(0.7f, 0.7f, 0.7f)); // scale
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry.getItemStackSerializer(false)), item); // slot
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(24, WrappedDataWatcher.Registry.get((Type) Byte.class)), (byte) 5); // mode HEAD
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(12, WrappedDataWatcher.Registry.get(
+                (Type) Vector3f.class)), new Vector3f(0.7f, 0.7f, 0.7f)); // scale
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry
+                .getItemStackSerializer(false)), item); // slot
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(24, WrappedDataWatcher.Registry.get(
+                (Type) Byte.class)), (byte) 5); // mode HEAD
         });
 
         if (needSpawn) {
@@ -107,16 +115,24 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
     }
 
     @Override
-    public void sendHologramPackets(@NonNull Player player, @NonNull FakeEntity entity, boolean needSpawn, @NonNull String textLine) {
+    public void sendHologramPackets(@NonNull Player player, @NonNull FakeEntity entity, boolean needSpawn,
+                                    @NonNull String textLine) {
         Object component = WrappedChatComponent.fromJson(NightMessage.asJson(textLine)).getHandle();
         PacketContainer dataPacket = this.createMetadataPacket(entity.getId(), metadata -> {
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(12, WrappedDataWatcher.Registry.get((Type) Vector3f.class)), new Vector3f(this.hologramScale, this.hologramScale, this.hologramScale)); // scale
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get((Type) Byte.class)), (byte) 1); // billboard
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry.getChatComponentSerializer()), component);
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(24, WrappedDataWatcher.Registry.get((Type) Integer.class)), this.settings.getHologramLineWidth());
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(25, WrappedDataWatcher.Registry.get((Type) Integer.class)), this.backgroundColor);
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(26, WrappedDataWatcher.Registry.get((Type) Byte.class)), (byte) this.settings.getHologramTextOpacity());
-            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(27, WrappedDataWatcher.Registry.get((Type) Byte.class)), this.textBitmask);
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(12, WrappedDataWatcher.Registry.get(
+                (Type) Vector3f.class)), new Vector3f(this.hologramScale, this.hologramScale, this.hologramScale)); // scale
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(
+                (Type) Byte.class)), (byte) 1); // billboard
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(23, WrappedDataWatcher.Registry
+                .getChatComponentSerializer()), component);
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(24, WrappedDataWatcher.Registry.get(
+                (Type) Integer.class)), this.settings.getHologramLineWidth());
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(25, WrappedDataWatcher.Registry.get(
+                (Type) Integer.class)), this.backgroundColor);
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(26, WrappedDataWatcher.Registry.get(
+                (Type) Byte.class)), (byte) this.settings.getHologramTextOpacity());
+            metadata.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(27, WrappedDataWatcher.Registry.get(
+                (Type) Byte.class)), this.textBitmask);
 
         });
 
@@ -127,8 +143,8 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
         this.protocolManager.sendServerPacket(player, dataPacket);
     }
 
-    @NotNull
-    protected PacketContainer createSpawnPacket(@NotNull EntityType entityType, @NotNull FakeEntity entity) {
+    @NonNull
+    protected PacketContainer createSpawnPacket(@NonNull EntityType entityType, @NonNull FakeEntity entity) {
         Location location = entity.getLocation();
 
         PacketContainer spawnPacket = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
@@ -141,8 +157,8 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
         return spawnPacket;
     }
 
-    @NotNull
-    private PacketContainer createMetadataPacket(int entityID, @NotNull Consumer<WrappedDataWatcher> consumer) {
+    @NonNull
+    private PacketContainer createMetadataPacket(int entityID, @NonNull Consumer<WrappedDataWatcher> consumer) {
         PacketContainer dataPacket = new PacketContainer(PacketType.Play.Server.ENTITY_METADATA);
         WrappedDataWatcher metadata = new WrappedDataWatcher();
 
@@ -151,7 +167,8 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
         List<WrappedDataValue> wrappedDataValueList = new ArrayList<>();
         metadata.getWatchableObjects().stream().filter(Objects::nonNull).forEach(entry -> {
             WrappedDataWatcher.WrappedDataWatcherObject dataWatcherObject = entry.getWatcherObject();
-            wrappedDataValueList.add(new WrappedDataValue(dataWatcherObject.getIndex(), dataWatcherObject.getSerializer(), entry.getRawValue()));
+            wrappedDataValueList.add(new WrappedDataValue(dataWatcherObject.getIndex(), dataWatcherObject
+                .getSerializer(), entry.getRawValue()));
         });
 
         dataPacket.getDataValueCollectionModifier().write(0, wrappedDataValueList);
@@ -160,8 +177,8 @@ public class ProtocolLibDisplayAdapter implements DisplayAdapter {
         return dataPacket;
     }
 
-    @NotNull
-    protected PacketContainer createDestroyPacket(@NotNull Set<Integer> list) {
+    @NonNull
+    protected PacketContainer createDestroyPacket(@NonNull Set<Integer> list) {
         PacketContainer container = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
         container.getIntLists().write(0, new ArrayList<>(list));
 

@@ -1,12 +1,12 @@
 package su.nightexpress.excellentshop;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.excellentshop.data.DataHandler;
 import su.nightexpress.excellentshop.data.DataManager;
-import su.nightexpress.excellentshop.feature.playershop.ChestShopModule;
-import su.nightexpress.excellentshop.feature.virtualshop.VirtualShopModule;
-import su.nightexpress.nexshop.user.UserManager;
+import su.nightexpress.excellentshop.playershop.ChestShopModule;
+import su.nightexpress.excellentshop.user.UserManager;
+import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
 
 import java.util.function.Consumer;
 
@@ -15,7 +15,7 @@ public class ShopAPI {
 
     private static ShopPlugin plugin;
 
-    static void load(@NotNull ShopPlugin instance) {
+    static void load(@NonNull ShopPlugin instance) {
         plugin = instance;
     }
 
@@ -27,24 +27,24 @@ public class ShopAPI {
         return plugin != null;
     }
 
-    @NotNull
+    @NonNull
     public static ShopPlugin getPlugin() {
         if (plugin == null) throw new IllegalStateException("API is not yet initialized!");
 
         return plugin;
     }
 
-    @NotNull
+    @NonNull
     public static DataHandler getDataHandler() {
         return plugin.getDataHandler();
     }
 
-    @NotNull
+    @NonNull
     public static DataManager getDataManager() {
         return plugin.getDataManager();
     }
 
-    public static void dataAccess(@NotNull Consumer<DataManager> consumer) {
+    public static void dataAccess(@NonNull Consumer<DataManager> consumer) {
         plugin.dataAccess(consumer);
     }
 
@@ -60,7 +60,7 @@ public class ShopAPI {
         return plugin.getChestShop();
     }
 
-    @NotNull
+    @NonNull
     public static UserManager getUserManager() {
         return plugin.getUserManager();
     }

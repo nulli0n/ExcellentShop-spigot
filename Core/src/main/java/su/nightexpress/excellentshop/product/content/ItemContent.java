@@ -6,12 +6,13 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
-import su.nightexpress.nexshop.exception.ProductLoadException;
-import su.nightexpress.excellentshop.product.ContentType;
-import su.nightexpress.excellentshop.product.ProductContent;
-import su.nightexpress.nexshop.util.ErrorHandler;
-import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nexshop.util.UnitUtils;
+
+import su.nightexpress.excellentshop.api.UnitUtils;
+import su.nightexpress.excellentshop.api.product.ContentType;
+import su.nightexpress.excellentshop.api.product.ProductContent;
+import su.nightexpress.excellentshop.exception.ProductLoadException;
+import su.nightexpress.excellentshop.util.ErrorHandler;
+import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.nightcore.bridge.item.AdaptedItem;
 import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -166,7 +167,8 @@ public class ItemContent extends ProductContent {
     @NonNull
     public ItemStack getItem() {
         ItemStack itemStack = this.adaptedItem.getItemStack();
-        if (itemStack == null) throw new IllegalStateException("Could not produce ItemStack from the AdaptedItem. Check #isValid before calling this method.");
+        if (itemStack == null)
+            throw new IllegalStateException("Could not produce ItemStack from the AdaptedItem. Check #isValid before calling this method.");
 
         return itemStack;
     }

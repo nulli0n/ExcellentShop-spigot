@@ -2,7 +2,7 @@ package su.nightexpress.nexshop.auction.command;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
@@ -25,8 +25,8 @@ public class AuctionCommands {
 
     public static final String FORCE = "f";
 
-    public static void build(@NotNull ShopPlugin plugin, @NotNull AuctionManager manager,
-                             @NotNull HubNodeBuilder builder) {
+    public static void build(@NonNull ShopPlugin plugin, @NonNull AuctionManager manager,
+                             @NonNull HubNodeBuilder builder) {
         builder.branch(Commands.literal("open")
             .permission(AuctionPerms.COMMAND_OPEN)
             .description(AuctionLang.COMMAND_OPEN_DESC.text())
@@ -93,8 +93,8 @@ public class AuctionCommands {
         builder.executes((context, arguments) -> openAuction(plugin, manager, context, arguments));
     }
 
-    public static boolean viewExpired(@NotNull ShopPlugin plugin, @NotNull AuctionManager manager,
-                                      @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean viewExpired(@NonNull ShopPlugin plugin, @NonNull AuctionManager manager,
+                                      @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
@@ -111,14 +111,14 @@ public class AuctionCommands {
         return true;
     }
 
-    public static boolean fillDummy(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager,
-                                    @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean fillDummy(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                                    @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         AuctionUtils.fillDummy(auctionManager);
         return true;
     }
 
-    public static boolean viewHistory(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager,
-                                      @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean viewHistory(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                                      @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
@@ -136,8 +136,8 @@ public class AuctionCommands {
         return true;
     }
 
-    public static boolean viewListings(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager,
-                                       @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean viewListings(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                                       @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 
@@ -155,8 +155,8 @@ public class AuctionCommands {
         return true;
     }
 
-    public static boolean openAuction(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager,
-                                      @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean openAuction(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                                      @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         if (arguments.contains(ARG_PLAYER)) {
             Player target = arguments.getPlayer(ARG_PLAYER);
             boolean force = context.hasFlag(FORCE);
@@ -171,7 +171,7 @@ public class AuctionCommands {
         return auctionManager.openAuction(context.getPlayerOrThrow());
     }
 
-    /*public static boolean openAuction(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull CommandContext context) {
+    /*public static boolean openAuction(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager, @NonNull CommandContext context) {
         Player player = context.getExecutor();
         if (player == null) {
             context.errorPlayerOnly();
@@ -180,8 +180,8 @@ public class AuctionCommands {
         return auctionManager.openAuction(player);
     }*/
 
-    public static boolean sellItem(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager,
-                                   @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean sellItem(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                                   @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
 
         ItemStack item = player.getInventory().getItemInMainHand();
@@ -195,8 +195,8 @@ public class AuctionCommands {
         return auctionManager.sell(player, item, price);
     }
 
-    public static boolean viewUnclaimed(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager,
-                                        @NotNull CommandContext context, @NotNull ParsedArguments arguments) {
+    public static boolean viewUnclaimed(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                                        @NonNull CommandContext context, @NonNull ParsedArguments arguments) {
         Player player = context.getPlayerOrThrow();
         String userName = arguments.getString(ARG_TARGET, player.getName());
 

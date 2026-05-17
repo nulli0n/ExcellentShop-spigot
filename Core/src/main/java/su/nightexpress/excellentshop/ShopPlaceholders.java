@@ -4,18 +4,18 @@ import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.shop.Shop;
-import su.nightexpress.excellentshop.feature.virtualshop.product.VirtualProduct;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.Rotation;
-import su.nightexpress.excellentshop.feature.virtualshop.shop.VirtualShop;
+import su.nightexpress.excellentshop.playershop.core.ChestConfig;
+import su.nightexpress.excellentshop.playershop.impl.ChestProduct;
+import su.nightexpress.excellentshop.playershop.impl.ChestShop;
+import su.nightexpress.excellentshop.playershop.rent.RentSettings;
+import su.nightexpress.excellentshop.util.ShopUtils;
+import su.nightexpress.excellentshop.virtualshop.product.VirtualProduct;
+import su.nightexpress.excellentshop.virtualshop.rotation.Rotation;
+import su.nightexpress.excellentshop.virtualshop.shop.VirtualShop;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.excellentshop.core.Lang;
-import su.nightexpress.excellentshop.feature.playershop.core.ChestConfig;
-import su.nightexpress.excellentshop.feature.playershop.impl.ChestProduct;
-import su.nightexpress.excellentshop.feature.playershop.impl.ChestShop;
-import su.nightexpress.excellentshop.feature.playershop.rent.RentSettings;
-import su.nightexpress.nexshop.util.ShopUtils;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.language.LangAssets;
@@ -36,9 +36,6 @@ public class ShopPlaceholders extends su.nightexpress.nightcore.util.Placeholder
 
     public static final String URL_WIKI              = "https://nightexpressdev.com/excellentshop/";
     public static final String URL_WIKI_PLACEHOLDERS = URL_WIKI + "placeholders";
-
-    public static final String URL_CUSTOM_ITEMS = "https://nightexpressdev.com/nightcore/integrations/items/";
-    public static final String URL_CURRENCIES   = "https://nightexpressdev.com/nightcore/integrations/currencies/";
 
     @Deprecated
     public static final String GENERIC_BUY          = "%buy%";
@@ -61,20 +58,20 @@ public class ShopPlaceholders extends su.nightexpress.nightcore.util.Placeholder
     public static final String GENERIC_TOTAL_UNITS  = "%total_units%";
     public static final String GENERIC_TYPE         = "%type%";
     //public static final String GENERIC_CURRENCY = "%currency%";
-    public static final String GENERIC_TIME         = "%time%";
-    public static final String GENERIC_PRICE        = "%price%";
-    public static final String GENERIC_WORTH        = "%worth%";
-    public static final String GENERIC_BALANCE      = "%balance%";
-    public static final String GENERIC_DISCOUNT     = "%discount%";
-    public static final String GENERIC_PERMISSION   = "%permission%";
-    public static final String GENERIC_TAX          = "%tax%";
-    public static final String GENERIC_EXPIRE       = "%expire%";
-    public static final String GENERIC_PAGE         = "%page%";
-    public static final String GENERIC_PAGES        = "%pages%";
-    public static final String GENERIC_WEIGHT       = "%weight%";
-    public static final String GENERIC_PATH         = "%path%";
-    public static final String GENERIC_STATE        = "%state%";
-    public static final String GENERIC_TREND        = "%trend%";
+    public static final String GENERIC_TIME       = "%time%";
+    public static final String GENERIC_PRICE      = "%price%";
+    public static final String GENERIC_WORTH      = "%worth%";
+    public static final String GENERIC_BALANCE    = "%balance%";
+    public static final String GENERIC_DISCOUNT   = "%discount%";
+    public static final String GENERIC_PERMISSION = "%permission%";
+    public static final String GENERIC_TAX        = "%tax%";
+    public static final String GENERIC_EXPIRE     = "%expire%";
+    public static final String GENERIC_PAGE       = "%page%";
+    public static final String GENERIC_PAGES      = "%pages%";
+    public static final String GENERIC_WEIGHT     = "%weight%";
+    public static final String GENERIC_PATH       = "%path%";
+    public static final String GENERIC_STATE      = "%state%";
+    public static final String GENERIC_TREND      = "%trend%";
 
     public static final String GENERIC_SELL_MULTIPLIER = "%sell_multiplier%";
 
@@ -125,9 +122,12 @@ public class ShopPlaceholders extends su.nightexpress.nightcore.util.Placeholder
     public static final String PRODUCT_PRICE_SELL_ALL           = "%product_price_sell_all%";
     public static final String PRODUCT_PRICE_SELL_ALL_FORMATTED = "%product_price_sell_all_formatted%";
 
-    public static final Function<TradeType, String> PRODUCT_PRICE           = type -> "%product_price_" + type.getLowerCase() + "%";
-    public static final Function<TradeType, String> PRODUCT_PRICE_FORMATTED = type -> "%product_price_" + type.getLowerCase() + "_formatted%";
-    public static final Function<TradeType, String> PRODUCT_PRICE_AVERAGE   = type -> "%product_price_avg_" + type.getLowerCase() + "%";
+    public static final Function<TradeType, String> PRODUCT_PRICE           = type -> "%product_price_" + type
+        .getLowerCase() + "%";
+    public static final Function<TradeType, String> PRODUCT_PRICE_FORMATTED = type -> "%product_price_" + type
+        .getLowerCase() + "_formatted%";
+    public static final Function<TradeType, String> PRODUCT_PRICE_AVERAGE   = type -> "%product_price_avg_" + type
+        .getLowerCase() + "%";
 
     public static final String PRODUCT_ID           = "%product_id%";
     public static final String PRODUCT_PREVIEW_NAME = "%product_preview_name%";
@@ -179,13 +179,16 @@ public class ShopPlaceholders extends su.nightexpress.nightcore.util.Placeholder
         .with(CHEST_SHOP_X, shop -> NumberUtil.format(shop.getBlockPos().getX()))
         .with(CHEST_SHOP_Y, shop -> NumberUtil.format(shop.getBlockPos().getY()))
         .with(CHEST_SHOP_Z, shop -> NumberUtil.format(shop.getBlockPos().getZ()))
-        .with(CHEST_SHOP_WORLD, shop -> shop.isAccessible() ? LangAssets.get(shop.getBlock().getWorld()) : shop.getWorldName())
+        .with(CHEST_SHOP_WORLD, shop -> shop.isAccessible() ? LangAssets.get(shop.getBlock().getWorld()) : shop
+            .getWorldName())
         .with(CHEST_SHOP_IS_ADMIN, shop -> CoreLang.STATE_YES_NO.get(shop.isAdminShop()))
         .with(CHEST_SHOP_HOLOGRAM_ENABLED, shop -> CoreLang.STATE_YES_NO.get(shop.isHologramEnabled()))
         .with(CHEST_SHOP_SHOWCASE_ENABLED, shop -> CoreLang.STATE_YES_NO.get(shop.isShowcaseEnabled()))
-        .with(CHEST_SHOP_RENT_EXPIRES_IN, shop -> shop.isRented() ? TimeFormats.formatDuration(shop.getRentedUntil(), TimeFormatType.LITERAL) : Lang.OTHER_NO_RENT.text())
+        .with(CHEST_SHOP_RENT_EXPIRES_IN, shop -> shop.isRented() ? TimeFormats.formatDuration(shop.getRentedUntil(),
+            TimeFormatType.LITERAL) : Lang.OTHER_NO_RENT.text())
         .with(CHEST_SHOP_RENTER_NAME, shop -> shop.isRented() ? shop.getRenterName() : Lang.OTHER_NO_RENT.text())
-        .with(CHEST_SHOP_RENT_DURATION, shop -> shop.isRentable() ? TimeFormats.toLiteral(shop.getRentSettings().getDurationMillis()) : "-")
+        .with(CHEST_SHOP_RENT_DURATION, shop -> shop.isRentable() ? TimeFormats.toLiteral(shop.getRentSettings()
+            .getDurationMillis()) : "-")
         .with(CHEST_SHOP_RENT_PRICE, shop -> shop.isRentable() ? shop.getRentSettings().getPriceFormatted() : "-")
         .build();
 
@@ -224,7 +227,8 @@ public class ShopPlaceholders extends su.nightexpress.nightcore.util.Placeholder
             .with(PRODUCT_UNIT_AMOUNT, product -> NumberUtil.format(product.getUnitSize()))
             .with(PRODUCT_PRICE_TYPE, product -> Lang.PRICE_TYPES.getLocalized(product.getPricingType()))
             .with(PRODUCT_PREVIEW_NAME, product -> ItemUtil.getNameSerialized(product.getEffectivePreview()))
-            .with(PRODUCT_PREVIEW_LORE, product -> String.join("\n", ItemUtil.getLoreSerialized(product.getEffectivePreview())))
+            .with(PRODUCT_PREVIEW_LORE, product -> String.join("\n", ItemUtil.getLoreSerialized(product
+                .getEffectivePreview())))
             .with("%product_amount%", product -> ShopUtils.formatOrInfinite(product.getStock()))
             .with(PRODUCT_STOCK, product -> ShopUtils.formatOrInfinite(product.getStock()))
             .with(PRODUCT_SPACE, product -> ShopUtils.formatOrInfinite(product.getSpace()))
@@ -255,11 +259,14 @@ public class ShopPlaceholders extends su.nightexpress.nightcore.util.Placeholder
         .with("%product_amount%", product -> ShopUtils.formatOrInfinite(product.getCachedAmount()))
         .with(PRODUCT_SPACE, product -> ShopUtils.formatOrInfinite(product.getCachedSpace()))
         .with(PRODUCT_CAPACITY, product -> ShopUtils.formatOrInfinite(product.getCachedCapacity()))
-        .with("%product_stock_global_buy_amount_left%", product -> ShopUtils.formatOrInfinite(product.getCachedAmount()))
-        .with("%product_stock_global_sell_amount_left%", product -> ShopUtils.formatOrInfinite(product.getCachedSpace()))
+        .with("%product_stock_global_buy_amount_left%", product -> ShopUtils.formatOrInfinite(product
+            .getCachedAmount()))
+        .with("%product_stock_global_sell_amount_left%", product -> ShopUtils.formatOrInfinite(product
+            .getCachedSpace()))
         .build();
 
-    public static final TypedPlaceholder<VirtualProduct> VIRTUAL_PRODUCT_TYPED = TypedPlaceholder.builder(VirtualProduct.class)
+    public static final TypedPlaceholder<VirtualProduct> VIRTUAL_PRODUCT_TYPED = TypedPlaceholder.builder(
+        VirtualProduct.class)
         .include(PRODUCT)
         .with(PRODUCT_BUY_LIMIT, product -> ShopUtils.formatOrInfinite(product.getLimitOptions().getBuyLimit()))
         .with(PRODUCT_SELL_LIMIT, product -> ShopUtils.formatOrInfinite(product.getLimitOptions().getSellLimit()))

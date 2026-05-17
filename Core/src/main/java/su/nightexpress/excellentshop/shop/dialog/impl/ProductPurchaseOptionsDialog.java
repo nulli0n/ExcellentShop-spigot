@@ -9,7 +9,7 @@ import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.excellentshop.core.Perms;
 import su.nightexpress.excellentshop.product.click.ProductClickContext;
-import su.nightexpress.nexshop.module.AbstractShopModule;
+import su.nightexpress.excellentshop.shop.AbstractShopModule;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.bridge.dialog.wrap.WrappedDialog;
 import su.nightexpress.nightcore.bridge.dialog.wrap.button.WrappedActionButton;
@@ -29,25 +29,28 @@ import java.util.List;
 
 public class ProductPurchaseOptionsDialog extends Dialog<ProductClickContext> {
 
-    private static final ProductClickAction[] CLICK_ACTIONS = {
-        ProductClickAction.BUY_ONE, ProductClickAction.SELL_ONE,
-        ProductClickAction.BUY_ALL, ProductClickAction.SELL_ALL,
-        ProductClickAction.OPEN_BUY_MENU, ProductClickAction.OPEN_SELL_MENU,
+    private static final ProductClickAction[] CLICK_ACTIONS = {ProductClickAction.BUY_ONE, ProductClickAction.SELL_ONE, ProductClickAction.BUY_ALL, ProductClickAction.SELL_ALL, ProductClickAction.OPEN_BUY_MENU, ProductClickAction.OPEN_SELL_MENU,
     };
 
     private static final TextLocale TITLE = LangEntry.builder("Shop.UI.Dialog.Product.PurchaseOptions.Title")
         .text(ShopPlaceholders.SHOP_NAME + TagWrappers.DARK_GRAY.wrap(" » ") + ShopPlaceholders.PRODUCT_PREVIEW_NAME);
 
-    private static final DialogElementLocale BODY = LangEntry.builder("Shop.UI.Dialog.Product.PurchaseOptions.Body").dialogElement(400,
-        "What you would like to do?");
+    private static final DialogElementLocale BODY = LangEntry.builder("Shop.UI.Dialog.Product.PurchaseOptions.Body")
+        .dialogElement(400,
+            "What you would like to do?");
 
-    private static final ButtonLocale BUY_BUTTON_LOCALE = LangEntry.builder("Shop.UI.Dialog.Product.PurchaseOptions.BuyButton")
-        .button(TagWrappers.GREEN.wrap("↓") + " " + ShopPlaceholders.GENERIC_TYPE + TagWrappers.GRAY.wrap(" (" + TagWrappers.GREEN.wrap(ShopPlaceholders.GENERIC_PRICE) + ")"));
+    private static final ButtonLocale BUY_BUTTON_LOCALE = LangEntry.builder(
+        "Shop.UI.Dialog.Product.PurchaseOptions.BuyButton")
+        .button(TagWrappers.GREEN.wrap("↓") + " " + ShopPlaceholders.GENERIC_TYPE + TagWrappers.GRAY.wrap(" (" +
+            TagWrappers.GREEN.wrap(ShopPlaceholders.GENERIC_PRICE) + ")"));
 
-    private static final ButtonLocale SELL_BUTTON_LOCALE = LangEntry.builder("Shop.UI.Dialog.Product.PurchaseOptions.SellButton")
-        .button(TagWrappers.RED.wrap("↑") + " " + ShopPlaceholders.GENERIC_TYPE + TagWrappers.GRAY.wrap(" (" + TagWrappers.RED.wrap(ShopPlaceholders.GENERIC_PRICE) + ")"));
+    private static final ButtonLocale SELL_BUTTON_LOCALE = LangEntry.builder(
+        "Shop.UI.Dialog.Product.PurchaseOptions.SellButton")
+        .button(TagWrappers.RED.wrap("↑") + " " + ShopPlaceholders.GENERIC_TYPE + TagWrappers.GRAY.wrap(" (" +
+            TagWrappers.RED.wrap(ShopPlaceholders.GENERIC_PRICE) + ")"));
 
-    private static final ButtonLocale MENU_BUTTON_LOCALE = LangEntry.builder("Shop.UI.Dialog.Product.PurchaseOptions.MenuButton")
+    private static final ButtonLocale MENU_BUTTON_LOCALE = LangEntry.builder(
+        "Shop.UI.Dialog.Product.PurchaseOptions.MenuButton")
         .button(TagWrappers.ORANGE.wrap("→") + " " + ShopPlaceholders.GENERIC_TYPE);
 
     private final AbstractShopModule module;
@@ -107,7 +110,8 @@ public class ProductPurchaseOptionsDialog extends Dialog<ProductClickContext> {
                     })
                     .build();
 
-                buttons.add(DialogButtons.action(locale.replace(placeholderContext)).action(DialogActions.customClick(jsonKey)).build());
+                buttons.add(DialogButtons.action(locale.replace(placeholderContext)).action(DialogActions.customClick(
+                    jsonKey)).build());
                 builder.handleResponse(jsonKey, (viewer, identifier, nbtHolder) -> {
                     this.module.handleProductClickAction(context, action);
                 });

@@ -1,6 +1,6 @@
 package su.nightexpress.excellentshop.api.product;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public enum TradeType {
 
@@ -17,12 +17,12 @@ public enum TradeType {
         return this.index;
     }
 
-    @NotNull
+    @NonNull
     public TradeType opposite() {
         return this == BUY ? SELL : BUY;
     }
 
-    @NotNull
+    @NonNull
     public String getLowerCase() {
         return this.name().toLowerCase();
     }

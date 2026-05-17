@@ -4,7 +4,7 @@ import net.william278.huskclaims.api.BukkitHuskClaimsAPI;
 import net.william278.huskclaims.claim.Claim;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 
 import java.util.UUID;
@@ -18,7 +18,7 @@ public class HuskClaimsHook implements ClaimHook {
     }
 
     @Override
-    public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
+    public boolean isInOwnClaim(@NonNull Player player, @NonNull Block block) {
         Claim claim = huskClaimsAPI.getClaimAt(huskClaimsAPI.getPosition(block.getLocation())).orElse(null);
         if (claim == null) return false;
 

@@ -4,7 +4,7 @@ import me.angeschossen.lands.api.LandsIntegration;
 import me.angeschossen.lands.api.land.Land;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.util.geodata.pos.ChunkPos;
@@ -15,12 +15,12 @@ public class LandsHook implements ClaimHook {
 
     private final LandsIntegration lands;
 
-    public LandsHook(@NotNull NightPlugin plugin) {
+    public LandsHook(@NonNull NightPlugin plugin) {
         this.lands = LandsIntegration.of(plugin);
     }
 
     @Override
-    public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
+    public boolean isInOwnClaim(@NonNull Player player, @NonNull Block block) {
         ChunkPos chunkPos = ChunkPos.from(block);
         Land land = lands.getLandByChunk(block.getWorld(), chunkPos.getX(), chunkPos.getZ());
         UUID id = player.getUniqueId();

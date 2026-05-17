@@ -1,5 +1,15 @@
 package su.nightexpress.excellentshop.shop.menu;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -12,20 +22,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
+import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.ShopPlugin;
+import su.nightexpress.excellentshop.api.BalanceHolder;
+import su.nightexpress.excellentshop.api.UnitUtils;
 import su.nightexpress.excellentshop.api.menu.SellingMenuAdapter;
 import su.nightexpress.excellentshop.api.menu.SellingMenuProvider;
 import su.nightexpress.excellentshop.api.product.Product;
 import su.nightexpress.excellentshop.api.product.TradeType;
-import su.nightexpress.excellentshop.api.transaction.EPreparedTransaction;
-import su.nightexpress.excellentshop.ShopPlaceholders;
-import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.shop.Shop;
+import su.nightexpress.excellentshop.api.transaction.EPreparedTransaction;
 import su.nightexpress.excellentshop.core.Lang;
-import su.nightexpress.nexshop.module.AbstractShopModule;
-import su.nightexpress.nexshop.util.BalanceHolder;
-import su.nightexpress.nexshop.util.PacketUtils;
-import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nexshop.util.UnitUtils;
+import su.nightexpress.excellentshop.shop.AbstractShopModule;
+import su.nightexpress.excellentshop.util.PacketUtils;
+import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.configuration.ConfigTypes;
 import su.nightexpress.nightcore.ui.inventory.MenuRegistry;
@@ -41,11 +52,6 @@ import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
-
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements SellingMenuProvider {
 
@@ -200,7 +206,6 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         ItemStack clickedItem = event.getCurrentItem();
 
         boolean isPlayerSlot = rawSlot >= inventory.getSize();
-        boolean hasClickedItem = clickedItem != null && !clickedItem.getType().isAir();
 
         context.getViewer().setNextClickIn(0L); // Allow fast clicks to make sure visuals update always triggers.
 
@@ -210,7 +215,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         }
 
         if (isPlayerSlot) {
-            if (hasClickedItem) {
+            if (clickedItem != null && !clickedItem.getType().isAir()) {
                 if (!this.isSellable(context, clickedItem)) {
                     // This prevents item visual glitch when using shift+double click.
                     this.plugin.runTask(() -> this.triggerSlotUpdate(player, realSlot));
@@ -240,7 +245,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
                     return;
                 }
 
-                if (hasClickedItem) {
+                if (clickedItem != null && !clickedItem.getType().isAir()) {
                     this.removeItem(context, clickedItem, removed -> {
                         if (event.isShiftClick()) {
                             Players.addItem(player, removed);
@@ -357,15 +362,17 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         return Lists.contains(this.productSlots, slot);
     }
 
-    private void addItem(@NonNull ViewerContext context, @NonNull ItemStack clickedItem, boolean resetCursor,
+    private void addItem(@NonNull ViewerContext context,
+                         @NonNull ItemStack clickedItem,
+                         boolean resetCursor,
                          @NonNull Consumer<@Nullable ItemStack> consumer) {
-        //Player player = context.getPlayer();
+        Player player = context.getPlayer();
         Product product = this.findProduct(context, clickedItem);
         if (product == null) return;
 
-        int amount = clickedItem.getAmount();
-        int units = UnitUtils.amountToUnits(product, amount);
-        if (units <= 0) return;
+        int itemAmount = clickedItem.getAmount();
+        int itemUnits = UnitUtils.amountToUnits(product, itemAmount);
+        if (itemUnits <= 0) return;
 
         Data data = this.getObject(context);
 
@@ -373,6 +380,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         keyStack.setAmount(1);
 
         ProductData current = data.products.get(keyStack);
+        int currentUnits = current == null ? 0 : current.units;
 
         // Calculate menu space.
         int unitSize = product.getUnitSize();
@@ -384,7 +392,29 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
             maxAllowedUnits -= current.units;
         }
 
-        for (ProductData other : data.products.values()) {
+        // Create virtual inventory and fill it with current items to get the max sellable unit amount for the current item/
+        Inventory inventory = this.plugin.getServer().createInventory(null, 54);
+
+        // Add player items.
+        for (ItemStack contents : player.getInventory().getStorageContents()) {
+            if (contents != null && !contents.getType().isAir()) {
+                inventory.addItem(new ItemStack(contents));
+            }
+        }
+
+        // Add the current item.
+        inventory.addItem(new ItemStack(clickedItem));
+
+        // Reduce possible sell unit amount of the current item based on currently placed items.
+        for (var entry : data.products.entrySet()) {
+            ItemStack itemStack = entry.getKey();
+            ProductData other = entry.getValue();
+
+            ItemStack stack = new ItemStack(itemStack);
+            stack.setAmount(UnitUtils.unitsToAmount(other.product, other.units));
+
+            inventory.addItem(stack);
+
             if (other.product == product) continue;
             int otherUnitSize = other.product.getUnitSize();
             int otherMaxStackSize = other.product.getEffectivePreview().getMaxStackSize();
@@ -393,17 +423,28 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
 
             maxAllowedUnits -= (otherUnitStacks * maxUnitsPerStack);
         }
+
         if (maxAllowedUnits <= 0) return;
 
-        int finalUnits = units;
+        // Don't allow to put item for sell if any limit(s) reached.
+        int maxSellableUnitAmount = product.getMaxSellableUnitAmount(player, inventory);
+        if (maxSellableUnitAmount == 0) return;
 
-        if (current != null) {
-            finalUnits += current.units();
+        int pureSellUnits = itemUnits;
+        if (maxSellableUnitAmount > 0) {
+            int toLimit = maxSellableUnitAmount - currentUnits;
+            if (pureSellUnits > toLimit) {
+                pureSellUnits = toLimit;
+            }
         }
-        data.products.put(keyStack, new ProductData(product, finalUnits));
+
+        // Get the smallest of current item units or max sellable unit amount.
+        int finalUnits = pureSellUnits;
+
+        data.products.put(keyStack, new ProductData(product, finalUnits + currentUnits));
 
         // Calculate leftovers
-        int leftover = amount - UnitUtils.unitsToAmount(product, units);
+        int leftover = itemAmount - UnitUtils.unitsToAmount(product, finalUnits);
         ItemStack left = null;
         if (leftover > 0) {
             left = new ItemStack(clickedItem);

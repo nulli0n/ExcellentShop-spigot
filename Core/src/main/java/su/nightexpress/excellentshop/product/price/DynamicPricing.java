@@ -4,9 +4,9 @@ import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.product.price.PriceData;
 import su.nightexpress.excellentshop.api.transaction.ECompletedTransaction;
+import su.nightexpress.excellentshop.api.product.PriceType;
 import su.nightexpress.excellentshop.api.product.Product;
-import su.nightexpress.excellentshop.product.PriceType;
-import su.nightexpress.excellentshop.product.ProductPricing;
+import su.nightexpress.excellentshop.api.product.ProductPricing;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.config.Writeable;
@@ -20,7 +20,7 @@ public class DynamicPricing extends ProductPricing {
 
     private final Map<TradeType, PriceUnit> priceUnits;
 
-    private int stabilizeInterval;
+    private int    stabilizeInterval;
     private double stabilizeAmount;
 
     public DynamicPricing() {
@@ -28,7 +28,8 @@ public class DynamicPricing extends ProductPricing {
         this.priceUnits = new HashMap<>();
     }
 
-    public record PriceUnit(double start, double buyOffset, double sellOffset, double minOffset, double maxOffset) implements Writeable {
+    public record PriceUnit(double start, double buyOffset, double sellOffset, double minOffset,
+                            double maxOffset) implements Writeable {
 
         public double offset(@NonNull TradeType type) {
             return switch (type) {
@@ -115,7 +116,8 @@ public class DynamicPricing extends ProductPricing {
     }
 
     @Override
-    public void handleTransaction(@NonNull ECompletedTransaction transaction, @NonNull Product product, int units, @NonNull PriceData priceData) {
+    public void handleTransaction(@NonNull ECompletedTransaction transaction, @NonNull Product product, int units,
+                                  @NonNull PriceData priceData) {
         TradeType currentType = transaction.type();
 
         // Delay the stabilization process
@@ -178,7 +180,8 @@ public class DynamicPricing extends ProductPricing {
         this.priceUnits.put(type, unit);
     }
 
-    public void setPriceUnit(@NonNull TradeType type, double start, double buyOffset, double sellOffset, double minOffset, double maxOffset) {
+    public void setPriceUnit(@NonNull TradeType type, double start, double buyOffset, double sellOffset,
+                             double minOffset, double maxOffset) {
         this.priceUnits.put(type, new PriceUnit(start, buyOffset, sellOffset, minOffset, maxOffset));
     }
 

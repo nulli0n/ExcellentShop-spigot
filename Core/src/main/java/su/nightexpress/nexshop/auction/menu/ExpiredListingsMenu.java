@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.auction.menu;
 
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.Listings;
@@ -28,7 +28,7 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
 
     private final ItemHandler takeAllHandler;
 
-    public ExpiredListingsMenu(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager) {
+    public ExpiredListingsMenu(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager) {
         super(plugin, auctionManager, FILE_NAME);
 
         this.addHandler(this.takeAllHandler = new ItemHandler("take_all", (viewer, event) -> {
@@ -43,9 +43,10 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
     }
 
     @Override
-    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<ActiveListing> autoFill) {
+    public void onAutoFill(@NonNull MenuViewer viewer, @NonNull AutoFill<ActiveListing> autoFill) {
         super.onAutoFill(viewer, autoFill);
-        autoFill.setItems(Listings.sortAndValidate(this.auctionManager.getListings().getExpired(this.getLinkedPlayerId(viewer))));
+        autoFill.setItems(Listings.sortAndValidate(this.auctionManager.getListings().getExpired(this.getLinkedPlayerId(
+            viewer))));
         autoFill.setClickAction(item -> (viewer1, event) -> {
             Player player = viewer1.getPlayer();
             this.auctionManager.takeListing(player, item);
@@ -54,7 +55,7 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
     }
 
     @Override
-    @NotNull
+    @NonNull
     protected MenuOptions createDefaultOptions() {
         MenuOptions options = new MenuOptions(BLACK.enclose("Expired Listings"), MenuSize.CHEST_54);
         options.setAutoRefresh(1);
@@ -62,7 +63,7 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
     }
 
     @Override
-    @NotNull
+    @NonNull
     protected List<MenuItem> createDefaultItems() {
         List<MenuItem> list = new ArrayList<>();
 
@@ -72,19 +73,19 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
             meta.setDisplayName(LIGHT_YELLOW.enclose(BOLD.enclose("Take All")));
         });
         list.add(new MenuItem(takeAllItem).setSlots(51).setPriority(10).setHandler(this.takeAllHandler));
-
+        
         ItemStack backItem = ItemUtil.getSkinHead(SKIN_ARROW_DOWN);
         ItemUtil.editMeta(backItem, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_RETURN.getDefaultName());
         });
         list.add(new MenuItem(backItem).setSlots(49).setPriority(10).setHandler(this.returnHandler));
-
+        
         ItemStack prevPage = ItemUtil.getSkinHead(SKIN_ARROW_LEFT);
         ItemUtil.editMeta(prevPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_PREVIOUS_PAGE.getDefaultName());
         });
         list.add(new MenuItem(prevPage).setSlots(45).setPriority(10).setHandler(ItemHandler.forPreviousPage(this)));
-
+        
         ItemStack nextPage = ItemUtil.getSkinHead(SKIN_ARROW_RIGHT);
         ItemUtil.editMeta(nextPage, meta -> {
             meta.setDisplayName(Lang.EDITOR_ITEM_NEXT_PAGE.getDefaultName());
@@ -96,20 +97,20 @@ public class ExpiredListingsMenu extends AbstractAuctionMenu<ActiveListing> {
 
     @Override
     protected void loadAdditional() {
-        this.itemName = ConfigValue.create("Items.Name", 
+        this.itemName = ConfigValue.create("Items.Name",
             LIGHT_YELLOW.enclose(BOLD.enclose(LISTING_ITEM_NAME))
         ).read(cfg);
 
         this.itemLore = ConfigValue.create("Items.Lore", Lists.newList(
             LISTING_ITEM_LORE,
-                "",
-                LIGHT_YELLOW.enclose(BOLD.enclose("Info:")),
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Price: ") + LISTING_PRICE),
-                LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Added: ") + LISTING_DATE_CREATION),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_RED.enclose("[❗]") + " Deletes in: " + LIGHT_RED.enclose(LISTING_DELETES_IN)),
-                "",
-                LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("take") + ".")
+            "",
+            LIGHT_YELLOW.enclose(BOLD.enclose("Info:")),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Price: ") + LISTING_PRICE),
+            LIGHT_YELLOW.enclose("▪ " + LIGHT_GRAY.enclose("Added: ") + LISTING_DATE_CREATION),
+            "",
+            LIGHT_GRAY.enclose(LIGHT_RED.enclose("[❗]") + " Deletes in: " + LIGHT_RED.enclose(LISTING_DELETES_IN)),
+            "",
+            LIGHT_GRAY.enclose(LIGHT_YELLOW.enclose("[▶]") + " Click to " + LIGHT_YELLOW.enclose("take") + ".")
         )).read(cfg);
 
         this.itemSlots = ConfigValue.create("Items.Slots", IntStream.range(0, 36).toArray()).read(cfg);

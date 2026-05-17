@@ -2,7 +2,7 @@ package su.nightexpress.nexshop.auction;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.StringUtil;
@@ -16,15 +16,15 @@ public class ListingCategory implements Placeholder {
 
     private final String      id;
     private final String      name;
-    private final boolean isDefault;
+    private final boolean     isDefault;
     private final Set<String> materials;
 
     private final PlaceholderMap placeholderMap;
 
-    public ListingCategory(@NotNull String id,
-                           @NotNull String name,
+    public ListingCategory(@NonNull String id,
+                           @NonNull String name,
                            boolean isDefault,
-                           @NotNull Set<String> materials) {
+                           @NonNull Set<String> materials) {
         this.id = StringUtil.lowerCaseUnderscore(id);
         this.name = name;
         this.isDefault = isDefault;
@@ -34,8 +34,8 @@ public class ListingCategory implements Placeholder {
             .add(ShopPlaceholders.CATEGORY_NAME, this::getName);
     }
 
-    @NotNull
-    public static ListingCategory read(@NotNull FileConfig config, @NotNull String path, @NotNull String id) {
+    @NonNull
+    public static ListingCategory read(@NonNull FileConfig config, @NonNull String path, @NonNull String id) {
         String name = config.getString(path + ".Name", StringUtil.capitalizeUnderscored(id));
         boolean isDefault = config.getBoolean(path + ".Default");
         Set<String> materials = config.getStringSet(path + ".Materials");
@@ -44,17 +44,17 @@ public class ListingCategory implements Placeholder {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public PlaceholderMap getPlaceholders() {
         return this.placeholderMap;
     }
 
-    @NotNull
+    @NonNull
     public String getId() {
         return this.id;
     }
 
-    @NotNull
+    @NonNull
     public String getName() {
         return this.name;
     }
@@ -63,21 +63,21 @@ public class ListingCategory implements Placeholder {
         return this.isDefault;
     }
 
-    @NotNull
+    @NonNull
     public Set<String> getMaterials() {
 
         return this.materials;
     }
 
-    public boolean isItemOfThis(@NotNull ItemStack item) {
+    public boolean isItemOfThis(@NonNull ItemStack item) {
         return this.isItemOfThis(item.getType());
     }
 
-    public boolean isItemOfThis(@NotNull Material material) {
+    public boolean isItemOfThis(@NonNull Material material) {
         return this.isItemOfThis(material.name());
     }
 
-    public boolean isItemOfThis(@NotNull String name) {
+    public boolean isItemOfThis(@NonNull String name) {
         return this.materials.contains(name.toLowerCase()) || this.materials.contains(ShopPlaceholders.WILDCARD);
     }
 }

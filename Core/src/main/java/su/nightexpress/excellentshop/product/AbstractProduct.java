@@ -9,12 +9,15 @@ import su.nightexpress.excellentshop.api.product.TradeStatus;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.product.price.PriceData;
 import su.nightexpress.excellentshop.api.transaction.ECompletedTransaction;
+import su.nightexpress.excellentshop.api.UnitUtils;
+import su.nightexpress.excellentshop.api.product.PriceType;
 import su.nightexpress.excellentshop.api.product.Product;
+import su.nightexpress.excellentshop.api.product.ProductContent;
+import su.nightexpress.excellentshop.api.product.ProductPricing;
 import su.nightexpress.excellentshop.product.content.EmptyContent;
 import su.nightexpress.excellentshop.product.price.FlatPricing;
 import su.nightexpress.excellentshop.shop.AbstractShop;
-import su.nightexpress.nexshop.util.ShopUtils;
-import su.nightexpress.nexshop.util.UnitUtils;
+import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 
@@ -23,7 +26,7 @@ import java.util.UUID;
 
 public abstract class AbstractProduct<S extends AbstractShop<?>> implements Product {
 
-    protected final UUID globalId;
+    protected final UUID   globalId;
     protected final String id;
 
     protected S              shop;
@@ -167,7 +170,8 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
 
     @Override
     public void setPrice(@NonNull TradeType type, double price) {
-        double floored = price == ProductPricing.DISABLED ? price : this.currency().map(currency -> currency.floorIfNeeded(price)).orElse(price);
+        double floored = price == ProductPricing.DISABLED ? price : this.currency().map(currency -> currency
+            .floorIfNeeded(price)).orElse(price);
         switch (type) {
             case BUY -> this.setBuyPrice(floored);
             case SELL -> this.setSellPrice(floored);
@@ -253,7 +257,8 @@ public abstract class AbstractProduct<S extends AbstractShop<?>> implements Prod
         return this.currency().map(currency -> currency.floorIfNeeded(boostedPrice)).orElse(boostedPrice) * units;
     }
 
-    protected abstract double applyPriceModifiers(@NonNull TradeType type, double currentPrice, @Nullable Player player);
+    protected abstract double applyPriceModifiers(@NonNull TradeType type, double currentPrice,
+                                                  @Nullable Player player);
 
 
     @Override

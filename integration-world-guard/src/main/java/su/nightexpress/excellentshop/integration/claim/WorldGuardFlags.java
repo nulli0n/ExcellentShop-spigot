@@ -14,7 +14,7 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class WorldGuardFlags {
 
@@ -37,7 +37,7 @@ public class WorldGuardFlags {
         }
     }
 
-    public static boolean checkFlag(@NotNull Player player, @NotNull Location location) {
+    public static boolean checkFlag(@NonNull Player player, @NonNull Location location) {
         if (FLAG_CHEST_SHOP_CREATE == null) return true;
 
         World world1 = location.getWorld();

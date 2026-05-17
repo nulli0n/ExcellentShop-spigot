@@ -5,11 +5,11 @@ import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.product.price.PriceData;
 import su.nightexpress.excellentshop.api.transaction.ECompletedTransaction;
+import su.nightexpress.excellentshop.api.product.PriceType;
 import su.nightexpress.excellentshop.api.product.Product;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.RefreshType;
-import su.nightexpress.excellentshop.product.PriceType;
-import su.nightexpress.excellentshop.product.ProductPricing;
-import su.nightexpress.nexshop.util.ShopUtils;
+import su.nightexpress.excellentshop.api.product.ProductPricing;
+import su.nightexpress.excellentshop.util.ShopUtils;
+import su.nightexpress.excellentshop.virtualshop.rotation.RefreshType;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.util.Lists;
 import su.nightexpress.nightcore.util.NumberUtil;
@@ -89,7 +89,8 @@ public class FloatPricing extends ProductPricing {
     }
 
     @Override
-    public void handleTransaction(@NonNull ECompletedTransaction transaction, @NonNull Product product, int units, @NonNull PriceData priceData) {
+    public void handleTransaction(@NonNull ECompletedTransaction transaction, @NonNull Product product, int units,
+                                  @NonNull PriceData priceData) {
         this.preventStale(priceData);
 
         if (priceData.isExpired()) {

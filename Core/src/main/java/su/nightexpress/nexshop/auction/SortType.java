@@ -1,6 +1,6 @@
 package su.nightexpress.nexshop.auction;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nightcore.language.LangAssets;
@@ -30,11 +30,11 @@ public enum SortType {
 
     private final Comparator<ActiveListing> comparator;
 
-    SortType(@NotNull Comparator<ActiveListing> comparator) {
+    SortType(@NonNull Comparator<ActiveListing> comparator) {
         this.comparator = comparator;
     }
 
-    @NotNull
+    @NonNull
     public Comparator<ActiveListing> getComparator() {
         return this.comparator;
     }

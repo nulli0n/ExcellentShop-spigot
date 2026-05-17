@@ -1,7 +1,7 @@
 package su.nightexpress.nexshop.auction.listing;
 
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.AuctionUtils;
 import su.nightexpress.excellentshop.product.content.ItemContent;
@@ -17,8 +17,8 @@ public class CompletedListing extends AbstractListing {
 
     private boolean claimed;
 
-    @NotNull
-    public static CompletedListing create(@NotNull ActiveListing listing, @NotNull Player buyer) {
+    @NonNull
+    public static CompletedListing create(@NonNull ActiveListing listing, @NonNull Player buyer) {
         UUID id = UUID.randomUUID();
         UUID holder = listing.getOwner();
         String ownerName = listing.getOwnerName();
@@ -41,17 +41,17 @@ public class CompletedListing extends AbstractListing {
     }
 
     public CompletedListing(
-        @NotNull UUID id,
-        @NotNull UUID owner,
-        @NotNull String ownerName,
-        @NotNull String buyerName,
-        @NotNull ItemContent typing,
-        @NotNull Currency currency,
-        double price,
-        long creationDate,
-        long buyDate,
-        long deletionDate,
-        boolean claimed
+                            @NonNull UUID id,
+                            @NonNull UUID owner,
+                            @NonNull String ownerName,
+                            @NonNull String buyerName,
+                            @NonNull ItemContent typing,
+                            @NonNull Currency currency,
+                            double price,
+                            long creationDate,
+                            long buyDate,
+                            long deletionDate,
+                            boolean claimed
     ) {
         super(id, owner, ownerName, typing, currency, price, creationDate, deletionDate);
         this.setClaimed(claimed);
@@ -60,12 +60,12 @@ public class CompletedListing extends AbstractListing {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public UnaryOperator<String> replacePlaceholders() {
         return ShopPlaceholders.forCompletedListing(this);
     }
 
-    @NotNull
+    @NonNull
     public String getBuyerName() {
         return this.buyerName;
     }

@@ -2,7 +2,7 @@ package su.nightexpress.nexshop.auction.listing;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 
@@ -21,10 +21,10 @@ public abstract class AbstractListing {
     protected final long creationDate;
     protected final long deletionDate;
 
-    public AbstractListing(@NotNull UUID id,
-                           @NotNull UUID owner,
-                           @NotNull String ownerName,
-                           @NotNull ItemContent typing,
+    public AbstractListing(@NonNull UUID id,
+                           @NonNull UUID owner,
+                           @NonNull String ownerName,
+                           @NonNull ItemContent typing,
                            Currency currency,
                            double price,
                            long creationDate,
@@ -43,24 +43,24 @@ public abstract class AbstractListing {
         return this.getDeleteDate() >= 0 && System.currentTimeMillis() >= this.getDeleteDate();
     }
 
-    @NotNull
+    @NonNull
     public abstract UnaryOperator<String> replacePlaceholders();
 
-    @NotNull
+    @NonNull
     public final UUID getId() {
         return id;
     }
 
-    @NotNull
+    @NonNull
     public UUID getOwner() {
         return owner;
     }
 
-    public boolean isOwner(@NotNull UUID uuid) {
+    public boolean isOwner(@NonNull UUID uuid) {
         return this.getOwner().equals(uuid);
     }
 
-    @NotNull
+    @NonNull
     public String getOwnerName() {
         return ownerName;
     }
@@ -69,17 +69,17 @@ public abstract class AbstractListing {
         return this.typing.isValid();
     }
 
-    @NotNull
+    @NonNull
     public ItemStack getItemStack() {
         return this.typing.getItem();
     }
 
-    @NotNull
+    @NonNull
     public ItemContent getTyping() {
         return this.typing;
     }
 
-    @NotNull
+    @NonNull
     public Currency getCurrency() {
         return currency;
     }
@@ -88,7 +88,7 @@ public abstract class AbstractListing {
         return price;
     }
 
-    public boolean isOwner(@NotNull Player player) {
+    public boolean isOwner(@NonNull Player player) {
         return player.getUniqueId().equals(this.getOwner());
     }
 

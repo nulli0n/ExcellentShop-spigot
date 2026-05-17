@@ -3,10 +3,11 @@ package su.nightexpress.excellentshop.product.content;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.product.ContentType;
-import su.nightexpress.excellentshop.product.ProductContent;
+import org.jspecify.annotations.NonNull;
+
+import su.nightexpress.excellentshop.api.product.ContentType;
+import su.nightexpress.excellentshop.api.product.ProductContent;
 import su.nightexpress.nightcore.config.FileConfig;
 
 public class EmptyContent extends ProductContent {
@@ -18,7 +19,7 @@ public class EmptyContent extends ProductContent {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public String getName() {
         return "empty";
     }
@@ -39,33 +40,33 @@ public class EmptyContent extends ProductContent {
     }
 
     @Override
-    @NotNull
+    @NonNull
     public ItemStack getPreview() {
         return new ItemStack(Material.STRUCTURE_VOID);
     }
 
     @Override
-    public boolean hasSpace(@NotNull Inventory inventory) {
+    public boolean hasSpace(@NonNull Inventory inventory) {
         return false;
     }
 
     @Override
-    public int countSpace(@NotNull Inventory inventory) {
+    public int countSpace(@NonNull Inventory inventory) {
         return 0;
     }
 
     @Override
-    public void delivery(@NotNull Inventory inventory, int count) {
+    public void delivery(@NonNull Inventory inventory, int count) {
 
     }
 
     @Override
-    public void take(@NotNull Inventory inventory, int count) {
+    public void take(@NonNull Inventory inventory, int count) {
 
     }
 
     @Override
-    public int count(@NotNull Inventory inventory) {
+    public int count(@NonNull Inventory inventory) {
         return 0;
     }
 
@@ -80,7 +81,7 @@ public class EmptyContent extends ProductContent {
     }
 
     @Override
-    public void write(@NotNull FileConfig config, @NotNull String path) {
+    public void write(@NonNull FileConfig config, @NonNull String path) {
 
     }
 }

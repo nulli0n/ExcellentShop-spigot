@@ -7,7 +7,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
 import su.nightexpress.nexshop.auction.config.AuctionPerms;
@@ -34,14 +34,14 @@ import java.util.stream.Stream;
 
 public class AuctionUtils {
 
-    public static void hideListingAttributes(@NotNull ItemStack itemStack) {
+    public static void hideListingAttributes(@NonNull ItemStack itemStack) {
         if (AuctionConfig.LISTINGS_HIDE_ATTRIBUTES.get()) {
             ItemUtil.hideAttributes(itemStack);
             ItemUtil.editMeta(itemStack, meta -> meta.removeItemFlags(ItemFlag.values())); // quick fix for enchants hidden
         }
     }
 
-    public static void fillDummy(@NotNull AuctionManager auctionManager) {
+    public static void fillDummy(@NonNull AuctionManager auctionManager) {
         Map<UUID, String> owners = new HashMap<>(); // TODO Real players
 
         Set<Material> materials = Stream.of(Material.values())
@@ -59,7 +59,8 @@ public class AuctionUtils {
             if ((ItemUtil.isArmor(item) || ItemUtil.isSword(item) || ItemUtil.isTool(item)) && Rnd.chance(30D)) {
                 for (int y = 0; y < Rnd.get(4); y++) {
                     Enchantment enchantment = Rnd.get(BukkitThing.getEnchantments());
-                    item.addUnsafeEnchantment(enchantment, Rnd.get(enchantment.getStartLevel(), enchantment.getMaxLevel()));
+                    item.addUnsafeEnchantment(enchantment, Rnd.get(enchantment.getStartLevel(), enchantment
+                        .getMaxLevel()));
                 }
             }
 
@@ -70,28 +71,30 @@ public class AuctionUtils {
             Currency currency = Rnd.get(auctionManager.getEnabledCurrencies());
             double price = NumberUtil.round((int) Rnd.getDouble(50, 10_000D));
 
-            LocalDateTime created = LocalDateTime.now().minusDays(Rnd.get(5)).minusHours(Rnd.get(6)).minusMinutes(Rnd.get(30));
+            LocalDateTime created = LocalDateTime.now().minusDays(Rnd.get(5)).minusHours(Rnd.get(6)).minusMinutes(Rnd
+                .get(30));
             long dateCreation = TimeUtil.toEpochMillis(created);
             long dateExpired = generateExpireDate(dateCreation);
 
             if (i < 15) {
                 long deletionDate = generatePurgeDate(dateExpired);
-                ActiveListing listing = new ActiveListing(UUID.randomUUID(), ownerId, ownerName, typing, currency, price, dateCreation, dateExpired, deletionDate);
+                ActiveListing listing = new ActiveListing(UUID
+                    .randomUUID(), ownerId, ownerName, typing, currency, price, dateCreation, dateExpired, deletionDate);
                 auctionManager.getListings().add(listing);
                 auctionManager.getDatabase().addListing(listing);
             }
         }
     }
 
-    public static boolean isDisabledWorld(@NotNull World world) {
+    public static boolean isDisabledWorld(@NonNull World world) {
         return isDisabledWorld(world.getName());
     }
 
-    public static boolean isDisabledWorld(@NotNull String name) {
+    public static boolean isDisabledWorld(@NonNull String name) {
         return AuctionConfig.DISABLED_WORLDS.get().contains(name);
     }
 
-    public static boolean isBadGamemode(@NotNull GameMode gameMode) {
+    public static boolean isBadGamemode(@NonNull GameMode gameMode) {
         return AuctionConfig.DISABLED_GAMEMODES.get().contains(gameMode);
     }
 
@@ -103,19 +106,19 @@ public class AuctionUtils {
         return from + TimeUnit.MILLISECONDS.convert(AuctionConfig.LISTINGS_PURGE_TIME.get(), TimeUnit.SECONDS);
     }
 
-    public static double getSellTax(@NotNull Player player) {
+    public static double getSellTax(@NonNull Player player) {
         if (player.hasPermission(AuctionPerms.BYPASS_LISTING_TAX)) return 0D;
 
         return AuctionConfig.LISTINGS_SELL_TAX.get();
     }
 
-    public static double getClaimTax(@NotNull Player player) {
+    public static double getClaimTax(@NonNull Player player) {
         if (player.hasPermission(AuctionPerms.BYPASS_LISTING_TAX)) return 0D;
 
         return AuctionConfig.LISTINGS_CLAIM_TAX.get();
     }
 
-    public static double getTax(@NotNull Currency currency, double price, double taxPercent) {
+    public static double getTax(@NonNull Currency currency, double price, double taxPercent) {
         double tax = price * (taxPercent / 100D);
 
         if (!currency.canHandleDecimals() || AuctionConfig.LISTINGS_FLOOR_PRICE.get()) {
@@ -135,35 +138,37 @@ public class AuctionUtils {
         return NumberUtil.round(price);
     }
 
-    public static int getPossibleListings(@NotNull Player player) {
+    public static int getPossibleListings(@NonNull Player player) {
         return AuctionConfig.LISTINGS_PER_RANK.get().getGreatestOrNegative(player);
     }
 
-    public static double getMaterialPriceMin(@NotNull Material material) {
+    public static double getMaterialPriceMin(@NonNull Material material) {
         return getMaterialPriceRange(material).getMinValue();
     }
 
-    public static double getMaterialPriceMax(@NotNull Material material) {
+    public static double getMaterialPriceMax(@NonNull Material material) {
         return getMaterialPriceRange(material).getMaxValue();
     }
 
-    @NotNull
-    private static UniDouble getMaterialPriceRange(@NotNull Material material) {
-        return AuctionConfig.LISTINGS_PRICE_PER_MATERIAL.get().getOrDefault(BukkitThing.toString(material), UniDouble.of(-1, -1));
+    @NonNull
+    private static UniDouble getMaterialPriceRange(@NonNull Material material) {
+        return AuctionConfig.LISTINGS_PRICE_PER_MATERIAL.get().getOrDefault(BukkitThing.toString(material), UniDouble
+            .of(-1, -1));
     }
 
-    public static double getCurrencyPriceMin(@NotNull Currency currency) {
+    public static double getCurrencyPriceMin(@NonNull Currency currency) {
         return getCurrencyPriceRange(currency).getMinValue();
     }
 
-    public static double getCurrencyPriceMax(@NotNull Currency currency) {
+    public static double getCurrencyPriceMax(@NonNull Currency currency) {
         return getCurrencyPriceRange(currency).getMaxValue();
     }
 
-    @NotNull
-    private static UniDouble getCurrencyPriceRange(@NotNull Currency currency) {
+    @NonNull
+    private static UniDouble getCurrencyPriceRange(@NonNull Currency currency) {
         var map = AuctionConfig.LISTINGS_PRICE_PER_CURRENCY.get();
 
-        return map.getOrDefault(currency.getInternalId(), map.getOrDefault(ShopPlaceholders.DEFAULT, UniDouble.of(-1, -1)));
+        return map.getOrDefault(currency.getInternalId(), map.getOrDefault(ShopPlaceholders.DEFAULT, UniDouble.of(-1,
+            -1)));
     }
 }

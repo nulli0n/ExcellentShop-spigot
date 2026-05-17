@@ -6,16 +6,16 @@ import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.data.legacy.LegacyPriceData;
 import su.nightexpress.excellentshop.data.legacy.LegacyRotationData;
 import su.nightexpress.excellentshop.data.legacy.LegacyStockData;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.data.RotationData;
 import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.excellentshop.shop.data.ProductLimitData;
 import su.nightexpress.excellentshop.shop.data.ProductPriceData;
 import su.nightexpress.excellentshop.shop.data.ProductStockData;
+import su.nightexpress.excellentshop.user.ShopUser;
+import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationData;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.core.Config;
 import su.nightexpress.excellentshop.data.serialize.ItemProductTypeSerializer;
 import su.nightexpress.nexshop.data.serialize.ItemTagSerializer;
-import su.nightexpress.nexshop.user.ShopUser;
 import su.nightexpress.nightcore.db.AbstractDatabaseManager;
 import su.nightexpress.nightcore.db.column.Column;
 import su.nightexpress.nightcore.db.statement.RowMapper;
@@ -123,7 +123,8 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
             .withColumn(DataColumns.STOCK_RESTOCK_DATE)
             .build();
 
-        this.legacyRotationDataTable = Table.builder(this.getTablePrefix() + "_" + Config.DATA_LEGACY_ROTATIONS_TABLE.get())
+        this.legacyRotationDataTable = Table.builder(this.getTablePrefix() + "_" + Config.DATA_LEGACY_ROTATIONS_TABLE
+            .get())
             .withColumn(DataColumns.ID)
             .withColumn(DataColumns.LEGACY_SHOP_ID)
             .withColumn(DataColumns.LEGACY_HOLDER_ID)
@@ -161,10 +162,14 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
         LocalDateTime deadline = LocalDateTime.now().minusDays(this.getConfig().getPurgePeriod());
         long deadlineMs = TimeUtil.toEpochMillis(deadline);
 
-        this.delete(this.priceDataTable, Wheres.where(DataColumns.PRICE_EXPIRE_DATE, Operator.SMALLER, o -> deadlineMs));
-        this.delete(this.globalStockDataTable, Wheres.where(DataColumns.STOCK_RESTOCK_DATE, Operator.SMALLER, o -> deadlineMs));
-        this.delete(this.playerLimitDataTable, Wheres.where(DataColumns.LIMIT_RESTOCK_DATE, Operator.SMALLER, o -> deadlineMs));
-        this.delete(this.rotationDataTable, Wheres.where(DataColumns.ROTATION_NEXT_ROTATION, Operator.SMALLER, o -> deadlineMs));
+        this.delete(this.priceDataTable, Wheres.where(DataColumns.PRICE_EXPIRE_DATE, Operator.SMALLER,
+            o -> deadlineMs));
+        this.delete(this.globalStockDataTable, Wheres.where(DataColumns.STOCK_RESTOCK_DATE, Operator.SMALLER,
+            o -> deadlineMs));
+        this.delete(this.playerLimitDataTable, Wheres.where(DataColumns.LIMIT_RESTOCK_DATE, Operator.SMALLER,
+            o -> deadlineMs));
+        this.delete(this.rotationDataTable, Wheres.where(DataColumns.ROTATION_NEXT_ROTATION, Operator.SMALLER,
+            o -> deadlineMs));
     }
 
     @Override
@@ -267,12 +272,12 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
     }
 
 
-
     // LEGACY - START
 
     @NonNull
     public List<LegacyStockData> loadLegacyStockDatas() {
-        return this.selectAny(this.legacyStockDataTable, SelectStatement.builder(DataQueries.LEGACY_STOCK_DATA_LOADER).build());
+        return this.selectAny(this.legacyStockDataTable, SelectStatement.builder(DataQueries.LEGACY_STOCK_DATA_LOADER)
+            .build());
     }
 
     public void deleteLegacyStockData(@NonNull Collection<LegacyStockData> data) {
@@ -286,7 +291,8 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
 
     @NonNull
     public List<LegacyPriceData> loadLegacyPriceDatas() {
-        return this.selectAny(this.legacyPriceDataTable, SelectStatement.builder(DataQueries.LEGACY_PRICE_DATA_LOADER).build());
+        return this.selectAny(this.legacyPriceDataTable, SelectStatement.builder(DataQueries.LEGACY_PRICE_DATA_LOADER)
+            .build());
     }
 
     public void deleteLegacyPriceData(@NonNull Set<LegacyPriceData> data) {
@@ -298,7 +304,8 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
 
     @NonNull
     public List<LegacyRotationData> loadLegacyRotationDatas() {
-        return this.selectAny(this.legacyRotationDataTable, SelectStatement.builder(DataQueries.LEGACY_ROTATION_DATA_LOADER).build());
+        return this.selectAny(this.legacyRotationDataTable, SelectStatement.builder(
+            DataQueries.LEGACY_ROTATION_DATA_LOADER).build());
     }
 
     public void deleteLegacyRotationData(@NonNull Collection<LegacyRotationData> data) {
@@ -312,12 +319,14 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
 
     @NonNull
     public List<ProductStockData> loadStockDatas() {
-        return this.selectAny(this.globalStockDataTable, SelectStatement.builder(DataQueries.STOCK_DATA_LOADER).build());
+        return this.selectAny(this.globalStockDataTable, SelectStatement.builder(DataQueries.STOCK_DATA_LOADER)
+            .build());
     }
 
     @NonNull
     public List<ProductLimitData> loadLimitDatas() {
-        return this.selectAny(this.playerLimitDataTable, SelectStatement.builder(DataQueries.LIMIT_DATA_LOADER).build());
+        return this.selectAny(this.playerLimitDataTable, SelectStatement.builder(DataQueries.LIMIT_DATA_LOADER)
+            .build());
     }
 
     @NonNull
@@ -327,7 +336,8 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
 
     @NonNull
     public List<RotationData> loadRotationDatas() {
-        return this.selectAny(this.rotationDataTable, SelectStatement.builder(DataQueries.ROTATION_DATA_LOADER).build());
+        return this.selectAny(this.rotationDataTable, SelectStatement.builder(DataQueries.ROTATION_DATA_LOADER)
+            .build());
     }
 
     public void upsertStockData(@NonNull Collection<ProductStockData> data) {
@@ -351,20 +361,20 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
             .whereUUID(DataColumns.STOCK_PRODUCT_ID, ProductStockData::getProductId)
         );
     }
-
+    
     public void updateLimitDatas(@NonNull Set<ProductLimitData> dataSet) {
         this.update(this.playerLimitDataTable, DataQueries.LIMIT_DATA_UPDATE, dataSet, Wheres
             .whereUUID(DataColumns.LIMIT_PLAYER_ID, ProductLimitData::getPlayerId)
             .and(DataColumns.LIMIT_PRODUCT_ID, Operator.EQUALS, data -> data.getProductId().toString())
         );
     }
-
+    
     public void updatePriceDatas(@NonNull Set<ProductPriceData> dataSet) {
         this.update(this.priceDataTable, DataQueries.PRICE_DATA_UPDATE, dataSet, Wheres
             .whereUUID(DataColumns.PRICE_PRODUCT_ID, ProductPriceData::getProductId)
         );
     }
-
+    
     public void updateRotationDatas(@NonNull Set<RotationData> dataSet) {
         this.update(this.rotationDataTable, DataQueries.ROTATION_DATA_UPDATE, dataSet, Wheres
             .whereUUID(DataColumns.ROTATION_ID, RotationData::getRotationId)
@@ -373,11 +383,13 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
 
 
     public void deletePriceData(@NonNull Collection<ProductPriceData> dataSet) {
-        this.delete(this.priceDataTable, dataSet, Wheres.whereUUID(DataColumns.PRICE_PRODUCT_ID, ProductPriceData::getProductId));
+        this.delete(this.priceDataTable, dataSet, Wheres.whereUUID(DataColumns.PRICE_PRODUCT_ID,
+            ProductPriceData::getProductId));
     }
 
     public void deleteStockData(@NonNull Collection<ProductStockData> dataSet) {
-        this.delete(this.globalStockDataTable, dataSet, Wheres.whereUUID(DataColumns.STOCK_PRODUCT_ID, ProductStockData::getProductId));
+        this.delete(this.globalStockDataTable, dataSet, Wheres.whereUUID(DataColumns.STOCK_PRODUCT_ID,
+            ProductStockData::getProductId));
     }
 
     public void deleteLimitData(@NonNull Collection<ProductLimitData> dataSet) {
@@ -388,6 +400,7 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
     }
 
     public void deleteRotationData(@NonNull Collection<RotationData> dataSet) {
-        this.delete(this.rotationDataTable, dataSet, Wheres.whereUUID(DataColumns.ROTATION_ID, RotationData::getRotationId));
+        this.delete(this.rotationDataTable, dataSet, Wheres.whereUUID(DataColumns.ROTATION_ID,
+            RotationData::getRotationId));
     }
 }

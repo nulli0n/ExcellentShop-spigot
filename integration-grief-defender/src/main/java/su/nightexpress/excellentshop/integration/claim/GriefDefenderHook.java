@@ -5,7 +5,7 @@ import com.griefdefender.api.claim.Claim;
 import com.griefdefender.api.claim.TrustTypes;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 
 import java.util.UUID;
@@ -13,7 +13,7 @@ import java.util.UUID;
 public class GriefDefenderHook implements ClaimHook {
 
     @Override
-    public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
+    public boolean isInOwnClaim(@NonNull Player player, @NonNull Block block) {
         Claim claim = GriefDefender.getCore().getClaimAt(block.getLocation());
         if (claim == null || claim.isWilderness()) return false;
 

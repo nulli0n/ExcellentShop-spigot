@@ -11,8 +11,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import su.nightexpress.excellentshop.api.claim.ClaimHook;
 
 import java.util.Comparator;
@@ -26,12 +26,12 @@ public class WorldGuardHook implements ClaimHook {
     }
 
     @Nullable
-    public ProtectedRegion getProtectedRegion(@NotNull Entity entity) {
+    public ProtectedRegion getProtectedRegion(@NonNull Entity entity) {
         return getProtectedRegion(entity.getLocation());
     }
 
     @Nullable
-    public ProtectedRegion getProtectedRegion(@NotNull Location location) {
+    public ProtectedRegion getProtectedRegion(@NonNull Location location) {
         World world = location.getWorld();
         if (world == null) return null;
 
@@ -45,7 +45,7 @@ public class WorldGuardHook implements ClaimHook {
     }
 
     @Override
-    public boolean isInOwnClaim(@NotNull Player player, @NotNull Block block) {
+    public boolean isInOwnClaim(@NonNull Player player, @NonNull Block block) {
         ProtectedRegion region = getProtectedRegion(player);
         return region != null && region.getOwners().contains(player.getUniqueId());
     }

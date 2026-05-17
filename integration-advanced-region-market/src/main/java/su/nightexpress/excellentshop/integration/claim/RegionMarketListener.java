@@ -6,7 +6,7 @@ import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.playershop.PlayerShopManager;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.manager.AbstractListener;
@@ -17,7 +17,7 @@ public class RegionMarketListener extends AbstractListener<NightPlugin> {
 
     private final PlayerShopManager manager;
 
-    public RegionMarketListener(@NotNull NightPlugin plugin, @NotNull PlayerShopManager manager) {
+    public RegionMarketListener(@NonNull NightPlugin plugin, @NonNull PlayerShopManager manager) {
         super(plugin);
         this.manager = manager;
     }

@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.nexshop.auction.AuctionManager;
@@ -19,7 +19,7 @@ public class AuctionListener extends AbstractListener<ShopPlugin> {
 
     private final AuctionManager auctionManager;
 
-    public AuctionListener(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager) {
+    public AuctionListener(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager) {
         super(plugin);
         this.auctionManager = auctionManager;
     }
@@ -35,11 +35,13 @@ public class AuctionListener extends AbstractListener<ShopPlugin> {
                 this.auctionManager.claimRewards(player, unclaimed);
             }
             else if (AuctionConfig.NOTIFY_UNCLAIMED_ON_JOIN.get()) {
-                AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.message().send(player, replacer -> replacer.replace(ShopPlaceholders.GENERIC_AMOUNT, unclaimed.size()));
+                AuctionLang.NOTIFY_UNCLAIMED_LISTINGS.message().send(player, replacer -> replacer.replace(
+                    ShopPlaceholders.GENERIC_AMOUNT, unclaimed.size()));
             }
         }
         if (expired > 0 && AuctionConfig.NOTIFY_EXPIRED_ON_JOIN.get()) {
-            AuctionLang.NOTIFY_EXPIRED_LISTINGS.message().send(player, replacer -> replacer.replace(ShopPlaceholders.GENERIC_AMOUNT, expired));
+            AuctionLang.NOTIFY_EXPIRED_LISTINGS.message().send(player, replacer -> replacer.replace(
+                ShopPlaceholders.GENERIC_AMOUNT, expired));
         }
     }
 }

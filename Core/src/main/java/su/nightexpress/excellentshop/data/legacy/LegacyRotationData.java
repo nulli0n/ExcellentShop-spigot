@@ -1,7 +1,8 @@
 package su.nightexpress.excellentshop.data.legacy;
 
 import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.data.RotationItemData;
+
+import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationItemData;
 
 import java.util.List;
 
@@ -14,7 +15,8 @@ public class LegacyRotationData {
 
     private boolean removed;
 
-    public LegacyRotationData(@NonNull String shopId, @NonNull String rotationId, long nextRotationDate, @NonNull List<RotationItemData> products) {
+    public LegacyRotationData(@NonNull String shopId, @NonNull String rotationId, long nextRotationDate,
+                              @NonNull List<RotationItemData> products) {
         this.shopId = shopId.toLowerCase();
         this.rotationId = rotationId.toLowerCase();
         this.products = products;

@@ -1,8 +1,8 @@
 package su.nightexpress.excellentshop.data.legacy;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.shop.Shop;
-import su.nightexpress.excellentshop.feature.virtualshop.rotation.Rotation;
+import su.nightexpress.excellentshop.virtualshop.rotation.Rotation;
 
 import java.util.Objects;
 
@@ -11,26 +11,26 @@ public class LegacyRotationKey {
     private final String shopId;
     private final String rotationId;
 
-    public LegacyRotationKey(@NotNull String shopId, @NotNull String rotationId) {
+    public LegacyRotationKey(@NonNull String shopId, @NonNull String rotationId) {
         this.shopId = shopId;
         this.rotationId = rotationId;
     }
 
-    @NotNull
-    public static LegacyRotationKey from(@NotNull Rotation rotation) {
+    @NonNull
+    public static LegacyRotationKey from(@NonNull Rotation rotation) {
         return new LegacyRotationKey(rotation.getShop().getId(), rotation.getId());
     }
 
-    public boolean isShop(@NotNull Shop shop) {
+    public boolean isShop(@NonNull Shop shop) {
         return this.shopId.equalsIgnoreCase(shop.getId());
     }
 
-    @NotNull
+    @NonNull
     public String getShopId() {
         return this.shopId;
     }
 
-    @NotNull
+    @NonNull
     public String getRotationId() {
         return this.rotationId;
     }

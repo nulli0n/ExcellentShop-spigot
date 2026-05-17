@@ -3,7 +3,7 @@ package su.nightexpress.nexshop.auction.menu;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.AuctionUtils;
@@ -39,7 +39,8 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
     protected List<String> itemLore;
     protected int[]        itemSlots;
 
-    public AbstractAuctionMenu(@NotNull ShopPlugin plugin, @NotNull AuctionManager auctionManager, @NotNull String fileName) {
+    public AbstractAuctionMenu(@NonNull ShopPlugin plugin, @NonNull AuctionManager auctionManager,
+                               @NonNull String fileName) {
         super(plugin, FileConfig.loadOrExtract(plugin, auctionManager.getMenusPath(), fileName));
         this.auctionManager = auctionManager;
         this.link = new ViewLink<>();
@@ -65,14 +66,14 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
         }));
     }
 
-    @NotNull
+    @NonNull
     @Override
     public ViewLink<UUID> getLink() {
         return link;
     }
 
-    @NotNull
-    protected UUID getLinkedPlayerId(@NotNull MenuViewer viewer) {
+    @NonNull
+    protected UUID getLinkedPlayerId(@NonNull MenuViewer viewer) {
         UUID id = this.getLink(viewer);
         return id == null ? viewer.getPlayer().getUniqueId() : id;
     }
@@ -89,17 +90,17 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
     }
 
     @Override
-    public void onPrepare(@NotNull MenuViewer viewer, @NotNull MenuOptions options) {
+    public void onPrepare(@NonNull MenuViewer viewer, @NonNull MenuOptions options) {
         this.autoFill(viewer);
     }
 
     @Override
-    protected void onReady(@NotNull MenuViewer viewer, @NotNull Inventory inventory) {
+    protected void onReady(@NonNull MenuViewer viewer, @NonNull Inventory inventory) {
 
     }
 
     @Override
-    public void onAutoFill(@NotNull MenuViewer viewer, @NotNull AutoFill<A> autoFill) {
+    public void onAutoFill(@NonNull MenuViewer viewer, @NonNull AutoFill<A> autoFill) {
         Player player = viewer.getPlayer();
 
         autoFill.setSlots(this.itemSlots);
@@ -116,12 +117,12 @@ public abstract class AbstractAuctionMenu<A extends AbstractListing> extends Con
 
             AuctionUtils.hideListingAttributes(item);
 
-//            ItemReplacer.create(item).trimmed()
-//                .setDisplayName(this.itemName)
-//                .setLore(this.itemLore)
-//                .replace(aucItem.replacePlaceholders())
-//                .replacePlaceholderAPI(player)
-//                .writeMeta();
+            //            ItemReplacer.create(item).trimmed()
+            //                .setDisplayName(this.itemName)
+            //                .setLore(this.itemLore)
+            //                .replace(aucItem.replacePlaceholders())
+            //                .replacePlaceholderAPI(player)
+            //                .writeMeta();
 
             return item;
         });

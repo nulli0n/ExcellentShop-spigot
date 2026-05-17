@@ -2,15 +2,15 @@ package su.nightexpress.nexshop.hook;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.excellentshop.feature.playershop.ChestShopModule;
-import su.nightexpress.excellentshop.feature.playershop.ChestUtils;
-import su.nightexpress.excellentshop.feature.virtualshop.VirtualShopModule;
+import su.nightexpress.excellentshop.playershop.ChestShopModule;
+import su.nightexpress.excellentshop.playershop.ChestUtils;
+import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
 import su.nightexpress.nightcore.integration.currency.EconomyBridge;
 import su.nightexpress.nightcore.util.NumberUtil;
 
@@ -18,7 +18,7 @@ public class PlaceholderHook {
 
     private static Expansion expansion;
 
-    public static void setup(@NotNull ShopPlugin plugin) {
+    public static void setup(@NonNull ShopPlugin plugin) {
         if (expansion == null) {
             expansion = new Expansion(plugin);
             expansion.register();
@@ -36,24 +36,24 @@ public class PlaceholderHook {
 
         private final ShopPlugin plugin;
 
-        public Expansion(@NotNull ShopPlugin plugin) {
+        public Expansion(@NonNull ShopPlugin plugin) {
             this.plugin = plugin;
         }
 
         @Override
-        @NotNull
+        @NonNull
         public String getIdentifier() {
             return plugin.getName().toLowerCase();
         }
 
         @Override
-        @NotNull
+        @NonNull
         public String getAuthor() {
             return plugin.getDescription().getAuthors().getFirst();
         }
 
         @Override
-        @NotNull
+        @NonNull
         public String getVersion() {
             return plugin.getDescription().getVersion();
         }
@@ -64,7 +64,7 @@ public class PlaceholderHook {
         }
 
         @Override
-        public String onPlaceholderRequest(Player player, @NotNull String params) {
+        public String onPlaceholderRequest(Player player, @NonNull String params) {
             if (params.startsWith("auction_")) {
                 AuctionManager module = this.plugin.getAuction();
                 if (module == null) return null;
@@ -105,10 +105,12 @@ public class PlaceholderHook {
                     );
                 }
                 if (subParams.startsWith("unclaimed_income_")) {
-                    Currency currency = EconomyBridge.api().getCurrency(subParams.substring("unclaimed_income_".length()));
+                    Currency currency = EconomyBridge.api().getCurrency(subParams.substring("unclaimed_income_"
+                        .length()));
                     return (currency == null) ? null : currency.format(
                         module.getListings().getUnclaimed(player).stream()
-                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency.getInternalId()))
+                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency
+                                .getInternalId()))
                             .mapToDouble(CompletedListing::getPrice)
                             .sum()
                     );
@@ -123,10 +125,12 @@ public class PlaceholderHook {
                     );
                 }
                 if (subParams.startsWith("claimed_income_")) {
-                    Currency currency = EconomyBridge.api().getCurrency(subParams.substring("claimed_income_".length()));
+                    Currency currency = EconomyBridge.api().getCurrency(subParams.substring("claimed_income_"
+                        .length()));
                     return (currency == null) ? null : currency.format(
                         module.getListings().getClaimed(player).stream()
-                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency.getInternalId()))
+                            .filter(listing -> listing.getCurrency().getInternalId().equalsIgnoreCase(currency
+                                .getInternalId()))
                             .mapToDouble(CompletedListing::getPrice)
                             .sum()
                     );

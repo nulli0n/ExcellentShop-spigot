@@ -4,7 +4,7 @@ import me.angeschossen.upgradeablehoppers.api.events.hopper.link.LinkCreationEve
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.api.playershop.PlayerShopManager;
 import su.nightexpress.nightcore.NightPlugin;
 import su.nightexpress.nightcore.manager.AbstractListener;
@@ -13,7 +13,7 @@ public class UpgradeHopperListener extends AbstractListener<NightPlugin> {
 
     private final PlayerShopManager manager;
 
-    public UpgradeHopperListener(@NotNull NightPlugin plugin, @NotNull PlayerShopManager manager) {
+    public UpgradeHopperListener(@NonNull NightPlugin plugin, @NonNull PlayerShopManager manager) {
         super(plugin);
         this.manager = manager;
     }

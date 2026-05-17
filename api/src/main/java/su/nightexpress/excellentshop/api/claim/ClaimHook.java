@@ -2,9 +2,9 @@ package su.nightexpress.excellentshop.api.claim;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public interface ClaimHook {
 
-    boolean isInOwnClaim(@NotNull Player player, @NotNull Block block);
+    boolean isInOwnClaim(@NonNull Player player, @NonNull Block block);
 }

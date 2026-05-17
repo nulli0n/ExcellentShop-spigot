@@ -2,16 +2,17 @@ package su.nightexpress.excellentshop.api.playershop;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import su.nightexpress.nightcore.util.geodata.Cuboid;
 
 import java.util.Set;
 
 public interface PlayerShopManager {
 
-    boolean isShop(@NotNull Block block);
+    boolean isShop(@NonNull Block block);
 
-    void removeShop(@NotNull PlayerShop shop);
+    void removeShop(@NonNull PlayerShop shop);
 
-    @NotNull Set<? extends PlayerShop> getShopsInArea(@NotNull World world, @NotNull Cuboid cuboid);
+    @NonNull
+    Set<? extends PlayerShop> getShopsInArea(@NonNull World world, @NonNull Cuboid cuboid);
 }

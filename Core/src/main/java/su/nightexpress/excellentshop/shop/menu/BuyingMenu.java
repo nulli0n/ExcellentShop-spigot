@@ -1,5 +1,9 @@
 package su.nightexpress.excellentshop.shop.menu;
 
+import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.IntStream;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -10,17 +14,18 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.api.product.TradeType;
-import su.nightexpress.excellentshop.api.transaction.EPreparedTransaction;
-import su.nightexpress.excellentshop.api.transaction.ETransactionResult;
+
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
-import su.nightexpress.excellentshop.api.shop.Shop;
+import su.nightexpress.excellentshop.api.BalanceHolder;
+import su.nightexpress.excellentshop.api.UnitUtils;
 import su.nightexpress.excellentshop.api.product.Product;
+import su.nightexpress.excellentshop.api.product.TradeType;
+import su.nightexpress.excellentshop.api.shop.Shop;
+import su.nightexpress.excellentshop.api.transaction.EPreparedTransaction;
+import su.nightexpress.excellentshop.api.transaction.ETransactionResult;
 import su.nightexpress.excellentshop.core.Lang;
-import su.nightexpress.nexshop.module.AbstractShopModule;
-import su.nightexpress.nexshop.util.BalanceHolder;
-import su.nightexpress.nexshop.util.UnitUtils;
+import su.nightexpress.excellentshop.shop.AbstractShopModule;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.configuration.ConfigTypes;
 import su.nightexpress.nightcore.ui.inventory.action.ActionContext;
@@ -34,10 +39,6 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrapper;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
-
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.IntStream;
 
 public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
 
@@ -79,9 +80,9 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
         //EIGHT(maxUnits -> maxUnits / 8),
         SINGLE(maxUnits -> 1);
 
-        private final Function<Integer, Integer> exactFunc;
+        private final UnaryOperator<Integer> exactFunc;
 
-        AmountPercent(@NonNull Function<Integer, Integer> exactFunc) {
+        AmountPercent(@NonNull UnaryOperator<Integer> exactFunc) {
             this.exactFunc = exactFunc;
         }
 
@@ -132,6 +133,8 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
                 .icon(NightItem.fromType(Material.LIME_DYE)
                     .setDisplayName(TagWrappers.GREEN.and(TagWrappers.BOLD).wrap("Checkout"))
                     .setLore(Lists.newList(
+                        TagWrappers.GRAY.wrap("Quantity: " + TagWrappers.WHITE.wrap("x" +
+                            ShopPlaceholders.GENERIC_UNITS)),
                         TagWrappers.GRAY.wrap("Your check: " + TagWrappers.WHITE.wrap(ShopPlaceholders.GENERIC_PRICE)),
                         "",
                         TagWrappers.GREEN.wrap("→ " + TagWrappers.UNDERLINED.wrap("Click to purchase"))
@@ -139,8 +142,13 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
                     .hideAllComponents()
                 )
                 .displayModifier((context, item) -> item.replace(builder -> builder
-                    .with(ShopPlaceholders.GENERIC_PRICE, () -> this.getObject(context).worth(context.getPlayer())
-                        .format(Lang.OTHER_PRICE_DELIMITER.text()))
+                    .with(ShopPlaceholders.GENERIC_PRICE, () -> {
+                        return this.getObject(context).worth(context.getPlayer())
+                            .format(Lang.OTHER_PRICE_DELIMITER.text());
+                    })
+                    .with(ShopPlaceholders.GENERIC_UNITS, () -> {
+                        return String.valueOf(this.getObject(context).selectedUnits);
+                    })
                 ))
                 .action(this::handleCheckout)
                 .build()
@@ -175,6 +183,24 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
                 .build()
             )
             .slots(47)
+            .build()
+        );
+
+        this.addDefaultButton("custom_quantity", MenuItem.button()
+            .defaultState(ItemState.builder()
+                .icon(NightItem.fromType(Material.OAK_SIGN)
+                    .setDisplayName(TagWrappers.GOLD.and(TagWrappers.BOLD).wrap("Custom Quantity"))
+                    .setLore(Lists.newList(
+                        TagWrappers.GRAY.wrap("Set desired custom quantity."),
+                        "",
+                        TagWrappers.GOLD.wrap("→ " + TagWrappers.UNDERLINED.wrap("Click to set"))
+                    ))
+                    .hideAllComponents()
+                )
+                .action(this::handleCustom)
+                .build()
+            )
+            .slots(49)
             .build()
         );
 
@@ -421,5 +447,14 @@ public class BuyingMenu extends AbstractObjectMenu<BuyingMenu.Data> {
 
         data.selectedUnits = max;
         context.getViewer().refresh();
+    }
+
+    private void handleCustom(@NonNull ActionContext context) {
+        Player player = context.getPlayer();
+        Data data = this.getObject(context);
+        Product product = data.product;
+        int currentUnits = data.selectedUnits;
+
+        data.module.openCustomBuyAmountDialog(player, product, data.shopPage, currentUnits);
     }
 }
