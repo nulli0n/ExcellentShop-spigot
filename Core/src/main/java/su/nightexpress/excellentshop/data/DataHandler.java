@@ -93,6 +93,7 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
             .withColumn(DataColumns.LIMIT_PURCHASES)
             .withColumn(DataColumns.LIMIT_SALES)
             .withColumn(DataColumns.LIMIT_RESTOCK_DATE)
+            .withColumn(DataColumns.LIMIT_RESTOCKING)
             .build();
 
         this.rotationDataTable = Table.builder(this.getTablePrefix() + "_" + Config.DATA_ROTATIONS_TABLE.get())

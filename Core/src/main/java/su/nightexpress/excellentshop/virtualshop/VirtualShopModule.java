@@ -224,7 +224,7 @@ public class VirtualShopModule extends AbstractShopModule {
 
         this.productFormatter.registerVariable("limit_reset_time", (product, player) -> {
             LimitData data = product.getLimitData(player);
-            if (!data.isActive()) {
+            if (!data.isRestocking()) {
                 long resetDate = TimeUnit.SECONDS.toMillis(product.getLimitOptions().getRestockTime());
                 return resetDate < 0L ? CoreLang.OTHER_NEVER.text() : TimeFormats.formatAmount(resetDate,
                     TimeFormatType.LITERAL);
@@ -942,10 +942,6 @@ public class VirtualShopModule extends AbstractShopModule {
     public void notifySuccessfulTransaction(@NonNull ECompletedTransaction transaction) {
         Player player = transaction.player();
         TradeType type = transaction.type();
-
-        transaction.items().forEach(quantified -> {
-            quantified.product().onSuccessfulTransaction(transaction, quantified.units());
-        });
 
         if (!transaction.silent()) {
             MessageLocale locale;

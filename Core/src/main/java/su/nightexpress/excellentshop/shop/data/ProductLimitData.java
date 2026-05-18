@@ -13,28 +13,34 @@ public class ProductLimitData extends StatefulData implements LimitData {
     private final UUID playerId;
     private final UUID productId;
 
-    private int purchases;
-    private int sales;
-    private long restockDate;
+    private int     purchases;
+    private int     sales;
+    private long    restockDate;
+    private boolean restocking;
 
-    public ProductLimitData(@NonNull UUID playerId, @NonNull UUID productId, int purchases, int sales, long restockDate) {
+    public ProductLimitData(@NonNull UUID playerId,
+                            @NonNull UUID productId,
+                            int purchases, int sales,
+                            long restockDate, boolean restocking) {
         this.playerId = playerId;
         this.productId = productId;
         this.setPurchases(purchases);
         this.setSales(sales);
         this.setRestockDate(restockDate);
+        this.setRestocking(restocking);
     }
 
     @Override
     public void reset() {
         this.setPurchases(0);
         this.setSales(0);
-        this.setRestockDate(-1L);
+        this.setRestockDate(0L);
+        this.setRestocking(false);
     }
 
     @Override
     public boolean isRestockTime() {
-        return TimeUtil.isPassed(this.restockDate);
+        return this.restocking && TimeUtil.isPassed(this.restockDate);
     }
 
     @Override
@@ -98,5 +104,15 @@ public class ProductLimitData extends StatefulData implements LimitData {
     @Override
     public void setRestockDate(long restockDate) {
         this.restockDate = restockDate;
+    }
+
+    @Override
+    public boolean isRestocking() {
+        return this.restocking;
+    }
+
+    @Override
+    public void setRestocking(boolean restocking) {
+        this.restocking = restocking;
     }
 }

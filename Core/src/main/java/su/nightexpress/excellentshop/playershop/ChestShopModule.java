@@ -696,10 +696,6 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         TradeType type = transaction.type();
         List<ETransactionItem> products = transaction.items();
 
-        products.forEach(transactionItem -> {
-            transactionItem.product().onSuccessfulTransaction(transaction, transactionItem.units());
-        });
-
         if (!transaction.silent()) {
             MessageLocale feedbackLocale;
             MessageLocale notifyLocale;

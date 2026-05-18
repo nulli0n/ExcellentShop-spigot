@@ -1,7 +1,6 @@
 package su.nightexpress.excellentshop.virtualshop.product;
 
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NonNull;
 
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.nightcore.config.FileConfig;

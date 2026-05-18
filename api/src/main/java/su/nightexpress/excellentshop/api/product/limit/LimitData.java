@@ -31,4 +31,8 @@ public interface LimitData extends Stateful {
     long getRestockDate();
 
     void setRestockDate(long restockDate);
+
+    boolean isRestocking();
+
+    void setRestocking(boolean restocking);
 }

@@ -172,8 +172,9 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
             limitData.addSales(units);
         }
 
-        if (limitData.getRestockDate() <= 0L && this.limitOptions.hasLimit(tradeType)) {
+        if (!limitData.isRestocking() && this.limitOptions.hasLimit(tradeType)) {
             limitData.setRestockDate(this.limitOptions.generateRestockTimestamp());
+            limitData.setRestocking(true);
         }
 
         stockData.markDirty();
@@ -271,7 +272,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
             return data;
         }
 
-        ProductLimitData limitData = new ProductLimitData(player.getUniqueId(), this.globalId, 0, 0, -1L);
+        ProductLimitData limitData = new ProductLimitData(player.getUniqueId(), this.globalId, 0, 0, 0L, false);
         limitData.markDirty(); // Signal to save (insert) to the database
         this.dataManager.loadLimitData(limitData);
         return limitData;

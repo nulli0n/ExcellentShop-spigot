@@ -30,6 +30,8 @@ public class DataColumns {
     public static final Column<Integer> LIMIT_PURCHASES    = Column.intType("purchases").build();
     public static final Column<Integer> LIMIT_SALES        = Column.intType("sales").build();
     public static final Column<Long>    LIMIT_RESTOCK_DATE = Column.longType("restockDate").build();
+    public static final Column<Boolean> LIMIT_RESTOCKING   = Column.booleanType("restocking").defaultValue(false)
+        .build();
 
     public static final Column<UUID>    PRICE_PRODUCT_ID  = Column.uuidType("productId").primaryKey().build();
     public static final Column<Double>  PRICE_BUY_OFFSET  = Column.doubleType("buyOffset").defaultValue(0).build();

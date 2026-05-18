@@ -90,8 +90,12 @@ public class DataQueries {
         int pruchases = DataColumns.LIMIT_PURCHASES.readOrThrow(resultSet);
         int sales = DataColumns.LIMIT_SALES.readOrThrow(resultSet);
         long restockDate = DataColumns.LIMIT_RESTOCK_DATE.readOrThrow(resultSet);
+        boolean restocking = DataColumns.LIMIT_RESTOCKING.readOrThrow(resultSet);
 
-        return new ProductLimitData(playerId, productId, pruchases, sales, restockDate);
+        // Patch for 5.1.0 -> 5.1.1
+        if (!restocking && restockDate > 0) restocking = true;
+
+        return new ProductLimitData(playerId, productId, pruchases, sales, restockDate, restocking);
     };
 
     public static final RowMapper<RotationData> ROTATION_DATA_LOADER = resultSet -> {
@@ -142,6 +146,7 @@ public class DataQueries {
         .setInt(DataColumns.LIMIT_PURCHASES, ProductLimitData::getPurchases)
         .setInt(DataColumns.LIMIT_SALES, ProductLimitData::getSales)
         .setLong(DataColumns.LIMIT_RESTOCK_DATE, ProductLimitData::getRestockDate)
+        .setBoolean(DataColumns.LIMIT_RESTOCKING, ProductLimitData::isRestocking)
         .build();
 
     /*public static final UpdateStatement<ProductLimitData> LIMIT_DATA_UPDATE = UpdateStatement.builder(ProductLimitData.class)

@@ -370,7 +370,7 @@ public class DataManager extends AbstractManager<ShopPlugin> {
             int sales = initialSell - oldSellLeft;
 
             ProductLimitData newData = new ProductLimitData(playerId, globalId, purchases, sales, oldData
-                .getRestockDate());
+                .getRestockDate(), true);
             this.loadLimitData(newData);
             this.plugin.debug("Replaced old %s player limit data for product: %s [%s]".formatted(playerId, product
                 .getId(), product.getGlobalId()));

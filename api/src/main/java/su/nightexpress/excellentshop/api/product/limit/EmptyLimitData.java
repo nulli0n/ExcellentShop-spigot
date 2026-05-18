@@ -94,4 +94,14 @@ public class EmptyLimitData implements LimitData {
     public void setRestockDate(long restockDate) {
 
     }
+
+    @Override
+    public boolean isRestocking() {
+        return false;
+    }
+
+    @Override
+    public void setRestocking(boolean restocking) {
+
+    }
 }
