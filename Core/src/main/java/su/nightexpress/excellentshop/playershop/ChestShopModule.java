@@ -1158,7 +1158,9 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return true;
         }
 
-        return false;
+        // Assume deposit is sucessful.
+        currency.depositAsync(profile.id(), amount);
+        return true;
     }
 
     public boolean withdrawShopBalance(@NonNull ChestShop shop, @NonNull Currency currency, double amount) {
@@ -1182,6 +1184,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return true;
         }
 
+        // Do not rely on offline transactions here.
         return false;
     }
 
