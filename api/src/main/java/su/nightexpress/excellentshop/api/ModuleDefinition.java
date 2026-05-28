@@ -22,8 +22,9 @@ public class ModuleDefinition implements Writeable {
     public static final String URL_CURRENCIES   = "https://nightexpressdev.com/nightcore/integrations/currencies/";
     public static final String URL_CUSTOM_ITEMS = "https://nightexpressdev.com/nightcore/integrations/items/";
 
-    public static final ConfigType<ModuleDefinition> CONFIG_TYPE = ConfigType.of(ModuleDefinition::read,
-        FileConfig::set);
+    public static ConfigType<ModuleDefinition> configType() {
+        return ConfigType.of(ModuleDefinition::read, FileConfig::set);
+    }
 
     private final boolean     enabled;
     private final String[]    commandAliases;

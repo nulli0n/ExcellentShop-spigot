@@ -42,7 +42,7 @@ public class PlayerShopSettings extends AbstractConfig implements ShopModuleSett
     );
 
     private final ConfigProperty<ProductClickSettings> guiProductClickSettings = this.addProperty(
-        ProductClickSettings.CONFIG_TYPE, "GUI.Product-Click-Settings",
+        ProductClickSettings.configType(), "GUI.Product-Click-Settings",
         getDefaultProductClickSettings(),
         "Controls GUI behavior when clicking shop products."
     );

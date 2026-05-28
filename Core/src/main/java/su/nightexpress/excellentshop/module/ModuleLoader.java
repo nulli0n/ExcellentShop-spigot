@@ -42,7 +42,7 @@ public class ModuleLoader {
         this.definitionMap.forEach((id, defaultDefinition) -> {
             // ========== MIGRATION FROM THE CONFIG.YML - START ==========
             if (pluginConfig.contains("Modules." + id)) {
-                ModuleDefinition oldValue = pluginConfig.get(ModuleDefinition.CONFIG_TYPE, "Modules." + id,
+                ModuleDefinition oldValue = pluginConfig.get(ModuleDefinition.configType(), "Modules." + id,
                     defaultDefinition);
 
                 config.set("Modules." + id, oldValue);
@@ -50,7 +50,7 @@ public class ModuleLoader {
             }
             // ========== MIGRATION FROM THE CONFIG.YML - END ==========
 
-            ModuleDefinition definition = config.get(ModuleDefinition.CONFIG_TYPE, "Modules." + id, defaultDefinition);
+            ModuleDefinition definition = config.get(ModuleDefinition.configType(), "Modules." + id, defaultDefinition);
 
             try {
                 this.loadModule(id, definition);

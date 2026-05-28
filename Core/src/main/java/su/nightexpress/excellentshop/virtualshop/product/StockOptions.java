@@ -9,7 +9,9 @@ import su.nightexpress.nightcore.util.TimeUtil;
 
 public class StockOptions implements Writeable {
 
-    public static final ConfigType<StockOptions> CONFIG_TYPE = ConfigType.of(StockOptions::read, FileConfig::set);
+    public static ConfigType<StockOptions> configType() {
+        return ConfigType.of(StockOptions::read, FileConfig::set);
+    }
 
     private boolean enabled;
     private int     capacity;
