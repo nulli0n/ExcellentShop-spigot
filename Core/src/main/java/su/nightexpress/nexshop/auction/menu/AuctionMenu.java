@@ -279,6 +279,34 @@ public class AuctionMenu extends AbstractAuctionMenu<ActiveListing> {
 
             this.runNextTick(() -> this.auctionManager.openPurchaseConfirmation(player, listing));
         });
+
+        // Register listing items as MenuItems for click handling
+        this.getItems().removeIf(menuItem -> {
+            for (int slot : this.itemSlots) {
+                if (menuItem.getSlots().length == 1 && menuItem.getSlots()[0] == slot) return true;
+            }
+            return false;
+        });
+
+        java.util.List<ActiveListing> listingItems = autoFill.getItems();
+        int[] autoSlots = autoFill.getSlots();
+        int slotIndex = 0;
+        for (ActiveListing listing : listingItems) {
+            if (slotIndex >= autoSlots.length) break;
+            int slot = autoSlots[slotIndex++];
+            ItemStack displayItem = autoFill.getItemCreator().apply(listing);
+            MenuItem menuItem = new MenuItem(displayItem, slot);
+            menuItem.setHandler(new ItemHandler("listing_item_" + slot, (viewer2, event) -> {
+                event.setCancelled(true);
+                if (listing.isOwner(player)) return;
+                if (!Config.GENERAL_BUY_WITH_FULL_INVENTORY.get() && player.getInventory().firstEmpty() < 0) {
+                    Lang.SHOP_TRADE_PLAYER_FULL_INVENTORY.message().send(player);
+                    return;
+                }
+                this.runNextTick(() -> this.auctionManager.openPurchaseConfirmation(player, listing));
+            }));
+            this.addItem(menuItem);
+        }
     }
 
     @NonNull

@@ -1178,7 +1178,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         }
 
         if (player != null) {
-            if (!currency.canAfford(player, amount)) return false;
+            if (currency.getBalance(player) < amount) return false;
 
             currency.withdraw(player, amount);
             return true;

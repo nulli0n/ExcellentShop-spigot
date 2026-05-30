@@ -16,8 +16,9 @@ import java.util.Map;
 
 public class ProductClickSettings implements Writeable {
 
-    public static final ConfigType<ProductClickSettings> CONFIG_TYPE = ConfigType.of(ProductClickSettings::read,
-        FileConfig::set);
+    public static ConfigType<ProductClickSettings> configType() {
+        return ConfigType.of(ProductClickSettings::read, FileConfig::set);
+    }
 
     private final Map<TradeStatus, Map<ClickType, ProductClickAction>> keyMappings;
 
