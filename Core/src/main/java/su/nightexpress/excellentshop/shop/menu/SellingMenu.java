@@ -18,7 +18,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import su.nightexpress.excellentshop.ShopPlaceholders;
@@ -51,16 +51,17 @@ import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 
+@NullMarked
 public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements SellingMenuProvider {
 
-    public record Data(@NonNull AbstractShopModule module,
-                       @NonNull Map<ItemStack, ProductData> products,
+    public record Data(AbstractShopModule module,
+                       Map<ItemStack, ProductData> products,
                        @Nullable Shop targetShop,
                        @Nullable Product targetProduct,
                        int shopPage) {
 
-        @NonNull
-        public BalanceHolder worth(@NonNull Player player) {
+
+        public BalanceHolder worth(Player player) {
             BalanceHolder holder = new BalanceHolder();
 
             this.products.forEach((itemStack, quantified) -> {
@@ -73,21 +74,23 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         }
     }
 
-    private record ProductData(@NonNull Product product, int units) {
+    private record ProductData(Product product, int units) {
     }
 
+    @Nullable
     private SellingMenuAdapter adapter;
-    private int[]              productSlots;
-    private NightItem          lockedIcon;
-    private String             worthText;
-    private String             amountText;
 
-    public SellingMenu(@NonNull ShopPlugin plugin) {
+    private int[]     productSlots;
+    private NightItem lockedIcon;
+    private String    worthText;
+    private String    amountText;
+
+    public SellingMenu(ShopPlugin plugin) {
         super(plugin, MenuType.GENERIC_9X6, "Selling", Data.class);
     }
 
     @Override
-    public void load(@NonNull FileConfig config) {
+    public void load(FileConfig config) {
         super.load(config);
 
         PacketUtils.library().ifPresent(lib -> {
@@ -105,7 +108,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         }
     }
 
-    public boolean show(@NonNull Player player, @NonNull AbstractShopModule module, @Nullable Shop targetShop,
+    public boolean show(Player player, AbstractShopModule module, @Nullable Shop targetShop,
                         @Nullable Product targetProduct, int shopPage) {
         return this.show(player, new Data(module, new LinkedHashMap<>(), targetShop, targetProduct, shopPage));
     }
@@ -177,7 +180,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    protected void onLoad(@NonNull FileConfig config) {
+    protected void onLoad(FileConfig config) {
         this.productSlots = config.get(ConfigTypes.INT_ARRAY, "Item.Sell-Slots", IntStream.range(0, 36).toArray());
 
         this.lockedIcon = config.get(ConfigTypes.NIGHT_ITEM, "Item.Locked-Icon", NightItem.fromType(Material.BARRIER)
@@ -194,7 +197,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    protected void onClick(@NonNull ViewerContext context, @NonNull InventoryClickEvent event) {
+    protected void onClick(ViewerContext context, InventoryClickEvent event) {
         Inventory inventory = event.getInventory();
         int rawSlot = event.getRawSlot();
         int realSlot = event.getSlot();
@@ -221,9 +224,26 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
                 }
 
                 if (event.isShiftClick()) {
+                    ItemStack copyStack = new ItemStack(clickedItem);
+                    clickedItem.setAmount(0);
+
+                    ItemStack cursor = event.getCursor();
+                    ItemStack saveCursor;
+                    if (cursor != null && !cursor.getType().isAir()) {
+                        saveCursor = new ItemStack(cursor);
+                        cursor.setAmount(0);
+                    }
+                    else saveCursor = new ItemStack(Material.AIR);
+
                     this.plugin.runTask(() -> {
-                        this.addItem(context, clickedItem, false, leftover -> player.getInventory().setItem(realSlot,
+                        this.addItem(context, copyStack, false, leftover -> player.getInventory().setItem(realSlot,
                             leftover));
+
+                        // Save after addItem due to Inventory simulation with all player items.
+                        if (!saveCursor.getType().isAir()) {
+                            Players.addItem(player, saveCursor);
+                            event.getView().setCursor(null);
+                        }
                     });
                     return;
                 }
@@ -237,14 +257,21 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
 
         if (this.isProductSlot(rawSlot)) {
             ItemStack cursor = event.getCursor();
-            this.plugin.runTask(() -> {
-                if (!cursor.getType().isAir()) {
-                    this.addItem(context, cursor, true, leftover -> event.getView().setCursor(leftover));
-                    return;
-                }
+            if (!cursor.getType().isAir()) {
+                ItemStack copyStack = new ItemStack(cursor);
+                cursor.setAmount(0);
+                this.plugin.runTask(() -> {
+                    this.addItem(context, copyStack, true, leftover -> event.getView().setCursor(leftover));
+                });
+                return;
+            }
 
-                if (clickedItem != null && !clickedItem.getType().isAir()) {
-                    this.removeItem(context, clickedItem, removed -> {
+            if (clickedItem != null && !clickedItem.getType().isAir()) {
+                ItemStack copyStack = new ItemStack(clickedItem);
+                clickedItem.setAmount(0);
+
+                this.plugin.runTask(() -> {
+                    this.removeItem(context, copyStack, removed -> {
                         if (event.isShiftClick()) {
                             Players.addItem(player, removed);
                         }
@@ -252,8 +279,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
                             event.getView().setCursor(new ItemStack(removed));
                         }
                     });
-                }
-            });
+                });
+            }
             return;
         }
 
@@ -262,7 +289,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    protected void onDrag(@NonNull ViewerContext context, @NonNull InventoryDragEvent event) {
+    protected void onDrag(ViewerContext context, InventoryDragEvent event) {
         Inventory inventory = event.getInventory();
         Set<Integer> slots = event.getRawSlots();
 
@@ -280,7 +307,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    protected void onClose(@NonNull ViewerContext context, @NonNull InventoryCloseEvent event) {
+    protected void onClose(ViewerContext context, InventoryCloseEvent event) {
         Player player = context.getPlayer();
         Data data = this.getObject(context);
         data.products.forEach((itemStack, productData) -> {
@@ -294,20 +321,20 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    public void handleClose(@NonNull Player player, @NonNull InventoryCloseEvent event,
-                            @NonNull MenuRegistry menuRegistry) {
+    public void handleClose(Player player, InventoryCloseEvent event,
+                            MenuRegistry menuRegistry) {
         super.handleClose(player, event, menuRegistry);
         this.triggerSlotUpdates(player); // A small workaround to not use #runTask in #onClose due to possible exception on server shutdown.
     }
 
     @Override
-    public void onPrepare(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory,
-                          @NonNull List<MenuItem> items) {
+    public void onPrepare(ViewerContext context, InventoryView view, Inventory inventory,
+                          List<MenuItem> items) {
 
     }
 
     @Override
-    public void onReady(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory) {
+    public void onReady(ViewerContext context, InventoryView view, Inventory inventory) {
         Player player = context.getPlayer();
         Data data = this.getObject(context);
 
@@ -338,12 +365,12 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Override
-    public void onRender(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory) {
+    public void onRender(ViewerContext context, InventoryView view, Inventory inventory) {
 
     }
 
     @Override
-    public boolean isImmuneSlot(@NonNull Player player, int slot) {
+    public boolean isImmuneSlot(Player player, int slot) {
         if (this.isProductSlot(slot)) return false;
 
         MenuViewer viewer = this.getViewer(player);
@@ -360,10 +387,10 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         return Lists.contains(this.productSlots, slot);
     }
 
-    private void addItem(@NonNull ViewerContext context,
-                         @NonNull ItemStack clickedItem,
+    private void addItem(ViewerContext context,
+                         ItemStack clickedItem,
                          boolean resetCursor,
-                         @NonNull Consumer<@Nullable ItemStack> consumer) {
+                         Consumer<@Nullable ItemStack> consumer) {
         Player player = context.getPlayer();
         Product product = this.findProduct(context, clickedItem);
         if (product == null) return;
@@ -457,8 +484,8 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         consumer.accept(left);
     }
 
-    private void removeItem(@NonNull ViewerContext context, @NonNull ItemStack clickedItem,
-                            @NonNull Consumer<@NonNull ItemStack> consumer) {
+    private void removeItem(ViewerContext context, ItemStack clickedItem,
+                            Consumer<ItemStack> consumer) {
         Data data = this.getObject(context);
 
         ItemStack keyStack = new ItemStack(clickedItem);
@@ -483,7 +510,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         consumer.accept(new ItemStack(clickedItem));
     }
 
-    private void triggerSlotUpdates(@NonNull Player player) {
+    private void triggerSlotUpdates(Player player) {
         if (this.adapter == null) return;
 
         for (int slot = 0; slot < player.getInventory().getStorageContents().length; slot++) {
@@ -491,7 +518,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         }
     }
 
-    private void triggerSlotUpdate(@NonNull Player player, int slot) {
+    private void triggerSlotUpdate(Player player, int slot) {
         if (this.adapter == null) return;
 
         ItemStack itemStack = player.getInventory().getItem(slot);
@@ -501,7 +528,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Nullable
-    private Product findProduct(@NonNull ViewerContext context, @NonNull ItemStack itemStack) {
+    private Product findProduct(ViewerContext context, ItemStack itemStack) {
         Player player = context.getPlayer();
         Data data = this.getObject(context);
 
@@ -515,12 +542,12 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         return ShopUtils.findBestProduct(itemStack, TradeType.SELL, shops);
     }
 
-    private boolean isSellable(@NonNull ViewerContext context, @NonNull ItemStack itemStack) {
+    private boolean isSellable(ViewerContext context, ItemStack itemStack) {
         Product product = this.findProduct(context, itemStack);
         return product != null && product.canTrade(context.getPlayer());
     }
 
-    private void handleSellOut(@NonNull ActionContext context) {
+    private void handleSellOut(ActionContext context) {
         Data data = this.getObject(context);
         if (data.products.isEmpty()) return;
 
@@ -557,11 +584,11 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
         });
     }
 
-    private void handleCancel(@NonNull ActionContext context) {
+    private void handleCancel(ActionContext context) {
         this.goBack(context);
     }
 
-    private void goBack(@NonNull ViewerContext context) {
+    private void goBack(ViewerContext context) {
         Player player = context.getPlayer();
         Data data = this.getObject(context);
 
@@ -577,7 +604,7 @@ public class SellingMenu extends AbstractObjectMenu<SellingMenu.Data> implements
     }
 
     @Nullable
-    public ItemStack onSlotRender(@NonNull Player player, @NonNull ItemStack itemStack) {
+    public ItemStack onSlotRender(Player player, ItemStack itemStack) {
         MenuViewer viewer = this.getViewer(player);
         if (viewer == null) return itemStack;
 

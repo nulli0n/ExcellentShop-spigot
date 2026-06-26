@@ -25,6 +25,7 @@ import su.nightexpress.excellentshop.shop.dialog.impl.ProductCustomBuyAmountDial
 import su.nightexpress.excellentshop.shop.transaction.TransactionCallback;
 import su.nightexpress.excellentshop.shop.transaction.TransactionEngine;
 import su.nightexpress.nightcore.ui.inventory.Menu;
+import su.nightexpress.nightcore.util.Players;
 
 public abstract class AbstractShopModule extends AbstractModule implements ShopModule {
 
@@ -84,6 +85,10 @@ public abstract class AbstractShopModule extends AbstractModule implements ShopM
         ClickType clickType = event.getClick();
         ProductClickAction action = this.getSettings().getProductClickSettings().getClickAction(status, clickType);
         ProductClickContext context = new ProductClickContext(player, product, event, shopPage);
+
+        if (Players.isBedrock(player)) {
+            action = ProductClickAction.PURCHASE_DIALOG;
+        }
 
         this.handleProductClick(action, context);
     }

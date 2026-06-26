@@ -33,6 +33,7 @@ import su.nightexpress.excellentshop.api.transaction.ETransactionItem;
 import su.nightexpress.excellentshop.api.transaction.ETransactionResult;
 import su.nightexpress.excellentshop.core.Lang;
 import su.nightexpress.excellentshop.shop.AbstractShopModule;
+import su.nightexpress.excellentshop.shop.transaction.validation.AvailabilityValidator;
 import su.nightexpress.excellentshop.shop.transaction.validation.BuyValidator;
 import su.nightexpress.excellentshop.shop.transaction.validation.EmptinessValidator;
 import su.nightexpress.excellentshop.shop.transaction.validation.SellValidator;
@@ -152,6 +153,7 @@ public class TransactionEngine {
         List<TransactionValidator> validators = new ArrayList<>();
 
         validators.add(new EmptinessValidator());
+        validators.add(new AvailabilityValidator());
 
         if (transaction.getType() == BUY) {
             validators.add(new BuyValidator());

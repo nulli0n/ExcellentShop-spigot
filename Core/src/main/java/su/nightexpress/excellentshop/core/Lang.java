@@ -80,6 +80,13 @@ public final class Lang implements LangContainer {
                 GENERIC_PRODUCTS) + ".")
         );
 
+    public static final MessageLocale SHOP_TRADE_PLAYER_FORBIDDEN = LangEntry
+        .builder("Shop.Trade.Product.Forbidden")
+        .chatMessage(
+            Sound.ENTITY_VILLAGER_NO,
+            GRAY.wrap("The following product(s): " + WHITE.wrap(GENERIC_PRODUCTS) + " are not available for you.")
+        );
+
     public static final MessageLocale SHOP_TRADE_PLAYER_NOT_ENOUGH_ITEMS = LangEntry
         .builder("Shop.Trade.Product.NotEnoughItems")
         .chatMessage(

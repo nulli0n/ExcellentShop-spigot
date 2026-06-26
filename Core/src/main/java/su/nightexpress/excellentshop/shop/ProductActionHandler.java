@@ -15,7 +15,6 @@ import su.nightexpress.excellentshop.api.transaction.ETransactionResult;
 import su.nightexpress.excellentshop.core.Perms;
 import su.nightexpress.excellentshop.product.click.ProductClickContext;
 import su.nightexpress.nightcore.core.config.CoreLang;
-import su.nightexpress.nightcore.util.Players;
 
 @NullMarked
 public class ProductActionHandler {
@@ -34,7 +33,7 @@ public class ProductActionHandler {
         if (status == TradeStatus.UNAVAILABLE) return;
         if (action == ProductClickAction.NONE) return;
 
-        if (Players.isBedrock(player) || action == ProductClickAction.PURCHASE_DIALOG) {
+        if (/* Players.isBedrock(player) ||  */action == ProductClickAction.PURCHASE_DIALOG) {
             this.module.openPurchaseOptionsDialog(context);
             return;
         }
@@ -82,7 +81,8 @@ public class ProductActionHandler {
 
         EPreparedTransaction transaction = EPreparedTransaction.builder(player, type)
             .addProduct(product, 1)
-            .setPreview(true).build();
+            .setPreview(true)
+            .build();
 
         this.module.previewTransaction(transaction, result -> {
             if (result != ETransactionResult.SUCCESS) return;

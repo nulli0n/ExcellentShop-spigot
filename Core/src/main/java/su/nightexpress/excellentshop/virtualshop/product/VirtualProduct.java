@@ -359,6 +359,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public void setAllowedRanks(@NonNull Collection<String> allowedRanks) {
         this.allowedRanks = Lists.modify(new HashSet<>(allowedRanks), String::toLowerCase);
+        this.allowedRanks.removeIf(String::isBlank);
     }
 
     @NonNull
@@ -368,6 +369,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public void setForbiddenRanks(@NonNull Collection<String> forbiddenRanks) {
         this.forbiddenRanks = Lists.modify(new HashSet<>(forbiddenRanks), String::toLowerCase);
+        this.forbiddenRanks.removeIf(String::isBlank);
     }
 
     @NonNull
@@ -377,6 +379,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public void setRequiredPermissions(@NonNull Collection<String> requiredPermissions) {
         this.requiredPermissions = new HashSet<>(requiredPermissions);
+        this.requiredPermissions.removeIf(String::isBlank);
     }
 
     @NonNull
@@ -386,6 +389,7 @@ public class VirtualProduct extends AbstractProduct<VirtualShop> implements Writ
 
     public void setForbiddenPermissions(@NonNull Collection<String> forbiddenPermissions) {
         this.forbiddenPermissions = new HashSet<>(forbiddenPermissions);
+        this.forbiddenPermissions.removeIf(String::isBlank);
     }
 
     public boolean isRotating() {

@@ -50,13 +50,14 @@ public class EmptinessValidator implements TransactionValidator {
                 case BUY -> product.getMaxBuyableUnitAmount(player, inventory);
                 case SELL -> product.getMaxSellableUnitAmount(player, inventory);
             };
-            if (maxUnits < 0 || maxUnits >= units) return;
 
             if (maxUnits == 0) {
                 transaction.getLooseItems().add(transactionItem);
                 transaction.getItems().remove(product);
                 return;
             }
+
+            if (maxUnits < 0 || maxUnits >= units) return;
 
             int loseUnits = units - maxUnits;
             Currency currency = product.getCurrency();
@@ -69,7 +70,6 @@ public class EmptinessValidator implements TransactionValidator {
 
             transaction.getLooseItems().add(new ETransactionItem(product, loseUnits, loseWorth));
             transaction.getItems().put(product, new ETransactionItem(product, maxUnits, maxWorth));
-            return;
         });
     }
 }
