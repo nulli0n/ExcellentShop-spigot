@@ -322,4 +322,9 @@ public class ShopPlugin extends NightPlugin implements ModuleContextProvider {
 
         config.remove("Modules");
     }
+
+    @Override
+    public @NonNull String getPlaceholderAPIIdentifier() {
+        return "eshop";
+    }
 }

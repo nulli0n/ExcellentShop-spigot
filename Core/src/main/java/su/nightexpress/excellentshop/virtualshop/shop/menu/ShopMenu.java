@@ -1,5 +1,9 @@
 package su.nightexpress.excellentshop.virtualshop.shop.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -9,16 +13,16 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
+import su.nightexpress.excellentshop.ShopPlaceholders;
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.product.ContentType;
 import su.nightexpress.excellentshop.api.product.TradeStatus;
 import su.nightexpress.excellentshop.api.product.TradeType;
 import su.nightexpress.excellentshop.api.transaction.ERawTransaction;
 import su.nightexpress.excellentshop.shop.formatter.ProductFormatter;
-import su.nightexpress.excellentshop.ShopPlaceholders;
-import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.virtualshop.VirtualShopModule;
 import su.nightexpress.excellentshop.virtualshop.core.VirtualLang;
 import su.nightexpress.excellentshop.virtualshop.product.VirtualProduct;
@@ -45,18 +49,13 @@ import su.nightexpress.nightcore.util.placeholder.CommonPlaceholders;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
-
+@NullMarked
 public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
 
     private static final String DEF_TITLE = TagWrappers.COLOR.with("#3E3E3E").wrap(
         "Shop → %s (" + TagWrappers.WHITE.wrap("%s") + "/" + TagWrappers.WHITE.wrap("%s") + ")")
         .formatted(ShopPlaceholders.SHOP_NAME, ShopPlaceholders.GENERIC_PAGE, ShopPlaceholders.GENERIC_PAGES);
 
-    public record Data(@NonNull VirtualShop shop, @NonNull ViewMode viewMode, @Nullable Rotation rotation) {
-    }
 
     private final VirtualShopModule                module;
     private final ProductFormatter<VirtualProduct> productFormatter;
@@ -64,9 +63,12 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
     private final NamedAction nextShopPageAction;
     private final NamedAction previousShopPageAction;
 
-    public ShopMenu(@NonNull ShopPlugin plugin,
-                    @NonNull VirtualShopModule module,
-                    @NonNull ProductFormatter<VirtualProduct> productFormatter) {
+    public record Data(VirtualShop shop, ViewMode viewMode, @Nullable Rotation rotation) {
+    }
+
+    public ShopMenu(ShopPlugin plugin,
+                    VirtualShopModule module,
+                    ProductFormatter<VirtualProduct> productFormatter) {
         super(plugin, MenuType.GENERIC_9X6, DEF_TITLE, Data.class);
         this.module = module;
         this.productFormatter = productFormatter;
@@ -77,8 +79,8 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
     }
 
     @Override
-    @NonNull
-    protected String getRawTitle(@NonNull ViewerContext context) {
+
+    protected String getRawTitle(ViewerContext context) {
         return PlaceholderContext.builder()
             .with(this.getObject(context).shop.placeholders())
             .with(ShopPlaceholders.GENERIC_PAGE, () -> String.valueOf(context.getViewer().getCurrentPage()))
@@ -94,7 +96,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
             .forEach(MenuViewer::refresh);
     }
 
-    public boolean show(@NonNull Player player, @NonNull VirtualShop shop, int page, @NonNull ViewMode viewMode,
+    public boolean show(Player player, VirtualShop shop, int page, ViewMode viewMode,
                         @Nullable Rotation rotation) {
         return this.show(player, new Data(shop, viewMode, rotation), viewer -> {
             viewer.setTotalPages(shop.getPages());
@@ -102,7 +104,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         });
     }
 
-    private void displayStatic(@NonNull ViewerContext context, @NonNull List<MenuItem> menuItems) {
+    private void displayStatic(ViewerContext context, List<MenuItem> menuItems) {
         MenuViewer viewer = context.getViewer();
         Data data = this.getObject(context);
         VirtualShop shop = data.shop;
@@ -116,7 +118,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         });
     }
 
-    private void displayRotating(@NonNull ViewerContext context, @NonNull List<MenuItem> menuItems) {
+    private void displayRotating(ViewerContext context, List<MenuItem> menuItems) {
         MenuViewer viewer = context.getViewer();
         Data data = this.getObject(context);
         VirtualShop shop = data.shop;
@@ -175,8 +177,8 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         });
     }
 
-    private void addProductItem(@NonNull MenuViewer viewer, @NonNull Data data, @NonNull VirtualProduct product,
-                                int slot, @NonNull List<MenuItem> menuItems) {
+    private void addProductItem(MenuViewer viewer, Data data, VirtualProduct product,
+                                int slot, List<MenuItem> menuItems) {
         VirtualShop shop = data.shop;
         Player player = viewer.getPlayer();
         ItemStack preview = product.getEffectivePreview();
@@ -347,12 +349,12 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
     }
 
     @Override
-    protected void onLoad(@NonNull FileConfig config) {
+    protected void onLoad(FileConfig config) {
 
     }
 
     @Override
-    protected void onClick(@NonNull ViewerContext context, @NonNull InventoryClickEvent event) {
+    protected void onClick(ViewerContext context, InventoryClickEvent event) {
         Player player = context.getPlayer();
         Data data = this.getObject(context);
         ViewMode mode = data.viewMode;
@@ -379,41 +381,41 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
     }
 
     @Override
-    protected void onDrag(@NonNull ViewerContext context, @NonNull InventoryDragEvent event) {
+    protected void onDrag(ViewerContext context, InventoryDragEvent event) {
 
     }
 
     @Override
-    protected void onClose(@NonNull ViewerContext context, @NonNull InventoryCloseEvent event) {
+    protected void onClose(ViewerContext context, InventoryCloseEvent event) {
 
     }
 
     @Override
-    public void onPrepare(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory,
-                          @NonNull List<MenuItem> items) {
+    public void onPrepare(ViewerContext context, InventoryView view, Inventory inventory,
+                          List<MenuItem> items) {
         this.displayStatic(context, items);
         this.displayRotating(context, items);
     }
 
     @Override
-    public void onReady(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory) {
+    public void onReady(ViewerContext context, InventoryView view, Inventory inventory) {
 
     }
 
     @Override
-    public void onRender(@NonNull ViewerContext context, @NonNull InventoryView view, @NonNull Inventory inventory) {
+    public void onRender(ViewerContext context, InventoryView view, Inventory inventory) {
 
     }
 
-    private void handleNextPage(@NonNull ActionContext context) {
+    private void handleNextPage(ActionContext context) {
         this.handlePage(context, context.getViewer().getCurrentPage() + 1);
     }
 
-    private void handlePreviousPage(@NonNull ActionContext context) {
+    private void handlePreviousPage(ActionContext context) {
         this.handlePage(context, context.getViewer().getCurrentPage() - 1);
     }
 
-    private void handlePage(@NonNull ActionContext context, int page) {
+    private void handlePage(ActionContext context, int page) {
         Data data = this.getObject(context);
         VirtualShop shop = data.shop;
         Player player = context.getPlayer();
@@ -423,7 +425,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         this.module.openShop(player, shop, page, false, data.viewMode, data.rotation);
     }
 
-    private void handleBack(@NonNull ActionContext context) {
+    private void handleBack(ActionContext context) {
         Data data = this.getObject(context);
         ViewMode mode = data.viewMode;
         VirtualShop shop = data.shop;
@@ -440,7 +442,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         }
     }
 
-    private void handleSellAll(@NonNull ActionContext context) {
+    private void handleSellAll(ActionContext context) {
         Player player = context.getPlayer();
         ERawTransaction transaction = ERawTransaction.builder(player, TradeType.SELL)
             .addItems(player.getInventory())
@@ -452,7 +454,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         });
     }
 
-    private void handleFreeSlot(@NonNull ActionContext context) {
+    private void handleFreeSlot(ActionContext context) {
         Data data = this.getObject(context);
         ViewMode mode = data.viewMode;
         if (mode == ViewMode.NORMAL) return;
@@ -490,7 +492,7 @@ public class ShopMenu extends AbstractObjectMenu<ShopMenu.Data> {
         context.getViewer().refresh();
     }
 
-    private void handleProductItem(@NonNull ActionContext context, @NonNull VirtualProduct product) {
+    private void handleProductItem(ActionContext context, VirtualProduct product) {
         Data data = this.getObject(context);
         if (data.viewMode == ViewMode.EDIT_ROTATION_SLOTS) return;
 

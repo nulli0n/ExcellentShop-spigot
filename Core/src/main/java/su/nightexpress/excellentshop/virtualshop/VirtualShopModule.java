@@ -103,6 +103,7 @@ import su.nightexpress.nightcore.util.PDCUtil;
 import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.StringUtil;
 import su.nightexpress.nightcore.util.Strings;
+import su.nightexpress.nightcore.util.TimeUtil;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
@@ -162,6 +163,7 @@ public class VirtualShopModule extends AbstractShopModule {
         this.loadLayouts();
         this.loadUI();
         this.loadShops();
+        this.loadRotationPlaceholders();
 
         if (VirtualConfig.isCentralMenuEnabled()) {
             this.loadMainMenu();
@@ -429,6 +431,23 @@ public class VirtualShopModule extends AbstractShopModule {
 
     private void loadUI() {
 
+    }
+
+    // Temporarty trashy method to support old placeholders in shop GUIs.
+    private void loadRotationPlaceholders() {
+        this.getShops().forEach(shop -> {
+            shop.getRotations().forEach(rotation -> {
+                this.plugin.addGlobalPlaceholders(registry -> {
+                    String placeholder = "rotation_" + rotation.getId() + "_next_in";
+                    registry.registerRaw(placeholder, (player, payload) -> {
+                        RotationData data = shop.getRotationData(rotation);
+                        if (data == null || data.getNextRotationDate() < 0L) return CoreLang.OTHER_NEVER.text();
+
+                        return TimeFormats.formatDuration(data.getNextRotationDate(), TimeFormatType.LITERAL);
+                    });
+                });
+            });
+        });
     }
 
     private void loadDialogs() {
