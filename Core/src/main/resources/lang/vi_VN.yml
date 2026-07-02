@@ -1,0 +1,54 @@
+# ExcellentShop Vietnamese Translation
+# By Antigravity for GitHub highlights
+# This file covers Core, GUI Shop, Auction House, and Chest Shop features
+
+general:
+  prefix: "&8[&6ExcellentShop&8] "
+  no_permission: "&cBạn không có quyền thực hiện hành động này!"
+  only_players: "&cChỉ người chơi mới có thể sử dụng lệnh này!"
+  player_not_found: "&cKhông tìm thấy người chơi &7%player%&c."
+  invalid_amount: "&cSố lượng không hợp lệ!"
+  not_enough_money: "&cBạn không có đủ tiền! Cần thêm &7%amount%&c."
+  reload: "&aĐã nạp lại cấu hình thành công!"
+
+economy:
+  money_format: "%amount% VNĐ"
+
+# GUI Shop module
+shop:
+  menu:
+    title: "&0Cửa hàng: %shop%"
+    buy_item: "&7Nhấp &aChuột trái &7để mua với giá &e%price%"
+    sell_item: "&7Nhấp &cChuột phải &7để bán với giá &e%price%"
+    info_header: "&6&lThông tin vật phẩm"
+    item_not_available: "&cVật phẩm này hiện không có sẵn!"
+  transaction:
+    buy_success: "&aBạn đã mua &e%amount%x %item% &avới giá &6%price%&a."
+    sell_success: "&aBạn đã bán &e%amount%x %item% &avới giá &6%price%&a."
+  errors:
+    inv_full: "&cTúi đồ của bạn đã đầy!"
+    shop_empty: "&cCửa hàng này hiện không còn hàng!"
+
+# Auction House module
+auction:
+  menu:
+    title: "&0Sàn đấu giá"
+    list_item: "&7Nhấp để treo bán vật phẩm đang cầm với giá &e%price%"
+    expired_items: "&6Vật phẩm đã hết hạn"
+    categories: "&eDanh mục vật phẩm"
+  messages:
+    item_listed: "&aVật phẩm của bạn đã được treo lên sàn với giá &6%price%&a!"
+    item_bought: "&aBạn đã mua thành công &e%item% &atừ &7%seller% &avới giá &6%price%&a."
+    item_sold: "&aNgười chơi &7%buyer% &ađã mua &e%item% &acủa bạn với giá &6%price%&a."
+    item_expired: "&cMột vật phẩm bạn treo bán đã hết hạn và được chuyển vào kho đồ cũ."
+    limit_reached: "&cBạn không thể treo thêm vật phẩm! Đã đạt giới hạn &7%limit%&c."
+
+# Chest Shop (Player Shops)
+chest_shop:
+  messages:
+    shop_created: "&aĐã tạo cửa hàng rương thành công!"
+    shop_removed: "&cĐã gỡ bỏ cửa hàng rương."
+    buy_from_player: "&aBạn đã mua &e%amount%x %item% &atừ cửa hàng của &7%player%&a."
+    sell_to_player: "&aBạn đã bán &e%amount%x %item% &acho cửa hàng của &7%player%&a."
+    owner_notify_buy: "&7%player% &ađã mua &e%amount%x %item% &atừ cửa hàng của bạn."
+    owner_notify_sell: "&7%player% &ađã bán &e%amount%x %item% &acho cửa hàng của bạn."
