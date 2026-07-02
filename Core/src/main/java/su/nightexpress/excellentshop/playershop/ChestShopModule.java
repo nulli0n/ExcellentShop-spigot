@@ -1106,7 +1106,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         }
 
         Bank bank = this.getEffectiveBank(shop);
-        if (bank != null && !bank.getAccount().isEmpty()) {
+        if (bank != null && !bank.getAccount().hasZeroBalance()) {
             this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_BANK_NOT_EMPTY, player);
             return false;
         }
