@@ -903,6 +903,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
+        this.payForCreate(player);
+
         BlockData blockData = material.createBlockData();
         if (blockData instanceof Directional directional) {
             if (blockData instanceof org.bukkit.block.data.type.Chest) {
@@ -1091,11 +1093,6 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     public boolean deleteShop(@NonNull Player player, @NonNull ChestShop shop) {
         if (!this.canBreak(player, shop)) return false;
 
-        if (!this.payForRemoval(player)) {
-            this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
-            return false;
-        }
-
         if (ChestUtils.isInfiniteStorage()) {
             if (shop.getValidProducts().stream().anyMatch(product -> product.getStock() > 0)) {
                 this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_NOT_EMPTY, player);
@@ -1103,19 +1100,34 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             }
         }
 
+        Bank bank = this.getEffectiveBank(shop);
+        if (bank != null && !bank.getAccount().hasZeroBalance()) {
+            this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_BANK_NOT_EMPTY, player);
+            return false;
+        }
+
+        ShopBlock shopBlock = this.getShopBlock(shop.getBlock().getType());
+        boolean isCreatedFromItem = shop.isItemCreated() && shop.isAccessible();
+        if (isCreatedFromItem && shopBlock != null) {
+            if (Players.countItemSpace(player, shopBlock.getItemStack()) < 1) {
+                this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_INV_FULL_FOR_CHESTITEM, player);
+                return false;
+            }
+        }
+
+        // only try to pay after all other checks
+        if (!this.payForRemoval(player)) {
+            this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
+            return false;
+        }
+
         ChestShopRemoveEvent event = new ChestShopRemoveEvent(player, shop);
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
-        if (shop.isItemCreated() && shop.isAccessible()) {
-            Block block = shop.getBlock();
-            ShopBlock shopBlock = this.getShopBlock(block.getType());
-
-            if (shopBlock != null) {
-                Location dropLocation = LocationUtil.setCenter3D(block.getLocation().clone());
-                block.setType(Material.AIR);
-                block.getWorld().dropItemNaturally(dropLocation, shopBlock.getItemStack());
-            }
+        if (isCreatedFromItem) {
+            shop.getBlock().setType(Material.AIR);
+            Players.addItem(player, shopBlock.getItemStack());
         }
 
         this.removeShop(shop);
