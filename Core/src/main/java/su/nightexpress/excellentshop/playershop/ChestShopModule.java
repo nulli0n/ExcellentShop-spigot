@@ -1093,11 +1093,6 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     public boolean deleteShop(@NonNull Player player, @NonNull ChestShop shop) {
         if (!this.canBreak(player, shop)) return false;
 
-        if (!this.payForRemoval(player)) {
-            this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
-            return false;
-        }
-
         if (ChestUtils.isInfiniteStorage()) {
             if (shop.getValidProducts().stream().anyMatch(product -> product.getStock() > 0)) {
                 this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_NOT_EMPTY, player);
@@ -1118,6 +1113,12 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
                 this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_INV_FULL_FOR_CHESTITEM, player);
                 return false;
             }
+        }
+
+        // only try to pay after all other checks
+        if (!this.payForRemoval(player)) {
+            this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
+            return false;
         }
 
         ChestShopRemoveEvent event = new ChestShopRemoveEvent(player, shop);
