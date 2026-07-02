@@ -105,6 +105,10 @@ public class ChestLang implements LangContainer {
         "ChestShop.Shop.Removal.Error.NotEmpty").chatMessage(
             SOFT_RED.wrap("Please withdraw items from shop storage to remove it."));
 
+    public static final MessageLocale SHOP_REMOVAL_ERROR_BANK_NOT_EMPTY = LangEntry.builder(
+            "ChestShop.Shop.Removal.Error.BankNotEmpty").chatMessage(
+                    SOFT_RED.wrap("Please withdraw all currencies from the shop bank before removing it."));
+
     public static final MessageLocale SHOP_REMOVAL_INFO_DONE = LangEntry.builder("ChestShop.Shop.Removal.Info.Done")
         .titleMessage(
             SOFT_RED.wrap(BOLD.wrap("Shop Removed!")), "",
