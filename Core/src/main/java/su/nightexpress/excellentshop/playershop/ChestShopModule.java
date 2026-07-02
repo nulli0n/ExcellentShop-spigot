@@ -903,6 +903,8 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
+        this.payForCreate(player);
+
         BlockData blockData = material.createBlockData();
         if (blockData instanceof Directional directional) {
             if (blockData instanceof org.bukkit.block.data.type.Chest) {
