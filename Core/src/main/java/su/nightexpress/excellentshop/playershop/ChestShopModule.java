@@ -1101,7 +1101,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
 
         ShopBlock shopBlock = this.getShopBlock(shop.getBlock().getType());
         boolean isCreatedFromItem = shop.isItemCreated() && shop.isAccessible();
-        if (isCreatedFromItem && shopBlock != null) {
+        if (isCreatedFromItem && shopBlock != null && !ChestConfig.SHOP_ITEM_DROP_ITEM_ON_REMOVAL.get()) {
             if (Players.countItemSpace(player, shopBlock.getItemStack()) < 1) {
                 this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_INV_FULL_FOR_CHESTITEM, player);
                 return false;
@@ -1125,9 +1125,16 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
-        if (isCreatedFromItem) {
-            shop.getBlock().setType(Material.AIR);
-            Players.addItem(player, shopBlock.getItemStack());
+        if (shopBlock != null) {
+            if (isCreatedFromItem && !ChestConfig.SHOP_ITEM_DROP_ITEM_ON_REMOVAL.get()) {
+                shop.getBlock().setType(Material.AIR);
+                Players.addItem(player, shopBlock.getItemStack());
+            } else {
+                Block block = shop.getBlock();
+                Location dropLocation = LocationUtil.setCenter3D(block.getLocation().clone());
+                block.setType(Material.AIR);
+                block.getWorld().dropItemNaturally(dropLocation, shopBlock.getItemStack());
+            }
         }
 
         this.removeShop(shop);
