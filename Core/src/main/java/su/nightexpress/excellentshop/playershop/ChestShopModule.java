@@ -857,7 +857,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         }
     }
 
-    public boolean checkShopCreation(@NonNull Player player, @NonNull Block block) {
+    public boolean checkShopCreation(@NonNull Player player, @NonNull Block block, boolean isCreatedFromItem) {
         if (this.isShop(block)) {
             this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_ALREADY_SHOP, player);
             return false;
@@ -880,7 +880,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return false;
         }
 
-        if (!this.canPayCreation(player)) {
+        if (!(isCreatedFromItem && ChestConfig.SHOP_ITEM_CREATION_FREE_OF_COST.get()) && !this.canPayCreation(player)) {
             this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
             return false;
         }
@@ -897,7 +897,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return false;
         }
 
-        if (!this.checkShopCreation(player, block)) return false;
+        if (!this.checkShopCreation(player, block, true)) return false;
 
         ChestShopCreateEvent event = new ChestShopCreateEvent(player, block, itemStack);
         plugin.getPluginManager().callEvent(event);
@@ -940,7 +940,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return false;
         }
 
-        if (!this.checkShopCreation(player, block)) return false;
+        if (!this.checkShopCreation(player, block, false)) return false;
 
         BlockInventoryHolder container = (BlockInventoryHolder) block.getState();
         Inventory inventory = container.getInventory();
@@ -1116,7 +1116,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         }
 
         // only try to pay after all other checks
-        if (!this.payForRemoval(player)) {
+        if (!(isCreatedFromItem && ChestConfig.SHOP_ITEM_CREATION_FREE_OF_COST.get()) && !this.payForRemoval(player)) {
             this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
             return false;
         }

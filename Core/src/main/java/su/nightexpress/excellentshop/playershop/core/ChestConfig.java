@@ -84,6 +84,11 @@ public class ChestConfig {
         false,
         "Sets whether or not players can create shops by placing specific item.");
 
+    public static final ConfigValue<Boolean> SHOP_ITEM_CREATION_FREE_OF_COST = ConfigValue.create(
+        "Shops.ItemCreation.FreeOfCost",
+        true,
+        "Sets whether creating/removing the shop will have a cost");
+
     public static final ConfigValue<Double> SHOP_CREATION_COST_CREATE = ConfigValue.create("Shops.Creation.Cost.Create",
         0D,
         "Sets how much player have to pay in order to create a chest shop.");
