@@ -41,12 +41,12 @@ public class ShopListener extends AbstractListener<ShopPlugin> {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        this.module.getDisplayManager().removeForViewer(event.getPlayer());
+    	this.module.removeDisplaysForViewer(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerWorldChange(PlayerChangedWorldEvent event) {
-        this.module.getDisplayManager().removeForViewer(event.getPlayer());
+    	   this.module.removeDisplaysForViewer(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

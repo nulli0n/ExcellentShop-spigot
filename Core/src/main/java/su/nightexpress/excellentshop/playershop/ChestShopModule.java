@@ -406,6 +406,9 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     }
 
     private void updateShopDisplays() {
+        if (this.displayManager == null) {
+            return;
+        }
         this.lookup().getAll().forEach(shop -> this.displayManager.render(shop));
     }
 
@@ -438,10 +441,16 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     }
 
     public void onShopActivation(@NonNull ChestShop shop) {
+        if (this.displayManager == null) {
+            return;
+        }
         this.displayManager.render(shop);
     }
 
     public void onShopDeactivation(@NonNull ChestShop shop) {
+        if (this.displayManager == null) {
+            return;
+        }        
         this.displayManager.remove(shop);
     }
 
@@ -474,7 +483,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         return this.lookup;
     }
 
-    @NonNull
+    @Nullable
     public DisplayManager getDisplayManager() {
         return this.displayManager;
     }
@@ -1356,4 +1365,9 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     public BankManager getBankManager() {
         return this.bankManager;
     }
+
+    public void removeDisplaysForViewer(@NonNull Player player) {
+   	 if (this.displayManager == null) return;
+    this.displayManager.removeForViewer(player);
+}
 }
