@@ -1,5 +1,8 @@
 package su.nightexpress.excellentshop.virtualshop.product.editor;
 
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -11,6 +14,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MenuType;
 import org.jspecify.annotations.NonNull;
+
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.product.ProductContent;
@@ -24,6 +28,7 @@ import su.nightexpress.excellentshop.virtualshop.product.VirtualProduct;
 import su.nightexpress.excellentshop.virtualshop.shop.VirtualShop;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
+import su.nightexpress.nightcore.integration.item.ItemProviderKeys;
 import su.nightexpress.nightcore.locale.entry.IconLocale;
 import su.nightexpress.nightcore.ui.inventory.action.ActionContext;
 import su.nightexpress.nightcore.ui.inventory.item.ItemState;
@@ -34,9 +39,6 @@ import su.nightexpress.nightcore.ui.inventory.viewer.ViewerContext;
 import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
-
-import java.util.List;
-import java.util.stream.IntStream;
 
 public class ProductOptionsMenu extends AbstractObjectMenu<VirtualProduct> {
 
@@ -302,7 +304,7 @@ public class ProductOptionsMenu extends AbstractObjectMenu<VirtualProduct> {
                             .isCompareNbt()))
                     );
                 })
-                .condition(ctx -> content.getAdaptedItem().getAdapter().isVanilla())
+                .condition(ctx -> content.getAdaptedItem().getProviderId().equalsIgnoreCase(ItemProviderKeys.BUKKIT))
                 .action(this::handleProductNbtMode)
                 .build()
             )
@@ -418,7 +420,7 @@ public class ProductOptionsMenu extends AbstractObjectMenu<VirtualProduct> {
         VirtualProduct product = this.getObject(context);
 
         if (!(product.getContent() instanceof ItemContent content)) return;
-        if (!content.getAdaptedItem().getAdapter().isVanilla()) return;
+        if (!content.getAdaptedItem().getProviderId().equalsIgnoreCase(ItemProviderKeys.BUKKIT)) return;
 
         content.setCompareNbt(!content.isCompareNbt());
         product.getShop().markDirty();

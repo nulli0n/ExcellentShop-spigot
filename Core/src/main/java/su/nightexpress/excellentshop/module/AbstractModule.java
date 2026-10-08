@@ -1,9 +1,18 @@
 package su.nightexpress.excellentshop.module;
 
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import su.nightexpress.excellentshop.ShopFiles;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
@@ -16,25 +25,17 @@ import su.nightexpress.excellentshop.exception.ModuleLoadException;
 import su.nightexpress.excellentshop.user.UserManager;
 import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.nightcore.bridge.currency.Currency;
-import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.commands.command.NightCommand;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.integration.currency.EconomyBridge;
+import su.nightexpress.nightcore.integration.item.ItemProvider;
 import su.nightexpress.nightcore.locale.entry.MessageLocale;
 import su.nightexpress.nightcore.locale.message.LangMessage;
 import su.nightexpress.nightcore.manager.AbstractManager;
 import su.nightexpress.nightcore.ui.dialog.wrap.DialogRegistry;
 import su.nightexpress.nightcore.util.StringUtil;
 import su.nightexpress.nightcore.util.placeholder.PlaceholderContext;
-
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public abstract class AbstractModule extends AbstractManager<ShopPlugin> implements Module {
 
@@ -225,8 +226,8 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
         return this.isItemProviderDisabled(ShopPlaceholders.WILDCARD);
     }
 
-    public boolean isItemProviderDisabled(@NonNull ItemAdapter<?> adapter) {
-        return this.isItemProviderDisabled(adapter.getName()) || this.isItemProvidersDisabled();
+    public boolean isItemProviderDisabled(@NonNull ItemProvider adapter) {
+        return this.isItemProviderDisabled(adapter.getId()) || this.isItemProvidersDisabled();
     }
 
     public boolean isItemProviderDisabled(@NonNull String id) {
@@ -234,7 +235,7 @@ public abstract class AbstractModule extends AbstractManager<ShopPlugin> impleme
     }
 
     @Override
-    public boolean isItemProviderAllowed(@NonNull ItemAdapter<?> adapter) {
+    public boolean isItemProviderAllowed(@NonNull ItemProvider adapter) {
         return !this.isItemProviderDisabled(adapter);
     }
 

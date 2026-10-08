@@ -1,14 +1,26 @@
 package su.nightexpress.nexshop.auction;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.module.AbstractModule;
 import su.nightexpress.excellentshop.module.ModuleContext;
+import su.nightexpress.excellentshop.product.ContentTypes;
+import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nexshop.api.shop.event.AuctionListingCreateEvent;
 import su.nightexpress.nexshop.auction.command.AuctionCommands;
 import su.nightexpress.nexshop.auction.config.AuctionConfig;
@@ -18,26 +30,36 @@ import su.nightexpress.nexshop.auction.data.AuctionDatabase;
 import su.nightexpress.nexshop.auction.listener.AuctionListener;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
-import su.nightexpress.nexshop.auction.menu.*;
-import su.nightexpress.excellentshop.product.ContentTypes;
-import su.nightexpress.excellentshop.product.content.ItemContent;
+import su.nightexpress.nexshop.auction.menu.AbstractAuctionMenu;
+import su.nightexpress.nexshop.auction.menu.AuctionMenu;
+import su.nightexpress.nexshop.auction.menu.CurrencySelectMenu;
+import su.nightexpress.nexshop.auction.menu.ExpiredListingsMenu;
+import su.nightexpress.nexshop.auction.menu.PlayerListingsMenu;
+import su.nightexpress.nexshop.auction.menu.SalesHistoryMenu;
+import su.nightexpress.nexshop.auction.menu.UnclaimedListingsMenu;
 import su.nightexpress.nightcore.bridge.currency.Currency;
-import su.nightexpress.nightcore.bridge.item.ItemAdapter;
+import su.nightexpress.nightcore.bridge.item.AdaptedItem;
 import su.nightexpress.nightcore.commands.builder.HubNodeBuilder;
 import su.nightexpress.nightcore.config.FileConfig;
 import su.nightexpress.nightcore.core.config.CoreLang;
 import su.nightexpress.nightcore.db.config.DatabaseType;
+import su.nightexpress.nightcore.integration.item.BaseIdentifiableItemProvider;
+import su.nightexpress.nightcore.integration.item.BaseProviderDataItem;
 import su.nightexpress.nightcore.integration.item.ItemBridge;
-import su.nightexpress.nightcore.integration.item.adapter.IdentifiableItemAdapter;
+import su.nightexpress.nightcore.integration.item.ItemProvider;
+import su.nightexpress.nightcore.integration.item.data.ItemIdData;
 import su.nightexpress.nightcore.language.LangAssets;
 import su.nightexpress.nightcore.menu.MenuViewer;
 import su.nightexpress.nightcore.ui.UIUtils;
 import su.nightexpress.nightcore.ui.menu.confirmation.Confirmation;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.util.BukkitThing;
+import su.nightexpress.nightcore.util.Colorizer;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.NumberUtil;
+import su.nightexpress.nightcore.util.Pair;
+import su.nightexpress.nightcore.util.Players;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class AuctionManager extends AbstractModule {
 
@@ -229,10 +251,15 @@ public class AuctionManager extends AbstractModule {
             return false;
         }
 
-        for (ItemAdapter<?> handler : ItemBridge.getAdapters()) {
-            if (!(handler instanceof IdentifiableItemAdapter identifiableItemAdapter)) continue;
+        for (ItemProvider handler : ItemBridge.get().getProviders()) {
+            if (!(handler instanceof BaseIdentifiableItemProvider identifiableItemAdapter)) continue;
 
-            String id = identifiableItemAdapter.getItemId(item);
+            AdaptedItem wrapped = handler.wrapItem(item).orElse(null);
+            if (wrapped == null) continue;
+            if (!(wrapped instanceof BaseProviderDataItem dataItem)) continue;
+            if (!(dataItem.getData() instanceof ItemIdData idData)) continue;
+
+            String id = idData.getItemId();
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }

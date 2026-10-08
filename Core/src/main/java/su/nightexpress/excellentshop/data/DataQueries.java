@@ -1,60 +1,20 @@
 package su.nightexpress.excellentshop.data;
 
-import su.nightexpress.excellentshop.shop.data.*;
+import java.util.List;
+import java.util.UUID;
+
+import su.nightexpress.excellentshop.shop.data.ProductLimitData;
+import su.nightexpress.excellentshop.shop.data.ProductPriceData;
+import su.nightexpress.excellentshop.shop.data.ProductStockData;
 import su.nightexpress.excellentshop.user.ShopUser;
 import su.nightexpress.excellentshop.user.UserSettings;
 import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationData;
 import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationItemData;
-import su.nightexpress.excellentshop.data.legacy.LegacyPriceData;
-import su.nightexpress.excellentshop.data.legacy.LegacyStockData;
-import su.nightexpress.excellentshop.data.legacy.LegacyRotationData;
 import su.nightexpress.nightcore.db.statement.RowMapper;
 import su.nightexpress.nightcore.db.statement.template.InsertStatement;
 import su.nightexpress.nightcore.db.statement.template.UpdateStatement;
 
-import java.util.List;
-import java.util.UUID;
-
 public class DataQueries {
-
-    // LEGACY - START
-
-    public static final RowMapper<LegacyStockData> LEGACY_STOCK_DATA_LOADER = resultSet -> {
-        String shopId = resultSet.getString(DataColumns.LEGACY_SHOP_ID.getName());
-        String productId = resultSet.getString(DataColumns.LEGACY_PRODUCT_ID.getName());
-        String holderId = resultSet.getString(DataColumns.LEGACY_HOLDER_ID.getName());
-
-        int buyStock = resultSet.getInt(DataColumns.LEGACY_STOCK_BUY.getName());
-        int sellStock = resultSet.getInt(DataColumns.LEGACY_STOCK_SELL.getName());
-        long restockDate = resultSet.getLong(DataColumns.STOCK_RESTOCK_DATE.getName());
-
-        return new LegacyStockData(shopId, productId, holderId, buyStock, sellStock, restockDate);
-    };
-
-    public static final RowMapper<LegacyPriceData> LEGACY_PRICE_DATA_LOADER = resultSet -> {
-        String shopId = resultSet.getString(DataColumns.LEGACY_SHOP_ID.getName());
-        String productId = resultSet.getString(DataColumns.LEGACY_PRODUCT_ID.getName());
-
-        double buyOffset = resultSet.getDouble(DataColumns.PRICE_BUY_OFFSET.getName());
-        double sellOffset = resultSet.getDouble(DataColumns.PRICE_SELL_OFFSET.getName());
-
-        long expireDate = resultSet.getLong(DataColumns.PRICE_EXPIRE_DATE.getName());
-        int purchases = resultSet.getInt(DataColumns.PRICE_PURCHASES.getName());
-        int sales = resultSet.getInt(DataColumns.PRICE_SALES.getName());
-
-        return new LegacyPriceData(shopId, productId, buyOffset, sellOffset, expireDate, purchases, sales);
-    };
-
-    public static final RowMapper<LegacyRotationData> LEGACY_ROTATION_DATA_LOADER = resultSet -> {
-        String shopId = resultSet.getString(DataColumns.LEGACY_SHOP_ID.getName());
-        String rotationId = resultSet.getString(DataColumns.LEGACY_HOLDER_ID.getName());
-        long nextRotation = resultSet.getLong(DataColumns.ROTATION_NEXT_ROTATION.getName());
-        List<RotationItemData> products = DataColumns.ROTATION_PRODUCTS.readOrThrow(resultSet);
-
-        return new LegacyRotationData(shopId, rotationId, nextRotation, products);
-    };
-
-    // LEGACY - END
 
     public static final RowMapper<ShopUser> SHOP_USER_MAPPER = resultSet -> {
         UUID uuid = DataColumns.USER_ID.readOrThrow(resultSet);

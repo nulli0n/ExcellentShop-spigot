@@ -1,5 +1,10 @@
 package su.nightexpress.excellentshop.playershop;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -11,7 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.playershop.core.ChestConfig;
 import su.nightexpress.excellentshop.playershop.core.ChestKeys;
@@ -19,23 +23,25 @@ import su.nightexpress.excellentshop.playershop.core.ChestPerms;
 import su.nightexpress.excellentshop.playershop.impl.ChestProduct;
 import su.nightexpress.excellentshop.playershop.impl.ChestShop;
 import su.nightexpress.excellentshop.playershop.impl.Showcase;
+import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.nightcore.bridge.currency.Currency;
 import su.nightexpress.nightcore.bridge.item.AdaptedItem;
-import su.nightexpress.nightcore.bridge.item.ItemAdapter;
+import su.nightexpress.nightcore.integration.item.BaseIdentifiableItemProvider;
+import su.nightexpress.nightcore.integration.item.BaseProviderDataItem;
 import su.nightexpress.nightcore.integration.item.ItemBridge;
-import su.nightexpress.nightcore.integration.item.adapter.IdentifiableItemAdapter;
-import su.nightexpress.nightcore.integration.item.impl.AdaptedCustomStack;
-import su.nightexpress.nightcore.util.*;
+import su.nightexpress.nightcore.integration.item.ItemProvider;
+import su.nightexpress.nightcore.integration.item.data.ItemIdData;
+import su.nightexpress.nightcore.util.BukkitThing;
+import su.nightexpress.nightcore.util.ItemUtil;
+import su.nightexpress.nightcore.util.Lists;
+import su.nightexpress.nightcore.util.LocationUtil;
+import su.nightexpress.nightcore.util.PDCUtil;
+import su.nightexpress.nightcore.util.Version;
 import su.nightexpress.nightcore.util.bukkit.NightItem;
 import su.nightexpress.nightcore.util.text.night.NightMessage;
 import su.nightexpress.nightcore.util.text.night.wrapper.TagWrappers;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-public class ChestUtils {
+public final class ChestUtils {
 
     private ChestUtils() {
     }
@@ -99,8 +105,9 @@ public class ChestUtils {
 
         AdaptedItem adaptedItem = itemContent.getAdaptedItem();
 
-        if (adaptedItem instanceof AdaptedCustomStack customStack) {
-            String itemId = customStack.getData().getItemId();
+        if (adaptedItem instanceof BaseProviderDataItem customStack && customStack
+            .getData() instanceof ItemIdData idData) {
+            String itemId = idData.getItemId();
             return itemId.contains(searchFor);
         }
 
@@ -157,10 +164,14 @@ public class ChestUtils {
         String material = item.getType().getKey().getKey();
         if (bannedItems.contains(material)) return false;
 
-        for (ItemAdapter<?> handler : ItemBridge.getAdapters()) {
-            if (!(handler instanceof IdentifiableItemAdapter identifiableAdapter)) continue;
+        for (ItemProvider handler : ItemBridge.get().getProviders()) {
+            if (!(handler instanceof BaseIdentifiableItemProvider identifiableAdapter)) continue;
 
-            String id = identifiableAdapter.getItemId(item);
+            AdaptedItem wrapped = identifiableAdapter.wrapItem(item).orElse(null);
+            if (wrapped == null || !(wrapped instanceof BaseProviderDataItem dataItem)) continue;
+            if (!(dataItem.getData() instanceof ItemIdData idData)) continue;
+
+            String id = idData.getItemId();
             if (id != null && bannedItems.contains(id.toLowerCase())) {
                 return false;
             }

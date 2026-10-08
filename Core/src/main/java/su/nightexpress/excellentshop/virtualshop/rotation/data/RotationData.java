@@ -1,12 +1,13 @@
 package su.nightexpress.excellentshop.virtualshop.rotation.data;
 
-import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.api.data.state.StatefulData;
-import su.nightexpress.nightcore.util.TimeUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.jspecify.annotations.NonNull;
+
+import su.nightexpress.excellentshop.api.data.state.StatefulData;
+import su.nightexpress.nightcore.util.TimeUtil;
 
 public class RotationData extends StatefulData {
 
@@ -17,8 +18,8 @@ public class RotationData extends StatefulData {
 
     public RotationData(@NonNull UUID rotationId, long nextRotationDate, @NonNull List<RotationItemData> products) {
         this.rotationId = rotationId;
-        this.setProducts(products);
-        this.setNextRotationDate(nextRotationDate);
+        this.products = new ArrayList<>(products);
+        this.nextRotationDate = nextRotationDate;
     }
 
     public boolean isRotationTime() {

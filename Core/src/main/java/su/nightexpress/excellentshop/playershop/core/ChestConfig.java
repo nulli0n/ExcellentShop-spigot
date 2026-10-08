@@ -1,17 +1,16 @@
 package su.nightexpress.excellentshop.playershop.core;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.bukkit.Material;
 
 import su.nightexpress.excellentshop.playershop.ChestUtils;
 import su.nightexpress.excellentshop.playershop.impl.Showcase;
 import su.nightexpress.nightcore.config.ConfigValue;
 import su.nightexpress.nightcore.integration.currency.CurrencyId;
-import su.nightexpress.nightcore.integration.item.ItemPlugins;
 import su.nightexpress.nightcore.util.BukkitThing;
 import su.nightexpress.nightcore.util.RankMap;
-
-import java.util.Map;
-import java.util.Set;
 
 public class ChestConfig {
 
@@ -158,8 +157,7 @@ public class ChestConfig {
             "custom_item_123"
         ),
         "List of items that can not be added as shop products.",
-        "Vanilla Names: https://minecraft.wiki/w/Java_Edition_data_values -> Blocks / Items -> Resource location column.",
-        "Supported Plugins: " + String.join(", ", ItemPlugins.values())
+        "Vanilla Names: https://minecraft.wiki/w/Java_Edition_data_values -> Blocks / Items -> Resource location column."
     );
 
     public static final ConfigValue<Set<String>> SHOP_PRODUCT_DENIED_LORES = ConfigValue.create(

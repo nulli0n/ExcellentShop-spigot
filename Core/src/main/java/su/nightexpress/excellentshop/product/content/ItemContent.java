@@ -14,14 +14,9 @@ import su.nightexpress.excellentshop.exception.ProductLoadException;
 import su.nightexpress.excellentshop.util.ErrorHandler;
 import su.nightexpress.excellentshop.util.ShopUtils;
 import su.nightexpress.nightcore.bridge.item.AdaptedItem;
-import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.config.FileConfig;
-import su.nightexpress.nightcore.integration.item.ItemBridge;
-import su.nightexpress.nightcore.integration.item.adapter.IdentifiableItemAdapter;
-import su.nightexpress.nightcore.integration.item.data.ItemIdData;
-import su.nightexpress.nightcore.integration.item.impl.AdaptedCustomStack;
-import su.nightexpress.nightcore.integration.item.impl.AdaptedItemStack;
-import su.nightexpress.nightcore.integration.item.impl.AdaptedVanillaStack;
+import su.nightexpress.nightcore.integration.item.bukkit.BukkitItem;
+import su.nightexpress.nightcore.integration.item.codec.AdaptedItemCodec;
 import su.nightexpress.nightcore.util.ItemTag;
 import su.nightexpress.nightcore.util.Version;
 
@@ -34,17 +29,14 @@ public class ItemContent extends ProductContent {
     public ItemContent(@NonNull AdaptedItem adaptedItem, boolean compareNbt) {
         super(ContentType.ITEM);
         this.adaptedItem = adaptedItem;
-        this.setCompareNbt(compareNbt);
+        this.compareNbt = compareNbt;
     }
 
     @Nullable
     public static ItemContent read(@NonNull FileConfig config, @NonNull String path) throws ProductLoadException {
         updateVanillaConfig(config, path);
-        updatePluginConfig(config, path);
 
-        AdaptedItem adaptedItem = AdaptedItemStack.read(config, path + ".Item");
-        if (adaptedItem == null) return null;
-
+        AdaptedItem adaptedItem = AdaptedItemCodec.read(config, path + ".Item");
         boolean compareNbt = config.getBoolean(path + ".Item.CompareNBT");
 
         return new ItemContent(adaptedItem, compareNbt);
@@ -71,33 +63,10 @@ public class ItemContent extends ProductContent {
             config.remove(path + ".ItemTag");
             config.remove(path + ".Item_Meta_Enabled");
 
-            AdaptedVanillaStack vanillaStack = new AdaptedVanillaStack(tag);
+            BukkitItem vanillaStack = new BukkitItem(tag);
             config.set(path + ".Item", vanillaStack);
             config.set(path + ".Item.CompareNBT", respectMeta);
         }
-    }
-
-    private static void updatePluginConfig(@NonNull FileConfig config, @NonNull String path) {
-        if (!config.contains(path + ".Handler")) return;
-
-        String handlerId = config.getString(path + ".Handler", "dummy");
-        if (handlerId.equalsIgnoreCase("bukkit_item")) {
-            config.remove(path + ".Handler");
-            return;
-        }
-
-        ItemAdapter<?> adapter = ItemBridge.getAdapter(handlerId);
-        if (!(adapter instanceof IdentifiableItemAdapter identifiableAdapter)) {
-            ErrorHandler.configError("Invalid item handler '" + handlerId + "'.", config, path);
-            return;
-        }
-
-        String itemId = config.getString(path + ".Content.ItemId", "null");
-        int amount = config.getInt(path + ".Content.Amount", 1);
-
-        AdaptedCustomStack customStack = new AdaptedCustomStack(identifiableAdapter, new ItemIdData(itemId, amount));
-        config.set(path + ".Item", customStack);
-        config.remove(path + ".Handler");
     }
 
     @Override
@@ -161,19 +130,20 @@ public class ItemContent extends ProductContent {
     public boolean isItemMatches(@NonNull ItemStack other) {
         if (!this.isValid()) return false;
 
-        if (this.adaptedItem.getAdapter().isVanilla()) {
+        if (this.adaptedItem instanceof BukkitItem) {
             ItemStack itemStack = this.getItem();
             return this.compareNbt ? itemStack.isSimilar(other) : itemStack.getType() == other.getType();
         }
 
-        return this.adaptedItem.isSimilar(other);
+        return this.adaptedItem.isChildren(other);
     }
 
     @NonNull
     public ItemStack getItem() {
         ItemStack itemStack = this.adaptedItem.getItemStack();
         if (itemStack == null)
-            throw new IllegalStateException("Could not produce ItemStack from the AdaptedItem. Check #isValid before calling this method.");
+            throw new IllegalStateException(
+                "Could not produce ItemStack from the AdaptedItem. Check #isValid before calling this method.");
 
         return itemStack;
     }
@@ -181,7 +151,7 @@ public class ItemContent extends ProductContent {
     @Override
     @NonNull
     public String getName() {
-        return this.adaptedItem.getAdapter().getName();
+        return this.adaptedItem.getProviderId();
     }
 
     @Override

@@ -1,10 +1,15 @@
 package su.nightexpress.nexshop.auction.data;
 
-import com.google.gson.GsonBuilder;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import org.jspecify.annotations.NonNull;
+
+import com.google.gson.GsonBuilder;
+
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.nexshop.auction.AuctionManager;
-import su.nightexpress.nexshop.auction.listing.AbstractListing;
 import su.nightexpress.nexshop.auction.listing.ActiveListing;
 import su.nightexpress.nexshop.auction.listing.CompletedListing;
 import su.nightexpress.nightcore.config.FileConfig;
@@ -14,15 +19,8 @@ import su.nightexpress.nightcore.db.sql.column.Column;
 import su.nightexpress.nightcore.db.sql.column.ColumnType;
 import su.nightexpress.nightcore.db.sql.query.SQLQueries;
 import su.nightexpress.nightcore.db.sql.query.impl.DeleteQuery;
-import su.nightexpress.nightcore.db.sql.query.impl.InsertQuery;
 import su.nightexpress.nightcore.db.sql.query.impl.SelectQuery;
 import su.nightexpress.nightcore.db.sql.util.WhereOperator;
-
-import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
 
 public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
 
@@ -80,11 +78,6 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
         this.addColumn(this.tableCompletedListings, COLUMN_CURRENCY, this.manager.getDefaultCurrency().getInternalId());
         this.addColumn(this.tableCompletedListings, COLUMN_DATE_CREATION, String.valueOf(System.currentTimeMillis()));
 
-        this.updateListings(this.tableListings, AuctionLegacyQueries.ACTIVE_LISTING_LOADER,
-            AuctionLegacyQueries.ACTIVE_LISTING_LOADER_2, AuctionQueries.ACTIVE_LISTING_INSERT_QUERY);
-        this.updateListings(this.tableCompletedListings, AuctionLegacyQueries.COMPLETED_LISTING_LOADER,
-            AuctionLegacyQueries.COMPLETED_LISTING_LOADER_2, AuctionQueries.COMPLETED_LISTING_INSERT_QUERY);
-
         if (SQLQueries.hasTable(this.connector, this.tableCompletedListings)) {
             DeleteQuery<Long> query = new DeleteQuery<Long>().where(COLUMN_DELETE_DATE, WhereOperator.SMALLER,
                 String::valueOf);
@@ -96,29 +89,6 @@ public class AuctionDatabase extends AbstractDataManager<ShopPlugin> {
                 String::valueOf);
             this.delete(this.tableListings, query, System.currentTimeMillis());
         }
-    }
-
-    private <T extends AbstractListing> void updateListings(@NonNull String table,
-                                                            @NonNull Function<ResultSet, T> function1,
-                                                            @NonNull Function<ResultSet, T> function2,
-                                                            @NonNull InsertQuery<T> insertQuery) {
-        if (SQLQueries.hasColumn(this.connector, table, COLUMN_ITEM_NEW)) return;
-
-        boolean isAlreadyUpdated = SQLQueries.hasColumn(this.connector, table, AuctionLegacyQueries.COLUMN_ITEM_DATA);
-
-        this.addColumn(table, COLUMN_ITEM_NEW, "{}");
-
-        SelectQuery<T> query = new SelectQuery<>(isAlreadyUpdated ? function2 : function1).all();
-        List<T> listings = this.select(table, query);
-
-        String deleteSql = "DELETE FROM " + table;
-        SQLQueries.executeSimpleQuery(this.connector, deleteSql);
-
-        this.dropColumn(table, AuctionLegacyQueries.COLUMN_ITEM);
-        this.dropColumn(table, AuctionLegacyQueries.COLUMN_HANDLER);
-        this.dropColumn(table, AuctionLegacyQueries.COLUMN_ITEM_DATA);
-
-        this.insert(table, insertQuery, listings);
     }
 
     @Override

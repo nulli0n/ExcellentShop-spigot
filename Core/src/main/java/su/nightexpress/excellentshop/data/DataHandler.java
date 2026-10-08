@@ -1,25 +1,31 @@
 package su.nightexpress.excellentshop.data;
 
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+
+import org.jspecify.annotations.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.jspecify.annotations.NonNull;
-import su.nightexpress.excellentshop.data.legacy.LegacyPriceData;
-import su.nightexpress.excellentshop.data.legacy.LegacyRotationData;
-import su.nightexpress.excellentshop.data.legacy.LegacyStockData;
+
+import su.nightexpress.excellentshop.ShopPlugin;
+import su.nightexpress.excellentshop.core.Config;
+import su.nightexpress.excellentshop.data.serialize.ItemProductTypeSerializer;
 import su.nightexpress.excellentshop.product.content.ItemContent;
 import su.nightexpress.excellentshop.shop.data.ProductLimitData;
 import su.nightexpress.excellentshop.shop.data.ProductPriceData;
 import su.nightexpress.excellentshop.shop.data.ProductStockData;
 import su.nightexpress.excellentshop.user.ShopUser;
 import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationData;
-import su.nightexpress.excellentshop.ShopPlugin;
-import su.nightexpress.excellentshop.core.Config;
-import su.nightexpress.excellentshop.data.serialize.ItemProductTypeSerializer;
 import su.nightexpress.nexshop.data.serialize.ItemTagSerializer;
 import su.nightexpress.nightcore.db.AbstractDatabaseManager;
 import su.nightexpress.nightcore.db.column.Column;
 import su.nightexpress.nightcore.db.statement.RowMapper;
-import su.nightexpress.nightcore.db.statement.SQLStatements;
 import su.nightexpress.nightcore.db.statement.condition.Operator;
 import su.nightexpress.nightcore.db.statement.condition.Wheres;
 import su.nightexpress.nightcore.db.statement.template.InsertStatement;
@@ -29,11 +35,6 @@ import su.nightexpress.nightcore.db.table.Table;
 import su.nightexpress.nightcore.user.data.UserDataSchema;
 import su.nightexpress.nightcore.util.ItemTag;
 import su.nightexpress.nightcore.util.TimeUtil;
-
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Consumer;
 
 public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements UserDataSchema<ShopUser> {
 
@@ -50,12 +51,6 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
     private final Table globalStockDataTable;
     private final Table playerLimitDataTable;
     private final Table rotationDataTable;
-
-    // LEGACY - START
-    private final Table legacyStockDataTable;
-    private final Table legacyPriceDataTable;
-    private final Table legacyRotationDataTable;
-    // LEGACY - END
 
     private boolean hasLegacyStocks;
     private boolean hasLegacyPrices;
@@ -101,39 +96,6 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
             .withColumn(DataColumns.ROTATION_NEXT_ROTATION)
             .withColumn(DataColumns.ROTATION_PRODUCTS)
             .build();
-
-        // LEGACY - START
-
-        this.legacyPriceDataTable = Table.builder(this.getTablePrefix() + "_" + Config.DATA_LEGACY_PRICE_TABLE.get())
-            .withColumn(DataColumns.ID)
-            .withColumn(DataColumns.LEGACY_SHOP_ID)
-            .withColumn(DataColumns.LEGACY_PRODUCT_ID)
-            .withColumn(DataColumns.PRICE_BUY_OFFSET)
-            .withColumn(DataColumns.PRICE_SELL_OFFSET)
-            .withColumn(DataColumns.PRICE_EXPIRE_DATE)
-            .withColumn(DataColumns.PRICE_PURCHASES)
-            .withColumn(DataColumns.PRICE_SALES)
-            .build();
-
-        this.legacyStockDataTable = Table.builder(this.getTablePrefix() + "_" + Config.DATA_LEGACY_STOCKS_TABLE.get())
-            .withColumn(DataColumns.ID)
-            .withColumn(DataColumns.LEGACY_PRODUCT_ID)
-            .withColumn(DataColumns.LEGACY_HOLDER_ID)
-            .withColumn(DataColumns.LEGACY_STOCK_BUY)
-            .withColumn(DataColumns.LEGACY_STOCK_SELL)
-            .withColumn(DataColumns.STOCK_RESTOCK_DATE)
-            .build();
-
-        this.legacyRotationDataTable = Table.builder(this.getTablePrefix() + "_" + Config.DATA_LEGACY_ROTATIONS_TABLE
-            .get())
-            .withColumn(DataColumns.ID)
-            .withColumn(DataColumns.LEGACY_SHOP_ID)
-            .withColumn(DataColumns.LEGACY_HOLDER_ID)
-            .withColumn(DataColumns.ROTATION_NEXT_ROTATION)
-            .withColumn(DataColumns.ROTATION_PRODUCTS)
-            .build();
-
-        // LEGACY - END
     }
 
     @Override
@@ -145,17 +107,6 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
         this.createTable(this.rotationDataTable);
 
         this.dropColumn(this.userTable, "dateCreated", "last_online");
-
-        this.hasLegacyStocks = SQLStatements.hasTable(this.connector, this.legacyStockDataTable.getName());
-        this.hasLegacyPrices = SQLStatements.hasTable(this.connector, this.legacyPriceDataTable.getName());
-        this.hasLegacyRotations = SQLStatements.hasTable(this.connector, this.legacyRotationDataTable.getName());
-
-        if (this.hasLegacyPrices) {
-            this.dropColumn(this.legacyPriceDataTable, "lastBuyPrice", "lastSellPrice", "lastUpdated");
-        }
-        if (this.hasLegacyRotations) {
-            this.dropColumn(this.legacyRotationDataTable, "products");
-        }
     }
 
     @Override
@@ -271,52 +222,6 @@ public class DataHandler extends AbstractDatabaseManager<ShopPlugin> implements 
     public UpdateStatement<ShopUser> getUserTinyUpdateStatement() {
         return DataQueries.USER_TINY_UPDATE;
     }
-
-
-    // LEGACY - START
-
-    @NonNull
-    public List<LegacyStockData> loadLegacyStockDatas() {
-        return this.selectAny(this.legacyStockDataTable, SelectStatement.builder(DataQueries.LEGACY_STOCK_DATA_LOADER)
-            .build());
-    }
-
-    public void deleteLegacyStockData(@NonNull Collection<LegacyStockData> data) {
-        this.delete(this.legacyStockDataTable, data, Wheres
-            .where(DataColumns.LEGACY_PRODUCT_ID, Operator.EQUALS, LegacyStockData::getProductId)
-            .and(DataColumns.LEGACY_SHOP_ID, Operator.EQUALS, LegacyStockData::getShopId)
-            .and(DataColumns.LEGACY_HOLDER_ID, Operator.EQUALS, LegacyStockData::getHolder)
-        );
-    }
-
-
-    @NonNull
-    public List<LegacyPriceData> loadLegacyPriceDatas() {
-        return this.selectAny(this.legacyPriceDataTable, SelectStatement.builder(DataQueries.LEGACY_PRICE_DATA_LOADER)
-            .build());
-    }
-
-    public void deleteLegacyPriceData(@NonNull Set<LegacyPriceData> data) {
-        this.delete(this.legacyPriceDataTable, data, Wheres
-            .where(DataColumns.LEGACY_PRODUCT_ID, Operator.EQUALS, LegacyPriceData::getProductId)
-            .and(DataColumns.LEGACY_SHOP_ID, Operator.EQUALS, LegacyPriceData::getShopId)
-        );
-    }
-
-    @NonNull
-    public List<LegacyRotationData> loadLegacyRotationDatas() {
-        return this.selectAny(this.legacyRotationDataTable, SelectStatement.builder(
-            DataQueries.LEGACY_ROTATION_DATA_LOADER).build());
-    }
-
-    public void deleteLegacyRotationData(@NonNull Collection<LegacyRotationData> data) {
-        this.delete(this.legacyRotationDataTable, data, Wheres
-            .where(DataColumns.LEGACY_HOLDER_ID, Operator.EQUALS, LegacyRotationData::getRotationId)
-            .and(DataColumns.LEGACY_SHOP_ID, Operator.EQUALS, LegacyRotationData::getShopId)
-        );
-    }
-
-    // LEGACY - END
 
     @NonNull
     public List<ProductStockData> loadStockDatas() {

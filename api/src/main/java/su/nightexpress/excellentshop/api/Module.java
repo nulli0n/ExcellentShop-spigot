@@ -7,8 +7,8 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 import su.nightexpress.nightcore.bridge.currency.Currency;
-import su.nightexpress.nightcore.bridge.item.ItemAdapter;
 import su.nightexpress.nightcore.config.FileConfig;
+import su.nightexpress.nightcore.integration.item.ItemProvider;
 
 public interface Module {
 
@@ -69,11 +69,11 @@ public interface Module {
 
     boolean isItemProvidersDisabled();
 
-    boolean isItemProviderDisabled(@NonNull ItemAdapter<?> adapter);
+    boolean isItemProviderDisabled(@NonNull ItemProvider adapter);
 
     boolean isItemProviderDisabled(@NonNull String id);
 
-    boolean isItemProviderAllowed(@NonNull ItemAdapter<?> adapter);
+    boolean isItemProviderAllowed(@NonNull ItemProvider adapter);
 
     boolean isItemProviderAllowed(@NonNull String id);
 

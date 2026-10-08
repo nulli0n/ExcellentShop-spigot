@@ -1,39 +1,35 @@
 package su.nightexpress.excellentshop.data;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+
 import org.bukkit.entity.Player;
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.api.data.state.Stateful;
 import su.nightexpress.excellentshop.api.data.state.StatefulData;
-import su.nightexpress.excellentshop.data.legacy.*;
+import su.nightexpress.excellentshop.api.product.Product;
+import su.nightexpress.excellentshop.api.shop.Shop;
+import su.nightexpress.excellentshop.core.Config;
 import su.nightexpress.excellentshop.shop.data.ProductLimitData;
 import su.nightexpress.excellentshop.shop.data.ProductPriceData;
 import su.nightexpress.excellentshop.shop.data.ProductStockData;
 import su.nightexpress.excellentshop.virtualshop.rotation.Rotation;
 import su.nightexpress.excellentshop.virtualshop.rotation.data.RotationData;
-import su.nightexpress.excellentshop.ShopPlugin;
-import su.nightexpress.excellentshop.api.shop.Shop;
-import su.nightexpress.excellentshop.api.product.Product;
-import su.nightexpress.excellentshop.core.Config;
 import su.nightexpress.nightcore.manager.AbstractManager;
-
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 public class DataManager extends AbstractManager<ShopPlugin> {
 
     private final DataHandler dataHandler;
-
-    // LEGACY - START
-
-    private final Map<LegacyProductKey, LegacyStockData>     legacyStockDataMap;
-    private final Map<LegacyProductKey, LegacyPriceData>     legacyPriceDataMap;
-    private final Map<LegacyRotationKey, LegacyRotationData> legacyRotationDataMap;
-
-    // LEGACY - END
 
     private final Map<UUID, ProductPriceData>            priceDataById;
     private final Map<UUID, ProductStockData>            stockDataById;
@@ -45,12 +41,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public DataManager(@NonNull ShopPlugin plugin, @NonNull DataHandler dataHandler) {
         super(plugin);
         this.dataHandler = dataHandler;
-
-        // LEGACY - START
-        this.legacyStockDataMap = new ConcurrentHashMap<>();
-        this.legacyPriceDataMap = new ConcurrentHashMap<>();
-        this.legacyRotationDataMap = new ConcurrentHashMap<>();
-        // LEGACY - END
 
         this.priceDataById = new ConcurrentHashMap<>();
         this.stockDataById = new ConcurrentHashMap<>();
@@ -70,10 +60,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     }
 
     public void clear() {
-        this.legacyStockDataMap.clear();
-        this.legacyPriceDataMap.clear();
-        this.legacyRotationDataMap.clear();
-
         this.priceDataById.clear();
         this.stockDataById.clear();
         this.limitDataById.clear();
@@ -89,29 +75,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     @NonNull
     public CompletableFuture<Void> loadAllData() {
         return CompletableFuture.runAsync(() -> {
-            // LEGACY - START
-            if (this.dataHandler.hasLegacyStocks()) {
-                this.dataHandler.loadLegacyStockDatas().forEach(data -> {
-                    LegacyProductKey key = new LegacyProductKey(data.getShopId(), data.getProductId(), data
-                        .getHolder());
-                    this.legacyStockDataMap.put(key, data);
-                });
-            }
-            if (this.dataHandler.hasLegacyPrices()) {
-                this.dataHandler.loadLegacyPriceDatas().forEach(data -> {
-                    LegacyProductKey key = new LegacyProductKey(data.getShopId(), data.getProductId(), data
-                        .getShopId());
-                    this.legacyPriceDataMap.put(key, data);
-                });
-            }
-            if (this.dataHandler.isHasLegacyRotations()) {
-                this.dataHandler.loadLegacyRotationDatas().forEach(data -> {
-                    LegacyRotationKey key = new LegacyRotationKey(data.getShopId(), data.getRotationId());
-                    this.legacyRotationDataMap.put(key, data);
-                });
-            }
-            // LEGACY - END
-
             this.loadStockDatas();
             this.loadLimitDatas();
             this.loadPriceDatas();
@@ -180,29 +143,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
             inner.values().removeIf(StatefulData::isRemoved);
             return inner.isEmpty();
         });
-
-        // LEGACY - START
-        Set<LegacyStockData> oldStocks = this.legacyStockDataMap.values().stream().filter(LegacyStockData::isRemoved)
-            .collect(Collectors.toSet());
-        if (!oldStocks.isEmpty()) {
-            this.dataHandler.deleteLegacyStockData(oldStocks);
-            this.legacyStockDataMap.values().removeAll(oldStocks);
-        }
-
-        Set<LegacyPriceData> oldPrices = this.legacyPriceDataMap.values().stream().filter(LegacyPriceData::isRemoved)
-            .collect(Collectors.toSet());
-        if (!oldPrices.isEmpty()) {
-            this.dataHandler.deleteLegacyPriceData(oldPrices);
-            this.legacyPriceDataMap.values().removeAll(oldPrices);
-        }
-
-        Set<LegacyRotationData> oldRotations = this.legacyRotationDataMap.values().stream().filter(
-            LegacyRotationData::isRemoved).collect(Collectors.toSet());
-        if (!oldRotations.isEmpty()) {
-            this.dataHandler.deleteLegacyRotationData(oldRotations);
-            this.legacyRotationDataMap.values().removeAll(oldRotations);
-        }
-        // LEGACY - END
     }
 
     private <T extends Stateful> void saveDataOrRemove(@NonNull Collection<T> originDatas,
@@ -241,21 +181,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         RotationData data = this.getRotationData(rotation.getGlobalId());
         if (data != null) return data;
 
-        // LEGACY - START
-        LegacyRotationKey key = new LegacyRotationKey(shop.getId(), rotation.getId());
-        LegacyRotationData oldData = this.legacyRotationDataMap.get(key);
-        if (oldData != null && !oldData.isRemoved()) {
-            oldData.setRemoved(true);
-
-            RotationData newData = new RotationData(rotation.getGlobalId(), oldData.getNextRotationDate(), oldData
-                .getProducts());
-            this.loadRotationData(newData);
-            this.plugin.debug("Replaced old rotation data for shop rotation: %s [%s]".formatted(shop.getId(), rotation
-                .getGlobalId()));
-            return newData;
-        }
-        // LEGACY - END
-
         return null;
     }
 
@@ -275,21 +200,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
         ProductPriceData data = this.getPriceData(product.getGlobalId());
         if (data != null) return data;
 
-        // LEGACY - START
-        LegacyProductKey key = LegacyProductKey.global(product);
-        LegacyPriceData oldData = this.legacyPriceDataMap.get(key);
-        if (oldData != null && !oldData.isRemoved()) {
-            oldData.setRemoved(true);
-
-            ProductPriceData newData = new ProductPriceData(product.getGlobalId(), oldData.getBuyOffset(), oldData
-                .getSellOffset(), oldData.getExpireDate(), oldData.getPurchases(), oldData.getSales());
-            this.loadPriceData(newData);
-            this.plugin.debug("Replaced old price data for product: %s [%s]".formatted(product.getId(), product
-                .getGlobalId()));
-            return newData;
-        }
-        // LEGACY - END
-
         return null;
     }
 
@@ -308,21 +218,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
     public ProductStockData getStockData(@NonNull Product product) {
         ProductStockData data = this.getStockData(product.getGlobalId());
         if (data != null) return data;
-
-        // LEGACY - START
-        LegacyProductKey key = LegacyProductKey.global(product);
-        LegacyStockData oldData = this.legacyStockDataMap.get(key);
-        if (oldData != null && !oldData.isRemoved()) {
-            oldData.setRemoved(true);
-
-            ProductStockData newData = new ProductStockData(product.getGlobalId(), oldData.getBuyStock(), oldData
-                .getRestockDate());
-            this.loadStockData(newData);
-            this.plugin.debug("Replaced old stock data for product: %s [%s]".formatted(product.getId(), product
-                .getGlobalId()));
-            return newData;
-        }
-        // LEGACY - END
 
         return null;
     }
@@ -353,30 +248,6 @@ public class DataManager extends AbstractManager<ShopPlugin> {
 
         ProductLimitData data = this.limitDataById.getOrDefault(globalId, Collections.emptyMap()).get(playerId);
         if (data != null) return data;
-
-        // LEGACY - START
-        LegacyProductKey key = LegacyProductKey.personal(product, playerId);
-        LegacyStockData oldData = this.legacyStockDataMap.get(key);
-        if (oldData != null && !oldData.isRemoved()) {
-            oldData.setRemoved(true);
-
-            int initialBuy = product.getBuyLimit();
-            int initialSell = product.getSellLimit();
-
-            int oldBuyLeft = oldData.getBuyStock();
-            int oldSellLeft = oldData.getSellStock();
-
-            int purchases = initialBuy - oldBuyLeft;
-            int sales = initialSell - oldSellLeft;
-
-            ProductLimitData newData = new ProductLimitData(playerId, globalId, purchases, sales, oldData
-                .getRestockDate(), true);
-            this.loadLimitData(newData);
-            this.plugin.debug("Replaced old %s player limit data for product: %s [%s]".formatted(playerId, product
-                .getId(), product.getGlobalId()));
-            return newData;
-        }
-        // LEGACY - END
 
         return null;
     }

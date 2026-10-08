@@ -10,15 +10,6 @@ import java.util.UUID;
 
 public class DataColumns {
 
-    // LEGACY - START
-    public static final Column<Integer> LEGACY_STOCK_BUY  = Column.intType("buyStock").build();
-    public static final Column<Integer> LEGACY_STOCK_SELL = Column.intType("sellStock").build();
-
-    public static final Column<String> LEGACY_SHOP_ID    = Column.stringType("shopId", 256).build();
-    public static final Column<String> LEGACY_PRODUCT_ID = Column.stringType("productId", 256).build();
-    public static final Column<String> LEGACY_HOLDER_ID  = Column.stringType("holderId", 256).build();
-    // LEGACY - END
-
     public static final Column<Integer> ID = Column.intType("id").primaryKey().autoIncrement().build();
 
     public static final Column<UUID>    STOCK_PRODUCT_ID   = Column.uuidType("productId").primaryKey().build();
