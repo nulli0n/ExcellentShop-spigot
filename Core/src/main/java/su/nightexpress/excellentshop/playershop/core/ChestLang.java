@@ -105,6 +105,15 @@ public class ChestLang implements LangContainer {
         "ChestShop.Shop.Removal.Error.NotEmpty").chatMessage(
             SOFT_RED.wrap("Please withdraw items from shop storage to remove it."));
 
+    public static final MessageLocale SHOP_REMOVAL_ERROR_BANK_NOT_EMPTY = LangEntry.builder(
+            "ChestShop.Shop.Removal.Error.BankNotEmpty").chatMessage(
+                    SOFT_RED.wrap("Please withdraw all currencies from the shop bank before removing it."));
+
+    public static final MessageLocale SHOP_REMOVAL_ERROR_INV_FULL_FOR_CHESTITEM = LangEntry.builder(
+            "ChestShop.Shop.Removal.Error.InventoryFullForChestItem").chatMessage(
+                    SOFT_RED.wrap(
+                            "Your inventory has no space to receive your ChestShop creation item. Make some space and try again."));
+
     public static final MessageLocale SHOP_REMOVAL_INFO_DONE = LangEntry.builder("ChestShop.Shop.Removal.Info.Done")
         .titleMessage(
             SOFT_RED.wrap(BOLD.wrap("Shop Removed!")), "",

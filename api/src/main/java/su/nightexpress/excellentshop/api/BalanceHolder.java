@@ -45,6 +45,12 @@ public class BalanceHolder {
         return this.balanceMap.isEmpty();
     }
 
+    public boolean hasZeroBalance() {
+        return !this.balanceMap.entrySet().stream().anyMatch(entry -> {
+            return entry.getValue() > 0.0;
+        });
+    }
+
     public boolean contains(@NonNull Currency currency) {
         return this.contains(currency.getInternalId());
     }

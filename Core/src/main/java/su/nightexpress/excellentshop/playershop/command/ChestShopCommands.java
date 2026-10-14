@@ -3,6 +3,7 @@ package su.nightexpress.excellentshop.playershop.command;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +11,7 @@ import org.jspecify.annotations.NonNull;
 import su.nightexpress.excellentshop.ShopPlaceholders;
 import su.nightexpress.excellentshop.ShopPlugin;
 import su.nightexpress.excellentshop.playershop.ChestShopModule;
+import su.nightexpress.excellentshop.playershop.ChestUtils;
 import su.nightexpress.excellentshop.playershop.core.ChestConfig;
 import su.nightexpress.excellentshop.playershop.core.ChestLang;
 import su.nightexpress.excellentshop.playershop.core.ChestPerms;
@@ -193,7 +195,21 @@ public class ChestShopCommands {
         double buyPrice = arguments.getDouble(BUY_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_BUY_PRICE.get());
         double sellPrice = arguments.getDouble(SELL_PRICE, ChestConfig.SHOP_PRODUCT_INITIAL_SELL_PRICE.get());
 
-        return module.createShopNaturally(player, block, buyPrice, sellPrice);
+        ItemStack itemStack = player.getInventory().getItemInMainHand();
+
+        if (ChestUtils.getShopItemType(itemStack) == null) {
+            return module.createShopNaturally(player, block, buyPrice, sellPrice);
+        } else {
+            BlockFace face = player.getTargetBlockFace(5);
+            if (face != null) {
+                Block sideBlock = block.getRelative(face);
+                if (sideBlock.getType().isAir()) {
+                    return module.createShopFromItem(player, sideBlock, itemStack);
+                }
+            }
+            module.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_BAD_LOCATION, player);
+            return false;
+        }
     }
 
     public static boolean removeShop(@NonNull ChestShopModule module, @NonNull CommandContext context,

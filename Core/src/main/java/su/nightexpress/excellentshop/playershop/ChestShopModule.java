@@ -859,7 +859,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
         }
     }
 
-    public boolean checkShopCreation(@NonNull Player player, @NonNull Block block) {
+    public boolean checkShopCreation(@NonNull Player player, @NonNull Block block, boolean isCreatedFromItem) {
         if (this.isShop(block)) {
             this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_ALREADY_SHOP, player);
             return false;
@@ -882,7 +882,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return false;
         }
 
-        if (!this.canPayCreation(player)) {
+        if (!(isCreatedFromItem && ChestConfig.SHOP_ITEM_CREATION_FREE_OF_COST.get()) && !this.canPayCreation(player)) {
             this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
             return false;
         }
@@ -899,11 +899,13 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return false;
         }
 
-        if (!this.checkShopCreation(player, block)) return false;
+        if (!this.checkShopCreation(player, block, true)) return false;
 
         ChestShopCreateEvent event = new ChestShopCreateEvent(player, block, itemStack);
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
+
+        this.payForCreate(player);
 
         BlockData blockData = material.createBlockData();
         if (blockData instanceof Directional directional) {
@@ -940,7 +942,7 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
             return false;
         }
 
-        if (!this.checkShopCreation(player, block)) return false;
+        if (!this.checkShopCreation(player, block, false)) return false;
 
         BlockInventoryHolder container = (BlockInventoryHolder) block.getState();
         Inventory inventory = container.getInventory();
@@ -1093,27 +1095,45 @@ public class ChestShopModule extends AbstractShopModule implements PlayerShopMan
     public boolean deleteShop(@NonNull Player player, @NonNull ChestShop shop) {
         if (!this.canBreak(player, shop)) return false;
 
-        if (!this.payForRemoval(player)) {
-            this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
+        Bank bank = this.getEffectiveBank(shop);
+        boolean isLastShop = this.getShops(player).size() == 1;
+        if (bank != null && isLastShop && settings.shouldWithdrawOnLastShopRemoval() && !bank.getAccount().hasZeroBalance()) {
+            this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_BANK_NOT_EMPTY, player);
             return false;
         }
 
-        if (ChestUtils.isInfiniteStorage()) {
+        ShopBlock shopBlock = this.getShopBlock(shop.getBlock().getType());
+        boolean isCreatedFromItem = shop.isItemCreated() && shop.isAccessible();
+        if (isCreatedFromItem && shopBlock != null && !ChestConfig.SHOP_ITEM_DROP_ITEM_ON_REMOVAL.get()) {
+            if (Players.countItemSpace(player, shopBlock.getItemStack()) < 1) {
+                this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_INV_FULL_FOR_CHESTITEM, player);
+                return false;
+            }
+        }
+
+        if (ChestUtils.isInfiniteStorage() || isCreatedFromItem) {
             if (shop.getValidProducts().stream().anyMatch(product -> product.getStock() > 0)) {
                 this.sendPrefixed(ChestLang.SHOP_REMOVAL_ERROR_NOT_EMPTY, player);
                 return false;
             }
         }
 
+        // only try to pay after all other checks
+        if (!(isCreatedFromItem && ChestConfig.SHOP_ITEM_CREATION_FREE_OF_COST.get()) && !this.payForRemoval(player)) {
+            this.sendPrefixed(ChestLang.SHOP_CREATION_ERROR_NOT_ENOUGH_FUNDS, player);
+            return false;
+        }
+
         ChestShopRemoveEvent event = new ChestShopRemoveEvent(player, shop);
         plugin.getPluginManager().callEvent(event);
         if (event.isCancelled()) return false;
 
-        if (shop.isItemCreated() && shop.isAccessible()) {
-            Block block = shop.getBlock();
-            ShopBlock shopBlock = this.getShopBlock(block.getType());
-
-            if (shopBlock != null) {
+        if (shopBlock != null) {
+            if (isCreatedFromItem && !ChestConfig.SHOP_ITEM_DROP_ITEM_ON_REMOVAL.get()) {
+                shop.getBlock().setType(Material.AIR);
+                Players.addItem(player, shopBlock.getItemStack());
+            } else {
+                Block block = shop.getBlock();
                 Location dropLocation = LocationUtil.setCenter3D(block.getLocation().clone());
                 block.setType(Material.AIR);
                 block.getWorld().dropItemNaturally(dropLocation, shopBlock.getItemStack());

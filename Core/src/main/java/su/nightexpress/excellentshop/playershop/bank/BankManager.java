@@ -19,6 +19,7 @@ import su.nightexpress.nightcore.util.Players;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -119,10 +120,10 @@ public class BankManager extends AbstractManager<ShopPlugin> {
             return;
         }
 
-        this.depositToBank(player, bank, currency, amount);
+        this.depositToBank(player, bank, currency, amount, () -> {});
     }
 
-    public void depositToBank(@NonNull Player player, @NonNull Bank bank, @NonNull Currency currency, double amount) {
+    public void depositToBank(@NonNull Player player, @NonNull Bank bank, @NonNull Currency currency, double amount, Runnable refreshUI) {
         if (!this.module.isAvailableCurrency(player, currency)) {
             this.module.sendPrefixed(ChestLang.BANK_ERROR_INVALID_CURRENCY, player);
             return;
@@ -150,6 +151,8 @@ public class BankManager extends AbstractManager<ShopPlugin> {
             this.module.sendPrefixed(ChestLang.BANK_DEPOSIT_SUCCESS, player, builder -> builder
                 .with(ShopPlaceholders.GENERIC_AMOUNT, () -> currency.format(depositAmount))
             );
+
+            refreshUI.run();
         }, this.plugin::runTask);
     }
 
@@ -165,28 +168,36 @@ public class BankManager extends AbstractManager<ShopPlugin> {
             return false;
         }
 
-        return this.withdrawFromBank(player, bank, currency, amount);
+        return this.withdrawFromBank(player, bank, currency, amount, () -> {}).join();
     }
 
-    public boolean withdrawFromBank(@NonNull Player player, @NonNull Bank bank, @NonNull Currency currency,
-                                    double amount) {
-        if (amount == 0) return false;
+    public CompletableFuture<Boolean> withdrawFromBank(@NonNull Player player, @NonNull Bank bank, @NonNull Currency currency,
+                                    double amount, Runnable refreshUI) {
+        if (amount == 0) return CompletableFuture.completedFuture(false);
 
         double withdrawAmount = amount < 0D ? bank.getAccount().query(currency) : amount;
 
         if (!bank.getAccount().has(currency, withdrawAmount)) {
             this.module.sendPrefixed(ChestLang.BANK_WITHDRAW_ERROR_NOT_ENOUGH, player);
-            return false;
+            return CompletableFuture.completedFuture(false);
         }
 
-        currency.deposit(player, withdrawAmount);
-        bank.getAccount().remove(currency, withdrawAmount);
-        bank.markDirty();
+        return currency.depositAsync(player, withdrawAmount).whenCompleteAsync((result, throwable) -> {
+            if (throwable != null) {
+                throwable.printStackTrace();
+                return;
+            }
+            if (!result)
+                return;
 
-        this.module.sendPrefixed(ChestLang.BANK_WITHDRAW_SUCCESS, player, replacer -> replacer
-            .with(ShopPlaceholders.GENERIC_AMOUNT, () -> currency.format(withdrawAmount))
-        );
-        return true;
+            bank.getAccount().remove(currency, withdrawAmount);
+            bank.markDirty();
+
+            this.module.sendPrefixed(ChestLang.BANK_WITHDRAW_SUCCESS, player, replacer -> replacer
+                    .with(ShopPlaceholders.GENERIC_AMOUNT, () -> currency.format(withdrawAmount)));
+
+            refreshUI.run();
+        }, this.plugin::runTask);
     }
 
     @NonNull

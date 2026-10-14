@@ -34,6 +34,11 @@ public class PlayerShopSettings extends AbstractConfig implements ShopModuleSett
         "Controls whether players MUST use bank to allocate funds for their shops.",
         "[Default is false]"
     );
+    
+    private final ConfigProperty<Boolean> withdrawOnLastShopRemoval = this.addProperty(ConfigTypes.BOOLEAN, "Bank.WidthdrawOnLastShopRemoval", false,
+        "Controls whether players MUST clear the bank balance when removing their last shop.",
+        "[Default is false]"
+    );
 
     private final ConfigProperty<Map<TradeStatus, List<String>>> guiProductDisplayMasterInfo = this.addProperty(
         TRADE_STATUS_LORE_TYPE, "GUI.Product.Display.Master",
@@ -178,6 +183,10 @@ public class PlayerShopSettings extends AbstractConfig implements ShopModuleSett
 
     public boolean isBankMandatory() {
         return this.bankMandatory.get();
+    }
+
+    public boolean shouldWithdrawOnLastShopRemoval() {
+        return this.withdrawOnLastShopRemoval.get();
     }
 
     @Override
